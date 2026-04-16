@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/envelope.schema.json",
+  "title": "Event Envelope",
+  "description": "The 11-field event envelope. Every event in Datarun carries this structure. Fields are finalized across 5 ADRs — no additions without ADR-level decision.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Client-generated UUID. Globally unique. Used for deduplication."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "capture",
+        "review",
+        "alert",
+        "task_created",
+        "task_completed",
+        "assignment_changed"
+      ],
+      "description": "Platform-fixed, closed, append-only vocabulary. Domain meaning lives in shapes, not types."
+    },
+    "shape_ref": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*/v[0-9]+$",
+      "description": "Mandatory. Format: {shape_name}/v{version}. References the shape definition that governs the payload."
+    },
+    "activity_ref": {
+      "type": ["string", "null"],
+      "description": "Optional. References the activity this event belongs to. Null when shape alone disambiguates."
+    },
+    "subject_ref": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["subject", "actor", "assignment", "process"],
+          "description": "One of four typed identity categories."
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Client-generated UUID for the subject."
+        }
+      },
+      "required": ["type", "id"],
+      "additionalProperties": false,
+      "description": "The entity this event is about. Typed identity reference."
+    },
+    "actor_ref": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["actor"],
+          "description": "Actor type. System actors use 'system:{source_type}/{source_id}' format in the id field."
+        },
+        "id": {
+          "type": "string",
+          "description": "UUID for human actors. 'system:{source_type}/{source_id}' for system actors."
+        }
+      },
+      "required": ["type", "id"],
+      "additionalProperties": false,
+      "description": "Who created this event."
+    },
+    "device_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Hardware-bound identifier. Generated on first app launch, persisted."
+    },
+    "device_seq": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonically increasing integer per device. Causal ordering within a device."
+    },
+    "sync_watermark": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "Server-assigned on receipt. Null until synced. Used for pull pagination."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Device clock, ISO 8601. Advisory only — not used for ordering."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Shape-conforming JSON object. Structure defined by shape_ref."
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "shape_ref",
+    "subject_ref",
+    "actor_ref",
+    "device_id",
+    "device_seq",
+    "timestamp",
+    "payload"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  test-db:
+    image: ghcr.io/vadosware/pg_idkit:0.2.3-pg16.2-alpine3.18-amd64
+    network_mode: host
+    environment:
+      POSTGRES_DB: datarun_test
+      POSTGRES_USER: datarun
+      POSTGRES_PASSWORD: datarun
+      PGPORT: "15432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datarun -d datarun_test -p 15432"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
