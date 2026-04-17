@@ -2,28 +2,35 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-04-17
+**Last updated**: 2026-04-18
 
 ---
 
 ## Current Phase
 
-**Phase 0: Core Loop** — S00 end-to-end (P7 benchmark)
+**Phase 1: Identity & Integrity** — Conflict Detector, Identity Resolver, Integration
 
 | Sub-phase | Status | Notes |
 |-----------|--------|-------|
-| **0a: Server Core** | **Complete** | All 8 quality gates pass. 11 tests green. [Journal →](../../datarun/docs/implementation/phases/phase-0.md#phase-0a-server-core) |
-| **0b: Mobile Core** | Not started | Blocked on Flutter/Android SDK setup |
-| **0c: Integration & Admin** | Not started | Depends on 0b |
+| **1a: Conflict Detector** | **Complete** | All 8 quality gates pass. 19 tests green (8 Phase 0 + 3 subject + 8 Phase 1a). |
+| **1b: Identity Resolver** | **Complete** | All 8 quality gates pass. 27 tests green (19 prior + 8 Phase 1b). |
+| **1c: Mobile + Admin + Integration** | Not started | Depends on 1a + 1b |
 
 ---
 
 ## What's Built
 
-- `contracts/` — envelope schema (11 fields, Draft 2020-12), sync protocol
-- `server/` — Spring Boot app: event store (PostgreSQL), sync push/pull, subject projection, envelope validation
+- `contracts/` — envelope schema (11 fields, 10 event types, Draft 2020-12), sync protocol (extended: device_id, last_pull_watermark, flags_raised)
+- `server/` — Spring Boot app: event store, sync push/pull, subject projection, envelope validation
+- `server/identity/` — ServerIdentity (env var + DB fallback, SEQUENCE-backed device_seq), AliasCache (ConcurrentHashMap, loaded at startup), IdentityService (merge/split with DD-3 row-level locking), IdentityController (REST endpoints)
+- `server/integrity/` — ConflictDetector (per-event W_effective detection + stale_reference detection), ConflictSweepJob (5-min stateless sweep)
+- `server/sync/` — Two-Tx pipeline (TransactionTemplate: Tx1 persist, Tx2 CD + flags)
+- `server/subject/` — SubjectProjection with flag exclusion + alias resolution (CTE-based, LEFT JOIN subject_aliases)
+- `server/subject/` — SubjectController with alias-aware event retrieval (includes events from all alias chains)
+- Migration V2: server_identity table, server_device_seq SEQUENCE, device_sync_state table
+- Migration V3: subject_aliases table (with CHECK constraint), subject_lifecycle table
 - `docker-compose.yml` — full stack dev setup
-- `docker-compose.test.yml` — test DB with host networking (VPN-compatible)
+- `docker-compose.test.yml` — test DB with host networking
 - `.github/workflows/server-ci.yml` — GitHub Actions CI
 
 **Repository**: https://github.com/Hamza-ye/datarun-platform.git
@@ -32,21 +39,20 @@
 
 ## What's Next
 
-1. Set up Flutter/Android SDK on dev machine
-2. Begin Phase 0b: Mobile Core
-   - SQLite event store
-   - Shape-driven form (basic_capture/v1)
-   - S1/S2/S3 screens + U1 sync panel
-   - Sync client targeting Phase 0a server
+1. Begin Phase 1c: Mobile + Admin + Integration
+   - Mobile PE extended for aliases + flags
+   - Admin flag resolution UI
+   - End-to-end multi-device scenario
+   - Projection equivalence test
 
 ---
 
 ## Blockers
 
-- Flutter/Android SDK not yet installed on dev machine
+_(None)_
 
 ---
 
 ## Active Decisions
 
-_(None pending — Phase 0b will surface new decisions as it starts.)_
+_(None pending — Phase 1c will follow phase-1.md spec.)_

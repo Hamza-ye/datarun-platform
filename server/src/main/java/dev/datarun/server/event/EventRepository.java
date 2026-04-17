@@ -28,17 +28,23 @@ public class EventRepository {
         this.objectMapper = objectMapper;
     }
 
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbc;
+    }
+
     /**
      * Insert an event. Returns true if inserted, false if duplicate (by id).
      * sync_watermark is assigned by the database (BIGSERIAL DEFAULT).
+     * Uses ON CONFLICT DO NOTHING for transaction-safe deduplication.
      */
     public boolean insert(Event event) {
         try {
-            jdbc.update("""
-                INSERT INTO events (id, type, shape_ref, activity_ref, subject_ref, actor_ref,
-                                    device_id, device_seq, timestamp, payload)
-                VALUES (?::uuid, ?, ?, ?, ?::jsonb, ?::jsonb, ?::uuid, ?, ?::timestamptz, ?::jsonb)
-                """,
+            int rows = jdbc.update("""
+                    INSERT INTO events (id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                                        device_id, device_seq, timestamp, payload)
+                    VALUES (?::uuid, ?, ?, ?, ?::jsonb, ?::jsonb, ?::uuid, ?, ?::timestamptz, ?::jsonb)
+                    ON CONFLICT (id) DO NOTHING
+                    """,
                     event.id().toString(),
                     event.type(),
                     event.shapeRef(),
@@ -49,10 +55,41 @@ public class EventRepository {
                     event.deviceSeq(),
                     event.timestamp().toString(),
                     toJson(event.payload()));
-            return true;
+            return rows > 0;
         } catch (DuplicateKeyException e) {
+            // device_id + device_seq unique constraint violation
             return false;
         }
+    }
+
+    /**
+     * Retrieve the assigned sync_watermark for a persisted event.
+     */
+    public Long getSyncWatermark(UUID eventId) {
+        return jdbc.queryForObject(
+                "SELECT sync_watermark FROM events WHERE id = ?::uuid",
+                Long.class,
+                eventId.toString());
+    }
+
+    /**
+     * Check if a subject has events from devices OTHER than the given device
+     * with sync_watermark strictly greater than the given horizon.
+     * Used by ConflictDetector for concurrent_state_change detection.
+     */
+    public boolean hasNewerEventsFromOtherDevices(UUID subjectId, UUID excludeDeviceId, long watermarkHorizon) {
+        Integer count = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM events
+                WHERE subject_ref->>'id' = ?
+                  AND device_id != ?::uuid
+                  AND sync_watermark > ?
+                  AND type NOT IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split')
+                """,
+                Integer.class,
+                subjectId.toString(),
+                excludeDeviceId.toString(),
+                watermarkHorizon);
+        return count != null && count > 0;
     }
 
     /**

@@ -18,7 +18,11 @@
         "alert",
         "task_created",
         "task_completed",
-        "assignment_changed"
+        "assignment_changed",
+        "subjects_merged",
+        "subject_split",
+        "conflict_detected",
+        "conflict_resolved"
       ],
       "description": "Platform-fixed, closed, append-only vocabulary. Domain meaning lives in shapes, not types."
     },

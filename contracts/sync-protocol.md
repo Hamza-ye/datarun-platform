@@ -34,16 +34,25 @@ Device sends events to server. Server deduplicates by `id`, assigns `sync_waterm
       "timestamp": "2026-04-16T10:30:00Z",
       "payload": { "name": "Site Alpha", "category": "urban", "notes": "Initial survey" }
     }
-  ]
+  ],
+  "device_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "last_pull_watermark": 0
 }
 ```
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `events` | array | yes | — | Events to push. |
+| `device_id` | string (uuid) | no | — | Pushing device's identity. Used for concurrency detection bookkeeping. |
+| `last_pull_watermark` | integer | no | 0 | The highest `sync_watermark` this device received in its most recent pull. Used for concurrency detection. If omitted, defaults to `0` (conservative — treats all existing events as potentially unseen). |
 
 ### Response — `200 OK`
 
 ```json
 {
   "accepted": 1,
-  "duplicates": 0
+  "duplicates": 0,
+  "flags_raised": 0
 }
 ```
 
@@ -57,6 +66,7 @@ Device sends events to server. Server deduplicates by `id`, assigns `sync_waterm
 | Ordering | Events may arrive in any order. Server does not require `device_seq` ordering. |
 | Validation | Every event is validated against `envelope.schema.json`. Invalid events → `400 Bad Request` with details. Nothing persisted from the batch if any event is invalid. |
 | Atomicity | All-or-nothing per request. Either all valid events are persisted, or none are (on validation failure). |
+| Concurrency detection | After persisting events (Tx1), the server evaluates each accepted event for concurrency conflicts (Tx2). For each event, `W_effective = min(event.sync_watermark, last_pull_watermark)`. If the event's subject has events from other devices with `sync_watermark > W_effective`, a `concurrent_state_change` flag is raised. CD failure does not affect event persistence. |
 
 ### Error Responses
 
