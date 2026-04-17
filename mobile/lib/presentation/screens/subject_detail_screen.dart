@@ -1,0 +1,129 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:datarun_mobile/presentation/app_state.dart';
+import 'package:datarun_mobile/presentation/screens/form_screen.dart';
+import 'package:datarun_mobile/domain/event.dart';
+
+/// S2: Subject Detail — hub for a single subject.
+class SubjectDetailScreen extends StatefulWidget {
+  final String subjectId;
+
+  const SubjectDetailScreen({super.key, required this.subjectId});
+
+  @override
+  State<SubjectDetailScreen> createState() => _SubjectDetailScreenState();
+}
+
+class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
+  List<Event> _events = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
+
+  Future<void> _loadEvents() async {
+    final state = context.read<AppState>();
+    final events =
+        await state.projectionEngine.getSubjectDetail(widget.subjectId);
+    setState(() {
+      _events = events;
+      _loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = _events.isNotEmpty
+        ? (_events.last.payload['name'] as String? ?? 'Unnamed subject')
+        : 'Subject';
+
+    return Scaffold(
+      appBar: AppBar(title: Text(name)),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _events.isEmpty
+              ? const Center(child: Text('No events'))
+              : ListView.builder(
+                  itemCount: _events.length,
+                  itemBuilder: (context, index) {
+                    final e = _events[index];
+                    return _EventTile(event: e);
+                  },
+                ),
+      // Action bar — Phase 0: single "Capture" action
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16),
+        child: FilledButton.icon(
+          onPressed: () => _capture(context),
+          icon: const Icon(Icons.add),
+          label: const Text('Capture'),
+        ),
+      ),
+    );
+  }
+
+  void _capture(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FormScreen(
+          subjectId: widget.subjectId,
+          shapeRef: 'basic_capture/v1',
+        ),
+      ),
+    ).then((_) {
+      if (!mounted) return;
+      _loadEvents(); // Refresh timeline
+      context.read<AppState>().refresh(); // Refresh work list counts
+    });
+  }
+}
+
+class _EventTile extends StatelessWidget {
+  final Event event;
+
+  const _EventTile({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    final dt = DateTime.tryParse(event.timestamp);
+    final timeStr = dt != null
+        ? '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}'
+        : event.timestamp;
+
+    return ExpansionTile(
+      leading: Icon(_iconForType(event.type)),
+      title: Text('${event.type} · ${event.shapeRef}'),
+      subtitle: Text(timeStr),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: event.payload.entries.map((e) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('${e.key}: ${e.value ?? '—'}',
+                    style: Theme.of(context).textTheme.bodyMedium),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData _iconForType(String type) {
+    switch (type) {
+      case 'capture':
+        return Icons.edit_note;
+      case 'review':
+        return Icons.rate_review;
+      default:
+        return Icons.event;
+    }
+  }
+}
