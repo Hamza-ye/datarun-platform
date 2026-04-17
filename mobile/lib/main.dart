@@ -10,7 +10,7 @@ import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/presentation/screens/work_list_screen.dart';
 
 // Phase 0: server URL. TODO: make configurable.
-const serverUrl = 'http://10.0.2.2:8080'; // Android emulator → host
+const serverUrl = 'http://192.168.8.8:8080'; // LAN IP for real device
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
