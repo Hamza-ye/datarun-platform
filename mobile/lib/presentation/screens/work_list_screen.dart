@@ -64,7 +64,25 @@ class WorkListScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final s = state.subjects[index];
                     return ListTile(
-                      title: Text(s.name ?? 'Unnamed subject'),
+                      title: Row(
+                        children: [
+                          Expanded(child: Text(s.name ?? 'Unnamed subject')),
+                          if (s.flagCount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${s.flagCount} flag${s.flagCount == 1 ? '' : 's'}',
+                                style: const TextStyle(
+                                    fontSize: 11, color: Colors.white),
+                              ),
+                            ),
+                        ],
+                      ),
                       subtitle: Text(
                           '${s.captureCount} capture${s.captureCount == 1 ? '' : 's'} · ${_formatTimestamp(s.latestTimestamp)}'),
                       trailing: const Icon(Icons.chevron_right),

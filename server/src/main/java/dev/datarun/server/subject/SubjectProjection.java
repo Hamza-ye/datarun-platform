@@ -40,6 +40,7 @@ public class SubjectProjection {
                           SELECT 1 FROM events cr
                           WHERE cr.type = 'conflict_resolved'
                             AND cr.payload->>'flag_event_id' = events.id::text
+                            AND cr.payload->>'resolution' IN ('accepted', 'reclassified')
                       )
                 ),
                 domain_events AS (
@@ -57,6 +58,18 @@ public class SubjectProjection {
                         COUNT(*) AS event_count
                     FROM domain_events
                     GROUP BY canonical_subject_id
+                ),
+                unresolved_flags AS (
+                    SELECT
+                        COALESCE(sa2.surviving_id::text, cd.subject_ref->>'id') AS canonical_subject_id
+                    FROM events cd
+                    LEFT JOIN subject_aliases sa2 ON (cd.subject_ref->>'id')::uuid = sa2.retired_id
+                    WHERE cd.type = 'conflict_detected'
+                      AND NOT EXISTS (
+                          SELECT 1 FROM events cr
+                          WHERE cr.type = 'conflict_resolved'
+                            AND cr.payload->>'flag_event_id' = cd.id::text
+                      )
                 )
                 SELECT
                     ss.subject_id,
@@ -64,7 +77,9 @@ public class SubjectProjection {
                      WHERE de2.canonical_subject_id = ss.subject_id
                      ORDER BY de2.sync_watermark DESC LIMIT 1) AS latest_event_type,
                     ss.latest_timestamp,
-                    ss.event_count
+                    ss.event_count,
+                    (SELECT COUNT(*) FROM unresolved_flags uf
+                     WHERE uf.canonical_subject_id = ss.subject_id) AS flag_count
                 FROM subject_summary ss
                 ORDER BY ss.latest_timestamp DESC
                 """,
@@ -72,7 +87,8 @@ public class SubjectProjection {
                         rs.getString("subject_id"),
                         rs.getString("latest_event_type"),
                         rs.getTimestamp("latest_timestamp").toInstant().atOffset(ZoneOffset.UTC),
-                        rs.getInt("event_count")
+                        rs.getInt("event_count"),
+                        rs.getInt("flag_count")
                 ));
     }
 }

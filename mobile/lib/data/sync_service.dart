@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:datarun_mobile/data/event_store.dart';
+import 'package:datarun_mobile/data/device_identity.dart';
 import 'package:datarun_mobile/domain/event.dart';
 
 class SyncResult {
@@ -14,10 +15,11 @@ class SyncResult {
 
 class SyncService {
   final EventStore _eventStore;
+  final DeviceIdentity _identity;
   final String _baseUrl;
   static const _watermarkKey = 'sync_watermark';
 
-  SyncService(this._eventStore, this._baseUrl);
+  SyncService(this._eventStore, this._identity, this._baseUrl);
 
   Future<SyncResult> sync() async {
     int pushed = 0;
@@ -27,11 +29,15 @@ class SyncService {
     try {
       final unpushed = await _eventStore.getUnpushed();
       if (unpushed.isNotEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        final lastPullWatermark = prefs.getInt(_watermarkKey) ?? 0;
         final response = await http.post(
           Uri.parse('$_baseUrl/api/sync/push'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'events': unpushed.map((e) => e.toEnvelope()).toList(),
+            'device_id': _identity.deviceId,
+            'last_pull_watermark': lastPullWatermark,
           }),
         );
         if (response.statusCode == 200) {
@@ -75,6 +81,14 @@ class SyncService {
 
         for (final event in events) {
           await _eventStore.insertFromServer(event);
+          // Process subjects_merged events to update local alias table
+          if (event.type == 'subjects_merged') {
+            final retiredId = event.payload['retired_id'] as String?;
+            final survivingId = event.payload['surviving_id'] as String?;
+            if (retiredId != null && survivingId != null) {
+              await _eventStore.upsertAlias(retiredId, survivingId, event.timestamp);
+            }
+          }
         }
         pulled += events.length;
 

@@ -20,7 +20,7 @@ void main() async {
   final projectionEngine = ProjectionEngine(eventStore);
   final eventAssembler = EventAssembler(identity, eventStore);
   final configLoader = ConfigLoader();
-  final syncService = SyncService(eventStore, serverUrl);
+  final syncService = SyncService(eventStore, identity, serverUrl);
 
   final appState = AppState(
     eventStore: eventStore,

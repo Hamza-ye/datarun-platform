@@ -134,6 +134,21 @@ public class EventRepository {
         return count != null && count > 0;
     }
 
+    /**
+     * Find a single event by ID. Returns null if not found.
+     */
+    public Event findById(UUID id) {
+        List<Event> results = jdbc.query("""
+                SELECT id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                       device_id, device_seq, sync_watermark, timestamp, payload
+                FROM events
+                WHERE id = ?::uuid
+                """,
+                eventRowMapper(),
+                id.toString());
+        return results.isEmpty() ? null : results.get(0);
+    }
+
     private RowMapper<Event> eventRowMapper() {
         return (rs, rowNum) -> mapRow(rs);
     }

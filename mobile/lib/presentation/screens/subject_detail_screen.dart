@@ -16,6 +16,7 @@ class SubjectDetailScreen extends StatefulWidget {
 
 class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   List<Event> _events = [];
+  Set<String> _flaggedIds = {};
   bool _loading = true;
 
   @override
@@ -28,8 +29,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     final state = context.read<AppState>();
     final events =
         await state.projectionEngine.getSubjectDetail(widget.subjectId);
+    final flaggedIds = await state.projectionEngine.getFlaggedEventIds();
     setState(() {
       _events = events;
+      _flaggedIds = flaggedIds;
       _loading = false;
     });
   }
@@ -50,7 +53,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                   itemCount: _events.length,
                   itemBuilder: (context, index) {
                     final e = _events[index];
-                    return _EventTile(event: e);
+                    return _EventTile(
+                        event: e, isFlagged: _flaggedIds.contains(e.id));
                   },
                 ),
       // Action bar — Phase 0: single "Capture" action
@@ -84,8 +88,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
 
 class _EventTile extends StatelessWidget {
   final Event event;
+  final bool isFlagged;
 
-  const _EventTile({required this.event});
+  const _EventTile({required this.event, this.isFlagged = false});
 
   @override
   Widget build(BuildContext context) {
@@ -95,8 +100,31 @@ class _EventTile extends StatelessWidget {
         : event.timestamp;
 
     return ExpansionTile(
-      leading: Icon(_iconForType(event.type)),
-      title: Text('${event.type} · ${event.shapeRef}'),
+      leading: Icon(
+        _iconForType(event.type),
+        color: isFlagged ? Colors.red : null,
+      ),
+      title: Row(
+        children: [
+          Expanded(child: Text('${event.type} · ${event.shapeRef}')),
+          if (isFlagged)
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.red.shade100,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                'FLAGGED',
+                style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.red.shade900,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+      ),
       subtitle: Text(timeStr),
       children: [
         Padding(
