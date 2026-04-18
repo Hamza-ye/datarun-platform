@@ -37,11 +37,14 @@ class MultiDeviceE2ETest extends AbstractIntegrationTest {
 
     @BeforeEach
     void cleanDb() {
+        jdbc.execute("DELETE FROM actor_tokens");
+        jdbc.execute("DELETE FROM subject_locations");
         jdbc.execute("DELETE FROM events");
         jdbc.execute("DELETE FROM subject_aliases");
         jdbc.execute("DELETE FROM subject_lifecycle");
         jdbc.execute("DELETE FROM device_sync_state");
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
+        provisionTestToken();
     }
 
     @Test
@@ -148,9 +151,7 @@ class MultiDeviceE2ETest extends AbstractIntegrationTest {
 
     private ResponseEntity<JsonNode> pullEvents(long sinceWatermark, int limit) {
         Map<String, Object> request = Map.of("since_watermark", sinceWatermark, "limit", limit);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         return rest.exchange("/api/sync/pull", HttpMethod.POST,
-                new HttpEntity<>(request, headers), JsonNode.class);
+                new HttpEntity<>(request, authHeaders()), JsonNode.class);
     }
 }

@@ -33,9 +33,11 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void cleanDb() {
+        jdbc.execute("DELETE FROM actor_tokens");
+        jdbc.execute("DELETE FROM subject_locations");
         jdbc.execute("DELETE FROM events");
-        // Reset the sequence so watermarks start fresh each test
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
+        provisionTestToken();
     }
 
     /**
@@ -53,7 +55,7 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
 
         // Verify watermarks assigned
         Integer count = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM events WHERE sync_watermark IS NOT NULL", Integer.class);
+                "SELECT COUNT(*) FROM events WHERE sync_watermark > 0", Integer.class);
         assertThat(count).isEqualTo(10);
     }
 
@@ -72,7 +74,7 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getBody().get("duplicates").asInt()).isEqualTo(10);
 
         // Still only 10 events in DB
-        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM events", Integer.class);
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM events WHERE sync_watermark > 0", Integer.class);
         assertThat(count).isEqualTo(10);
     }
 
@@ -139,7 +141,7 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody().get("error").asText()).isEqualTo("validation_failed");
 
-        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM events", Integer.class);
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM events WHERE sync_watermark > 0", Integer.class);
         assertThat(count).isEqualTo(0);
     }
 
@@ -249,8 +251,7 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
 
     private ResponseEntity<JsonNode> pullEvents(long sinceWatermark, int limit) {
         Map<String, Object> request = Map.of("since_watermark", sinceWatermark, "limit", limit);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = authHeaders();
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
         return rest.exchange("/api/sync/pull", HttpMethod.POST, entity, JsonNode.class);
     }

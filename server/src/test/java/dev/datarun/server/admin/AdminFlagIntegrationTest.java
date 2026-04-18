@@ -35,11 +35,14 @@ class AdminFlagIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void cleanDb() {
+        jdbc.execute("DELETE FROM actor_tokens");
+        jdbc.execute("DELETE FROM subject_locations");
         jdbc.execute("DELETE FROM events");
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         jdbc.execute("DELETE FROM device_sync_state");
         jdbc.execute("DELETE FROM subject_aliases");
         jdbc.execute("DELETE FROM subject_lifecycle");
+        provisionTestToken();
     }
 
     @Test
