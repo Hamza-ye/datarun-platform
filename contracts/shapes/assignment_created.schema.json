@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/shapes/assignment_created.schema.json",
+  "title": "assignment_created/v1 payload",
+  "description": "Payload for assignment_changed events with shape_ref assignment_created/v1. Binds an actor to a scope with a role.",
+  "type": "object",
+  "properties": {
+    "target_actor": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "actor"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": ["type", "id"],
+      "additionalProperties": false,
+      "description": "The actor being assigned."
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque role label. Deployer vocabulary validated in Phase 3."
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "geographic": {
+          "type": ["string", "null"],
+          "description": "Single location UUID. Non-contiguous areas require separate assignments."
+        },
+        "subject_list": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": "Explicit list of subject UUIDs. Null means no subject-list restriction."
+        },
+        "activity": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "List of permitted activity_ref values. Null means no activity restriction."
+        }
+      },
+      "required": ["geographic", "subject_list", "activity"],
+      "additionalProperties": false,
+      "description": "Scope dimensions. All non-null dimensions must pass (AND). OR across assignments."
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the assignment takes effect."
+    },
+    "valid_to": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When the assignment expires. Null means indefinite (active until explicitly ended)."
+    }
+  },
+  "required": ["target_actor", "role", "scope", "valid_from", "valid_to"],
+  "additionalProperties": false
+}

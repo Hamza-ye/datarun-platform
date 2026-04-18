@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/shapes/assignment_ended.schema.json",
+  "title": "assignment_ended/v1 payload",
+  "description": "Payload for assignment_changed events with shape_ref assignment_ended/v1. Terminates an active assignment.",
+  "type": "object",
+  "properties": {
+    "reason": {
+      "type": ["string", "null"],
+      "description": "Optional reason for ending the assignment."
+    }
+  },
+  "required": ["reason"],
+  "additionalProperties": false
+}
