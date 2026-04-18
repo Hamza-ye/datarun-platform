@@ -48,7 +48,7 @@ public class SubjectProjection {
                            COALESCE(sa.surviving_id::text, e.subject_ref->>'id') AS canonical_subject_id
                     FROM events e
                     LEFT JOIN subject_aliases sa ON (e.subject_ref->>'id')::uuid = sa.retired_id
-                    WHERE e.type NOT IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split')
+                    WHERE e.type NOT IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split', 'assignment_changed')
                       AND e.id::text NOT IN (SELECT flagged_id FROM flagged_event_ids WHERE flagged_id IS NOT NULL)
                 ),
                 subject_summary AS (

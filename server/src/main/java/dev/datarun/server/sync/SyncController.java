@@ -3,6 +3,9 @@ package dev.datarun.server.sync;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.datarun.server.authorization.ActiveAssignment;
+import dev.datarun.server.authorization.ActorTokenInterceptor;
+import dev.datarun.server.authorization.ScopeResolver;
 import dev.datarun.server.event.EnvelopeValidator;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,19 +38,22 @@ public class SyncController {
     private final ConflictDetector conflictDetector;
     private final TransactionTemplate transactionTemplate;
     private final JdbcTemplate jdbc;
+    private final ScopeResolver scopeResolver;
 
     public SyncController(EventRepository eventRepository,
                           EnvelopeValidator envelopeValidator,
                           ObjectMapper objectMapper,
                           ConflictDetector conflictDetector,
                           TransactionTemplate transactionTemplate,
-                          JdbcTemplate jdbc) {
+                          JdbcTemplate jdbc,
+                          ScopeResolver scopeResolver) {
         this.eventRepository = eventRepository;
         this.envelopeValidator = envelopeValidator;
         this.objectMapper = objectMapper;
         this.conflictDetector = conflictDetector;
         this.transactionTemplate = transactionTemplate;
         this.jdbc = jdbc;
+        this.scopeResolver = scopeResolver;
     }
 
     @PostMapping("/push")
@@ -112,7 +119,8 @@ public class SyncController {
     }
 
     @PostMapping("/pull")
-    public ResponseEntity<?> pull(@RequestBody PullRequest request) {
+    public ResponseEntity<?> pull(@RequestBody PullRequest request,
+                                  HttpServletRequest httpRequest) {
         if (request.sinceWatermark() == null) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "invalid_watermark"));
@@ -122,10 +130,37 @@ public class SyncController {
         if (limit < 1) limit = 1;
         if (limit > 1000) limit = 1000;
 
-        List<Event> events = eventRepository.findSince(request.sinceWatermark(), limit);
+        // Resolve actor from token (set by ActorTokenInterceptor)
+        UUID actorId = (UUID) httpRequest.getAttribute(ActorTokenInterceptor.ACTOR_ID_ATTR);
+
+        // Compute actor's scope from active assignments
+        List<ActiveAssignment> assignments = scopeResolver.getActiveAssignments(actorId);
+
+        // If any assignment has unrestricted geographic scope (null), actor sees all events
+        boolean hasUnrestrictedGeo = assignments.stream()
+                .anyMatch(a -> a.geographicPath() == null);
+
+        List<String> scopePaths = assignments.stream()
+                .map(ActiveAssignment::geographicPath)
+                .filter(p -> p != null)
+                .toList();
+
+        List<Event> events;
+        if (assignments.isEmpty()) {
+            // No active assignments → empty result (no events authorized)
+            events = List.of();
+        } else if (hasUnrestrictedGeo) {
+            // Unrestricted geographic scope → return all events (same as pre-Phase 2)
+            events = eventRepository.findSince(request.sinceWatermark(), limit);
+        } else {
+            events = eventRepository.findSinceScoped(
+                    request.sinceWatermark(), limit, actorId, scopePaths);
+        }
+
         long latestWatermark = events.isEmpty()
                 ? request.sinceWatermark()
                 : events.get(events.size() - 1).syncWatermark();
+        boolean hasMore = events.size() == limit;
 
         // Update device_sync_state on each pull (bookkeeping)
         if (request.deviceId() != null) {
@@ -134,7 +169,8 @@ public class SyncController {
 
         return ResponseEntity.ok(Map.of(
                 "events", events,
-                "latest_watermark", latestWatermark
+                "latest_watermark", latestWatermark,
+                "has_more", hasMore
         ));
     }
 

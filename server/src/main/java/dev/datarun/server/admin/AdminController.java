@@ -1,5 +1,9 @@
 package dev.datarun.server.admin;
 
+import dev.datarun.server.authorization.AssignmentService;
+import dev.datarun.server.authorization.Location;
+import dev.datarun.server.authorization.LocationRepository;
+import dev.datarun.server.authorization.ScopeResolver;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.integrity.ConflictResolutionService;
@@ -10,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -22,13 +27,22 @@ public class AdminController {
     private final SubjectProjection subjectProjection;
     private final EventRepository eventRepository;
     private final ConflictResolutionService resolutionService;
+    private final LocationRepository locationRepository;
+    private final ScopeResolver scopeResolver;
+    private final AssignmentService assignmentService;
 
     public AdminController(SubjectProjection subjectProjection,
                            EventRepository eventRepository,
-                           ConflictResolutionService resolutionService) {
+                           ConflictResolutionService resolutionService,
+                           LocationRepository locationRepository,
+                           ScopeResolver scopeResolver,
+                           AssignmentService assignmentService) {
         this.subjectProjection = subjectProjection;
         this.eventRepository = eventRepository;
         this.resolutionService = resolutionService;
+        this.locationRepository = locationRepository;
+        this.scopeResolver = scopeResolver;
+        this.assignmentService = assignmentService;
     }
 
     @GetMapping
@@ -94,5 +108,67 @@ public class AdminController {
             return "redirect:/admin/flags/" + flagId;
         }
         return "redirect:/admin/flags";
+    }
+
+    // --- Assignments ---
+
+    @GetMapping("/assignments")
+    public String assignmentList(Model model) {
+        // Show all assignment events grouped by actor
+        List<Event> assignmentEvents = eventRepository.findByType("assignment_changed");
+        model.addAttribute("events", assignmentEvents);
+        return "assignment-list";
+    }
+
+    @GetMapping("/assignments/create")
+    public String assignmentCreateForm(Model model) {
+        List<Location> locations = locationRepository.findAll();
+        model.addAttribute("locations", locations);
+        return "assignment-create";
+    }
+
+    @PostMapping("/assignments/create")
+    public String createAssignment(@RequestParam String creatorActorId,
+                                   @RequestParam String targetActorId,
+                                   @RequestParam String role,
+                                   @RequestParam(required = false) String geographicScope,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            UUID creatorId = UUID.fromString(creatorActorId);
+            UUID targetId = UUID.fromString(targetActorId);
+            UUID geoId = (geographicScope != null && !geographicScope.isBlank())
+                    ? UUID.fromString(geographicScope) : null;
+
+            assignmentService.createAssignment(creatorId, targetId, role, geoId,
+                    null, null, OffsetDateTime.now(), null);
+            redirectAttributes.addFlashAttribute("success", "Assignment created");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/assignments/create";
+        }
+        return "redirect:/admin/assignments";
+    }
+
+    @PostMapping("/assignments/{id}/end")
+    public String endAssignment(@PathVariable UUID id,
+                                @RequestParam String actorId,
+                                @RequestParam(required = false) String reason,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            assignmentService.endAssignment(id, UUID.fromString(actorId), reason);
+            redirectAttributes.addFlashAttribute("success", "Assignment ended");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/assignments";
+    }
+
+    // --- Locations ---
+
+    @GetMapping("/locations")
+    public String locationList(Model model) {
+        List<Location> locations = locationRepository.findAll();
+        model.addAttribute("locations", locations);
+        return "location-list";
     }
 }

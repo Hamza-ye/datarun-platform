@@ -55,10 +55,40 @@ public class EventRepository {
                     event.deviceSeq(),
                     event.timestamp().toString(),
                     toJson(event.payload()));
+            if (rows > 0) {
+                // Resolve location_path for subject events (IDR-015)
+                resolveLocationPath(event);
+            }
             return rows > 0;
         } catch (DuplicateKeyException e) {
             // device_id + device_seq unique constraint violation
             return false;
+        }
+    }
+
+    /**
+     * Resolve and set location_path on a newly inserted event (IDR-015).
+     * Only subject events get a location_path. Assignment/system events get NULL.
+     */
+    private void resolveLocationPath(Event event) {
+        JsonNode subjectRef = event.subjectRef();
+        if (subjectRef == null) return;
+        String subjectType = subjectRef.path("type").asText("");
+        if (!"subject".equals(subjectType)) return;
+
+        String subjectId = subjectRef.path("id").asText(null);
+        if (subjectId == null) return;
+
+        try {
+            List<String> paths = jdbc.queryForList(
+                    "SELECT path FROM subject_locations WHERE subject_id = ?::uuid",
+                    String.class, subjectId);
+            if (!paths.isEmpty()) {
+                jdbc.update("UPDATE events SET location_path = ? WHERE id = ?::uuid",
+                        paths.get(0), event.id().toString());
+            }
+        } catch (Exception e) {
+            // subject_locations table may not exist during early migrations — safe to skip
         }
     }
 
@@ -109,6 +139,84 @@ public class EventRepository {
     }
 
     /**
+     * Scope-filtered pull (IDR-015). Three categories OR'd:
+     * 1. Subject events matching geographic scope (LIKE prefix)
+     * 2. Own assignment events (sync rule E9 — always included)
+     * 3. System events in scope
+     *
+     * @param sinceWatermark watermark to pull from
+     * @param limit page size
+     * @param actorId the pulling actor
+     * @param scopePaths geographic scope paths (one per active assignment)
+     * @return events matching the actor's scope
+     */
+    public List<Event> findSinceScoped(long sinceWatermark, int limit,
+                                        UUID actorId, List<String> scopePaths) {
+        if (scopePaths == null || scopePaths.isEmpty()) {
+            // Actor has no geographic scope — return only own assignment events (E9)
+            return jdbc.query("""
+                    SELECT id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                           device_id, device_seq, sync_watermark, timestamp, payload
+                    FROM events
+                    WHERE sync_watermark > ?
+                      AND type = 'assignment_changed'
+                      AND payload->'target_actor'->>'id' = ?
+                    ORDER BY sync_watermark ASC
+                    LIMIT ?
+                    """,
+                    eventRowMapper(),
+                    sinceWatermark, actorId.toString(), limit);
+        }
+
+        // Build dynamic LIKE conditions for geographic scope paths
+        StringBuilder sql = new StringBuilder();
+        sql.append("""
+                SELECT id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                       device_id, device_seq, sync_watermark, timestamp, payload
+                FROM events
+                WHERE sync_watermark > ?
+                  AND (
+                    -- Category 1: Subject events in geographic scope
+                    (location_path IS NOT NULL AND (
+                """);
+
+        List<Object> params = new java.util.ArrayList<>();
+        params.add(sinceWatermark);
+
+        for (int i = 0; i < scopePaths.size(); i++) {
+            if (i > 0) sql.append(" OR ");
+            sql.append("location_path LIKE ?");
+            params.add(scopePaths.get(i) + "%");
+        }
+
+        sql.append("""
+                    ))
+                    -- Category 2: Own assignment events (E9 — always included)
+                    OR (type = 'assignment_changed' AND payload->'target_actor'->>'id' = ?)
+                    -- Category 3: System events in scope
+                    OR (type IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split')
+                        AND location_path IS NOT NULL AND (
+                """);
+        params.add(actorId.toString());
+
+        for (int i = 0; i < scopePaths.size(); i++) {
+            if (i > 0) sql.append(" OR ");
+            sql.append("location_path LIKE ?");
+            params.add(scopePaths.get(i) + "%");
+        }
+
+        sql.append("""
+                    ))
+                  )
+                ORDER BY sync_watermark ASC
+                LIMIT ?
+                """);
+        params.add(limit);
+
+        return jdbc.query(sql.toString(), eventRowMapper(), params.toArray());
+    }
+
+    /**
      * Find all events for a given subject, ordered by sync_watermark.
      */
     public List<Event> findBySubjectId(UUID subjectId) {
@@ -147,6 +255,21 @@ public class EventRepository {
                 eventRowMapper(),
                 id.toString());
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    /**
+     * Find events by type, ordered by sync_watermark.
+     */
+    public List<Event> findByType(String type) {
+        return jdbc.query("""
+                SELECT id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                       device_id, device_seq, sync_watermark, timestamp, payload
+                FROM events
+                WHERE type = ?
+                ORDER BY sync_watermark DESC
+                """,
+                eventRowMapper(),
+                type);
     }
 
     private RowMapper<Event> eventRowMapper() {

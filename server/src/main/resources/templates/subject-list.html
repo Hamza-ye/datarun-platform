@@ -24,6 +24,8 @@
     <nav>
         <a href="/admin">Subjects</a>
         <a href="/admin/flags">Flags<span class="badge" th:if="${flagCount > 0}" th:text="${flagCount}">0</span></a>
+        <a href="/admin/assignments">Assignments</a>
+        <a href="/admin/locations">Locations</a>
     </nav>
     <h1>Subjects</h1>
     <table th:if="${!subjects.isEmpty()}">
