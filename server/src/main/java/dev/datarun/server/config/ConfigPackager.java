@@ -2,12 +2,15 @@ package dev.datarun.server.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -20,15 +23,18 @@ public class ConfigPackager {
 
     private final ShapeRepository shapeRepository;
     private final ActivityRepository activityRepository;
+    private final ExpressionRepository expressionRepository;
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
 
     public ConfigPackager(ShapeRepository shapeRepository,
                           ActivityRepository activityRepository,
+                          ExpressionRepository expressionRepository,
                           JdbcTemplate jdbc,
                           ObjectMapper objectMapper) {
         this.shapeRepository = shapeRepository;
         this.activityRepository = activityRepository;
+        this.expressionRepository = expressionRepository;
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
     }
@@ -73,8 +79,26 @@ public class ConfigPackager {
         }
         packageJson.set("activities", activitiesNode);
 
-        // Expressions: empty in Phase 3a, populated in Phase 3b
-        packageJson.set("expressions", objectMapper.createObjectNode());
+        // Expressions: grouped by "{activity_ref}.{shape_ref}" key (IDR-018/IDR-019)
+        ObjectNode expressionsNode = objectMapper.createObjectNode();
+        List<ExpressionRule> allRules = expressionRepository.findAll();
+        Map<String, ArrayNode> groupedRules = new LinkedHashMap<>();
+        for (ExpressionRule rule : allRules) {
+            String key = rule.activityRef() + "." + rule.shapeRef();
+            groupedRules.computeIfAbsent(key, k -> objectMapper.createArrayNode());
+            ObjectNode ruleNode = objectMapper.createObjectNode();
+            ruleNode.put("field_name", rule.fieldName());
+            ruleNode.put("rule_type", rule.ruleType());
+            ruleNode.set("expression", rule.expression());
+            if (rule.message() != null) {
+                ruleNode.put("message", rule.message());
+            }
+            groupedRules.get(key).add(ruleNode);
+        }
+        for (var entry : groupedRules.entrySet()) {
+            expressionsNode.set(entry.getKey(), entry.getValue());
+        }
+        packageJson.set("expressions", expressionsNode);
 
         // Flag severity overrides: empty stub for Phase 3 (IDR-019)
         packageJson.set("flag_severity_overrides", objectMapper.createObjectNode());

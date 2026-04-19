@@ -1,0 +1,395 @@
+{
+  "_comment": "Cross-platform expression evaluation fixtures (IDR-018). Both Java and Dart evaluators must produce identical results for every case. Pattern follows E7 projection equivalence.",
+  "_format": {
+    "description": "Each entry has: expression (JSON AST), values (resolved namespace→value map), expected (boolean or value), description.",
+    "values_keys": "Flat map: 'payload.field_name', 'entity.attr', 'context.prop', 'event.field' → resolved value"
+  },
+  "cases": [
+    {
+      "id": "eq_string_match",
+      "description": "eq: string equality — match",
+      "expression": { "eq": ["payload.status", "active"] },
+      "values": { "payload.status": "active" },
+      "expected": true
+    },
+    {
+      "id": "eq_string_no_match",
+      "description": "eq: string equality — no match",
+      "expression": { "eq": ["payload.status", "closed"] },
+      "values": { "payload.status": "active" },
+      "expected": false
+    },
+    {
+      "id": "eq_number_match",
+      "description": "eq: numeric equality",
+      "expression": { "eq": ["payload.count", 5] },
+      "values": { "payload.count": 5 },
+      "expected": true
+    },
+    {
+      "id": "eq_boolean_match",
+      "description": "eq: boolean equality",
+      "expression": { "eq": ["payload.active", true] },
+      "values": { "payload.active": true },
+      "expected": true
+    },
+    {
+      "id": "eq_null_operand",
+      "description": "eq: null operand → false (null safety)",
+      "expression": { "eq": ["payload.status", "active"] },
+      "values": {},
+      "expected": false
+    },
+    {
+      "id": "neq_match",
+      "description": "neq: values differ",
+      "expression": { "neq": ["payload.status", "closed"] },
+      "values": { "payload.status": "active" },
+      "expected": true
+    },
+    {
+      "id": "neq_same",
+      "description": "neq: values same → false",
+      "expression": { "neq": ["payload.status", "active"] },
+      "values": { "payload.status": "active" },
+      "expected": false
+    },
+    {
+      "id": "neq_null_operand",
+      "description": "neq: null operand → false",
+      "expression": { "neq": ["payload.status", "closed"] },
+      "values": {},
+      "expected": false
+    },
+    {
+      "id": "gt_true",
+      "description": "gt: 10 > 5",
+      "expression": { "gt": ["payload.count", 5] },
+      "values": { "payload.count": 10 },
+      "expected": true
+    },
+    {
+      "id": "gt_equal",
+      "description": "gt: 5 > 5 → false",
+      "expression": { "gt": ["payload.count", 5] },
+      "values": { "payload.count": 5 },
+      "expected": false
+    },
+    {
+      "id": "gt_less",
+      "description": "gt: 3 > 5 → false",
+      "expression": { "gt": ["payload.count", 5] },
+      "values": { "payload.count": 3 },
+      "expected": false
+    },
+    {
+      "id": "gte_equal",
+      "description": "gte: 5 >= 5",
+      "expression": { "gte": ["payload.count", 5] },
+      "values": { "payload.count": 5 },
+      "expected": true
+    },
+    {
+      "id": "gte_greater",
+      "description": "gte: 10 >= 5",
+      "expression": { "gte": ["payload.count", 5] },
+      "values": { "payload.count": 10 },
+      "expected": true
+    },
+    {
+      "id": "lt_true",
+      "description": "lt: 3 < 5",
+      "expression": { "lt": ["payload.count", 5] },
+      "values": { "payload.count": 3 },
+      "expected": true
+    },
+    {
+      "id": "lt_equal",
+      "description": "lt: 5 < 5 → false",
+      "expression": { "lt": ["payload.count", 5] },
+      "values": { "payload.count": 5 },
+      "expected": false
+    },
+    {
+      "id": "lte_equal",
+      "description": "lte: 5 <= 5",
+      "expression": { "lte": ["payload.count", 5] },
+      "values": { "payload.count": 5 },
+      "expected": true
+    },
+    {
+      "id": "lte_less",
+      "description": "lte: 3 <= 5",
+      "expression": { "lte": ["payload.count", 5] },
+      "values": { "payload.count": 3 },
+      "expected": true
+    },
+    {
+      "id": "in_match",
+      "description": "in: value in literal array",
+      "expression": { "in": ["payload.status", ["active", "partial"]] },
+      "values": { "payload.status": "active" },
+      "expected": true
+    },
+    {
+      "id": "in_no_match",
+      "description": "in: value not in literal array",
+      "expression": { "in": ["payload.status", ["active", "partial"]] },
+      "values": { "payload.status": "closed" },
+      "expected": false
+    },
+    {
+      "id": "in_null_needle",
+      "description": "in: null needle → false",
+      "expression": { "in": ["payload.status", ["active", "partial"]] },
+      "values": {},
+      "expected": false
+    },
+    {
+      "id": "in_multi_select_haystack",
+      "description": "in: needle in multi_select field (array haystack)",
+      "expression": { "in": ["vaccines", "payload.stockout_items"] },
+      "values": { "payload.stockout_items": ["vaccines", "antimalarials"] },
+      "expected": true
+    },
+    {
+      "id": "in_multi_select_no_match",
+      "description": "in: needle not in multi_select field",
+      "expression": { "in": ["bandages", "payload.stockout_items"] },
+      "values": { "payload.stockout_items": ["vaccines", "antimalarials"] },
+      "expected": false
+    },
+    {
+      "id": "not_null_present",
+      "description": "not_null: field present → true",
+      "expression": { "not_null": ["payload.notes"] },
+      "values": { "payload.notes": "some text" },
+      "expected": true
+    },
+    {
+      "id": "not_null_absent",
+      "description": "not_null: field absent → false",
+      "expression": { "not_null": ["payload.notes"] },
+      "values": {},
+      "expected": false
+    },
+    {
+      "id": "not_null_explicit_null",
+      "description": "not_null: field explicitly null → false",
+      "expression": { "not_null": ["payload.notes"] },
+      "values": { "payload.notes": null },
+      "expected": false
+    },
+    {
+      "id": "and_all_true",
+      "description": "and: all predicates true",
+      "expression": {
+        "and": [
+          { "eq": ["payload.status", "active"] },
+          { "gt": ["payload.count", 3] }
+        ]
+      },
+      "values": { "payload.status": "active", "payload.count": 5 },
+      "expected": true
+    },
+    {
+      "id": "and_one_false",
+      "description": "and: one predicate false → false",
+      "expression": {
+        "and": [
+          { "eq": ["payload.status", "active"] },
+          { "gt": ["payload.count", 10] }
+        ]
+      },
+      "values": { "payload.status": "active", "payload.count": 5 },
+      "expected": false
+    },
+    {
+      "id": "and_three_predicates",
+      "description": "and: three predicates all true",
+      "expression": {
+        "and": [
+          { "eq": ["payload.status", "active"] },
+          { "gt": ["payload.count", 1] },
+          { "lt": ["payload.count", 10] }
+        ]
+      },
+      "values": { "payload.status": "active", "payload.count": 5 },
+      "expected": true
+    },
+    {
+      "id": "or_first_true",
+      "description": "or: first predicate true",
+      "expression": {
+        "or": [
+          { "eq": ["payload.status", "closed"] },
+          { "gt": ["payload.count", 100] }
+        ]
+      },
+      "values": { "payload.status": "closed", "payload.count": 1 },
+      "expected": true
+    },
+    {
+      "id": "or_second_true",
+      "description": "or: second predicate true",
+      "expression": {
+        "or": [
+          { "eq": ["payload.status", "closed"] },
+          { "gt": ["payload.count", 100] }
+        ]
+      },
+      "values": { "payload.status": "active", "payload.count": 200 },
+      "expected": true
+    },
+    {
+      "id": "or_none_true",
+      "description": "or: no predicates true → false",
+      "expression": {
+        "or": [
+          { "eq": ["payload.status", "closed"] },
+          { "gt": ["payload.count", 100] }
+        ]
+      },
+      "values": { "payload.status": "active", "payload.count": 50 },
+      "expected": false
+    },
+    {
+      "id": "not_negates_true",
+      "description": "not: negates true comparison → false",
+      "expression": { "not": { "eq": ["payload.active", true] } },
+      "values": { "payload.active": true },
+      "expected": false
+    },
+    {
+      "id": "not_negates_false",
+      "description": "not: negates false comparison → true",
+      "expression": { "not": { "eq": ["payload.active", true] } },
+      "values": { "payload.active": false },
+      "expected": true
+    },
+    {
+      "id": "type_coercion_string_to_number",
+      "description": "Type coercion: string '5' compared to number 5",
+      "expression": { "eq": ["payload.count", 5] },
+      "values": { "payload.count": "5" },
+      "expected": true
+    },
+    {
+      "id": "type_coercion_number_to_string",
+      "description": "Type coercion: number 5 compared to string '5'",
+      "expression": { "eq": ["payload.count", "5"] },
+      "values": { "payload.count": 5 },
+      "expected": true
+    },
+    {
+      "id": "type_coercion_failure",
+      "description": "Type coercion: string 'abc' compared to number 5 → false",
+      "expression": { "eq": ["payload.count", 5] },
+      "values": { "payload.count": "abc" },
+      "expected": false
+    },
+    {
+      "id": "gt_null_operand",
+      "description": "gt: null operand → false",
+      "expression": { "gt": ["payload.count", 5] },
+      "values": {},
+      "expected": false
+    },
+    {
+      "id": "and_with_null",
+      "description": "and: one operand null → that comparison false → and false",
+      "expression": {
+        "and": [
+          { "eq": ["payload.status", "active"] },
+          { "gt": ["payload.count", 3] }
+        ]
+      },
+      "values": { "payload.status": "active" },
+      "expected": false
+    },
+    {
+      "id": "context_reference",
+      "description": "context.* reference resolved",
+      "expression": { "gt": ["context.days_since_last_event", 90] },
+      "values": { "context.days_since_last_event": 120 },
+      "expected": true
+    },
+    {
+      "id": "entity_reference",
+      "description": "entity.* reference resolved",
+      "expression": { "eq": ["entity.facility_type", "hospital"] },
+      "values": { "entity.facility_type": "hospital" },
+      "expected": true
+    },
+    {
+      "id": "event_reference_trigger_context",
+      "description": "event.* reference (trigger context)",
+      "expression": { "eq": ["event.service_availability", "closed"] },
+      "values": { "event.service_availability": "closed" },
+      "expected": true
+    },
+    {
+      "id": "ref_value_node",
+      "description": "ref: resolves reference to its value",
+      "expression": { "ref": "context.actor.scope_name" },
+      "values": { "context.actor.scope_name": "Nairobi County" },
+      "expected_value": "Nairobi County"
+    },
+    {
+      "id": "ref_null_value",
+      "description": "ref: null reference → null value",
+      "expression": { "ref": "context.subject_pattern" },
+      "values": {},
+      "expected_value": null
+    },
+    {
+      "id": "ref_numeric_value",
+      "description": "ref: numeric reference value",
+      "expression": { "ref": "context.event_count" },
+      "values": { "context.event_count": 42 },
+      "expected_value": 42
+    },
+    {
+      "id": "decimal_comparison",
+      "description": "gt: decimal comparison 12.5 > 10.0",
+      "expression": { "gt": ["payload.temperature", 10.0] },
+      "values": { "payload.temperature": 12.5 },
+      "expected": true
+    },
+    {
+      "id": "in_integer_array",
+      "description": "in: integer in literal array",
+      "expression": { "in": ["payload.priority", [1, 2, 3]] },
+      "values": { "payload.priority": 2 },
+      "expected": true
+    },
+    {
+      "id": "bare_comparison_as_expression",
+      "description": "Bare comparison (no logical wrapper) as top-level expression",
+      "expression": { "gt": ["context.days_since_last_event", 90] },
+      "values": { "context.days_since_last_event": 91 },
+      "expected": true
+    },
+    {
+      "id": "not_null_empty_string",
+      "description": "not_null: empty string is present (not null)",
+      "expression": { "not_null": ["payload.notes"] },
+      "values": { "payload.notes": "" },
+      "expected": true
+    },
+    {
+      "id": "eq_both_null",
+      "description": "eq: both operands null → false (null safety rule)",
+      "expression": { "eq": ["payload.a", "payload.b"] },
+      "values": {},
+      "expected": false
+    },
+    {
+      "id": "two_field_refs_comparison",
+      "description": "Two field references compared",
+      "expression": { "gt": ["payload.actual", "payload.target"] },
+      "values": { "payload.actual": 15, "payload.target": 10 },
+      "expected": true
+    }
+  ]
+}

@@ -410,6 +410,144 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         assertEquals("elevated", sensClass.get("shapes").get("sensitive_form/v1").asText());
     }
 
+    // --- Expression Rules (Phase 3b) ---
+
+    @Test
+    void createExpressionRule_storedCorrectly() {
+        // Create shape and activity for expression to target
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ObjectNode schema = buildSchema(0, null);
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+        ObjectNode statusField = objectMapper.createObjectNode();
+        statusField.put("name", "status");
+        statusField.put("type", "select");
+        statusField.put("required", false);
+        statusField.put("deprecated", false);
+        statusField.putArray("options").add("active").add("closed");
+        fields.add(statusField);
+        ss.createShape("expr_test", "standard", schema);
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("expr_test/v1");
+        config.putObject("roles").putArray("worker").add("capture");
+        as.createActivity("expr_activity", "standard", config);
+
+        // Create expression rule via admin form POST
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        String formData = "activityRef=expr_activity&shapeRef=expr_test/v1&fieldName=status&ruleType=show_condition"
+                + "&expressionStr=" + java.net.URLEncoder.encode("{\"when\":{\"eq\":[\"payload.status\",\"active\"]}}", java.nio.charset.StandardCharsets.UTF_8)
+                + "&message=";
+        HttpEntity<String> entity = new HttpEntity<>(formData, headers);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/admin/config/expressions/create", HttpMethod.POST, entity, String.class);
+
+        // Should redirect (302/303)
+        assertTrue(response.getStatusCode().is3xxRedirection(),
+                "Expected redirect, got: " + response.getStatusCode());
+
+        // Verify rule stored in DB
+        var rules = jdbcTemplate.queryForList("SELECT * FROM expression_rules");
+        assertEquals(1, rules.size());
+        assertEquals("expr_activity", rules.get(0).get("activity_ref"));
+        assertEquals("expr_test/v1", rules.get(0).get("shape_ref"));
+        assertEquals("status", rules.get(0).get("field_name"));
+        assertEquals("show_condition", rules.get(0).get("rule_type"));
+    }
+
+    @Test
+    void expressionRule_includedInConfigPackage() {
+        // Setup: shape + activity + expression rule
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ObjectNode schema = buildSchema(0, null);
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+        ObjectNode countField = objectMapper.createObjectNode();
+        countField.put("name", "count");
+        countField.put("type", "integer");
+        countField.put("required", false);
+        countField.put("deprecated", false);
+        fields.add(countField);
+        ss.createShape("pkg_test", "standard", schema);
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("pkg_test/v1");
+        config.putObject("roles").putArray("worker").add("capture");
+        as.createActivity("pkg_activity", "standard", config);
+
+        // Insert expression rule directly
+        UUID ruleId = UUID.randomUUID();
+        jdbcTemplate.update("""
+                INSERT INTO expression_rules (id, activity_ref, shape_ref, field_name, rule_type, expression, message)
+                VALUES (?::uuid, ?, ?, ?, ?, ?::jsonb, ?)
+                """,
+                ruleId.toString(), "pkg_activity", "pkg_test/v1", "count", "warning",
+                "{\"when\":{\"gt\":[\"payload.count\",100]}}",
+                "Count seems high");
+
+        // Publish config
+        configPackager.publish(null);
+
+        // Fetch config and verify expressions present
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
+                "/api/sync/config",
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                JsonNode.class);
+
+        assertEquals(200, response.getStatusCode().value());
+        JsonNode expressions = response.getBody().get("expressions");
+        assertNotNull(expressions);
+        assertTrue(expressions.has("pkg_activity.pkg_test/v1"),
+                "Expected key 'pkg_activity.pkg_test/v1' in expressions");
+
+        JsonNode rulesArray = expressions.get("pkg_activity.pkg_test/v1");
+        assertTrue(rulesArray.isArray());
+        assertEquals(1, rulesArray.size());
+        assertEquals("count", rulesArray.get(0).get("field_name").asText());
+        assertEquals("warning", rulesArray.get(0).get("rule_type").asText());
+        assertEquals("Count seems high", rulesArray.get(0).get("message").asText());
+    }
+
+    @Test
+    void dtvRejects_invalidExpressionRule() {
+        // Create shape with text field
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ObjectNode schema = buildSchema(0, null);
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+        ObjectNode nameField = objectMapper.createObjectNode();
+        nameField.put("name", "name");
+        nameField.put("type", "text");
+        nameField.put("required", false);
+        nameField.put("deprecated", false);
+        fields.add(nameField);
+        ss.createShape("dtv_test", "standard", schema);
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("dtv_test/v1");
+        config.putObject("roles").putArray("worker").add("capture");
+        as.createActivity("dtv_activity", "standard", config);
+
+        // Try to create rule with ordering operator on text field → DtV rejects
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        String formData = "activityRef=dtv_activity&shapeRef=dtv_test/v1&fieldName=name&ruleType=show_condition"
+                + "&expressionStr=" + java.net.URLEncoder.encode("{\"when\":{\"gt\":[\"payload.name\",\"abc\"]}}", java.nio.charset.StandardCharsets.UTF_8)
+                + "&message=";
+        HttpEntity<String> entity = new HttpEntity<>(formData, headers);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/admin/config/expressions/create", HttpMethod.POST, entity, String.class);
+
+        // Should redirect back to create form with error
+        assertTrue(response.getStatusCode().is3xxRedirection());
+
+        // Verify NO rule was stored
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM expression_rules", Integer.class);
+        assertEquals(0, count.intValue());
+    }
+
     // --- Helpers ---
 
     private ObjectNode buildSchema(int fieldCount, String shapeName) {

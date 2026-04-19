@@ -22,15 +22,24 @@ public class ConfigAdminController {
     private final ShapeService shapeService;
     private final ActivityService activityService;
     private final ConfigPackager configPackager;
+    private final ExpressionRepository expressionRepository;
+    private final DeployTimeValidator deployTimeValidator;
+    private final ShapeRepository shapeRepository;
     private final ObjectMapper objectMapper;
 
     public ConfigAdminController(ShapeService shapeService,
                                  ActivityService activityService,
                                  ConfigPackager configPackager,
+                                 ExpressionRepository expressionRepository,
+                                 DeployTimeValidator deployTimeValidator,
+                                 ShapeRepository shapeRepository,
                                  ObjectMapper objectMapper) {
         this.shapeService = shapeService;
         this.activityService = activityService;
         this.configPackager = configPackager;
+        this.expressionRepository = expressionRepository;
+        this.deployTimeValidator = deployTimeValidator;
+        this.shapeRepository = shapeRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -180,6 +189,70 @@ public class ConfigAdminController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/config/activities";
+    }
+
+    // --- Expressions ---
+
+    @GetMapping("/expressions")
+    public String expressionList(Model model) {
+        model.addAttribute("rules", expressionRepository.findAll());
+        return "config/expression-list";
+    }
+
+    @GetMapping("/expressions/create")
+    public String expressionCreateForm(Model model) {
+        model.addAttribute("activities", activityService.getAllActivities());
+        model.addAttribute("shapes", shapeService.getAllShapes());
+        return "config/expression-create";
+    }
+
+    @PostMapping("/expressions/create")
+    public String createExpression(@RequestParam String activityRef,
+                                   @RequestParam String shapeRef,
+                                   @RequestParam String fieldName,
+                                   @RequestParam String ruleType,
+                                   @RequestParam String expressionStr,
+                                   @RequestParam(required = false) String message,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            JsonNode expressionJson = objectMapper.readTree(expressionStr);
+            UUID id = UUID.randomUUID();
+            ExpressionRule rule = new ExpressionRule(
+                    id, activityRef, shapeRef, fieldName, ruleType, expressionJson, message, null);
+
+            // DtV validation
+            String[] shapeParts = ShapeService.parseShapeRef(shapeRef);
+            if (shapeParts == null) {
+                redirectAttributes.addFlashAttribute("error", "Invalid shape_ref format: " + shapeRef);
+                return "redirect:/admin/config/expressions/create";
+            }
+            var shape = shapeRepository.findByNameAndVersion(shapeParts[0], Integer.parseInt(shapeParts[1]));
+            if (shape.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Shape '" + shapeRef + "' not found");
+                return "redirect:/admin/config/expressions/create";
+            }
+
+            List<String> violations = deployTimeValidator.validateRule(rule, shape.get());
+            if (!violations.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", String.join("; ", violations));
+                return "redirect:/admin/config/expressions/create";
+            }
+
+            expressionRepository.insert(rule);
+            redirectAttributes.addFlashAttribute("success",
+                    "Expression rule created for " + fieldName + " (" + ruleType + ")");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Invalid JSON: " + e.getMessage());
+            return "redirect:/admin/config/expressions/create";
+        }
+        return "redirect:/admin/config/expressions";
+    }
+
+    @PostMapping("/expressions/{id}/delete")
+    public String deleteExpression(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
+        expressionRepository.delete(id);
+        redirectAttributes.addFlashAttribute("success", "Expression rule deleted");
+        return "redirect:/admin/config/expressions";
     }
 
     // --- Config Publishing ---
