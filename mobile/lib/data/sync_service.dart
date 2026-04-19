@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:datarun_mobile/data/event_store.dart';
+import 'package:datarun_mobile/data/config_store.dart';
 import 'package:datarun_mobile/data/device_identity.dart';
 import 'package:datarun_mobile/domain/event.dart';
 
@@ -17,9 +18,10 @@ class SyncService {
   final EventStore _eventStore;
   final DeviceIdentity _identity;
   final String _baseUrl;
+  final ConfigStore _configStore;
   static const _watermarkKey = 'sync_watermark';
 
-  SyncService(this._eventStore, this._identity, this._baseUrl);
+  SyncService(this._eventStore, this._identity, this._baseUrl, this._configStore);
 
   Future<SyncResult> sync() async {
     int pushed = 0;
@@ -117,6 +119,33 @@ class SyncService {
       }
     } on Exception {
       // Pull errors are non-fatal — pushed data is already safe
+    }
+
+    // Config download: fetch new config if pull response indicated a newer version
+    try {
+      final configHeaders = <String, String>{
+        'Content-Type': 'application/json',
+      };
+      final token = _identity.actorToken;
+      if (token != null) {
+        configHeaders['Authorization'] = 'Bearer $token';
+      }
+      final currentVersion = _configStore.configVersion;
+      if (currentVersion > 0) {
+        configHeaders['If-None-Match'] = '"$currentVersion"';
+      }
+      final configResponse = await http.get(
+        Uri.parse('$_baseUrl/api/sync/config'),
+        headers: configHeaders,
+      );
+      if (configResponse.statusCode == 200) {
+        final configBody =
+            jsonDecode(configResponse.body) as Map<String, dynamic>;
+        await _configStore.applyConfig(configBody);
+      }
+      // 304 Not Modified — skip
+    } on Exception {
+      // Config download errors are non-fatal
     }
 
     // Selective-retain: purge out-of-scope events from other actors (Phase 2c)

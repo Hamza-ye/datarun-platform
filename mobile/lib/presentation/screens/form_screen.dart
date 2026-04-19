@@ -33,9 +33,9 @@ class _FormScreenState extends State<FormScreen> {
     _loadShape();
   }
 
-  Future<void> _loadShape() async {
+  void _loadShape() {
     final state = context.read<AppState>();
-    final shape = await state.configLoader.loadShape(widget.shapeRef);
+    final shape = state.configStore.getShape(widget.shapeRef);
     setState(() {
       _shape = shape;
       _loading = false;
@@ -53,7 +53,7 @@ class _FormScreenState extends State<FormScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_shape?.displayName ?? 'Loading...'),
+          title: Text(_shape?.name ?? 'Loading...'),
           actions: [
             TextButton(
               onPressed: _saving ? null : _save,
@@ -68,23 +68,25 @@ class _FormScreenState extends State<FormScreen> {
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
-            : Form(
-                key: _formKey,
-                child: ListView(
-                  children: _shape!.fields.map((field) {
-                    return WidgetMapper.build(
-                      field,
-                      _values[field.key],
-                      (value) {
-                        setState(() {
-                          _values[field.key] = value;
-                          _dirty = true;
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
+            : _shape == null
+                ? const Center(child: Text('Shape not found in config'))
+                : Form(
+                    key: _formKey,
+                    child: ListView(
+                      children: _shape!.activeFields.map((field) {
+                        return WidgetMapper.build(
+                          field,
+                          _values[field.name],
+                          (value) {
+                            setState(() {
+                              _values[field.name] = value;
+                              _dirty = true;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
       ),
     );
   }

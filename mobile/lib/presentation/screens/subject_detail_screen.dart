@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/presentation/screens/form_screen.dart';
 import 'package:datarun_mobile/domain/event.dart';
+import 'package:datarun_mobile/domain/shape.dart';
 
 /// S2: Subject Detail — hub for a single subject.
 class SubjectDetailScreen extends StatefulWidget {
@@ -70,18 +71,59 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   }
 
   void _capture(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => FormScreen(
-          subjectId: widget.subjectId,
-          shapeRef: 'basic_capture/v1',
+    final state = context.read<AppState>();
+    final configStore = state.configStore;
+    final activeActivities = configStore.getActiveActivities();
+
+    // Collect all shapes across active activities
+    final allShapes = <ShapeDefinition>[];
+    for (final actName in activeActivities) {
+      allShapes.addAll(configStore.getShapesForActivity(actName));
+    }
+
+    if (allShapes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No activities configured')),
+      );
+      return;
+    }
+
+    void navigateToForm(String shapeRef) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => FormScreen(
+            subjectId: widget.subjectId,
+            shapeRef: shapeRef,
+          ),
         ),
+      ).then((_) {
+        if (!mounted) return;
+        _loadEvents();
+        context.read<AppState>().refresh();
+      });
+    }
+
+    if (allShapes.length == 1) {
+      navigateToForm(allShapes.first.shapeRef);
+      return;
+    }
+
+    showDialog<ShapeDefinition>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Select form'),
+        children: allShapes.map((shape) {
+          return SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, shape),
+            child: Text(shape.name),
+          );
+        }).toList(),
       ),
-    ).then((_) {
-      if (!mounted) return;
-      _loadEvents(); // Refresh timeline
-      context.read<AppState>().refresh(); // Refresh work list counts
+    ).then((selected) {
+      if (selected != null) {
+        navigateToForm(selected.shapeRef);
+      }
     });
   }
 }

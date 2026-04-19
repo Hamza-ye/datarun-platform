@@ -4,6 +4,7 @@ import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/presentation/screens/subject_detail_screen.dart';
 import 'package:datarun_mobile/presentation/screens/form_screen.dart';
 import 'package:datarun_mobile/presentation/widgets/sync_panel.dart';
+import 'package:datarun_mobile/domain/shape.dart';
 
 /// S1: Work List — subject-centric entry point.
 class WorkListScreen extends StatelessWidget {
@@ -121,19 +122,71 @@ class WorkListScreen extends StatelessWidget {
   }
 
   void _addNew(BuildContext context) {
-    // S1 → S3 shortcut: new subject, skip detail
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const FormScreen(
-          subjectId: null,
-          shapeRef: 'basic_capture/v1',
+    final state = context.read<AppState>();
+    final configStore = state.configStore;
+    final activeActivities = configStore.getActiveActivities();
+
+    if (activeActivities.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No activities configured')),
+      );
+      return;
+    }
+
+    // Collect all shapes across active activities
+    final allShapes = <ShapeDefinition>[];
+    for (final actName in activeActivities) {
+      allShapes.addAll(configStore.getShapesForActivity(actName));
+    }
+
+    if (allShapes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No shapes available')),
+      );
+      return;
+    }
+
+    if (allShapes.length == 1) {
+      // Single shape — go directly to form
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => FormScreen(
+            subjectId: null,
+            shapeRef: allShapes.first.shapeRef,
+          ),
         ),
+      ).then((_) {
+        if (context.mounted) context.read<AppState>().refresh();
+      });
+      return;
+    }
+
+    // Multiple shapes — show selection dialog
+    showDialog<ShapeDefinition>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Select form'),
+        children: allShapes.map((shape) {
+          return SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, shape),
+            child: Text(shape.name),
+          );
+        }).toList(),
       ),
-    ).then((_) {
-      // Refresh on return
-      if (context.mounted) {
-        context.read<AppState>().refresh();
+    ).then((selected) {
+      if (selected != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FormScreen(
+              subjectId: null,
+              shapeRef: selected.shapeRef,
+            ),
+          ),
+        ).then((_) {
+          if (context.mounted) context.read<AppState>().refresh();
+        });
       }
     });
   }

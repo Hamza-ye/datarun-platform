@@ -4,7 +4,7 @@ import 'package:datarun_mobile/data/device_identity.dart';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/projection_engine.dart';
 import 'package:datarun_mobile/data/event_assembler.dart';
-import 'package:datarun_mobile/data/config_loader.dart';
+import 'package:datarun_mobile/data/config_store.dart';
 import 'package:datarun_mobile/data/sync_service.dart';
 import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/presentation/screens/work_list_screen.dart';
@@ -19,14 +19,15 @@ void main() async {
   final eventStore = EventStore();
   final projectionEngine = ProjectionEngine(eventStore);
   final eventAssembler = EventAssembler(identity, eventStore);
-  final configLoader = ConfigLoader();
-  final syncService = SyncService(eventStore, identity, serverUrl);
+  final configStore = ConfigStore(eventStore);
+  await configStore.init();
+  final syncService = SyncService(eventStore, identity, serverUrl, configStore);
 
   final appState = AppState(
     eventStore: eventStore,
     projectionEngine: projectionEngine,
     eventAssembler: eventAssembler,
-    configLoader: configLoader,
+    configStore: configStore,
     syncService: syncService,
     identity: identity,
   );

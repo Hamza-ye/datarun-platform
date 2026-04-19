@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/projection_engine.dart';
 import 'package:datarun_mobile/data/event_assembler.dart';
-import 'package:datarun_mobile/data/config_loader.dart';
+import 'package:datarun_mobile/data/config_store.dart';
 import 'package:datarun_mobile/data/sync_service.dart';
 import 'package:datarun_mobile/data/device_identity.dart';
 import 'package:datarun_mobile/domain/subject_summary.dart';
@@ -12,7 +12,7 @@ class AppState extends ChangeNotifier {
   final EventStore eventStore;
   final ProjectionEngine projectionEngine;
   final EventAssembler eventAssembler;
-  final ConfigLoader configLoader;
+  final ConfigStore configStore;
   final SyncService syncService;
   final DeviceIdentity identity;
 
@@ -26,7 +26,7 @@ class AppState extends ChangeNotifier {
     required this.eventStore,
     required this.projectionEngine,
     required this.eventAssembler,
-    required this.configLoader,
+    required this.configStore,
     required this.syncService,
     required this.identity,
   });

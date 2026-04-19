@@ -7,8 +7,8 @@ void main() {
   group('WidgetMapper', () {
     testWidgets('renders text field from shape definition', (tester) async {
       final field = ShapeField(
-        key: 'name',
-        label: 'Name',
+        name: 'name',
+        description: 'Name',
         type: 'text',
         required: true,
       );
@@ -29,8 +29,8 @@ void main() {
 
     testWidgets('renders number field from shape definition', (tester) async {
       final field = ShapeField(
-        key: 'value',
-        label: 'Numeric Value',
+        name: 'value',
+        description: 'Numeric Value',
         type: 'number',
         required: false,
       );
@@ -50,14 +50,11 @@ void main() {
 
     testWidgets('renders select field with options from shape', (tester) async {
       final field = ShapeField(
-        key: 'category',
-        label: 'Category',
+        name: 'category',
+        description: 'Category',
         type: 'select',
         required: true,
-        options: [
-          ShapeOption(value: 'urban', label: 'Urban'),
-          ShapeOption(value: 'rural', label: 'Rural'),
-        ],
+        options: ['urban', 'rural'],
       );
 
       dynamic captured;
@@ -74,8 +71,8 @@ void main() {
 
     testWidgets('renders boolean field from shape definition', (tester) async {
       final field = ShapeField(
-        key: 'active',
-        label: 'Active',
+        name: 'active',
+        description: 'Active',
         type: 'boolean',
         required: false,
       );
@@ -96,8 +93,8 @@ void main() {
 
     testWidgets('renders date field from shape definition', (tester) async {
       final field = ShapeField(
-        key: 'date',
-        label: 'Date',
+        name: 'date',
+        description: 'Date',
         type: 'date',
         required: true,
       );
@@ -116,17 +113,17 @@ void main() {
     testWidgets('renders all 5 field types from shape', (tester) async {
       // Simulates the full FieldResolver → WidgetMapper pipeline
       final fields = [
-        ShapeField(key: 'name', label: 'Name', type: 'text', required: true),
-        ShapeField(key: 'date', label: 'Date', type: 'date', required: true),
+        ShapeField(name: 'name', description: 'Name', type: 'text', required: true),
+        ShapeField(name: 'date', description: 'Date', type: 'date', required: true),
         ShapeField(
-          key: 'category',
-          label: 'Category',
+          name: 'category',
+          description: 'Category',
           type: 'select',
           required: true,
-          options: [ShapeOption(value: 'urban', label: 'Urban')],
+          options: ['urban'],
         ),
-        ShapeField(key: 'notes', label: 'Notes', type: 'text', required: false),
-        ShapeField(key: 'value', label: 'Value', type: 'number', required: false),
+        ShapeField(name: 'notes', description: 'Notes', type: 'text', required: false),
+        ShapeField(name: 'value', description: 'Value', type: 'number', required: false),
       ];
 
       await tester.pumpWidget(MaterialApp(
@@ -148,8 +145,8 @@ void main() {
 
     testWidgets('required field validation shows error', (tester) async {
       final field = ShapeField(
-        key: 'name',
-        label: 'Name',
+        name: 'name',
+        description: 'Name',
         type: 'text',
         required: true,
       );
@@ -173,8 +170,8 @@ void main() {
 
     test('unsupported field type renders fallback', () {
       final field = ShapeField(
-        key: 'unknown',
-        label: 'Unknown',
+        name: 'unknown',
+        description: 'Unknown',
         type: 'gps',
         required: false,
       );

@@ -4,8 +4,9 @@ import 'package:datarun_mobile/domain/event.dart';
 
 class EventStore {
   static const _dbName = 'datarun.db';
-  static const _dbVersion = 3;
+  static const _dbVersion = 4;
   static const _table = 'events';
+  static const _configTable = 'config_current';
   static const _aliasTable = 'subject_aliases';
   static const _assignmentTable = 'local_assignments';
 
@@ -66,6 +67,13 @@ class EventStore {
         ended         INTEGER NOT NULL DEFAULT 0
       )
     ''');
+    await db.execute('''
+      CREATE TABLE $_configTable (
+        id            INTEGER PRIMARY KEY CHECK(id = 1),
+        version       INTEGER NOT NULL,
+        package_json  TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -90,6 +98,15 @@ class EventStore {
           valid_from    TEXT NOT NULL,
           valid_to      TEXT,
           ended         INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+    }
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE $_configTable (
+          id            INTEGER PRIMARY KEY CHECK(id = 1),
+          version       INTEGER NOT NULL,
+          package_json  TEXT NOT NULL
         )
       ''');
     }
@@ -296,5 +313,28 @@ class EventStore {
     await batch.commit(noResult: true);
 
     return toPurge.length;
+  }
+
+  // --- Config package persistence (Phase 3a) ---
+
+  /// Read the stored config package, or null if none.
+  Future<Map<String, dynamic>?> getConfigPackage() async {
+    final db = await database;
+    final rows = await db.query(_configTable, where: 'id = 1');
+    if (rows.isEmpty) return null;
+    final row = rows.first;
+    return {
+      'version': row['version'] as int,
+      'package_json': row['package_json'] as String,
+    };
+  }
+
+  /// Store (or replace) the config package.
+  Future<void> saveConfigPackage(int version, String packageJson) async {
+    final db = await database;
+    await db.rawInsert(
+      'INSERT OR REPLACE INTO $_configTable (id, version, package_json) VALUES (1, ?, ?)',
+      [version, packageJson],
+    );
   }
 }
