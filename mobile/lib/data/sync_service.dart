@@ -61,15 +61,28 @@ class SyncService {
       final prefs = await SharedPreferences.getInstance();
       var watermark = prefs.getInt(_watermarkKey) ?? 0;
 
+      // Build pull headers: include actor token if available (Phase 2b auth)
+      final pullHeaders = <String, String>{'Content-Type': 'application/json'};
+      final token = _identity.actorToken;
+      if (token != null) {
+        pullHeaders['Authorization'] = 'Bearer $token';
+      }
+
       while (true) {
         final response = await http.post(
           Uri.parse('$_baseUrl/api/sync/pull'),
-          headers: {'Content-Type': 'application/json'},
+          headers: pullHeaders,
           body: jsonEncode({
             'since_watermark': watermark,
             'limit': 100,
           }),
         );
+        if (response.statusCode == 401) {
+          return SyncResult(
+              pushedCount: pushed,
+              pulledCount: pulled,
+              error: 'Unauthorized — invalid or missing actor token');
+        }
         if (response.statusCode != 200) break;
 
         final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -88,6 +101,10 @@ class SyncService {
             if (retiredId != null && survivingId != null) {
               await _eventStore.upsertAlias(retiredId, survivingId, event.timestamp);
             }
+          }
+          // Process assignment events to maintain local scope knowledge (Phase 2b)
+          if (event.type == 'assignment_changed') {
+            await _eventStore.processAssignmentEvent(event);
           }
         }
         pulled += events.length;

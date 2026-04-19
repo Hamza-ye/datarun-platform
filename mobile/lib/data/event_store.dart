@@ -4,9 +4,10 @@ import 'package:datarun_mobile/domain/event.dart';
 
 class EventStore {
   static const _dbName = 'datarun.db';
-  static const _dbVersion = 2;
+  static const _dbVersion = 3;
   static const _table = 'events';
   static const _aliasTable = 'subject_aliases';
+  static const _assignmentTable = 'local_assignments';
 
   final String? _dbPath; // null = default platform path
   Database? _db;
@@ -53,6 +54,18 @@ class EventStore {
         merged_at     TEXT NOT NULL
       )
     ''');
+    await db.execute('''
+      CREATE TABLE $_assignmentTable (
+        assignment_id TEXT PRIMARY KEY,
+        role          TEXT NOT NULL,
+        geo_scope     TEXT,
+        subject_list  TEXT,
+        activity_list TEXT,
+        valid_from    TEXT NOT NULL,
+        valid_to      TEXT,
+        ended         INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -63,6 +76,20 @@ class EventStore {
           retired_id    TEXT PRIMARY KEY,
           surviving_id  TEXT NOT NULL,
           merged_at     TEXT NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE $_assignmentTable (
+          assignment_id TEXT PRIMARY KEY,
+          role          TEXT NOT NULL,
+          geo_scope     TEXT,
+          subject_list  TEXT,
+          activity_list TEXT,
+          valid_from    TEXT NOT NULL,
+          valid_to      TEXT,
+          ended         INTEGER NOT NULL DEFAULT 0
         )
       ''');
     }
@@ -163,5 +190,51 @@ class EventStore {
       await db.close();
       _db = null;
     }
+  }
+
+  // --- Assignment table operations (Phase 2b) ---
+
+  /// Process an assignment event to maintain local scope knowledge.
+  /// assignment_created → insert into local_assignments
+  /// assignment_ended → mark ended = 1
+  Future<void> processAssignmentEvent(Event event) async {
+    final db = await database;
+    final shapeRef = event.shapeRef;
+    final assignmentId = event.subjectRef['id']!;
+
+    if (shapeRef == 'assignment_created/v1') {
+      final payload = event.payload;
+      final scope = payload['scope'] as Map<String, dynamic>?;
+      await db.insert(_assignmentTable, {
+        'assignment_id': assignmentId,
+        'role': payload['role'] as String,
+        'geo_scope': scope?['geographic'] as String?,
+        'subject_list': scope?['subject_list'] != null
+            ? (scope!['subject_list'] as List).join(',')
+            : null,
+        'activity_list': scope?['activity'] != null
+            ? (scope!['activity'] as List).join(',')
+            : null,
+        'valid_from': payload['valid_from'] as String,
+        'valid_to': payload['valid_to'] as String?,
+        'ended': 0,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    } else if (shapeRef == 'assignment_ended/v1') {
+      await db.update(
+        _assignmentTable,
+        {'ended': 1},
+        where: 'assignment_id = ?',
+        whereArgs: [assignmentId],
+      );
+    }
+  }
+
+  /// Get active assignments for the local actor.
+  Future<List<Map<String, dynamic>>> getActiveAssignments() async {
+    final db = await database;
+    return db.query(
+      _assignmentTable,
+      where: 'ended = 0',
+    );
   }
 }

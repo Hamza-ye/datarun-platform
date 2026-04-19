@@ -5,6 +5,7 @@ class DeviceIdentity {
   static const _deviceIdKey = 'device_id';
   static const _deviceSeqKey = 'device_seq';
   static const _actorIdKey = 'actor_id';
+  static const _actorTokenKey = 'actor_token';
 
   final SharedPreferences _prefs;
 
@@ -35,6 +36,12 @@ class DeviceIdentity {
   String get deviceId => _prefs.getString(_deviceIdKey)!;
 
   String get actorId => _prefs.getString(_actorIdKey)!;
+
+  String? get actorToken => _prefs.getString(_actorTokenKey);
+
+  Future<void> setActorToken(String token) async {
+    await _prefs.setString(_actorTokenKey, token);
+  }
 
   /// Returns the next device_seq and persists it.
   /// Monotonically increasing, starting at 1.

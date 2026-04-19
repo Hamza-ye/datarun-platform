@@ -255,5 +255,85 @@ void main() {
       // Only 1 subject — the conflict_detected event doesn't create a separate subject
       expect(subjects, hasLength(1));
     });
+
+    test('assignment events excluded from subject grouping', () async {
+      await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
+      // Simulate receiving an assignment_changed event via sync
+      final assignmentEvent = Event(
+        id: 'assign-1',
+        type: 'assignment_changed',
+        shapeRef: 'assignment_created/v1',
+        subjectRef: {'type': 'assignment', 'id': 'assign-uuid-1'},
+        actorRef: {'type': 'actor', 'id': 'admin-1'},
+        deviceId: 'server',
+        deviceSeq: 200,
+        syncWatermark: 50,
+        timestamp: '2026-04-19T10:00:00Z',
+        payload: {
+          'target_actor': {'type': 'actor', 'id': 'actor-1'},
+          'role': 'field_worker',
+          'scope': {'geographic': 'loc-1', 'subject_list': null, 'activity': null},
+          'valid_from': '2026-04-19T00:00:00Z',
+          'valid_to': null,
+        },
+      );
+      await store.insertFromServer(assignmentEvent);
+
+      final subjects = await pe.getSubjectList();
+      // Only 1 subject — the assignment event doesn't create a subject entry
+      expect(subjects, hasLength(1));
+      expect(subjects[0].subjectId, 'subj-1');
+    });
+
+    test('processAssignmentEvent stores and tracks assignments', () async {
+      final createdEvent = Event(
+        id: 'assign-evt-1',
+        type: 'assignment_changed',
+        shapeRef: 'assignment_created/v1',
+        subjectRef: {'type': 'assignment', 'id': 'assign-uuid-2'},
+        actorRef: {'type': 'actor', 'id': 'admin-1'},
+        deviceId: 'server',
+        deviceSeq: 201,
+        syncWatermark: 51,
+        timestamp: '2026-04-19T10:00:00Z',
+        payload: {
+          'target_actor': {'type': 'actor', 'id': 'actor-1'},
+          'role': 'field_worker',
+          'scope': {
+            'geographic': 'loc-1',
+            'subject_list': null,
+            'activity': ['vaccination', 'survey'],
+          },
+          'valid_from': '2026-04-19T00:00:00Z',
+          'valid_to': null,
+        },
+      );
+      await store.processAssignmentEvent(createdEvent);
+
+      var assignments = await store.getActiveAssignments();
+      expect(assignments, hasLength(1));
+      expect(assignments[0]['assignment_id'], 'assign-uuid-2');
+      expect(assignments[0]['role'], 'field_worker');
+      expect(assignments[0]['activity_list'], 'vaccination,survey');
+      expect(assignments[0]['ended'], 0);
+
+      // End the assignment
+      final endedEvent = Event(
+        id: 'assign-evt-2',
+        type: 'assignment_changed',
+        shapeRef: 'assignment_ended/v1',
+        subjectRef: {'type': 'assignment', 'id': 'assign-uuid-2'},
+        actorRef: {'type': 'actor', 'id': 'admin-1'},
+        deviceId: 'server',
+        deviceSeq: 202,
+        syncWatermark: 52,
+        timestamp: '2026-04-19T11:00:00Z',
+        payload: {'reason': 'reassignment'},
+      );
+      await store.processAssignmentEvent(endedEvent);
+
+      assignments = await store.getActiveAssignments();
+      expect(assignments, isEmpty);
+    });
   });
 }

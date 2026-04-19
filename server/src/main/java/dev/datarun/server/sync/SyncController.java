@@ -157,6 +157,27 @@ public class SyncController {
                     request.sinceWatermark(), limit, actorId, scopePaths);
         }
 
+        // Post-query filtering: apply activity + subject_list scope (AND composition).
+        // Geographic filtering is done at SQL level; activity and subject_list filter in Java.
+        // Check against each assignment — event passes if ANY assignment accepts it
+        // (OR across assignments, AND within: activity + subject_list must both pass).
+        boolean hasActivityOrSubjectListScope = assignments.stream()
+                .anyMatch(a -> a.activityList() != null || a.subjectList() != null);
+        if (hasActivityOrSubjectListScope && !events.isEmpty()) {
+            events = events.stream().filter(event -> {
+                // Assignment events (E9) and system events always pass
+                if ("assignment_changed".equals(event.type())) return true;
+                if (isSystemEventType(event.type())) return true;
+                // Extract subject_id and activity_ref for scope check
+                String subjectId = event.subjectRef() != null
+                        ? event.subjectRef().path("id").asText(null) : null;
+                UUID subjectUuid = subjectId != null ? UUID.fromString(subjectId) : null;
+                // OR across assignments: passes if ANY assignment passes both checks
+                return assignments.stream().anyMatch(a ->
+                        a.containsActivity(event.activityRef()) && a.containsSubject(subjectUuid));
+            }).toList();
+        }
+
         long latestWatermark = events.isEmpty()
                 ? request.sinceWatermark()
                 : events.get(events.size() - 1).syncWatermark();
@@ -186,6 +207,11 @@ public class SyncController {
             return persisted;
         });
         return result != null ? result : 0;
+    }
+
+    private boolean isSystemEventType(String type) {
+        return "conflict_detected".equals(type) || "conflict_resolved".equals(type)
+                || "subjects_merged".equals(type) || "subject_split".equals(type);
     }
 
     private void updateDeviceSyncState(UUID deviceId, long latestWatermark) {

@@ -17,6 +17,7 @@ class AppState extends ChangeNotifier {
   final DeviceIdentity identity;
 
   List<SubjectSummary> subjects = [];
+  List<Map<String, dynamic>> activeAssignments = [];
   int pendingCount = 0;
   DateTime? lastSync;
   bool isSyncing = false;
@@ -32,6 +33,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> refresh() async {
     subjects = await projectionEngine.getSubjectList();
+    activeAssignments = await eventStore.getActiveAssignments();
     pendingCount = await eventStore.unpushedCount();
     notifyListeners();
   }

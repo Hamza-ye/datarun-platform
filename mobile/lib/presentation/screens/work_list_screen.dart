@@ -15,7 +15,20 @@ class WorkListScreen extends StatelessWidget {
       builder: (context, state, _) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Datarun'),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Datarun'),
+                if (state.activeAssignments.isNotEmpty)
+                  Text(
+                    state.activeAssignments
+                        .map((a) => a['role'] as String)
+                        .toSet()
+                        .join(', '),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                  ),
+              ],
+            ),
             actions: [
               // Sync indicator
               InkWell(

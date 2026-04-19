@@ -8,6 +8,8 @@ class ProjectionEngine {
   ProjectionEngine(this._eventStore);
 
   /// Derive subject list from all local events. Full replay with alias resolution + flag exclusion.
+  /// Since sync is scope-filtered (server returns only authorized events), the work list
+  /// shows only in-scope subjects by construction. No client-side scope filtering needed.
   Future<List<SubjectSummary>> getSubjectList() async {
     final events = await _eventStore.getAll();
     final aliases = await _eventStore.getAllAliases();
@@ -147,6 +149,7 @@ class ProjectionEngine {
     return type == 'conflict_detected' ||
         type == 'conflict_resolved' ||
         type == 'subjects_merged' ||
-        type == 'subject_split';
+        type == 'subject_split' ||
+        type == 'assignment_changed';
   }
 }
