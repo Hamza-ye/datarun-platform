@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.datarun.server.authorization.ActiveAssignment;
 import dev.datarun.server.authorization.ActorTokenInterceptor;
 import dev.datarun.server.authorization.ScopeResolver;
+import dev.datarun.server.config.ConfigPackager;
+import dev.datarun.server.config.ShapePayloadValidator;
 import dev.datarun.server.event.EnvelopeValidator;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
@@ -39,6 +41,8 @@ public class SyncController {
     private final TransactionTemplate transactionTemplate;
     private final JdbcTemplate jdbc;
     private final ScopeResolver scopeResolver;
+    private final ConfigPackager configPackager;
+    private final ShapePayloadValidator shapePayloadValidator;
 
     public SyncController(EventRepository eventRepository,
                           EnvelopeValidator envelopeValidator,
@@ -46,7 +50,9 @@ public class SyncController {
                           ConflictDetector conflictDetector,
                           TransactionTemplate transactionTemplate,
                           JdbcTemplate jdbc,
-                          ScopeResolver scopeResolver) {
+                          ScopeResolver scopeResolver,
+                          ConfigPackager configPackager,
+                          ShapePayloadValidator shapePayloadValidator) {
         this.eventRepository = eventRepository;
         this.envelopeValidator = envelopeValidator;
         this.objectMapper = objectMapper;
@@ -54,6 +60,8 @@ public class SyncController {
         this.transactionTemplate = transactionTemplate;
         this.jdbc = jdbc;
         this.scopeResolver = scopeResolver;
+        this.configPackager = configPackager;
+        this.shapePayloadValidator = shapePayloadValidator;
     }
 
     @PostMapping("/push")
@@ -79,6 +87,22 @@ public class SyncController {
         if (!validationErrors.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "validation_failed", "details", validationErrors));
+        }
+
+        // Validate payloads against shape definitions (Phase 3a)
+        // Structural invalidity → 400 (not accept-and-flag)
+        List<Map<String, Object>> shapeErrors = new ArrayList<>();
+        for (int i = 0; i < request.events().size(); i++) {
+            Event event = request.events().get(i);
+            List<String> errors = shapePayloadValidator.validate(
+                    event.shapeRef(), event.payload());
+            if (!errors.isEmpty()) {
+                shapeErrors.add(Map.of("index", i, "errors", errors));
+            }
+        }
+        if (!shapeErrors.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "shape_validation_failed", "details", shapeErrors));
         }
 
         // --- Tx1: Persist events ---
@@ -204,10 +228,14 @@ public class SyncController {
             updateDeviceSyncState(request.deviceId(), latestWatermark);
         }
 
+        // IDR-019: config_version discovery field in pull response
+        int configVersion = configPackager.getLatestVersion();
+
         return ResponseEntity.ok(Map.of(
                 "events", events,
                 "latest_watermark", latestWatermark,
-                "has_more", hasMore
+                "has_more", hasMore,
+                "config_version", configVersion
         ));
     }
 

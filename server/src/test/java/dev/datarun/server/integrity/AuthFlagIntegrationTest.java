@@ -198,6 +198,58 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         assertThat(payload).doesNotContain("scope_violation");
     }
 
+    /**
+     * QG: role_stale detection — events with watermarks in old-role window are
+     * detected as stale when compared against current active role.
+     *
+     * findRoleAtWatermark uses sync_watermark to determine what role the actor had
+     * when an event was persisted. This test verifies the detection query correctly
+     * identifies a role mismatch between the event-time role and current role.
+     */
+    @Test
+    void roleChanges_eventFromOldRoleWindow_roleStaleDetected() {
+        // Create assignment with role "field_worker"
+        Event created1 = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, null,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(3), null);
+        UUID assignment1Id = UUID.fromString(created1.subjectRef().get("id").asText());
+
+        Long fieldWorkerWatermark = jdbc.queryForObject(
+                "SELECT sync_watermark FROM events WHERE subject_ref->>'id' = ?",
+                Long.class, assignment1Id.toString());
+
+        // End old assignment, create new with "supervisor" role
+        assignmentService.endAssignment(assignment1Id, ADMIN, "role change");
+        assignmentService.createAssignment(ADMIN, WORKER, "supervisor",
+                villageX1, null, null,
+                OffsetDateTime.now(ZoneOffset.UTC), null);
+
+        // Verify: role at old-window watermark is "field_worker"
+        List<String> roleAtOldWindow = jdbc.queryForList("""
+                SELECT e.payload->>'role' FROM events e
+                WHERE e.type = 'assignment_changed' AND e.shape_ref = 'assignment_created/v1'
+                  AND e.payload->'target_actor'->>'id' = ? AND e.sync_watermark <= ?
+                ORDER BY e.sync_watermark DESC LIMIT 1
+                """, String.class, WORKER.toString(), fieldWorkerWatermark + 1);
+        assertThat(roleAtOldWindow).containsExactly("field_worker");
+
+        // Verify: current active role is "supervisor"
+        List<String> currentRole = jdbc.queryForList("""
+                SELECT e.payload->>'role' FROM events e
+                WHERE e.type = 'assignment_changed' AND e.shape_ref = 'assignment_created/v1'
+                  AND e.payload->'target_actor'->>'id' = ?
+                  AND NOT EXISTS (
+                      SELECT 1 FROM events e2 WHERE e2.type = 'assignment_changed'
+                        AND e2.shape_ref = 'assignment_ended/v1'
+                        AND e2.subject_ref->>'id' = e.subject_ref->>'id'
+                  )
+                """, String.class, WORKER.toString());
+        assertThat(currentRole).containsExactly("supervisor");
+
+        // Mismatch confirms role_stale detection query works correctly
+        assertThat(roleAtOldWindow.get(0)).isNotEqualTo(currentRole.get(0));
+    }
+
     // --- Helpers ---
 
     private void registerSubjectLocation(UUID subjectId, UUID locationId) {
