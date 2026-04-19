@@ -8,12 +8,12 @@
 
 ## Current Phase
 
-**Phase 3: Configuration** — **3a COMPLETE, 3b/3c remaining**
+**Phase 3: Configuration** — **3a/3b COMPLETE, 3c remaining**
 
 | Sub-phase | Status | Notes |
 |-----------|--------|-------|
 | **3a: Shapes + Config Delivery** | **Complete** | 80 server + 33 mobile tests. Shapes, activities, config endpoint, payload validation, admin UI (server). ConfigStore, shape.dart IDR-017 rewrite, sync config download, form engine, widget_mapper 10 field types (mobile). |
-| **3b: Expressions + DtV** | Not started | IDR-018 expression grammar. Java + Dart evaluators in parallel. |
+| **3b: Expressions + DtV** | **Complete** | 148 server + 47 mobile tests. Java + Dart expression evaluators (50 shared E7 fixtures), DtV L2 (15 tests), expression admin UI, ConfigStore expression methods, form show/hide + defaults + warnings. |
 | **3c: Config Packager + Full Pipeline** | Not started | IDR-019 full pipeline E2E. |
 
 ### Previous Phases
@@ -24,6 +24,7 @@
 | **1: Identity & Integrity** | Complete | 64 total |
 | **2: Authorization & Multi-Actor** | Complete | 80 server + 22 mobile |
 | **3a: Shapes + Config Delivery** | Complete | 80 server + 33 mobile |
+| **3b: Expressions + DtV** | Complete | 148 server + 47 mobile |
 
 ---
 

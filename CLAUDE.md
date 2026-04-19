@@ -16,7 +16,7 @@ The implementation repository for the Datarun operations platform — a domain-a
 - Phase 1 (Identity & Integrity): COMPLETE — 64 total tests
 - Phase 2 (Authorization & Multi-Actor): COMPLETE — 80 tests before Phase 3
 - Phase 3a (Shapes + Config Delivery): COMPLETE — 80 server + 33 mobile tests
-- Phase 3b (Expressions + DtV): Not started
+- Phase 3b (Expressions + DtV): COMPLETE — 148 server + 47 mobile tests
 - Phase 3c (Config Packager + Full Pipeline): Not started
 
 See [docs/status.md](docs/status.md) for detailed status and quality gate results.
@@ -110,6 +110,7 @@ contracts/                         # Language-neutral shared definitions
   sync-protocol.md                 # Push/pull sync contract
   flag-catalog.md                  # 6 flag categories (3 identity + 3 auth)
   fixtures/projection-equivalence.json
+  fixtures/expression-evaluation.json  # 50 shared expression evaluator test cases (E7)
   shapes/                          # Assignment event schemas
 
 server/src/main/java/dev/datarun/server/
@@ -127,12 +128,12 @@ server/src/main/resources/
   templates/                       # Thymeleaf HTML (admin, config)
   envelope.schema.json             # Bundled for server-side validation
 
-server/src/test/java/              # 12 test classes, 80 server integration tests
+server/src/test/java/              # 14 test classes, 148 server tests
   AbstractIntegrationTest.java     # Base: test actor provisioning, auth helpers
 
 mobile/lib/
-  domain/                          # Event, Shape (IDR-017), SubjectSummary models
-  data/                            # EventStore, SyncService, ConfigStore, ProjectionEngine
+  domain/                          # Event, Shape (IDR-017), ExpressionEvaluator, SubjectSummary models
+  data/                            # EventStore, SyncService, ConfigStore (+ expressions), ProjectionEngine
   presentation/                    # AppState, screens (WorkList, SubjectDetail, Form), widgets
 
 design/                            # Git submodule → datarun docs repo
@@ -203,10 +204,14 @@ design/                            # Git submodule → datarun docs repo
 | `Activity.java` | Activity record | `record(name, configJson, status, sensitivity, createdAt)` |
 | `ActivityRepository.java` | Activity persistence | `insert(Activity)`, `update(Activity)`, `findByName(name)→Optional`, `findAll()`, `findActive()` |
 | `ActivityService.java` | Activity validation: name format, shapes exist | `createActivity(name, sensitivity, configJson)→List<String>`, `updateActivity(...)`, `deprecate(name)` |
-| `ConfigPackager.java` | Assembles IDR-019 JSON package (all shapes, active activities, empty expressions/flags) | `publish(publishedBy)→int version`, `getLatest()→Optional<ConfigPackage>`, `getLatestVersion()→int` |
+| `ConfigPackager.java` | Assembles IDR-019 JSON package (all shapes, active activities, expressions grouped by activity.shape, empty flags) | `publish(publishedBy)→int version`, `getLatest()→Optional<ConfigPackage>`, `getLatestVersion()→int` |
 | `ConfigApiController.java` | Config delivery endpoint with ETag | `GET /api/sync/config` (If-None-Match → 304) |
-| `ConfigAdminController.java` | Thymeleaf admin: shape CRUD, activity CRUD, publish | Routes under `/admin/config/` |
+| `ConfigAdminController.java` | Thymeleaf admin: shape CRUD, activity CRUD, expression CRUD, publish | Routes under `/admin/config/` |
 | `ShapePayloadValidator.java` | Validates event payload against shape fields; unknown shapes pass through | `validate(shapeRef, payload)→List<String>` |
+| `ExpressionEvaluator.java` | Pure-function JSON AST evaluator (IDR-018). 8 comparison + 3 logical + ref | `evaluateCondition(JsonNode, Map)→boolean`, `evaluateValue(JsonNode, Map)→Object` |
+| `ExpressionRule.java` | Expression rule record | `record(id, activityRef, shapeRef, fieldName, ruleType, expression, message, createdAt)` |
+| `ExpressionRepository.java` | Expression rule persistence (JSONB expression column) | `insert(ExpressionRule)`, `findAll()`, `findByActivityAndShape(activity, shape)`, `delete(UUID)` |
+| `DeployTimeValidator.java` | DtV L2: field refs exist, operator-type compat, predicate budget ≤3, no nesting, default type match | `validate(ExpressionRule, Shape)→List<String>` |
 
 ### admin/ — Admin UI
 | File | Purpose |
@@ -223,6 +228,7 @@ design/                            # Git submodule → datarun docs repo
 | `event.dart` | 11-field Event class; `toMap()` (SQLite), `toEnvelope()` (sync), `fromMap()`, `fromServerJson()` |
 | `shape.dart` | IDR-017 format. ShapeField(name,type,required,description,displayOrder,group,deprecated,options:List\<String\>), ShapeDefinition(shapeRef,name,version,status,sensitivity,fields). `activeFields` getter filters deprecated + sorts by displayOrder. Factory: `fromConfigJson(shapeRef, json)` |
 | `subject_summary.dart` | SubjectSummary(subjectId, subjectType, latestTimestamp, name, captureCount, flagCount) |
+| `expression_evaluator.dart` | Pure-function JSON AST evaluator (IDR-018 Dart port). Identical results to Java via shared fixtures. | `evaluateCondition(Map, Map)→bool`, `evaluateValue(Map, Map)→dynamic` |
 
 ### data/ — Data Layer
 | File | Purpose | Key API |
@@ -230,7 +236,7 @@ design/                            # Git submodule → datarun docs repo
 | `event_store.dart` | SQLite: events, aliases, assignments, config. DB version=4 | `insert(Event)`, `insertFromServer(Event)`, `getUnpushed()`, `markPushed(ids)`, `getBySubject(id)`, `getAll()`, `getAllAliases()`, `getActiveAssignments()`, `purgeOutOfScopeEvents(deviceId)`, `getConfigPackage()`, `saveConfigPackage(version, json)` |
 | `event_assembler.dart` | Assembles 11-field envelope from form state | `assemble(subjectId, shapeRef, payload)→Future<Event>` |
 | `sync_service.dart` | Push→pull pipeline with actor token auth + config download after pull | `sync()→Future<SyncResult>`. Downloads config via GET /api/sync/config with If-None-Match when server reports newer config_version. |
-| `config_store.dart` | SQLite-persisted config cache (IDR-019). Parses shapes/activities into memory on init. | `init()`, `applyConfig(json)`, `getShape(ref)→ShapeDefinition?`, `getActivity(name)`, `getActiveActivities()→List<String>`, `getShapesForActivity(name)→List<ShapeDefinition>`, `configVersion→int` |
+| `config_store.dart` | SQLite-persisted config cache (IDR-019). Parses shapes/activities/expressions into memory on init. | `init()`, `applyConfig(json)`, `getShape(ref)→ShapeDefinition?`, `getActivity(name)`, `getActiveActivities()→List<String>`, `getShapesForActivity(name)→List<ShapeDefinition>`, `getExpressionsForField(activity,shape,field)`, `getShowCondition(...)`, `getDefaultExpression(...)`, `getWarningExpression(...)`, `configVersion→int` |
 | `device_identity.dart` | Persists device_id, actor_id, device_seq, actor_token | `init()→Future<DeviceIdentity>`, `nextSeq()→Future<int>`, `get/set actorToken` |
 | `projection_engine.dart` | Subject list + detail from events; alias-aware, flag-excluding | `getSubjectList()→Future<List<SubjectSummary>>`, `getSubjectDetail(id)→Future<List<Event>>`, `getFlaggedEventIds()→Future<Set<String>>` |
 
@@ -240,9 +246,9 @@ design/                            # Git submodule → datarun docs repo
 | `app_state.dart` | ChangeNotifier: subjects, assignments, sync status, pending count. Uses ConfigStore (not ConfigLoader). `refresh()`, `sync()` |
 | `screens/work_list_screen.dart` | Subject list, sync indicator, FAB. Config-driven shape selection (single→direct, multiple→dialog, none→message) |
 | `screens/subject_detail_screen.dart` | Event timeline with flags. Config-driven shape selection for capture action |
-| `screens/form_screen.dart` | Shape-driven form via `configStore.getShape(shapeRef)` (sync). Uses `activeFields` for rendering. Dirty tracking, save. |
+| `screens/form_screen.dart` | Shape-driven form with expression evaluation. Show/hide (show_condition), computed defaults, conditional warnings. Re-evaluates on field change. Optional activityRef param. |
 | `widgets/sync_panel.dart` | Modal: sync trigger, last sync time, device ID |
-| `widgets/widget_mapper.dart` | Maps field type → Flutter widget. Types: text, integer, decimal, number, date, select, multi_select (chips), boolean, narrative (multiline), location, subject_ref |
+| `widgets/widget_mapper.dart` | Maps field type → Flutter widget. Types: text, integer, decimal, number, date, select, multi_select (chips), boolean, narrative (multiline), location, subject_ref. Optional warningMessage param for amber warning display. |
 
 ---
 
@@ -258,7 +264,7 @@ design/                            # Git submodule → datarun docs repo
 
 ---
 
-## Test Classes — Server (80 tests)
+## Test Classes — Server (148 tests)
 
 | Class | Tests | Module |
 |-------|-------|--------|
@@ -273,9 +279,11 @@ design/                            # Git submodule → datarun docs repo
 | `AdminFlagIntegrationTest` | 4 | Admin UI flag operations |
 | `MultiActorScopeIntegrationTest` | 4 | Multi-actor scope containment (S5) |
 | `ScopeFilteredSyncIntegrationTest` | 6 | IDR-015 scope-filtered pull |
-| `ConfigIntegrationTest` | 16 | Phase 3a: shape/activity CRUD, config endpoint, payload validation |
+| `ConfigIntegrationTest` | 19 | Phase 3a/3b: shape/activity/expression CRUD, config endpoint, payload validation, DtV rejection |
+| `ExpressionEvaluatorTest` | 50 | Shared fixture-driven (E7): all IDR-018 operators, null handling, type coercion, logical ops |
+| `DeployTimeValidatorTest` | 15 | DtV L2: field refs, operator-type compat, predicate budget, nesting, default type match |
 
-## Test Classes — Mobile (33 tests)
+## Test Classes — Mobile (47 tests)
 
 | File | Tests | Module |
 |------|-------|--------|
@@ -284,7 +292,8 @@ design/                            # Git submodule → datarun docs repo
 | `projection_engine_test.dart` | — | Subject list/detail projection |
 | `projection_equivalence_test.dart` | 6 | Server/mobile projection parity (E7) |
 | `selective_retain_test.dart` | — | Scope-based event purging |
-| `config_store_test.dart` | 7 | Config parse, shape lookup, activity→shapes, persistence round-trip |
+| `config_store_test.dart` | 12 | Config parse, shape lookup, activity→shapes, persistence round-trip, expression storage/retrieval |
+| `expression_evaluator_test.dart` | 9 | Shared fixture-driven (E7, 50 cases) + individual operator unit tests |
 
 ---
 
