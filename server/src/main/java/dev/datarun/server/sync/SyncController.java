@@ -102,13 +102,29 @@ public class SyncController {
             long lastPullWatermark = request.lastPullWatermark() != null
                     ? request.lastPullWatermark() : 0L;
             try {
+                // Identity detection: concurrent_state_change, stale_reference
                 List<Event> flagEvents = conflictDetector.evaluate(acceptedEvents, lastPullWatermark);
                 if (!flagEvents.isEmpty()) {
-                    flagsRaised = persistFlagEvents(flagEvents);
+                    flagsRaised += persistFlagEvents(flagEvents);
                 }
             } catch (Exception e) {
-                log.warn("Conflict detection failed (events already persisted, flags missing): {}",
+                log.warn("Identity conflict detection failed (events already persisted, flags missing): {}",
                         e.getMessage());
+            }
+
+            // Authorization detection: temporal_authority_expired, scope_violation, role_stale
+            // Runs after identity CD in the same pipeline (phase-2.md §8)
+            UUID actorId = extractActorId(acceptedEvents);
+            if (actorId != null) {
+                try {
+                    List<Event> authFlags = conflictDetector.evaluateAuth(acceptedEvents, actorId);
+                    if (!authFlags.isEmpty()) {
+                        flagsRaised += persistFlagEvents(authFlags);
+                    }
+                } catch (Exception e) {
+                    log.warn("Authorization conflict detection failed (events persisted, auth flags missing): {}",
+                            e.getMessage());
+                }
             }
         }
 
@@ -212,6 +228,26 @@ public class SyncController {
     private boolean isSystemEventType(String type) {
         return "conflict_detected".equals(type) || "conflict_resolved".equals(type)
                 || "subjects_merged".equals(type) || "subject_split".equals(type);
+    }
+
+    /**
+     * Extract actor_id from the first event in a batch.
+     * All events in a push batch share the same actor.
+     */
+    private UUID extractActorId(List<Event> events) {
+        for (Event e : events) {
+            if (e.actorRef() != null && e.actorRef().has("id")) {
+                String id = e.actorRef().get("id").asText(null);
+                if (id != null && !"system".equals(id)) {
+                    try {
+                        return UUID.fromString(id);
+                    } catch (IllegalArgumentException ex) {
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void updateDeviceSyncState(UUID deviceId, long latestWatermark) {

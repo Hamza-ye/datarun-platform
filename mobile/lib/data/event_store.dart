@@ -237,4 +237,64 @@ class EventStore {
       where: 'ended = 0',
     );
   }
+
+  /// Selective-retain: purge out-of-scope events from other actors.
+  /// Own events (matching ownDeviceId) are always retained.
+  /// Returns the count of purged events.
+  Future<int> purgeOutOfScopeEvents(String ownDeviceId) async {
+    final db = await database;
+    final assignments = await getActiveAssignments();
+    if (assignments.isEmpty) return 0; // No assignments → no scope info → keep all
+
+    // Build list of in-scope subject IDs from assignments' subject_list + geo
+    // For selective-retain, we only purge events from OTHER devices whose subjects
+    // are provably out of scope. Geographic containment requires path matching.
+    // Subject list filtering is simpler: if assignments specify subject_list,
+    // events for subjects NOT in any list (and not from own device) are purge candidates.
+
+    final allSubjects = <String>{};
+    bool hasSubjectListScope = false;
+    for (final a in assignments) {
+      final sl = a['subject_list'] as String?;
+      if (sl != null && sl.isNotEmpty) {
+        hasSubjectListScope = true;
+        allSubjects.addAll(sl.split(','));
+      }
+    }
+
+    if (!hasSubjectListScope) return 0; // No subject_list scope → can't determine out-of-scope
+
+    // Find events from other devices whose subject is not in any active assignment's subject_list
+    // and not system events
+    final candidates = await db.rawQuery('''
+      SELECT id, subject_ref FROM $_table
+      WHERE device_id != ?
+        AND type NOT IN ('conflict_detected', 'conflict_resolved',
+                         'subjects_merged', 'subject_split', 'assignment_changed')
+    ''', [ownDeviceId]);
+
+    final toPurge = <String>[];
+    for (final row in candidates) {
+      final subjectRef = row['subject_ref'] as String;
+      // Extract subject ID from JSON string stored in subject_ref
+      final match = RegExp(r'"id"\s*:\s*"([^"]+)"').firstMatch(subjectRef);
+      if (match != null) {
+        final subjectId = match.group(1)!;
+        if (!allSubjects.contains(subjectId)) {
+          toPurge.add(row['id'] as String);
+        }
+      }
+    }
+
+    if (toPurge.isEmpty) return 0;
+
+    // Purge in batches
+    final batch = db.batch();
+    for (final id in toPurge) {
+      batch.delete(_table, where: 'id = ?', whereArgs: [id]);
+    }
+    await batch.commit(noResult: true);
+
+    return toPurge.length;
+  }
 }

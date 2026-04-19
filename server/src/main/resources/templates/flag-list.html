@@ -21,6 +21,9 @@
         .category-concurrent { background: #fef7e0; color: #b06000; }
         .category-stale { background: #e8f0fe; color: #1a73e8; }
         .category-identity { background: #fce8e6; color: #c5221f; }
+        .category-scope { background: #fce4ec; color: #880e4f; }
+        .category-temporal { background: #fff3e0; color: #e65100; }
+        .category-role { background: #e0f2f1; color: #004d40; }
         .empty { color: #888; padding: 2rem; text-align: center; }
         .mono { font-family: monospace; font-size: 0.82rem; }
     </style>
@@ -51,7 +54,14 @@
             <tr th:each="f : ${flags}">
                 <td>
                     <span class="category"
-                          th:classappend="${f.flagCategory() == 'concurrent_state_change'} ? 'category-concurrent' : (${f.flagCategory() == 'stale_reference'} ? 'category-stale' : 'category-identity')"
+                          th:classappend="${
+                            f.flagCategory() == 'concurrent_state_change' ? 'category-concurrent' :
+                            f.flagCategory() == 'stale_reference' ? 'category-stale' :
+                            f.flagCategory() == 'identity_conflict' ? 'category-identity' :
+                            f.flagCategory() == 'scope_violation' ? 'category-scope' :
+                            f.flagCategory() == 'temporal_authority_expired' ? 'category-temporal' :
+                            f.flagCategory() == 'role_stale' ? 'category-role' : ''
+                          }"
                           th:text="${f.flagCategory()}">concurrent_state_change</span>
                 </td>
                 <td class="mono">

@@ -119,6 +119,15 @@ class SyncService {
       // Pull errors are non-fatal — pushed data is already safe
     }
 
+    // Selective-retain: purge out-of-scope events from other actors (Phase 2c)
+    if (pulled > 0) {
+      try {
+        await _eventStore.purgeOutOfScopeEvents(_identity.deviceId);
+      } on Exception {
+        // Purge errors are non-fatal
+      }
+    }
+
     return SyncResult(pushedCount: pushed, pulledCount: pulled);
   }
 }

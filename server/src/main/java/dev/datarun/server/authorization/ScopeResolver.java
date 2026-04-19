@@ -163,4 +163,88 @@ public class ScopeResolver {
         }
         return false;
     }
+
+    /**
+     * Compute ALL assignments for an actor (including ended ones).
+     * Used by auth CD to detect temporal_authority_expired.
+     */
+    public List<ActiveAssignment> getAllAssignments(UUID actorId) {
+        List<Map<String, Object>> created = jdbc.queryForList("""
+                SELECT e.subject_ref->>'id' AS assignment_id,
+                       e.payload,
+                       e.sync_watermark
+                FROM events e
+                WHERE e.type = 'assignment_changed'
+                  AND e.shape_ref = 'assignment_created/v1'
+                  AND e.payload->'target_actor'->>'id' = ?
+                ORDER BY e.sync_watermark ASC
+                """, actorId.toString());
+
+        if (created.isEmpty()) return List.of();
+
+        List<String> assignmentIds = created.stream()
+                .map(row -> (String) row.get("assignment_id"))
+                .toList();
+
+        Set<String> endedAssignments = new HashSet<>();
+        if (!assignmentIds.isEmpty()) {
+            String placeholders = String.join(",", Collections.nCopies(assignmentIds.size(), "?"));
+            endedAssignments.addAll(jdbc.queryForList(
+                    "SELECT subject_ref->>'id' FROM events WHERE type = 'assignment_changed' " +
+                    "AND shape_ref = 'assignment_ended/v1' AND subject_ref->>'id' IN (" + placeholders + ")",
+                    String.class, assignmentIds.toArray()));
+        }
+
+        List<ActiveAssignment> all = new ArrayList<>();
+        for (Map<String, Object> row : created) {
+            String assignmentId = (String) row.get("assignment_id");
+            boolean ended = endedAssignments.contains(assignmentId);
+
+            try {
+                JsonNode payload = objectMapper.readTree(row.get("payload").toString());
+
+                UUID geoScope = null;
+                String geoPath = null;
+                JsonNode geoNode = payload.path("scope").path("geographic");
+                if (!geoNode.isNull() && geoNode.isTextual()) {
+                    geoScope = UUID.fromString(geoNode.asText());
+                    geoPath = locationRepository.findPathById(geoScope);
+                }
+
+                List<UUID> subjectList = null;
+                JsonNode slNode = payload.path("scope").path("subject_list");
+                if (!slNode.isNull() && slNode.isArray()) {
+                    subjectList = new ArrayList<>();
+                    for (JsonNode item : slNode) {
+                        subjectList.add(UUID.fromString(item.asText()));
+                    }
+                }
+
+                List<String> activityList = null;
+                JsonNode actNode = payload.path("scope").path("activity");
+                if (!actNode.isNull() && actNode.isArray()) {
+                    activityList = new ArrayList<>();
+                    for (JsonNode item : actNode) {
+                        activityList.add(item.asText());
+                    }
+                }
+
+                OffsetDateTime validFrom = OffsetDateTime.parse(payload.get("valid_from").asText());
+                OffsetDateTime validTo = null;
+                if (!payload.get("valid_to").isNull()) {
+                    validTo = OffsetDateTime.parse(payload.get("valid_to").asText());
+                }
+
+                all.add(new ActiveAssignment(
+                        UUID.fromString(assignmentId), actorId,
+                        payload.get("role").asText(),
+                        geoScope, geoPath, subjectList, activityList,
+                        validFrom, validTo, ended));
+            } catch (Exception e) {
+                log.warn("Skipping malformed assignment event {}: {}", assignmentId, e.getMessage());
+            }
+        }
+
+        return all;
+    }
 }
