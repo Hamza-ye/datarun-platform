@@ -10,6 +10,8 @@ class ConfigStore {
   int _configVersion = 0;
   Map<String, ShapeDefinition> _shapes = {};
   Map<String, Map<String, dynamic>> _activities = {};
+  // Key: "{activity_ref}.{shape_ref}" → List of rule maps
+  Map<String, List<Map<String, dynamic>>> _expressions = {};
 
   ConfigStore(this._eventStore);
 
@@ -31,24 +33,38 @@ class ConfigStore {
   }
 
   void _applyToCache(int version, Map<String, dynamic> packageJson) {
-    final shapesMap = packageJson['shapes'] as Map<String, dynamic>? ?? {};
-    final activitiesMap = packageJson['activities'] as Map<String, dynamic>? ?? {};
+    final shapesRaw = packageJson['shapes'];
+    final activitiesRaw = packageJson['activities'];
+    final expressionsRaw = packageJson['expressions'];
+
+    final shapesMap = shapesRaw is Map ? Map<String, dynamic>.from(shapesRaw) : <String, dynamic>{};
+    final activitiesMap = activitiesRaw is Map ? Map<String, dynamic>.from(activitiesRaw) : <String, dynamic>{};
+    final expressionsMap = expressionsRaw is Map ? Map<String, dynamic>.from(expressionsRaw) : <String, dynamic>{};
 
     final parsedShapes = <String, ShapeDefinition>{};
     for (final entry in shapesMap.entries) {
       parsedShapes[entry.key] =
-          ShapeDefinition.fromConfigJson(entry.key, entry.value as Map<String, dynamic>);
+          ShapeDefinition.fromConfigJson(entry.key, Map<String, dynamic>.from(entry.value as Map));
     }
 
     final parsedActivities = <String, Map<String, dynamic>>{};
     for (final entry in activitiesMap.entries) {
-      parsedActivities[entry.key] = entry.value as Map<String, dynamic>;
+      parsedActivities[entry.key] = Map<String, dynamic>.from(entry.value as Map);
+    }
+
+    final parsedExpressions = <String, List<Map<String, dynamic>>>{};
+    for (final entry in expressionsMap.entries) {
+      final rules = (entry.value as List)
+          .map((r) => Map<String, dynamic>.from(r as Map))
+          .toList();
+      parsedExpressions[entry.key] = rules;
     }
 
     // Atomic swap
     _configVersion = version;
     _shapes = parsedShapes;
     _activities = parsedActivities;
+    _expressions = parsedExpressions;
   }
 
   /// Current config version (0 if no config loaded).
@@ -79,4 +95,61 @@ class ConfigStore {
 
   /// All loaded shapes.
   Map<String, ShapeDefinition> get allShapes => Map.unmodifiable(_shapes);
+
+  /// Get all expression rules for a field within an activity+shape combination.
+  List<Map<String, dynamic>> getExpressionsForField(
+      String activityRef, String shapeRef, String fieldName) {
+    final key = '$activityRef.$shapeRef';
+    final rules = _expressions[key];
+    if (rules == null) return [];
+    return rules.where((r) => r['field_name'] == fieldName).toList();
+  }
+
+  /// Get the show_condition expression for a field. Returns the expression node or null.
+  Map<String, dynamic>? getShowCondition(
+      String activityRef, String shapeRef, String fieldName) {
+    final rules = getExpressionsForField(activityRef, shapeRef, fieldName);
+    for (final rule in rules) {
+      if (rule['rule_type'] == 'show_condition') {
+        return rule['expression'] as Map<String, dynamic>?;
+      }
+    }
+    return null;
+  }
+
+  /// Get the default expression for a field. Returns the expression node or null.
+  Map<String, dynamic>? getDefaultExpression(
+      String activityRef, String shapeRef, String fieldName) {
+    final rules = getExpressionsForField(activityRef, shapeRef, fieldName);
+    for (final rule in rules) {
+      if (rule['rule_type'] == 'default') {
+        return rule['expression'] as Map<String, dynamic>?;
+      }
+    }
+    return null;
+  }
+
+  /// Get the warning expression for a field. Returns the expression node or null.
+  Map<String, dynamic>? getWarningExpression(
+      String activityRef, String shapeRef, String fieldName) {
+    final rules = getExpressionsForField(activityRef, shapeRef, fieldName);
+    for (final rule in rules) {
+      if (rule['rule_type'] == 'warning') {
+        return rule['expression'] as Map<String, dynamic>?;
+      }
+    }
+    return null;
+  }
+
+  /// Get the warning message for a field (from the rule, not the expression).
+  String? getWarningMessage(
+      String activityRef, String shapeRef, String fieldName) {
+    final rules = getExpressionsForField(activityRef, shapeRef, fieldName);
+    for (final rule in rules) {
+      if (rule['rule_type'] == 'warning') {
+        return rule['message'] as String?;
+      }
+    }
+    return null;
+  }
 }

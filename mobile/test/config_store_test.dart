@@ -201,4 +201,80 @@ void main() {
     expect(configStore2.getShape('household_visit/v1'), isNotNull);
     expect(configStore2.getActiveActivities(), contains('monitoring'));
   });
+
+  group('expression storage and retrieval', () {
+    final configWithExpressions = <String, dynamic>{
+      ...sampleConfig,
+      'expressions': {
+        'monitoring.household_visit/v1': [
+          {
+            'field_name': 'followup_notes',
+            'rule_type': 'show_condition',
+            'expression': {'eq': ['payload.needs_followup', true]},
+            'message': null,
+          },
+          {
+            'field_name': 'members_count',
+            'rule_type': 'warning',
+            'expression': {'gt': ['payload.members_count', 20]},
+            'message': 'Unusually large household — please verify',
+          },
+          {
+            'field_name': 'visit_type',
+            'rule_type': 'default',
+            'expression': {'ref': 'context.default_visit_type'},
+            'message': null,
+          },
+        ],
+      },
+    };
+
+    test('expressions parsed and accessible via getExpressionsForField', () async {
+      await configStore.applyConfig(configWithExpressions);
+
+      final rules = configStore.getExpressionsForField(
+          'monitoring', 'household_visit/v1', 'followup_notes');
+      expect(rules.length, 1);
+      expect(rules.first['rule_type'], 'show_condition');
+    });
+
+    test('getShowCondition returns correct expression', () async {
+      await configStore.applyConfig(configWithExpressions);
+
+      final expr = configStore.getShowCondition(
+          'monitoring', 'household_visit/v1', 'followup_notes');
+      expect(expr, isNotNull);
+      expect(expr!['eq'], equals(['payload.needs_followup', true]));
+    });
+
+    test('getWarningExpression returns correct expression and message', () async {
+      await configStore.applyConfig(configWithExpressions);
+
+      final expr = configStore.getWarningExpression(
+          'monitoring', 'household_visit/v1', 'members_count');
+      expect(expr, isNotNull);
+      expect(expr!['gt'], equals(['payload.members_count', 20]));
+
+      final msg = configStore.getWarningMessage(
+          'monitoring', 'household_visit/v1', 'members_count');
+      expect(msg, 'Unusually large household — please verify');
+    });
+
+    test('getDefaultExpression returns correct expression', () async {
+      await configStore.applyConfig(configWithExpressions);
+
+      final expr = configStore.getDefaultExpression(
+          'monitoring', 'household_visit/v1', 'visit_type');
+      expect(expr, isNotNull);
+      expect(expr!['ref'], 'context.default_visit_type');
+    });
+
+    test('getShowCondition returns null for field without expressions', () async {
+      await configStore.applyConfig(configWithExpressions);
+
+      final expr = configStore.getShowCondition(
+          'monitoring', 'household_visit/v1', 'head_of_household');
+      expect(expr, isNull);
+    });
+  });
 }

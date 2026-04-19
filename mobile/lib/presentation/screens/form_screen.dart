@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/domain/shape.dart';
+import 'package:datarun_mobile/domain/expression_evaluator.dart';
 import 'package:datarun_mobile/presentation/widgets/widget_mapper.dart';
 
 /// S3: Form — shape-driven event creation.
 class FormScreen extends StatefulWidget {
   final String? subjectId; // null = new subject
   final String shapeRef;
+  final String? activityRef; // null = no expression evaluation
 
   const FormScreen({
     super.key,
     required this.subjectId,
     required this.shapeRef,
+    this.activityRef,
   });
 
   @override
@@ -23,6 +26,8 @@ class _FormScreenState extends State<FormScreen> {
   final _formKey = GlobalKey<FormState>();
   ShapeDefinition? _shape;
   final Map<String, dynamic> _values = {};
+  final Set<String> _hiddenFields = {};
+  final Map<String, String> _warnings = {};
   bool _loading = true;
   bool _dirty = false;
   bool _saving = false;
@@ -40,6 +45,79 @@ class _FormScreenState extends State<FormScreen> {
       _shape = shape;
       _loading = false;
     });
+    if (shape != null) {
+      _applyDefaults();
+      _evaluateExpressions();
+    }
+  }
+
+  /// Build the values map for expression evaluation.
+  Map<String, dynamic> _buildValuesMap() {
+    final map = <String, dynamic>{};
+    for (final entry in _values.entries) {
+      map['payload.${entry.key}'] = entry.value;
+    }
+    return map;
+  }
+
+  /// Apply default expressions to fields that have no value yet.
+  void _applyDefaults() {
+    if (widget.activityRef == null || _shape == null) return;
+    final state = context.read<AppState>();
+    final valuesMap = _buildValuesMap();
+
+    for (final field in _shape!.activeFields) {
+      if (_values[field.name] != null) continue;
+      final expr = state.configStore.getDefaultExpression(
+          widget.activityRef!, widget.shapeRef, field.name);
+      if (expr == null) continue;
+      final value = ExpressionEvaluator.evaluateValue(expr, valuesMap);
+      if (value != null) {
+        _values[field.name] = value;
+      }
+    }
+  }
+
+  /// Evaluate show_conditions and warnings for all fields.
+  void _evaluateExpressions() {
+    if (widget.activityRef == null || _shape == null) return;
+    final state = context.read<AppState>();
+    final valuesMap = _buildValuesMap();
+    final hidden = <String>{};
+    final warnings = <String, String>{};
+
+    for (final field in _shape!.activeFields) {
+      // Show condition
+      final showExpr = state.configStore.getShowCondition(
+          widget.activityRef!, widget.shapeRef, field.name);
+      if (showExpr != null) {
+        final visible = ExpressionEvaluator.evaluateCondition(showExpr, valuesMap);
+        if (!visible) {
+          hidden.add(field.name);
+        }
+      }
+
+      // Warning
+      final warnExpr = state.configStore.getWarningExpression(
+          widget.activityRef!, widget.shapeRef, field.name);
+      if (warnExpr != null) {
+        final triggered = ExpressionEvaluator.evaluateCondition(warnExpr, valuesMap);
+        if (triggered) {
+          final msg = state.configStore.getWarningMessage(
+              widget.activityRef!, widget.shapeRef, field.name);
+          if (msg != null) {
+            warnings[field.name] = msg;
+          }
+        }
+      }
+    }
+
+    _hiddenFields
+      ..clear()
+      ..addAll(hidden);
+    _warnings
+      ..clear()
+      ..addAll(warnings);
   }
 
   @override
@@ -73,7 +151,9 @@ class _FormScreenState extends State<FormScreen> {
                 : Form(
                     key: _formKey,
                     child: ListView(
-                      children: _shape!.activeFields.map((field) {
+                      children: _shape!.activeFields
+                          .where((field) => !_hiddenFields.contains(field.name))
+                          .map((field) {
                         return WidgetMapper.build(
                           field,
                           _values[field.name],
@@ -81,8 +161,10 @@ class _FormScreenState extends State<FormScreen> {
                             setState(() {
                               _values[field.name] = value;
                               _dirty = true;
+                              _evaluateExpressions();
                             });
                           },
+                          warningMessage: _warnings[field.name],
                         );
                       }).toList(),
                     ),

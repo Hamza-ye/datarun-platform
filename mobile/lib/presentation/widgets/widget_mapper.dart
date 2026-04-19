@@ -22,15 +22,35 @@ class WidgetMapper {
   };
 
   static Widget build(
-      ShapeField field, dynamic value, ValueChanged<dynamic> onChanged) {
+      ShapeField field, dynamic value, ValueChanged<dynamic> onChanged,
+      {String? warningMessage}) {
     final builder = _registry[field.type];
+    Widget fieldWidget;
     if (builder == null) {
-      return ListTile(
+      fieldWidget = ListTile(
         title: Text(field.label),
         subtitle: Text('Unsupported field type: ${field.type}'),
       );
+    } else {
+      fieldWidget = builder(field, value, onChanged);
     }
-    return builder(field, value, onChanged);
+    if (warningMessage != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          fieldWidget,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              warningMessage,
+              style: const TextStyle(color: Colors.amber, fontSize: 12),
+            ),
+          ),
+        ],
+      );
+    }
+    return fieldWidget;
   }
 
   static Widget _buildTextField(
