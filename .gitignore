@@ -30,5 +30,3 @@ pgdata/
 # Test
 server/src/test/resources/application-local.properties
 
-# AI
-CLAUDE.md
