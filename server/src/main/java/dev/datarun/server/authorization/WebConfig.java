@@ -20,6 +20,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(actorTokenInterceptor)
-                .addPathPatterns("/api/sync/pull");
+                .addPathPatterns("/api/sync/pull", "/api/sync/config");
     }
 }

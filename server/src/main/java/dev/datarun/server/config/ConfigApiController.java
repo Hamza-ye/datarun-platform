@@ -44,9 +44,9 @@ public class ConfigApiController {
 
         ConfigPackager.ConfigPackage pkg = latest.get();
 
-        // ETag/304 support
+        // ETag/304 support (strip quotes per HTTP spec — clients may send '"1"' or '1')
         String etag = String.valueOf(pkg.version());
-        if (etag.equals(ifNoneMatch)) {
+        if (ifNoneMatch != null && etag.equals(ifNoneMatch.replace("\"", ""))) {
             return ResponseEntity.status(304).build();
         }
 

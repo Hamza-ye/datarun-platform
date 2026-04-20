@@ -225,7 +225,8 @@ public class SyncController {
 
         // Update device_sync_state on each pull (bookkeeping)
         if (request.deviceId() != null) {
-            updateDeviceSyncState(request.deviceId(), latestWatermark);
+            updateDeviceSyncState(request.deviceId(), latestWatermark,
+                    request.configVersion());
         }
 
         // IDR-019: config_version discovery field in pull response
@@ -278,16 +279,29 @@ public class SyncController {
         return null;
     }
 
-    private void updateDeviceSyncState(UUID deviceId, long latestWatermark) {
+    private void updateDeviceSyncState(UUID deviceId, long latestWatermark,
+                                       Integer configVersion) {
         try {
-            jdbc.update("""
-                INSERT INTO device_sync_state (device_id, last_pull_watermark, last_pull_at)
-                VALUES (?::uuid, ?, NOW())
-                ON CONFLICT (device_id) DO UPDATE
-                SET last_pull_watermark = GREATEST(device_sync_state.last_pull_watermark, EXCLUDED.last_pull_watermark),
-                    last_pull_at = NOW()
-                """,
-                    deviceId.toString(), latestWatermark);
+            if (configVersion != null && configVersion > 0) {
+                jdbc.update("""
+                    INSERT INTO device_sync_state (device_id, last_pull_watermark, last_pull_at, config_version)
+                    VALUES (?::uuid, ?, NOW(), ?)
+                    ON CONFLICT (device_id) DO UPDATE
+                    SET last_pull_watermark = GREATEST(device_sync_state.last_pull_watermark, EXCLUDED.last_pull_watermark),
+                        last_pull_at = NOW(),
+                        config_version = GREATEST(device_sync_state.config_version, EXCLUDED.config_version)
+                    """,
+                        deviceId.toString(), latestWatermark, configVersion);
+            } else {
+                jdbc.update("""
+                    INSERT INTO device_sync_state (device_id, last_pull_watermark, last_pull_at)
+                    VALUES (?::uuid, ?, NOW())
+                    ON CONFLICT (device_id) DO UPDATE
+                    SET last_pull_watermark = GREATEST(device_sync_state.last_pull_watermark, EXCLUDED.last_pull_watermark),
+                        last_pull_at = NOW()
+                    """,
+                        deviceId.toString(), latestWatermark);
+            }
         } catch (Exception e) {
             log.warn("Failed to update device_sync_state for {}: {}", deviceId, e.getMessage());
         }
@@ -302,6 +316,7 @@ public class SyncController {
     public record PullRequest(
             @JsonProperty("since_watermark") Long sinceWatermark,
             Integer limit,
-            @JsonProperty("device_id") UUID deviceId
+            @JsonProperty("device_id") UUID deviceId,
+            @JsonProperty("config_version") Integer configVersion
     ) {}
 }

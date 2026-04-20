@@ -18,8 +18,9 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Phase 3a integration tests: shape/activity CRUD, config endpoint, payload validation.
- * Quality gates from phase-3.md §5 Phase 3a.
+ * Phase 3a/3b/3c integration tests: shape/activity CRUD, config endpoint, payload validation,
+ * DtV publish gating, auth on config, config version tracking, full pipeline E2E.
+ * Quality gates from phase-3.md.
  */
 class ConfigIntegrationTest extends AbstractIntegrationTest {
 
@@ -546,6 +547,255 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         // Verify NO rule was stored
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM expression_rules", Integer.class);
         assertEquals(0, count.intValue());
+    }
+
+    // --- Phase 3c: Auth on Config Endpoint ---
+
+    @Test
+    void configEndpoint_requiresAuth() {
+        // QG: Config endpoint requires Bearer token (IDR-019)
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/sync/config",
+                HttpMethod.GET,
+                new HttpEntity<>(new HttpHeaders()),
+                String.class);
+
+        assertEquals(401, response.getStatusCode().value());
+    }
+
+    @Test
+    void configEndpoint_304WithQuotedETag() {
+        // Clients may send quoted ETags per HTTP spec
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ss.createShape("etag_test", "standard", buildSchema(1, null));
+        configPackager.publish(null);
+
+        HttpHeaders headers = authHeaders();
+        headers.set("If-None-Match", "\"1\"");
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/api/sync/config",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                Void.class);
+
+        assertEquals(304, response.getStatusCode().value());
+    }
+
+    // --- Phase 3c: DtV Publish Gating ---
+
+    @Test
+    void publishBlocked_whenDtvViolationsExist() {
+        // QG: Config with DtV violation → publish blocked, deployer sees specific error
+        // Setup: create shape with text field, then manually insert an expression
+        // with invalid field reference (bypassing DtV on creation)
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ObjectNode schema = buildSchema(0, null);
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+        ObjectNode nameField = objectMapper.createObjectNode();
+        nameField.put("name", "name");
+        nameField.put("type", "text");
+        nameField.put("required", false);
+        nameField.put("deprecated", false);
+        fields.add(nameField);
+        ss.createShape("pub_gate", "standard", schema);
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("pub_gate/v1");
+        config.putObject("roles").putArray("worker").add("capture");
+        as.createActivity("pub_activity", "standard", config);
+
+        // Insert invalid expression directly — references non-existent field
+        UUID ruleId = UUID.randomUUID();
+        jdbcTemplate.update("""
+                INSERT INTO expression_rules (id, activity_ref, shape_ref, field_name, rule_type, expression)
+                VALUES (?::uuid, ?, ?, ?, ?, ?::jsonb)
+                """,
+                ruleId.toString(), "pub_activity", "pub_gate/v1", "nonexistent_field", "show_condition",
+                "{\"when\":{\"eq\":[\"payload.nonexistent_field\",\"active\"]}}");
+
+        // Attempt publish via admin form
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/admin/config/publish", HttpMethod.POST, entity, String.class);
+
+        // Should redirect (publish blocked)
+        assertTrue(response.getStatusCode().is3xxRedirection());
+
+        // Verify no package was created
+        Integer pkgCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM config_packages", Integer.class);
+        assertEquals(0, pkgCount.intValue());
+    }
+
+    // --- Phase 3c: Config Version Tracking ---
+
+    @Test
+    void pullRequest_tracksDeviceConfigVersion() {
+        // QG: Config version tracking — server knows what version each device has
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ss.createShape("track_test", "standard", buildSchema(1, null));
+        configPackager.publish(null);
+
+        UUID deviceId = UUID.randomUUID();
+        ObjectNode pullRequest = objectMapper.createObjectNode();
+        pullRequest.put("since_watermark", 0);
+        pullRequest.put("limit", 10);
+        pullRequest.put("device_id", deviceId.toString());
+        pullRequest.put("config_version", 1);
+
+        HttpEntity<JsonNode> entity = new HttpEntity<>(pullRequest, authHeaders());
+        restTemplate.exchange("/api/sync/pull", HttpMethod.POST, entity, JsonNode.class);
+
+        // Verify device_sync_state has config_version
+        Integer configVer = jdbcTemplate.queryForObject(
+                "SELECT config_version FROM device_sync_state WHERE device_id = ?::uuid",
+                Integer.class, deviceId.toString());
+        assertEquals(1, configVer.intValue());
+    }
+
+    // --- Phase 3c: Full Pipeline E2E ---
+
+    @Test
+    void fullPipelineE2E_authorPublishSyncCaptureProject() {
+        // QG: Full pipeline E2E: admin authors malaria_followup/v1 → publishes → worker syncs
+        // → captures with new shape → server validates → PE projects → visible in admin
+
+        // 1. Admin authors shape
+        ObjectNode schema = buildSchema(0, null);
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+
+        ObjectNode patientField = objectMapper.createObjectNode();
+        patientField.put("name", "patient_name");
+        patientField.put("type", "text");
+        patientField.put("required", true);
+        patientField.put("deprecated", false);
+        patientField.put("display_order", 1);
+        fields.add(patientField);
+
+        ObjectNode statusField = objectMapper.createObjectNode();
+        statusField.put("name", "followup_status");
+        statusField.put("type", "select");
+        statusField.put("required", true);
+        statusField.put("deprecated", false);
+        statusField.put("display_order", 2);
+        statusField.putArray("options").add("completed").add("missed").add("rescheduled");
+        fields.add(statusField);
+
+        ObjectNode tempField = objectMapper.createObjectNode();
+        tempField.put("name", "temperature");
+        tempField.put("type", "decimal");
+        tempField.put("required", false);
+        tempField.put("deprecated", false);
+        tempField.put("display_order", 3);
+        fields.add(tempField);
+
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        List<String> shapeViolations = ss.createShape("malaria_followup", "elevated", schema);
+        assertTrue(shapeViolations.isEmpty(), "Shape creation failed: " + shapeViolations);
+
+        // 2. Admin creates activity
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode actConfig = objectMapper.createObjectNode();
+        actConfig.putArray("shapes").add("malaria_followup/v1");
+        ObjectNode roles = actConfig.putObject("roles");
+        roles.putArray("field_worker").add("capture");
+        roles.putArray("supervisor").add("capture").add("review");
+        List<String> actViolations = as.createActivity("malaria_program", "elevated", actConfig);
+        assertTrue(actViolations.isEmpty(), "Activity creation failed: " + actViolations);
+
+        // 3. Admin publishes config
+        int configVersion = configPackager.publish(null);
+        assertTrue(configVersion > 0);
+
+        // 4. Worker syncs — pull to get config_version discovery
+        ObjectNode pullRequest = objectMapper.createObjectNode();
+        pullRequest.put("since_watermark", 0);
+        pullRequest.put("limit", 100);
+
+        HttpEntity<JsonNode> pullEntity = new HttpEntity<>(pullRequest, authHeaders());
+        ResponseEntity<JsonNode> pullResponse = restTemplate.exchange(
+                "/api/sync/pull", HttpMethod.POST, pullEntity, JsonNode.class);
+
+        assertEquals(200, pullResponse.getStatusCode().value());
+        assertEquals(configVersion, pullResponse.getBody().get("config_version").asInt());
+
+        // 5. Worker downloads config
+        ResponseEntity<JsonNode> configResponse = restTemplate.exchange(
+                "/api/sync/config",
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                JsonNode.class);
+
+        assertEquals(200, configResponse.getStatusCode().value());
+        JsonNode configBody = configResponse.getBody();
+        assertTrue(configBody.get("shapes").has("malaria_followup/v1"));
+        assertTrue(configBody.get("activities").has("malaria_program"));
+        assertEquals("elevated",
+                configBody.get("sensitivity_classifications").get("shapes").get("malaria_followup/v1").asText());
+
+        // 6. Worker captures event with new shape
+        UUID subjectId = UUID.randomUUID();
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("patient_name", "Alice Mapendo");
+        payload.put("followup_status", "completed");
+        payload.put("temperature", 36.8);
+
+        ObjectNode event = buildEvent("malaria_followup/v1", payload);
+        // Set activity_ref
+        event.put("activity_ref", "malaria_program");
+        // Set specific subject
+        ObjectNode subRef = objectMapper.createObjectNode();
+        subRef.put("type", "subject");
+        subRef.put("id", subjectId.toString());
+        event.set("subject_ref", subRef);
+
+        ObjectNode pushReq = buildPushRequest(event);
+        ResponseEntity<JsonNode> pushResponse = pushEvents(pushReq);
+
+        assertEquals(200, pushResponse.getStatusCode().value());
+        assertEquals(1, pushResponse.getBody().get("accepted").asInt());
+
+        // 7. Projection engine projects the subject
+        ResponseEntity<JsonNode> subjectsResponse = restTemplate.exchange(
+                "/api/subjects",
+                HttpMethod.GET,
+                new HttpEntity<>(new HttpHeaders()),
+                JsonNode.class);
+
+        assertEquals(200, subjectsResponse.getStatusCode().value());
+        JsonNode subjectsWrapper = subjectsResponse.getBody();
+        assertTrue(subjectsWrapper.has("subjects"));
+        JsonNode subjects = subjectsWrapper.get("subjects");
+        assertTrue(subjects.isArray());
+        boolean found = false;
+        for (JsonNode s : subjects) {
+            if (subjectId.toString().equals(s.get("id").asText())) {
+                found = true;
+                assertEquals("capture", s.get("latest_event_type").asText());
+                assertEquals(1, s.get("event_count").asInt());
+                break;
+            }
+        }
+        assertTrue(found, "Subject " + subjectId + " not found in projection");
+
+        // 8. Subject events visible via detail endpoint
+        ResponseEntity<JsonNode> detailResponse = restTemplate.exchange(
+                "/api/subjects/" + subjectId + "/events",
+                HttpMethod.GET,
+                new HttpEntity<>(new HttpHeaders()),
+                JsonNode.class);
+
+        assertEquals(200, detailResponse.getStatusCode().value());
+        JsonNode detailWrapper = detailResponse.getBody();
+        assertTrue(detailWrapper.has("events"));
+        JsonNode eventsList = detailWrapper.get("events");
+        assertTrue(eventsList.isArray());
+        assertEquals(1, eventsList.size());
+        assertEquals("malaria_followup/v1", eventsList.get(0).get("shape_ref").asText());
     }
 
     // --- Helpers ---
