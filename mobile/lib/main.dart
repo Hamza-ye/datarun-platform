@@ -61,21 +61,29 @@ class _DatarunAppState extends State<DatarunApp> {
 
   @override
   Widget build(BuildContext context) {
+    if (_appState != null) {
+      return ChangeNotifierProvider.value(
+        value: _appState!,
+        child: MaterialApp(
+          title: 'Datarun',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+            useMaterial3: true,
+          ),
+          home: const WorkListScreen(),
+        ),
+      );
+    }
     return MaterialApp(
       title: 'Datarun',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: _appState != null
-          ? ChangeNotifierProvider.value(
-              value: _appState!,
-              child: const WorkListScreen(),
-            )
-          : SetupScreen(
-              identity: widget.identity,
-              onSetupComplete: () => _bootstrap(),
-            ),
+      home: SetupScreen(
+        identity: widget.identity,
+        onSetupComplete: () => _bootstrap(),
+      ),
     );
   }
 }
