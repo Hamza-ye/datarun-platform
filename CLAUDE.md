@@ -10,14 +10,14 @@ The implementation repository for the Datarun operations platform — a domain-a
 
 ## Current Phase
 
-**Phase 3: Configuration** — in progress (3a complete, 3b/3c remaining)
+**Phase 3: Configuration** — COMPLETE
 
 - Phase 0 (Core Loop): COMPLETE
 - Phase 1 (Identity & Integrity): COMPLETE — 64 total tests
 - Phase 2 (Authorization & Multi-Actor): COMPLETE — 80 tests before Phase 3
 - Phase 3a (Shapes + Config Delivery): COMPLETE — 80 server + 33 mobile tests
 - Phase 3b (Expressions + DtV): COMPLETE — 148 server + 47 mobile tests
-- Phase 3c (Config Packager + Full Pipeline): Not started
+- Phase 3c (Config Packager + Full Pipeline): COMPLETE — 153 server + 54 mobile tests
 
 See [docs/status.md](docs/status.md) for detailed status and quality gate results.
 
@@ -46,7 +46,7 @@ IDRs: IDR-017 (shape storage), IDR-018 (expression grammar), IDR-019 (config pac
 # Start test database (host networking — works with VPN)
 docker compose -f docker-compose.test.yml up -d
 
-# Run all server tests (80 tests, ~40s)
+# Run all server tests (153 tests, ~30s)
 cd server && ./mvnw test
 
 # Run single test class
@@ -128,7 +128,7 @@ server/src/main/resources/
   templates/                       # Thymeleaf HTML (admin, config)
   envelope.schema.json             # Bundled for server-side validation
 
-server/src/test/java/              # 14 test classes, 148 server tests
+server/src/test/java/              # 14 test classes, 153 server tests
   AbstractIntegrationTest.java     # Base: test actor provisioning, auth helpers
 
 mobile/lib/
@@ -193,7 +193,7 @@ design/                            # Git submodule → datarun docs repo
 | `AssignmentService.java` | Create/end assignments with S5 scope-containment | `createAssignment(...)→Event`, `endAssignment(id, actorId, reason)→Event` |
 | `LocationRepository.java` | Geographic hierarchy with materialized paths (IDR-014) | `findById(UUID)`, `findPathById(UUID)→String`, `insert(id, name, parentId, level)` |
 | `SubjectLocationRepository.java` | Subject→location mapping with denormalized path | `findPathBySubjectId(UUID)→String`, `upsert(subjectId, locationId, locationPath)` |
-| `WebConfig.java` | Registers token interceptor | Interceptor on `/api/sync/pull` |
+| `WebConfig.java` | Registers token interceptor | Interceptor on `/api/sync/pull`, `/api/sync/config` |
 
 ### config/ — Phase 3: Configuration
 | File | Purpose | Key API |
@@ -205,8 +205,8 @@ design/                            # Git submodule → datarun docs repo
 | `ActivityRepository.java` | Activity persistence | `insert(Activity)`, `update(Activity)`, `findByName(name)→Optional`, `findAll()`, `findActive()` |
 | `ActivityService.java` | Activity validation: name format, shapes exist | `createActivity(name, sensitivity, configJson)→List<String>`, `updateActivity(...)`, `deprecate(name)` |
 | `ConfigPackager.java` | Assembles IDR-019 JSON package (all shapes, active activities, expressions grouped by activity.shape, empty flags) | `publish(publishedBy)→int version`, `getLatest()→Optional<ConfigPackage>`, `getLatestVersion()→int` |
-| `ConfigApiController.java` | Config delivery endpoint with ETag | `GET /api/sync/config` (If-None-Match → 304) |
-| `ConfigAdminController.java` | Thymeleaf admin: shape CRUD, activity CRUD, expression CRUD, publish | Routes under `/admin/config/` |
+| `ConfigApiController.java` | Config delivery endpoint with ETag (quoted + raw) | `GET /api/sync/config` (If-None-Match → 304, Bearer token auth) |
+| `ConfigAdminController.java` | Thymeleaf admin: shape CRUD, activity CRUD, expression CRUD, publish with DtV gating | Routes under `/admin/config/` |
 | `ShapePayloadValidator.java` | Validates event payload against shape fields; unknown shapes pass through | `validate(shapeRef, payload)→List<String>` |
 | `ExpressionEvaluator.java` | Pure-function JSON AST evaluator (IDR-018). 8 comparison + 3 logical + ref | `evaluateCondition(JsonNode, Map)→boolean`, `evaluateValue(JsonNode, Map)→Object` |
 | `ExpressionRule.java` | Expression rule record | `record(id, activityRef, shapeRef, fieldName, ruleType, expression, message, createdAt)` |
@@ -233,10 +233,10 @@ design/                            # Git submodule → datarun docs repo
 ### data/ — Data Layer
 | File | Purpose | Key API |
 |------|---------|---------|
-| `event_store.dart` | SQLite: events, aliases, assignments, config. DB version=4 | `insert(Event)`, `insertFromServer(Event)`, `getUnpushed()`, `markPushed(ids)`, `getBySubject(id)`, `getAll()`, `getAllAliases()`, `getActiveAssignments()`, `purgeOutOfScopeEvents(deviceId)`, `getConfigPackage()`, `saveConfigPackage(version, json)` |
+| `event_store.dart` | SQLite: events, aliases, assignments, config (current + pending). DB version=5 | `insert(Event)`, `insertFromServer(Event)`, `getUnpushed()`, `markPushed(ids)`, `getBySubject(id)`, `getAll()`, `getAllAliases()`, `getActiveAssignments()`, `purgeOutOfScopeEvents(deviceId)`, `getConfigPackage()`, `saveConfigPackage(version, json)`, `getPendingConfigPackage()`, `savePendingConfigPackage(version, json)`, `deletePendingConfigPackage()` |
 | `event_assembler.dart` | Assembles 11-field envelope from form state | `assemble(subjectId, shapeRef, payload)→Future<Event>` |
-| `sync_service.dart` | Push→pull pipeline with actor token auth + config download after pull | `sync()→Future<SyncResult>`. Downloads config via GET /api/sync/config with If-None-Match when server reports newer config_version. |
-| `config_store.dart` | SQLite-persisted config cache (IDR-019). Parses shapes/activities/expressions into memory on init. | `init()`, `applyConfig(json)`, `getShape(ref)→ShapeDefinition?`, `getActivity(name)`, `getActiveActivities()→List<String>`, `getShapesForActivity(name)→List<ShapeDefinition>`, `getExpressionsForField(activity,shape,field)`, `getShowCondition(...)`, `getDefaultExpression(...)`, `getWarningExpression(...)`, `configVersion→int` |
+| `sync_service.dart` | Push→pull pipeline with actor token auth + config download after pull | `sync()→Future<SyncResult>`. Downloads config via GET /api/sync/config with If-None-Match when server reports newer config_version. Sends config_version in pull request for server-side tracking. |
+| `config_store.dart` | SQLite-persisted config cache (IDR-019). Two-slot model: current + pending. Parses shapes/activities/expressions into memory on init. | `init()`, `applyConfig(json)`, `promotePending()`, `hasPending`, `getShape(ref)→ShapeDefinition?`, `getActivity(name)`, `getActiveActivities()→List<String>`, `getShapesForActivity(name)→List<ShapeDefinition>`, `getExpressionsForField(activity,shape,field)`, `getShowCondition(...)`, `getDefaultExpression(...)`, `getWarningExpression(...)`, `configVersion→int` |
 | `device_identity.dart` | Persists device_id, actor_id, device_seq, actor_token | `init()→Future<DeviceIdentity>`, `nextSeq()→Future<int>`, `get/set actorToken` |
 | `projection_engine.dart` | Subject list + detail from events; alias-aware, flag-excluding | `getSubjectList()→Future<List<SubjectSummary>>`, `getSubjectDetail(id)→Future<List<Event>>`, `getFlaggedEventIds()→Future<Set<String>>` |
 
@@ -264,26 +264,26 @@ design/                            # Git submodule → datarun docs repo
 
 ---
 
-## Test Classes — Server (148 tests)
+## Test Classes — Server (153 tests)
 
 | Class | Tests | Module |
 |-------|-------|--------|
 | `SyncControllerIntegrationTest` | 8 | Push/pull pipeline, pagination |
-| `MultiDeviceE2ETest` | 8 | Multi-device sync, conflict flags |
-| `IdentityResolverIntegrationTest` | 6 | Merge/split, alias chains |
+| `MultiDeviceE2ETest` | 1 | Multi-device sync E2E |
+| `IdentityResolverIntegrationTest` | 8 | Merge/split, alias chains |
 | `ConflictDetectorIntegrationTest` | 8 | W_effective, stale_reference detection |
-| `ConflictResolutionIntegrationTest` | 6 | Resolve flags, manual identity conflicts |
-| `ProjectionEquivalenceTest` | 6 | Server/mobile projection parity (E7) |
-| `SubjectControllerIntegrationTest` | 4 | Subject REST, alias-aware queries |
-| `AuthFlagIntegrationTest` | 4 | Auth CD: scope_violation, temporal_authority |
-| `AdminFlagIntegrationTest` | 4 | Admin UI flag operations |
-| `MultiActorScopeIntegrationTest` | 4 | Multi-actor scope containment (S5) |
-| `ScopeFilteredSyncIntegrationTest` | 6 | IDR-015 scope-filtered pull |
-| `ConfigIntegrationTest` | 19 | Phase 3a/3b: shape/activity/expression CRUD, config endpoint, payload validation, DtV rejection |
+| `ConflictResolutionIntegrationTest` | 9 | Resolve flags, manual identity conflicts |
+| `ProjectionEquivalenceTest` | 1 | Server/mobile projection parity (E7) |
+| `SubjectControllerIntegrationTest` | 3 | Subject REST, alias-aware queries |
+| `AuthFlagIntegrationTest` | 6 | Auth CD: scope_violation, temporal_authority |
+| `AdminFlagIntegrationTest` | 6 | Admin UI flag operations |
+| `MultiActorScopeIntegrationTest` | 7 | Multi-actor scope containment (S5) |
+| `ScopeFilteredSyncIntegrationTest` | 7 | IDR-015 scope-filtered pull |
+| `ConfigIntegrationTest` | 24 | Phase 3a/3b/3c: shape/activity/expression CRUD, config endpoint, payload validation, DtV publish gating, auth on config, config version tracking, full pipeline E2E |
 | `ExpressionEvaluatorTest` | 50 | Shared fixture-driven (E7): all IDR-018 operators, null handling, type coercion, logical ops |
 | `DeployTimeValidatorTest` | 15 | DtV L2: field refs, operator-type compat, predicate budget, nesting, default type match |
 
-## Test Classes — Mobile (47 tests)
+## Test Classes — Mobile (54 tests)
 
 | File | Tests | Module |
 |------|-------|--------|
@@ -292,7 +292,7 @@ design/                            # Git submodule → datarun docs repo
 | `projection_engine_test.dart` | — | Subject list/detail projection |
 | `projection_equivalence_test.dart` | 6 | Server/mobile projection parity (E7) |
 | `selective_retain_test.dart` | — | Scope-based event purging |
-| `config_store_test.dart` | 12 | Config parse, shape lookup, activity→shapes, persistence round-trip, expression storage/retrieval |
+| `config_store_test.dart` | 19 | Config parse, shape lookup, activity→shapes, persistence round-trip, expression storage/retrieval, two-slot model (pending/current/promotion/restart) |
 | `expression_evaluator_test.dart` | 9 | Shared fixture-driven (E7, 50 cases) + individual operator unit tests |
 
 ---

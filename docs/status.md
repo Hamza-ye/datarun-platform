@@ -8,13 +8,13 @@
 
 ## Current Phase
 
-**Phase 3: Configuration** — **3a/3b COMPLETE, 3c remaining**
+**Phase 3: Configuration** — **COMPLETE**
 
 | Sub-phase | Status | Notes |
 |-----------|--------|-------|
 | **3a: Shapes + Config Delivery** | **Complete** | 80 server + 33 mobile tests. Shapes, activities, config endpoint, payload validation, admin UI (server). ConfigStore, shape.dart IDR-017 rewrite, sync config download, form engine, widget_mapper 10 field types (mobile). |
 | **3b: Expressions + DtV** | **Complete** | 148 server + 47 mobile tests. Java + Dart expression evaluators (50 shared E7 fixtures), DtV L2 (15 tests), expression admin UI, ConfigStore expression methods, form show/hide + defaults + warnings. |
-| **3c: Config Packager + Full Pipeline** | Not started | IDR-019 full pipeline E2E. |
+| **3c: Config Packager + Full Pipeline** | **Complete** | 153 server + 54 mobile tests. Auth on config endpoint, DtV publish gating, config version tracking, ETag fix, two-slot config model (current/pending), full E2E pipeline test. |
 
 ### Previous Phases
 
@@ -25,6 +25,7 @@
 | **2: Authorization & Multi-Actor** | Complete | 80 server + 22 mobile |
 | **3a: Shapes + Config Delivery** | Complete | 80 server + 33 mobile |
 | **3b: Expressions + DtV** | Complete | 148 server + 47 mobile |
+| **3c: Config Packager + Full Pipeline** | Complete | 153 server + 54 mobile |
 
 ---
 
@@ -55,20 +56,9 @@
 
 ## What's Next
 
-**Phase 3: Configuration** — Domain-agnosticism. Deployer-authored shapes, expression evaluator, config packaging.
+**Phase 4: Triggers & State Progression** — Next phase (not yet started).
 
-Prerequisites before starting:
-- Write `docs/implementation/phases/phase-3.md` (sub-phase breakdown, quality gates, module scope)
-- Resolve IG items: IG-2, IG-6, IG-7, IG-8, IG-9, IG-15
-
-Primitives to build:
-- Shape Registry (full: authoring, versioning, deprecation-only evolution)
-- Expression Evaluator (form L2 + trigger L3 contexts)
-- Deploy-time Validator (hard budgets, composition rules)
-- Config Packager (atomic delivery, at-most-2 versions)
-- Admin UI: config authoring (shapes, activities, expressions)
-
-Contracts exercised: C5, C12, C13, C14, C19, C20. ADR exercised: ADR-4 fully.
+Phase 3 (Configuration) is fully complete with 207 total tests (153 server + 54 mobile).
 
 ---
 
@@ -80,4 +70,4 @@ _(None)_
 
 ## Active Decisions
 
-_(None pending — Phase 3 spec needs to be written before implementation begins.)_
+_(None pending — Phase 3 complete, Phase 4 spec needs to be written.)_
