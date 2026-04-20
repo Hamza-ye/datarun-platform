@@ -32,6 +32,8 @@ class AppState extends ChangeNotifier {
   });
 
   Future<void> refresh() async {
+    // Promote pending config at safe transition point (IDR-019 two-slot model)
+    await configStore.promotePending();
     subjects = await projectionEngine.getSubjectList();
     activeAssignments = await eventStore.getActiveAssignments();
     pendingCount = await eventStore.unpushedCount();

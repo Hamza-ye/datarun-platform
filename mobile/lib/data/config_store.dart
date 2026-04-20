@@ -3,7 +3,9 @@ import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 
 /// Stores and caches the config package (IDR-019).
-/// Persists to SQLite via EventStore; keeps parsed shapes/activities in memory.
+/// Two-slot model: current (in-memory, used by forms) + pending (awaiting promotion).
+/// Pending is promoted to current at safe transition points (form open, refresh).
+/// At-most-2 invariant: only current + pending exist simultaneously.
 class ConfigStore {
   final EventStore _eventStore;
 
@@ -13,24 +15,63 @@ class ConfigStore {
   // Key: "{activity_ref}.{shape_ref}" → List of rule maps
   Map<String, List<Map<String, dynamic>>> _expressions = {};
 
+  // Pending slot (IDR-019 two-slot model)
+  int _pendingVersion = 0;
+  Map<String, dynamic>? _pendingJson;
+
   ConfigStore(this._eventStore);
 
   /// Load persisted config from SQLite into memory cache.
+  /// Loads current config. Pending config stays in SQLite until promoted.
   Future<void> init() async {
     final stored = await _eventStore.getConfigPackage();
-    if (stored == null) return;
-    final version = stored['version'] as int;
-    final json = jsonDecode(stored['package_json'] as String) as Map<String, dynamic>;
-    _applyToCache(version, json);
+    if (stored != null) {
+      final version = stored['version'] as int;
+      final json = jsonDecode(stored['package_json'] as String) as Map<String, dynamic>;
+      _applyToCache(version, json);
+    }
+    // Check for pending config in SQLite
+    final pending = await _eventStore.getPendingConfigPackage();
+    if (pending != null) {
+      _pendingVersion = pending['version'] as int;
+      _pendingJson = jsonDecode(pending['package_json'] as String) as Map<String, dynamic>;
+    }
   }
 
-  /// Apply a new config package. Persists to SQLite, then updates cache.
+  /// Apply a new config package from sync.
+  /// If no current config exists, promotes immediately.
+  /// Otherwise, stores as pending (two-slot model).
   Future<void> applyConfig(Map<String, dynamic> packageJson) async {
     final version = packageJson['version'] as int;
     final encoded = jsonEncode(packageJson);
-    await _eventStore.saveConfigPackage(version, encoded);
-    _applyToCache(version, packageJson);
+
+    if (_configVersion == 0) {
+      // No current config — promote immediately
+      await _eventStore.saveConfigPackage(version, encoded);
+      _applyToCache(version, packageJson);
+    } else {
+      // Store as pending — will be promoted at next safe transition point
+      await _eventStore.savePendingConfigPackage(version, encoded);
+      _pendingVersion = version;
+      _pendingJson = packageJson;
+    }
   }
+
+  /// Promote pending config to current, if one exists.
+  /// Called at safe transition points (form open, app refresh).
+  Future<void> promotePending() async {
+    if (_pendingJson == null) return;
+
+    final encoded = jsonEncode(_pendingJson);
+    await _eventStore.saveConfigPackage(_pendingVersion, encoded);
+    await _eventStore.deletePendingConfigPackage();
+    _applyToCache(_pendingVersion, _pendingJson!);
+    _pendingVersion = 0;
+    _pendingJson = null;
+  }
+
+  /// Whether a pending config is waiting for promotion.
+  bool get hasPending => _pendingJson != null;
 
   void _applyToCache(int version, Map<String, dynamic> packageJson) {
     final shapesRaw = packageJson['shapes'];

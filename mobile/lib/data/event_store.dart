@@ -4,9 +4,10 @@ import 'package:datarun_mobile/domain/event.dart';
 
 class EventStore {
   static const _dbName = 'datarun.db';
-  static const _dbVersion = 4;
+  static const _dbVersion = 5;
   static const _table = 'events';
   static const _configTable = 'config_current';
+  static const _configPendingTable = 'config_pending';
   static const _aliasTable = 'subject_aliases';
   static const _assignmentTable = 'local_assignments';
 
@@ -74,6 +75,13 @@ class EventStore {
         package_json  TEXT NOT NULL
       )
     ''');
+    await db.execute('''
+      CREATE TABLE $_configPendingTable (
+        id            INTEGER PRIMARY KEY CHECK(id = 1),
+        version       INTEGER NOT NULL,
+        package_json  TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -104,6 +112,15 @@ class EventStore {
     if (oldVersion < 4) {
       await db.execute('''
         CREATE TABLE $_configTable (
+          id            INTEGER PRIMARY KEY CHECK(id = 1),
+          version       INTEGER NOT NULL,
+          package_json  TEXT NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 5) {
+      await db.execute('''
+        CREATE TABLE $_configPendingTable (
           id            INTEGER PRIMARY KEY CHECK(id = 1),
           version       INTEGER NOT NULL,
           package_json  TEXT NOT NULL
@@ -336,5 +353,34 @@ class EventStore {
       'INSERT OR REPLACE INTO $_configTable (id, version, package_json) VALUES (1, ?, ?)',
       [version, packageJson],
     );
+  }
+
+  // --- Pending config package (Phase 3c: two-slot model, IDR-019) ---
+
+  /// Read the pending config package, or null if none.
+  Future<Map<String, dynamic>?> getPendingConfigPackage() async {
+    final db = await database;
+    final rows = await db.query(_configPendingTable, where: 'id = 1');
+    if (rows.isEmpty) return null;
+    final row = rows.first;
+    return {
+      'version': row['version'] as int,
+      'package_json': row['package_json'] as String,
+    };
+  }
+
+  /// Store (or replace) the pending config package.
+  Future<void> savePendingConfigPackage(int version, String packageJson) async {
+    final db = await database;
+    await db.rawInsert(
+      'INSERT OR REPLACE INTO $_configPendingTable (id, version, package_json) VALUES (1, ?, ?)',
+      [version, packageJson],
+    );
+  }
+
+  /// Delete the pending config package (after promotion to current).
+  Future<void> deletePendingConfigPackage() async {
+    final db = await database;
+    await db.delete(_configPendingTable, where: 'id = 1');
   }
 }

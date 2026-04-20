@@ -77,6 +77,7 @@ class SyncService {
           body: jsonEncode({
             'since_watermark': watermark,
             'limit': 100,
+            'config_version': _configStore.configVersion,
           }),
         );
         if (response.statusCode == 401) {
@@ -132,7 +133,7 @@ class SyncService {
       }
       final currentVersion = _configStore.configVersion;
       if (currentVersion > 0) {
-        configHeaders['If-None-Match'] = '"$currentVersion"';
+        configHeaders['If-None-Match'] = '$currentVersion';
       }
       final configResponse = await http.get(
         Uri.parse('$_baseUrl/api/sync/config'),

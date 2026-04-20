@@ -38,8 +38,10 @@ class _FormScreenState extends State<FormScreen> {
     _loadShape();
   }
 
-  void _loadShape() {
+  void _loadShape() async {
     final state = context.read<AppState>();
+    // Promote pending config at form-open (IDR-019 two-slot model)
+    await state.configStore.promotePending();
     final shape = state.configStore.getShape(widget.shapeRef);
     setState(() {
       _shape = shape;

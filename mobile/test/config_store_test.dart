@@ -277,4 +277,159 @@ void main() {
       expect(expr, isNull);
     });
   });
+
+  // --- Phase 3c: Two-slot config model (IDR-019) ---
+
+  group('two-slot config model', () {
+    final configV2 = <String, dynamic>{
+      'version': 2,
+      'shapes': {
+        'household_visit/v1': {
+          'name': 'household_visit',
+          'version': 1,
+          'status': 'active',
+          'sensitivity': 'standard',
+          'fields': [
+            {
+              'name': 'head_of_household',
+              'type': 'text',
+              'required': true,
+              'description': 'Head of Household',
+              'display_order': 1,
+              'deprecated': false,
+            },
+          ],
+        },
+        'malaria_followup/v1': {
+          'name': 'malaria_followup',
+          'version': 1,
+          'status': 'active',
+          'sensitivity': 'elevated',
+          'fields': [
+            {
+              'name': 'patient_name',
+              'type': 'text',
+              'required': true,
+              'description': 'Patient Name',
+              'display_order': 1,
+              'deprecated': false,
+            },
+          ],
+        },
+      },
+      'activities': {
+        'malaria_program': {
+          'name': 'malaria_program',
+          'shapes': ['malaria_followup/v1'],
+          'roles': {'field_worker': ['capture']},
+          'status': 'active',
+        },
+      },
+      'expressions': {},
+      'flag_severity_overrides': {},
+      'sensitivity_classifications': {'shapes': {}, 'activities': {}},
+      'published_at': '2026-04-20T11:00:00Z',
+    };
+
+    test('first config promotes immediately when no current exists', () async {
+      expect(configStore.configVersion, 0);
+      await configStore.applyConfig(sampleConfig);
+      // Should be current immediately (no pending)
+      expect(configStore.configVersion, 1);
+      expect(configStore.hasPending, false);
+      expect(configStore.getShape('household_visit/v1'), isNotNull);
+    });
+
+    test('second config goes to pending, not current', () async {
+      await configStore.applyConfig(sampleConfig);
+      expect(configStore.configVersion, 1);
+
+      await configStore.applyConfig(configV2);
+      // Current should still be v1
+      expect(configStore.configVersion, 1);
+      expect(configStore.hasPending, true);
+      // v1 shapes still active
+      expect(configStore.getShape('household_visit/v1')!.fields.length, 4);
+      // v2 shape not yet visible
+      expect(configStore.getShape('malaria_followup/v1'), isNull);
+    });
+
+    test('promotePending moves pending to current', () async {
+      await configStore.applyConfig(sampleConfig);
+      await configStore.applyConfig(configV2);
+      expect(configStore.configVersion, 1);
+      expect(configStore.hasPending, true);
+
+      await configStore.promotePending();
+
+      expect(configStore.configVersion, 2);
+      expect(configStore.hasPending, false);
+      // v2 shape now visible
+      expect(configStore.getShape('malaria_followup/v1'), isNotNull);
+      // v2 only has 1 field for household_visit (simplified in v2)
+      expect(configStore.getShape('household_visit/v1')!.fields.length, 1);
+    });
+
+    test('promotePending is no-op when no pending', () async {
+      await configStore.applyConfig(sampleConfig);
+      expect(configStore.configVersion, 1);
+      expect(configStore.hasPending, false);
+
+      await configStore.promotePending();
+
+      expect(configStore.configVersion, 1);
+    });
+
+    test('at-most-2: new pending overwrites previous pending', () async {
+      await configStore.applyConfig(sampleConfig); // v1 → current
+
+      await configStore.applyConfig(configV2); // v2 → pending
+      expect(configStore.hasPending, true);
+
+      final configV3 = Map<String, dynamic>.from(configV2);
+      configV3['version'] = 3;
+      await configStore.applyConfig(configV3); // v3 replaces v2 as pending
+
+      expect(configStore.configVersion, 1); // current unchanged
+      await configStore.promotePending();
+      expect(configStore.configVersion, 3); // v3 promoted, v2 was overwritten
+    });
+
+    test('pending survives app restart via init', () async {
+      await configStore.applyConfig(sampleConfig); // v1 → current
+      await configStore.applyConfig(configV2); // v2 → pending
+
+      // Create a fresh ConfigStore pointing at same DB (simulate restart)
+      final configStore2 = ConfigStore(eventStore);
+      await configStore2.init();
+
+      expect(configStore2.configVersion, 1); // current loaded
+      expect(configStore2.hasPending, true); // pending loaded
+
+      await configStore2.promotePending();
+      expect(configStore2.configVersion, 2);
+      expect(configStore2.getShape('malaria_followup/v1'), isNotNull);
+    });
+
+    test('pending persisted in SQLite and cleared after promotion', () async {
+      await configStore.applyConfig(sampleConfig);
+      await configStore.applyConfig(configV2);
+
+      // Verify pending exists in DB
+      final pending = await eventStore.getPendingConfigPackage();
+      expect(pending, isNotNull);
+      expect(pending!['version'], 2);
+
+      await configStore.promotePending();
+
+      // Pending cleared from DB
+      final pendingAfter = await eventStore.getPendingConfigPackage();
+      expect(pendingAfter, isNull);
+
+      // Current updated in DB
+      final current = await eventStore.getConfigPackage();
+      expect(current, isNotNull);
+      expect(current!['version'], 2);
+    });
+  });
 }
