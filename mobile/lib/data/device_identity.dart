@@ -6,6 +6,7 @@ class DeviceIdentity {
   static const _deviceSeqKey = 'device_seq';
   static const _actorIdKey = 'actor_id';
   static const _actorTokenKey = 'actor_token';
+  static const _serverUrlKey = 'server_url';
 
   final SharedPreferences _prefs;
 
@@ -42,6 +43,17 @@ class DeviceIdentity {
   Future<void> setActorToken(String token) async {
     await _prefs.setString(_actorTokenKey, token);
   }
+
+  String? get serverUrl => _prefs.getString(_serverUrlKey);
+
+  Future<void> setServerUrl(String url) async {
+    await _prefs.setString(_serverUrlKey, url);
+  }
+
+  /// Whether the device has been set up (has server URL + token).
+  bool get isSetupComplete =>
+      _prefs.getString(_serverUrlKey) != null &&
+      _prefs.getString(_actorTokenKey) != null;
 
   /// Returns the next device_seq and persists it.
   /// Monotonically increasing, starting at 1.
