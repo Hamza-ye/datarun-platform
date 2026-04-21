@@ -4,7 +4,7 @@
 
 The implementation repository for the Datarun operations platform — a domain-agnostic operational backbone. Event-sourced, offline-first, append-only architecture.
 
-**Design docs**: `design/docs/` (git submodule → github.com/Hamza-ye/datarun.git)
+**Design docs**: `docs/` (previously a submodule, now tracked in this repo)
 
 ---
 
@@ -22,8 +22,8 @@ The implementation repository for the Datarun operations platform — a domain-a
 
 See [docs/status.md](docs/status.md) for detailed status and quality gate results.
 
-Phase spec: `design/docs/implementation/phases/phase-3.md`
-IDRs: IDR-017 (shape storage), IDR-018 (expression grammar), IDR-019 (config package) in `design/docs/decisions/`
+Phase spec: `docs/implementation/phases/phase-3.md`
+IDRs: IDR-017 (shape storage), IDR-018 (expression grammar), IDR-019 (config package) in `docs/decisions/`
 
 ---
 
@@ -196,7 +196,7 @@ mobile/lib/
   data/                            # EventStore, SyncService, ConfigStore (+ expressions), ProjectionEngine
   presentation/                    # AppState, screens (WorkList, SubjectDetail, Form), widgets
 
-design/                            # Git submodule → datarun docs repo
+design/                            # formerly a git submodule — now inlined here
   docs/architecture/               # Primitives, patterns, contracts, boundaries
   docs/adrs/                       # 5 ADRs (all DECIDED)
   docs/decisions/                  # 19 IDRs
@@ -369,17 +369,17 @@ design/                            # Git submodule → datarun docs repo
 
 ## Architecture Reference
 
-Canonical docs in `design/docs/`:
+Canonical docs in `docs/`:
 
 | What | Where |
 |------|-------|
-| Architecture primitives (11), patterns (4), contracts (21), cross-cutting (8), boundaries (29) | `design/docs/architecture/` |
-| ADRs (5, all DECIDED) — offline data model, identity conflict, authorization sync, config boundary, state progression | `design/docs/adrs/` |
-| IDRs (19) — implementation decisions | `design/docs/decisions/` |
-| Implementation plan + execution plan | `design/docs/implementation/plan.md`, `execution-plan.md` |
-| Phase specs | `design/docs/implementation/phases/` |
-| UX model | `design/docs/implementation/ux-model.md` |
-| 22 operational scenarios | `design/docs/scenarios/` |
+| Architecture primitives (11), patterns (4), contracts (21), cross-cutting (8), boundaries (29) | `docs/architecture/` |
+| ADRs (5, all DECIDED) — offline data model, identity conflict, authorization sync, config boundary, state progression | `docs/adrs/` |
+| IDRs (19) — implementation decisions | `docs/decisions/` |
+| Implementation plan + execution plan | `docs/implementation/plan.md`, `execution-plan.md` |
+| Phase specs | `docs/implementation/phases/` |
+| UX model | `docs/implementation/ux-model.md` |
+| 22 operational scenarios | `docs/scenarios/` |
 
 ---
 
@@ -402,7 +402,7 @@ Canonical docs in `design/docs/`:
 
 ## Journal Triggers
 
-Record in `design/docs/implementation/phases/phase-N.md` when:
+Record in `docs/implementation/phases/phase-N.md` when:
 
 1. An IG (implementation-grade) decision is made
 2. Mid-phase discovery reaches Stage 2+ (spike or escalation)
