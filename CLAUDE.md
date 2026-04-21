@@ -10,20 +10,29 @@ The implementation repository for the Datarun operations platform — a domain-a
 
 ## Current Phase
 
-**Phase 4: Workflow & Policies** — IN PROGRESS (4.0 complete)
+**Phase 3c (Config Packager + Full Pipeline) — COMPLETE with carried debt.**
+Phase 4.0 (role-action enforcement) was drafted, rolled back (IDR-020 violated architecture),
+and the corresponding Phase 3a quality gate remains OPEN. A Phase 3d close-out is proposed
+before any Phase 4 work; see §"Audit — End of Phase 3c (2026-04-21)" below.
 
 - Phase 0 (Core Loop): COMPLETE
-- Phase 1 (Identity & Integrity): COMPLETE — 64 total tests
-- Phase 2 (Authorization & Multi-Actor): COMPLETE — 80 tests before Phase 3
-- Phase 3a (Shapes + Config Delivery): COMPLETE — 80 server + 33 mobile tests
-- Phase 3b (Expressions + DtV): COMPLETE — 148 server + 47 mobile tests
-- Phase 3c (Config Packager + Full Pipeline): COMPLETE — 153 server + 54 mobile tests
-- Phase 4.0 (Role-Action Enforcement): COMPLETE — 157 server + 54 mobile tests
+- Phase 1 (Identity & Integrity): COMPLETE
+- Phase 2 (Authorization & Multi-Actor): COMPLETE
+- Phase 3a (Shapes + Config Delivery): COMPLETE — one QG carried as debt (role→action)
+- Phase 3b (Expressions + DtV): COMPLETE
+- Phase 3c (Config Packager + Full Pipeline): COMPLETE
+- **Phase 3d (close-out)**: COMPLETE — 3d.1 activity_ref plumbing, 3d.2 sensitivity surface on device, 3d.3 ContextResolver. 67 mobile tests, 153 server tests.
+- **Phase 4**: NOT STARTED — blocked on IDR-020 rewrite + IDR-021 (role-action) + IDR-022 (severity/uniqueness)
 
-See [docs/status.md](docs/status.md) for detailed status and quality gate results.
+**Test counts (actual, 2026-04-21)**: 14 server test classes, 103 `@Test` methods
+(parameterized expansions ≈ 153 rows, which is what `status.md` historically reported).
+Mobile: ~54 tests across ~7 files. The "157" in older CLAUDE.md revisions was the
+rolled-back Phase 4.0 number — ignore it.
 
-Phase spec: `docs/implementation/phases/phase-3.md`
-IDRs: IDR-017 (shape storage), IDR-018 (expression grammar), IDR-019 (config package) in `docs/decisions/`
+See [docs/status.md](docs/status.md) for living status.
+
+Phase specs: `docs/implementation/phases/phase-{0,1,2,3}.md`
+IDRs: IDR-001..IDR-019 in `docs/decisions/`. IDR-020, IDR-021, IDR-022 pending (see audit below).
 
 ---
 
@@ -188,7 +197,7 @@ server/src/main/resources/
   templates/                       # Thymeleaf HTML (admin, config)
   envelope.schema.json             # Bundled for server-side validation
 
-server/src/test/java/              # 14 test classes, 153 server tests
+server/src/test/java/              # 14 test classes, 103 @Test methods (~153 parameterized rows)
   AbstractIntegrationTest.java     # Base: test actor provisioning, auth helpers
 
 mobile/lib/
@@ -238,7 +247,7 @@ design/                            # formerly a git submodule — now inlined he
 ### integrity/ — Conflict Detection & Resolution
 | File | Purpose | Key API |
 |------|---------|---------|
-| `ConflictDetector.java` | Per-event identity CD + auth CD + role-action enforcement; creates flag events | `evaluate(events, lastPullWatermark)→List<Event>`, `evaluateAuth(events, actorId)→List<Event>` (includes role_action_mismatch check: whitelist model, activity.roles matrix), `sweep(trailingWatermark)→List<Event>` |
+| `ConflictDetector.java` | Per-event identity CD + auth CD; creates flag events. **Phase 3c scope only** — no role-action check (rolled back), no transition_violation, no domain_uniqueness_violation | `evaluate(events, lastPullWatermark)→List<Event>` (identity: concurrent_state_change + stale_reference), `evaluateAuth(events, actorId)→List<Event>` (auth: temporal_authority_expired → scope_violation → role_stale, ordered), `sweep(trailingWatermark)→List<Event>` |
 | `ConflictResolutionService.java` | Resolve flags, create manual identity conflicts | `resolve(flagEventId, resolution, reclassifiedSubjectId, actorId, reason)→Event`, `listUnresolvedFlags()`, `getFlagDetail(UUID)` |
 | `ConflictController.java` | REST flag operations | `GET /api/conflicts`, `POST /api/conflicts/{flagId}/resolve`, `POST /api/conflicts/identity` |
 | `ConflictSweepJob.java` | 5-min scheduled sweep | `@Scheduled sweep()` |
@@ -276,7 +285,8 @@ design/                            # formerly a git submodule — now inlined he
 ### admin/ — Admin UI
 | File | Purpose |
 |------|---------|
-| `AdminController.java` | Thymeleaf: subject list, detail, flags, assignments | Routes under `/admin/` |
+| `AdminController.java` | Thymeleaf: subject list, detail, flags, assignments. Routes under `/admin/` |
+| `DevBootstrapController.java` | Dev-only helpers: seed test actor token + root-scope assignment |
 
 ---
 
@@ -294,19 +304,20 @@ design/                            # formerly a git submodule — now inlined he
 | File | Purpose | Key API |
 |------|---------|---------|
 | `event_store.dart` | SQLite: events, aliases, assignments, config (current + pending). DB version=5 | `insert(Event)`, `insertFromServer(Event)`, `getUnpushed()`, `markPushed(ids)`, `getBySubject(id)`, `getAll()`, `getAllAliases()`, `getActiveAssignments()`, `purgeOutOfScopeEvents(deviceId)`, `getConfigPackage()`, `saveConfigPackage(version, json)`, `getPendingConfigPackage()`, `savePendingConfigPackage(version, json)`, `deletePendingConfigPackage()` |
-| `event_assembler.dart` | Assembles 11-field envelope from form state | `assemble(subjectId, shapeRef, payload)→Future<Event>` |
+| `event_assembler.dart` | Assembles 11-field envelope from form state | `assemble({subjectId, shapeRef, payload, activityRef?})→Future<Event>`. activityRef auto-populated from dispatching screen (Phase 3d.1). |
 | `sync_service.dart` | Push→pull pipeline with actor token auth + config download after pull | `sync()→Future<SyncResult>`. Downloads config via GET /api/sync/config with If-None-Match when server reports newer config_version. Sends config_version in pull request for server-side tracking. |
-| `config_store.dart` | SQLite-persisted config cache (IDR-019). Two-slot model: current + pending. Parses shapes/activities/expressions into memory on init. | `init()`, `applyConfig(json)`, `promotePending()`, `hasPending`, `getShape(ref)→ShapeDefinition?`, `getActivity(name)`, `getActiveActivities()→List<String>`, `getShapesForActivity(name)→List<ShapeDefinition>`, `getExpressionsForField(activity,shape,field)`, `getShowCondition(...)`, `getDefaultExpression(...)`, `getWarningExpression(...)`, `configVersion→int` |
+| `config_store.dart` | SQLite-persisted config cache (IDR-019). Two-slot model: current + pending. Parses shapes/activities/expressions/sensitivity_classifications into memory on init. | `init()`, `applyConfig(json)`, `promotePending()`, `hasPending`, `getShape(ref)→ShapeDefinition?`, `getActivity(name)`, `getActiveActivities()→List<String>`, `getShapesForActivity(name)→List<ShapeDefinition>`, `getExpressionsForField(activity,shape,field)`, `getShowCondition(...)`, `getDefaultExpression(...)`, `getWarningExpression(...)`, `getShapeSensitivity(ref)→String`, `getActivitySensitivity(name)→String`, `configVersion→int` |
 | `device_identity.dart` | Persists device_id, actor_id, device_seq, actor_token | `init()→Future<DeviceIdentity>`, `nextSeq()→Future<int>`, `get/set actorToken` |
+| `context_resolver.dart` | Phase 3d.3: resolves `context.*` properties at form-open (ADR-5 S8 / IDR-018 rule 4). Returns actor.role, actor.scope_name, event_count, days_since_last_event from local state; subject_state/subject_pattern/activity_stage as null (Phase 4 placeholders). | `resolve({subjectId, activityRef, now})→Future<Map<String,dynamic>>` |
 | `projection_engine.dart` | Subject list + detail from events; alias-aware, flag-excluding | `getSubjectList()→Future<List<SubjectSummary>>`, `getSubjectDetail(id)→Future<List<Event>>`, `getFlaggedEventIds()→Future<Set<String>>` |
 
 ### presentation/ — UI
 | File | Purpose |
 |------|---------|
-| `app_state.dart` | ChangeNotifier: subjects, assignments, sync status, pending count. Uses ConfigStore (not ConfigLoader). `refresh()`, `sync()` |
-| `screens/work_list_screen.dart` | Subject list, sync indicator, FAB. Config-driven shape selection (single→direct, multiple→dialog, none→message) |
-| `screens/subject_detail_screen.dart` | Event timeline with flags. Config-driven shape selection for capture action |
-| `screens/form_screen.dart` | Shape-driven form with expression evaluation. Show/hide (show_condition), computed defaults, conditional warnings. Re-evaluates on field change. Optional activityRef param. |
+| `app_state.dart` | ChangeNotifier: subjects, assignments, sync status, pending count. Holds ConfigStore + ContextResolver. `refresh()`, `sync()` |
+| `screens/work_list_screen.dart` | Subject list, sync indicator, FAB. Config-driven shape selection (single→direct, multiple→dialog, none→message). Threads `activityRef` into FormScreen (Phase 3d.1). |
+| `screens/subject_detail_screen.dart` | Event timeline with flags. Config-driven shape selection for capture action; threads `activityRef` into FormScreen (Phase 3d.1). |
+| `screens/form_screen.dart` | Shape-driven form with expression evaluation. Show/hide (show_condition), computed defaults, conditional warnings. Pre-resolves `context.*` via ContextResolver at form-open; merges into expression values map. Optional activityRef param (Phase 3d.1/3d.3). |
 | `widgets/sync_panel.dart` | Modal: sync trigger, last sync time, device ID |
 | `widgets/widget_mapper.dart` | Maps field type → Flutter widget. Types: text, integer, decimal, number, date, select, multi_select (chips), boolean, narrative (multiline), location, subject_ref. Optional warningMessage param for amber warning display. |
 
@@ -324,36 +335,40 @@ design/                            # formerly a git submodule — now inlined he
 
 ---
 
-## Test Classes — Server (157 tests)
+## Test Classes — Server (14 classes, 104 @Test methods; ~153 rows after parameterization)
 
-| Class | Tests | Module |
-|-------|-------|--------|
+| Class | @Test | Module |
+|-------|:-----:|--------|
+| `ConfigIntegrationTest` | 24 | Phase 3a/3b/3c: shape/activity/expression CRUD, config endpoint, payload validation, DtV publish gating, auth on config, config version tracking, full pipeline E2E |
+| `DeployTimeValidatorTest` | 15 | DtV L2: field refs, operator-type compat, predicate budget, nesting, default type match |
+| `ConflictResolutionIntegrationTest` | 9 | Resolve flags, manual identity conflicts |
 | `SyncControllerIntegrationTest` | 8 | Push/pull pipeline, pagination |
-| `MultiDeviceE2ETest` | 1 | Multi-device sync E2E |
 | `IdentityResolverIntegrationTest` | 8 | Merge/split, alias chains |
 | `ConflictDetectorIntegrationTest` | 8 | W_effective, stale_reference detection |
-| `ConflictResolutionIntegrationTest` | 9 | Resolve flags, manual identity conflicts |
-| `ProjectionEquivalenceTest` | 1 | Server/mobile projection parity (E7) |
-| `SubjectControllerIntegrationTest` | 3 | Subject REST, alias-aware queries |
-| `AuthFlagIntegrationTest` | 10 | Auth CD: scope_violation, temporal_authority, role_action_mismatch (G0.1-G0.4) |
-| `AdminFlagIntegrationTest` | 6 | Admin UI flag operations |
-| `MultiActorScopeIntegrationTest` | 7 | Multi-actor scope containment (S5) |
 | `ScopeFilteredSyncIntegrationTest` | 7 | IDR-015 scope-filtered pull |
-| `ConfigIntegrationTest` | 24 | Phase 3a/3b/3c: shape/activity/expression CRUD, config endpoint, payload validation, DtV publish gating, auth on config, config version tracking, full pipeline E2E |
-| `ExpressionEvaluatorTest` | 50 | Shared fixture-driven (E7): all IDR-018 operators, null handling, type coercion, logical ops |
-| `DeployTimeValidatorTest` | 15 | DtV L2: field refs, operator-type compat, predicate budget, nesting, default type match |
+| `MultiActorScopeIntegrationTest` | 7 | Multi-actor scope containment (S5) |
+| `AuthFlagIntegrationTest` | 6 | Auth CD: scope_violation, temporal_authority_expired, role_stale (NO role_action_mismatch — rolled back) |
+| `AdminFlagIntegrationTest` | 6 | Admin UI flag operations |
+| `SubjectControllerIntegrationTest` | 3 | Subject REST, alias-aware queries |
+| `ProjectionEquivalenceTest` | 1 | Server/mobile projection parity (E7) |
+| `MultiDeviceE2ETest` | 1 | Multi-device sync E2E |
+| `ExpressionEvaluatorTest` | 1 | Parameterized @MethodSource over 50 shared fixtures (E7) — all IDR-018 operators, null handling, type coercion, logical ops |
 
-## Test Classes — Mobile (54 tests)
+**Parameterized note**: `ExpressionEvaluatorTest` is a single `@Test`/`@ParameterizedTest` that expands to 50 runs via [fixtures/expression-evaluation.json](contracts/fixtures/expression-evaluation.json). That is why `./mvnw test` reports ~153 total runs vs. 104 `@Test` methods. The "157" number in older CLAUDE.md revisions came from Phase 4.0 before rollback — ignore.
+
+## Test Classes — Mobile (9 files, 67 tests)
 
 | File | Tests | Module |
-|------|-------|--------|
-| `event_test.dart` | — | Event model serialization |
-| `form_engine_test.dart` | 5+ | WidgetMapper: text, number, select, boolean, date fields |
-| `projection_engine_test.dart` | — | Subject list/detail projection |
-| `projection_equivalence_test.dart` | 6 | Server/mobile projection parity (E7) |
-| `selective_retain_test.dart` | — | Scope-based event purging |
-| `config_store_test.dart` | 19 | Config parse, shape lookup, activity→shapes, persistence round-trip, expression storage/retrieval, two-slot model (pending/current/promotion/restart) |
+|------|:-----:|--------|
+| `config_store_test.dart` | 23 | Config parse, shape lookup, activity→shapes, persistence round-trip, expression storage/retrieval, two-slot model (pending/current/promotion/restart), sensitivity classifications (Phase 3d.2) |
+| `projection_engine_test.dart` | 11 | Subject list/detail projection |
 | `expression_evaluator_test.dart` | 9 | Shared fixture-driven (E7, 50 cases) + individual operator unit tests |
+| `form_engine_test.dart` | 8 | WidgetMapper: text, number, select, boolean, date fields |
+| `context_resolver_test.dart` | 6 | Phase 3d.3: context.* pre-resolution — actor.role, actor.scope_name, event_count, days_since_last_event, Phase 4 null placeholders |
+| `selective_retain_test.dart` | 4 | Scope-based event purging |
+| `event_assembler_test.dart` | 3 | Phase 3d.1: activity_ref auto-population in assembled events |
+| `event_test.dart` | 2 | Event model serialization |
+| `projection_equivalence_test.dart` | 1 | Server/mobile projection parity (E7) |
 
 ---
 

@@ -8,17 +8,18 @@
 
 ## Current Phase
 
-**Phase 3: Configuration** — **COMPLETE**
+**Phase 3: Configuration** — **COMPLETE** (including 3d close-out)
 
 | Sub-phase | Status | Notes |
 |-----------|--------|-------|
 | **3a: Shapes + Config Delivery** | **Complete** | 80 server + 33 mobile tests. |
 | **3b: Expressions + DtV** | **Complete** | 148 server + 47 mobile tests. |
 | **3c: Config Packager + Full Pipeline** | **Complete** | 153 server + 54 mobile tests. |
+| **3d: Close-out** | **Complete** | 153 server + 67 mobile tests. activity_ref plumbing, sensitivity surface on device, ContextResolver. |
 
 **Phase 4: Workflow & Policies** — **NOT STARTED**
 
-Phase 4.0 (role-action enforcement) was drafted and rolled back — IDR-020 violated architecture rules (`docs/architecture/patterns.md`, `docs/exploration/28-pattern-inventory-walkthrough.md`). IDR-020 needs a rewrite before any Phase 4 implementation begins.
+Phase 4.0 (role-action enforcement) was drafted and rolled back — IDR-020 violated architecture rules (`docs/architecture/patterns.md`, `docs/exploration/28-pattern-inventory-walkthrough.md`). IDR-020 needs a rewrite before any Phase 4 implementation begins. See `docs/implementation/phases/phase-3d.md` §7 (Carried Debt) for the IDR-020 → IDR-021 → IDR-022 sequence.
 
 ### Previous Phases
 
@@ -30,6 +31,7 @@ Phase 4.0 (role-action enforcement) was drafted and rolled back — IDR-020 viol
 | **3a: Shapes + Config Delivery** | Complete | 80 server + 33 mobile |
 | **3b: Expressions + DtV** | Complete | 148 server + 47 mobile |
 | **3c: Config Packager + Full Pipeline** | Complete | 153 server + 54 mobile |
+| **3d: Close-out** | Complete | 153 server + 67 mobile |
 
 ---
 
