@@ -6,6 +6,8 @@ The implementation repository for the Datarun operations platform — a domain-a
 
 **Design docs**: `docs/` (previously a submodule, now tracked in this repo)
 
+**Before drafting an IDR or starting a new phase, read**: [`docs/flagged-positions.md`](docs/flagged-positions.md) — living register of deferred verification items. Rule R-4: items whose `Blocks:` field names your upcoming work must be resolved (or explicitly re-deferred with justification) before proceeding. Silent deferral is forbidden (Rule R-1).
+
 ---
 
 ## Current Phase
@@ -414,6 +416,7 @@ Canonical docs in `docs/`:
 | F12 | Change production semantics to fix a test | Tests adapt to production logic, never the reverse. If a test fails after a correct production change, fix the test fixture. |
 | F13 | Skip writing a test for the exact scenario that caused a bug | If a bug was caused by scenario X, there must be a test that fails without the fix and passes with it. |
 | F14 | Treat test scaffolding as a design input | Production code must be designed from domain rules, not from what makes tests pass. |
+| F15 | Silent deferral | If you observe a position that is "correct today but could drift under future work," you MUST add an entry to [`docs/flagged-positions.md`](docs/flagged-positions.md) before closing the phase. Trusting memory is the failure mode that produced the Phase 1/2 envelope-type drift. See Rule R-1 in the register. |
 
 ---
 

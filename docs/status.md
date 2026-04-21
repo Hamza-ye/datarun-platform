@@ -23,7 +23,19 @@ Phase 4.0 (role-action enforcement) was drafted and rolled back — IDR-020 viol
 
 ### Carried architectural debt — ADR-002 Addendum + Phase 3e retrofit
 
-A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four string literals (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) as envelope `type` values, contradicting ADR-4 S3's closed 6-type vocabulary. **The correction is recorded** in [ADR-002 Addendum — Envelope Type Mapping](adrs/adr-002-addendum-type-vocabulary.md): those four strings are internal **shape** names, not envelope types. The code retrofit is tracked as **Phase 3e** (spec pending) and must land before Phase 4 begins. Until then, `F2a`/`F2b` in [CLAUDE.md](../CLAUDE.md) forbid new code that keys on the drift strings.
+A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four string literals (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) as envelope `type` values, contradicting ADR-4 S3's closed 6-type vocabulary. **The correction is recorded** in [ADR-002 Addendum — Envelope Type Mapping](adrs/adr-002-addendum-type-vocabulary.md): those four strings are internal **shape** names, not envelope types. The code retrofit is tracked as **[Phase 3e](implementation/phases/phase-3e.md)** (specced 2026-04-21) and must land before Phase 4 begins. Until then, `F2a`/`F2b` in [CLAUDE.md](../CLAUDE.md) forbid new code that keys on the drift strings.
+
+### Flagged positions register (living)
+
+[`docs/flagged-positions.md`](flagged-positions.md) — deferred verification items and quiet positions that must not be forgotten. Open items as of 2026-04-21:
+
+| FP# | Item | Blocks | Severity |
+|-----|------|--------|:--------:|
+| FP-001 | `role_stale` projection-derived role verification | IDR-021 | A |
+| FP-002 | `subject_lifecycle` table read-discipline audit | Phase 4 | B |
+| FP-003 | Envelope schema parity test | Phase 3e.5 (in-progress) | C |
+
+**Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
 
 ### Previous Phases
 
