@@ -63,8 +63,8 @@ else
             if [[ "$adr_id" != *"-R"* ]] && grep -q '^Superseded-By:' "$adr_file"; then
                 fail "charter cites $cite but $adr_file is Superseded-By another ADR (use the -R replacement)"
             fi
-            # ADR must be DECIDED
-            if ! grep -qE '^Status:\s*DECIDED' "$adr_file"; then
+            # ADR must be DECIDED (accept plain or markdown-decorated blockquote form)
+            if ! grep -qiE '^>?\s*Status:\s*\*{0,2}decided\*{0,2}' "$adr_file"; then
                 fail "charter cites $cite but $adr_file is not Status: DECIDED"
             fi
         done <<< "$cites"
@@ -87,7 +87,7 @@ else
             adr_file=$(ls docs/adrs/adr-${adr_num}*.md 2>/dev/null | head -1 || true)
             if [[ -z "$adr_file" ]]; then
                 fail "ledger cites $adr_id but no matching adr file in docs/adrs/"
-            elif ! grep -qE '^Status:\s*DECIDED' "$adr_file"; then
+            elif ! grep -qiE '^>?\s*Status:\s*\*{0,2}decided\*{0,2}' "$adr_file"; then
                 fail "ledger cites $adr_id but $adr_file is not Status: DECIDED"
             fi
         done <<< "$ledger_cites"
