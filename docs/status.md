@@ -2,22 +2,23 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-04-20
+**Last updated**: 2026-04-21
 
 ---
 
 ## Current Phase
 
-**Phase 4: Workflow & Policies** — **IN PROGRESS** (4.0 complete)
+**Phase 3: Configuration** — **COMPLETE**
 
 | Sub-phase | Status | Notes |
 |-----------|--------|-------|
-| **4.0: Role-Action Enforcement** | **Complete** | 157 server + 54 mobile tests. Whitelist model: ConflictDetector checks actor role against activity.roles matrix, flags scope_violation with "Role-action mismatch" reason. 4 quality gate tests (G0.1–G0.4). |
-| **4a: Patterns** | Not started | Vertical slice with capture_with_review. IDR-020 DECIDED. |
-| **4b: Triggers** | Not started | |
-| **4c: CV + E2E** | Not started | |
+| **3a: Shapes + Config Delivery** | **Complete** | 80 server + 33 mobile tests. |
+| **3b: Expressions + DtV** | **Complete** | 148 server + 47 mobile tests. |
+| **3c: Config Packager + Full Pipeline** | **Complete** | 153 server + 54 mobile tests. |
 
-**Deferred from 4.0 → 4a**: Mobile UI gating (WorkListScreen shape filtering + FormScreen action filtering by actor role). Server enforces via accept-and-flag; mobile filtering is presentation-only, natural fit with 4a's pattern-driven UI rework.
+**Phase 4: Workflow & Policies** — **NOT STARTED**
+
+Phase 4.0 (role-action enforcement) was drafted and rolled back — IDR-020 violated architecture rules (`docs/architecture/patterns.md`, `docs/exploration/28-pattern-inventory-walkthrough.md`). IDR-020 needs a rewrite before any Phase 4 implementation begins.
 
 ### Previous Phases
 
@@ -29,7 +30,6 @@
 | **3a: Shapes + Config Delivery** | Complete | 80 server + 33 mobile |
 | **3b: Expressions + DtV** | Complete | 148 server + 47 mobile |
 | **3c: Config Packager + Full Pipeline** | Complete | 153 server + 54 mobile |
-| **4.0: Role-Action Enforcement** | Complete | 157 server + 54 mobile |
 
 ---
 
@@ -60,16 +60,15 @@
 
 ## What's Next
 
-**Phase 4a: Patterns** — vertical slice with `capture_with_review` pattern (IDR-020 DECIDED).
+**Phase 4: Workflow & Policies** — next phase. Requires IDR-020 rewrite first.
+
+- IDR-020 (Pattern State Machine Representation) must be rewritten grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md` before any Phase 4 code begins.
+- Phase spec: `docs/implementation/phases/phase-4.md` (once written)
 
 ### Test Debt (carried from Phase 3)
 - Multi-version PE fixture
 - activity_ref auto-population
 - Widget-level form tests
-
-### Deferred Items
-- Mobile UI gating by role (deferred from 4.0 → 4a)
-- Performance benchmark (tracked since Phase 3 boundary)
 
 ---
 
@@ -83,5 +82,5 @@ _(None)_
 
 | Decision | Status | Reference |
 |----------|--------|-----------|
-| IDR-020: Pattern State Machine Representation | DECIDED | `design/docs/decisions/idr-020-pattern-state-machine-representation.md` |
-| DD-2: Lock — needs IDR-021 (state change events) | OPEN | Phase 4 spec |
+| IDR-020: Pattern State Machine Representation | **NEEDS REWRITE** | `docs/decisions/idr-020-*.md` — does not exist yet, previous version violated architecture |
+| DD-2: Lock — needs IDR-020 first | OPEN | Phase 4 spec |
