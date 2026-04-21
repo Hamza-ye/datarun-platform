@@ -68,6 +68,14 @@ knob, derived value, reserved/deferred item) has exactly one row.
   - ALGORITHM: 49, CONFIG: 42, PRIMITIVE: 39, DERIVED: 33, INVARIANT: 32, CONTRACT: 29
   - FLAG: 15, OPEN: 13, DISPUTED: 9, RESERVED: 8
 - Size note: target was 150–200 unique concepts. Actual 269 reflects that the platform's ADR stress-tests (archive/ 00–21) introduce many named micro-concepts (anti-patterns, composition rules, trap names). Phase 1 topological sort will likely reveal synonyms to merge (`role-stale`/`role-staleness`, `scope-stale`/`scope-violation`, `workflow-pattern`/`pattern`). Do not prune pre-sort.
+
+**Archive-harvest companion (round 0.5)** — the 9 DISPUTED rows were back-filled with targeted readings of `exploration/archive/` stress-tests at the authority order established 2026-04-22 (root docs > ADRs > archive > architecture). Findings in [disputes-harvest.md](inventory/disputes-harvest.md):
+
+- **Cross-cutting finding**: all 9 disputes share one structure — platform-fixed mechanism + deployer-configured instance. A single classification is lossy by construction; the `notes` column records the subordinate reading. Phase 2 may collapse to 2–4 ADRs (one on the duality itself, a few per-concept).
+- **Likely already-settled**: `conflict-detected` (CONTRACT per ADR-002 Addendum — should be STABLE by round 1).
+- **Subagent artifacts, not real disputes**: `actor-ref` and `activity-ref` `RESERVED` readings have no archive evidence. Recommend CONTRACT in Phase 2.
+- **Category errors**: `subject-ref` dispute dissolves once the referent (PRIMITIVE subject) is separated from the reference (CONTRACT field).
+- **Genuine architecture-level**: `scope`/`pattern`/`activity` share the duality and will drive the Phase 2 cross-cutting ADR.
 - Top 10 DISPUTED concepts (Phase 2 ADR priority queue):
   - `accept-and-flag`: A:ALGORITHM, B:INVARIANT, C1:ALGORITHM, C2:ALGORITHM — ambiguity between "the invariant that we never reject" and "the algorithm for detect+append"
   - `activity`: A:PRIMITIVE, C1:CONFIG
@@ -84,12 +92,12 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 
 | concept | classification | settled-by | status | introduced-in | history | notes |
 |---|---|---|---|---|---|---|
-| accept-and-flag | DISPUTED | — | OPEN | ADR-002 | round 0: DISPUTED (A:ALGORITHM, B:INVARIANT, C1:ALGORITHM, C2:ALGORITHM) | 3 sources ALGORITHM, 1 source INVARIANT |
+| accept-and-flag | DISPUTED | — | OPEN | ADR-002 | round 0: DISPUTED (A:ALGORITHM, B:INVARIANT, C1:ALGORITHM, C2:ALGORITHM) | 3 sources ALGORITHM, 1 INVARIANT. Harvest: the property is INVARIANT (ADR-002 S14 / archive-09 Q12); the detection procedure is ALGORITHM (conflict-detection, separate row). Recommend: INVARIANT. See [disputes-harvest.md §Group-1](inventory/disputes-harvest.md) |
 | active-assignment | DERIVED | — | PROPOSED | phases/phase-2.md | round 0: DERIVED (inventory) | — |
-| activity | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:PRIMITIVE, C1:CONFIG) | also referenced in L0-assembly context |
-| activity-ref | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT) | — |
+| activity | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:PRIMITIVE, C1:CONFIG) | Harvest: deployer-bundled L0 assembly (shape+pattern+role+scope). Archive 13 Q11 framed as config. Recommend: CONFIG (activity-ref stays CONTRACT). See [disputes-harvest.md §Group-3](inventory/disputes-harvest.md) |
+| activity-ref | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT) | Harvest: fully live (Phase 3d.1). Subagent B RESERVED framing is artifact, no archive evidence. Recommend: CONTRACT. See [disputes-harvest.md §Group-2](inventory/disputes-harvest.md) |
 | actor | INVARIANT | — | PROPOSED | adr-002-identity-conflict.md | round 0: INVARIANT (inventory) | persistent identity category |
-| actor-ref | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT) | — |
+| actor-ref | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT) | Harvest: human UUID + `system:{component}/{id}` both live (ADR-004 S4, Archive 16/18). Recommend: CONTRACT. See [disputes-harvest.md §Group-2](inventory/disputes-harvest.md) |
 | actor-token | CONTRACT | — | PROPOSED | phases/phase-2.md | round 0: CONTRACT (inventory) | — |
 | alias-cache | DERIVED | — | PROPOSED | phases/phase-1.md | round 0: DERIVED (inventory) | in-memory map for merge resolution |
 | alias-mapping | DERIVED | — | PROPOSED | adr-002-identity-conflict.md | round 0: DERIVED (inventory) | merge resolution projection |
@@ -131,7 +139,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | configuration-delivery-pipeline | ALGORITHM | — | PROPOSED | adr-004-configuration-boundary.md | round 0: ALGORITHM (inventory) | author→validate→package→deliver→apply |
 | configuration-specialist-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
 | conflict | FLAG | — | PROPOSED | ADR-001 | round 0: FLAG (inventory) | anomaly for resolution |
-| conflict-detected | DISPUTED | — | OPEN | ADR-002 | round 0: DISPUTED (A:CONTRACT, B:SHAPE→CONTRACT, C1:CONFIG, C2:PRIMITIVE) | platform-bundled shape, not envelope type (ADR-002 Addendum) |
+| conflict-detected | DISPUTED | — | OPEN | ADR-002 | round 0: DISPUTED (A:CONTRACT, B:SHAPE→CONTRACT, C1:CONFIG, C2:PRIMITIVE) | Harvest: already settled by ADR-002 Addendum (2026-04-21) as platform-bundled shape. Dispute = un-migrated prose layers. Recommend: CONTRACT, resolve to STABLE round 1. See [disputes-harvest.md §Group-1](inventory/disputes-harvest.md) |
 | conflict-detection | ALGORITHM | — | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory) | process raising flags |
 | conflict-detector | PRIMITIVE | — | PROPOSED | adr-002-identity-conflict.md | round 0: PRIMITIVE (inventory) | evaluates anomalies |
 | conflict-resolution | ALGORITHM | — | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory) | ConflictResolved workflow |
@@ -182,7 +190,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | field-budget | INVARIANT | — | PROPOSED | ADR-004 S10 | round 0: INVARIANT (inventory) | 60-field limit per shape |
 | field-reference | CONTRACT | — | PROPOSED | ADR-004 S8 | round 0: CONTRACT (inventory) | expression component |
 | filter-predicate | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | boolean condition in expression |
-| flag | DISPUTED | — | OPEN | ADR-001 | round 0: DISPUTED (B:DERIVED, C1:INVARIANT, C2:PRIMITIVE) | anomaly surfacing |
+| flag | DISPUTED | — | OPEN | ADR-001 | round 0: DISPUTED (B:DERIVED, C1:INVARIANT, C2:PRIMITIVE) | Harvest: all 3 readings true at different levels (invariant-property / derived-instance / primitive-category). Archive 09 Q12 locks INVARIANT. Recommend: INVARIANT; delegate DERIVED to `conflict-detector`, PRIMITIVE to `alert`/`type-vocabulary`. See [disputes-harvest.md §Group-1](inventory/disputes-harvest.md) |
 | flag-cascade-contamination | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | projection property |
 | flag-catalog | CONTRACT | — | PROPOSED | flag-catalog.md | round 0: CONTRACT (inventory) | 9-category register |
 | flag-category | CONTRACT | — | PROPOSED | conflict_detected.schema.json | round 0: CONTRACT (inventory) | enumerated anomaly type |
@@ -239,7 +247,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | operator-type-compatibility | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | DtV rule |
 | order-independent-sync | INVARIANT | — | PROPOSED | adr-001-offline-data-model.md | round 0: INVARIANT (inventory) | events carry ordering metadata |
 | overlapping-authority-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
-| pattern | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:PRIMITIVE, B:CONFIG, C2:PRIMITIVE) | workflow template — primitive or deployer knob? |
+| pattern | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:PRIMITIVE, B:CONFIG, C2:PRIMITIVE) | Harvest: ADR-005 S5 — closed registry, deployer-referenced, not deployer-authored. Recommend: PRIMITIVE (consistent with `pattern-registry`). Parameters stay CONFIG. See [disputes-harvest.md §Group-3](inventory/disputes-harvest.md) |
 | pattern-composition | ALGORITHM | — | PROPOSED | ADR-005 Session 2 | round 0: ALGORITHM (inventory) | composition rules |
 | pattern-composition-rule | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | 5 interaction rules |
 | pattern-registry | PRIMITIVE | — | PROPOSED | ADR-005 Session 1 | round 0: PRIMITIVE (inventory) | platform-fixed workflows |
@@ -276,7 +284,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | s00 | RESERVED | — | PROPOSED | principles.md | round 0: RESERVED (inventory) | simplicity benchmark |
 | schema-evolution-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
 | schema-versioning | CONFIG | — | PROPOSED | ADR-004 S6 | round 0: CONFIG (inventory) | shape_name/v{N} format |
-| scope | DISPUTED | — | OPEN | ADR-003 | round 0: DISPUTED (C1:PRIMITIVE, C2:CONFIG) | authorization boundary |
+| scope | DISPUTED | — | OPEN | ADR-003 | round 0: DISPUTED (C1:PRIMITIVE, C2:CONFIG) | Harvest: root-docs (authority) frames PRIMITIVE (P6, access-control-scenario §33). ADR-004 S7 closes scope-type registry but scope model stays platform-fixed. Recommend: PRIMITIVE; scope-type/composition stay CONFIG. See [disputes-harvest.md §Group-3](inventory/disputes-harvest.md) |
 | scope-composition | CONFIG | — | PROPOSED | adr-003-authorization-sync.md | round 0: CONFIG (inventory) | combining scope types |
 | scope-containment | ALGORITHM | — | PROPOSED | ADR-003 S5 | round 0: ALGORITHM (inventory) | access control test |
 | scope-containment-invariant | INVARIANT | — | PROPOSED | ADR-003 S5 | round 0: INVARIANT (inventory) | foundational rule |
@@ -320,7 +328,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | subject-level-pattern | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | subject-scoped workflow |
 | subject-level-state | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | lifecycle projection |
 | subject-list-scope | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | explicit subject type |
-| subject-ref | DISPUTED | — | OPEN | ADR-001 | round 0: DISPUTED (A:PRIMITIVE, C1:CONTRACT, C2:PRIMITIVE) | identity reference |
+| subject-ref | DISPUTED | — | OPEN | ADR-001 | round 0: DISPUTED (A:PRIMITIVE, C1:CONTRACT, C2:PRIMITIVE) | Harvest: category error — `subject` is PRIMITIVE, `subject_ref` is the CONTRACT by which events reference subjects. Reserved `process` type in enum is separate row. Recommend: CONTRACT. See [disputes-harvest.md §Group-2](inventory/disputes-harvest.md) |
 | subject-split | CONTRACT | — | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory) | platform-bundled shape |
 | subjects-merged | CONTRACT | — | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory) | platform-bundled shape |
 | sync-contract | CONTRACT | — | PROPOSED | raw-B | round 0: CONTRACT (inventory) | 8 guarantees |
