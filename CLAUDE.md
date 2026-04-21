@@ -403,7 +403,9 @@ Canonical docs in `docs/`:
 | # | Forbidden | Why |
 | --- | --- | --- |
 | F1 | Add or modify envelope fields | Envelope finalized at 11 fields. ADR-level decision. |
-| F2 | Create new event types | Type vocabulary is platform-fixed, closed, append-only. |
+| F2 | Create new envelope `type` values | Envelope type vocabulary is locked at **6 values** by ADR-4 S3: `capture`, `review`, `alert`, `task_created`, `task_completed`, `assignment_changed`. If you think you need a 7th, you need a new **shape**, not a new type. See [ADR-002 Addendum](docs/adrs/adr-002-addendum-type-vocabulary.md). |
+| F2a | Filter code on `type == "conflict_detected"` / `conflict_resolved` / `subjects_merged` / `subject_split` | These are **shape names**, not envelope types (per ADR-002 Addendum, 2026-04-21). Filter on `shape_ref` prefix instead. Any code or test that keys integrity-event discrimination off `type` is wrong. |
+| F2b | Encode authorship in envelope `type` | `type` answers "what pipeline"; `actor_ref` answers "who authored". `conflict_resolved/v1` spans `type=review` (human) and `type=capture` (`system:auto_resolution/*`) — discriminate on actor, never add a new type. |
 | F3 | Write to events table outside Event Store module | Write-path discipline. |
 | F4 | Modify or delete persisted events | Append-only is the foundational invariant. |
 | F5 | Skip contract tests | Contract tests are the backbone of system correctness. |

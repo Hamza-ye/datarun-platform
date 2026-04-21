@@ -21,6 +21,10 @@
 
 Phase 4.0 (role-action enforcement) was drafted and rolled back — IDR-020 violated architecture rules (`docs/architecture/patterns.md`, `docs/exploration/28-pattern-inventory-walkthrough.md`). IDR-020 needs a rewrite before any Phase 4 implementation begins. See `docs/implementation/phases/phase-3d.md` §7 (Carried Debt) for the IDR-020 → IDR-021 → IDR-022 sequence.
 
+### Carried architectural debt — ADR-002 Addendum + Phase 3e retrofit
+
+A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four string literals (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) as envelope `type` values, contradicting ADR-4 S3's closed 6-type vocabulary. **The correction is recorded** in [ADR-002 Addendum — Envelope Type Mapping](adrs/adr-002-addendum-type-vocabulary.md): those four strings are internal **shape** names, not envelope types. The code retrofit is tracked as **Phase 3e** (spec pending) and must land before Phase 4 begins. Until then, `F2a`/`F2b` in [CLAUDE.md](../CLAUDE.md) forbid new code that keys on the drift strings.
+
 ### Previous Phases
 
 | Phase | Status | Tests |

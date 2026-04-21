@@ -3,6 +3,7 @@
 > Status: **Decided**
 > Date: 2026-04-10
 > Exploration: [Reading Guide](../exploration/guide-adr-002.md) · Raw: [05](../exploration/archive/05-adr2-event-storm-identity.md) (Phase 1), [07](../exploration/archive/07-adr2-phase2-stress-test-results.md) (Phase 2), [09](../exploration/archive/09-adr2-phase3-classification-results.md) (Phase 3)
+> **Addendum (2026-04-21)**: [Envelope Type Mapping for Identity and Integrity Events](adr-002-addendum-type-vocabulary.md) — binding. Read before writing or modifying any code that touches `conflict_detected`, `conflict_resolved`, `subjects_merged`, or `subject_split`.
 
 ---
 
