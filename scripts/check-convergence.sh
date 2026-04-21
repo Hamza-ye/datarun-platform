@@ -77,8 +77,13 @@ echo "[2/3] concept-ledger.md settled-by cites"
 if [[ ! -f docs/convergence/concept-ledger.md ]]; then
     fail "docs/convergence/concept-ledger.md missing"
 else
-    # Rough cite extraction from ledger table cells; ignore the dash placeholder
-    ledger_cites=$(grep -oE 'ADR-[0-9]+(-R[0-9]*)?' docs/convergence/concept-ledger.md | sort -u || true)
+    # Extract settled-by cites only. Per ledger schema, settled-by is formatted
+    # as `ADR-NNN §X` — the `§` anchor distinguishes real cites from prose
+    # references (e.g. Phase 1 queue entries naming ADR-006..009 in summary).
+    # Restrict to `|`-delimited table rows to further avoid prose matches.
+    ledger_cites=$(grep -E '^\|' docs/convergence/concept-ledger.md | \
+                   grep -oE 'ADR-[0-9]+(-R[0-9]*)? §' | \
+                   grep -oE 'ADR-[0-9]+(-R[0-9]*)?' | sort -u || true)
     if [[ -z "$ledger_cites" ]]; then
         report "ledger has no ADR cites yet (expected during Phase 0)"
     else

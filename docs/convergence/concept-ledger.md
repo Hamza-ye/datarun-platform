@@ -69,6 +69,15 @@ knob, derived value, reserved/deferred item) has exactly one row.
   - FLAG: 15, OPEN: 13, DISPUTED: 9, RESERVED: 8
 - Size note: target was 150–200 unique concepts. Actual 269 reflects that the platform's ADR stress-tests (archive/ 00–21) introduce many named micro-concepts (anti-patterns, composition rules, trap names). Phase 1 topological sort will likely reveal synonyms to merge (`role-stale`/`role-staleness`, `scope-stale`/`scope-violation`, `workflow-pattern`/`pattern`). Do not prune pre-sort.
 
+**Phase 1 topological sort (round 0, finalized)** — 22 OPEN rows triaged into four action buckets in [phase-1-topology.md](inventory/phase-1-topology.md):
+
+- **Bucket A (10 rows) → OBSOLETE** in Phase 2: 7 anti-pattern alerts + 3 convergence-process steps. Not platform concepts.
+- **Bucket B (1 row) → DEFERRED** to Phase 4: `sensitive-subject-classification`.
+- **Bucket C (10 rows) → 4-ADR queue**: ADR-006 (flag semantics) → ADR-007 (envelope type closure / conflict-detected) → ADR-008 (envelope ref fields) → ADR-009 (platform-fixed vs deployer-configured duality).
+- **Bucket D (1 row) → IDR**: `projection-rebuild-strategy` (implementation-grade, not ADR-authority).
+
+Status changes enacted in Phase 2 when each ADR commits. Ledger rows remain OPEN in round 0. See topology doc for ordering rationale, upstream deps, expected supersessions (ADR-002 → ADR-002-R, ADR-004 partial supersede by ADR-009), and origin-layer source weighting.
+
 **Archive-harvest companion (round 0.5)** — the 9 DISPUTED rows were back-filled with targeted readings of `exploration/archive/` stress-tests at the authority order established 2026-04-22 (root docs > ADRs > archive > architecture). Findings in [disputes-harvest.md](inventory/disputes-harvest.md):
 
 - **Cross-cutting finding**: all 9 disputes share one structure — platform-fixed mechanism + deployer-configured instance. A single classification is lossy by construction; the `notes` column records the subordinate reading. Phase 2 may collapse to 2–4 ADRs (one on the duality itself, a few per-concept).
