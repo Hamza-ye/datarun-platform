@@ -69,6 +69,8 @@ knob, derived value, reserved/deferred item) has exactly one row.
   - FLAG: 15, OPEN: 13, DISPUTED: 9, RESERVED: 8
 - Size note: target was 150–200 unique concepts. Actual 269 reflects that the platform's ADR stress-tests (archive/ 00–21) introduce many named micro-concepts (anti-patterns, composition rules, trap names). Phase 1 topological sort will likely reveal synonyms to merge (`role-stale`/`role-staleness`, `scope-stale`/`scope-violation`, `workflow-pattern`/`pattern`). Do not prune pre-sort.
 
+**Phase 2 round 1 — ADR-006 landed (2026-04-22)**: flag semantics. Settles `accept-and-flag` (INVARIANT), `flag` (INVARIANT), `flag-creation-location` (INVARIANT), `conflict-detection` (ALGORITHM confirmed). Dedupes `role-staleness` → OBSOLETE (canonical `role-stale`). Sweeps 7 flag-catalog rows with class-membership cite. No supersessions (ADR-002 S14 refined, not replaced). Next: ADR-007.
+
 **Phase 1 topological sort (round 0, finalized)** — 22 OPEN rows triaged into four action buckets in [phase-1-topology.md](inventory/phase-1-topology.md):
 
 - **Bucket A (10 rows) → OBSOLETE** in Phase 2: 7 anti-pattern alerts + 3 convergence-process steps. Not platform concepts.
@@ -101,7 +103,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 
 | concept | classification | settled-by | status | introduced-in | history | notes |
 |---|---|---|---|---|---|---|
-| accept-and-flag | DISPUTED | — | OPEN | ADR-002 | round 0: DISPUTED (A:ALGORITHM, B:INVARIANT, C1:ALGORITHM, C2:ALGORITHM) | 3 sources ALGORITHM, 1 INVARIANT. Harvest: the property is INVARIANT (ADR-002 S14 / archive-09 Q12); the detection procedure is ALGORITHM (conflict-detection, separate row). Recommend: INVARIANT. See [disputes-harvest.md §Group-1](inventory/disputes-harvest.md) |
+| accept-and-flag | INVARIANT | ADR-006 §S1 | PROPOSED | ADR-002 | round 0: DISPUTED (A:ALGORITHM, B:INVARIANT, C1:ALGORITHM, C2:ALGORITHM); round 1: INVARIANT (ADR-006 §S1) | Property vs. procedure split: property is INVARIANT (this row), procedure lives at `conflict-detection` (ALGORITHM). Canonical over prior ADR-002 S14 cite. |
 | active-assignment | DERIVED | — | PROPOSED | phases/phase-2.md | round 0: DERIVED (inventory) | — |
 | activity | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:PRIMITIVE, C1:CONFIG) | Harvest: deployer-bundled L0 assembly (shape+pattern+role+scope). Archive 13 Q11 framed as config. Recommend: CONFIG (activity-ref stays CONTRACT). See [disputes-harvest.md §Group-3](inventory/disputes-harvest.md) |
 | activity-ref | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT) | Harvest: fully live (Phase 3d.1). Subagent B RESERVED framing is artifact, no archive evidence. Recommend: CONTRACT. See [disputes-harvest.md §Group-2](inventory/disputes-harvest.md) |
@@ -139,7 +141,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | competing-patterns | INVARIANT | — | PROPOSED | phases/phase-4.md | round 0: INVARIANT (inventory) | composition rule 5 |
 | complex-composition | ALGORITHM | — | PROPOSED | ADR-005 Session 2 | round 0: ALGORITHM (inventory) | multi-pattern on same subject |
 | composition-rule | CONTRACT | — | PROPOSED | phases/phase-4.md | round 0: CONTRACT (inventory) | 5 pattern interaction rules |
-| concurrent-state-change | FLAG | — | PROPOSED | ADR-002 S7 | round 0: FLAG (inventory) | structural conflict |
+| concurrent-state-change | FLAG | ADR-006 §S2 | PROPOSED | ADR-002 S7 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | structural conflict |
 | config-gradient | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | four-layer configuration model |
 | config-package | CONTRACT | — | PROPOSED | phases/phase-3.md | round 0: CONTRACT (inventory) | atomic delivery structure |
 | config-packager | PRIMITIVE | — | PROPOSED | adr-004-configuration-boundary.md | round 0: PRIMITIVE (inventory) | assembles atomic deliverable |
@@ -149,7 +151,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | configuration-specialist-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
 | conflict | FLAG | — | PROPOSED | ADR-001 | round 0: FLAG (inventory) | anomaly for resolution |
 | conflict-detected | DISPUTED | — | OPEN | ADR-002 | round 0: DISPUTED (A:CONTRACT, B:SHAPE→CONTRACT, C1:CONFIG, C2:PRIMITIVE) | Harvest: already settled by ADR-002 Addendum (2026-04-21) as platform-bundled shape. Dispute = un-migrated prose layers. Recommend: CONTRACT, resolve to STABLE round 1. See [disputes-harvest.md §Group-1](inventory/disputes-harvest.md) |
-| conflict-detection | ALGORITHM | — | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory) | process raising flags |
+| conflict-detection | ALGORITHM | ADR-006 §S3 | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory); round 1: ALGORITHM confirmed (ADR-006 §S3) | Procedure that enforces the §S1 invariant. Extensible/relocatable without changing the invariant. |
 | conflict-detector | PRIMITIVE | — | PROPOSED | adr-002-identity-conflict.md | round 0: PRIMITIVE (inventory) | evaluates anomalies |
 | conflict-resolution | ALGORITHM | — | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory) | ConflictResolved workflow |
 | conflict-resolved | CONTRACT | — | PROPOSED | ADR-002 | round 0: CONTRACT (inventory) | platform-bundled shape |
@@ -177,7 +179,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | device-sharing | RESERVED | — | DEFERRED | phases/phase-2.md | round 0: DEFERRED (inventory) | per-actor sync sessions (IG-14) |
 | device-time | INVARIANT | — | PROPOSED | ADR-001 S5 | round 0: INVARIANT (inventory) | advisory-only timestamp |
 | domain-uniqueness-constraint | CONFIG | — | PROPOSED | ADR-004 Session 3 Part 4 | round 0: CONFIG (inventory) | deployer-defined rule |
-| domain-uniqueness-violation | FLAG | — | PROPOSED | ADR-004 Session 3 Part 4 | round 0: FLAG (inventory) | flag category (entry 7) |
+| domain-uniqueness-violation | FLAG | ADR-006 §S2 | DEFERRED | ADR-004 Session 3 Part 4 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | flag category (entry 7); emission deferred to Phase 4 per flag-catalog |
 | draft-config | DERIVED | — | PROPOSED | phases/phase-3.md | round 0: DERIVED (inventory) | pending package on device |
 | duplicate-candidate-identified | FLAG | — | PROPOSED | ADR-002 S9 | round 0: FLAG (inventory) | merge nomination event |
 | entity-lifecycle | PRIMITIVE | — | PROPOSED | ADR-005 Session 2 | round 0: PRIMITIVE (inventory) | pattern for static entities |
@@ -199,11 +201,11 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | field-budget | INVARIANT | — | PROPOSED | ADR-004 S10 | round 0: INVARIANT (inventory) | 60-field limit per shape |
 | field-reference | CONTRACT | — | PROPOSED | ADR-004 S8 | round 0: CONTRACT (inventory) | expression component |
 | filter-predicate | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | boolean condition in expression |
-| flag | DISPUTED | — | OPEN | ADR-001 | round 0: DISPUTED (B:DERIVED, C1:INVARIANT, C2:PRIMITIVE) | Harvest: all 3 readings true at different levels (invariant-property / derived-instance / primitive-category). Archive 09 Q12 locks INVARIANT. Recommend: INVARIANT; delegate DERIVED to `conflict-detector`, PRIMITIVE to `alert`/`type-vocabulary`. See [disputes-harvest.md §Group-1](inventory/disputes-harvest.md) |
+| flag | INVARIANT | ADR-006 §S2 | PROPOSED | ADR-001 | round 0: DISPUTED (B:DERIVED, C1:INVARIANT, C2:PRIMITIVE); round 1: INVARIANT (ADR-006 §S2) | Class is INVARIANT (coverage commitment); instances are DERIVED (produced by conflict-detection); members of the class are CONFIG flag-catalog rows. |
 | flag-cascade-contamination | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | projection property |
 | flag-catalog | CONTRACT | — | PROPOSED | flag-catalog.md | round 0: CONTRACT (inventory) | 9-category register |
 | flag-category | CONTRACT | — | PROPOSED | conflict_detected.schema.json | round 0: CONTRACT (inventory) | enumerated anomaly type |
-| flag-creation-location | OPEN | — | OPEN | raw-B | round 0: OPEN (inventory) | server vs device decision |
+| flag-creation-location | INVARIANT | ADR-006 §S4 | PROPOSED | raw-B | round 0: OPEN (inventory); round 1: INVARIANT (ADR-006 §S4) | Server-side by default; additively evolvable to device. Canonicalizes `architecture/boundary.md §SG-1`. |
 | flag-exclusion | ALGORITHM | — | PROPOSED | phases/phase-1.md | round 0: ALGORITHM (inventory) | flagged from state derivation |
 | flag-resolvability-classification | DERIVED | — | PROPOSED | raw-B | round 0: DERIVED (inventory) | auto_eligible vs manual_only |
 | flag-severity | CONFIG | — | PROPOSED | phases/phase-4.md | round 0: CONFIG (inventory) | blocking vs informational |
@@ -288,8 +290,8 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | role-action-enforcement | ALGORITHM | — | PROPOSED | phases/phase-4.md | round 0: ALGORITHM (inventory) | IDR-021 implementation |
 | role-action-permission | CONFIG | — | PROPOSED | ADR-003 S8 | round 0: CONFIG (inventory) | role×action matrix |
 | role-action-table | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | deployer matrix |
-| role-stale | FLAG | — | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory) | role changed flag |
-| role-staleness | FLAG | — | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory) | synonym of role-stale (dedupe in Phase 2) |
+| role-stale | FLAG | ADR-006 §S2 | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | role changed flag; canonical over `role-staleness` (OBSOLETE) |
+| role-staleness | OBSOLETE | ADR-006 §Consequences | OBSOLETE | ADR-003 S7 | round 0: FLAG (inventory); round 1: OBSOLETE (ADR-006 §Consequences) | Synonym of `role-stale` — deduped in ADR-006. Row retained for traceability per ledger rule 5. |
 | s00 | RESERVED | — | PROPOSED | principles.md | round 0: RESERVED (inventory) | simplicity benchmark |
 | schema-evolution-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
 | schema-versioning | CONFIG | — | PROPOSED | ADR-004 S6 | round 0: CONFIG (inventory) | shape_name/v{N} format |
@@ -304,7 +306,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | scope-stale | FLAG | — | PROPOSED | raw-B | round 0: FLAG (inventory) | alt name for scope_violation |
 | scope-subject-based | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | explicit subject list |
 | scope-type | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | platform-fixed vocabulary |
-| scope-violation | FLAG | — | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory) | unauthorized access |
+| scope-violation | FLAG | ADR-006 §S2 | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | unauthorized access flag category |
 | selective-retain | ALGORITHM | — | PROPOSED | ADR-003 S6 | round 0: ALGORITHM (inventory) | device purge strategy |
 | sensitivity-classification | CONFIG | — | PROPOSED | phases/phase-3d.md | round 0: CONFIG (inventory) | shape/activity sensitivity |
 | sensitive-subject-classification | OPEN | — | OPEN | raw-B | round 0: OPEN (inventory) | subject-level dimension |
@@ -325,7 +327,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | split | ALGORITHM | — | PROPOSED | ADR-001 | round 0: ALGORITHM (inventory) | subject identity operation |
 | split-freezes-history | INVARIANT | — | PROPOSED | raw-B | round 0: INVARIANT (inventory) | source archival |
 | split-subject | ALGORITHM | — | PROPOSED | adr-002-identity-conflict.md | round 0: ALGORITHM (inventory) | online-only operation |
-| stale-reference | FLAG | — | PROPOSED | ADR-002 S8 | round 0: FLAG (inventory) | entity update lag |
+| stale-reference | FLAG | ADR-006 §S2 | PROPOSED | ADR-002 S8 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | entity update lag |
 | state-as-projection | ALGORITHM | — | PROPOSED | ADR-005 Session 1 | round 0: ALGORITHM (inventory) | derived from events |
 | state-machine | PRIMITIVE | — | PROPOSED | ADR-005 Session 1 | round 0: PRIMITIVE (inventory) | named states + transitions |
 | state-progression | ALGORITHM | — | PROPOSED | phases/phase-4.md | round 0: ALGORITHM (inventory) | work lifecycle |
@@ -350,11 +352,11 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | task-completed | CONTRACT | — | PROPOSED | ADR-004 | round 0: CONTRACT (inventory) | envelope type |
 | task-created | CONTRACT | — | PROPOSED | ADR-004 | round 0: CONTRACT (inventory) | envelope type |
 | temporal-access-bounds | CONFIG | — | PROPOSED | ADR-003 S4 | round 0: CONFIG (inventory) | valid_from/valid_until |
-| temporal-authority-expired | FLAG | — | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory) | assignment ended |
+| temporal-authority-expired | FLAG | ADR-006 §S2 | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | assignment ended |
 | three-tier-hierarchy | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | organizational structure |
 | transaction-boundary | ALGORITHM | — | PROPOSED | phases/phase-1.md | round 0: ALGORITHM (inventory) | 2-Tx pipeline |
 | transfer-with-acknowledgment | CONFIG | — | PROPOSED | ADR-005 Session 2 | round 0: CONFIG (inventory) | handoff pattern |
-| transition-violation | FLAG | — | PROPOSED | ADR-005 Session 1 | round 0: FLAG (inventory) | invalid state transition |
+| transition-violation | FLAG | ADR-006 §S2 | DEFERRED | ADR-005 Session 1 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | invalid state transition; emission deferred to Phase 4 per flag-catalog |
 | trigger | PRIMITIVE | — | PROPOSED | ADR-004 S7 | round 0: PRIMITIVE (inventory) | L3 reactive rule |
 | trigger-budget | CONFIG | — | PROPOSED | phases/phase-4.md | round 0: CONFIG (inventory) | hard complexity limits |
 | trigger-context | PRIMITIVE | — | PROPOSED | phases/phase-4.md | round 0: PRIMITIVE (inventory) | expression evaluation |

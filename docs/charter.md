@@ -11,9 +11,9 @@
 
 ## Status
 
-**Convergence phase**: 0 (drafting scaffolding, not yet inventoried)
+**Convergence phase**: 2 (ADR drafting — round 1 in progress)
 **Active code phase**: paused — code work resumes at Phase 4 freeze
-**Last ADR landed**: ADR-005 (pre-convergence; will be re-evaluated)
+**Last ADR landed**: ADR-006 (flag semantics)
 
 ---
 
@@ -21,10 +21,9 @@
 
 > One line per invariant. Each cites the ADR that established it.
 
-<!-- Populated incrementally as ADRs land in Phase 2. Example shape:
-- The event envelope has exactly N fields. (cite to owning ADR)
-- Events are append-only; never modified, never deleted. (cite to owning ADR)
--->
+- **Accept-and-flag.** A validly-structured event is never rejected for state-based reasons; state anomalies surface as flag events, never as rejections or modifications. ([ADR-006 §S1](adrs/adr-006-flag-semantics.md))
+- **Flag as sole anomaly surface.** Every state anomaly detected by the platform is represented as a flag event; the flag class is the only surface through which anomalies enter the event stream. ([ADR-006 §S2](adrs/adr-006-flag-semantics.md))
+- **Server-side flag creation (default).** Flags are created server-side during sync processing; device-side creation is additively evolvable. ([ADR-006 §S4](adrs/adr-006-flag-semantics.md))
 
 ---
 
