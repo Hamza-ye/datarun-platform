@@ -44,11 +44,19 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Clean config tables (reverse dependency order)
+        // Clean config tables (reverse dependency order).
+        // Platform-bundled shapes (conflict_detected/v1, conflict_resolved/v1,
+        // subjects_merged/v1, subject_split/v1) are part of the platform contract
+        // \u2014 they are registered at startup by PlatformShapeBootstrap and must not
+        // be wiped by deployer-scoped cleanup. Only deployer-owned shapes are cleared.
         jdbcTemplate.update("DELETE FROM config_packages");
         jdbcTemplate.update("DELETE FROM expression_rules");
         jdbcTemplate.update("DELETE FROM activities");
-        jdbcTemplate.update("DELETE FROM shapes");
+        jdbcTemplate.update("""
+                DELETE FROM shapes
+                WHERE name NOT IN ('conflict_detected','conflict_resolved',
+                                   'subjects_merged','subject_split')
+                """);
         // Clean event tables for sync tests
         jdbcTemplate.update("DELETE FROM events");
         jdbcTemplate.update("DELETE FROM device_sync_state");

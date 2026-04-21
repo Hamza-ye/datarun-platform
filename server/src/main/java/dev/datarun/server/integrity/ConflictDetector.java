@@ -78,8 +78,8 @@ public class ConflictDetector {
         List<Event> flagEvents = new ArrayList<>();
 
         for (Event event : acceptedEvents) {
-            // Only evaluate domain events (not system events)
-            if (isSystemEventType(event.type())) {
+            // Only evaluate domain events (not integrity/identity system events)
+            if (isIntegrityOrIdentityEvent(event)) {
                 continue;
             }
 
@@ -149,7 +149,7 @@ public class ConflictDetector {
                 .toList();
 
         for (Event event : acceptedEvents) {
-            if (isSystemEventType(event.type()) || isAssignmentEventType(event.type())) {
+            if (isIntegrityOrIdentityEvent(event) || isAssignmentEvent(event)) {
                 continue;
             }
 
@@ -281,12 +281,18 @@ public class ConflictDetector {
                        e.subject_ref->>'id' AS subject_id
                 FROM events e
                 WHERE e.sync_watermark > ?
-                  AND e.type NOT IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split')
+                  AND e.shape_ref NOT LIKE 'conflict_detected/%'
+                  AND e.shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND e.shape_ref NOT LIKE 'subjects_merged/%'
+                  AND e.shape_ref NOT LIKE 'subject_split/%'
                   AND EXISTS (
                       SELECT 1 FROM events e2
                       WHERE e2.subject_ref->>'id' = e.subject_ref->>'id'
                         AND e2.device_id != e.device_id
-                        AND e2.type NOT IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split')
+                        AND e2.shape_ref NOT LIKE 'conflict_detected/%'
+                        AND e2.shape_ref NOT LIKE 'conflict_resolved/%'
+                        AND e2.shape_ref NOT LIKE 'subjects_merged/%'
+                        AND e2.shape_ref NOT LIKE 'subject_split/%'
                   )
                 ORDER BY e.sync_watermark ASC
                 """,
@@ -327,24 +333,29 @@ public class ConflictDetector {
         subjectRef.put("type", "subject");
         subjectRef.put("id", subjectId.toString());
 
+        // System actor convention (ADR-002 Addendum F-A3): system:{component}/{identifier}.
+        // Component = detector module; identifier = the specific flag category this invocation raised.
         ObjectNode actorRef = objectMapper.createObjectNode();
         actorRef.put("type", "actor");
-        actorRef.put("id", "system");
+        actorRef.put("id", "system:conflict_detector/" + flagCategory);
 
         ObjectNode payload = objectMapper.createObjectNode();
         payload.put("source_event_id", sourceEventId.toString());
         payload.put("flag_category", flagCategory);
         payload.put("resolvability", resolvability);
-        ObjectNode resolver = objectMapper.createObjectNode();
-        resolver.put("type", "actor");
-        resolver.put("id", designatedResolver != null ? designatedResolver.toString() : "system");
-        payload.set("designated_resolver", resolver);
+        // designated_resolver is optional — omit when no specific resolver is known.
+        if (designatedResolver != null) {
+            ObjectNode resolver = objectMapper.createObjectNode();
+            resolver.put("type", "actor");
+            resolver.put("id", designatedResolver.toString());
+            payload.set("designated_resolver", resolver);
+        }
         payload.put("reason", reason);
 
         return new Event(
                 flagId,
-                "conflict_detected",
-                "system/integrity/v1",
+                "alert",
+                "conflict_detected/v1",
                 null,
                 subjectRef,
                 actorRef,
@@ -459,16 +470,18 @@ public class ConflictDetector {
         return supervisors.isEmpty() ? null : UUID.fromString(supervisors.get(0));
     }
 
-    private boolean isAssignmentEventType(String type) {
-        return "assignment_changed".equals(type);
+    private boolean isAssignmentEvent(Event e) {
+        return "assignment_changed".equals(e.type());
     }
 
     /**
-     * Deterministic UUID from (source_event_id + flag_category).
+     * Deterministic UUID from (source_event_id + shape_ref + flag_category).
      * Enables idempotent sweep — same input always produces same flag ID.
+     * shape_ref is included (per ADR-002 Addendum) so future integrity shapes
+     * cannot collide against historical flag IDs.
      */
     static UUID deterministicUuid(UUID sourceEventId, String flagCategory) {
-        String input = sourceEventId.toString() + ":" + flagCategory;
+        String input = sourceEventId.toString() + ":conflict_detected/v1:" + flagCategory;
         return UUID.nameUUIDFromBytes(input.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -484,11 +497,13 @@ public class ConflictDetector {
         return null;
     }
 
-    private boolean isSystemEventType(String type) {
-        return "conflict_detected".equals(type) ||
-               "conflict_resolved".equals(type) ||
-               "subjects_merged".equals(type) ||
-               "subject_split".equals(type);
+    private boolean isIntegrityOrIdentityEvent(Event event) {
+        String shapeRef = event.shapeRef();
+        if (shapeRef == null) return false;
+        return shapeRef.startsWith("conflict_detected/") ||
+               shapeRef.startsWith("conflict_resolved/") ||
+               shapeRef.startsWith("subjects_merged/") ||
+               shapeRef.startsWith("subject_split/");
     }
 
     record SweepCandidate(UUID eventId, UUID deviceId, long eventWatermark, UUID subjectId) {}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/shapes/conflict_resolved.schema.json",
+  "title": "conflict_resolved/v1 payload",
+  "description": "Payload for resolution events on integrity flags. Manual resolutions emit with envelope type=review. Phase 4 auto-resolutions emit with envelope type=capture and actor_ref.id prefix 'system:auto_resolution/{policy_id}' — discrimination between human and automated resolution lives in actor_ref, NOT in this payload. The resolution enum stays at 3 values; do not bump to v2 to model automation.",
+  "type": "object",
+  "properties": {
+    "flag_event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The conflict_detected event being resolved."
+    },
+    "source_event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Denormalised reference to the underlying domain event."
+    },
+    "resolution": {
+      "type": "string",
+      "enum": ["accepted", "rejected", "reclassified"],
+      "description": "accepted = include in state derivation; rejected = permanently excluded; reclassified = event attributed to a different subject (requires reclassified_subject_id; identity_conflict flags only)."
+    },
+    "reclassified_subject_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Required iff resolution = reclassified. Null otherwise."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Optional free-text explanation from the resolving actor."
+    }
+  },
+  "required": ["flag_event_id", "source_event_id", "resolution"],
+  "additionalProperties": true
+}

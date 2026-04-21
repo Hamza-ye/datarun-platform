@@ -87,7 +87,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
 
         // Verify scope_violation flag raised
         List<Map<String, Object>> flags = jdbc.queryForList(
-                "SELECT payload FROM events WHERE type = 'conflict_detected'");
+                "SELECT payload FROM events WHERE shape_ref LIKE 'conflict_detected/%'");
         assertThat(flags).hasSize(1);
         String payload = flags.get(0).get("payload").toString();
         assertThat(payload).contains("scope_violation");
@@ -113,7 +113,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
 
         // Verify temporal_authority_expired flag raised
         List<Map<String, Object>> flags = jdbc.queryForList(
-                "SELECT payload FROM events WHERE type = 'conflict_detected'");
+                "SELECT payload FROM events WHERE shape_ref LIKE 'conflict_detected/%'");
         assertThat(flags).hasSize(1);
         String payload = flags.get(0).get("payload").toString();
         assertThat(payload).contains("temporal_authority_expired");
@@ -135,7 +135,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         pushCaptureEvent(subject, WORKER, DEVICE_W, "Auto eligible check");
 
         List<Map<String, Object>> flags = jdbc.queryForList(
-                "SELECT payload FROM events WHERE type = 'conflict_detected'");
+                "SELECT payload FROM events WHERE shape_ref LIKE 'conflict_detected/%'");
         assertThat(flags).isNotEmpty();
         String payload = flags.get(0).get("payload").toString();
         assertThat(payload).contains("auto_eligible");
@@ -191,7 +191,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         pushCaptureEvent(subject, WORKER, DEVICE_W, "After assignment ended");
 
         List<Map<String, Object>> flags = jdbc.queryForList(
-                "SELECT payload FROM events WHERE type = 'conflict_detected'");
+                "SELECT payload FROM events WHERE shape_ref LIKE 'conflict_detected/%'");
         assertThat(flags).hasSize(1);
         String payload = flags.get(0).get("payload").toString();
         assertThat(payload).contains("temporal_authority_expired");

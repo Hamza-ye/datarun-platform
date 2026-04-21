@@ -56,11 +56,11 @@
     {
       "_comment": "Flag: e2 is concurrent with e1 for same subject from different device",
       "id": "aaaaaaaa-0005-0000-0000-000000000005",
-      "type": "conflict_detected",
-      "shape_ref": "system/integrity/v1",
+      "type": "alert",
+      "shape_ref": "conflict_detected/v1",
       "activity_ref": null,
       "subject_ref": { "type": "subject", "id": "bbbbbbbb-0001-0000-0000-000000000001" },
-      "actor_ref": { "type": "actor", "id": "system" },
+      "actor_ref": { "type": "actor", "id": "system:conflict_detector/concurrent_state_change" },
       "device_id": "00000000-0000-0000-0000-000000000000",
       "device_seq": 1,
       "sync_watermark": 5,
@@ -69,15 +69,14 @@
         "source_event_id": "aaaaaaaa-0002-0000-0000-000000000002",
         "flag_category": "concurrent_state_change",
         "resolvability": "manual_only",
-        "designated_resolver": { "type": "actor", "id": "system" },
         "reason": "Concurrent capture from different device"
       }
     },
     {
       "_comment": "Merge: Carol (subj-3) absorbed into Bob (subj-2)",
       "id": "aaaaaaaa-0006-0000-0000-000000000006",
-      "type": "subjects_merged",
-      "shape_ref": "system/identity/v1",
+      "type": "capture",
+      "shape_ref": "subjects_merged/v1",
       "activity_ref": null,
       "subject_ref": { "type": "subject", "id": "bbbbbbbb-0002-0000-0000-000000000002" },
       "actor_ref": { "type": "actor", "id": "cccccccc-0001-0000-0000-000000000001" },
@@ -94,8 +93,8 @@
     {
       "_comment": "Resolve flag on e2: accepted — event re-included in state",
       "id": "aaaaaaaa-0007-0000-0000-000000000007",
-      "type": "conflict_resolved",
-      "shape_ref": "system/integrity/v1",
+      "type": "review",
+      "shape_ref": "conflict_resolved/v1",
       "activity_ref": null,
       "subject_ref": { "type": "subject", "id": "bbbbbbbb-0001-0000-0000-000000000001" },
       "actor_ref": { "type": "actor", "id": "cccccccc-0001-0000-0000-000000000001" },

@@ -69,9 +69,9 @@ public class ConflictResolutionService {
         if (flagEvent == null) {
             throw new IllegalArgumentException("Flag event not found: " + flagEventId);
         }
-        if (!"conflict_detected".equals(flagEvent.type())) {
+        if (flagEvent.shapeRef() == null || !flagEvent.shapeRef().startsWith("conflict_detected/")) {
             throw new IllegalArgumentException(
-                    "Event " + flagEventId + " is not a conflict_detected event");
+                    "Event " + flagEventId + " is not a conflict_detected flag");
         }
 
         // Check not already resolved
@@ -140,10 +140,10 @@ public class ConflictResolutionService {
                        cd.subject_ref->>'id' AS subject_id,
                        cd.timestamp AS flagged_at
                 FROM events cd
-                WHERE cd.type = 'conflict_detected'
+                WHERE cd.shape_ref LIKE 'conflict_detected/%'
                   AND NOT EXISTS (
                       SELECT 1 FROM events cr
-                      WHERE cr.type = 'conflict_resolved'
+                      WHERE cr.shape_ref LIKE 'conflict_resolved/%'
                         AND cr.payload->>'flag_event_id' = cd.id::text
                   )
                 ORDER BY cd.timestamp DESC
@@ -163,7 +163,8 @@ public class ConflictResolutionService {
      */
     public FlagDetail getFlagDetail(UUID flagEventId) {
         Event flagEvent = eventRepository.findById(flagEventId);
-        if (flagEvent == null || !"conflict_detected".equals(flagEvent.type())) {
+        if (flagEvent == null || flagEvent.shapeRef() == null
+                || !flagEvent.shapeRef().startsWith("conflict_detected/")) {
             return null;
         }
         if (isAlreadyResolved(flagEventId)) {
@@ -203,7 +204,7 @@ public class ConflictResolutionService {
     private boolean isAlreadyResolved(UUID flagEventId) {
         Integer count = eventRepository.getJdbcTemplate().queryForObject("""
                 SELECT COUNT(*) FROM events
-                WHERE type = 'conflict_resolved'
+                WHERE shape_ref LIKE 'conflict_resolved/%'
                   AND payload->>'flag_event_id' = ?
                 """,
                 Integer.class, flagEventId.toString());
@@ -234,8 +235,8 @@ public class ConflictResolutionService {
 
         return new Event(
                 UUID.randomUUID(),
-                "conflict_resolved",
-                "system/integrity/v1",
+                "review",
+                "conflict_resolved/v1",
                 null,
                 subjectRef,
                 actorRef,
@@ -269,8 +270,8 @@ public class ConflictResolutionService {
 
         return new Event(
                 flagId,
-                "conflict_detected",
-                "system/integrity/v1",
+                "alert",
+                "conflict_detected/v1",
                 null,
                 subjectRef,
                 actorRef,

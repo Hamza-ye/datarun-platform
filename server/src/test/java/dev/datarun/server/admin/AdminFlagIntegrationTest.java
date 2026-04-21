@@ -112,7 +112,7 @@ class AdminFlagIntegrationTest extends AbstractIntegrationTest {
 
         // Verify conflict_resolved event was created
         Integer resolvedCount = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM events WHERE type = 'conflict_resolved'", Integer.class);
+                "SELECT COUNT(*) FROM events WHERE shape_ref LIKE 'conflict_resolved/%'", Integer.class);
         assertThat(resolvedCount).isEqualTo(1);
 
         // Flag list should now be empty
@@ -173,7 +173,7 @@ class AdminFlagIntegrationTest extends AbstractIntegrationTest {
 
     private UUID findFlagEventId() {
         return jdbc.queryForObject(
-                "SELECT id FROM events WHERE type = 'conflict_detected' ORDER BY sync_watermark LIMIT 1",
+                "SELECT id FROM events WHERE shape_ref LIKE 'conflict_detected/%' ORDER BY sync_watermark LIMIT 1",
                 UUID.class);
     }
 }

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/shapes/subject_split.schema.json",
+  "title": "subject_split/v1 payload",
+  "description": "Payload for identity-lifecycle split events. Emitted with envelope type=capture. Recorded when a coordinator determines a subject UUID is archiving and a successor identifier takes over (e.g., patient record was wrong and is being retired with a correction).",
+  "type": "object",
+  "properties": {
+    "source_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The subject UUID being archived."
+    },
+    "successor_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The new subject UUID that takes over for source_id."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Optional explanation of the split decision."
+    }
+  },
+  "required": ["source_id", "successor_id"],
+  "additionalProperties": true
+}

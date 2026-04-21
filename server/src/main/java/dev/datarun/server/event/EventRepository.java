@@ -113,7 +113,10 @@ public class EventRepository {
                 WHERE subject_ref->>'id' = ?
                   AND device_id != ?::uuid
                   AND sync_watermark > ?
-                  AND type NOT IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split')
+                  AND shape_ref NOT LIKE 'conflict_detected/%'
+                  AND shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND shape_ref NOT LIKE 'subjects_merged/%'
+                  AND shape_ref NOT LIKE 'subject_split/%'
                 """,
                 Integer.class,
                 subjectId.toString(),
@@ -193,8 +196,11 @@ public class EventRepository {
                     ))
                     -- Category 2: Own assignment events (E9 — always included)
                     OR (type = 'assignment_changed' AND payload->'target_actor'->>'id' = ?)
-                    -- Category 3: System events in scope
-                    OR (type IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split')
+                    -- Category 3: Integrity/identity events in scope (discriminated by shape_ref)
+                    OR ((shape_ref LIKE 'conflict_detected/%'
+                         OR shape_ref LIKE 'conflict_resolved/%'
+                         OR shape_ref LIKE 'subjects_merged/%'
+                         OR shape_ref LIKE 'subject_split/%')
                         AND location_path IS NOT NULL AND (
                 """);
         params.add(actorId.toString());

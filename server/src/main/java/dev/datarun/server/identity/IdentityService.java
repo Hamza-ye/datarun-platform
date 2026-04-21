@@ -198,8 +198,8 @@ public class IdentityService {
 
         return new Event(
                 UUID.randomUUID(),
-                "subjects_merged",
-                "system/identity/v1",
+                "capture",
+                "subjects_merged/v1",
                 null,
                 subjectRef,
                 actorRef,
@@ -229,8 +229,8 @@ public class IdentityService {
 
         return new Event(
                 UUID.randomUUID(),
-                "subject_split",
-                "system/identity/v1",
+                "capture",
+                "subject_split/v1",
                 null,
                 subjectRef,
                 actorRef,

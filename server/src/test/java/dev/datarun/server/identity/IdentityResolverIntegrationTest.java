@@ -142,7 +142,8 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         var sourceEvents = rest.getForEntity("/api/subjects/" + sourceId + "/events", JsonNode.class);
         int domainEventCount = 0;
         for (JsonNode e : sourceEvents.getBody().get("events")) {
-            if ("capture".equals(e.get("type").asText())) domainEventCount++;
+            // Domain captures — excludes system-authored identity lifecycle (subject_split/v1 etc.).
+            if ("basic_capture/v1".equals(e.get("shape_ref").asText())) domainEventCount++;
         }
         assertThat(domainEventCount).isEqualTo(2);
 
@@ -219,7 +220,7 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         // Verify stale_reference flag exists
         Integer staleFlags = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM events
-                WHERE type = 'conflict_detected'
+                WHERE shape_ref LIKE 'conflict_detected/%'
                   AND payload->>'flag_category' = 'stale_reference'
                   AND subject_ref->>'id' = ?
                 """,
@@ -260,7 +261,8 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         var eventsResponse = rest.getForEntity("/api/subjects/" + subjectB + "/events", JsonNode.class);
         int domainEvents = 0;
         for (JsonNode e : eventsResponse.getBody().get("events")) {
-            if ("capture".equals(e.get("type").asText())) domainEvents++;
+            // Domain captures — excludes system-authored subjects_merged/v1.
+            if ("basic_capture/v1".equals(e.get("shape_ref").asText())) domainEvents++;
         }
         assertThat(domainEvents).isEqualTo(3);
     }
@@ -292,7 +294,7 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         // At minimum, stale_reference should be raised (CD detects retired ID)
         Integer flags = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM events
-                WHERE type = 'conflict_detected'
+                WHERE shape_ref LIKE 'conflict_detected/%'
                   AND payload->>'flag_category' = 'stale_reference'
                 """, Integer.class);
         assertThat(flags).isGreaterThan(0);

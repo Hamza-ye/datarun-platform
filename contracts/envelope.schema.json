@@ -18,13 +18,9 @@
         "alert",
         "task_created",
         "task_completed",
-        "assignment_changed",
-        "subjects_merged",
-        "subject_split",
-        "conflict_detected",
-        "conflict_resolved"
+        "assignment_changed"
       ],
-      "description": "Platform-fixed, closed, append-only vocabulary. Domain meaning lives in shapes, not types."
+      "description": "Platform-fixed, closed, append-only vocabulary of 6 values (ADR-4 S3). Domain meaning lives in shapes, not types. Identity and integrity events (conflict_detected, conflict_resolved, subjects_merged, subject_split) are shape names, not types; see ADR-002 Addendum for mapping."
     },
     "shape_ref": {
       "type": "string",

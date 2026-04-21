@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/shapes/conflict_detected.schema.json",
+  "title": "conflict_detected/v1 payload",
+  "description": "Payload for integrity flag events. Emitted with envelope type=alert. Describes a single detected integrity anomaly; one flag per (source_event_id, flag_category). flag_category is one of the 9 values in docs/contracts/flag-catalog.md.",
+  "type": "object",
+  "properties": {
+    "source_event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The domain event this flag is about."
+    },
+    "flag_category": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One of the categories in flag-catalog.md. Platform-closed vocabulary."
+    },
+    "resolvability": {
+      "type": "string",
+      "enum": ["auto_eligible", "manual_only"],
+      "description": "Whether the resolution pipeline may resolve this automatically."
+    },
+    "designated_resolver": {
+      "type": "object",
+      "properties": {
+        "type": {"type": "string", "const": "actor"},
+        "id":   {"type": "string"}
+      },
+      "required": ["type", "id"],
+      "additionalProperties": false,
+      "description": "Actor who should review this flag. System actors use the 'system:{component}/{id}' id convention."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Human-readable context for the flag."
+    }
+  },
+  "required": ["source_event_id", "flag_category"],
+  "additionalProperties": true
+}

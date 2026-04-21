@@ -153,7 +153,7 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
 
         JsonNode flagEvent = null;
         for (JsonNode e : events) {
-            if ("conflict_detected".equals(e.get("type").asText())) {
+            if ("conflict_detected/v1".equals(e.get("shape_ref").asText())) {
                 flagEvent = e;
                 break;
             }
@@ -163,15 +163,18 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         // Verify all 11 envelope fields
         assertThat(flagEvent.has("id")).isTrue();
         assertThat(flagEvent.has("type")).isTrue();
-        assertThat(flagEvent.get("type").asText()).isEqualTo("conflict_detected");
+        assertThat(flagEvent.get("type").asText()).isEqualTo("alert");
         assertThat(flagEvent.has("shape_ref")).isTrue();
-        assertThat(flagEvent.get("shape_ref").asText()).isEqualTo("system/integrity/v1");
+        assertThat(flagEvent.get("shape_ref").asText()).isEqualTo("conflict_detected/v1");
         // activity_ref is null (excluded by Jackson non_null)
         assertThat(flagEvent.has("subject_ref")).isTrue();
         assertThat(flagEvent.get("subject_ref").get("type").asText()).isEqualTo("subject");
         assertThat(flagEvent.get("subject_ref").get("id").asText()).isEqualTo(SUBJECT_X.toString());
         assertThat(flagEvent.has("actor_ref")).isTrue();
         assertThat(flagEvent.get("actor_ref").get("type").asText()).isEqualTo("actor");
+        // System actor convention: system:{component}/{identifier} (ADR-002 Addendum F-A3)
+        assertThat(flagEvent.get("actor_ref").get("id").asText())
+                .startsWith("system:conflict_detector/");
         assertThat(flagEvent.has("device_id")).isTrue();
         assertThat(flagEvent.has("device_seq")).isTrue();
         assertThat(flagEvent.has("sync_watermark")).isTrue();
@@ -185,8 +188,8 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         assertThat(payload.has("flag_category")).isTrue();
         assertThat(payload.get("flag_category").asText()).isEqualTo("concurrent_state_change");
         assertThat(payload.has("resolvability")).isTrue();
-        assertThat(payload.has("designated_resolver")).isTrue();
         assertThat(payload.has("reason")).isTrue();
+        // designated_resolver is optional — absent when no specific resolver is known (ADR-002 Addendum).
     }
 
     /**
@@ -210,9 +213,9 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         // No additional flags for duplicates
         assertThat(response2.getBody().get("flags_raised").asInt()).isEqualTo(0);
 
-        // Count conflict_detected events — should be exactly 1
+        // Count conflict_detected flag events — should be exactly 1
         Integer flagCount = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM events WHERE type = 'conflict_detected'", Integer.class);
+                "SELECT COUNT(*) FROM events WHERE shape_ref LIKE 'conflict_detected/%'", Integer.class);
         assertThat(flagCount).isEqualTo(flags1);
     }
 
@@ -245,23 +248,52 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         pushEventsWithMeta(List.of(buildEvent(SUBJECT_X, DEVICE_A, 1)), DEVICE_A, 0);
         pushEventsWithMeta(List.of(buildEvent(SUBJECT_X, DEVICE_B, 1)), DEVICE_B, 0);
 
-        // Find the conflict_detected event
+        // Find the conflict_detected flag event
         var pullResponse = pullEvents(0, 100);
         JsonNode flagEvent = null;
         for (JsonNode e : pullResponse.getBody().get("events")) {
-            if ("conflict_detected".equals(e.get("type").asText())) {
+            if ("conflict_detected/v1".equals(e.get("shape_ref").asText())) {
                 flagEvent = e;
                 break;
             }
         }
         assertThat(flagEvent).isNotNull();
 
-        // C8: conflict_detected event has source ref, flag category, resolver
+        // C8: conflict_detected event has source ref and flag category; designated_resolver optional.
         JsonNode payload = flagEvent.get("payload");
         assertThat(payload.get("source_event_id").asText()).isNotEmpty();
         assertThat(payload.get("flag_category").asText()).isEqualTo("concurrent_state_change");
-        assertThat(payload.get("designated_resolver")).isNotNull();
-        assertThat(payload.get("designated_resolver").get("type").asText()).isEqualTo("actor");
+    }
+
+    /**
+     * ADR-002 Addendum F-A3: system-emitted flags carry actor_ref.id using the
+     * convention {@code system:{component}/{identifier}}. The component is
+     * {@code conflict_detector}; the identifier is the flag category.
+     */
+    @Test
+    void conflictDetected_actorRefFollowsSystemConvention() {
+        pushEventsWithMeta(List.of(buildEvent(SUBJECT_X, DEVICE_A, 1)), DEVICE_A, 0);
+        pushEventsWithMeta(List.of(buildEvent(SUBJECT_X, DEVICE_B, 1)), DEVICE_B, 0);
+
+        var pullResponse = pullEvents(0, 100);
+        JsonNode flagEvent = null;
+        for (JsonNode e : pullResponse.getBody().get("events")) {
+            if ("conflict_detected/v1".equals(e.get("shape_ref").asText())) {
+                flagEvent = e;
+                break;
+            }
+        }
+        assertThat(flagEvent).isNotNull();
+
+        JsonNode actorRef = flagEvent.get("actor_ref");
+        assertThat(actorRef.get("type").asText()).isEqualTo("actor");
+        String id = actorRef.get("id").asText();
+        assertThat(id)
+                .as("System actor id must follow 'system:{component}/{identifier}' (F-A3)")
+                .startsWith("system:conflict_detector/");
+        // The identifier segment must match the flag category from the payload.
+        String flagCategory = flagEvent.get("payload").get("flag_category").asText();
+        assertThat(id).isEqualTo("system:conflict_detector/" + flagCategory);
     }
 
     // --- Helpers ---
@@ -308,7 +340,7 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
     private void assertConflictDetectedExists(UUID subjectId) {
         Integer count = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM events
-                WHERE type = 'conflict_detected'
+                WHERE shape_ref LIKE 'conflict_detected/%'
                   AND subject_ref->>'id' = ?
                 """,
                 Integer.class,

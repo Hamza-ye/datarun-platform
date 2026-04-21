@@ -205,9 +205,9 @@ public class SyncController {
                 .anyMatch(a -> a.activityList() != null || a.subjectList() != null);
         if (hasActivityOrSubjectListScope && !events.isEmpty()) {
             events = events.stream().filter(event -> {
-                // Assignment events (E9) and system events always pass
+                // Assignment events (E9) and integrity/identity events always pass
                 if ("assignment_changed".equals(event.type())) return true;
-                if (isSystemEventType(event.type())) return true;
+                if (isIntegrityOrIdentityEvent(event)) return true;
                 // Extract subject_id and activity_ref for scope check
                 String subjectId = event.subjectRef() != null
                         ? event.subjectRef().path("id").asText(null) : null;
@@ -254,9 +254,13 @@ public class SyncController {
         return result != null ? result : 0;
     }
 
-    private boolean isSystemEventType(String type) {
-        return "conflict_detected".equals(type) || "conflict_resolved".equals(type)
-                || "subjects_merged".equals(type) || "subject_split".equals(type);
+    private boolean isIntegrityOrIdentityEvent(Event event) {
+        String shapeRef = event.shapeRef();
+        if (shapeRef == null) return false;
+        return shapeRef.startsWith("conflict_detected/")
+                || shapeRef.startsWith("conflict_resolved/")
+                || shapeRef.startsWith("subjects_merged/")
+                || shapeRef.startsWith("subject_split/");
     }
 
     /**
@@ -267,7 +271,9 @@ public class SyncController {
         for (Event e : events) {
             if (e.actorRef() != null && e.actorRef().has("id")) {
                 String id = e.actorRef().get("id").asText(null);
-                if (id != null && !"system".equals(id)) {
+                // System actors use the 'system:{component}/{identifier}' convention
+                // (ADR-002 Addendum F-A3) and never carry a human UUID.
+                if (id != null && !id.startsWith("system:")) {
                     try {
                         return UUID.fromString(id);
                     } catch (IllegalArgumentException ex) {

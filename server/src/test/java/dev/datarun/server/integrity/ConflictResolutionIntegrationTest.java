@@ -117,7 +117,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         var pullResponse = pullEvents(0, 100);
         JsonNode resolvedEvent = null;
         for (JsonNode e : pullResponse.getBody().get("events")) {
-            if ("conflict_resolved".equals(e.get("type").asText())) {
+            if ("conflict_resolved/v1".equals(e.get("shape_ref").asText())) {
                 resolvedEvent = e;
                 break;
             }
@@ -143,16 +143,16 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         var pullResponse = pullEvents(0, 100);
         JsonNode resolvedEvent = null;
         for (JsonNode e : pullResponse.getBody().get("events")) {
-            if ("conflict_resolved".equals(e.get("type").asText())) {
+            if ("conflict_resolved/v1".equals(e.get("shape_ref").asText())) {
                 resolvedEvent = e;
                 break;
             }
         }
         assertThat(resolvedEvent).isNotNull();
 
-        // Verify envelope
-        assertThat(resolvedEvent.get("type").asText()).isEqualTo("conflict_resolved");
-        assertThat(resolvedEvent.get("shape_ref").asText()).isEqualTo("system/integrity/v1");
+        // Verify envelope per ADR-002 Addendum: manual resolution is type=review.
+        assertThat(resolvedEvent.get("type").asText()).isEqualTo("review");
+        assertThat(resolvedEvent.get("shape_ref").asText()).isEqualTo("conflict_resolved/v1");
         assertThat(resolvedEvent.get("subject_ref").get("type").asText()).isEqualTo("subject");
         assertThat(resolvedEvent.get("subject_ref").get("id").asText()).isEqualTo(SUBJECT_X.toString());
         assertThat(resolvedEvent.get("actor_ref").get("type").asText()).isEqualTo("actor");
@@ -330,7 +330,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
 
     private UUID findFlagEventId() {
         return jdbc.queryForObject(
-                "SELECT id FROM events WHERE type = 'conflict_detected' ORDER BY sync_watermark LIMIT 1",
+                "SELECT id FROM events WHERE shape_ref LIKE 'conflict_detected/%' ORDER BY sync_watermark LIMIT 1",
                 UUID.class);
     }
 
