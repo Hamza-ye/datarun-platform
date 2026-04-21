@@ -14,11 +14,13 @@ class EventAssembler {
   /// Build and persist an event from form data.
   /// [subjectId] — existing subject UUID or null for new subject.
   /// [shapeRef] — e.g. "basic_capture/v1"
+  /// [activityRef] — activity context when the form was opened from an activity; null otherwise.
   /// [payload] — shape-conforming field values
   Future<Event> assemble({
     required String? subjectId,
     required String shapeRef,
     required Map<String, dynamic> payload,
+    String? activityRef,
   }) async {
     final sid = subjectId ?? _uuid.v4();
     final seq = await _identity.nextSeq();
@@ -27,7 +29,7 @@ class EventAssembler {
       id: _uuid.v4(),
       type: 'capture', // Phase 0: only type
       shapeRef: shapeRef,
-      activityRef: null, // Phase 0: no activities
+      activityRef: activityRef,
       subjectRef: {'type': 'subject', 'id': sid},
       actorRef: {'type': 'actor', 'id': _identity.actorId},
       deviceId: _identity.deviceId,

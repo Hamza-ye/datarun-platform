@@ -278,6 +278,105 @@ void main() {
     });
   });
 
+  // --- Phase 3d: Sensitivity classifications (IDR-019) ---
+
+  group('sensitivity classifications', () {
+    final configWithSensitivity = <String, dynamic>{
+      'version': 5,
+      'shapes': {
+        'household_visit/v1': {
+          'name': 'household_visit',
+          'version': 1,
+          'status': 'active',
+          'sensitivity': 'standard',
+          'fields': [
+            {
+              'name': 'name',
+              'type': 'text',
+              'required': true,
+              'description': 'Name',
+              'display_order': 1,
+              'deprecated': false,
+            },
+          ],
+        },
+        'malaria_followup/v1': {
+          'name': 'malaria_followup',
+          'version': 1,
+          'status': 'active',
+          'sensitivity': 'elevated',
+          'fields': [
+            {
+              'name': 'name',
+              'type': 'text',
+              'required': true,
+              'description': 'Name',
+              'display_order': 1,
+              'deprecated': false,
+            },
+          ],
+        },
+      },
+      'activities': {
+        'monitoring': {
+          'name': 'monitoring',
+          'shapes': ['household_visit/v1'],
+          'roles': {'field_worker': ['capture']},
+          'status': 'active',
+        },
+        'outbreak_response': {
+          'name': 'outbreak_response',
+          'shapes': ['malaria_followup/v1'],
+          'roles': {'field_worker': ['capture']},
+          'status': 'active',
+        },
+      },
+      'expressions': {},
+      'flag_severity_overrides': {},
+      'sensitivity_classifications': {
+        'shapes': {
+          'household_visit/v1': 'standard',
+          'malaria_followup/v1': 'elevated',
+        },
+        'activities': {
+          'monitoring': 'routine',
+          'outbreak_response': 'restricted',
+        },
+      },
+      'published_at': '2026-04-21T10:00:00Z',
+    };
+
+    test('getShapeSensitivity returns classification from config', () async {
+      await configStore.applyConfig(configWithSensitivity);
+
+      expect(configStore.getShapeSensitivity('household_visit/v1'), 'standard');
+      expect(configStore.getShapeSensitivity('malaria_followup/v1'), 'elevated');
+    });
+
+    test('getActivitySensitivity returns classification from config', () async {
+      await configStore.applyConfig(configWithSensitivity);
+
+      expect(configStore.getActivitySensitivity('monitoring'), 'routine');
+      expect(
+          configStore.getActivitySensitivity('outbreak_response'), 'restricted');
+    });
+
+    test('defaults apply when classification is missing', () async {
+      await configStore.applyConfig(sampleConfig);
+
+      // sampleConfig has empty sensitivity_classifications maps
+      expect(configStore.getShapeSensitivity('household_visit/v1'), 'standard');
+      expect(configStore.getActivitySensitivity('monitoring'), 'routine');
+    });
+
+    test('defaults apply for unknown shape/activity', () async {
+      await configStore.applyConfig(configWithSensitivity);
+
+      expect(configStore.getShapeSensitivity('unknown_shape/v99'), 'standard');
+      expect(configStore.getActivitySensitivity('unknown_activity'), 'routine');
+    });
+  });
+
   // --- Phase 3c: Two-slot config model (IDR-019) ---
 
   group('two-slot config model', () {

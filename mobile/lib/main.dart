@@ -5,6 +5,7 @@ import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/projection_engine.dart';
 import 'package:datarun_mobile/data/event_assembler.dart';
 import 'package:datarun_mobile/data/config_store.dart';
+import 'package:datarun_mobile/data/context_resolver.dart';
 import 'package:datarun_mobile/data/sync_service.dart';
 import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/presentation/screens/work_list_screen.dart';
@@ -43,6 +44,7 @@ class _DatarunAppState extends State<DatarunApp> {
     final eventAssembler = EventAssembler(identity, eventStore);
     final configStore = ConfigStore(eventStore);
     await configStore.init();
+    final contextResolver = ContextResolver(eventStore, projectionEngine);
     final syncService =
         SyncService(eventStore, identity, serverUrl, configStore);
 
@@ -51,6 +53,7 @@ class _DatarunAppState extends State<DatarunApp> {
       projectionEngine: projectionEngine,
       eventAssembler: eventAssembler,
       configStore: configStore,
+      contextResolver: contextResolver,
       syncService: syncService,
       identity: identity,
     );

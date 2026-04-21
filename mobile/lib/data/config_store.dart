@@ -14,6 +14,9 @@ class ConfigStore {
   Map<String, Map<String, dynamic>> _activities = {};
   // Key: "{activity_ref}.{shape_ref}" → List of rule maps
   Map<String, List<Map<String, dynamic>>> _expressions = {};
+  // Sensitivity classifications (IDR-019 §sensitivity_classifications)
+  Map<String, String> _shapeSensitivity = {};
+  Map<String, String> _activitySensitivity = {};
 
   // Pending slot (IDR-019 two-slot model)
   int _pendingVersion = 0;
@@ -106,6 +109,27 @@ class ConfigStore {
     _shapes = parsedShapes;
     _activities = parsedActivities;
     _expressions = parsedExpressions;
+
+    // Sensitivity classifications (IDR-019). Defaults: shape='standard', activity='routine'.
+    final sensRaw = packageJson['sensitivity_classifications'];
+    final parsedShapeSens = <String, String>{};
+    final parsedActivitySens = <String, String>{};
+    if (sensRaw is Map) {
+      final shapesSens = sensRaw['shapes'];
+      if (shapesSens is Map) {
+        for (final entry in shapesSens.entries) {
+          parsedShapeSens[entry.key as String] = entry.value as String;
+        }
+      }
+      final actsSens = sensRaw['activities'];
+      if (actsSens is Map) {
+        for (final entry in actsSens.entries) {
+          parsedActivitySens[entry.key as String] = entry.value as String;
+        }
+      }
+    }
+    _shapeSensitivity = parsedShapeSens;
+    _activitySensitivity = parsedActivitySens;
   }
 
   /// Current config version (0 if no config loaded).
@@ -193,4 +217,14 @@ class ConfigStore {
     }
     return null;
   }
+
+  /// Sensitivity classification for a shape (e.g. 'standard', 'elevated', 'restricted').
+  /// Returns 'standard' if the shape has no explicit classification.
+  String getShapeSensitivity(String shapeRef) =>
+      _shapeSensitivity[shapeRef] ?? 'standard';
+
+  /// Sensitivity classification for an activity (e.g. 'routine', 'elevated', 'restricted').
+  /// Returns 'routine' if the activity has no explicit classification.
+  String getActivitySensitivity(String activityName) =>
+      _activitySensitivity[activityName] ?? 'routine';
 }

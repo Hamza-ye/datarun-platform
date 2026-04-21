@@ -133,10 +133,14 @@ class WorkListScreen extends StatelessWidget {
       return;
     }
 
-    // Collect all shapes across active activities
+    // Collect all shapes across active activities, tracking the activity for each shape
     final allShapes = <ShapeDefinition>[];
+    final shapeToActivity = <String, String>{};
     for (final actName in activeActivities) {
-      allShapes.addAll(configStore.getShapesForActivity(actName));
+      for (final shape in configStore.getShapesForActivity(actName)) {
+        allShapes.add(shape);
+        shapeToActivity[shape.shapeRef] = actName;
+      }
     }
 
     if (allShapes.isEmpty) {
@@ -154,6 +158,7 @@ class WorkListScreen extends StatelessWidget {
           builder: (_) => FormScreen(
             subjectId: null,
             shapeRef: allShapes.first.shapeRef,
+            activityRef: shapeToActivity[allShapes.first.shapeRef],
           ),
         ),
       ).then((_) {
@@ -182,6 +187,7 @@ class WorkListScreen extends StatelessWidget {
             builder: (_) => FormScreen(
               subjectId: null,
               shapeRef: selected.shapeRef,
+              activityRef: shapeToActivity[selected.shapeRef],
             ),
           ),
         ).then((_) {

@@ -26,6 +26,7 @@ class _FormScreenState extends State<FormScreen> {
   final _formKey = GlobalKey<FormState>();
   ShapeDefinition? _shape;
   final Map<String, dynamic> _values = {};
+  final Map<String, dynamic> _context = {};
   final Set<String> _hiddenFields = {};
   final Map<String, String> _warnings = {};
   bool _loading = true;
@@ -43,6 +44,14 @@ class _FormScreenState extends State<FormScreen> {
     // Promote pending config at form-open (IDR-019 two-slot model)
     await state.configStore.promotePending();
     final shape = state.configStore.getShape(widget.shapeRef);
+    // Pre-resolve context.* properties per IDR-018 rule 4
+    final ctx = await state.contextResolver.resolve(
+      subjectId: widget.subjectId,
+      activityRef: widget.activityRef,
+    );
+    _context
+      ..clear()
+      ..addAll(ctx);
     setState(() {
       _shape = shape;
       _loading = false;
@@ -54,11 +63,13 @@ class _FormScreenState extends State<FormScreen> {
   }
 
   /// Build the values map for expression evaluation.
+  /// Merges payload.* values with pre-resolved context.* properties.
   Map<String, dynamic> _buildValuesMap() {
     final map = <String, dynamic>{};
     for (final entry in _values.entries) {
       map['payload.${entry.key}'] = entry.value;
     }
+    map.addAll(_context);
     return map;
   }
 
@@ -189,6 +200,7 @@ class _FormScreenState extends State<FormScreen> {
       subjectId: widget.subjectId,
       shapeRef: widget.shapeRef,
       payload: payload,
+      activityRef: widget.activityRef,
     );
 
     if (mounted) {

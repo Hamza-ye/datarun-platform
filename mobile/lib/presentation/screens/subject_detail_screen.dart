@@ -75,10 +75,14 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     final configStore = state.configStore;
     final activeActivities = configStore.getActiveActivities();
 
-    // Collect all shapes across active activities
+    // Collect all shapes across active activities, tracking the activity for each shape
     final allShapes = <ShapeDefinition>[];
+    final shapeToActivity = <String, String>{};
     for (final actName in activeActivities) {
-      allShapes.addAll(configStore.getShapesForActivity(actName));
+      for (final shape in configStore.getShapesForActivity(actName)) {
+        allShapes.add(shape);
+        shapeToActivity[shape.shapeRef] = actName;
+      }
     }
 
     if (allShapes.isEmpty) {
@@ -95,6 +99,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
           builder: (_) => FormScreen(
             subjectId: widget.subjectId,
             shapeRef: shapeRef,
+            activityRef: shapeToActivity[shapeRef],
           ),
         ),
       ).then((_) {
