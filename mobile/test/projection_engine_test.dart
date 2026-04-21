@@ -51,10 +51,11 @@ void main() {
       String timestamp = '2026-04-18T11:00:00Z'}) {
     return Event(
       id: flagId,
-      type: 'conflict_detected',
-      shapeRef: 'system/integrity/v1',
+      type: 'alert',
+      shapeRef: 'conflict_detected/v1',
       subjectRef: {'type': 'subject', 'id': subjectId},
-      actorRef: {'type': 'actor', 'id': 'system'},
+      // F-A3 system actor convention.
+      actorRef: {'type': 'actor', 'id': 'system:conflict_detector/$category'},
       deviceId: 'server',
       deviceSeq: serverSeq++,
       syncWatermark: 50,
@@ -72,8 +73,8 @@ void main() {
       {String timestamp = '2026-04-18T12:00:00Z'}) {
     return Event(
       id: id,
-      type: 'conflict_resolved',
-      shapeRef: 'system/integrity/v1',
+      type: 'review',
+      shapeRef: 'conflict_resolved/v1',
       subjectRef: {'type': 'subject', 'id': subjectId},
       actorRef: {'type': 'actor', 'id': 'admin-1'},
       deviceId: 'server',
@@ -93,8 +94,8 @@ void main() {
       {String timestamp = '2026-04-18T11:00:00Z'}) {
     return Event(
       id: id,
-      type: 'subjects_merged',
-      shapeRef: 'system/identity/v1',
+      type: 'capture',
+      shapeRef: 'subjects_merged/v1',
       subjectRef: {'type': 'subject', 'id': survivingId},
       actorRef: {'type': 'actor', 'id': 'admin-1'},
       deviceId: 'server',

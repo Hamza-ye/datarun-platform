@@ -299,12 +299,16 @@ class EventStore {
     if (!hasSubjectListScope) return 0; // No subject_list scope → can't determine out-of-scope
 
     // Find events from other devices whose subject is not in any active assignment's subject_list
-    // and not system events
+    // and are not system-authored (integrity/identity via shape_ref, assignment via type).
+    // ADR-002 Addendum: integrity/identity events are discriminated by shape_ref, not type.
     final candidates = await db.rawQuery('''
       SELECT id, subject_ref FROM $_table
       WHERE device_id != ?
-        AND type NOT IN ('conflict_detected', 'conflict_resolved',
-                         'subjects_merged', 'subject_split', 'assignment_changed')
+        AND shape_ref NOT LIKE 'conflict_detected/%'
+        AND shape_ref NOT LIKE 'conflict_resolved/%'
+        AND shape_ref NOT LIKE 'subjects_merged/%'
+        AND shape_ref NOT LIKE 'subject_split/%'
+        AND type != 'assignment_changed'
     ''', [ownDeviceId]);
 
     final toPurge = <String>[];

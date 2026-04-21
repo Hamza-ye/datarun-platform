@@ -97,15 +97,16 @@ class SyncService {
 
         for (final event in events) {
           await _eventStore.insertFromServer(event);
-          // Process subjects_merged events to update local alias table
-          if (event.type == 'subjects_merged') {
+          // Process subjects_merged events to update local alias table.
+          // ADR-002 Addendum: discriminate identity lifecycle by shape_ref.
+          if (event.shapeRef.startsWith('subjects_merged/')) {
             final retiredId = event.payload['retired_id'] as String?;
             final survivingId = event.payload['surviving_id'] as String?;
             if (retiredId != null && survivingId != null) {
               await _eventStore.upsertAlias(retiredId, survivingId, event.timestamp);
             }
           }
-          // Process assignment events to maintain local scope knowledge (Phase 2b)
+          // Process assignment events to maintain local scope knowledge (Phase 2b).
           if (event.type == 'assignment_changed') {
             await _eventStore.processAssignmentEvent(event);
           }

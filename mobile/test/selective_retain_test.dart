@@ -121,13 +121,18 @@ void main() {
       await store.insert(assignment);
       await store.processAssignmentEvent(assignment);
 
-      // System event (conflict_detected) from other device for out-of-scope subject
+      // System-authored integrity event from other device for out-of-scope subject.
+      // Under ADR-002 Addendum: type=alert, shape_ref=conflict_detected/v1,
+      // actor_ref.id follows the system:{component}/{identifier} convention.
       final systemEvent = Event(
         id: 'sys-1',
-        type: 'conflict_detected',
-        shapeRef: 'conflict/v1',
+        type: 'alert',
+        shapeRef: 'conflict_detected/v1',
         subjectRef: {'type': 'subject', 'id': 'subj-out'},
-        actorRef: {'type': 'actor', 'id': 'system'},
+        actorRef: {
+          'type': 'actor',
+          'id': 'system:conflict_detector/scope_violation'
+        },
         deviceId: otherDevice,
         deviceSeq: seq++,
         syncWatermark: seq,
