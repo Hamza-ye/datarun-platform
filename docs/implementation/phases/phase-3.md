@@ -36,7 +36,7 @@ It validates:
 |---|---|---|
 | `shape_ref` mandatory, format `{name}/v{version}`, names `[a-z][a-z0-9_]*` | ADR-4 S1 | Envelope field already exists. Shape lookup key is defined. |
 | `activity_ref` optional, groups shapes with role-action-pattern mappings | ADR-4 S2 | Activities are the deployer's organizational unit |
-| 6-type ADR-4 vocabulary: capture, review, alert, task_created, task_completed, assignment_changed | ADR-4 S3 | Append-only. `review`, `alert`, `task_created`, `task_completed` ship with Phase 4 triggers. Phase 3 uses `capture` + `assignment_changed` (already implemented). ADR-2 types (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) remain from Phases 0–2. Total platform vocabulary = 10 types. |
+| 6-type ADR-4 vocabulary: capture, review, alert, task_created, task_completed, assignment_changed | ADR-4 S3 | Append-only. `review`, `alert`, `task_created`, `task_completed` ship with Phase 4 triggers. Phase 3 uses `capture` + `assignment_changed` (already implemented). Envelope vocabulary = 6 types. The four identity/integrity primitives (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) are platform-bundled **shape names**, not envelope types — see [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md). |
 | System actor convention: `system:{source_type}/{source_id}` | ADR-4 S4 | Already implemented in Phase 1 |
 | Triggers server-only (both L3a and L3b) | ADR-4 S5 | Device never evaluates triggers |
 | Atomic config delivery, at-most-2 versions on device | ADR-4 S6 | Binary: old config until apply, then new config. No partial states. |

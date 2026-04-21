@@ -47,7 +47,7 @@
       },
       "required": ["type", "id"],
       "additionalProperties": false,
-      "description": "The entity this event is about. Typed identity reference."
+      "description": "The entity this event is about. Typed identity reference. Note: 'process' is reserved for future workflow-instance refs (see ADR-2 S2). No current emission site. Pattern instances in Phase 4 use (subject_ref, activity_ref) or source_event_id per docs/architecture/patterns.md, NOT 'process' refs — do not claim this identity category without a new IDR."
     },
     "actor_ref": {
       "type": "object",
@@ -64,7 +64,7 @@
       },
       "required": ["type", "id"],
       "additionalProperties": false,
-      "description": "Who created this event."
+      "description": "Who created this event. System actors use 'id' prefixed with 'system:{component}/{identifier}' (e.g., 'system:auto_resolution/late_entry_accept'). The 'type' enum stays ['actor'] — authorship discrimination is by 'id' prefix, never by adding a new type value. See ADR-002 Addendum F-A3."
     },
     "device_id": {
       "type": "string",

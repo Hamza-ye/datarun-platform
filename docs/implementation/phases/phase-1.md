@@ -158,7 +158,7 @@ If Transaction 1 succeeds but Transaction 2 fails: events are persisted (C3 sati
 
 **Implementation**: Use `TransactionTemplate` (programmatic transaction management) — makes the two-transaction boundary explicit in code, avoids `@Transactional` proxy pitfalls. Single Tx2 for all flags in the batch (not per-flag) — flag failures are systemic (DB down), not per-flag.
 
-**Deterministic flag IDs**: Derive `conflict_detected` event UUID from `(source_event_id + flag_category)` — enables idempotent sweep re-evaluation with `ON CONFLICT DO NOTHING`.
+**Deterministic flag IDs**: Derive the flag event UUID from `(source_event_id + shape_ref + flag_category)` — enables idempotent sweep re-evaluation with `ON CONFLICT DO NOTHING`. (`shape_ref` was added to the derivation input in Phase 3e / DD-3 so future integrity shapes cannot collide; pre-3e the derivation used only `source_event_id + flag_category`.)
 
 **Sweep job**: Stateless re-evaluation every 5 minutes. No tracking tables. Re-runs CD on subjects with multi-device events in a trailing window. Deterministic IDs make duplicate flags impossible. Catches both Tx2 failures and the rare asymmetric-flagging race (two concurrent pushes for the same subject where one push's Tx2 runs before the other's Tx1 commits).
 
@@ -314,7 +314,7 @@ Classified after Phase 1 completion. See [execution-plan.md §6.1](../execution-
 
 **contracts/**
 
-- `envelope.schema.json` — type enum extended: add `subjects_merged`, `subject_split`, `conflict_detected`, `conflict_resolved`
+- `envelope.schema.json` — **(historical)** Phase 1 extended the `type` enum with `subjects_merged`, `subject_split`, `conflict_detected`, `conflict_resolved`. [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md) (2026-04-21) reclassifies these as shape names; Phase 3e removed them from the type enum. The canonical mapping is documented in the Addendum.
 - `sync-protocol.md` — push request body extended: `{events: [...], device_id: "...", last_pull_watermark: N}`
 - `flag-catalog.md` — 3 flag categories documented: `concurrent_state_change`, `stale_reference`, `identity_conflict`
 

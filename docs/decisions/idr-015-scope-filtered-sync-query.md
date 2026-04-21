@@ -62,7 +62,7 @@ Three categories OR'd together:
 
 2. **Own assignment events** (sync rule E9): `type = 'assignment_changed' AND payload->'target_actor'->>'id' = :actor_id`. Always included regardless of geographic scope — the device PE needs them to know its own scope.
 
-3. **System events in scope**: `type IN ('conflict_detected', 'conflict_resolved', 'subjects_merged', 'subject_split')` with geographic filter on `location_path`.
+3. **System events in scope**: `shape_ref LIKE 'conflict_detected/%' OR shape_ref LIKE 'conflict_resolved/%' OR shape_ref LIKE 'subjects_merged/%' OR shape_ref LIKE 'subject_split/%'` with geographic filter on `location_path`. (Phase 3e migration: pre-3e this filter keyed on `type`, which was architecturally wrong — those four strings are shape names, not envelope types. See [ADR-002 Addendum](../adrs/adr-002-addendum-type-vocabulary.md). If EXPLAIN ANALYZE shows regression vs. the pre-3e `type IN (...)` path, add a prefix or partial index on `shape_ref`.)
 
 The actor's active assignments are reconstructed via a small CTE (typically 1-10 assignment events per actor). Assignment identity uses `subject_ref_id` on the event (per IDR-013: no `assignment_id` in payload).
 

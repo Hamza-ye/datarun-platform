@@ -20,7 +20,7 @@ Subject merge needs an alias table for identity resolution. Contract C7 demands 
 
 Materialized `subject_aliases` table with eager transitive closure updated atomically within the merge transaction. In-memory `ConcurrentHashMap` cache (<100KB at scale) refreshed after each merge — zero DB round-trips on the hot path.
 
-Merge procedure (within single transaction): eager-insert lifecycle rows → `SELECT FOR UPDATE` (ordered by subject_id to prevent deadlocks) → check both active → cascade existing aliases → insert new alias (`ON CONFLICT DO NOTHING`) → archive retired → insert `subjects_merged` event → commit → refresh cache.
+Merge procedure (within single transaction): eager-insert lifecycle rows → `SELECT FOR UPDATE` (ordered by subject_id to prevent deadlocks) → check both active → cascade existing aliases → insert new alias (`ON CONFLICT DO NOTHING`) → archive retired → insert event with `type = capture` and `shape_ref = subjects_merged/v1` → commit → refresh cache. (`subjects_merged` is a shape name, not an envelope type — see [ADR-002 Addendum](../adrs/adr-002-addendum-type-vocabulary.md).)
 
 Three fixes from Database Optimizer agent review:
 1. **Concurrent merge race**: `SELECT ... FOR UPDATE` on lifecycle rows (without this, READ COMMITTED allows broken alias table)

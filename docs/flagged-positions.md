@@ -112,7 +112,7 @@ All three must be true:
 
 ## FP-003 — Envelope schema parity test (meta-drift protection)
 
-**Status**: IN_PROGRESS
+**Status**: RESOLVED
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding B4)
 **Blocks**: Phase 3e Commit 3 (folded into 3e.5)
 **Severity**: C — cleanup hygiene, but directly prevents a repeat of the root-cause drift
@@ -132,6 +132,7 @@ A JUnit test `EnvelopeSchemaParityTest` exists in the server test suite that rea
 ### Resolution log
 
 - **2026-04-21**: Opened. Folded into Phase 3e.5 as an in-scope deliverable.
+- **2026-04-21**: RESOLVED. `server/src/test/java/dev/datarun/server/contracts/EnvelopeSchemaParityTest.java` landed in Phase 3e Commit 3. The test reads both files with `Files.readString`, normalizes trailing newlines only, and fails the build on any other divergence. Gate met.
 
 ---
 

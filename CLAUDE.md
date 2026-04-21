@@ -23,13 +23,13 @@ before any Phase 4 work; see §"Audit — End of Phase 3c (2026-04-21)" below.
 - Phase 3a (Shapes + Config Delivery): COMPLETE — one QG carried as debt (role→action)
 - Phase 3b (Expressions + DtV): COMPLETE
 - Phase 3c (Config Packager + Full Pipeline): COMPLETE
-- **Phase 3d (close-out)**: COMPLETE — 3d.1 activity_ref plumbing, 3d.2 sensitivity surface on device, 3d.3 ContextResolver. 67 mobile tests, 153 server tests.
+- **Phase 3d (close-out)**: COMPLETE — 3d.1 activity_ref plumbing, 3d.2 sensitivity surface on device, 3d.3 ContextResolver.
+- **Phase 3e (envelope type vocabulary retrofit)**: COMPLETE — executes [ADR-002 Addendum](docs/adrs/adr-002-addendum-type-vocabulary.md). Envelope `type` closed at 6 values (ADR-4 S3); the four identity/integrity primitives (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) are platform-bundled **shape** names, registered at boot by `PlatformShapeBootstrap`. Server: 164 tests (16 classes). Mobile: 72 tests (10 files).
 - **Phase 4**: NOT STARTED — blocked on IDR-020 rewrite + IDR-021 (role-action) + IDR-022 (severity/uniqueness)
 
-**Test counts (actual, 2026-04-21)**: 14 server test classes, 103 `@Test` methods
-(parameterized expansions ≈ 153 rows, which is what `status.md` historically reported).
-Mobile: ~54 tests across ~7 files. The "157" in older CLAUDE.md revisions was the
-rolled-back Phase 4.0 number — ignore it.
+**Test counts (actual, post-Phase 3e 2026-04-21)**: 16 server test classes, 108 `@Test` methods
+(parameterized expansions ≈ 164 rows — the number reported by `./mvnw test`).
+Mobile: 72 tests across 10 files. Historical "157" / "153" numbers are pre-3e baselines.
 
 See [docs/status.md](docs/status.md) for living status.
 
@@ -177,12 +177,15 @@ For sub-phases touching both server and mobile, split into 2-3 commits:
 
 ```
 contracts/                         # Language-neutral shared definitions
-  envelope.schema.json             # 11-field event envelope (JSON Schema Draft 2020-12)
+  envelope.schema.json             # 11-field event envelope, closed 6-type vocabulary (Draft 2020-12)
   sync-protocol.md                 # Push/pull sync contract
-  flag-catalog.md                  # 6 flag categories (3 identity + 3 auth)
+  flag-catalog.md                  # 9 flag categories (6 active, 2 deferred Phase 4, 1 reserved)
   fixtures/projection-equivalence.json
   fixtures/expression-evaluation.json  # 50 shared expression evaluator test cases (E7)
-  shapes/                          # Assignment event schemas
+  shapes/                          # Shape schemas: assignment_{created,ended}/v1 (IDR-013),
+                                   # conflict_detected/v1, conflict_resolved/v1,
+                                   # subjects_merged/v1, subject_split/v1 (platform-bundled
+                                   # internal shapes per ADR-002 Addendum, Phase 3e)
 
 server/src/main/java/dev/datarun/server/
   event/                           # Event store + envelope validation
@@ -199,7 +202,7 @@ server/src/main/resources/
   templates/                       # Thymeleaf HTML (admin, config)
   envelope.schema.json             # Bundled for server-side validation
 
-server/src/test/java/              # 14 test classes, 103 @Test methods (~153 parameterized rows)
+server/src/test/java/              # 16 test classes, 108 @Test methods (~164 parameterized rows)
   AbstractIntegrationTest.java     # Base: test actor provisioning, auth helpers
 
 mobile/lib/
@@ -283,6 +286,7 @@ design/                            # formerly a git submodule — now inlined he
 | `ExpressionRule.java` | Expression rule record | `record(id, activityRef, shapeRef, fieldName, ruleType, expression, message, createdAt)` |
 | `ExpressionRepository.java` | Expression rule persistence (JSONB expression column) | `insert(ExpressionRule)`, `findAll()`, `findByActivityAndShape(activity, shape)`, `delete(UUID)` |
 | `DeployTimeValidator.java` | DtV L2: field refs exist, operator-type compat, predicate budget ≤3, no nesting, default type match | `validate(ExpressionRule, Shape)→List<String>` |
+| `PlatformShapeBootstrap.java` | Phase 3e: `@EventListener(ApplicationReadyEvent)` registers the four platform-bundled internal shapes (`conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, `subject_split/v1`) via `ShapeService.createShape`. Idempotent — skips insertion if the shape already exists at version 1. Formalizes the Phase 1/2 payloads per [ADR-002 Addendum](docs/adrs/adr-002-addendum-type-vocabulary.md). | Spring component, no public API — runs once per boot |
 
 ### admin/ — Admin UI
 | File | Purpose |
@@ -311,7 +315,7 @@ design/                            # formerly a git submodule — now inlined he
 | `config_store.dart` | SQLite-persisted config cache (IDR-019). Two-slot model: current + pending. Parses shapes/activities/expressions/sensitivity_classifications into memory on init. | `init()`, `applyConfig(json)`, `promotePending()`, `hasPending`, `getShape(ref)→ShapeDefinition?`, `getActivity(name)`, `getActiveActivities()→List<String>`, `getShapesForActivity(name)→List<ShapeDefinition>`, `getExpressionsForField(activity,shape,field)`, `getShowCondition(...)`, `getDefaultExpression(...)`, `getWarningExpression(...)`, `getShapeSensitivity(ref)→String`, `getActivitySensitivity(name)→String`, `configVersion→int` |
 | `device_identity.dart` | Persists device_id, actor_id, device_seq, actor_token | `init()→Future<DeviceIdentity>`, `nextSeq()→Future<int>`, `get/set actorToken` |
 | `context_resolver.dart` | Phase 3d.3: resolves `context.*` properties at form-open (ADR-5 S8 / IDR-018 rule 4). Returns actor.role, actor.scope_name, event_count, days_since_last_event from local state; subject_state/subject_pattern/activity_stage as null (Phase 4 placeholders). | `resolve({subjectId, activityRef, now})→Future<Map<String,dynamic>>` |
-| `projection_engine.dart` | Subject list + detail from events; alias-aware, flag-excluding | `getSubjectList()→Future<List<SubjectSummary>>`, `getSubjectDetail(id)→Future<List<Event>>`, `getFlaggedEventIds()→Future<Set<String>>` |
+| `projection_engine.dart` | Subject list + detail from events; alias-aware, flag-excluding. DD-2: four named top-level predicates (`isIntegrityFlag`, `isIntegrityResolution`, `isIdentityLifecycle`, `isAssignmentEvent`) classify events by `shape_ref` (integrity) or envelope `type` (assignment). No `type`-based discrimination for integrity/identity events. | `getSubjectList()→Future<List<SubjectSummary>>`, `getSubjectDetail(id)→Future<List<Event>>`, `getFlaggedEventIds()→Future<Set<String>>` |
 
 ### presentation/ — UI
 | File | Purpose |
@@ -337,28 +341,31 @@ design/                            # formerly a git submodule — now inlined he
 
 ---
 
-## Test Classes — Server (14 classes, 104 @Test methods; ~153 rows after parameterization)
+## Test Classes — Server (16 classes, 108 @Test methods; ~164 rows after parameterization)
 
 | Class | @Test | Module |
 |-------|:-----:|--------|
 | `ConfigIntegrationTest` | 24 | Phase 3a/3b/3c: shape/activity/expression CRUD, config endpoint, payload validation, DtV publish gating, auth on config, config version tracking, full pipeline E2E |
 | `DeployTimeValidatorTest` | 15 | DtV L2: field refs, operator-type compat, predicate budget, nesting, default type match |
 | `ConflictResolutionIntegrationTest` | 9 | Resolve flags, manual identity conflicts |
+| `ConflictDetectorIntegrationTest` | 9 | W_effective, stale_reference detection, system-actor F-A3 format (Phase 3e) |
 | `SyncControllerIntegrationTest` | 8 | Push/pull pipeline, pagination |
 | `IdentityResolverIntegrationTest` | 8 | Merge/split, alias chains |
-| `ConflictDetectorIntegrationTest` | 8 | W_effective, stale_reference detection |
 | `ScopeFilteredSyncIntegrationTest` | 7 | IDR-015 scope-filtered pull |
 | `MultiActorScopeIntegrationTest` | 7 | Multi-actor scope containment (S5) |
-| `AuthFlagIntegrationTest` | 6 | Auth CD: scope_violation, temporal_authority_expired, role_stale (NO role_action_mismatch — rolled back) |
+| `AuthFlagIntegrationTest` | 6 | Auth CD: scope_violation, temporal_authority_expired, role_stale |
 | `AdminFlagIntegrationTest` | 6 | Admin UI flag operations |
+| `PlatformShapeBootstrapTest` | 4 | Phase 3e: parameterized — each of the 4 platform-bundled internal shapes is registered at boot |
+| `EnvelopeVocabularyTest` | 3 | Phase 3e: parameterized — rejects each of the 4 drift strings as envelope `type`; accepts each of the 6 canonical types |
 | `SubjectControllerIntegrationTest` | 3 | Subject REST, alias-aware queries |
+| `EnvelopeSchemaParityTest` | 1 | Phase 3e / FP-003: byte-parity between `contracts/envelope.schema.json` and server-bundled copy |
 | `ProjectionEquivalenceTest` | 1 | Server/mobile projection parity (E7) |
 | `MultiDeviceE2ETest` | 1 | Multi-device sync E2E |
 | `ExpressionEvaluatorTest` | 1 | Parameterized @MethodSource over 50 shared fixtures (E7) — all IDR-018 operators, null handling, type coercion, logical ops |
 
 **Parameterized note**: `ExpressionEvaluatorTest` is a single `@Test`/`@ParameterizedTest` that expands to 50 runs via [fixtures/expression-evaluation.json](contracts/fixtures/expression-evaluation.json). That is why `./mvnw test` reports ~153 total runs vs. 104 `@Test` methods. The "157" number in older CLAUDE.md revisions came from Phase 4.0 before rollback — ignore.
 
-## Test Classes — Mobile (9 files, 67 tests)
+## Test Classes — Mobile (10 files, 72 tests)
 
 | File | Tests | Module |
 |------|:-----:|--------|
@@ -367,6 +374,7 @@ design/                            # formerly a git submodule — now inlined he
 | `expression_evaluator_test.dart` | 9 | Shared fixture-driven (E7, 50 cases) + individual operator unit tests |
 | `form_engine_test.dart` | 8 | WidgetMapper: text, number, select, boolean, date fields |
 | `context_resolver_test.dart` | 6 | Phase 3d.3: context.* pre-resolution — actor.role, actor.scope_name, event_count, days_since_last_event, Phase 4 null placeholders |
+| `event_classifiers_test.dart` | 5 | Phase 3e (DD-2): `isIntegrityFlag`, `isIntegrityResolution`, `isIdentityLifecycle`, `isAssignmentEvent` — positive/negative coverage, version independence (vN), mutual exclusivity |
 | `selective_retain_test.dart` | 4 | Scope-based event purging |
 | `event_assembler_test.dart` | 3 | Phase 3d.1: activity_ref auto-population in assembled events |
 | `event_test.dart` | 2 | Event model serialization |
