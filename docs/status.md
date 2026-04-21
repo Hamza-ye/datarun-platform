@@ -8,13 +8,16 @@
 
 ## Current Phase
 
-**Phase 3: Configuration** — **COMPLETE**
+**Phase 4: Workflow & Policies** — **IN PROGRESS** (4.0 complete)
 
 | Sub-phase | Status | Notes |
 |-----------|--------|-------|
-| **3a: Shapes + Config Delivery** | **Complete** | 80 server + 33 mobile tests. Shapes, activities, config endpoint, payload validation, admin UI (server). ConfigStore, shape.dart IDR-017 rewrite, sync config download, form engine, widget_mapper 10 field types (mobile). |
-| **3b: Expressions + DtV** | **Complete** | 148 server + 47 mobile tests. Java + Dart expression evaluators (50 shared E7 fixtures), DtV L2 (15 tests), expression admin UI, ConfigStore expression methods, form show/hide + defaults + warnings. |
-| **3c: Config Packager + Full Pipeline** | **Complete** | 153 server + 54 mobile tests. Auth on config endpoint, DtV publish gating, config version tracking, ETag fix, two-slot config model (current/pending), full E2E pipeline test. |
+| **4.0: Role-Action Enforcement** | **Complete** | 157 server + 54 mobile tests. Whitelist model: ConflictDetector checks actor role against activity.roles matrix, flags scope_violation with "Role-action mismatch" reason. 4 quality gate tests (G0.1–G0.4). |
+| **4a: Patterns** | Not started | Vertical slice with capture_with_review. IDR-020 DECIDED. |
+| **4b: Triggers** | Not started | |
+| **4c: CV + E2E** | Not started | |
+
+**Deferred from 4.0 → 4a**: Mobile UI gating (WorkListScreen shape filtering + FormScreen action filtering by actor role). Server enforces via accept-and-flag; mobile filtering is presentation-only, natural fit with 4a's pattern-driven UI rework.
 
 ### Previous Phases
 
@@ -26,6 +29,7 @@
 | **3a: Shapes + Config Delivery** | Complete | 80 server + 33 mobile |
 | **3b: Expressions + DtV** | Complete | 148 server + 47 mobile |
 | **3c: Config Packager + Full Pipeline** | Complete | 153 server + 54 mobile |
+| **4.0: Role-Action Enforcement** | Complete | 157 server + 54 mobile |
 
 ---
 
@@ -56,9 +60,16 @@
 
 ## What's Next
 
-**Phase 4: Triggers & State Progression** — Next phase (not yet started).
+**Phase 4a: Patterns** — vertical slice with `capture_with_review` pattern (IDR-020 DECIDED).
 
-Phase 3 (Configuration) is fully complete with 207 total tests (153 server + 54 mobile).
+### Test Debt (carried from Phase 3)
+- Multi-version PE fixture
+- activity_ref auto-population
+- Widget-level form tests
+
+### Deferred Items
+- Mobile UI gating by role (deferred from 4.0 → 4a)
+- Performance benchmark (tracked since Phase 3 boundary)
 
 ---
 
@@ -70,4 +81,7 @@ _(None)_
 
 ## Active Decisions
 
-_(None pending — Phase 3 complete, Phase 4 spec needs to be written.)_
+| Decision | Status | Reference |
+|----------|--------|-----------|
+| IDR-020: Pattern State Machine Representation | DECIDED | `design/docs/decisions/idr-020-pattern-state-machine-representation.md` |
+| DD-2: Lock — needs IDR-021 (state change events) | OPEN | Phase 4 spec |

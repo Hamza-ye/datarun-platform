@@ -10,7 +10,7 @@ The implementation repository for the Datarun operations platform — a domain-a
 
 ## Current Phase
 
-**Phase 3: Configuration** — COMPLETE
+**Phase 4: Workflow & Policies** — IN PROGRESS (4.0 complete)
 
 - Phase 0 (Core Loop): COMPLETE
 - Phase 1 (Identity & Integrity): COMPLETE — 64 total tests
@@ -18,6 +18,7 @@ The implementation repository for the Datarun operations platform — a domain-a
 - Phase 3a (Shapes + Config Delivery): COMPLETE — 80 server + 33 mobile tests
 - Phase 3b (Expressions + DtV): COMPLETE — 148 server + 47 mobile tests
 - Phase 3c (Config Packager + Full Pipeline): COMPLETE — 153 server + 54 mobile tests
+- Phase 4.0 (Role-Action Enforcement): COMPLETE — 157 server + 54 mobile tests
 
 See [docs/status.md](docs/status.md) for detailed status and quality gate results.
 
@@ -65,6 +66,65 @@ docker compose -f docker-compose.test.yml down
 - **Test DB port**: `localhost:15432` (local), `localhost:5432` (CI).
 - **Java**: `sdk use java 17.0.14-tem`
 - **Flutter**: `/home/hamza/dev/flutter`, Android SDK at `/home/hamza/Android/Sdk`
+
+---
+
+## Agent Workflow
+
+See `docs/agent-workflow/` for session tasks and persistent lessons.
+
+### Workflow Orchestration
+
+**1. Plan Node Default**
+- Enter plan mode for any non-trivial task (three or more steps, or involving architectural decisions).
+- If something goes wrong, stop and re-plan immediately rather than continuing blindly.
+- Use plan mode for verification steps, not just implementation.
+- Write detailed specifications upfront to reduce ambiguity.
+
+**2. Subagent Strategy**
+- Use subagents liberally to keep the main context window clean.
+- Offload research, exploration, and parallel analysis to subagents.
+- For complex problems, allocate more compute via subagents.
+- Assign one task per subagent to ensure focused execution.
+
+**3. Self-Improvement Loop**
+- After any correction from the user, update `docs/agent-workflow/lessons.md` with the relevant pattern.
+- Create rules for yourself that prevent repeating the same mistake.
+- Iterate on these lessons rigorously until the mistake rate declines.
+- Review lessons at the start of each session when relevant to the project.
+
+**4. Verification Before Done**
+- Never mark a task complete without proving it works.
+- Diff behavior between main and your changes when relevant.
+- Ask: "Would a staff engineer approve this?"
+- Run tests, check logs, and demonstrate correctness.
+
+**5. Demand Elegance (Balanced)**
+- For non-trivial changes, pause and ask whether there is a more elegant solution.
+- If a fix feels hacky, implement the solution you would choose knowing everything you now know.
+- Do not over-engineer simple or obvious fixes.
+- Critically evaluate your own work before presenting it.
+
+**6. Autonomous Bug Fixing**
+- When given a bug report, fix it without asking for unnecessary guidance.
+- Review logs, errors, and failing tests, then resolve them.
+- Avoid requiring context switching from the user.
+- Fix failing CI tests proactively.
+
+### Task Management
+
+1. **Plan First**: Use `manage_todo_list` tool for in-session tracking; write cross-session plans to `docs/agent-workflow/todo.md`.
+2. **Verify Plan**: Review before starting implementation.
+3. **Track Progress**: Mark items complete as you go.
+4. **Explain Changes**: Provide a high-level summary at each step.
+5. **Document Results**: Add a review section after completion.
+6. **Capture Lessons**: Update `docs/agent-workflow/lessons.md` after corrections.
+
+### Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Minimize code impact.
+- **No Laziness**: Identify root causes. Avoid temporary fixes. Apply senior developer standards.
+- **Minimal Impact**: Touch only what is necessary. Avoid introducing new bugs.
 
 ---
 
@@ -178,7 +238,7 @@ design/                            # Git submodule → datarun docs repo
 ### integrity/ — Conflict Detection & Resolution
 | File | Purpose | Key API |
 |------|---------|---------|
-| `ConflictDetector.java` | Per-event identity CD + auth CD; creates flag events | `evaluate(events, lastPullWatermark)→List<Event>`, `evaluateAuth(events, actorId)→List<Event>`, `sweep(trailingWatermark)→List<Event>` |
+| `ConflictDetector.java` | Per-event identity CD + auth CD + role-action enforcement; creates flag events | `evaluate(events, lastPullWatermark)→List<Event>`, `evaluateAuth(events, actorId)→List<Event>` (includes role_action_mismatch check: whitelist model, activity.roles matrix), `sweep(trailingWatermark)→List<Event>` |
 | `ConflictResolutionService.java` | Resolve flags, create manual identity conflicts | `resolve(flagEventId, resolution, reclassifiedSubjectId, actorId, reason)→Event`, `listUnresolvedFlags()`, `getFlagDetail(UUID)` |
 | `ConflictController.java` | REST flag operations | `GET /api/conflicts`, `POST /api/conflicts/{flagId}/resolve`, `POST /api/conflicts/identity` |
 | `ConflictSweepJob.java` | 5-min scheduled sweep | `@Scheduled sweep()` |
@@ -264,7 +324,7 @@ design/                            # Git submodule → datarun docs repo
 
 ---
 
-## Test Classes — Server (153 tests)
+## Test Classes — Server (157 tests)
 
 | Class | Tests | Module |
 |-------|-------|--------|
@@ -275,7 +335,7 @@ design/                            # Git submodule → datarun docs repo
 | `ConflictResolutionIntegrationTest` | 9 | Resolve flags, manual identity conflicts |
 | `ProjectionEquivalenceTest` | 1 | Server/mobile projection parity (E7) |
 | `SubjectControllerIntegrationTest` | 3 | Subject REST, alias-aware queries |
-| `AuthFlagIntegrationTest` | 6 | Auth CD: scope_violation, temporal_authority |
+| `AuthFlagIntegrationTest` | 10 | Auth CD: scope_violation, temporal_authority, role_action_mismatch (G0.1-G0.4) |
 | `AdminFlagIntegrationTest` | 6 | Admin UI flag operations |
 | `MultiActorScopeIntegrationTest` | 7 | Multi-actor scope containment (S5) |
 | `ScopeFilteredSyncIntegrationTest` | 7 | IDR-015 scope-filtered pull |
@@ -326,7 +386,7 @@ Canonical docs in `design/docs/`:
 ## Forbidden Patterns
 
 | # | Forbidden | Why |
-|---|-----------|-----|
+| --- | --- | --- |
 | F1 | Add or modify envelope fields | Envelope finalized at 11 fields. ADR-level decision. |
 | F2 | Create new event types | Type vocabulary is platform-fixed, closed, append-only. |
 | F3 | Write to events table outside Event Store module | Write-path discipline. |
@@ -334,6 +394,9 @@ Canonical docs in `design/docs/`:
 | F5 | Skip contract tests | Contract tests are the backbone of system correctness. |
 | F6 | Reject events for state staleness | Accept-and-flag — events are never rejected. |
 | F11 | Schema changes without migration scripts | Flyway on server, SQLite onUpgrade on device. |
+| F12 | Change production semantics to fix a test | Tests adapt to production logic, never the reverse. If a test fails after a correct production change, fix the test fixture. |
+| F13 | Skip writing a test for the exact scenario that caused a bug | If a bug was caused by scenario X, there must be a test that fails without the fix and passes with it. |
+| F14 | Treat test scaffolding as a design input | Production code must be designed from domain rules, not from what makes tests pass. |
 
 ---
 
