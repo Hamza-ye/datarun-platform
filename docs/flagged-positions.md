@@ -76,6 +76,7 @@ All three must be true:
 ### Resolution log
 
 - **2026-04-21**: Opened.
+- **2026-04-24**: Re-scoped by [Ship-1 spec](ships/ship-1.md) §5. Original gate references discarded pre-convergence code. New gate: Ship-1 retro must confirm scope reconstruction replays `assignment_changed` events (no cache, no envelope field, no snapshot), and a test exists that would fail under a cache-based implementation. Closure deferred to Ship-1 retro; `Blocks:` field (IDR-021) is obsolete — role-action enforcement is a Ship-3 or later concern under the new cadence.
 
 ---
 
@@ -107,6 +108,7 @@ All three must be true:
 ### Resolution log
 
 - **2026-04-21**: Opened.
+- **2026-04-24**: Confirmed out of scope for Ship-1 (no merge/split). `Blocks:` field updated conceptually — not Phase 4, but Ship-2 (long-running subjects + merge/split). The V3 migration and the code it audits are pre-convergence artifacts; gate is re-assessed against Ship-2's implementation at Ship-2 start.
 
 ---
 
