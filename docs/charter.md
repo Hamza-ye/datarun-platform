@@ -17,9 +17,10 @@
 
 **Convergence phase**: 2 — **CLOSED** (2026-04-23). Protocol dormant; re-enters only if a Ship retro triggers a cross-cutting ADR round.
 **Forward cadence**: scenario-driven Ships (see *Rhythm* section).
-**Next action**: draft `docs/ships/ship-1.md` (Cluster A+B — offline structured capture under assigned scope).
-**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance).
-**Ledger state**: 251 STABLE / 7 DEFERRED / 11 OBSOLETE / 0 OPEN / 269 total. Drift gate: PASS.
+**Active ship**: Ship-1 — **implementation COMPLETE, retro written** (2026-04-24). Scenarios S00 + S01 + S03 shipped under the S19 offline constraint. `WalkthroughAcceptanceTest` 3/3 green (W-0 happy path, W-1 duplicate household → `identity_conflict`, W-2 out-of-scope capture → `scope_violation`). Mobile app deliberately deferred to a follow-up session; CI acceptance gate satisfied by the scripted two-device walkthrough. See [`ships/ship-1-retro.md`](ships/ship-1-retro.md).
+**Next action**: tag `ship-1`, then draft Ship-2 spec (merge/split resolution; FP-001 re-evaluated against `ScopeResolver`).
+**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance). **No new ADR drafted during Ship-1** — none of risks R1–R5 triggered.
+**Ledger state**: 251 STABLE / 7 DEFERRED / 11 OBSOLETE / 0 OPEN / 269 total. Drift gate: PASS (no classification changes forced by Ship-1).
 
 ---
 
