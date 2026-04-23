@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Datarun admin — unresolved flags</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; margin: 2rem; font-size: 13px; }
+        nav a { margin-right: 1rem; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { padding: 4px 8px; border: 1px solid #ddd; text-align: left; vertical-align: top; }
+        th { background: #f5f5f5; }
+        .small { color: #666; font-size: 11px; }
+        pre { margin: 0; white-space: pre-wrap; word-break: break-all; max-width: 500px; }
+        .empty { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="/admin/events">Events</a>
+    <a href="/admin/flags">Flags</a>
+</nav>
+<h1>Unresolved flags</h1>
+<p class="small">Ship-1 has no resolution pipeline: all flag events are listed.
+    Resolution lives in Ship-2 (identity) and Ship-3 (review).</p>
+<p th:if="${flags.isEmpty()}" class="empty">No flags raised.</p>
+<table th:unless="${flags.isEmpty()}">
+    <thead>
+    <tr>
+        <th>wm</th><th>category</th><th>source_event_id</th><th>subject</th>
+        <th>detector</th><th>reason</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="f : ${flags}">
+        <td th:text="${f.syncWatermark}"></td>
+        <td th:text="${f.payload.get('flag_category').asText()}"></td>
+        <td class="small" th:text="${f.payload.get('source_event_id').asText()}"></td>
+        <td class="small" th:text="${f.subjectId}"></td>
+        <td class="small" th:text="${f.actorId}"></td>
+        <td><pre th:text="${f.payload.toString()}"></pre></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

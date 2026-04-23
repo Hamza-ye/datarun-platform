@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/shapes/subjects_merged.schema.json",
+  "title": "subjects_merged/v1 payload",
+  "description": "Payload for identity-lifecycle merge events. Emitted with envelope type=capture. Recorded when a coordinator determines two subject UUIDs refer to the same real-world entity. The retired_id is never re-used; alias resolution routes it to surviving_id for all projection.",
+  "type": "object",
+  "properties": {
+    "surviving_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The subject UUID that continues to identify the entity."
+    },
+    "retired_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The subject UUID that is retired in favour of surviving_id."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Optional explanation of the merge decision."
+    }
+  },
+  "required": ["surviving_id", "retired_id"],
+  "additionalProperties": true
+}

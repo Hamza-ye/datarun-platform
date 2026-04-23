@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:15432/datarun_test
+    username: datarun
+    password: datarun
+  flyway:
+    enabled: true
+    clean-disabled: false
+
+logging:
+  level:
+    dev.datarun: DEBUG
