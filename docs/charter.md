@@ -11,7 +11,7 @@
 
 ## Status
 
-**Convergence phase**: 2 (round 1 close-out — 230 STABLE, 21 PROPOSED awaiting quiet round)
+**Convergence phase**: 2 (round 2 complete — 251 STABLE, 0 PROPOSED, charter closure-ready)
 **Active code phase**: paused — code work resumes at Phase 4 freeze
 **Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance)
 
