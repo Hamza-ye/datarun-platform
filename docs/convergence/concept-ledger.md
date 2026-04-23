@@ -69,6 +69,19 @@ knob, derived value, reserved/deferred item) has exactly one row.
   - FLAG: 15, OPEN: 13, DISPUTED: 9, RESERVED: 8
 - Size note: target was 150–200 unique concepts. Actual 269 reflects that the platform's ADR stress-tests (archive/ 00–21) introduce many named micro-concepts (anti-patterns, composition rules, trap names). Phase 1 topological sort will likely reveal synonyms to merge (`role-stale`/`role-staleness`, `scope-stale`/`scope-violation`, `workflow-pattern`/`pattern`). Do not prune pre-sort.
 
+**Phase 2 round 1 — fixpoint close-out (2026-04-23)**: after ADR-009 landed, a full ledger scan applied three operations:
+
+1. **Topology buckets enacted** (queued from round 0, triaged in [phase-1-topology.md](inventory/phase-1-topology.md)):
+   - Bucket A (10 rows) → OBSOLETE. Anti-pattern alerts + convergence-protocol process steps; not platform concepts.
+   - Bucket B (1 row: `sensitive-subject-classification`) → DEFERRED. Blocker: Phase 4 workflow & policy design surface.
+   - Bucket D (1 row: `projection-rebuild-strategy`) → DEFERRED. Blocker: IDR track after flag lifecycle settles (IG-authority, not ADR-authority).
+
+2. **Fixpoint promotion** (ledger rule 3): every PROPOSED row whose classification did not change in round 1 and whose upstream ADR was not superseded was promoted to STABLE — **230 rows**.
+
+3. **Round-1-touched rows stay PROPOSED** — 21 rows: the four charter-invariant settlements (accept-and-flag, flag, flag-creation-location, conflict-detection), seven class-membership flag cites (concurrent-state-change, stale-reference, temporal-authority-expired, scope-violation, role-stale), the five envelope-type canonicalizations (conflict-detected, conflict-resolved, subjects-merged, subject-split, type-vocabulary), the four reference-field canonicalizations (subject-ref, actor-ref, activity-ref, process-identity), and the three duality canonicalizations (scope, pattern, activity). Promotion of these requires one additional quiet round (or the Phase 2 → Phase 3 transition).
+
+**Status after round 1 close-out**: STABLE 230, PROPOSED 21, DEFERRED 7 (5 pre-existing + Bucket-B + Bucket-D), OBSOLETE 11 (pre-existing `role-staleness` + 10 Bucket-A), OPEN 0, DISPUTED 0. Total 269. Zero open forward-refs. Drift gate PASS.
+
 **Phase 2 round 1 — ADR-009 landed (2026-04-23)**: platform-fixed mechanism vs. deployer-configured instance duality canonicalized. `scope` DISPUTED → PRIMITIVE (§S2). `pattern` DISPUTED → PRIMITIVE (§S3). `activity` DISPUTED → CONFIG (§S4). The duality rule is recorded as a charter invariant (§S1) and a forbidden pattern (F-C1), subsuming future concepts exhibiting the same shape without a new ADR. No supersessions — ADR-003 §S7, ADR-004 §S7/§S9, ADR-005 §S5 all re-cited. Round 1 is now closure-ready: all nine DISPUTED rows from round 0 are classified.
 
 **Phase 2 round 1 — ADR-008 landed (2026-04-23)**: envelope reference fields canonicalized. `subject-ref`, `actor-ref`, `activity-ref` all DISPUTED → CONTRACT. `process-identity` re-cited as RESERVED under ADR-008 §S1. Reference-vs-referent rule stated explicitly (F-B1). Forward item FP-004 opened for potential `assignment_ref` evolution. No supersedes on ADR-001/002/004 — all re-cited.
@@ -110,272 +123,272 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | concept | classification | settled-by | status | introduced-in | history | notes |
 |---|---|---|---|---|---|---|
 | accept-and-flag | INVARIANT | ADR-006 §S1 | PROPOSED | ADR-002 | round 0: DISPUTED (A:ALGORITHM, B:INVARIANT, C1:ALGORITHM, C2:ALGORITHM); round 1: INVARIANT (ADR-006 §S1) | Property vs. procedure split: property is INVARIANT (this row), procedure lives at `conflict-detection` (ALGORITHM). Canonical over prior ADR-002 S14 cite. |
-| active-assignment | DERIVED | — | PROPOSED | phases/phase-2.md | round 0: DERIVED (inventory) | — |
+| active-assignment | DERIVED | — | STABLE | phases/phase-2.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | — |
 | activity | CONFIG | ADR-009 §S4 | PROPOSED | ADR-004 | round 0: DISPUTED (A:PRIMITIVE, C1:CONFIG); round 1: CONFIG (ADR-009 §S4) | Deployer-assembled L0 instance (pattern selection + shape bindings + role mappings + scope params). Envelope field `activity-ref` is CONTRACT in its own row (ADR-008 §S3) — reference-vs-referent orthogonality (ADR-008 §S4). |
 | activity-ref | CONTRACT | ADR-008 §S3 | PROPOSED | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT); round 1: CONTRACT (ADR-008 §S3) | Optional-with-auto-populate deployer-chosen identifier (`[a-z][a-z0-9_]*` or null). Field is CONTRACT; activity *instance* is CONFIG (ADR-004 §S9) — separate rows. B:RESERVED was a subagent artifact. |
-| actor | INVARIANT | — | PROPOSED | adr-002-identity-conflict.md | round 0: INVARIANT (inventory) | persistent identity category |
+| actor | INVARIANT | — | STABLE | adr-002-identity-conflict.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | persistent identity category |
 | actor-ref | CONTRACT | ADR-008 §S2 | PROPOSED | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT); round 1: CONTRACT (ADR-008 §S2) | Two admissible forms: human UUID and `system:{source_type}/{source_id}`. `source_type` is an evolvable platform vocabulary, not a closed enum. Discriminator: `startswith("system:")`. B:RESERVED was a subagent artifact. |
-| actor-token | CONTRACT | — | PROPOSED | phases/phase-2.md | round 0: CONTRACT (inventory) | — |
-| alias-cache | DERIVED | — | PROPOSED | phases/phase-1.md | round 0: DERIVED (inventory) | in-memory map for merge resolution |
-| alias-mapping | DERIVED | — | PROPOSED | adr-002-identity-conflict.md | round 0: DERIVED (inventory) | merge resolution projection |
-| alias-resolution | ALGORITHM | — | PROPOSED | raw-B | round 0: ALGORITHM (inventory) | single-hop lookup |
-| alias-table | CONTRACT | — | PROPOSED | phases/phase-1.md | round 0: CONTRACT (inventory) | materialized persistence layer |
-| alert | CONTRACT | — | PROPOSED | phases/phase-4.md | round 0: CONTRACT (inventory) | envelope type (Phase 4) |
-| anti-pattern | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | 6 catalogued pitfalls |
-| append-only | INVARIANT | — | PROPOSED | phases/phase-0.md | round 0: INVARIANT (inventory) | foundational write discipline |
-| approval-chain | ALGORITHM | — | PROPOSED | ADR-005 Session 1 | round 0: ALGORITHM (inventory) | multi-level workflow |
-| assignment | INVARIANT | — | PROPOSED | ADR-001 | round 0: INVARIANT (inventory) | temporal identity category |
-| assignment-based-access | CONTRACT | — | PROPOSED | raw-B | round 0: CONTRACT (inventory) | scope bindings via events |
-| assignment-changed | CONTRACT | — | PROPOSED | ADR-003 | round 0: CONTRACT (inventory) | envelope type |
-| assignment-created | CONFIG | — | PROPOSED | shapes/assignment_created.schema.json | round 0: CONFIG (inventory) | shape definition |
-| assignment-ended | CONFIG | — | PROPOSED | shapes/assignment_ended.schema.json | round 0: CONFIG (inventory) | shape definition |
-| assignment-lifecycle | DERIVED | — | PROPOSED | phases/phase-2.md | round 0: DERIVED (inventory) | projected from events |
-| assignment-resolver | PRIMITIVE | — | PROPOSED | ADR-005 Session 1 | round 0: PRIMITIVE (inventory) | validates role-holders |
-| authority-as-projection | ALGORITHM | — | PROPOSED | ADR-003 S12 | round 0: ALGORITHM (inventory) | reconstructed from timeline |
-| authority-context | DERIVED | — | PROPOSED | ADR-003 | round 0: DERIVED (inventory) | per-event authorization |
-| auto-eligible-flag | CONFIG | — | PROPOSED | phases/phase-2.md | round 0: CONFIG (inventory) | resolvability classification |
-| auto-resolution | ALGORITHM | — | PROPOSED | ADR-005 Session 1 | round 0: ALGORITHM (inventory) | L3b deadline-watch |
-| auto-resolution-policy | ALGORITHM | — | PROPOSED | phases/phase-4.md | round 0: ALGORITHM (inventory) | auto-eligible flag resolution |
-| boundary-mapping | OPEN | — | OPEN | raw-B | round 0: OPEN (inventory) | consolidation framework step |
-| breaking-change | CONFIG | — | PROPOSED | ADR-004 Session 2 | round 0: CONFIG (inventory) | schema evolution mode |
-| capture | CONTRACT | — | PROPOSED | phases/phase-0.md | round 0: CONTRACT (inventory) | envelope type |
-| capture-only | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | operational pattern |
-| capture-with-review | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | operational pattern |
-| case-management | CONFIG | — | PROPOSED | ADR-005 Session 1 | round 0: CONFIG (inventory) | workflow pattern |
-| causal-ordering | ALGORITHM | — | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory) | device_seq + sync_watermark |
-| command-validator | DERIVED | — | PROPOSED | primitives.md | round 0: DERIVED (inventory) | device-side advisory |
-| competing-patterns | INVARIANT | — | PROPOSED | phases/phase-4.md | round 0: INVARIANT (inventory) | composition rule 5 |
-| complex-composition | ALGORITHM | — | PROPOSED | ADR-005 Session 2 | round 0: ALGORITHM (inventory) | multi-pattern on same subject |
-| composition-rule | CONTRACT | — | PROPOSED | phases/phase-4.md | round 0: CONTRACT (inventory) | 5 pattern interaction rules |
+| actor-token | CONTRACT | — | STABLE | phases/phase-2.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | — |
+| alias-cache | DERIVED | — | STABLE | phases/phase-1.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | in-memory map for merge resolution |
+| alias-mapping | DERIVED | — | STABLE | adr-002-identity-conflict.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | merge resolution projection |
+| alias-resolution | ALGORITHM | — | STABLE | raw-B | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | single-hop lookup |
+| alias-table | CONTRACT | — | STABLE | phases/phase-1.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | materialized persistence layer |
+| alert | CONTRACT | — | STABLE | phases/phase-4.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | envelope type (Phase 4) |
+| anti-pattern | OBSOLETE | — | OBSOLETE | ADR-004 Session 3 | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | 6 catalogued pitfalls |
+| append-only | INVARIANT | — | STABLE | phases/phase-0.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | foundational write discipline |
+| approval-chain | ALGORITHM | — | STABLE | ADR-005 Session 1 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | multi-level workflow |
+| assignment | INVARIANT | — | STABLE | ADR-001 | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | temporal identity category |
+| assignment-based-access | CONTRACT | — | STABLE | raw-B | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | scope bindings via events |
+| assignment-changed | CONTRACT | — | STABLE | ADR-003 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | envelope type |
+| assignment-created | CONFIG | — | STABLE | shapes/assignment_created.schema.json | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | shape definition |
+| assignment-ended | CONFIG | — | STABLE | shapes/assignment_ended.schema.json | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | shape definition |
+| assignment-lifecycle | DERIVED | — | STABLE | phases/phase-2.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | projected from events |
+| assignment-resolver | PRIMITIVE | — | STABLE | ADR-005 Session 1 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | validates role-holders |
+| authority-as-projection | ALGORITHM | — | STABLE | ADR-003 S12 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | reconstructed from timeline |
+| authority-context | DERIVED | — | STABLE | ADR-003 | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | per-event authorization |
+| auto-eligible-flag | CONFIG | — | STABLE | phases/phase-2.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | resolvability classification |
+| auto-resolution | ALGORITHM | — | STABLE | ADR-005 Session 1 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L3b deadline-watch |
+| auto-resolution-policy | ALGORITHM | — | STABLE | phases/phase-4.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | auto-eligible flag resolution |
+| boundary-mapping | OBSOLETE | — | OBSOLETE | raw-B | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | consolidation framework step |
+| breaking-change | CONFIG | — | STABLE | ADR-004 Session 2 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | schema evolution mode |
+| capture | CONTRACT | — | STABLE | phases/phase-0.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | envelope type |
+| capture-only | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | operational pattern |
+| capture-with-review | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | operational pattern |
+| case-management | CONFIG | — | STABLE | ADR-005 Session 1 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | workflow pattern |
+| causal-ordering | ALGORITHM | — | STABLE | ADR-002 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | device_seq + sync_watermark |
+| command-validator | DERIVED | — | STABLE | primitives.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | device-side advisory |
+| competing-patterns | INVARIANT | — | STABLE | phases/phase-4.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | composition rule 5 |
+| complex-composition | ALGORITHM | — | STABLE | ADR-005 Session 2 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | multi-pattern on same subject |
+| composition-rule | CONTRACT | — | STABLE | phases/phase-4.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 5 pattern interaction rules |
 | concurrent-state-change | FLAG | ADR-006 §S2 | PROPOSED | ADR-002 S7 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | structural conflict |
-| config-gradient | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | four-layer configuration model |
-| config-package | CONTRACT | — | PROPOSED | phases/phase-3.md | round 0: CONTRACT (inventory) | atomic delivery structure |
-| config-packager | PRIMITIVE | — | PROPOSED | adr-004-configuration-boundary.md | round 0: PRIMITIVE (inventory) | assembles atomic deliverable |
-| config-version | DERIVED | — | PROPOSED | phases/phase-3.md | round 0: DERIVED (inventory) | monotonic versioning |
-| configuration-boundary | INVARIANT | — | PROPOSED | adr-004-configuration-boundary.md | round 0: INVARIANT (inventory) | four-layer separation |
-| configuration-delivery-pipeline | ALGORITHM | — | PROPOSED | adr-004-configuration-boundary.md | round 0: ALGORITHM (inventory) | author→validate→package→deliver→apply |
-| configuration-specialist-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
-| conflict | FLAG | — | PROPOSED | ADR-001 | round 0: FLAG (inventory) | anomaly for resolution |
+| config-gradient | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | four-layer configuration model |
+| config-package | CONTRACT | — | STABLE | phases/phase-3.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | atomic delivery structure |
+| config-packager | PRIMITIVE | — | STABLE | adr-004-configuration-boundary.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | assembles atomic deliverable |
+| config-version | DERIVED | — | STABLE | phases/phase-3.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | monotonic versioning |
+| configuration-boundary | INVARIANT | — | STABLE | adr-004-configuration-boundary.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | four-layer separation |
+| configuration-delivery-pipeline | ALGORITHM | — | STABLE | adr-004-configuration-boundary.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | author→validate→package→deliver→apply |
+| configuration-specialist-trap | OBSOLETE | — | OBSOLETE | ADR-004 Session 3 | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | anti-pattern alert |
+| conflict | FLAG | — | STABLE | ADR-001 | round 0: FLAG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | anomaly for resolution |
 | conflict-detected | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 | round 0: DISPUTED (A:CONTRACT, B:SHAPE→CONTRACT, C1:CONFIG, C2:PRIMITIVE); round 1: CONTRACT (ADR-007 §S2) | Platform-bundled integrity shape. ADR-007 absorbs the ADR-002 Addendum and makes this the canonical cite. |
 | conflict-detection | ALGORITHM | ADR-006 §S3 | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory); round 1: ALGORITHM confirmed (ADR-006 §S3) | Procedure that enforces the §S1 invariant. Extensible/relocatable without changing the invariant. |
-| conflict-detector | PRIMITIVE | — | PROPOSED | adr-002-identity-conflict.md | round 0: PRIMITIVE (inventory) | evaluates anomalies |
-| conflict-resolution | ALGORITHM | — | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory) | ConflictResolved workflow |
+| conflict-detector | PRIMITIVE | — | STABLE | adr-002-identity-conflict.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | evaluates anomalies |
+| conflict-resolution | ALGORITHM | — | STABLE | ADR-002 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | ConflictResolved workflow |
 | conflict-resolved | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 | round 0: CONTRACT (inventory); round 1: CONTRACT re-cited (ADR-007 §S2) | Platform-bundled shape; spans type=review (human) and type=capture (system:auto_resolution). |
-| context-properties | DERIVED | — | PROPOSED | raw-B | round 0: DERIVED (inventory) | 7 platform-fixed values |
-| context-resolver | PRIMITIVE | — | PROPOSED | phases/phase-3d.md | round 0: PRIMITIVE (inventory) | resolves context.* at form-open |
-| context-scope | DERIVED | — | PROPOSED | adr-005-state-progression.md | round 0: DERIVED (inventory) | form evaluation scope |
-| contract | INVARIANT | — | PROPOSED | contracts.md | round 0: INVARIANT (inventory) | inter-primitive guarantee |
-| cross-activity-link | ALGORITHM | — | PROPOSED | phases/phase-4.md | round 0: ALGORITHM (inventory) | composition rule 4 |
-| cross-cutting | INVARIANT | — | PROPOSED | cross-cutting.md | round 0: INVARIANT (inventory) | 8 spanning concerns |
-| custom-shape | DERIVED | — | PROPOSED | phases/phase-3.md | round 0: DERIVED (inventory) | deployer-authored definition |
-| deadline-check | CONFIG | — | PROPOSED | ADR-004 S7 | round 0: CONFIG (inventory) | L3b trigger type |
-| deadline-trigger | CONFIG | — | PROPOSED | ADR-005 Session 1 | round 0: CONFIG (inventory) | time-based reaction |
-| decision-harvest | OPEN | — | OPEN | raw-B | round 0: OPEN (inventory) | convergence framework step |
-| default-expression | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | L2 form rule |
-| deploy-time-validator | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | complexity gating |
-| deployment-parameterization | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | deployer configuration |
-| deprecated-shape | DERIVED | — | PROPOSED | phases/phase-3.md | round 0: DERIVED (inventory) | unavailable for new events |
-| deprecation-change | CONFIG | — | PROPOSED | ADR-004 Session 2 | round 0: CONFIG (inventory) | schema evolution mode |
-| deprecation-only-evolution | ALGORITHM | — | PROPOSED | raw-B | round 0: ALGORITHM (inventory) | default shape versioning strategy |
-| detect-before-act | INVARIANT | — | PROPOSED | ADR-002 S12 | round 0: INVARIANT (inventory) | flagged events excluded from state/policy |
-| device-id | CONTRACT | — | PROPOSED | ADR-001 | round 0: CONTRACT (inventory) | hardware-bound UUID |
-| device-identity | RESERVED | — | PROPOSED | raw-B | round 0: RESERVED (inventory) | hardware-bound persisted identity |
-| device-seq | CONTRACT | — | PROPOSED | ADR-001 | round 0: CONTRACT (inventory) | per-device monotonic integer |
-| device-sequence | CONTRACT | — | PROPOSED | adr-002-identity-conflict.md | round 0: CONTRACT (inventory) | synonym of device-seq |
+| context-properties | DERIVED | — | STABLE | raw-B | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 7 platform-fixed values |
+| context-resolver | PRIMITIVE | — | STABLE | phases/phase-3d.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | resolves context.* at form-open |
+| context-scope | DERIVED | — | STABLE | adr-005-state-progression.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | form evaluation scope |
+| contract | INVARIANT | — | STABLE | contracts.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | inter-primitive guarantee |
+| cross-activity-link | ALGORITHM | — | STABLE | phases/phase-4.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | composition rule 4 |
+| cross-cutting | INVARIANT | — | STABLE | cross-cutting.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 8 spanning concerns |
+| custom-shape | DERIVED | — | STABLE | phases/phase-3.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | deployer-authored definition |
+| deadline-check | CONFIG | — | STABLE | ADR-004 S7 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L3b trigger type |
+| deadline-trigger | CONFIG | — | STABLE | ADR-005 Session 1 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | time-based reaction |
+| decision-harvest | OBSOLETE | — | OBSOLETE | raw-B | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | convergence framework step |
+| default-expression | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L2 form rule |
+| deploy-time-validator | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | complexity gating |
+| deployment-parameterization | CONFIG | — | STABLE | raw-B | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | deployer configuration |
+| deprecated-shape | DERIVED | — | STABLE | phases/phase-3.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | unavailable for new events |
+| deprecation-change | CONFIG | — | STABLE | ADR-004 Session 2 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | schema evolution mode |
+| deprecation-only-evolution | ALGORITHM | — | STABLE | raw-B | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | default shape versioning strategy |
+| detect-before-act | INVARIANT | — | STABLE | ADR-002 S12 | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | flagged events excluded from state/policy |
+| device-id | CONTRACT | — | STABLE | ADR-001 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | hardware-bound UUID |
+| device-identity | RESERVED | — | STABLE | raw-B | round 0: RESERVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | hardware-bound persisted identity |
+| device-seq | CONTRACT | — | STABLE | ADR-001 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | per-device monotonic integer |
+| device-sequence | CONTRACT | — | STABLE | adr-002-identity-conflict.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | synonym of device-seq |
 | device-sharing | RESERVED | — | DEFERRED | phases/phase-2.md | round 0: DEFERRED (inventory) | per-actor sync sessions (IG-14) |
-| device-time | INVARIANT | — | PROPOSED | ADR-001 S5 | round 0: INVARIANT (inventory) | advisory-only timestamp |
-| domain-uniqueness-constraint | CONFIG | — | PROPOSED | ADR-004 Session 3 Part 4 | round 0: CONFIG (inventory) | deployer-defined rule |
+| device-time | INVARIANT | — | STABLE | ADR-001 S5 | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | advisory-only timestamp |
+| domain-uniqueness-constraint | CONFIG | — | STABLE | ADR-004 Session 3 Part 4 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | deployer-defined rule |
 | domain-uniqueness-violation | FLAG | ADR-006 §S2 | DEFERRED | ADR-004 Session 3 Part 4 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | flag category (entry 7); emission deferred to Phase 4 per flag-catalog |
-| draft-config | DERIVED | — | PROPOSED | phases/phase-3.md | round 0: DERIVED (inventory) | pending package on device |
-| duplicate-candidate-identified | FLAG | — | PROPOSED | ADR-002 S9 | round 0: FLAG (inventory) | merge nomination event |
-| entity-lifecycle | PRIMITIVE | — | PROPOSED | ADR-005 Session 2 | round 0: PRIMITIVE (inventory) | pattern for static entities |
-| envelope | CONTRACT | — | PROPOSED | ADR-001 | round 0: CONTRACT (inventory) | 11-field event wrapper |
-| event | PRIMITIVE | — | PROPOSED | ADR-001 | round 0: PRIMITIVE (inventory) | immutable record |
-| event-assembler | ALGORITHM | — | PROPOSED | phases/phase-3d.md | round 0: ALGORITHM (inventory) | constructs 11-field envelope |
-| event-id | CONTRACT | — | PROPOSED | adr-001-offline-data-model.md | round 0: CONTRACT (inventory) | client-generated UUID |
-| event-level-pattern | CONFIG | — | PROPOSED | ADR-005 Session 1 | round 0: CONFIG (inventory) | per-event state pattern |
-| event-level-state | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | event-scoped state |
-| event-reaction | ALGORITHM | — | PROPOSED | ADR-004 S7 | round 0: ALGORITHM (inventory) | L3a synchronous trigger |
-| event-reaction-trigger | CONFIG | — | PROPOSED | ADR-005 Session 1 | round 0: CONFIG (inventory) | L3a trigger type |
-| event-ref | CONTRACT | — | PROPOSED | adr-001-offline-data-model.md | round 0: CONTRACT (inventory) | cross-event reference |
-| event-sourcing | INVARIANT | — | PROPOSED | phases/phase-0.md | round 0: INVARIANT (inventory) | all state from events |
-| event-store | PRIMITIVE | — | PROPOSED | ADR-001 | round 0: PRIMITIVE (inventory) | append-only persistence |
-| event-type | CONTRACT | — | PROPOSED | ADR-004 S3 | round 0: CONTRACT (inventory) | closed 6-value vocabulary |
-| expression-evaluator | PRIMITIVE | — | PROPOSED | ADR-004 S8 | round 0: PRIMITIVE (inventory) | pure-function AST evaluator |
-| expression-language | ALGORITHM | — | PROPOSED | ADR-004 S8 | round 0: ALGORITHM (inventory) | single language, two contexts |
+| draft-config | DERIVED | — | STABLE | phases/phase-3.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | pending package on device |
+| duplicate-candidate-identified | FLAG | — | STABLE | ADR-002 S9 | round 0: FLAG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | merge nomination event |
+| entity-lifecycle | PRIMITIVE | — | STABLE | ADR-005 Session 2 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | pattern for static entities |
+| envelope | CONTRACT | — | STABLE | ADR-001 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 11-field event wrapper |
+| event | PRIMITIVE | — | STABLE | ADR-001 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | immutable record |
+| event-assembler | ALGORITHM | — | STABLE | phases/phase-3d.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | constructs 11-field envelope |
+| event-id | CONTRACT | — | STABLE | adr-001-offline-data-model.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | client-generated UUID |
+| event-level-pattern | CONFIG | — | STABLE | ADR-005 Session 1 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | per-event state pattern |
+| event-level-state | DERIVED | — | STABLE | ADR-005 Session 2 | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | event-scoped state |
+| event-reaction | ALGORITHM | — | STABLE | ADR-004 S7 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L3a synchronous trigger |
+| event-reaction-trigger | CONFIG | — | STABLE | ADR-005 Session 1 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L3a trigger type |
+| event-ref | CONTRACT | — | STABLE | adr-001-offline-data-model.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | cross-event reference |
+| event-sourcing | INVARIANT | — | STABLE | phases/phase-0.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | all state from events |
+| event-store | PRIMITIVE | — | STABLE | ADR-001 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | append-only persistence |
+| event-type | CONTRACT | — | STABLE | ADR-004 S3 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | closed 6-value vocabulary |
+| expression-evaluator | PRIMITIVE | — | STABLE | ADR-004 S8 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | pure-function AST evaluator |
+| expression-language | ALGORITHM | — | STABLE | ADR-004 S8 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | single language, two contexts |
 | file-pattern | RESERVED | — | DEFERRED | phases/phase-4.md | round 0: DEFERRED (inventory) | entity_lifecycle alternative (Phase 4+) |
-| field-budget | INVARIANT | — | PROPOSED | ADR-004 S10 | round 0: INVARIANT (inventory) | 60-field limit per shape |
-| field-reference | CONTRACT | — | PROPOSED | ADR-004 S8 | round 0: CONTRACT (inventory) | expression component |
-| filter-predicate | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | boolean condition in expression |
+| field-budget | INVARIANT | — | STABLE | ADR-004 S10 | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 60-field limit per shape |
+| field-reference | CONTRACT | — | STABLE | ADR-004 S8 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | expression component |
+| filter-predicate | ALGORITHM | — | STABLE | phases/phase-3.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | boolean condition in expression |
 | flag | INVARIANT | ADR-006 §S2 | PROPOSED | ADR-001 | round 0: DISPUTED (B:DERIVED, C1:INVARIANT, C2:PRIMITIVE); round 1: INVARIANT (ADR-006 §S2) | Event-stream canonicality (scoped, not global): on-stream anomaly records take flag form with no parallel record-surface; off-stream surfaces (metrics/telemetry/logs) are out of scope. Instances are DERIVED; catalog members are CONFIG. |
-| flag-cascade-contamination | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | projection property |
-| flag-catalog | CONTRACT | — | PROPOSED | flag-catalog.md | round 0: CONTRACT (inventory) | 9-category register |
-| flag-category | CONTRACT | — | PROPOSED | conflict_detected.schema.json | round 0: CONTRACT (inventory) | enumerated anomaly type |
+| flag-cascade-contamination | DERIVED | — | STABLE | ADR-005 Session 2 | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | projection property |
+| flag-catalog | CONTRACT | — | STABLE | flag-catalog.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 9-category register |
+| flag-category | CONTRACT | — | STABLE | conflict_detected.schema.json | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | enumerated anomaly type |
 | flag-creation-location | INVARIANT | ADR-006 §S4 | PROPOSED | raw-B | round 0: OPEN (inventory); round 1: INVARIANT (ADR-006 §S4) | Server-side by default; additively evolvable to device. Canonicalizes `architecture/boundary.md §SG-1`. |
-| flag-exclusion | ALGORITHM | — | PROPOSED | phases/phase-1.md | round 0: ALGORITHM (inventory) | flagged from state derivation |
-| flag-resolvability-classification | DERIVED | — | PROPOSED | raw-B | round 0: DERIVED (inventory) | auto_eligible vs manual_only |
-| flag-severity | CONFIG | — | PROPOSED | phases/phase-4.md | round 0: CONFIG (inventory) | blocking vs informational |
-| flagged-event-exclusion | ALGORITHM | — | PROPOSED | phases/phase-1.md | round 0: ALGORITHM (inventory) | remove from state |
-| form-context | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | expression evaluation scope |
-| form-engine | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | shape→form renderer |
-| form-logic | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | L2 expressions |
-| forward-compatibility | INVARIANT | — | PROPOSED | phases/phase-3.md | round 0: INVARIANT (inventory) | config package design |
-| four-layer-gradient | CONFIG | — | PROPOSED | ADR-004 S5 | round 0: CONFIG (inventory) | L0-L3 configuration |
-| gap-identification | OPEN | — | OPEN | raw-B | round 0: OPEN (inventory) | convergence framework step |
-| geographic-scope | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | location hierarchy type |
-| greenspun-rule | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
-| hardware-bound-identity | INVARIANT | — | PROPOSED | adr-002-identity-conflict.md | round 0: INVARIANT (inventory) | device_id uniqueness |
-| identity-conflict | FLAG | — | PROPOSED | ADR-002 S9 | round 0: FLAG (inventory) | probable duplicate subjects |
-| identity-lifecycle | DERIVED | — | PROPOSED | phases/phase-1.md | round 0: DERIVED (inventory) | merge/split transitions |
-| identity-resolver | PRIMITIVE | — | PROPOSED | ADR-002 | round 0: PRIMITIVE (inventory) | merge/split/alias management |
-| identity-type-taxonomy | INVARIANT | — | PROPOSED | adr-002-identity-conflict.md | round 0: INVARIANT (inventory) | 4 identity categories |
-| informational-flag | CONFIG | — | PROPOSED | phases/phase-4.md | round 0: CONFIG (inventory) | non-blocking severity |
-| inner-platform-effect | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
-| invariant | INVARIANT | — | PROPOSED | primitives.md | round 0: INVARIANT (inventory) | structural guarantee |
-| json-schema | CONTRACT | — | PROPOSED | phases/phase-0.md | round 0: CONTRACT (inventory) | language-neutral contracts |
-| knowledge-horizon | ALGORITHM | — | PROPOSED | phases/phase-1.md | round 0: ALGORITHM (inventory) | device awareness cutoff |
-| l0-assembly | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | configuration layer |
-| l1-shape | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | configuration layer |
-| l2-form-logic | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | configuration layer |
-| l3-policy | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | configuration layer |
-| lifecycle-state | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | entity_lifecycle pattern state |
-| lineage-dag-acyclic | INVARIANT | — | PROPOSED | raw-B | round 0: INVARIANT (inventory) | merge operands construction |
-| lineage-graph | DERIVED | — | PROPOSED | adr-002-identity-conflict.md | round 0: DERIVED (inventory) | identity merge/split history |
-| location-hierarchy | DERIVED | — | PROPOSED | phases/phase-2.md | round 0: DERIVED (inventory) | materialized path trees |
-| logic-rule | CONFIG | — | PROPOSED | ADR-004 | round 0: CONFIG (inventory) | L2 expression-based rule |
-| manual-identity-conflict | DERIVED | — | PROPOSED | phases/phase-1.md | round 0: DERIVED (inventory) | admin-triggered flag |
-| manual-only | FLAG | — | PROPOSED | ADR-005 Session 1 | round 0: FLAG (inventory) | resolvability classification |
-| manual-only-flag | CONFIG | — | PROPOSED | phases/phase-2.md | round 0: CONFIG (inventory) | requires human resolution |
-| materialized-path | ALGORITHM | — | PROPOSED | ADR-003 S3 | round 0: ALGORITHM (inventory) | hierarchy containment test |
-| merge | ALGORITHM | — | PROPOSED | ADR-001 | round 0: ALGORITHM (inventory) | subject identity operation |
-| merge-alias-projection | ALGORITHM | — | PROPOSED | raw-B | round 0: ALGORITHM (inventory) | alias-in-projection strategy |
-| merge-subject | ALGORITHM | — | PROPOSED | adr-002-identity-conflict.md | round 0: ALGORITHM (inventory) | online-only operation |
-| multi-actor-handoff | ALGORITHM | — | PROPOSED | ADR-005 Session 1 | round 0: ALGORITHM (inventory) | workflow step |
-| multi-device | DERIVED | — | PROPOSED | phases/phase-1.md | round 0: DERIVED (inventory) | concurrent capture scenario |
-| multi-level-distribution | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | raw PATTERN→CONFIG (workflow pattern) |
-| multi-step-approval | CONFIG | — | PROPOSED | ADR-005 Session 1 | round 0: CONFIG (inventory) | workflow pattern |
-| multi-version-projection | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | union projection |
-| no-pattern-activity | CONFIG | — | PROPOSED | adr-004-configuration-boundary.md | round 0: CONFIG (inventory) | pattern: none |
-| no-unmerge | INVARIANT | — | PROPOSED | raw-B | round 0: INVARIANT (inventory) | SubjectUnmerged does not exist |
-| offline-first | INVARIANT | — | PROPOSED | principles.md | round 0: INVARIANT (inventory) | work disconnected |
-| offline-first-architecture | INVARIANT | — | PROPOSED | adr-001-offline-data-model.md | round 0: INVARIANT (inventory) | events offline-capable |
-| offline-local-state | PRIMITIVE | — | PROPOSED | phases/phase-0.md | round 0: PRIMITIVE (inventory) | complete device copy |
-| online-only | RESERVED | — | PROPOSED | phases/phase-1.md | round 0: RESERVED (inventory) | merge/split/resolution |
-| operator-type-compatibility | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | DtV rule |
-| order-independent-sync | INVARIANT | — | PROPOSED | adr-001-offline-data-model.md | round 0: INVARIANT (inventory) | events carry ordering metadata |
-| overlapping-authority-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
+| flag-exclusion | ALGORITHM | — | STABLE | phases/phase-1.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | flagged from state derivation |
+| flag-resolvability-classification | DERIVED | — | STABLE | raw-B | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | auto_eligible vs manual_only |
+| flag-severity | CONFIG | — | STABLE | phases/phase-4.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | blocking vs informational |
+| flagged-event-exclusion | ALGORITHM | — | STABLE | phases/phase-1.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | remove from state |
+| form-context | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | expression evaluation scope |
+| form-engine | ALGORITHM | — | STABLE | phases/phase-3.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | shape→form renderer |
+| form-logic | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L2 expressions |
+| forward-compatibility | INVARIANT | — | STABLE | phases/phase-3.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | config package design |
+| four-layer-gradient | CONFIG | — | STABLE | ADR-004 S5 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L0-L3 configuration |
+| gap-identification | OBSOLETE | — | OBSOLETE | raw-B | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | convergence framework step |
+| geographic-scope | CONFIG | — | STABLE | ADR-003 S3 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | location hierarchy type |
+| greenspun-rule | OBSOLETE | — | OBSOLETE | ADR-004 Session 3 | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | anti-pattern alert |
+| hardware-bound-identity | INVARIANT | — | STABLE | adr-002-identity-conflict.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | device_id uniqueness |
+| identity-conflict | FLAG | — | STABLE | ADR-002 S9 | round 0: FLAG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | probable duplicate subjects |
+| identity-lifecycle | DERIVED | — | STABLE | phases/phase-1.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | merge/split transitions |
+| identity-resolver | PRIMITIVE | — | STABLE | ADR-002 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | merge/split/alias management |
+| identity-type-taxonomy | INVARIANT | — | STABLE | adr-002-identity-conflict.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 4 identity categories |
+| informational-flag | CONFIG | — | STABLE | phases/phase-4.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | non-blocking severity |
+| inner-platform-effect | OBSOLETE | — | OBSOLETE | ADR-004 Session 3 | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | anti-pattern alert |
+| invariant | INVARIANT | — | STABLE | primitives.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | structural guarantee |
+| json-schema | CONTRACT | — | STABLE | phases/phase-0.md | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | language-neutral contracts |
+| knowledge-horizon | ALGORITHM | — | STABLE | phases/phase-1.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | device awareness cutoff |
+| l0-assembly | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | configuration layer |
+| l1-shape | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | configuration layer |
+| l2-form-logic | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | configuration layer |
+| l3-policy | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | configuration layer |
+| lifecycle-state | DERIVED | — | STABLE | ADR-005 Session 2 | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | entity_lifecycle pattern state |
+| lineage-dag-acyclic | INVARIANT | — | STABLE | raw-B | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | merge operands construction |
+| lineage-graph | DERIVED | — | STABLE | adr-002-identity-conflict.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | identity merge/split history |
+| location-hierarchy | DERIVED | — | STABLE | phases/phase-2.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | materialized path trees |
+| logic-rule | CONFIG | — | STABLE | ADR-004 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L2 expression-based rule |
+| manual-identity-conflict | DERIVED | — | STABLE | phases/phase-1.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | admin-triggered flag |
+| manual-only | FLAG | — | STABLE | ADR-005 Session 1 | round 0: FLAG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | resolvability classification |
+| manual-only-flag | CONFIG | — | STABLE | phases/phase-2.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | requires human resolution |
+| materialized-path | ALGORITHM | — | STABLE | ADR-003 S3 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | hierarchy containment test |
+| merge | ALGORITHM | — | STABLE | ADR-001 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | subject identity operation |
+| merge-alias-projection | ALGORITHM | — | STABLE | raw-B | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | alias-in-projection strategy |
+| merge-subject | ALGORITHM | — | STABLE | adr-002-identity-conflict.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | online-only operation |
+| multi-actor-handoff | ALGORITHM | — | STABLE | ADR-005 Session 1 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | workflow step |
+| multi-device | DERIVED | — | STABLE | phases/phase-1.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | concurrent capture scenario |
+| multi-level-distribution | CONFIG | — | STABLE | raw-B | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | raw PATTERN→CONFIG (workflow pattern) |
+| multi-step-approval | CONFIG | — | STABLE | ADR-005 Session 1 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | workflow pattern |
+| multi-version-projection | ALGORITHM | — | STABLE | phases/phase-3.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | union projection |
+| no-pattern-activity | CONFIG | — | STABLE | adr-004-configuration-boundary.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | pattern: none |
+| no-unmerge | INVARIANT | — | STABLE | raw-B | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | SubjectUnmerged does not exist |
+| offline-first | INVARIANT | — | STABLE | principles.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | work disconnected |
+| offline-first-architecture | INVARIANT | — | STABLE | adr-001-offline-data-model.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | events offline-capable |
+| offline-local-state | PRIMITIVE | — | STABLE | phases/phase-0.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | complete device copy |
+| online-only | RESERVED | — | STABLE | phases/phase-1.md | round 0: RESERVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | merge/split/resolution |
+| operator-type-compatibility | ALGORITHM | — | STABLE | phases/phase-3.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | DtV rule |
+| order-independent-sync | INVARIANT | — | STABLE | adr-001-offline-data-model.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | events carry ordering metadata |
+| overlapping-authority-trap | OBSOLETE | — | OBSOLETE | ADR-004 Session 3 | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | anti-pattern alert |
 | pattern | PRIMITIVE | ADR-009 §S3 | PROPOSED | ADR-004 | round 0: DISPUTED (A:PRIMITIVE, B:CONFIG, C2:PRIMITIVE); round 1: PRIMITIVE (ADR-009 §S3) | Platform-fixed mechanism (closed registry per ADR-005 §S5, deployer-referenced not deployer-authored). Parameters and roles stay CONFIG in their own rows. `workflow-pattern` is a synonym pointer (not promoted). |
-| pattern-composition | ALGORITHM | — | PROPOSED | ADR-005 Session 2 | round 0: ALGORITHM (inventory) | composition rules |
-| pattern-composition-rule | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | 5 interaction rules |
-| pattern-registry | PRIMITIVE | — | PROPOSED | ADR-005 Session 1 | round 0: PRIMITIVE (inventory) | platform-fixed workflows |
-| pattern-role | CONFIG | — | PROPOSED | ADR-005 Session 1 | round 0: CONFIG (inventory) | abstract role in pattern |
-| pattern-state | DERIVED | — | PROPOSED | phases/phase-4.md | round 0: DERIVED (inventory) | derived workflow state |
-| pending-config | DERIVED | — | PROPOSED | phases/phase-3.md | round 0: DERIVED (inventory) | staged package |
-| periodic-capture | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | scheduled pattern |
-| policy-routing | ALGORITHM | — | PROPOSED | phases/phase-4.md | round 0: ALGORITHM (inventory) | non-recursive triggers |
-| predicate | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | atomic comparison |
-| predicate-budget | CONFIG | — | PROPOSED | phases/phase-3.md | round 0: CONFIG (inventory) | 3-predicate limit |
-| process | PRIMITIVE | — | PROPOSED | ADR-001 | round 0: PRIMITIVE (inventory) | identity category |
+| pattern-composition | ALGORITHM | — | STABLE | ADR-005 Session 2 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | composition rules |
+| pattern-composition-rule | CONFIG | — | STABLE | raw-B | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 5 interaction rules |
+| pattern-registry | PRIMITIVE | — | STABLE | ADR-005 Session 1 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | platform-fixed workflows |
+| pattern-role | CONFIG | — | STABLE | ADR-005 Session 1 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | abstract role in pattern |
+| pattern-state | DERIVED | — | STABLE | phases/phase-4.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | derived workflow state |
+| pending-config | DERIVED | — | STABLE | phases/phase-3.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | staged package |
+| periodic-capture | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | scheduled pattern |
+| policy-routing | ALGORITHM | — | STABLE | phases/phase-4.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | non-recursive triggers |
+| predicate | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | atomic comparison |
+| predicate-budget | CONFIG | — | STABLE | phases/phase-3.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 3-predicate limit |
+| process | PRIMITIVE | — | STABLE | ADR-001 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | identity category |
 | process-identity | RESERVED | ADR-008 §S1 | PROPOSED | envelope.schema.json | round 0: RESERVED (inventory); round 1: RESERVED re-cited (ADR-008 §S1) | `subject_ref.type = "process"` — present in the enum, no current emission site. Active set extension is architecture-grade. |
-| projection | DERIVED | — | PROPOSED | ADR-001 | round 0: DERIVED (inventory) | computed current state |
-| projection-derived-state | INVARIANT | — | PROPOSED | adr-005-state-progression.md | round 0: INVARIANT (inventory) | never stored in payloads |
-| projection-engine | PRIMITIVE | — | PROPOSED | ADR-001 | round 0: PRIMITIVE (inventory) | state derivation |
-| projection-equivalence | CONTRACT | — | PROPOSED | contracts/fixtures/projection-equivalence.json | round 0: CONTRACT (inventory) | server/mobile parity |
-| projection-rebuild-strategy | OPEN | — | OPEN | raw-B | round 0: OPEN (inventory) | implementation decision |
-| projection-rule | DERIVED | — | PROPOSED | ADR-004 Session 2 | round 0: DERIVED (inventory) | source→derived mapping |
+| projection | DERIVED | — | STABLE | ADR-001 | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | computed current state |
+| projection-derived-state | INVARIANT | — | STABLE | adr-005-state-progression.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | never stored in payloads |
+| projection-engine | PRIMITIVE | — | STABLE | ADR-001 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | state derivation |
+| projection-equivalence | CONTRACT | — | STABLE | contracts/fixtures/projection-equivalence.json | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | server/mobile parity |
+| projection-rebuild-strategy | OPEN | — | DEFERRED | raw-B | round 0: OPEN (inventory); round 1: DEFERRED (topology Bucket-D — IG-authority; blocker: IDR track after flag lifecycle settles) | Blocker: IDR track after flag lifecycle (ADR-006) settles — implementation-grade, not ADR-authority. |
+| projection-rule | DERIVED | — | STABLE | ADR-004 Session 2 | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | source→derived mapping |
 | provisional-release | RESERVED | — | DEFERRED | phases/phase-3.md | round 0: DEFERRED (inventory) | breaking change tooling (IG-7) |
-| query-based-scope | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | conditional data access |
-| raw-reference | ALGORITHM | — | PROPOSED | adr-002-identity-conflict.md | round 0: ALGORITHM (inventory) | CD uses original subject_ref |
-| read-discipline | RESERVED | — | PROPOSED | phases/phase-1.md | round 0: RESERVED (inventory) | all reads defensive |
-| replay | ALGORITHM | — | PROPOSED | phases/phase-0.md | round 0: ALGORITHM (inventory) | reconstruct from events |
-| resolvability-classification | INVARIANT | — | PROPOSED | adr-005-state-progression.md | round 0: INVARIANT (inventory) | auto_eligible or manual_only |
-| responsibility-binding | DERIVED | — | PROPOSED | phases/phase-2.md | round 0: DERIVED (inventory) | actor→scope assignment |
-| review | CONTRACT | — | PROPOSED | ADR-004 | round 0: CONTRACT (inventory) | envelope type |
-| review-state | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | event-level state |
-| role | DERIVED | — | PROPOSED | phases/phase-4.md | round 0: DERIVED (inventory) | actor capability class |
-| role-action-enforcement | ALGORITHM | — | PROPOSED | phases/phase-4.md | round 0: ALGORITHM (inventory) | IDR-021 implementation |
-| role-action-permission | CONFIG | — | PROPOSED | ADR-003 S8 | round 0: CONFIG (inventory) | role×action matrix |
-| role-action-table | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | deployer matrix |
+| query-based-scope | CONFIG | — | STABLE | ADR-003 S3 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | conditional data access |
+| raw-reference | ALGORITHM | — | STABLE | adr-002-identity-conflict.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | CD uses original subject_ref |
+| read-discipline | RESERVED | — | STABLE | phases/phase-1.md | round 0: RESERVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | all reads defensive |
+| replay | ALGORITHM | — | STABLE | phases/phase-0.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | reconstruct from events |
+| resolvability-classification | INVARIANT | — | STABLE | adr-005-state-progression.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | auto_eligible or manual_only |
+| responsibility-binding | DERIVED | — | STABLE | phases/phase-2.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | actor→scope assignment |
+| review | CONTRACT | — | STABLE | ADR-004 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | envelope type |
+| review-state | DERIVED | — | STABLE | ADR-005 Session 2 | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | event-level state |
+| role | DERIVED | — | STABLE | phases/phase-4.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | actor capability class |
+| role-action-enforcement | ALGORITHM | — | STABLE | phases/phase-4.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | IDR-021 implementation |
+| role-action-permission | CONFIG | — | STABLE | ADR-003 S8 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | role×action matrix |
+| role-action-table | CONFIG | — | STABLE | raw-B | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | deployer matrix |
 | role-stale | FLAG | ADR-006 §S2 | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | role changed flag; canonical over `role-staleness` (OBSOLETE) |
 | role-staleness | OBSOLETE | ADR-006 §Consequences | OBSOLETE | ADR-003 S7 | round 0: FLAG (inventory); round 1: OBSOLETE (ADR-006 §Consequences) | Synonym of `role-stale` — deduped in ADR-006. Row retained for traceability per ledger rule 5. |
-| s00 | RESERVED | — | PROPOSED | principles.md | round 0: RESERVED (inventory) | simplicity benchmark |
-| schema-evolution-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
-| schema-versioning | CONFIG | — | PROPOSED | ADR-004 S6 | round 0: CONFIG (inventory) | shape_name/v{N} format |
+| s00 | RESERVED | — | STABLE | principles.md | round 0: RESERVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | simplicity benchmark |
+| schema-evolution-trap | OBSOLETE | — | OBSOLETE | ADR-004 Session 3 | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | anti-pattern alert |
+| schema-versioning | CONFIG | — | STABLE | ADR-004 S6 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | shape_name/v{N} format |
 | scope | PRIMITIVE | ADR-009 §S2 | PROPOSED | ADR-003 | round 0: DISPUTED (C1:PRIMITIVE, C2:CONFIG); round 1: PRIMITIVE (ADR-009 §S2) | Platform-fixed mechanism — scope-type registry closed at 3 values (ADR-003 §S7, ADR-004 §S7). Security-critical closure (leak-vulnerability surface). Instance rows `geographic-scope`, `subject-list-scope`, `scope-composition`, `scope-type`, `temporal-access-bounds` stay CONFIG. |
-| scope-composition | CONFIG | — | PROPOSED | adr-003-authorization-sync.md | round 0: CONFIG (inventory) | combining scope types |
-| scope-containment | ALGORITHM | — | PROPOSED | ADR-003 S5 | round 0: ALGORITHM (inventory) | access control test |
-| scope-containment-invariant | INVARIANT | — | PROPOSED | ADR-003 S5 | round 0: INVARIANT (inventory) | foundational rule |
-| scope-containment-test | ALGORITHM | — | PROPOSED | raw-B | round 0: ALGORITHM (inventory) | scope filtering |
-| scope-equality | INVARIANT | — | PROPOSED | adr-003-authorization-sync.md | round 0: INVARIANT (inventory) | sync = access scope |
-| scope-resolver | PRIMITIVE | — | PROPOSED | ADR-003 | round 0: PRIMITIVE (inventory) | determines scope |
-| scope-staleness | FLAG | — | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory) | reassigned actor flag |
-| scope-stale | FLAG | — | PROPOSED | raw-B | round 0: FLAG (inventory) | alt name for scope_violation |
-| scope-subject-based | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | explicit subject list |
-| scope-type | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | platform-fixed vocabulary |
+| scope-composition | CONFIG | — | STABLE | adr-003-authorization-sync.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | combining scope types |
+| scope-containment | ALGORITHM | — | STABLE | ADR-003 S5 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | access control test |
+| scope-containment-invariant | INVARIANT | — | STABLE | ADR-003 S5 | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | foundational rule |
+| scope-containment-test | ALGORITHM | — | STABLE | raw-B | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | scope filtering |
+| scope-equality | INVARIANT | — | STABLE | adr-003-authorization-sync.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | sync = access scope |
+| scope-resolver | PRIMITIVE | — | STABLE | ADR-003 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | determines scope |
+| scope-staleness | FLAG | — | STABLE | ADR-003 S7 | round 0: FLAG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | reassigned actor flag |
+| scope-stale | FLAG | — | STABLE | raw-B | round 0: FLAG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | alt name for scope_violation |
+| scope-subject-based | CONFIG | — | STABLE | ADR-003 S3 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | explicit subject list |
+| scope-type | CONFIG | — | STABLE | raw-B | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | platform-fixed vocabulary |
 | scope-violation | FLAG | ADR-006 §S2 | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | unauthorized access flag category |
-| selective-retain | ALGORITHM | — | PROPOSED | ADR-003 S6 | round 0: ALGORITHM (inventory) | device purge strategy |
-| sensitivity-classification | CONFIG | — | PROPOSED | phases/phase-3d.md | round 0: CONFIG (inventory) | shape/activity sensitivity |
-| sensitive-subject-classification | OPEN | — | OPEN | raw-B | round 0: OPEN (inventory) | subject-level dimension |
-| shape | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | payload schema |
-| shape-binding | ALGORITHM | — | PROPOSED | phases/phase-4.md | round 0: ALGORITHM (inventory) | transition vs activation |
-| shape-definition | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | versioned schema |
-| shape-payload-validator | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | validates against shape |
-| shape-ref | CONTRACT | — | PROPOSED | ADR-004 | round 0: CONTRACT (inventory) | mandatory envelope field |
-| shape-registry | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | stores definitions |
-| shape-role | DERIVED | — | PROPOSED | phases/phase-4.md | round 0: DERIVED (inventory) | abstract→concrete mapping |
-| shape-version | DERIVED | — | PROPOSED | phases/phase-3.md | round 0: DERIVED (inventory) | timestamped snapshot |
-| shape-versioning | CONFIG | — | PROPOSED | ADR-004 S6 | round 0: CONFIG (inventory) | additive/deprecation/breaking |
-| show-condition | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | L2 visibility rule |
-| single-source-of-truth | INVARIANT | — | PROPOSED | raw-B | round 0: INVARIANT (inventory) | events authoritative |
-| single-writer-resolution | INVARIANT | — | PROPOSED | raw-B | round 0: INVARIANT (inventory) | one resolver per flag |
-| source-chain-traversal | ALGORITHM | — | PROPOSED | ADR-005 Session 2 | round 0: ALGORITHM (inventory) | upstream flag detection |
-| source-only-flagging | ALGORITHM | — | PROPOSED | ADR-005 Session 2 | round 0: ALGORITHM (inventory) | root-cause flagging |
-| split | ALGORITHM | — | PROPOSED | ADR-001 | round 0: ALGORITHM (inventory) | subject identity operation |
-| split-freezes-history | INVARIANT | — | PROPOSED | raw-B | round 0: INVARIANT (inventory) | source archival |
-| split-subject | ALGORITHM | — | PROPOSED | adr-002-identity-conflict.md | round 0: ALGORITHM (inventory) | online-only operation |
+| selective-retain | ALGORITHM | — | STABLE | ADR-003 S6 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | device purge strategy |
+| sensitivity-classification | CONFIG | — | STABLE | phases/phase-3d.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | shape/activity sensitivity |
+| sensitive-subject-classification | OPEN | — | DEFERRED | raw-B | round 0: OPEN (inventory); round 1: DEFERRED (topology Bucket-B — subject-level sensitivity; blocker: Phase 4 workflow & policy) | Blocker: Phase 4 workflow & policy design surface. |
+| shape | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | payload schema |
+| shape-binding | ALGORITHM | — | STABLE | phases/phase-4.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | transition vs activation |
+| shape-definition | CONFIG | — | STABLE | raw-B | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | versioned schema |
+| shape-payload-validator | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | validates against shape |
+| shape-ref | CONTRACT | — | STABLE | ADR-004 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | mandatory envelope field |
+| shape-registry | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | stores definitions |
+| shape-role | DERIVED | — | STABLE | phases/phase-4.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | abstract→concrete mapping |
+| shape-version | DERIVED | — | STABLE | phases/phase-3.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | timestamped snapshot |
+| shape-versioning | CONFIG | — | STABLE | ADR-004 S6 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | additive/deprecation/breaking |
+| show-condition | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L2 visibility rule |
+| single-source-of-truth | INVARIANT | — | STABLE | raw-B | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | events authoritative |
+| single-writer-resolution | INVARIANT | — | STABLE | raw-B | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | one resolver per flag |
+| source-chain-traversal | ALGORITHM | — | STABLE | ADR-005 Session 2 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | upstream flag detection |
+| source-only-flagging | ALGORITHM | — | STABLE | ADR-005 Session 2 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | root-cause flagging |
+| split | ALGORITHM | — | STABLE | ADR-001 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | subject identity operation |
+| split-freezes-history | INVARIANT | — | STABLE | raw-B | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | source archival |
+| split-subject | ALGORITHM | — | STABLE | adr-002-identity-conflict.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | online-only operation |
 | stale-reference | FLAG | ADR-006 §S2 | PROPOSED | ADR-002 S8 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | entity update lag |
-| state-as-projection | ALGORITHM | — | PROPOSED | ADR-005 Session 1 | round 0: ALGORITHM (inventory) | derived from events |
-| state-machine | PRIMITIVE | — | PROPOSED | ADR-005 Session 1 | round 0: PRIMITIVE (inventory) | named states + transitions |
-| state-progression | ALGORITHM | — | PROPOSED | phases/phase-4.md | round 0: ALGORITHM (inventory) | work lifecycle |
-| subject | PRIMITIVE | — | PROPOSED | ADR-001 | round 0: PRIMITIVE (inventory) | identity category |
-| subject-based-scope | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | explicit list type |
-| subject-binding | DERIVED | — | PROPOSED | phases/phase-3.md | round 0: DERIVED (inventory) | shape field mapping |
-| subject-deactivated | FLAG | — | PROPOSED | ADR-002 S9 | round 0: FLAG (inventory) | decommissioned entity |
-| subject-identity-resolver | PRIMITIVE | — | PROPOSED | ADR-002 | round 0: PRIMITIVE (inventory) | merge/split validator |
-| subject-level-pattern | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | subject-scoped workflow |
-| subject-level-state | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | lifecycle projection |
-| subject-list-scope | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | explicit subject type |
+| state-as-projection | ALGORITHM | — | STABLE | ADR-005 Session 1 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | derived from events |
+| state-machine | PRIMITIVE | — | STABLE | ADR-005 Session 1 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | named states + transitions |
+| state-progression | ALGORITHM | — | STABLE | phases/phase-4.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | work lifecycle |
+| subject | PRIMITIVE | — | STABLE | ADR-001 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | identity category |
+| subject-based-scope | CONFIG | — | STABLE | ADR-003 S3 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | explicit list type |
+| subject-binding | DERIVED | — | STABLE | phases/phase-3.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | shape field mapping |
+| subject-deactivated | FLAG | — | STABLE | ADR-002 S9 | round 0: FLAG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | decommissioned entity |
+| subject-identity-resolver | PRIMITIVE | — | STABLE | ADR-002 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | merge/split validator |
+| subject-level-pattern | CONFIG | — | STABLE | raw-B | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | subject-scoped workflow |
+| subject-level-state | DERIVED | — | STABLE | ADR-005 Session 2 | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | lifecycle projection |
+| subject-list-scope | CONFIG | — | STABLE | ADR-003 S3 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | explicit subject type |
 | subject-ref | CONTRACT | ADR-008 §S1 | PROPOSED | ADR-001 | round 0: DISPUTED (A:PRIMITIVE, C1:CONTRACT, C2:PRIMITIVE); round 1: CONTRACT (ADR-008 §S1) | Reference-vs-referent rule: `subject_ref` is the envelope field contract; `subject` (separate row) remains PRIMITIVE. Type enum closed at 4 values; `process` RESERVED (no current emission). |
 | subject-split | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory); round 1: CONTRACT re-cited (ADR-007 §S2) | Platform-bundled shape on envelope type=capture. |
 | subjects-merged | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory); round 1: CONTRACT re-cited (ADR-007 §S2) | Platform-bundled shape on envelope type=capture. |
-| sync-contract | CONTRACT | — | PROPOSED | raw-B | round 0: CONTRACT (inventory) | 8 guarantees |
-| sync-protocol | ALGORITHM | — | PROPOSED | phases/phase-0.md | round 0: ALGORITHM (inventory) | watermark-based exchange |
-| sync-scope | INVARIANT | — | PROPOSED | ADR-003 | round 0: INVARIANT (inventory) | data device receives |
-| sync-unit | INVARIANT | — | PROPOSED | adr-001-offline-data-model.md | round 0: INVARIANT (inventory) | immutable event |
-| sync-watermark | CONTRACT | — | PROPOSED | ADR-001 | round 0: CONTRACT (inventory) | server sequence number |
-| system-actor | ALGORITHM | — | PROPOSED | ADR-004 S4 | round 0: ALGORITHM (inventory) | system: prefix format |
-| sweep-job | ALGORITHM | — | PROPOSED | phases/phase-1.md | round 0: ALGORITHM (inventory) | periodic CD re-evaluation |
-| task-completed | CONTRACT | — | PROPOSED | ADR-004 | round 0: CONTRACT (inventory) | envelope type |
-| task-created | CONTRACT | — | PROPOSED | ADR-004 | round 0: CONTRACT (inventory) | envelope type |
-| temporal-access-bounds | CONFIG | — | PROPOSED | ADR-003 S4 | round 0: CONFIG (inventory) | valid_from/valid_until |
+| sync-contract | CONTRACT | — | STABLE | raw-B | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 8 guarantees |
+| sync-protocol | ALGORITHM | — | STABLE | phases/phase-0.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | watermark-based exchange |
+| sync-scope | INVARIANT | — | STABLE | ADR-003 | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | data device receives |
+| sync-unit | INVARIANT | — | STABLE | adr-001-offline-data-model.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | immutable event |
+| sync-watermark | CONTRACT | — | STABLE | ADR-001 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | server sequence number |
+| system-actor | ALGORITHM | — | STABLE | ADR-004 S4 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | system: prefix format |
+| sweep-job | ALGORITHM | — | STABLE | phases/phase-1.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | periodic CD re-evaluation |
+| task-completed | CONTRACT | — | STABLE | ADR-004 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | envelope type |
+| task-created | CONTRACT | — | STABLE | ADR-004 | round 0: CONTRACT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | envelope type |
+| temporal-access-bounds | CONFIG | — | STABLE | ADR-003 S4 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | valid_from/valid_until |
 | temporal-authority-expired | FLAG | ADR-006 §S2 | PROPOSED | ADR-003 S7 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | assignment ended |
-| three-tier-hierarchy | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | organizational structure |
-| transaction-boundary | ALGORITHM | — | PROPOSED | phases/phase-1.md | round 0: ALGORITHM (inventory) | 2-Tx pipeline |
-| transfer-with-acknowledgment | CONFIG | — | PROPOSED | ADR-005 Session 2 | round 0: CONFIG (inventory) | handoff pattern |
+| three-tier-hierarchy | CONFIG | — | STABLE | ADR-003 S3 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | organizational structure |
+| transaction-boundary | ALGORITHM | — | STABLE | phases/phase-1.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | 2-Tx pipeline |
+| transfer-with-acknowledgment | CONFIG | — | STABLE | ADR-005 Session 2 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | handoff pattern |
 | transition-violation | FLAG | ADR-006 §S2 | DEFERRED | ADR-005 Session 1 | round 0: FLAG (inventory); round 1: class-membership cited (ADR-006 §S2) | invalid state transition; emission deferred to Phase 4 per flag-catalog |
-| trigger | PRIMITIVE | — | PROPOSED | ADR-004 S7 | round 0: PRIMITIVE (inventory) | L3 reactive rule |
-| trigger-budget | CONFIG | — | PROPOSED | phases/phase-4.md | round 0: CONFIG (inventory) | hard complexity limits |
-| trigger-context | PRIMITIVE | — | PROPOSED | phases/phase-4.md | round 0: PRIMITIVE (inventory) | expression evaluation |
-| trigger-engine | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | server-side processing |
-| trigger-escalation-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
-| trustee-records | INVARIANT | — | PROPOSED | principles.md | round 0: INVARIANT (inventory) | audit trail requirement |
-| two-slot-config | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | current + pending |
-| two-tier-sync | ALGORITHM | — | PROPOSED | ADR-003 S6 | round 0: ALGORITHM (inventory) | asymmetric model |
+| trigger | PRIMITIVE | — | STABLE | ADR-004 S7 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L3 reactive rule |
+| trigger-budget | CONFIG | — | STABLE | phases/phase-4.md | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | hard complexity limits |
+| trigger-context | PRIMITIVE | — | STABLE | phases/phase-4.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | expression evaluation |
+| trigger-engine | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | server-side processing |
+| trigger-escalation-trap | OBSOLETE | — | OBSOLETE | ADR-004 Session 3 | round 0: OPEN (inventory); round 1: OBSOLETE (topology Bucket-A — anti-pattern alert or convergence-protocol step, not a platform concept) | anti-pattern alert |
+| trustee-records | INVARIANT | — | STABLE | principles.md | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | audit trail requirement |
+| two-slot-config | ALGORITHM | — | STABLE | phases/phase-3.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | current + pending |
+| two-tier-sync | ALGORITHM | — | STABLE | ADR-003 S6 | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | asymmetric model |
 | type-vocabulary | INVARIANT | ADR-007 §S1 | PROPOSED | ADR-004 S3 | round 0: INVARIANT (inventory); round 1: INVARIANT re-cited (ADR-007 §S1) | 6-value envelope type closure. ADR-004 §S3 remains first-decision cite; ADR-007 §S1 is the canonical cite. |
-| union-projection | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | multi-version shapes |
-| validation-engine | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | constraint evaluator |
-| warning-expression | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | L2 conditional warning |
-| watermark | DERIVED | — | PROPOSED | phases/phase-0.md | round 0: DERIVED (inventory) | pagination key |
-| workflow-pattern | CONFIG | — | PROPOSED | ADR-005 Session 1 | round 0: CONFIG (inventory) | synonym of pattern |
-| write-path-discipline | INVARIANT | — | PROPOSED | ADR-001 | round 0: INVARIANT (inventory) | events sole write path |
+| union-projection | ALGORITHM | — | STABLE | phases/phase-3.md | round 0: ALGORITHM (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | multi-version shapes |
+| validation-engine | PRIMITIVE | — | STABLE | ADR-004 | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | constraint evaluator |
+| warning-expression | PRIMITIVE | — | STABLE | phases/phase-3.md | round 0: PRIMITIVE (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | L2 conditional warning |
+| watermark | DERIVED | — | STABLE | phases/phase-0.md | round 0: DERIVED (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | pagination key |
+| workflow-pattern | CONFIG | — | STABLE | ADR-005 Session 1 | round 0: CONFIG (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | synonym of pattern |
+| write-path-discipline | INVARIANT | — | STABLE | ADR-001 | round 0: INVARIANT (inventory); round 1: STABLE (fixpoint — unchanged under round 1, upstream ADR not superseded) | events sole write path |
 
