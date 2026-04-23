@@ -69,6 +69,8 @@ knob, derived value, reserved/deferred item) has exactly one row.
   - FLAG: 15, OPEN: 13, DISPUTED: 9, RESERVED: 8
 - Size note: target was 150–200 unique concepts. Actual 269 reflects that the platform's ADR stress-tests (archive/ 00–21) introduce many named micro-concepts (anti-patterns, composition rules, trap names). Phase 1 topological sort will likely reveal synonyms to merge (`role-stale`/`role-staleness`, `scope-stale`/`scope-violation`, `workflow-pattern`/`pattern`). Do not prune pre-sort.
 
+**Phase 2 round 1 — ADR-007 landed (2026-04-23)**: envelope type closure + integrity shape canonicalization. Settles `conflict-detected` (CONTRACT, DISPUTED→settled); re-cites `conflict-resolved`, `subjects-merged`, `subject-split` (CONTRACT) and `type-vocabulary` (INVARIANT). **Absorbs ADR-002 Addendum** — Addendum retained as archival artifact with `Superseded-By: ADR-007` header + `>>> ABSORBED INTO ADR-007` annotation. ADR-002 main untouched (Addendum pointer becomes one-hop redirect). Kills the Addendum pattern, which was the single largest source of drift that motivated this convergence pass.
+
 **Phase 2 round 1 — ADR-006 landed (2026-04-22)**: flag semantics. Settles `accept-and-flag` (INVARIANT), `flag` (INVARIANT), `flag-creation-location` (INVARIANT), `conflict-detection` (ALGORITHM confirmed). Dedupes `role-staleness` → OBSOLETE (canonical `role-stale`). Sweeps 7 flag-catalog rows with class-membership cite. No supersessions (ADR-002 S14 refined, not replaced). Next: ADR-007.
 
 **Phase 1 topological sort (round 0, finalized)** — 22 OPEN rows triaged into four action buckets in [phase-1-topology.md](inventory/phase-1-topology.md):
@@ -150,11 +152,11 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | configuration-delivery-pipeline | ALGORITHM | — | PROPOSED | adr-004-configuration-boundary.md | round 0: ALGORITHM (inventory) | author→validate→package→deliver→apply |
 | configuration-specialist-trap | OPEN | — | OPEN | ADR-004 Session 3 | round 0: OPEN (inventory) | anti-pattern alert |
 | conflict | FLAG | — | PROPOSED | ADR-001 | round 0: FLAG (inventory) | anomaly for resolution |
-| conflict-detected | DISPUTED | — | OPEN | ADR-002 | round 0: DISPUTED (A:CONTRACT, B:SHAPE→CONTRACT, C1:CONFIG, C2:PRIMITIVE) | Harvest: already settled by ADR-002 Addendum (2026-04-21) as platform-bundled shape. Dispute = un-migrated prose layers. Recommend: CONTRACT, resolve to STABLE round 1. See [disputes-harvest.md §Group-1](inventory/disputes-harvest.md) |
+| conflict-detected | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 | round 0: DISPUTED (A:CONTRACT, B:SHAPE→CONTRACT, C1:CONFIG, C2:PRIMITIVE); round 1: CONTRACT (ADR-007 §S2) | Platform-bundled integrity shape. ADR-007 absorbs the ADR-002 Addendum and makes this the canonical cite. |
 | conflict-detection | ALGORITHM | ADR-006 §S3 | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory); round 1: ALGORITHM confirmed (ADR-006 §S3) | Procedure that enforces the §S1 invariant. Extensible/relocatable without changing the invariant. |
 | conflict-detector | PRIMITIVE | — | PROPOSED | adr-002-identity-conflict.md | round 0: PRIMITIVE (inventory) | evaluates anomalies |
 | conflict-resolution | ALGORITHM | — | PROPOSED | ADR-002 | round 0: ALGORITHM (inventory) | ConflictResolved workflow |
-| conflict-resolved | CONTRACT | — | PROPOSED | ADR-002 | round 0: CONTRACT (inventory) | platform-bundled shape |
+| conflict-resolved | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 | round 0: CONTRACT (inventory); round 1: CONTRACT re-cited (ADR-007 §S2) | Platform-bundled shape; spans type=review (human) and type=capture (system:auto_resolution). |
 | context-properties | DERIVED | — | PROPOSED | raw-B | round 0: DERIVED (inventory) | 7 platform-fixed values |
 | context-resolver | PRIMITIVE | — | PROPOSED | phases/phase-3d.md | round 0: PRIMITIVE (inventory) | resolves context.* at form-open |
 | context-scope | DERIVED | — | PROPOSED | adr-005-state-progression.md | round 0: DERIVED (inventory) | form evaluation scope |
@@ -340,8 +342,8 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | subject-level-state | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | lifecycle projection |
 | subject-list-scope | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | explicit subject type |
 | subject-ref | DISPUTED | — | OPEN | ADR-001 | round 0: DISPUTED (A:PRIMITIVE, C1:CONTRACT, C2:PRIMITIVE) | Harvest: category error — `subject` is PRIMITIVE, `subject_ref` is the CONTRACT by which events reference subjects. Reserved `process` type in enum is separate row. Recommend: CONTRACT. See [disputes-harvest.md §Group-2](inventory/disputes-harvest.md) |
-| subject-split | CONTRACT | — | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory) | platform-bundled shape |
-| subjects-merged | CONTRACT | — | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory) | platform-bundled shape |
+| subject-split | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory); round 1: CONTRACT re-cited (ADR-007 §S2) | Platform-bundled shape on envelope type=capture. |
+| subjects-merged | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory); round 1: CONTRACT re-cited (ADR-007 §S2) | Platform-bundled shape on envelope type=capture. |
 | sync-contract | CONTRACT | — | PROPOSED | raw-B | round 0: CONTRACT (inventory) | 8 guarantees |
 | sync-protocol | ALGORITHM | — | PROPOSED | phases/phase-0.md | round 0: ALGORITHM (inventory) | watermark-based exchange |
 | sync-scope | INVARIANT | — | PROPOSED | ADR-003 | round 0: INVARIANT (inventory) | data device receives |
@@ -365,7 +367,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | trustee-records | INVARIANT | — | PROPOSED | principles.md | round 0: INVARIANT (inventory) | audit trail requirement |
 | two-slot-config | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | current + pending |
 | two-tier-sync | ALGORITHM | — | PROPOSED | ADR-003 S6 | round 0: ALGORITHM (inventory) | asymmetric model |
-| type-vocabulary | INVARIANT | — | PROPOSED | ADR-004 S3 | round 0: INVARIANT (inventory) | 6-value envelope type |
+| type-vocabulary | INVARIANT | ADR-007 §S1 | PROPOSED | ADR-004 S3 | round 0: INVARIANT (inventory); round 1: INVARIANT re-cited (ADR-007 §S1) | 6-value envelope type closure. ADR-004 §S3 remains first-decision cite; ADR-007 §S1 is the canonical cite. |
 | union-projection | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | multi-version shapes |
 | validation-engine | PRIMITIVE | — | PROPOSED | ADR-004 | round 0: PRIMITIVE (inventory) | constraint evaluator |
 | warning-expression | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | L2 conditional warning |

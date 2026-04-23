@@ -54,7 +54,10 @@ else
         while IFS= read -r cite; do
             adr_id=$(echo "$cite" | grep -oE '^ADR-[0-9]+(-R[0-9]*)?')
             adr_num=$(echo "$adr_id" | sed -E 's/^ADR-//; s/-R[0-9]*$//')
-            adr_file=$(ls docs/adrs/adr-${adr_num}*.md 2>/dev/null | head -1 || true)
+            # Resolve to the canonical ADR file. Addenda are archival artifacts
+            # under the convergence supersede rules (absorbed into successor
+            # ADRs) and must not shadow the main ADR during cite resolution.
+            adr_file=$(ls docs/adrs/adr-${adr_num}*.md 2>/dev/null | grep -v -- '-addendum-' | head -1 || true)
             if [[ -z "$adr_file" ]]; then
                 fail "charter cites $cite but no matching adr file in docs/adrs/"
                 continue
@@ -89,7 +92,7 @@ else
     else
         while IFS= read -r adr_id; do
             adr_num=$(echo "$adr_id" | sed -E 's/^ADR-//; s/-R[0-9]*$//')
-            adr_file=$(ls docs/adrs/adr-${adr_num}*.md 2>/dev/null | head -1 || true)
+            adr_file=$(ls docs/adrs/adr-${adr_num}*.md 2>/dev/null | grep -v -- '-addendum-' | head -1 || true)
             if [[ -z "$adr_file" ]]; then
                 fail "ledger cites $adr_id but no matching adr file in docs/adrs/"
             elif ! grep -qiE '^>?\s*Status:\s*\*{0,2}decided\*{0,2}' "$adr_file"; then

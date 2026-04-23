@@ -13,7 +13,7 @@
 
 **Convergence phase**: 2 (ADR drafting — round 1 in progress)
 **Active code phase**: paused — code work resumes at Phase 4 freeze
-**Last ADR landed**: ADR-006 (flag semantics)
+**Last ADR landed**: ADR-007 (envelope type closure + integrity shape canonicalization)
 
 ---
 
@@ -24,6 +24,7 @@
 - **Accept-and-flag.** A validly-structured event is never rejected for state-based reasons; state anomalies surface as flag events, never as rejections or modifications. ([ADR-006 §S1](adrs/adr-006-flag-semantics.md))
 - **Flag as canonical anomaly surface (event stream).** Flags are the canonical representation of state anomalies on the event stream; no parallel anomaly-record surface exists or is permitted on the event stream. Scoped to representation and emission — does not govern non-event-stream surfaces (telemetry, metrics, operational logs). ([ADR-006 §S2](adrs/adr-006-flag-semantics.md))
 - **Server-side flag creation (default).** Flags are created server-side during sync processing; device-side creation is additively evolvable. ([ADR-006 §S4](adrs/adr-006-flag-semantics.md))
+- **Envelope type vocabulary is closed at six values.** Allowed: `capture`, `review`, `alert`, `task_created`, `task_completed`, `assignment_changed`. Extension is architecture-grade. `type` answers *which pipeline*; `shape_ref` answers *what fact*; `actor_ref` answers *who authored*. ([ADR-007 §S1](adrs/adr-007-envelope-type-closure.md); first-decision cite [ADR-004 §S3](adrs/adr-004-configuration-boundary.md))
 
 ---
 
@@ -44,7 +45,10 @@
 
 | contract | location | settled-by |
 |---|---|---|
-| _to be populated in Phase 2_ | | |
+| `conflict_detected/v1` (platform-bundled shape; integrity flag) | `contracts/shapes/` | [ADR-007 §S2](adrs/adr-007-envelope-type-closure.md) |
+| `conflict_resolved/v1` (platform-bundled shape; spans `type=review` human, `type=capture` system) | `contracts/shapes/` | [ADR-007 §S2](adrs/adr-007-envelope-type-closure.md) |
+| `subjects_merged/v1` (platform-bundled shape; `type=capture`) | `contracts/shapes/` | [ADR-007 §S2](adrs/adr-007-envelope-type-closure.md) |
+| `subject_split/v1` (platform-bundled shape; `type=capture`) | `contracts/shapes/` | [ADR-007 §S2](adrs/adr-007-envelope-type-closure.md) |
 
 ---
 

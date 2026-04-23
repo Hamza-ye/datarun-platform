@@ -1,5 +1,17 @@
 # ADR-002 Addendum: Envelope Type Mapping for Identity and Integrity Events
 
+> **Status: Superseded-By: [ADR-007](adr-007-envelope-type-closure.md) (content absorbed, 2026-04-23)**
+>
+> **>>> ABSORBED INTO ADR-007**: this entire document's content is now in
+> [ADR-007 §S1–§S5](adr-007-envelope-type-closure.md) and the forbidden-patterns
+> section. Consult ADR-007 as canonical. This file is retained as an archival
+> artifact under the convergence protocol's supersede rules; its body is not
+> authoritative as of 2026-04-23.
+>
+> ---
+>
+> *Historical header (pre-supersession):*
+>
 > Status: **Decided** (Addendum to ADR-002, effective alongside ADR-004 S3)
 > Date: 2026-04-21
 > Exploration: [archive/18](../exploration/archive/18-envelope-vocabulary.md), [archive/20](../exploration/archive/20-system-event-authorship.md), [archive/21](../exploration/archive/21-6-type-closure.md) §4.2
