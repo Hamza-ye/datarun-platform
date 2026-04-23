@@ -11,9 +11,9 @@
 
 ## Status
 
-**Convergence phase**: 2 (ADR drafting — round 1 in progress)
+**Convergence phase**: 2 (ADR drafting — round 1 complete pending fixpoint check)
 **Active code phase**: paused — code work resumes at Phase 4 freeze
-**Last ADR landed**: ADR-008 (envelope reference fields)
+**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance)
 
 ---
 
@@ -25,6 +25,7 @@
 - **Flag as canonical anomaly surface (event stream).** Flags are the canonical representation of state anomalies on the event stream; no parallel anomaly-record surface exists or is permitted on the event stream. Scoped to representation and emission — does not govern non-event-stream surfaces (telemetry, metrics, operational logs). ([ADR-006 §S2](adrs/adr-006-flag-semantics.md))
 - **Server-side flag creation (default).** Flags are created server-side during sync processing; device-side creation is additively evolvable. ([ADR-006 §S4](adrs/adr-006-flag-semantics.md))
 - **Envelope type vocabulary is closed at six values.** Allowed: `capture`, `review`, `alert`, `task_created`, `task_completed`, `assignment_changed`. Extension is architecture-grade. `type` answers *which pipeline*; `shape_ref` answers *what fact*; `actor_ref` answers *who authored*. ([ADR-007 §S1](adrs/adr-007-envelope-type-closure.md); first-decision cite [ADR-004 §S3](adrs/adr-004-configuration-boundary.md))
+- **Platform-fixed mechanism vs. deployer-configured instance (duality rule).** When a platform concept exposes both a closed mechanism (set, grammar, protocol, or typed interface owned by the platform) and a parameterized instance surface (named and authored by deployers), the two are classified in separate ledger rows: the mechanism PRIMITIVE, the instance CONFIG. Conflating them is a classification error. ([ADR-009 §S1](adrs/adr-009-platform-fixed-vs-deployer-configured.md))
 
 ---
 
@@ -35,7 +36,8 @@
 
 | primitive | contract | settled-by |
 |---|---|---|
-| _to be populated in Phase 2_ | | |
+| `scope` (platform-fixed authorization mechanism; scope-type registry closed at 3 values) | authorization mechanism | [ADR-009 §S2](adrs/adr-009-platform-fixed-vs-deployer-configured.md); first-decision cites [ADR-003 §S7](adrs/adr-003-authorization-sync.md), [ADR-004 §S7](adrs/adr-004-configuration-boundary.md) |
+| `pattern` (platform-fixed workflow skeleton registry; deployer-referenced, not deployer-authored) | pattern registry | [ADR-009 §S3](adrs/adr-009-platform-fixed-vs-deployer-configured.md); first-decision cite [ADR-005 §S5](adrs/adr-005-state-progression.md) |
 
 ---
 
