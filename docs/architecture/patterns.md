@@ -1,5 +1,7 @@
 # Pattern Specifications
 
+> **ℹ RETAINED — RELOCATES POST-SHIP-3.** This is specification-grade content for the four decided patterns. It is authoritative, but its home will move to `docs/specification/patterns.md` after Ship-3 (approval chains) validates the transition tables in the field. Current cites from ADRs and the charter remain valid; the relocation is a move, not a rewrite.
+
 > Formal specifications for the platform's workflow patterns. Each pattern was validated through scenario walk-throughs in [exploration/28](../exploration/28-pattern-inventory-walkthrough.md) and traced to ADR-005 S5 (Pattern Registry).
 
 ---

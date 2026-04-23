@@ -1,5 +1,7 @@
 # Structural View — Platform Primitives
 
+> **⚠ HISTORICAL — REWRITE POST-SHIP-2.** This document predates [charter.md](../charter.md) and [ADR-009](../adrs/adr-009-platform-fixed-vs-deployer-configured.md). It classifies 11 things as "primitives"; the ledger (per ADR-009 §S1) promotes only `scope` and `pattern` to PRIMITIVE status. The remainder are implementation components, not primitives. Retained as a Ship-1/Ship-2 input only. After Ship-2 validates merge/split under offline + shape evolution, this file is rewritten to reflect what is actually load-bearing. Do not cite this file against the charter.
+
 > The 11 building blocks of the Datarun platform. Each has a distinct invariant that no other primitive shares. Organized by architectural layer.
 
 ---
