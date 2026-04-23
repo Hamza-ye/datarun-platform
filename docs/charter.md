@@ -13,7 +13,7 @@
 
 **Convergence phase**: 2 (ADR drafting — round 1 in progress)
 **Active code phase**: paused — code work resumes at Phase 4 freeze
-**Last ADR landed**: ADR-007 (envelope type closure + integrity shape canonicalization)
+**Last ADR landed**: ADR-008 (envelope reference fields)
 
 ---
 
@@ -45,6 +45,9 @@
 
 | contract | location | settled-by |
 |---|---|---|
+| `subject_ref` (envelope field; typed UUID with 4-value type enum, `process` reserved) | envelope schema | [ADR-008 §S1](adrs/adr-008-envelope-reference-fields.md) |
+| `actor_ref` (envelope field; human UUID or `system:{source_type}/{source_id}`) | envelope schema | [ADR-008 §S2](adrs/adr-008-envelope-reference-fields.md) |
+| `activity_ref` (envelope field; optional deployer-chosen identifier `[a-z][a-z0-9_]*`) | envelope schema | [ADR-008 §S3](adrs/adr-008-envelope-reference-fields.md) |
 | `conflict_detected/v1` (platform-bundled shape; integrity flag) | `contracts/shapes/` | [ADR-007 §S2](adrs/adr-007-envelope-type-closure.md) |
 | `conflict_resolved/v1` (platform-bundled shape; spans `type=review` human, `type=capture` system) | `contracts/shapes/` | [ADR-007 §S2](adrs/adr-007-envelope-type-closure.md) |
 | `subjects_merged/v1` (platform-bundled shape; `type=capture`) | `contracts/shapes/` | [ADR-007 §S2](adrs/adr-007-envelope-type-closure.md) |

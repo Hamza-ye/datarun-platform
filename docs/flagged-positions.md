@@ -136,6 +136,40 @@ A JUnit test `EnvelopeSchemaParityTest` exists in the server test suite that rea
 
 ---
 
+## FP-004 — `assignment_ref` as potential future envelope field
+
+**Status**: OPEN
+**Opened**: 2026-04-23 by ADR-008 drafting pass (convergence round 1)
+**Blocks**: any future ADR/work that introduces an Assignment-targeting emission site distinct from the current `subject_ref.type = "assignment"` channel
+**Severity**: B — architecture-grade question, no current forcing function
+
+### Context
+
+ADR-008 §S1 settles `subject_ref` as a CONTRACT with a closed four-value type enum including `assignment`. This covers all current emission sites that target an assignment as the referent of an event. The harvest (Group 2, `actor-ref` section) notes that if Assignment evolves into a reference type with emission sites that do not fit the `subject_ref.type = "assignment"` channel — for example, events that reference *both* a subject and an assignment distinctly — a structural design decision surfaces: parameterize existing fields, or add a dedicated `assignment_ref` envelope field.
+
+No archive material commits either way. No current operational surface forces the question.
+
+### Trigger
+
+Any of the following lifts this item to `BLOCKS`:
+
+1. A proposal or discovery that an event needs to reference a subject *and* an assignment distinctly in the same envelope.
+2. A deployer or platform request to correlate events to assignment lifecycle without collapsing into the subject channel.
+3. Any ADR draft that touches assignment authority, assignment projection, or the assignment shape pair (`assignment_created/v1`, `assignment_ended/v1`) in a way that implies a dedicated ref.
+
+### Gate
+
+A successor ADR must exist, and either:
+
+- **(resolve by decision)** explicitly close the question (parameterize vs. dedicated field) with rationale, **or**
+- **(resolve by subsumption)** demonstrate that the forcing case can be handled under the existing `subject_ref` contract and record that reading as canonical.
+
+### Resolution log
+
+- **2026-04-23**: Opened by ADR-008 §S4 / Alt-4. No current forcing function; filed to prevent silent deferral per R-1.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.

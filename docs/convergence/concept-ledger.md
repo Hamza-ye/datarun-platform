@@ -69,6 +69,8 @@ knob, derived value, reserved/deferred item) has exactly one row.
   - FLAG: 15, OPEN: 13, DISPUTED: 9, RESERVED: 8
 - Size note: target was 150–200 unique concepts. Actual 269 reflects that the platform's ADR stress-tests (archive/ 00–21) introduce many named micro-concepts (anti-patterns, composition rules, trap names). Phase 1 topological sort will likely reveal synonyms to merge (`role-stale`/`role-staleness`, `scope-stale`/`scope-violation`, `workflow-pattern`/`pattern`). Do not prune pre-sort.
 
+**Phase 2 round 1 — ADR-008 landed (2026-04-23)**: envelope reference fields canonicalized. `subject-ref`, `actor-ref`, `activity-ref` all DISPUTED → CONTRACT. `process-identity` re-cited as RESERVED under ADR-008 §S1. Reference-vs-referent rule stated explicitly (F-B1). Forward item FP-004 opened for potential `assignment_ref` evolution. No supersedes on ADR-001/002/004 — all re-cited.
+
 **Phase 2 round 1 — ADR-007 landed (2026-04-23)**: envelope type closure + integrity shape canonicalization. Settles `conflict-detected` (CONTRACT, DISPUTED→settled); re-cites `conflict-resolved`, `subjects-merged`, `subject-split` (CONTRACT) and `type-vocabulary` (INVARIANT). **Absorbs ADR-002 Addendum** — Addendum retained as archival artifact with `Superseded-By: ADR-007` header + `>>> ABSORBED INTO ADR-007` annotation. ADR-002 main untouched (Addendum pointer becomes one-hop redirect). Kills the Addendum pattern, which was the single largest source of drift that motivated this convergence pass.
 
 **Phase 2 round 1 — ADR-006 landed (2026-04-22)**: flag semantics. Settles `accept-and-flag` (INVARIANT), `flag` (INVARIANT), `flag-creation-location` (INVARIANT), `conflict-detection` (ALGORITHM confirmed). Dedupes `role-staleness` → OBSOLETE (canonical `role-stale`). Sweeps 7 flag-catalog rows with class-membership cite. No supersessions (ADR-002 S14 refined, not replaced). Next: ADR-007.
@@ -108,9 +110,9 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | accept-and-flag | INVARIANT | ADR-006 §S1 | PROPOSED | ADR-002 | round 0: DISPUTED (A:ALGORITHM, B:INVARIANT, C1:ALGORITHM, C2:ALGORITHM); round 1: INVARIANT (ADR-006 §S1) | Property vs. procedure split: property is INVARIANT (this row), procedure lives at `conflict-detection` (ALGORITHM). Canonical over prior ADR-002 S14 cite. |
 | active-assignment | DERIVED | — | PROPOSED | phases/phase-2.md | round 0: DERIVED (inventory) | — |
 | activity | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:PRIMITIVE, C1:CONFIG) | Harvest: deployer-bundled L0 assembly (shape+pattern+role+scope). Archive 13 Q11 framed as config. Recommend: CONFIG (activity-ref stays CONTRACT). See [disputes-harvest.md §Group-3](inventory/disputes-harvest.md) |
-| activity-ref | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT) | Harvest: fully live (Phase 3d.1). Subagent B RESERVED framing is artifact, no archive evidence. Recommend: CONTRACT. See [disputes-harvest.md §Group-2](inventory/disputes-harvest.md) |
+| activity-ref | CONTRACT | ADR-008 §S3 | PROPOSED | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT); round 1: CONTRACT (ADR-008 §S3) | Optional-with-auto-populate deployer-chosen identifier (`[a-z][a-z0-9_]*` or null). Field is CONTRACT; activity *instance* is CONFIG (ADR-004 §S9) — separate rows. B:RESERVED was a subagent artifact. |
 | actor | INVARIANT | — | PROPOSED | adr-002-identity-conflict.md | round 0: INVARIANT (inventory) | persistent identity category |
-| actor-ref | DISPUTED | — | OPEN | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT) | Harvest: human UUID + `system:{component}/{id}` both live (ADR-004 S4, Archive 16/18). Recommend: CONTRACT. See [disputes-harvest.md §Group-2](inventory/disputes-harvest.md) |
+| actor-ref | CONTRACT | ADR-008 §S2 | PROPOSED | ADR-004 | round 0: DISPUTED (A:CONTRACT, B:RESERVED, C1:CONTRACT); round 1: CONTRACT (ADR-008 §S2) | Two admissible forms: human UUID and `system:{source_type}/{source_id}`. `source_type` is an evolvable platform vocabulary, not a closed enum. Discriminator: `startswith("system:")`. B:RESERVED was a subagent artifact. |
 | actor-token | CONTRACT | — | PROPOSED | phases/phase-2.md | round 0: CONTRACT (inventory) | — |
 | alias-cache | DERIVED | — | PROPOSED | phases/phase-1.md | round 0: DERIVED (inventory) | in-memory map for merge resolution |
 | alias-mapping | DERIVED | — | PROPOSED | adr-002-identity-conflict.md | round 0: DERIVED (inventory) | merge resolution projection |
@@ -272,7 +274,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | predicate | PRIMITIVE | — | PROPOSED | phases/phase-3.md | round 0: PRIMITIVE (inventory) | atomic comparison |
 | predicate-budget | CONFIG | — | PROPOSED | phases/phase-3.md | round 0: CONFIG (inventory) | 3-predicate limit |
 | process | PRIMITIVE | — | PROPOSED | ADR-001 | round 0: PRIMITIVE (inventory) | identity category |
-| process-identity | RESERVED | — | PROPOSED | envelope.schema.json | round 0: RESERVED (inventory) | subject_ref type (Phase 4+) |
+| process-identity | RESERVED | ADR-008 §S1 | PROPOSED | envelope.schema.json | round 0: RESERVED (inventory); round 1: RESERVED re-cited (ADR-008 §S1) | `subject_ref.type = "process"` — present in the enum, no current emission site. Active set extension is architecture-grade. |
 | projection | DERIVED | — | PROPOSED | ADR-001 | round 0: DERIVED (inventory) | computed current state |
 | projection-derived-state | INVARIANT | — | PROPOSED | adr-005-state-progression.md | round 0: INVARIANT (inventory) | never stored in payloads |
 | projection-engine | PRIMITIVE | — | PROPOSED | ADR-001 | round 0: PRIMITIVE (inventory) | state derivation |
@@ -341,7 +343,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | subject-level-pattern | CONFIG | — | PROPOSED | raw-B | round 0: CONFIG (inventory) | subject-scoped workflow |
 | subject-level-state | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | lifecycle projection |
 | subject-list-scope | CONFIG | — | PROPOSED | ADR-003 S3 | round 0: CONFIG (inventory) | explicit subject type |
-| subject-ref | DISPUTED | — | OPEN | ADR-001 | round 0: DISPUTED (A:PRIMITIVE, C1:CONTRACT, C2:PRIMITIVE) | Harvest: category error — `subject` is PRIMITIVE, `subject_ref` is the CONTRACT by which events reference subjects. Reserved `process` type in enum is separate row. Recommend: CONTRACT. See [disputes-harvest.md §Group-2](inventory/disputes-harvest.md) |
+| subject-ref | CONTRACT | ADR-008 §S1 | PROPOSED | ADR-001 | round 0: DISPUTED (A:PRIMITIVE, C1:CONTRACT, C2:PRIMITIVE); round 1: CONTRACT (ADR-008 §S1) | Reference-vs-referent rule: `subject_ref` is the envelope field contract; `subject` (separate row) remains PRIMITIVE. Type enum closed at 4 values; `process` RESERVED (no current emission). |
 | subject-split | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory); round 1: CONTRACT re-cited (ADR-007 §S2) | Platform-bundled shape on envelope type=capture. |
 | subjects-merged | CONTRACT | ADR-007 §S2 | PROPOSED | ADR-002 S9 | round 0: CONTRACT (inventory); round 1: CONTRACT re-cited (ADR-007 §S2) | Platform-bundled shape on envelope type=capture. |
 | sync-contract | CONTRACT | — | PROPOSED | raw-B | round 0: CONTRACT (inventory) | 8 guarantees |
