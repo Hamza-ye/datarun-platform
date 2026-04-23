@@ -201,7 +201,7 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | field-budget | INVARIANT | — | PROPOSED | ADR-004 S10 | round 0: INVARIANT (inventory) | 60-field limit per shape |
 | field-reference | CONTRACT | — | PROPOSED | ADR-004 S8 | round 0: CONTRACT (inventory) | expression component |
 | filter-predicate | ALGORITHM | — | PROPOSED | phases/phase-3.md | round 0: ALGORITHM (inventory) | boolean condition in expression |
-| flag | INVARIANT | ADR-006 §S2 | PROPOSED | ADR-001 | round 0: DISPUTED (B:DERIVED, C1:INVARIANT, C2:PRIMITIVE); round 1: INVARIANT (ADR-006 §S2) | Class is INVARIANT (coverage commitment); instances are DERIVED (produced by conflict-detection); members of the class are CONFIG flag-catalog rows. |
+| flag | INVARIANT | ADR-006 §S2 | PROPOSED | ADR-001 | round 0: DISPUTED (B:DERIVED, C1:INVARIANT, C2:PRIMITIVE); round 1: INVARIANT (ADR-006 §S2) | Event-stream canonicality (scoped, not global): on-stream anomaly records take flag form with no parallel record-surface; off-stream surfaces (metrics/telemetry/logs) are out of scope. Instances are DERIVED; catalog members are CONFIG. |
 | flag-cascade-contamination | DERIVED | — | PROPOSED | ADR-005 Session 2 | round 0: DERIVED (inventory) | projection property |
 | flag-catalog | CONTRACT | — | PROPOSED | flag-catalog.md | round 0: CONTRACT (inventory) | 9-category register |
 | flag-category | CONTRACT | — | PROPOSED | conflict_detected.schema.json | round 0: CONTRACT (inventory) | enumerated anomaly type |

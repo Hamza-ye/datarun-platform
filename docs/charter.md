@@ -22,7 +22,7 @@
 > One line per invariant. Each cites the ADR that established it.
 
 - **Accept-and-flag.** A validly-structured event is never rejected for state-based reasons; state anomalies surface as flag events, never as rejections or modifications. ([ADR-006 §S1](adrs/adr-006-flag-semantics.md))
-- **Flag as sole anomaly surface.** Every state anomaly detected by the platform is represented as a flag event; the flag class is the only surface through which anomalies enter the event stream. ([ADR-006 §S2](adrs/adr-006-flag-semantics.md))
+- **Flag as canonical anomaly surface (event stream).** Flags are the canonical representation of state anomalies on the event stream; no parallel anomaly-record surface exists or is permitted on the event stream. Scoped to representation and emission — does not govern non-event-stream surfaces (telemetry, metrics, operational logs). ([ADR-006 §S2](adrs/adr-006-flag-semantics.md))
 - **Server-side flag creation (default).** Flags are created server-side during sync processing; device-side creation is additively evolvable. ([ADR-006 §S4](adrs/adr-006-flag-semantics.md))
 
 ---

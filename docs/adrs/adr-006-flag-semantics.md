@@ -39,9 +39,11 @@ This is a property of the write path. It holds for every event the platform acce
 
 ### S2: `flag` is an INVARIANT (as a class)
 
-**Every state anomaly detected by the platform is represented as a flag event. The class "flag" is closed to integrity + authorization signals and is the *only* surface through which anomalies enter the event stream.**
+**Flags are the canonical representation of state anomalies on the event stream. Every state anomaly that the platform surfaces as a first-class record on the event stream does so as a flag event — no parallel anomaly-record surface exists or is permitted on the event stream.**
 
-The instances of the class are DERIVED (produced by the Conflict Detector, not authored by actors — see §S3). Individual flag categories — `scope_violation`, `temporal_authority_expired`, `role_stale`, `concurrent_state_change`, `stale_reference`, `domain_uniqueness_violation`, `transition_violation` — are CONFIG rows in the flag catalog. But the *class itself*, the commitment that "all state anomalies surface as flags and nothing else," is INVARIANT.
+This ADR defines representation and emission. It does not override §S1 (accept-and-flag) and does not govern non-event-stream surfaces such as telemetry, metrics, or operational logs. §S1 governs *whether* anomalies enter the stream; §S2 governs *the shape they take when they do*.
+
+The instances of the class are DERIVED (produced by the Conflict Detector, not authored by actors — see §S3). Individual flag categories — `scope_violation`, `temporal_authority_expired`, `role_stale`, `concurrent_state_change`, `stale_reference`, `domain_uniqueness_violation`, `transition_violation` — are CONFIG rows in the flag catalog. But the *class itself* — the commitment that *when anomalies are surfaced on the event stream, they take flag form, and no competing record-shape for the same purpose exists* — is INVARIANT.
 
 **Why not PRIMITIVE.** A primitive is a load-bearing object the platform is built on (Event, Subject, Actor, Device). A flag is a kind of event, not a new primitive. It rides on the Event primitive.
 
@@ -69,7 +71,7 @@ This is not a knob for deployers. It is a platform implementation choice with an
 
 ### Charter updates
 
-- **Invariants** gain two rows: *accept-and-flag* (ADR-006 §S1) and *flags are the only anomaly surface* (ADR-006 §S2).
+- **Invariants** gain two rows: *accept-and-flag* (ADR-006 §S1) and *flags are the canonical event-stream representation of state anomalies* (ADR-006 §S2).
 - **Primitives** gain no rows (flag is not a primitive — correction if any such row existed).
 - **Cross-cutting rules** already cite accept-and-flag; cites get repointed to `ADR-006 §S1` (previously `[2-S14]`, which stays as the first-decision cite but is now dominated by this ADR's formal statement).
 
@@ -104,8 +106,10 @@ All rows go to PROPOSED, not STABLE. Per ledger rule 3, STABLE requires a full r
 
 **Alt-4: leave `flag-creation-location` as OPEN for a future IDR.** Rejected because the architecture note `boundary.md §SG-1` already committed the position. Leaving it open in the ledger creates drift exactly of the kind the convergence protocol exists to eliminate.
 
+**Alt-5: phrase §S2 as "flags are the *only* surface for state anomalies."** Rejected as too strong. The earlier form made flags the single surface for anomalies globally, which would pre-commit against legitimate non-event-stream surfaces (metrics, telemetry, audit logs) and would leak into §S1's territory (the accept-vs-reject decision). The canonical wording scopes §S2 to event-stream representation only: when anomalies enter the event stream, flags are the shape; what happens off-stream is not §S2's concern. §S1 remains the sole authority on whether anomalies enter.
+
 ---
 
 ## Forward reference
 
-ADR-007 (next in queue) will cite §S2 when canonicalizing the four platform-bundled integrity shapes (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`). The class-coverage invariant in §S2 is what makes those four shapes the *closed set* of integrity event names.
+ADR-007 (next in queue) will cite §S2 when canonicalizing the four platform-bundled integrity shapes (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`). The event-stream canonicality in §S2 is what makes those four shapes the *closed set* of integrity event names on the stream.
