@@ -2,6 +2,10 @@
 
 > **Lifespan**: permanent. After Phase 4 freeze, this file moves to
 > `docs/adrs/_supersede-rules.md` and continues to govern future ADRs.
+>
+> **Companion**: [adr-authoring-rules.md](adr-authoring-rules.md) — rules for
+> what an ADR body may and may not cite (enforces the one-way authority arrow
+> from ADRs down to implementation).
 
 ## Core rule
 

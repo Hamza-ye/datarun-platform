@@ -13,11 +13,11 @@
 
 The envelope `type` field defines which processing pipeline handles an event. ADR-004 §S3 closed the type vocabulary at six values: `capture`, `review`, `alert`, `task_created`, `task_completed`, `assignment_changed`. That closure is a structural invariant — extending it is an architecture-grade change, forbidden without a new ADR.
 
-During Phases 1 and 2 of implementation, four additional strings were used as envelope `type` values: `conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`. They leaked into the envelope schema, the events table, tests, and client code across ~12 files. This contradicted ADR-004 §S3.
+During earlier implementation phases, four additional strings were used as envelope `type` values: `conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`. They propagated through the envelope contract and the downstream consumers that depend on it. This contradicted ADR-004 §S3.
 
-The drift was caught in the Phase 3d audit and corrected under a document titled *"ADR-002 Addendum: Envelope Type Mapping for Identity and Integrity Events"* (2026-04-21). The correction was right. The document form was wrong.
+The drift was caught in a subsequent audit and corrected under a document titled *"ADR-002 Addendum: Envelope Type Mapping for Identity and Integrity Events"* (2026-04-21). The correction was right. The document form was wrong.
 
-**The Addendum form creates two authoritative documents for one decision area** — exactly the failure mode the convergence protocol was written to eliminate (see [supersede-rules.md §"Why no Addenda"](../convergence/supersede-rules.md)). Future agents reading ADR-002 would see a pointer to the Addendum; agents reading only the Addendum would miss ADR-002's context; agents reading neither would re-introduce the drift. The Phase 0 inventory DISPUTED the concept `conflict-detected` precisely because prose across the repo still carried the pre-Addendum reading.
+**The Addendum form creates two authoritative documents for one decision area** — exactly the failure mode the convergence protocol was written to eliminate (see [supersede-rules.md §"Why no Addenda"](../convergence/supersede-rules.md)). Future readers of ADR-002 would see a pointer to the Addendum; readers of only the Addendum would miss ADR-002's context; readers of neither would re-introduce the drift. The convergence Phase 0 inventory DISPUTED the concept `conflict-detected` precisely because prose across the repo still carried the pre-Addendum reading.
 
 This ADR canonicalizes the correction as a standalone, self-contained decision. The Addendum is absorbed. The content below is authoritative; the Addendum file is retained only as an archival artifact with a top-of-file pointer to this ADR.
 
@@ -76,9 +76,9 @@ flag_event_uuid = UUIDv5(
 
 ### S5: Platform-bundled shape registry obligation
 
-The four integrity/identity shapes (`conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, `subject_split/v1`) are **platform-bundled**. They are registered by the platform itself at server boot; they are not authored through the admin UI; they cannot be deprecated by operators.
+The four integrity/identity shapes (`conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, `subject_split/v1`) are **platform-bundled**. They are registered by the platform itself at registry initialization; they are not authored through the admin UI; they cannot be deprecated by operators.
 
-Platform-bundled is a classification of the shape registry, parallel to `assignment_created/v1` and `assignment_ended/v1` (already platform-bundled per IDR-013). Shape schemas live under `contracts/shapes/`; boot-time registration is a server obligation.
+Platform-bundled is a classification of the shape registry, parallel to `assignment_created/v1` and `assignment_ended/v1`, which already carry the same classification. Shape schemas live under `contracts/shapes/`; registration is a platform obligation, not a deployer-configured concern.
 
 ---
 
@@ -147,5 +147,5 @@ ADR-008 (next in queue) canonicalizes envelope **reference** fields (`subject_re
 | Four integrity domain facts | ADR-002 S6, S8, Phase 1/2 specs |
 | Auto-resolution uses `capture` | Archive 21 §4.2 Check (d) |
 | `review` = "judgment on a prior event" | `docs/architecture/cross-cutting.md` §1 |
-| Platform-bundled shape treatment | IDR-013 (assignment shapes); ADR-007 §S5 generalizes |
+| Platform-bundled shape treatment | `assignment_created/v1`, `assignment_ended/v1` already carry this classification; ADR-007 §S5 generalizes |
 | Correction provenance | ADR-002 Addendum (2026-04-21) — absorbed by this ADR |

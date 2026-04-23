@@ -19,7 +19,7 @@ Phase 0 inventory found three DISPUTED classifications on flag-related concepts:
 
 The Phase 0.5 archive harvest (see [disputes-harvest.md §Group-1](../convergence/inventory/disputes-harvest.md)) found the dispute is not about what the platform does — it is about which facet of one underlying thing each classification captures. The platform never rejects events for state anomalies. That is a property; it does not change. The machinery that inspects events and raises flags is a procedure; it can evolve without changing the property. The disputes collapse once the two are separated.
 
-ADR-002 S14 committed the property. ADR-002 Addendum §DD-3 made the flag identity deterministic. Phase 3e code wired four platform-bundled shapes into the integrity pipeline. What remained undocumented was the canonical split: **property vs. procedure**, and where each sits in the concept vocabulary. This ADR makes that split explicit.
+ADR-002 S14 committed the property. ADR-002 Addendum §DD-3 made the flag identity deterministic. Platform-bundled integrity shapes (the four canonical integrity/identity shapes) wire into the detection pipeline as fixed contracts — canonicalized in ADR-007. What remained undocumented was the canonical split: **property vs. procedure**, and where each sits in the concept vocabulary. This ADR makes that split explicit.
 
 ---
 
@@ -53,7 +53,7 @@ The instances of the class are DERIVED (produced by the Conflict Detector, not a
 
 **The procedure that inspects events against projected state and emits flags is algorithmic. It evolves without changing the invariants in S1 and S2.**
 
-The server-side Conflict Detector (ADR-002 S13, implemented in `server/src/main/java/dev/datarun/server/integrity/ConflictDetector.java`) is the current implementation. Its shape is not protocol; it is mechanism. It can be extended (new detectors), relocated (device-side pre-flagging, see §S4), or re-implemented without violating S1 or S2.
+The server-side Conflict Detector (ADR-002 S13) is the current realization. Its shape is not protocol; it is mechanism. It can be extended (new detector passes), relocated (device-side pre-flagging, see §S4), or re-implemented without violating S1 or S2.
 
 The algorithm has named parts — evaluate-per-event, sweep, single-writer resolution — but these are ALGORITHM rows, not INVARIANT rows.
 
