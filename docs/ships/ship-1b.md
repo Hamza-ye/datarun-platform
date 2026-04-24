@@ -1,6 +1,6 @@
 # Ship-1b — Real-Device Delivery of S00/S01/S03 under S19
 
-> **Status**: spec scaffold (no code yet). **Orchestrator disclosure**: §1, §2, §3 (structural), §4, §5, §6.5, §7 pre-filled from cites. **§3 (domain realism), §6 (scope/slice), §6.4 (walkthroughs) are user-owned and blank pending your fill.** Walkthrough brainstorm is raw material, not a proposal. Pressure-test pending once user-owned sections are drafted.
+> **Status**: spec ready for build. Slim shape adopted 2026-04-24: §3.2 domain risks are not enumerated pre-build (observed at retro); §6 scope/slice is the thinnest Flutter client against Ship-1's server; §6.4 walkthroughs are Ship-1's W-0/W-1/W-2 re-scripted on real hardware. §3.1 structural risks (R1–R6) remain the ADR-risk surface; they are exercised by running the walkthroughs, not by dedicated walkthrough steps.
 >
 > **Opened**: 2026-04-24
 > **Tag target**: `ship-1b`
@@ -66,13 +66,9 @@ Same ADR surface as Ship-1 §2, but exercised on the **device half** of the syst
 | **R5 — Pull is authoritative for on-device UI state** | [ADR-003 §S3, §S7](../adrs/adr-003-authorization-sync.md) | CHV re-assigned mid-day: previously-captured events for village-1 disappear from the pull on next sync. The UX either hides them (the projection is honest but the CHV's own work "vanishes") or keeps a client-side shadow (violates ADR-003 §S3 — authority context is a projection, not a device cache). Forces either an ADR on CHV-facing authorship view vs. scope view, or an implementation-grade decision recorded at retro. |
 | **R6 — Dynamic form from shape schema** | [ADR-004 §S1](../adrs/adr-004-configuration-boundary.md) | A real shape produces a form that cannot be rendered faithfully (field types under-specified, validation ambiguous, i18n unaccounted). Forces either a shape-grammar addendum on form-renderability or a Ship-3 deployer-UI position. |
 
-### 3.2 Domain-realism risks — **user-owned, blank**
+### 3.2 Domain-realism risks
 
-*Orchestrator cannot judge field realism. Fill in risks you would see from CHV context that the §S positions don't cover. Examples of the kind of thing that belongs here (not proposals):*
-
-- Low-end Android hardware, 2G / EDGE connectivity, GPS permission churn, app-background-killer behaviour on Chinese Android OEMs, language / script input for `household_name`, photo capture expectations (Ship-1 has none — would CHVs expect one?), CHV battery anxiety driving incomplete captures, supervisors sharing a device, …
-
-Pick the 2–4 that matter. For each: specific observable condition under Ship-1b that would surface it.
+Not enumerated pre-build. Ship-1b puts the app on real hardware for the first time; which domain realities bite is discovered by running, not by speculation. Categories to watch during build and record in the retro §4 as they surface: **connectivity** (2G/EDGE, intermittent drop), **lifecycle** (OS-initiated app kill, low-memory recycling, reinstall), **input** (script / keyboard for `household_name`). Anything observed that pushes an ADR §S position is promoted to a real risk at retro, not before.
 
 ---
 
@@ -110,101 +106,27 @@ Expected classification changes: none. If R1–R6 trigger, a ledger row may move
 
 ---
 
-## 6. Slice — **user-owned, blank**
+## 6. Slice
 
-*Orchestrator pressure-test question: what is the thinnest real-device implementation that makes the walkthroughs pass?*
+Thinnest Flutter client that: authenticates with a bearer token, pulls config (activities + shapes + villages in scope), pulls events in scope, renders `household_observation/v1` as a dynamic form, persists captured events locally in an append-only store, and pushes on a manual sync action (plus opportunistic push on network return). One activity, one shape, one scope type, one assignment per CHV — mirrors Ship-1 §6.1 on the device half.
 
-Candidates the user should decide among (not proposals):
+Two instances required (two emulators, or one emulator + one device, or two physical devices). Server is Ship-1's server, unchanged — no server-side work in Ship-1b.
 
-- **Adopt existing `mobile/` tree** (built compile-clean during mobile-1 exploration; currently untracked). If adopted, Ship-1b is a discipline-and-testing Ship, not a build-from-scratch Ship.
-- **Build fresh.** Treat `mobile/` as reference material, like Ship-1 treated the prior server. The charter conformance cost is lower but the build cost is higher.
-- **Hybrid.** Adopt the skeleton; rewrite capture / sync / storage paths against Ship-1's server surface.
+**Starting point**: user-decided between adopting the untracked `mobile/` tree as a skeleton vs. building fresh against Ship-1's server. Not a scope question — an execution question. Record the choice at first commit.
 
-Required elements regardless of the above choice:
-
-- One activity, one shape (`household_observation/v1`), one scope type, one assignment per CHV — same as Ship-1 §6.1.
-- Real device or emulator capable of offline-mode toggling.
-- Two instances (two emulators, or one emulator + one device, or two physical devices).
-- Server is Ship-1's server, unchanged. No server-side work in Ship-1b except fixing the disclosures of Ship-1 retro if they surface as blockers (RFS-3 minimally).
-
-Fill §6.1–§6.3 with the slice you choose. Orchestrator will pressure-test "is this the thinnest?" once filled.
+Out of scope: see §6.5.
 
 ---
 
-## 6.4 Adversarial walkthroughs — **user selects from brainstorm below**
+## 6.4 Acceptance walkthroughs
 
-<!-- ORCHESTRATOR BRAINSTORM — WALKTHROUGH CANDIDATES
-These are candidates for W-0 through W-6 — select, modify, combine, or
-discard. Orchestrator has not validated field realism (§3.2 is yours).
+Ship-1b re-delivers Ship-1's three walkthroughs at the device surface. The walkthroughs are not reinvented; they are re-scripted against real hardware. The §3.1 structural risks (R1–R6) are exercised by the act of running these walkthroughs on a real device — retro §4 records which ones surfaced observable trouble.
 
-W-0 (HAPPY PATH — NOT OPTIONAL):
-  C0. CHV-A installs app, enters bearer token, pulls config, pulls scope,
-      captures one in-scope household (offline), taps sync while online,
-      server receives one capture event with correct envelope, no flags.
-      → assertion: one `capture` event in server store with
-      `shape_ref=household_observation/v1`, zero `conflict_detected/v1`
-      events, device UI shows the capture as synced.
+- **W-0 (happy path, S00).** CHV-A on a real device installs, authenticates, pulls config + scope, captures one in-scope household while offline, syncs on network return. Same assertions as Ship-1 W-0: one `capture` event server-side with `shape_ref=household_observation/v1`, zero `conflict_detected/v1` events, device UI reflects synced state.
+- **W-1 (duplicate household, S01).** Two instances. Both offline. Both capture the same household in village-1. CHV-A syncs first, CHV-B second. Same assertion as Ship-1 W-1: server emits `identity_conflict` flag (`conflict_detected/v1`, discriminated on `shape_ref` per F-A2). Both device UIs reflect their own capture's post-sync state.
+- **W-2 (out-of-scope capture, S03).** CHV-A attempts a capture in village-2 (not assigned). Syncs. Same assertion as Ship-1 W-2: server emits `scope_violation` flag. Device UI reflects post-sync state.
 
-R1 (ADR-002 §S5 — device_id stability):
-  C1. CHV-A installs, captures 3 households, syncs. Uninstall. Reinstall.
-      Capture 1 more household, sync.
-      → assertion: server receives the 4th event with a DIFFERENT
-      `device_id` than the first 3. No crash. No duplicate. This is the
-      observation that proves §S5 is either fine ("new install = new
-      device, accepted") or needs an addendum.
-  C2. CHV-A installs, captures, clears app data via OS settings, captures,
-      syncs.
-      → same assertion.
-
-R2 (ADR-001 §S1, §S3 — client event store durability):
-  C3. CHV-A captures 3 households offline. Force-kill app from OS. Relaunch.
-      Sync.
-      → assertion: all 3 events persist and push. No partial envelopes
-      (every event has all 11 fields). No duplicates on retry.
-  C4. CHV-A captures offline, toggles airplane mode off → on → off during
-      sync push. Relaunch app. Sync.
-      → assertion: idempotent push. Server-side event count is correct.
-      Client-side "synced" state is correct (no ghosts, no orphans).
-
-R3 (ADR-002 §S1 — device_seq monotonicity):
-  C5. CHV-A captures 5 households across 3 app launches (2, 2, 1), offline
-      throughout. Sync once at end.
-      → assertion: all 5 events have strictly increasing device_seq, no
-      gaps forced by app lifecycle, no rollback after any launch.
-
-R4 (ADR-006 §S1, §S2 — flag UX on device):
-  C6. W-1-style duplicate (both devices offline, both capture "Khan
-      household" in village-1). CHV-A syncs first. CHV-B syncs second.
-      Both pull after sync.
-      → assertion: server emits `identity_conflict` flag. Both devices see
-      their own capture on the device. What does each device's UI SHOW for
-      the flagged capture? This is the observation that exercises R4 —
-      the acceptable answers are your call, the important part is that
-      the walkthrough pins down what "honest flag UX offline-first" looks
-      like. The retro records whichever answer you choose as
-      implementation-grade.
-  C7. CHV-A captures out-of-scope (village-2) household, syncs.
-      → assertion: server emits `scope_violation` flag. Device shows ???
-      (same open question as C6).
-
-R5 (ADR-003 §S3, §S7 — pull as authoritative):
-  C8. CHV-A captures 3 in-village-1 households, syncs. Admin re-assigns
-      CHV-A to village-2 (via `assignment_changed` event). CHV-A pulls.
-      → assertion: CHV-A's pull no longer contains the village-1 events.
-      What does the UI show for the 3 captures the CHV MADE and which
-      are still on-device? This is the observation that proves R5.
-
-R6 (ADR-004 §S1 — dynamic form):
-  C9. CHV-A captures a household. UI is rendered dynamically from
-      `household_observation/v1`. Required fields enforce validation
-      client-side.
-      → assertion: this is really a W-0 sub-check, not a distinct
-      walkthrough. Fold into W-0 if no separate concern.
-
-User: pick 4–6 of these (or write new ones). W-0 is mandatory. At least
-one walkthrough per ADR risk you keep live in §3.1. Mark unused candidates
-as "considered, not shipped" for the Ship-1b retro record.
--->
+W-1 and W-2 walkthrough prose requires each device's UI to "reflect post-sync state" for a flagged capture. What that UX actually is — hide, annotate, queue-for-review, silent — is an implementation-grade choice made during build and recorded in retro §3, not pre-specified here. That is where R4 and R5 are observed.
 
 ---
 
@@ -227,10 +149,10 @@ as "considered, not shipped" for the Ship-1b retro record.
 
 Ship-1b is done when all of the following hold.
 
-1. All walkthroughs selected in §6.4 pass end-to-end on a real device or emulator + Ship-1's server, starting from clean install.
+1. All three walkthroughs in §6.4 (W-0, W-1, W-2) pass end-to-end on a real device or emulator + Ship-1's server, starting from clean install.
 2. Every commit in the Ship-1b range cites at least one scenario ID (`S00`, `S01`, `S03`, or `S19`). `git log --oneline` greppable.
 3. No envelope / contract / shape change from Ship-1 tag. `git diff ship-1..HEAD -- contracts/` → empty.
-4. No new ADR drafted unless one of R1–R6 (§3.1) or a user-drafted domain risk (§3.2) triggered. If one did: ADR merged before tag; charter regenerated; drift gate PASS.
+4. No new ADR drafted unless one of R1–R6 (§3.1) or a domain reality surfaced during build triggered one. If one did: ADR merged before tag; charter regenerated; drift gate PASS.
 5. All integrity/flag UX discriminated on `shape_ref`, never on envelope `type` (F-A2, F-A4, F-B4). Grep the client code for `type == "conflict_detected"` or `type == "capture"` as a UI discriminator → zero matches.
 6. Ledger: any row that changed classification has a history entry citing the Ship-1b observation.
 7. Charter: regenerated if (6) produced a delta. Drift gate PASS.
