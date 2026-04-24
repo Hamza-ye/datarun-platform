@@ -1,0 +1,25 @@
+{
+  "events": [
+    {
+      "id": "a6c829c7-4a36-45df-bd8b-bd28b6ac65f5",
+      "type": "capture",
+      "shape_ref": "household_observation/v1",
+      "activity_ref": "household_observation",
+      "subject_ref": {"type":"subject","id":"7f786abe-fd57-4886-8b6c-adaa7e635081"},
+      "actor_ref":   {"type":"actor","id":"d4510519-da2c-4375-a729-671f936cd26b"},
+      "device_id":   "d52f2021-f5f5-4195-bfc6-b23d6b88328c",
+      "device_seq":  1,
+      "sync_watermark": null,
+      "timestamp":   "2026-04-24T21:36:07.844Z",
+      "payload": {
+        "household_name": "Khan household",
+        "head_of_household_name": "Ali Khan",
+        "household_size": 6,
+        "village_ref": "7032bc52-414e-4e36-83a4-fe55c421968b",
+        "latitude": null,
+        "longitude": null,
+        "visit_notes": null
+      }
+    }
+  ]
+}
