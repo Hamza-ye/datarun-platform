@@ -38,7 +38,7 @@ Mechanical verification against spec §7.
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 1 | W-1 + W-2 pass end-to-end | ✅ | `WalkthroughAcceptanceTest`: 3 tests, 0 failures, 0 errors, BUILD SUCCESS. W-0 is also covered explicitly. |
+| 1 | W-1 + W-2 pass end-to-end | ✅ | `WalkthroughAcceptanceTest`: 3 tests, 0 failures, 0 errors, BUILD SUCCESS. W-0 is also covered explicitly. <br>Post-close addendum (§9): two ADR-001 §S4 coverage tests added — `idempotent_push_produces_no_duplicate_events_or_flags` (M1) and `order_agnostic_identity_detection_in_W1` (M2). Suite now 5/5 green. |
 | 2 | Every Ship-1 commit cites ≥ 1 of `S00/S01/S03` | ✅ | `git log --oneline 9a79140..HEAD` each carry scenario IDs in the subject line. |
 | 3 | `contracts/envelope.schema.json` unchanged from HEAD at Ship-1 open | ✅ | `git diff 9a79140 HEAD -- contracts/envelope.schema.json` → empty. |
 | 4 | No new ADR drafted during Ship-1 unless R1–R5 triggered | ✅ | No ADR drafted. None of R1–R5 observed (see §4 below). |
@@ -288,6 +288,15 @@ no standalone retro. Closure is an amendment to this retro's §2 criterion
 - At close: add a bullet to §2 row 1 evidence noting the addendum tests,
   and a line to this §9.3 pointing at the commit SHAs. No other retro
   surface changes.
+
+**Closed** (2026-04-24). Commits on `main`:
+
+- `2beef1b` — chore(ship-1-addendum): restore Maven wrapper (mvnw)
+- `3d4deb6` — test(ship-1-addendum): S00 — ADR-001 §S4 idempotent push coverage (M1)
+- `65f8e17` — test(ship-1-addendum): S01 — ADR-001 §S4 order-independent sync coverage (M2)
+
+`./mvnw test` green (5/5). Drift gate PASS. No tag move; `ship-1` tag stays on
+`633c6fb`.
 
 ### 9.4 Why record this now rather than ship and forget
 
