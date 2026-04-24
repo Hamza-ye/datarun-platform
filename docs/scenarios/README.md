@@ -61,6 +61,9 @@ Scenario 19 (working without connectivity) is not a separate operational situati
 ### Composite Real-World Scenarios
 Scenarios 20 and 21 describe complete, real-world operational contexts (a CHV's field day, a supervisor visit) that naturally touch multiple scenarios from the core set. They exist to validate that the platform's eventual design can support a coherent real-world workflow, not just individual isolated capabilities.
 
+### Bundled-File Caveat
+Scenario file [06](06-entity-registry-lifecycle.md) contains **two distinct architectural concerns** under one number: **06 registry lifecycle** (identity mutation — merge, split, deactivation) and **06b shape evolution** (the shape of information changes over time). These are deliverable as separate Ship-level atoms even though they share a file. The Ship map in [../ships/README.md](../ships/README.md) treats them separately.
+
 ---
 
 ## Architectural Significance

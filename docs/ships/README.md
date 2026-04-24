@@ -1,6 +1,6 @@
 # Ships — Scenario-Driven Delivery Index
 
-> Each Ship delivers one or more scenarios from [../scenarios/](../scenarios/) end-to-end. Ships replace the prior phase-driven decomposition at Phase 2 closure (2026-04-23). See [charter.md § Rhythm](../charter.md#rhythm) for the per-Ship loop and anti-drift rules.
+> Each Ship delivers a **vertical slice through one or more scenarios** from [../scenarios/](../scenarios/). A Ship does not deliver a scenario "fully" — scenarios are cross-cutting problem narratives. The Ship picks the slice, and §6.5 "deliberately not built" lists what the Ship parks for later Ships or FPs. Ships replace the prior phase-driven decomposition at Phase 2 closure (2026-04-23). See [charter.md § Rhythm](../charter.md#rhythm) for the per-Ship loop and anti-drift rules.
 
 ## Map
 
@@ -44,7 +44,7 @@ Resolve this split at Ship-2 spec-open time. If rejected, the rejection must be 
 ## Rules (carried from charter § Rhythm)
 
 1. Ship spec written before any code.
-2. Slice end-to-end; no horizontal work.
+2. Slice vertically; no horizontal work. The slice advances the chosen scenarios; the rest of each scenario's problem surface is parked in §6.5 or on the FP register.
 3. Every commit cites the scenario ID it advances (`feat(ship-N): S0X — …`).
 4. Scenario acceptance walkthrough follows scenario prose — it is the acceptance criterion.
 5. Retro: ADR supersessions → ledger updates → charter regenerated (never hand-edited) → drift gate re-runs → Ship tag.

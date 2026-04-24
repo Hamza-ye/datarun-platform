@@ -175,7 +175,7 @@ Cross-subject aggregation (dashboards, campaign progress, reporting) is classifi
 **Per-Ship loop**:
 
 1. **Ship spec** (`docs/ships/ship-N.md`) — written before any code. Declares: scenarios delivered, ADRs exercised (§S cites), ADRs at risk of supersession with the specific position that would break and under what observation, ledger concepts touched with expected status changes, out-of-scope assertion, retro criteria.
-2. **Slice** — thinnest vertical that implements the scenarios end-to-end. No horizontal work.
+2. **Slice** — thinnest vertical that advances the chosen scenarios. A Ship does **not** deliver a scenario "fully"; it delivers the slice it commits to and parks the rest of each scenario's problem surface in §6.5 "deliberately not built" or on the FP register. No horizontal work.
 3. **Build** — every commit cites the scenario ID advanced (`feat(ship-N): S0X — …`). Commits without a scenario cite are red flags visible in `git log`.
 4. **Scenario acceptance** — scripted walkthrough that follows the scenario prose. Walkthrough is the acceptance criterion, not unit tests alone.
 5. **Retro + convergence pass** — produces, in order: any ADR position changed → new ADR (supersede per [convergence/supersede-rules.md](convergence/supersede-rules.md)); ledger rows updated in the same commit; charter **regenerated** (never hand-edited); flagged-positions entries closed or created; Ship tag (`ship-N`).
