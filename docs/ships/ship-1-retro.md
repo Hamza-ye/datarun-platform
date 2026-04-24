@@ -237,3 +237,62 @@ the Ship-2 spec:
 - **One environment workaround**: Flyway checksum drift after the Ship-0 → Ship-1 wipe required `docker compose -f docker-compose.test.yml down -v` to reset the test DB volume. Worth remembering; already noted in CLAUDE.md.
 - **One debug loop**: the walkthrough initially asserted `flagsFromB == 1` for W-1 and failed because the server (correctly) emitted two flags. Test expectation was the bug, not the server. See §3.8.
 - **Total commits in Ship-1 range**: 2 (delete-historical + feat-ship-1-server). Docs commit + retro is a third. Tag `ship-1` follows.
+
+---
+
+## 9. Addendum (2026-04-24, post-close) — ADR-001 §S4 coverage gap
+
+Opened by a post-close ADR-1 × Ship-1 coverage scan. Recorded here, **not**
+retrofitted into §2 or §4 — Ship-1 closure stands as it was. The gap is
+real, narrow, and cheap to close before Ship-1b build begins.
+
+### 9.1 Observation
+
+Ship-1 §2 lists ADR-001 §S1–§S5 as exercised. A §S-level check against
+the walkthroughs and `WalkthroughAcceptanceTest` reveals two positions
+that are **structurally implemented but not observed**:
+
+- **M1 — Idempotent push (ADR-001 §S4)**. `ON CONFLICT (id) DO NOTHING`
+  is in `EventRepository.insert` (retro §3.9), but no acceptance test
+  replays a push batch and asserts zero duplicate events + zero duplicate
+  flags. The property is true by inspection, not by observation.
+- **M2 — Order-independent sync (ADR-001 §S4)**. `sync_watermark` gives
+  total ordering on arrival, but W-1 fixes sync order (A first, B second).
+  No variant asserts same outcome when the order is swapped.
+
+All other ADR-001 positions are either covered (§S1 append-only by
+code discipline, §S3 client-generated UUIDs implicit in round-trip,
+§S5 envelope guarantees fully exercised) or correctly deferred (§S2
+projection rebuildability — no projection cache in Ship-1 to rebuild;
+becomes a Ship-2 obligation at the moment `subject_lifecycle` reappears,
+per FP-002).
+
+### 9.2 Classification — side-quest, not sub-Ship
+
+Per the skill's four-way classification test, this is a **side-quest**:
+no new scenarios, no new ADR surface, no first-time §S load. It adds
+test coverage for positions already declared-exercised. No tag move;
+no standalone retro. Closure is an amendment to this retro's §2 criterion
+#1 evidence row.
+
+### 9.3 Closure plan
+
+- Two new tests in `WalkthroughAcceptanceTest` (or a sibling class):
+  - `idempotent_push_produces_no_duplicate_events_or_flags` — push the
+    W-0 batch twice; assert event count stable, flag count stable.
+  - `order_agnostic_identity_detection_in_W1` — run W-1 with sync order
+    (B first, A second); assert the same `identity_conflict` flag is
+    emitted with the same discriminators.
+- Commits cite `S00` and `S01` respectively, subject-line form
+  `test(ship-1-addendum): S0X — ADR-001 §S4 coverage`.
+- At close: add a bullet to §2 row 1 evidence noting the addendum tests,
+  and a line to this §9.3 pointing at the commit SHAs. No other retro
+  surface changes.
+
+### 9.4 Why record this now rather than ship and forget
+
+Ship-1b will put real-device retry loops (network flap, app kill, re-sync)
+on the push path for the first time. If M1 has a silent bug, Ship-1b is
+exactly where it surfaces — as a Ship-1b failure mis-attributed to the
+client. Closing M1/M2 first means Ship-1b inherits a demonstrably
+idempotent server.

@@ -172,6 +172,44 @@ A successor ADR must exist, and either:
 
 ---
 
+## FP-005 — Corrections surface is unassigned in the 5-Ship map
+
+**Status**: OPEN
+**Opened**: 2026-04-24 by post-Ship-1 ADR-1 × Ship-1 coverage scan
+**Blocks**: any Ship that would need corrections to exist without naming them; currently no Ship has them scheduled
+**Severity**: A — the behaviour is ADR-001-decided but has no delivery plan
+
+### Context
+
+ADR-001 §S1 commits: *"Corrections, reviews, status changes, and amendments produce new records that reference earlier ones."* S00's "what makes this hard" section elaborates: *"A record may need to be corrected after it was considered complete. The correction must be traceable — who changed what, when, and why — without erasing the original. Corrections made while offline add further complexity."*
+
+This is a first-class platform behaviour — not a nice-to-have. A grep of `docs/scenarios/` for `correction`, `amendment`, `amend`, `supersed` finds the word only in S00's edge-case paragraph and in S04's reviewer workflow ("send back for correction"). **No scenario is dedicated to the CHV-initiated correction flow.** S04 covers reviewer-initiated send-back; the ADR-001 §S1 clause names a broader behaviour.
+
+Consequence: the 5-Ship map (`docs/ships/README.md`) has no Ship where the correction event (a new record referencing an earlier one with a "this supersedes X" shape) is first exercised. The ADR-002 §S6–§S11 merge/split shapes (Ship-2) are a different concern — they reconcile two subjects, not two captures of the same subject. The ADR-005 review flow (Ship-3/5 under current map) is reviewer-driven, not CHV-driven.
+
+### Trigger
+
+Any of the following lifts this item to `BLOCKS`:
+
+1. A Ship spec is opened whose scenarios implicitly require corrections (e.g., S04 supervisor review sending back → CHV must be able to amend).
+2. A retro surfaces a real field case where a CHV wants to fix a prior capture and the platform has no path.
+3. Cleanup pass before Ship-3 open, if Ship-3 includes S04.
+
+### Gate
+
+All of the following must be true:
+
+1. A scenario (existing or new) is explicitly assigned the CHV-correction behaviour in `docs/ships/README.md` with a named Ship.
+2. A shape (or shape family) for the correction event exists under `contracts/shapes/` with a payload that carries at minimum: reference to the original event, reason for correction, new values.
+3. The Ship's walkthrough exercises: original capture → correction capture offline → sync → server accepts both, projection reflects the corrected state, audit trail preserves the original.
+4. ADR-001 §S1 is re-read to confirm whether the correction shape needs an envelope-level position (likely reusing `subject_ref` channel with a payload-level `corrects_event_id`, but that is a design decision the triggering Ship must make).
+
+### Resolution log
+
+- **2026-04-24**: Opened by post-Ship-1 coverage scan. No current forcing function; current-map Ship-3 (S04 supervisor review) is the earliest likely trigger.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
