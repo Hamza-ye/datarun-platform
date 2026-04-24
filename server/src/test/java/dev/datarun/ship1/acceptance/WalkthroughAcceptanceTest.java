@@ -184,6 +184,57 @@ class WalkthroughAcceptanceTest {
         }
     }
 
+    /**
+     * Addendum M1 (retro §9.3) — ADR-001 §S4 idempotent push.
+     *
+     * <p>Replays the W-0 happy-path batch a second time with identical envelope ids.
+     * Asserts the second push is observably deduplicated ({@code duplicates} count, zero
+     * accepted, zero new flags) and that the {@code events} table row count is unchanged.
+     * Covers S00.
+     */
+    @Test
+    void idempotent_push_produces_no_duplicate_events_or_flags() throws Exception {
+        Bootstrap b = bootstrap();
+        UUID deviceA = UUID.randomUUID();
+        UUID subject = UUID.randomUUID();
+
+        ObjectNode capture = buildHouseholdCapture(
+                subject, b.chvAActor, deviceA, 1, b.villageA, "Khan household", 5);
+
+        // First push — W-0 happy path.
+        HttpResponse<String> first = push(pushBody(capture));
+        assertThat(first.statusCode).isEqualTo(200);
+        JsonNode firstParsed = mapper.readTree(first.body);
+        assertThat(firstParsed.path("accepted").asInt()).isEqualTo(1);
+        assertThat(firstParsed.path("duplicates").asInt()).isEqualTo(0);
+        assertThat(firstParsed.path("flags_raised").asInt()).isEqualTo(0);
+
+        int eventsAfterFirst = countAllEvents();
+        int flagsAfterFirst = countByShapeDb("conflict_detected/v1");
+
+        // Second push — identical envelope id(s). Must be a no-op on both events and flags.
+        HttpResponse<String> second = push(pushBody(capture));
+        assertThat(second.statusCode).isEqualTo(200);
+        JsonNode secondParsed = mapper.readTree(second.body);
+        assertThat(secondParsed.path("accepted").asInt())
+                .describedAs("no new event accepted on re-push of same id")
+                .isEqualTo(0);
+        assertThat(secondParsed.path("duplicates").asInt())
+                .describedAs("re-push reports the event as a duplicate")
+                .isEqualTo(1);
+        assertThat(secondParsed.path("flags_raised").asInt())
+                .describedAs("no new flag emitted on duplicate (detector skipped for duplicates)")
+                .isEqualTo(0);
+
+        // Total event rows unchanged; no new flag events in DB.
+        assertThat(countAllEvents())
+                .describedAs("events table row count unchanged after duplicate push")
+                .isEqualTo(eventsAfterFirst);
+        assertThat(countByShapeDb("conflict_detected/v1"))
+                .describedAs("conflict_detected/v1 flag count unchanged after duplicate push")
+                .isEqualTo(flagsAfterFirst);
+    }
+
     // =========================================================================== helpers
     private record Bootstrap(UUID villageA, UUID villageB, UUID chvAActor, String chvAToken,
                              UUID chvBActor, String chvBToken) {}
@@ -299,6 +350,17 @@ class WalkthroughAcceptanceTest {
 
     private int countEvents(String type) {
         Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM events WHERE type = ?", Integer.class, type);
+        return n == null ? 0 : n;
+    }
+
+    private int countAllEvents() {
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM events", Integer.class);
+        return n == null ? 0 : n;
+    }
+
+    private int countByShapeDb(String shapeRef) {
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM events WHERE shape_ref = ?", Integer.class, shapeRef);
         return n == null ? 0 : n;
     }
 
