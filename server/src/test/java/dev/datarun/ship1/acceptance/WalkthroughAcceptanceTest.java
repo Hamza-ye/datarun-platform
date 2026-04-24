@@ -235,6 +235,66 @@ class WalkthroughAcceptanceTest {
                 .isEqualTo(flagsAfterFirst);
     }
 
+    /**
+     * Addendum M2 (retro §9.3) — ADR-001 §S4 order-independent sync.
+     *
+     * <p>Mirrors W-1 but swaps the device sync order: device-B pushes first, device-A second.
+     * Identity detection must produce the same {@code identity_conflict} flag (shape-discriminated
+     * per F-A2), referencing the same two subject_ids and the same two event_ids, regardless of
+     * which device's capture arrived first. Covers S01.
+     */
+    @Test
+    void order_agnostic_identity_detection_in_W1() throws Exception {
+        Bootstrap b = bootstrap();
+        UUID deviceA = UUID.randomUUID();
+        UUID deviceB = UUID.randomUUID();
+        UUID subjectA = UUID.randomUUID();
+        UUID subjectB = UUID.randomUUID();
+
+        ObjectNode captureA = buildHouseholdCapture(
+                subjectA, b.chvAActor, deviceA, 1, b.villageA, "Khan household", 5);
+        ObjectNode captureB = buildHouseholdCapture(
+                subjectB, b.chvBActor, deviceB, 1, b.villageA, "Khan household", 6);
+
+        // Swapped order: B syncs first. B's village_ref is village-A (not B's assignment) →
+        // scope_violation on B. No prior Khan in village-A yet, so no identity_conflict yet.
+        HttpResponse<String> respB = push(pushBody(captureB));
+        assertThat(respB.statusCode).isEqualTo(200);
+        assertThat(mapper.readTree(respB.body).path("flags_raised").asInt())
+                .describedAs("B-first: only scope_violation, no prior Khan to conflict with")
+                .isEqualTo(1);
+
+        // A syncs second. A is in scope (no scope_violation). Prior Khan exists in village-A
+        // with a different subject_id → identity_conflict on A.
+        HttpResponse<String> respA = push(pushBody(captureA));
+        assertThat(respA.statusCode).isEqualTo(200);
+        assertThat(mapper.readTree(respA.body).path("flags_raised").asInt())
+                .describedAs("A-second: identity_conflict against B's prior capture")
+                .isEqualTo(1);
+
+        assertThat(countEvents("capture")).isEqualTo(2);
+
+        // Exactly one identity_conflict flag — shape-discriminated, same two subject_ids/event_ids.
+        JsonNode idFlags = adminListFlags("identity_conflict");
+        assertThat(idFlags.size()).isEqualTo(1);
+        assertThat(idFlags.get(0).path("shape_ref").asText()).isEqualTo("conflict_detected/v1");
+        assertThat(idFlags.get(0).path("type").asText()).isEqualTo("alert");
+        assertThat(idFlags.get(0).path("actor_id").asText())
+                .isEqualTo("system:conflict_detector/identity_conflict");
+
+        JsonNode related = idFlags.get(0).path("payload").path("related_event_ids");
+        assertThat(related.size()).isEqualTo(2);
+        assertThat(related.toString())
+                .contains(captureA.path("id").asText())
+                .contains(captureB.path("id").asText());
+
+        JsonNode relatedSubjects = idFlags.get(0).path("payload").path("related_subject_ids");
+        assertThat(relatedSubjects.size()).isEqualTo(2);
+        assertThat(relatedSubjects.toString())
+                .contains(subjectA.toString())
+                .contains(subjectB.toString());
+    }
+
     // =========================================================================== helpers
     private record Bootstrap(UUID villageA, UUID villageB, UUID chvAActor, String chvAToken,
                              UUID chvBActor, String chvBToken) {}
