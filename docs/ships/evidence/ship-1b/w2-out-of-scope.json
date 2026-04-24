@@ -1,0 +1,25 @@
+{
+  "events": [
+    {
+      "id": "a09b9e4c-d52b-479e-893b-b53e3d2e4c5f",
+      "type": "capture",
+      "shape_ref": "household_observation/v1",
+      "activity_ref": "household_observation",
+      "subject_ref": {"type":"subject","id":"ceb3ae2c-3dfc-4df8-ab32-18b9454993b1"},
+      "actor_ref":   {"type":"actor","id":"e008bee2-a351-4c37-af47-4c7e249b9ffa"},
+      "device_id":   "fc7fdb5a-3074-4594-945c-b829a5ab796d",
+      "device_seq":  3,
+      "sync_watermark": null,
+      "timestamp":   "2026-04-24T21:40:37.469Z",
+      "payload": {
+        "household_name": "W-2 Out-of-scope Household",
+        "head_of_household_name": "Test Subject",
+        "household_size": 2,
+        "village_ref": "0463c3d3-0c34-4d89-b9bb-86bf26764efe",
+        "latitude": null,
+        "longitude": null,
+        "visit_notes": null
+      }
+    }
+  ]
+}
