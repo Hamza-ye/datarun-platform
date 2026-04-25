@@ -37,6 +37,18 @@ public class ScopeResolver {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Projection-derived role check (Ship-2 §6 commitment 1, FP-002 path a, ScopeResolver
+     * precedent). Returns true iff at least one of the actor's active assignments at {@code at}
+     * carries the given role. No cache.
+     */
+    public boolean hasRoleAt(String actorId, String role, OffsetDateTime at) {
+        for (Assignment a : activeAssignments(actorId, at)) {
+            if (role.equals(a.role())) return true;
+        }
+        return false;
+    }
+
     /** All active assignments for the actor at the given time. */
     public List<Assignment> activeAssignments(String actorId, OffsetDateTime at) {
         // Replay every assignment_created/v1 event; filter by target_actor.id and time validity.
