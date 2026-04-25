@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.ship1.event.Event;
 import dev.datarun.ship1.event.EventRepository;
+import dev.datarun.ship1.event.ServerEmission;
 import dev.datarun.ship1.scope.ScopeResolver;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -33,18 +33,18 @@ public class ConflictDetector {
 
     private static final String HOUSEHOLD_SHAPE = "household_observation/v1";
     private static final String FLAG_SHAPE = "conflict_detected/v1";
-    private static final UUID SERVER_DEVICE_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
     private final EventRepository events;
     private final ScopeResolver scopes;
     private final ObjectMapper mapper;
-    private final JdbcTemplate jdbc;
+    private final ServerEmission serverEmission;
 
-    public ConflictDetector(EventRepository events, ScopeResolver scopes, ObjectMapper mapper, JdbcTemplate jdbc) {
+    public ConflictDetector(EventRepository events, ScopeResolver scopes, ObjectMapper mapper,
+                            ServerEmission serverEmission) {
         this.events = events;
         this.scopes = scopes;
         this.mapper = mapper;
-        this.jdbc = jdbc;
+        this.serverEmission = serverEmission;
     }
 
     /** Called after a capture event is persisted. May emit 0..N flag events. */
@@ -121,16 +121,11 @@ public class ConflictDetector {
                 source.subjectType(),
                 source.subjectId(),
                 "system:conflict_detector/" + category,
-                SERVER_DEVICE_ID,
-                nextServerSeq(),
+                serverEmission.serverDeviceId(),
+                serverEmission.nextServerDeviceSeq(),
                 null,
                 OffsetDateTime.now(),
                 payload);
-    }
-
-    private synchronized long nextServerSeq() {
-        Long v = jdbc.queryForObject("SELECT nextval('server_device_seq')", Long.class);
-        return v == null ? 1L : v;
     }
 
     private static String normalize(String s) {
