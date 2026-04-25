@@ -12,12 +12,12 @@
     },
     "successor_ids": {
       "type": "array",
-      "description": "The new subject UUIDs that take over for source_id. minItems: 1 per ship-2.md §6 commitment 4 (length-0 is rejected pre-validation per W-4). Wrong-merge correction emits 2 in a single event so both lineages survive.",
+      "description": "The new subject UUIDs that take over for source_id. minItems: 2 per ship-2.md §6 commitment 4 — the §S7 wrong-merge correction case requires both conflated lineages to be recovered atomically; a single-successor split has no domain meaning under §S8.",
       "items": {
         "type": "string",
         "format": "uuid"
       },
-      "minItems": 1,
+      "minItems": 2,
       "uniqueItems": true
     },
     "reason": {
