@@ -52,9 +52,18 @@ public class DevBootstrapController {
         tokens.createToken(tokenA, chvA);
         tokens.createToken(tokenB, chvB);
 
+        // Ship-2 §6 commitment 1: coordinator recognition is a projection over
+        // assignment_created/v1 events with role="coordinator" and all-null scope dimensions
+        // (the schema already permits null on every dimension). No actor_tokens.kind, no
+        // coordinators table — same authority primitive every other actor's role uses.
+        UUID coordinator = UUID.randomUUID();
+        String coordinatorToken = randomToken();
+        tokens.createToken(coordinatorToken, coordinator);
+
         OffsetDateTime now = OffsetDateTime.now();
         emitAssignment(chvA, villageA, "chv", now);
         emitAssignment(chvB, villageB, "chv", now);
+        emitCoordinatorAssignment(coordinator, now);
 
         ObjectNode out = mapper.createObjectNode();
         out.put("village_a", villageA.toString());
@@ -63,7 +72,38 @@ public class DevBootstrapController {
         out.put("chv_a_token", tokenA);
         out.put("chv_b_actor_id", chvB.toString());
         out.put("chv_b_token", tokenB);
+        out.put("coordinator_actor_id", coordinator.toString());
+        out.put("coordinator_token", coordinatorToken);
         return ResponseEntity.ok(out);
+    }
+
+    private void emitCoordinatorAssignment(UUID actorId, OffsetDateTime now) {
+        ObjectNode payload = mapper.createObjectNode();
+        ObjectNode target = payload.putObject("target_actor");
+        target.put("type", "actor");
+        target.put("id", actorId.toString());
+        payload.put("role", "coordinator");
+        ObjectNode scope = payload.putObject("scope");
+        scope.putNull("geographic");
+        scope.putNull("subject_list");
+        scope.putNull("activity");
+        payload.put("valid_from", now.toString());
+        payload.putNull("valid_to");
+
+        Event e = new Event(
+                UUID.randomUUID(),
+                "assignment_changed",
+                "assignment_created/v1",
+                null,
+                "assignment",
+                UUID.randomUUID(),
+                "system:dev_bootstrap/seed",
+                DEV_DEVICE_ID,
+                nextDevSeq(),
+                null,
+                now,
+                payload);
+        events.insert(e);
     }
 
     private void emitAssignment(UUID actorId, UUID villageId, String role, OffsetDateTime now) {
