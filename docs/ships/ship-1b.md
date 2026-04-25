@@ -18,7 +18,7 @@ Ship-1b re-delivers **S00**, **S01**, **S03** under **S19** — **same scenarios
 | [S00](../scenarios/00-basic-structured-capture.md) | Capture occurs on a real Flutter UI driven by `household_observation/v1`, persisted locally while offline, and pushed on sync. |
 | [S01](../scenarios/01-entity-linked-capture.md) | Identity duplicate emerges from **two real devices** operating independently, not from one HTTP test client acting as two. |
 | [S03](../scenarios/03-user-based-assignment.md) | A CHV installs the app, authenticates, pulls their scope, and sees only their village's events and config. |
-| [S19](../scenarios/19-offline-first.md) | **Real** offline-first behaviour: airplane mode, low battery, app restart, reinstall, intermittent connectivity. Ship-1's two-client simulation could not exercise any of these. |
+| [S19](../scenarios/19-offline-capture-and-sync.md) | **Real** offline-first behaviour: airplane mode, low battery, app restart, reinstall, intermittent connectivity. Ship-1's two-client simulation could not exercise any of these. |
 
 **Why a separate Ship, not a side-quest**: Ship-1 proved the server can serve two simulated devices over `TestRestTemplate`. The *load-bearing scenario of Ship-1* — S19 (offline-first) — is proved by construction (event-based sync protocol) but not by observation. Ship-1b puts the client half of S19 under adversarial load for the first time. That touches ADR-001, ADR-002 §S5, ADR-006, and the device UX for ADR-003 §S7 pull filtering — enough ADR surface that side-quest discipline is insufficient. See the skill's *Side-quest lifecycle* section for the classification test.
 

@@ -9,7 +9,7 @@
 >   [S00](../scenarios/00-basic-structured-capture.md)
 > + [S01](../scenarios/01-entity-linked-capture.md)
 > + [S03](../scenarios/03-user-based-assignment.md)
-> under [S19](../scenarios/19-offline-first.md).
+> under [S19](../scenarios/19-offline-capture-and-sync.md).
 
 ---
 

@@ -15,7 +15,7 @@
 retro pending. Spec: [`docs/ships/ship-1.md`](docs/ships/ship-1.md). Scenarios
 delivered: [S00](docs/scenarios/00-basic-structured-capture.md),
 [S01](docs/scenarios/01-entity-linked-capture.md),
-[S03](docs/scenarios/03-user-based-assignment.md) under the [S19](docs/scenarios/19-offline-first.md)
+[S03](docs/scenarios/03-user-based-assignment.md) under the [S19](docs/scenarios/19-offline-capture-and-sync.md)
 offline constraint.
 
 Acceptance: `WalkthroughAcceptanceTest` (3/3 pass) drives the real server as two

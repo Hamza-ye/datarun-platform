@@ -4,7 +4,7 @@
 > **Opened**: 2026-04-24
 > **Closed (implementation)**: 2026-04-24
 > **Spec**: [`ship-1.md`](ship-1.md)
-> **Scenarios shipped**: [S00](../scenarios/00-basic-structured-capture.md) + [S01](../scenarios/01-entity-linked-capture.md) + [S03](../scenarios/03-user-based-assignment.md) under [S19](../scenarios/19-offline-first.md)
+> **Scenarios shipped**: [S00](../scenarios/00-basic-structured-capture.md) + [S01](../scenarios/01-entity-linked-capture.md) + [S03](../scenarios/03-user-based-assignment.md) under [S19](../scenarios/19-offline-capture-and-sync.md)
 
 ---
 
