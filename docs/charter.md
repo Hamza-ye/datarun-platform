@@ -17,10 +17,10 @@
 
 **Convergence phase**: 2 — **CLOSED** (2026-04-23). Protocol dormant; re-enters only if a Ship retro triggers a cross-cutting ADR round.
 **Forward cadence**: scenario-driven Ships (see *Rhythm* section).
-**Active ship**: Ship-1 — **implementation COMPLETE, retro written** (2026-04-24). Scenarios S00 + S01 + S03 shipped under the S19 offline constraint. `WalkthroughAcceptanceTest` 3/3 green (W-0 happy path, W-1 duplicate household → `identity_conflict`, W-2 out-of-scope capture → `scope_violation`). Mobile app deliberately deferred to a follow-up session; CI acceptance gate satisfied by the scripted two-device walkthrough. See [`ships/ship-1-retro.md`](ships/ship-1-retro.md).
-**Next action**: tag `ship-1`, then draft Ship-2 spec (merge/split resolution; FP-001 re-evaluated against `ScopeResolver`).
-**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance). **No new ADR drafted during Ship-1** — none of risks R1–R5 triggered.
-**Ledger state**: 251 STABLE / 7 DEFERRED / 11 OBSOLETE / 0 OPEN / 269 total. Drift gate: PASS (no classification changes forced by Ship-1).
+**Active ship**: none in flight. Last closed: **Ship-1b** (tag `ship-1b`, 2026-04-25) — S00 + S01 + S03 under S19 re-delivered on a real Flutter client + emulator against Ship-1's server (unchanged; `ship-1` tag did not move). W-0 driven through real UI; W-1 / W-2 used hand-rolled second-actor envelopes per spec authorisation. No ADR drafted, no FP promoted. See [`ships/ship-1b-retro.md`](ships/ship-1b-retro.md).
+**Next action**: draft Ship-2 spec (S06 registry lifecycle + merge/split). 7-Ship split resolved 2026-04-25 (see [`ships/README.md`](ships/README.md)). FP R-4 sweep required before spec drafting (FP-001, FP-002, FP-004).
+**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance). No new ADR drafted during Ship-1 or Ship-1b.
+**Ledger state**: 251 STABLE / 7 DEFERRED / 11 OBSOLETE / 0 OPEN / 269 total. Drift gate: PASS.
 
 ---
 

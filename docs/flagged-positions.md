@@ -77,6 +77,8 @@ All three must be true:
 
 - **2026-04-21**: Opened.
 - **2026-04-24**: Re-scoped by [Ship-1 spec](ships/ship-1.md) §5. Original gate references discarded pre-convergence code. New gate: Ship-1 retro must confirm scope reconstruction replays `assignment_changed` events (no cache, no envelope field, no snapshot), and a test exists that would fail under a cache-based implementation. Closure deferred to Ship-1 retro; `Blocks:` field (IDR-021) is obsolete — role-action enforcement is a Ship-3 or later concern under the new cadence.
+- **2026-04-24** (Ship-1 retro §3.2): `ScopeResolver` confirmed to be event-replay with no cache (Javadoc explicit, no projection table). Gate part 1 met by construction. Gate part 2 (test that would fail under a cache-based implementation) **not yet authored** — Ship-1's W-2 covers correctness at the current scale but does not exercise temporal divergence (role-X-then-Y-then-replay-back-to-X). Carried as live debt.
+- **2026-04-25** (Ship-2 R-4 sweep): does not block Ship-2 (S06 merge/split — identity, not authority). Stays OPEN; next re-evaluation when role-action enforcement first lands (Ship-5 judgment / approvals under the 7-Ship map). The temporal-divergence test remains the outstanding piece of the gate; lands at the Ship that first depends on it.
 
 ---
 
@@ -109,6 +111,7 @@ All three must be true:
 
 - **2026-04-21**: Opened.
 - **2026-04-24**: Confirmed out of scope for Ship-1 (no merge/split). `Blocks:` field updated conceptually — not Phase 4, but Ship-2 (long-running subjects + merge/split). The V3 migration and the code it audits are pre-convergence artifacts; gate is re-assessed against Ship-2's implementation at Ship-2 start.
+- **2026-04-25** (Ship-2 R-4 sweep): **BLOCKS Ship-2**. Ship-2 = S06 registry lifecycle + merge/split under the 7-Ship map; merge/split is the first time subject-lifecycle state is exercised on the platform. The pre-convergence V3 table no longer exists in `server/src/main/resources/db/migration/V1__ship1_schema.sql` — the slate is clean. **Ship-2 spec must explicitly choose** either (a) no `subject_lifecycle` table; lifecycle is projected from events on demand (the `ScopeResolver` precedent), or (b) a rebuildable cache with the gate's three conditions baked into the spec and the acceptance walkthrough. The choice and its proof are a Ship-2 spec deliverable; closure of FP-002 is a Ship-2 retro deliverable.
 
 ---
 
@@ -210,6 +213,130 @@ All of the following must be true:
 
 ---
 
+## FP-006 — S7↔S8 attribution semantics in the corrective-split case
+
+**Status**: OPEN
+**Opened**: 2026-04-25 by Ship-2 spec review (intra-ADR-002 tension surfaced during partner-mode pressure-test)
+**Blocks**: the first Ship that introduces device flows referencing existing subjects by UUID (likely Ship-3 shape evolution if devices carry subject UUIDs by ID; certainly Ship-4 case management)
+**Severity**: A — touches ADR-002 §S7 and §S8 structural constraints; resolution may require ADR-002-R supersession
+
+### Context
+
+ADR-002 §S7 and §S8 are individually consistent but produce an under-specified seam in the **corrective-split** case (§S7's prescribed remedy for a wrong merge):
+
+- [§S7](adrs/adr-002-identity-conflict.md#s7-no-subjectsunmerged--wrong-merges-use-corrective-split): *"Post-merge events that were recorded against the surviving ID remain attributed to the surviving subject by default. Manual re-attribution... is **optional, not required**."*
+- [§S8](adrs/adr-002-identity-conflict.md#s8-split-freezes-history-source-is-permanently-archived): *"A `SubjectSplit` event archives the source subject (terminal lifecycle state). All historical events remain attributed to the source_id."*
+
+In the corrective-split case, the surviving subject **becomes** the split source. Pre-split captures against the surviving subject (good-faith captures during the wrong-merge window) are now attributed to an **archived** identity. §S7's "optional re-attribution" promise was implicitly conditioned on the surviving subject staying *active*; the corrective-split path voids that condition. The captures are correctly preserved (immutability + accept-and-flag), but the projection-layer surface and the operator workflow consequences are unspecified:
+
+1. Does the read path show those captures under the archived source's projection (which has no living state) or under one of the successors (which violates §S8 "historical events remain attributed to the source_id")?
+2. Successors emerge with empty projection state (no name, no village, no demographics) until fresh captures are authored against them. What does a coordinator do *operationally* immediately after a corrective split? Is bootstrap-capture a workflow obligation or a UI affordance?
+3. If field workers were holding offline captures referencing the (now archived) surviving subject when the corrective split happened, those captures sync against the archived ID. §S14 says accept-and-flag — but §S7's "by default" attribution promise is no longer meaningful because there is no living "default" subject to attribute to.
+
+This is **intra-ADR-002 tension**, not cross-ADR conflict. ADR-007/008/009 do not contradict ADR-002 here; the tension is inside ADR-002 between two adjacent positions that were never exercised together until Ship-2's W-4.
+
+### Trigger
+
+Any of the following lifts this item to `BLOCKS`:
+
+1. Any Ship spec that introduces a device flow capturing events against existing subjects by UUID reference (not Ship-1's fresh-`subject_id`-per-capture pattern). Likely Ship-3 if shape evolution introduces UUID-referenced flows; certainly Ship-4 case management.
+2. A Ship-2-or-later retro that observes a real coordinator workflow case where the empty-successor consequence breaks operator trust or produces a data-quality incident.
+3. Any read-path implementation work that must answer question (1) above for projection rendering.
+
+### Gate
+
+All of the following must be true:
+
+1. The seam is resolved by one of: (a) ADR-002-R supersession that explicitly addresses the corrective-split case (read-path attribution rule + workflow obligations), (b) a documented strategy-level position recorded in the ledger that does not require ADR change because the resolution turns out to be implementation-grade (with proof that no §S is altered), or (c) a new ADR addressing the post-corrective-split workflow surface (case management / re-attribution UI).
+2. A test exists that exercises the offending sequence: wrong merge → corrective split → offline capture pre-archive → sync → read-path resolution. The test asserts the read-path behaviour matches the resolved position from (1), not whatever the implementation happens to do.
+3. Operator workflow for empty-successor bootstrap is documented (if (1)(c) was chosen) or explicitly declared out-of-scope-for-now with the next-Ship gate named.
+
+### Resolution log
+
+- **2026-04-25**: Opened by Ship-2 spec partner-mode review. Ship-2 observes the empty-successor invariant in W-4 (§6.4) but does not stress S7↔S8 because Ship-1's CHV flow generates fresh `subject_id` per capture and never references existing subjects by UUID — the offline-capture-against-now-archived-source path is not constructible in the current device flow. Carried forward; not closed by Ship-2.
+
+---
+
+## FP-007 — Contract↔server-resource shape drift not enforced
+
+**Status**: OPEN
+**Opened**: 2026-04-25 by Ship-2 spec partner-mode review (pre-build close-out)
+**Blocks**: any Ship that edits shapes or the envelope (Ship-2 onward)
+**Severity**: B — projection of contracts into the server runtime; same failure class as FP-003 (envelope parity), one layer over
+
+### Context
+
+Two parallel shape directories exist as independently-maintained copies: `contracts/shapes/*.schema.json` (the language-neutral contract source) and `server/src/main/resources/schemas/shapes/*.schema.json` (the server runtime bundle loaded by `ShapePayloadValidator`). The two trees are byte-identical today (verified 2026-04-25, `diff -r contracts/shapes server/src/main/resources/schemas/shapes` → empty), but parity is maintained by manual copy convention. **No drift gate, no build step, no CI check enforces the copy.** A single-sided edit during any future Ship will silently diverge the contract source from the runtime bundle — the validator will accept payloads that violate the contract, or reject payloads the contract permits, without any signal.
+
+This is the same failure class FP-003 closed for `envelope.schema.json` (single-file parity test), one layer over: shapes are a multi-file tree, and the parity test at FP-003 does not extend to it.
+
+### Trigger
+
+Ship-2 is the first Ship that mutates a shape (`subject_split.schema.json` arity edit, §6 commitment 4). Every Ship from here forward that touches shapes inherits the silent-drift risk until the gate closes.
+
+### Gate
+
+One of the following must be true, and the chosen mechanism must run on the developer build path (not just CI), so the drift cannot reach a commit:
+
+1. **(a)** Drift-gate diff check (`diff -r contracts/shapes server/src/main/resources/schemas/shapes`) added to `scripts/check-convergence.sh`, with the script running as part of pre-merge verification (existing convergence gate already runs on every Ship close).
+2. **(b)** Build-time copy at Maven `generate-resources` phase (or equivalent), deleting the duplicated server tree; `contracts/shapes/` becomes the single source.
+3. **(c)** Ship-2 spec §6 declares the manual-copy convention and the coding agent edits both folders in the same commit. **Interim discipline only** — does not close the FP, only documents the discipline pending (a) or (b).
+
+Resolution path — **chosen 2026-04-25 → (a)** at Ship-2 OQ-4. The actual `scripts/check-convergence.sh` edit lands in Ship-2's first build commit alongside the `subject_split.schema.json` arity edit so the gate is in place before the schema diverges. FP-007 closes at Ship-2 retro when the gate is observed PASS at Ship-2 close.
+
+### Resolution log
+
+- **2026-04-25**: Opened by Ship-2 spec close-out review. Byte-identity verified at open time.
+- **2026-04-25**: Path (a) chosen at Ship-2 OQ-4. Gate implementation deferred to Ship-2's first build commit. Closure pending Ship-2 retro.
+
+---
+
+## FP-008 — `conflict_detected` payload lacks root_cause trace metadata
+
+**Status**: OPEN
+**Opened**: 2026-04-25 by Ship-2 spec partner-mode review (against phase-3 classification archive)
+**Blocks**: the first Ship that emits a `conflict_detected/v1` event whose source-of-badness is distinct from `source_event_id` — likely Ship-3 if shape evolution introduces UUID-referenced flows, certainly Ship-4 case management; structurally required by Ship-5 batch resolution. **Does not block Ship-2** (Ship-2 emits no flag categories where `source_event_id != trigger`).
+**Severity**: B — observability / resolution-pipeline metadata; non-breaking to add later, and the early flag corpus does not accrue trace-less flags (Ship-1 + Ship-2 emit only categories where `source_event_id` IS the trigger)
+
+### Context
+
+`contracts/shapes/conflict_detected.schema.json` defines payload fields `{source_event_id, flag_category, resolvability, designated_resolver, reason}`. There is no `root_cause`, `trigger_type`, or `trigger_event_id` field. Phase-3 classification (`docs/exploration/archive/09-adr2-phase3-classification-results.md`, Bucket 2 items A3/M7) called for structured root-cause metadata to enable batch resolution; this was deferred at the time as "strategy" and never propagated into ADR-007 or ADR-008 or the shape schema.
+
+For Ship-1's two flag categories (`scope_violation`, `identity_conflict`), `source_event_id` alone is sufficient — the trigger **is** the source event (the offending capture is what got detected). For Ship-2 onward, this stops being true. Stale-reference flags (charter §Flag catalog #2) can be caused by a **merge or split event distinct from the offending capture**: a CHV captures against subject `S_X` while online, then a coordinator merges `S_X → S_Y`, then the next sync re-evaluates the existing capture and flags it. `source_event_id` names the bad event but not the identity-evolution event that **caused** the badness. Ship-5's batch-resolution by root cause ("approve all flags caused by merge M") is structurally blocked without this metadata.
+
+### Mitigations in place
+
+`additionalProperties: true` on the schema means optional fields can be added later without breaking existing validators or persisted events — the addition is non-breaking at the schema level. The cost of deferral is that the **early flag corpus** (any flag emitted before the field lands) lacks the trace, so historical batch-resolution would have to fall back to category-level grouping for that corpus.
+
+### Trigger
+
+Either:
+
+1. Ship-5 spec opens (judgment / batch resolution is in scope) — at that point the field is load-bearing and must exist before any Ship-5 walkthrough.
+2. Ship-2-or-later retro records that diagnostic quality on a stale-reference flag was insufficient to debug a real case — promotes the FP from "Ship-5 only" to "next Ship after observation".
+
+### Gate
+
+All of the following must be true:
+
+1. `conflict_detected/v1` payload schema carries an optional `root_cause` (or `trigger_type` + `trigger_event_id`) field set, with documented semantics for which flag categories require it (e.g., stale-reference: required; scope/identity: optional).
+2. Server emission code populates the field for every flag category whose source-of-badness is distinct from the source event itself.
+3. A test asserts that a stale-reference flag emitted in response to a merge/split event carries the merge/split event's UUID as `trigger_event_id`.
+4. Ledger row for `conflict_detected/v1` records the schema delta and classification (STABLE remains; field addition is non-breaking).
+
+Resolution path — **chosen 2026-04-25 → (c)** at Ship-2 OQ-5:
+
+- **(a)** ~~Add the field in Ship-2.~~ **Rejected**: lands a schema field with no Ship-2 emission site that populates it (§3.1 R3 — stale-reference flags not observable in Ship-2's slice). Speculative engineering; `additionalProperties: true` makes deferral free.
+- **(b)** ~~Defer to Ship-5.~~ **Rejected**: Ship-3/4 emits stale-reference flags first, which is the producer side. Ship-5 consumes. Add the field at the producing Ship, not the consuming Ship.
+- **(c) — CHOSEN.** Defer to the first Ship that emits a `conflict_detected/v1` flag whose source-of-badness is distinct from `source_event_id`. That Ship adds the schema field, populates it on emission, and lands the walkthrough asserting `trigger_event_id`. Cost of deferral past Ship-2 is zero in practice — Ship-1's two flag categories and Ship-2's emissions all have `source_event_id == trigger`, so the early flag corpus is not trace-less.
+
+### Resolution log
+
+- **2026-04-25**: Opened by Ship-2 spec close-out review.
+- **2026-04-25**: Path (c) chosen at Ship-2 OQ-5. `Blocks:` field rewritten to name the producing Ship as the gate. Stays OPEN; closure is the first Ship that emits a stale-reference (or other non-self-trigger) flag.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
@@ -240,6 +367,12 @@ Items that block the upcoming work must be resolved (or explicitly re-deferred w
 ### Rule R-5: `SUPERSEDED` status for orphaned items
 
 If an architectural change (a new ADR, an addendum, a phase spec) makes an FP item obsolete, mark it `SUPERSEDED` with a pointer to the artifact that absorbed it. Do not delete. History matters for traceability.
+
+### Candidate Rule R-6 (NOT yet adopted) — Intra-ADR seam discipline
+
+**Status**: open trip-wire, not a Standing Rule. Triggered by FP-006 (Ship-2 spec review, 2026-04-25).
+
+If a second intra-ADR seam (tension between two §S of the same ADR, or between an ADR and the charter/ledger/later-Decided ADR) is surfaced by a Ship pressure-test or retro — not handled by R-1 because the agent reasoned past it as "interpretable" — promote this candidate to Standing Rule. Proposed text in [`docs/ships/ship-2.md`](ships/ship-2.md) §9 OQ-2.
 
 ---
 
