@@ -59,12 +59,16 @@ class CoordinatorAuthInterceptorTest {
     private String url(String path) { return "http://localhost:" + port + path; }
 
     private int post(String path, String token) {
+        return post(path, token, "{}");
+    }
+
+    private int post(String path, String token, String body) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if (token != null) headers.set("Authorization", "Bearer " + token);
         try {
             ResponseEntity<String> resp = http.exchange(
-                    url(path), HttpMethod.POST, new HttpEntity<>("{}", headers), String.class);
+                    url(path), HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
             return resp.getStatusCode().value();
         } catch (HttpClientErrorException ex) {
             return ex.getStatusCode().value();
@@ -130,6 +134,8 @@ class CoordinatorAuthInterceptorTest {
         seedToken(token, coord);
         emitAssignment(coord, "coordinator", OffsetDateTime.now().minusMinutes(1));
 
-        assertThat(post("/admin/subjects/merge", token)).isEqualTo(200);
+        // Valid merge body — interceptor allows through; controller emits the event and returns 200.
+        String body = "{\"surviving_id\":\"" + UUID.randomUUID() + "\",\"retired_id\":\"" + UUID.randomUUID() + "\"}";
+        assertThat(post("/admin/subjects/merge", token, body)).isEqualTo(200);
     }
 }
