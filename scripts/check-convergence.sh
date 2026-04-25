@@ -14,6 +14,8 @@
 #   3. Every `>>> OPEN-Q:` in any doc must have a matching `>>> CLOSED BY`,
 #      `>>> STALE`, `>>> RECLASSIFIED BY`, or `>>> ABSORBED INTO` annotation
 #      below it (Phase 4 freeze: count must be 0).
+#   4. contracts/shapes/ and server/src/main/resources/schemas/shapes/ must
+#      be byte-identical (FP-007 — contract<->server-resource shape drift).
 #
 # Exit codes:
 #   0 — pass (or report-only mode with no critical drift)
@@ -41,7 +43,7 @@ echo "== convergence drift gate =="
 
 # --- Check 1: charter ADR cites resolve ---
 echo
-echo "[1/3] charter.md ADR cites"
+echo "[1/4] charter.md ADR cites"
 if [[ ! -f docs/charter.md ]]; then
     fail "docs/charter.md missing"
 else
@@ -76,7 +78,7 @@ fi
 
 # --- Check 2: concept-ledger settled-by cites resolve ---
 echo
-echo "[2/3] concept-ledger.md settled-by cites"
+echo "[2/4] concept-ledger.md settled-by cites"
 if [[ ! -f docs/convergence/concept-ledger.md ]]; then
     fail "docs/convergence/concept-ledger.md missing"
 else
@@ -104,7 +106,7 @@ fi
 
 # --- Check 3: open forward-refs in annotated docs ---
 echo
-echo "[3/3] open forward-refs (>>> OPEN-Q: without resolution)"
+echo "[3/4] open forward-refs (>>> OPEN-Q: without resolution)"
 # Count `>>> OPEN-Q:` markers across all docs
 open_count=$(grep -rEn '^>>> OPEN-Q:' docs/ 2>/dev/null | wc -l | tr -d ' ')
 # Count resolution markers
@@ -116,6 +118,24 @@ report "open: $open_count, resolved: $closed_count"
 # if open > resolved AND we're in Phase 4, that's a fail. Otherwise report only.
 if [[ $STRICT_MODE -eq 1 ]] && (( open_count > closed_count )); then
     fail "Phase 4 freeze: $open_count open forward-refs vs $closed_count resolutions"
+fi
+
+# --- Check 4: contract <-> server-resource shape parity (FP-007) ---
+echo
+echo "[4/4] contracts/shapes <-> server/src/main/resources/schemas/shapes parity"
+contract_dir="contracts/shapes"
+server_dir="server/src/main/resources/schemas/shapes"
+if [[ ! -d "$contract_dir" ]]; then
+    fail "$contract_dir missing"
+elif [[ ! -d "$server_dir" ]]; then
+    fail "$server_dir missing"
+else
+    if diff_out=$(diff -r "$contract_dir" "$server_dir" 2>&1); then
+        report "shape trees byte-identical"
+    else
+        fail "shape drift between $contract_dir and $server_dir:"
+        echo "$diff_out" | sed 's/^/    /'
+    fi
 fi
 
 echo
