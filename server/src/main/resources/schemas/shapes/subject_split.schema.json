@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://datarun.dev/schemas/shapes/subject_split.schema.json",
   "title": "subject_split/v1 payload",
-  "description": "Payload for identity-lifecycle split events. Emitted with envelope type=capture. Recorded when a coordinator determines a subject UUID is archiving and a successor identifier takes over (e.g., patient record was wrong and is being retired with a correction).",
+  "description": "Payload for identity-lifecycle split events. Emitted with envelope type=capture. Recorded when a coordinator archives a subject UUID and emits one or more successor identifiers (e.g., wrong-merge correction recovers the two conflated lineages atomically). Per ADR-002 §S7/§S8: the corrective-split case requires multiple successors emitted in a single event so neither lineage is lost; sequential single-successor splits would archive the source after the first emission.",
   "type": "object",
   "properties": {
     "source_id": {
@@ -10,16 +10,22 @@
       "format": "uuid",
       "description": "The subject UUID being archived."
     },
-    "successor_id": {
-      "type": "string",
-      "format": "uuid",
-      "description": "The new subject UUID that takes over for source_id."
+    "successor_ids": {
+      "type": "array",
+      "description": "The new subject UUIDs that take over for source_id. minItems: 1 per ship-2.md §6 commitment 4 (length-0 is rejected pre-validation per W-4). Wrong-merge correction emits 2 in a single event so both lineages survive.",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "minItems": 1,
+      "uniqueItems": true
     },
     "reason": {
       "type": "string",
       "description": "Optional explanation of the split decision."
     }
   },
-  "required": ["source_id", "successor_id"],
+  "required": ["source_id", "successor_ids"],
   "additionalProperties": true
 }
+
