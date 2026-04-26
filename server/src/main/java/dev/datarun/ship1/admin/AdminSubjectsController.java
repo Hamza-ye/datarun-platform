@@ -11,6 +11,8 @@ import dev.datarun.ship1.event.ShapePayloadValidator;
 import dev.datarun.ship1.sync.CoordinatorAuthInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,16 +49,44 @@ public class AdminSubjectsController {
     private final ShapePayloadValidator shapeValidator;
     private final ServerEmission serverEmission;
     private final SubjectLifecycleProjector lifecycle;
+    private final SubjectAliasProjector aliases;
 
     public AdminSubjectsController(ObjectMapper mapper, EventRepository events,
                                    ShapePayloadValidator shapeValidator,
                                    ServerEmission serverEmission,
-                                   SubjectLifecycleProjector lifecycle) {
+                                   SubjectLifecycleProjector lifecycle,
+                                   SubjectAliasProjector aliases) {
         this.mapper = mapper;
         this.events = events;
         this.shapeValidator = shapeValidator;
         this.serverEmission = serverEmission;
         this.lifecycle = lifecycle;
+        this.aliases = aliases;
+    }
+
+    // -------------------------------------------------------- canonical (read)
+    /**
+     * Resolves a subject UUID to its ultimate-surviving id under eager transitive
+     * closure of {@code subjects_merged/v1} events (Ship-2 §6 commitment 5; ADR-002
+     * §S6). Returns {@code {requested_id, canonical_id, alias_chain_length}}. If
+     * {@code id} is not retired, {@code canonical_id == requested_id} and
+     * {@code alias_chain_length == 0}. The underlying historical events are NOT
+     * rewritten — this is a parallel read-side projection (W-3 "raw, not rewritten").
+     */
+    @GetMapping("/{id}/canonical")
+    public ResponseEntity<?> canonical(@PathVariable("id") String idStr) {
+        UUID id;
+        try { id = UUID.fromString(idStr); }
+        catch (IllegalArgumentException ex) {
+            return badRequest("id must be a valid UUID");
+        }
+        UUID canonical = aliases.canonicalId(id);
+        int hops = aliases.aliasChainLength(id);
+        ObjectNode resp = mapper.createObjectNode();
+        resp.put("requested_id", id.toString());
+        resp.put("canonical_id", canonical.toString());
+        resp.put("alias_chain_length", hops);
+        return ResponseEntity.ok(resp);
     }
 
     // ----------------------------------------------------------------- merge
