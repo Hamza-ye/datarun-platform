@@ -33,6 +33,7 @@ The spec-conformance review is a separate step from walkthrough acceptance becau
 - **H6.** Memory is not a citation. Only workspace files are.
 - **H7.** No Ship-(N+1) spec opens until Ship-N is tagged, or its remaining work is parked as a named side-quest, or a sub-Ship (Ship-Nb) spec is opened.
 - **H8.** Every Ship spec §1 declares its **delivery surface**. A scenario proved at one surface is not proved at another.
+- **H9.** Every Ship spec §1 declares **composite-scenario coverage** for S05 / S20 / S21 (and any future composite): which bullets the slice exercises, which carry forward. Composites are pull-based — they are acceptance-tested by whichever Ship contains their parts. Silent coverage (a Ship's walkthroughs exercise a composite bullet without declaring it) is the failure mode this rule prevents. "None" is a valid declaration; absence is not.
 
 ---
 
@@ -85,7 +86,7 @@ Only if it contradicts a Decided §S, introduces a new invariant future Ships in
 
 Ships should fit in one build session and one retro. The spec is a working doc, not a form to fill.
 
-**Orchestrator pre-fills (from cites, mechanical)**: §1 scenarios + delivery surface, §2 ADRs exercised (§S table), §3.1 structural risks (§S under real load), §4 ledger concepts touched, §5 FP consultation, §6.5 out-of-scope (inverse of slice), §7 retro criteria.
+**Orchestrator pre-fills (from cites, mechanical)**: §1 scenarios + delivery surface + composite-scenario coverage (H9), §2 ADRs exercised (§S table), §3.1 structural risks (§S under real load), §4 ledger concepts touched, §5 FP consultation, §6.5 out-of-scope (inverse of slice), §7 retro criteria.
 
 **User owns**: §6 scope/slice (short paragraph — thinnest vertical that makes walkthroughs pass), §3.2 domain-realism risks if any are predictable pre-build (otherwise observed at retro), §6.4 walkthroughs.
 
@@ -155,6 +156,7 @@ Ask in order:
 - Walkthrough asserts without §S cite → decoration, not acceptance.
 - User overrides a push-back → user wins; record in `/memories/session/` as retro-visible.
 - §1 missing delivery surface → H8.
+- §1 missing composite-scenario coverage table (declaration of which composite bullets the slice exercises and which it carries forward) → H9.
 - Scenario proved only by simulation when constraint is real-world (offline, field UX, scale) → sub-Ship owed.
 - Work touches §S for first time but framed as side-quest → mis-classification; re-frame as sub-Ship.
 
