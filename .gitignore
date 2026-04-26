@@ -30,3 +30,4 @@ pgdata/
 # Test
 server/src/test/resources/application-local.properties
 
+mobile/android/build/
