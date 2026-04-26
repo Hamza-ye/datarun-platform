@@ -200,14 +200,32 @@ Ship-2 is done when all of the following hold.
 
 ## 8. Hand-off to Ship-3
 
-*(Populated at retro.)*
+Populated at retro 2026-04-26.
 
-Expected handoffs:
+**Live risks carried forward (§3.1 R-N status):**
 
-- Any R1–R6 observation that remains live under larger fixtures.
-- FP status updates: FP-002 closed or explicitly re-deferred; FP-001 unchanged; any new FPs opened by §3.2 observations.
-- The alias-projection rebuild procedure will be inherited by Ship-3's version-diverse projection concern (shape evolution) — Ship-3 spec §2 should cite it.
-- Whether a new `conflict_detected/v1` category (or a new `shape_ref`) was introduced for "against archived source", and if so, its classification in the ledger.
+- **R1** (alias correctness under eager closure) — *exercised at single-hop scale* in W-3 (`A→B`, `B→C` ⇒ `A→C` direct lookup). Not stressed under concurrent merges (single-coordinator slice). Still live for the first Ship that runs >1 coordinator simultaneously.
+- **R2** (lineage DAG enforcement under race) — carried unchanged. First exercise: Ship-5 judgment / multi-resolver.
+- **R3** (post-archive accept-and-flag) — carried unchanged. Becomes load-bearing the first Ship a device flow references existing subjects by UUID. Likely Ship-3 (shape evolution if subject pick-lists land); certainly Ship-4 (case management).
+- **R4** (projection rebuild cost) — not observable on Ship-2 fixture sizes; no rebuild procedure authored because option (a) declines the cache. Reopens if a future Ship adopts the cache (escape hatch B→C remains available).
+- **R5** (subject-lifecycle storage discipline / FP-002) — RESOLVED at Ship-2 close (option a, no cache).
+- **R6** (Conflict Detector alias-blindness) — carried unchanged. Same trigger Ship as R3.
+
+**FP status updates:**
+
+- **FP-002** RESOLVED 2026-04-26 (option a, gate met by structural absence of `subject_lifecycle` table + zero matches in server source).
+- **FP-007** RESOLVED 2026-04-26 (drift-gate check 4 in `scripts/check-convergence.sh` PASS at Ship-2 close).
+- **FP-006** stays OPEN — not stressed by Ship-2's slice; carries to Ship-3 / Ship-4.
+- **FP-008** stays OPEN per OQ-5 path (c) — Ship-2 emits no flag with `source_event_id != trigger`; the early flag corpus stays trace-clean.
+- **FP-001, FP-004, FP-005** unchanged. RFS-1 (naïve identity heuristic) stress-tested in Ship-2 setup; merge corrected the false-positive cleanly.
+
+**Ship-3 inherits:**
+
+- **Alias-projection rebuild procedure** — `SubjectAliasProjector` rebuilds eagerly on every read (no persistent cache). Shape-evolution work (Ship-3) inherits this read-time projection pattern; if Ship-3 introduces a version-diverse projection cache, the FP-002 / FP-007 patterns are the gate templates.
+- **Multi-successor split arity invariant** (`successor_ids: array, minItems: 2`) is now contract; Ship-3 shape-evolution touches must not re-narrow this.
+- **Coordinator authority via projection** — recognition is `assignment_changed` replay with `role="coordinator"`. No parallel authority surface. Ship-3 / 5 extensions add scope dimensions on this row, never a new mechanism.
+
+**Cosmetic note (non-fix):** `SubjectAliasProjector#aliasChainLength` walks raw edges to count hops while the docstring asserts "not chain-walked at query time". The doc claim is correct only for `canonicalId` (single-hop after eager closure). If Ship-3 touches the projector, scope the docstring to `canonicalId` or reimplement `aliasChainLength` over the closure. Not a Ship-3 obligation.
 
 ---
 
@@ -233,9 +251,9 @@ The FP-006 (S7↔S8 corrective-split tension) episode surfaced a class of drift 
 
 **Decision needed from**: user, but only if a second instance surfaces. Until then this OQ stays open as a trip-wire for the next person reading this spec.
 
-### OQ-3 — Broken-link cleanup side-quest
+### OQ-3 — Broken-link cleanup side-quest — RESOLVED 2026-04-26 → folded into Ship-2's first build commit
 
-[`docs/scenarios/19-offline-first.md`](../scenarios/) does not exist; the file is [`19-offline-capture-and-sync.md`](../scenarios/19-offline-capture-and-sync.md). The wrong link survives in tagged Ship-1 docs ([ship-1.md](ship-1.md), [ship-1b.md](ship-1b.md), [ship-1-retro.md](ship-1-retro.md), [ship-1b-retro.md](ship-1b-retro.md)) and [`CLAUDE.md`](../../CLAUDE.md) line 18. Fixed in Ship-2 spec; not fixed in tagged docs. **Routing**: side-quest, no ADR surface, single small commit — either run before Ship-2 build opens, or fold into Ship-2's first commit. **Decision needed from**: user.
+**Decision**: fixed at commit [`31c6bf9`](../../) (`docs(ship-2): S06 — fix broken scenario link in tagged Ship-1 docs (OQ-3)`) — the first commit of Ship-2's build cycle, before any code change. Tagged docs (`ship-1.md`, `ship-1b.md`, `ship-1-retro.md`, `ship-1b-retro.md`) and `CLAUDE.md` line 18 now point at `19-offline-capture-and-sync.md`. Tags `ship-1` / `ship-1b` do not move (the broken link survives in the tagged commit; `main` is correct from `31c6bf9` forward).
 
 ### OQ-4 — FP-007 contract↔server-resource shape drift enforcement — RESOLVED 2026-04-25 → option (a)
 

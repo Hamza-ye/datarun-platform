@@ -17,10 +17,10 @@
 
 **Convergence phase**: 2 — **CLOSED** (2026-04-23). Protocol dormant; re-enters only if a Ship retro triggers a cross-cutting ADR round.
 **Forward cadence**: scenario-driven Ships (see *Rhythm* section).
-**Active ship**: none in flight. Last closed: **Ship-1b** (tag `ship-1b`, 2026-04-25) — S00 + S01 + S03 under S19 re-delivered on a real Flutter client + emulator against Ship-1's server (unchanged; `ship-1` tag did not move). W-0 driven through real UI; W-1 / W-2 used hand-rolled second-actor envelopes per spec authorisation. No ADR drafted, no FP promoted. See [`ships/ship-1b-retro.md`](ships/ship-1b-retro.md).
-**Next action**: draft Ship-2 spec (S06 registry lifecycle + merge/split). 7-Ship split resolved 2026-04-25 (see [`ships/README.md`](ships/README.md)). FP R-4 sweep required before spec drafting (FP-001, FP-002, FP-004).
-**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance). No new ADR drafted during Ship-1 or Ship-1b.
-**Ledger state**: 251 STABLE / 7 DEFERRED / 11 OBSOLETE / 0 OPEN / 269 total. Drift gate: PASS.
+**Active ship**: none in flight. Last closed: **Ship-2** (tag `ship-2`, 2026-04-26) — S06 identity half (registry lifecycle + merge/split) under S19. Three new walkthroughs (W-3 reactive merge + eager closure, W-4 wrong-merge correction via multi-successor split, W-5 lineage DAG enforcement) pass via real HTTP (`Ship2WalkthroughAcceptanceTest`); Ship-1's five prior walkthroughs unchanged and green (33/33 total). FP-002 RESOLVED (option a, no `subject_lifecycle` cache); FP-007 RESOLVED (drift-gate check 4 added). No ADR drafted, no ADR superseded. See [`ships/ship-2-retro.md`](ships/ship-2-retro.md).
+**Next action**: draft Ship-3 spec (S06b shape evolution). FP R-4 sweep required before spec drafting (FP-001, FP-004, FP-005, FP-006, FP-008 — FP-006 / FP-008 most prominently plausible to become live).
+**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance). No new ADR drafted during Ship-1, Ship-1b, or Ship-2.
+**Ledger state**: 254 STABLE / 7 DEFERRED / 11 OBSOLETE / 0 OPEN / 272 total. Drift gate: PASS.
 
 ---
 

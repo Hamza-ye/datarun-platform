@@ -84,7 +84,7 @@ All three must be true:
 
 ## FP-002 — `subject_lifecycle` table read-discipline audit
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding B3)
 **Blocks**: Phase 4 (not a specific IDR — pattern state machines will interact with identity lifecycle)
 **Severity**: B — projection discipline
@@ -112,6 +112,13 @@ All three must be true:
 - **2026-04-21**: Opened.
 - **2026-04-24**: Confirmed out of scope for Ship-1 (no merge/split). `Blocks:` field updated conceptually — not Phase 4, but Ship-2 (long-running subjects + merge/split). The V3 migration and the code it audits are pre-convergence artifacts; gate is re-assessed against Ship-2's implementation at Ship-2 start.
 - **2026-04-25** (Ship-2 R-4 sweep): **BLOCKS Ship-2**. Ship-2 = S06 registry lifecycle + merge/split under the 7-Ship map; merge/split is the first time subject-lifecycle state is exercised on the platform. The pre-convergence V3 table no longer exists in `server/src/main/resources/db/migration/V1__ship1_schema.sql` — the slate is clean. **Ship-2 spec must explicitly choose** either (a) no `subject_lifecycle` table; lifecycle is projected from events on demand (the `ScopeResolver` precedent), or (b) a rebuildable cache with the gate's three conditions baked into the spec and the acceptance walkthrough. The choice and its proof are a Ship-2 spec deliverable; closure of FP-002 is a Ship-2 retro deliverable.
+- **2026-04-25** (Ship-2 OQ-1): path (a) locked at spec close — no `subject_lifecycle` table; lifecycle replays `subjects_merged/v1` / `subject_split/v1` on demand (the [`ScopeResolver`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java) precedent). Closure evidence deferred to Ship-2 retro.
+- **2026-04-26** (Ship-2 close): **RESOLVED — option (a)**. Gate met by mechanical inspection at Ship-2 HEAD:
+  1. *No `subject_lifecycle` table*: `git diff ship-1b..HEAD -- server/src/main/resources/db/migration/` returns no lines (zero migration touches in Ship-2; `V1__ship1_schema.sql` carries no such table).
+  2. *No source file reads `subject_lifecycle` as a state source*: `git grep -l subject_lifecycle server/` returns zero matches. The structural test would fail under any silent re-introduction.
+  3. *Reads project from events on demand*: the `coordinator` recognition path commits at `ecf3ece` ([`ScopeResolver.hasRoleAt`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java)) replays `assignment_created/v1` / `assignment_ended/v1`; the alias projection commits at `17461d9` ([`SubjectAliasProjector`](../server/src/main/java/dev/datarun/ship1/admin/SubjectAliasProjector.java)) rebuilds eagerly per request from `subjects_merged/v1` / `subject_split/v1`. Both follow the `ScopeResolver` precedent — no cache, no projection table.
+
+  Cache is intentionally absent. Escape hatch ADR-001 §S2 (B→C) remains available if a future Ship's fixture surfaces read cost; FP-002's gate is already specified for that path.
 
 ---
 
@@ -254,12 +261,13 @@ All of the following must be true:
 ### Resolution log
 
 - **2026-04-25**: Opened by Ship-2 spec partner-mode review. Ship-2 observes the empty-successor invariant in W-4 (§6.4) but does not stress S7↔S8 because Ship-1's CHV flow generates fresh `subject_id` per capture and never references existing subjects by UUID — the offline-capture-against-now-archived-source path is not constructible in the current device flow. Carried forward; not closed by Ship-2.
+- **2026-04-26** (Ship-2 close): status check — **stays OPEN**. Ship-2's W-4 (`Ship2WalkthroughAcceptanceTest#W4_*`) confirmed the empty-successor invariant operationally (post-split projection of either successor returns no payload-derived state; original capture stays attributed to the archived source). The offline-capture-against-archived-source path remains structurally unconstructible in Ship-1's CHV flow, so the seam is not exercised. Carries to Ship-3 (if shape evolution introduces UUID-referenced flows) or Ship-4 (case management) at the latest. No ADR-002 §S re-decided.
 
 ---
 
 ## FP-007 — Contract↔server-resource shape drift not enforced
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-04-25 by Ship-2 spec partner-mode review (pre-build close-out)
 **Blocks**: any Ship that edits shapes or the envelope (Ship-2 onward)
 **Severity**: B — projection of contracts into the server runtime; same failure class as FP-003 (envelope parity), one layer over
@@ -288,6 +296,7 @@ Resolution path — **chosen 2026-04-25 → (a)** at Ship-2 OQ-4. The actual `sc
 
 - **2026-04-25**: Opened by Ship-2 spec close-out review. Byte-identity verified at open time.
 - **2026-04-25**: Path (a) chosen at Ship-2 OQ-4. Gate implementation deferred to Ship-2's first build commit. Closure pending Ship-2 retro.
+- **2026-04-26** (Ship-2 close): **RESOLVED**. Drift-gate check 4 (`contracts/shapes` ↔ `server/src/main/resources/schemas/shapes` parity) landed at commit [`5cbb183`](../scripts/check-convergence.sh) (the first build commit of Ship-2's range, ahead of the `subject_split` arity edit at `f7f0e8a` / `48049e2`). Gate observed PASS at Ship-2 close; the two trees are byte-identical (Ship-2 mutated both in lock-step under the new gate). The gate runs on every Ship close from here forward.
 
 ---
 
@@ -334,6 +343,7 @@ Resolution path — **chosen 2026-04-25 → (c)** at Ship-2 OQ-5:
 
 - **2026-04-25**: Opened by Ship-2 spec close-out review.
 - **2026-04-25**: Path (c) chosen at Ship-2 OQ-5. `Blocks:` field rewritten to name the producing Ship as the gate. Stays OPEN; closure is the first Ship that emits a stale-reference (or other non-self-trigger) flag.
+- **2026-04-26** (Ship-2 close): status check — **stays OPEN per path (c)**. Ship-2 emitted no `conflict_detected/v1` events whose `source_event_id` differs from the trigger event (the only flags in Ship-2's corpus continue to be the Ship-1 categories `scope_violation` and `identity_conflict`, both self-triggering). The early flag corpus stays trace-clean. Carries to Ship-3 / Ship-4 per OQ-5.
 
 ---
 
