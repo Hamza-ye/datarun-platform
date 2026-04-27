@@ -8,8 +8,8 @@
 |---|---|---|---|---|
 | **Ship-1** | A+B — offline structured capture under assigned scope | S00, S01, S03 | ADR-001, -003, -006, -007, -008, -009 §S1/§S2 | **CLOSED** (tag `ship-1`, 2026-04-24). Delivery surface: scripted two-device HTTP simulation. |
 | **Ship-1b** | same scenarios as Ship-1, new delivery surface | S00, S01, S03 under S19 | + ADR-002 §S5, ADR-001 §S1/§S3, ADR-002 §S1 under app lifecycle, ADR-006 §S2 flag UX | **CLOSED** (tag `ship-1b`, 2026-04-25). Real Flutter client + real device/emulator. Parent `ship-1` tag did not move. |
-| Ship-2 | identity — registry lifecycle + merge/split | S06 (registry lifecycle + merge/split) | + ADR-002 §S6–§S11, ADR-001 §S2 (projection rebuild via FP-002) | pending |
-| Ship-3 | shape evolution | S06b | + ADR-004 §S10, ADR-001 §S2 (version-diverse projection) | pending |
+| **Ship-2** | identity — registry lifecycle + merge/split | S06 (registry lifecycle + merge/split) | + ADR-002 §S6–§S11, ADR-001 §S2 (projection rebuild via FP-002) | **CLOSED** (tag `ship-2`, 2026-04-26). Delivery surface: scripted multi-actor HTTP simulation. Identity reconciliation (registry / merge / split / corrective-split alias). |
+| **Ship-3** | shape evolution | S06b | + ADR-004 §S10, ADR-001 §S2 (version-diverse projection) | **CLOSED** (tag `ship-3`, 2026-04-27). Delivery surface: scripted two-device HTTP simulation. Shape evolution under multi-version load (`household_observation/v1` + `/v2` simultaneously). FP-009 RESOLVED. |
 | Ship-4 | case management — long-running situations | S08 | + ADR-003 (assignment churn) + ADR-005 first exercise | pending |
 | Ship-5 | C — judgment / approvals | S04, S11 | + ADR-005 §S1/§S4/§S5/§S6 | pending |
 | Ship-6 | E — transfer + campaigns | S07, S09, S14, S22 | + ADR-004 §S2, ADR-008 §S3, ADR-009 §S4 | pending |
