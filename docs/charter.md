@@ -17,10 +17,11 @@
 
 **Convergence phase**: 2 — **CLOSED** (2026-04-23). Protocol dormant; re-enters only if a Ship retro triggers a cross-cutting ADR round.
 **Forward cadence**: scenario-driven Ships (see *Rhythm* section).
-**Active ship**: none in flight. Last closed: **Ship-2** (tag `ship-2`, 2026-04-26) — S06 identity half (registry lifecycle + merge/split) under S19. Three new walkthroughs (W-3 reactive merge + eager closure, W-4 wrong-merge correction via multi-successor split, W-5 lineage DAG enforcement) pass via real HTTP (`Ship2WalkthroughAcceptanceTest`); Ship-1's five prior walkthroughs unchanged and green (33/33 total). FP-002 RESOLVED (option a, no `subject_lifecycle` cache); FP-007 RESOLVED (drift-gate check 4 added). No ADR drafted, no ADR superseded. See [`ships/ship-2-retro.md`](ships/ship-2-retro.md).
-**Next action**: draft Ship-3 spec (S06b shape evolution). FP R-4 sweep required before spec drafting (FP-001, FP-004, FP-005, FP-006, FP-008 — FP-006 / FP-008 most prominently plausible to become live).
-**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance). No new ADR drafted during Ship-1, Ship-1b, or Ship-2.
-**Ledger state**: 254 STABLE / 7 DEFERRED / 11 OBSOLETE / 0 OPEN / 272 total. Drift gate: PASS.
+**Active ship**: none in flight. Last closed: **Ship-3** (tag `ship-3`, 2026-04-27) — S06b shape-evolution half (additive evolution + deprecation under multi-version load) under S19; composite [S20](scenarios/20-chv-field-operations.md) bullets 1 + 5 stressed under shape evolution. Four new walkthroughs (W-6 additive happy path with FP-009 closure, W-7 deprecation with verbatim storage, W-8 unknown `shape_ref` rejection, W-10 backward-compat mixed-version admin render) pass via real HTTP (`Ship3WalkthroughAcceptanceTest`); Ship-1 / 1b / 2 walkthroughs unchanged and green (46/46 total, was 33/33 at Ship-2 close). FP-009 RESOLVED (`ConflictDetector` unchanged across Ship-3, v1-current direction asserted; v2-current asymmetry folds into FP-012 — no new FP). No ADR drafted, no ADR superseded. See [`ships/ship-3-retro.md`](ships/ship-3-retro.md).
+**Next action**: Ship-4 spec authoring pending. Likely scope S04 (corrections) + start of S08 (case management referencing existing UUIDs); FP-005, FP-006, FP-008 become candidates for closure; deactivation-while-referenced (S06b parked surface) lands here. R-4 sweep required before spec drafting.
+**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance). No new ADR drafted during Ship-1, Ship-1b, Ship-2, or Ship-3.
+**Active FPs**: FP-001 OPEN, FP-004 OPEN, FP-005 OPEN, FP-006 OPEN, FP-008 OPEN, FP-010 OPEN, FP-011 OPEN (re-deferred), FP-012 OPEN, FP-013 OPEN. Resolved: FP-002, FP-003, FP-007, FP-009.
+**Ledger state**: 258 STABLE / 7 DEFERRED / 11 OBSOLETE / 0 OPEN / 276 total. Drift gate: PASS.
 
 ---
 
