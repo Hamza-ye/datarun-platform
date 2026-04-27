@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.ship1.event.*;
 import dev.datarun.ship1.integrity.ConflictDetector;
+import dev.datarun.ship1.integrity.CycleGuard;
 import dev.datarun.ship1.scope.ScopeResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -32,16 +33,18 @@ public class SyncController {
     private final ShapePayloadValidator shapeValidator;
     private final EventRepository events;
     private final ConflictDetector detector;
+    private final CycleGuard cycleGuard;
     private final ScopeResolver scopes;
     private final ObjectMapper mapper;
 
     public SyncController(EnvelopeValidator envelopeValidator, ShapePayloadValidator shapeValidator,
-                          EventRepository events, ConflictDetector detector, ScopeResolver scopes,
-                          ObjectMapper mapper) {
+                          EventRepository events, ConflictDetector detector, CycleGuard cycleGuard,
+                          ScopeResolver scopes, ObjectMapper mapper) {
         this.envelopeValidator = envelopeValidator;
         this.shapeValidator = shapeValidator;
         this.events = events;
         this.detector = detector;
+        this.cycleGuard = cycleGuard;
         this.scopes = scopes;
         this.mapper = mapper;
     }
@@ -77,6 +80,12 @@ public class SyncController {
                     Map.of("error", "validation_failed", "details", allErrors));
         }
 
+        // --- Phase 1.5: cycle-guard pass over alias events (subjects_merged/*, subject_split/*) ---
+        // Computed BEFORE persistence so verdicts read the persisted graph plus earlier-in-batch
+        // already-accepted edges per cycle-guard contract §3.2 (batch-serial). Verdicts apply
+        // post-persistence; the alias events themselves are still inserted (accept-and-flag).
+        Map<UUID, List<UUID>> cycleVerdicts = cycleGuard.checkBatch(toInsert);
+
         // --- Phase 2: persist + detect ---
         int accepted = 0;
         int duplicates = 0;
@@ -91,6 +100,12 @@ public class SyncController {
                 Event persisted = events.findById(e.id()).orElse(e);
                 List<Event> flags = detector.detect(persisted);
                 flagsRaised += flags.size();
+            }
+            // Phase 2.5: emit cycle_violation flag alongside the triggering alias event.
+            List<UUID> cyclePath = cycleVerdicts.get(e.id());
+            if (cyclePath != null) {
+                cycleGuard.emitCycleFlag(e, cyclePath);
+                flagsRaised++;
             }
         }
         return ResponseEntity.ok(Map.of(
