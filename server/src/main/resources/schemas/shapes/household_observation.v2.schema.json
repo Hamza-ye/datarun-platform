@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/shapes/household_observation.v2.schema.json",
+  "title": "household_observation/v2 payload",
+  "description": "Ship-3 deployer shape evolution. v2 = v1 + one additive optional field (head_of_household_phone) + one deprecation (visit_notes). Identity-key fields (village_ref, household_name) preserved verbatim per Ship-3 §6.1 sub-decision 2 (FP-009 closure assertion). Default change class CF-1 (deprecation-only) per ADR-004 §S10. v1 events remain valid forever; v2 is registered alongside v1.",
+  "type": "object",
+  "properties": {
+    "household_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "head_of_household_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "head_of_household_phone": {
+      "type": ["string", "null"],
+      "maxLength": 32,
+      "description": "v2 additive field — optional phone number for the head of household. Free-form for now; pattern validation deferred to a later evolution."
+    },
+    "household_size": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "village_ref": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID of the village this household is in. Identity-key field — name preserved verbatim from v1 to keep ConflictDetector field-name lookup working unchanged across versions (FP-009)."
+    },
+    "latitude":  { "type": ["number", "null"] },
+    "longitude": { "type": ["number", "null"] },
+    "visit_notes": {
+      "type": ["string", "null"],
+      "maxLength": 4000,
+      "deprecated": true,
+      "description": "DEPRECATED in v2 (CF-1 deprecation per ADR-004 §S10). Free-form text intended to be superseded by structured observation fields in a future shape version. Still accepted for backward compatibility; new captures should leave it null."
+    }
+  },
+  "required": ["household_name", "head_of_household_name", "household_size", "village_ref"],
+  "additionalProperties": false
+}

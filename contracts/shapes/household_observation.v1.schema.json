@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://datarun.dev/schemas/shapes/household_observation.schema.json",
+  "$id": "https://datarun.dev/schemas/shapes/household_observation.v1.schema.json",
   "title": "household_observation/v1 payload",
   "description": "Ship-1 deployer shape. A CHV records a household visit. village_ref ties the record to a geographic scope for scope-containment checks; household_name is the Ship-1 key for identity_conflict detection (two captures with the same name in the same village = suspected duplicate).",
   "type": "object",
