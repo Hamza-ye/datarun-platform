@@ -823,6 +823,42 @@ All required:
 
 ---
 
+## FP-019 — Alias-cycle guard implementation tracking
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 closeout Wave 3 step (a) — architect dispatch
+**Blocks**: closes inside Ship-3 closeout Wave 3 step (b); does not carry to a future Ship
+**Severity**: A — surfaces a high-irreversibility structural risk (cycle-closing alias events are permanent under [ADR-001 §S1](adrs/adr-001-offline-data-model.md))
+
+### Context
+
+Ship-3 closeout Wave 3 addresses reviewer findings SC-07 + C2-03 ([`docs/reviews/system/architect.md`](reviews/system/architect.md)) on alias-cycle constructibility. [ADR-006-R §S5](adrs/adr-006-flag-semantics-R.md#s5--alias-cycle-prevention-as-a-push-path-guard-with-cycle_violation-flag) commits the platform to push-path batch-serial cycle detection with `flag_category = "cycle_violation"` (catalog row 9, `manual_only`). Implementation specification: [`docs/architecture/cycle-guard-contract.md`](architecture/cycle-guard-contract.md). Wave 3 step (b) — Senior Developer dispatch — implements the contract and lands the two specified tests.
+
+This FP exists so Wave 3 has a register entry the closeout retro can cite when marking Ship-3 closure complete. It is unusual that an FP opens and closes inside the same closeout, but appropriate given the closeout's two-dispatch structure (architect → developer): the FP is the explicit handoff the developer's verification logs against.
+
+### Trigger
+
+Wave 3 step (b) dispatch (immediate — opens and triggers in the same closeout).
+
+### Gate
+
+All required:
+
+1. `CycleGuard` (or equivalently-named) component lands in `dev.datarun.ship1.integrity` and is wired into [`SyncController.push`](../server/src/main/java/dev/datarun/ship1/sync/SyncController.java) per [`docs/architecture/cycle-guard-contract.md`](architecture/cycle-guard-contract.md) §2.
+2. Edge projection follows the contract's §3.3 field-name table (`subjects_merged/v1`: `retired_id → surviving_id`; `subject_split/v1`: `source_id → successor_ids[i]`).
+3. Cycle-path canonical form per contract §4.3 (`[to, ..., from, to]`).
+4. Flag emission per contract §5: envelope `type=alert`, `shape_ref=conflict_detected/v1`, `actor_ref=system:cycle_guard/cycle_violation`, request-time `timestamp` ([ADR-006-R §S5.4](adrs/adr-006-flag-semantics-R.md#54-request-time-anchor)), `payload.flag_category=cycle_violation`, `payload.cycle_path` populated.
+5. Test A (`cycleGuard_singleEventPush_persistedGraphCloses`) and Test B (`cycleGuard_twoEventBatch_inFlightCloses`) from contract §7 land and pass against the real HTTP push surface.
+6. `./mvnw test` PASS at the closing commit (ship-3 prior baseline + 2 new tests).
+7. Drift gate (`scripts/check-convergence.sh`) PASS.
+8. Resolution log records the implementation commit SHA, the test commit SHA, and the test report.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Wave 3 step (a) architect dispatch. Authorities cited: [ADR-006-R](adrs/adr-006-flag-semantics-R.md) (decided same date), [`contracts/flag-catalog.md`](../contracts/flag-catalog.md) row 9 (claimed same date), [`docs/architecture/cycle-guard-contract.md`](architecture/cycle-guard-contract.md) (authored same date as the implementation specification step (b) follows). Awaiting Wave 3 step (b) dispatch.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
