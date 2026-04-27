@@ -347,6 +347,173 @@ Resolution path — **chosen 2026-04-25 → (c)** at Ship-2 OQ-5:
 
 ---
 
+## FP-009 — `ConflictDetector` field-name coupling
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 spec lock (Cleaving A)
+**Blocks**: Ship-3 close (closure asserted at retro via W-6)
+**Severity**: B — Ship-1 expedient that becomes load-bearing the moment a shape change touches identity-key fields
+
+### Context
+
+[`server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) lines 53–56 hard-code the field-name lookups for the two Ship-1 detectors:
+
+```java
+UUID villageRef     = optUuid(capture.payload().path("village_ref").asText(null));
+String householdName = normalize(capture.payload().path("household_name").asText(""));
+```
+
+`village_ref` and `household_name` are literal string keys in the `household_observation/v1` payload. There is no shape-declared uniqueness rule (Q7a / [ADR-004 §S14](adrs/adr-004-configuration-boundary.md#s14-deployer-parameterized-policies)) feeding the detector — the coupling is a Ship-1 expedient. Ship-3 evolves `household_observation` to v2, which is the first time this coupling can break by mistake.
+
+### Trigger
+
+Already triggered by Ship-3 spec opening. Resolution work happens *inside* Ship-3 (negative form: prove the coupling does not break under v2).
+
+### Gate
+
+Both:
+
+1. Ship-3 spec [§6 sub-decision 2](ships/ship-3.md#61-sub-decisions) forbids removal or rename of `village_ref` and `household_name` in v2. The v2 schema preserves both field names verbatim.
+2. Ship-3 W-6 (additive happy path) asserts the detector continues to fire on duplicate-household across mixed v1/v2 events. Closes at Ship-3 tag if W-6 passes.
+
+### Trigger if not closed
+
+Any future shape change that touches identity-key fields (rename, type change, removal) reopens FP-009 with mandatory shape-declared-uniqueness work (Q7a). That work folds into [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies) gate (b)/(c) — the deployer-authoring surface is where uniqueness rules become declarable, and the detector becomes shape-driven rather than field-name-coupled.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 spec §6 lock. Closure deferred to Ship-3 retro.
+
+---
+
+## FP-010 — Cross-version projection composition contract
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 spec lock (Cleaving A)
+**Blocks**: the first Ship that needs a breaking shape change OR a cross-version aggregation in the admin/projection layer beyond per-event routing on `shape_ref`
+**Severity**: B — projection-composition contract is unspecified for non-additive evolution and for multi-version aggregation
+
+### Context
+
+[ADR-004 §S10](adrs/adr-004-configuration-boundary.md#s10-shape-definition-versioning-and-evolution) commits to additive evolution + deprecation + breaking changes (the "exceptional path" with "explicit deployer acknowledgment and server-side migration support"). [ADR-004 §S1](adrs/adr-004-configuration-boundary.md#s1-shape-reference-in-envelope) ensures events are self-describing. *How* the projection engine composes a multi-version stream — beyond the trivial per-event routing on `shape_ref` that Ship-3 W-6 / W-10 exercises — is not specified. ADR-004's "What This Does NOT Decide" table explicitly classifies "Projection merge strategy across schema versions" as Implementation, but Ship-3's scope deliberately excludes both breaking changes and cross-version aggregation; the contract surfaces only when a Ship needs them.
+
+Carries forward through Ship-3 (the additive-only slice does not exercise it). The next Ship that lands a breaking change or admin/projection logic that aggregates across `shape_ref` versions is the trigger.
+
+### Trigger
+
+Either:
+
+1. A Ship spec opens whose scenarios require a breaking shape change (field removal, type change) — [ADR-004 §S10](adrs/adr-004-configuration-boundary.md#s10-shape-definition-versioning-and-evolution) "exceptional path."
+2. An admin/projection or analytics requirement lands that must aggregate over a multi-version event corpus and present a unified view (e.g., a coordinator dashboard summing across v1+v2 captures with non-trivial field reconciliation).
+3. A retro observes that per-event routing on `shape_ref` is insufficient for an operator-facing read path.
+
+### Gate
+
+All three must be true:
+
+1. Cross-version projection composition contract is specified (either as a successor ADR position, or as a concretely-decided implementation pattern recorded in the ledger with proof that no §S is altered) — covering: per-event routing (Ship-3 baseline), field-reconciliation across versions for aggregations, and breaking-change migration semantics (§S10 exceptional path).
+2. A test exists that exercises a v1 + v2 (and ideally v1 + v2 + breaking-vN) stream through the chosen composition, asserting fidelity for each version and the documented merge semantics for aggregations.
+3. Admin read-path code branches on `shape_ref` (never on envelope `type` — F-A2) and the contract is reflected in inline comments or ledger row.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 spec §6 lock. Carried through Ship-3; not exercised by the additive-only slice.
+
+---
+
+## FP-011 — `household_observation` directory classification (re-deferral)
+
+**Status**: OPEN (re-deferred)
+**Opened**: 2026-04-27 by Ship-3 spec lock (Cleaving A) — surfaced under F-C1
+**Blocks**: same Ship that closes [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies)
+**Severity**: C — classification hygiene; no functional drift today
+
+### Context
+
+[`contracts/shapes/household_observation.schema.json`](../contracts/shapes/household_observation.schema.json) is described in its own header as a "Ship-1 deployer shape." Per [ADR-009 §S1](adrs/adr-009-platform-fixed-vs-deployer-configured.md#s1-duality-rule-charter-invariant) duality rule, deployer-authored shape *instances* are CONFIG, not platform PRIMITIVES. `household_observation` therefore should not live in the same directory as platform-bundled shapes (`subjects_merged/v1`, `subject_split/v1`, `assignment_created/v1`, `assignment_ended/v1`, `conflict_detected/v1`, `conflict_resolved/v1`). This is a [F-C1](adrs/adr-009-platform-fixed-vs-deployer-configured.md) violation: the directory layout conflates mechanism and instance.
+
+### Why re-defer rather than fix now
+
+Resolving the directory split today is restructuring without load. The split only becomes operationally meaningful when deployer-CONFIG shapes are *first* persisted outside the JAR-bundled fixture — which is the scope of [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies) (deployer-authoring surface). Splitting the directories before then would introduce two paths (`contracts/shapes/platform/` and `contracts/shapes/deployer/` or equivalent) that the runtime has no reason to distinguish, plus a second copy under `server/src/main/resources/schemas/shapes/` that [FP-007](#fp-007--contractserver-resource-shape-drift-not-enforced)'s drift-gate must continue to police. Net effect: motion without traction.
+
+### Trigger
+
+[FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies) trigger fires (whichever sub-trigger lands first).
+
+### Gate
+
+Both:
+
+1. Directory split lands in the same Ship that closes FP-012: deployer-CONFIG shapes (`household_observation` and any siblings) are persisted in the deployer-authoring surface (DB or filesystem); platform-bundled shapes remain in the `contracts/shapes/` tree (or a `contracts/shapes/platform/` subdirectory).
+2. FP-007's drift-gate is updated in lock-step to police the new directory layout — no schema can land in only one tree.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 §6 sub-decision 3 lock. Re-deferred per gate above; the JAR-bundled fixture continues one Ship as a named expedient.
+
+---
+
+## FP-012 — Deployer-authoring surface for shapes/triggers/policies
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 spec lock (Cleaving A)
+**Blocks**: the first Ship matching any of the three triggers below
+**Severity**: A — [ADR-004 §S6](adrs/adr-004-configuration-boundary.md#s6-atomic-configuration-delivery) / [§S10](adrs/adr-004-configuration-boundary.md#s10-shape-definition-versioning-and-evolution) / [§S13](adrs/adr-004-configuration-boundary.md#s13-complexity-budgets) / [§S14](adrs/adr-004-configuration-boundary.md#s14-deployer-parameterized-policies) architecture is decided; the build is not
+
+### Context
+
+[ADR-004](adrs/adr-004-configuration-boundary.md) commits the platform to a deployer-authored shape/trigger/policy surface: shapes versioned via `shape_ref` (§S1, §S10), atomic configuration delivery to devices with at-most-2-version coexistence (§S6), deploy-time validation enforcing complexity budgets (§S13), deployer-parameterized policies — flag severity, domain uniqueness (Q7a), scope composition, sensitivity classification Q12 (§S14). Ship-1 implemented the runtime *enough* for one shape; Ship-3 ([§6 sub-decision 3](ships/ship-3.md#61-sub-decisions)) extends the JAR-bundled fixture by one Ship as a named expedient. **The deployer-authoring surface itself — REST endpoint, file format, validation pipeline, atomic-package format, on-device application semantics — has never been built.** Ship-3's [§3.2 DR-2](ships/ship-3.md#32-domain-realism-risks) records the trigger evidence: walkthroughs cannot exercise runtime authoring because no such path exists, and §S13 budget enforcement consequently lands as a unit test rather than HTTP.
+
+### Trigger (whichever fires first)
+
+1. **Non-fixture shape required.** A Ship spec opens whose scenarios require a shape that the JAR-bundled fixture cannot ship — either because deployer-specific values are needed at deploy time (multi-tenant) or because the shape is authored by a non-engineering deployer.
+2. **Q7a or Q12 declaration required.** A Ship spec opens whose scenarios require shape-declared uniqueness rules (Q7a / [ADR-004 §S14](adrs/adr-004-configuration-boundary.md#s14-deployer-parameterized-policies)) or shape/activity-level sensitivity classification (Q12 / §S14) — the validator cannot honor declarations that have nowhere to be declared.
+3. **Deployer onboarding owned.** A Ship spec opens whose scenarios cover deployer onboarding (S22-class scenarios — naming, parameterization, package upload, deploy-time validation feedback).
+
+### Gate (all required at close)
+
+1. **(a) Shape registry persisted outside the JAR.** DB table or deployer-controlled filesystem path (deployer's choice), separate from `server/src/main/resources/schemas/shapes/`. Platform-bundled shapes may continue in the JAR; deployer-CONFIG shapes do not.
+2. **(b) Admin endpoint accepts shape definition** with deploy-time validation per [§S13](adrs/adr-004-configuration-boundary.md#s13-complexity-budgets) (60-field budget; predicate / trigger budgets; naming rules; change classification per [§S10](adrs/adr-004-configuration-boundary.md#s10-shape-definition-versioning-and-evolution) — additive / deprecation / breaking).
+3. **(c) Q7a uniqueness rules + Q12 sensitivity declarations** authored on the shape are honored by the validator and by downstream detectors. Specifically: `ConflictDetector`'s identity-key lookup (FP-009) becomes shape-declared rather than field-name-coupled.
+4. **(d) Atomic package delivery** per [§S6](adrs/adr-004-configuration-boundary.md#s6-atomic-configuration-delivery) with the wire-versioning scheme from [FP-013](#fp-013--config-package-wire-versioning-scheme) — at-most-2-version on-device coexistence; in-progress work under previous version completes before new version applies.
+5. **(e) Walkthrough.** A coordinator-role actor registers v3 of a shape via HTTP; two devices receive the new package atomically; the cascade-table per [`docs/exploration/file-15`](exploration/) Check (b) blocks an invalid breaking change at the validator (test asserts the rejection, not the accept).
+6. **(f) [FP-011](#fp-011--household_observation-directory-classification-re-deferral) directory split lands alongside.** Platform-bundled vs deployer-CONFIG directory separation is part of this Ship, not the next.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 §6 sub-decision 3 lock. Ship-1 + Ship-3 use the JAR-bundled fixture as a named expedient; the architecture (ADR-004 §S6/§S10/§S13/§S14) is not under question — the build is.
+
+---
+
+## FP-013 — Config-package wire-versioning scheme
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 spec lock (Cleaving A)
+**Blocks**: same Ship as [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies); delivery of a config package to a real device is the first time wire format is load-bearing
+**Severity**: B — [ADR-004 §S6](adrs/adr-004-configuration-boundary.md#s6-atomic-configuration-delivery) commits atomicity but not wire format
+
+### Context
+
+[ADR-004 §S6](adrs/adr-004-configuration-boundary.md#s6-atomic-configuration-delivery) commits: *"Configuration is delivered to devices as an atomic package at sync time. The device applies the new configuration only after in-progress work under the previous configuration completes. At most two configuration versions coexist on-device: current and previous."* What the *wire format* of an atomic package is — package version field, monotonic ordering rule, signature/integrity, fragment/page boundaries for large packages, on-device persistence schema for the `current/previous` pair — is not specified. The file-15 action item from the convergence-phase ADR-writing session 4 to specify this scheme never landed; the gap is currently masked by Ship-3 simulating §S6 with two HTTP devices on different `shape_ref` values rather than delivering an actual config bundle.
+
+### Trigger
+
+[FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies) trigger fires. Wire format becomes load-bearing the moment a real device receives a non-fixture config package.
+
+### Gate
+
+All three must be true:
+
+1. Wire-versioning scheme specified — at minimum: package version field (monotonic), payload (shape definitions, trigger definitions, policy values), atomic-application rule (`current` / `previous` slots; in-flight work pinned to the slot it started under), validation contract (server-rejects-malformed; device-rejects-non-monotonic).
+2. Scheme tested in the same Ship as FP-012 — a walkthrough delivers package vN+1 to a device that has package vN, asserts at-most-2-version coexistence, asserts in-progress work under vN completes before vN+1 applies.
+3. Scheme reflected in a contract artifact under `contracts/` (analogous to [`contracts/sync-protocol.md`](../contracts/sync-protocol.md)) so future Ships have a settled cite, not a buried implementation detail.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 spec §6 sub-decision 3 lock. Ship-3 simulates §S6 atomicity at the HTTP layer (two devices on different `shape_ref` values) without exercising package wire format; FP-013 records the gap.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
