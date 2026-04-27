@@ -558,6 +558,39 @@ All required:
 
 ---
 
+## FP-016 — Fixture-event schema regression check (drift-gate scope expansion)
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 closeout (Wave 2-A) — promoted from SC-08 / C2-04 reviewer findings
+**Blocks**: any Ship that introduces a non-additive shape change ([ADR-004 §S10](adrs/adr-004-configuration-boundary.md#s10-shape-definition-versioning-and-evolution) exceptional path) — likely Ship-N where N > 4 unless an earlier Ship needs it
+**Severity**: B — drift-gate observability gap
+
+### Context
+
+[`scripts/check-convergence.sh`](../scripts/check-convergence.sh) validates byte-identity between [`contracts/shapes/`](../contracts/shapes/) and [`server/src/main/resources/schemas/shapes/`](../server/src/main/resources/schemas/shapes/) ([FP-007](#fp-007--contractserver-resource-shape-drift-not-enforced) close-out, drift-check #4). This catches *file-level* divergence between the two trees.
+
+It does NOT catch *behavioral* schema regression: a schema edit that weakens a constraint (drops a required field, broadens an enum, makes an optional field required) and is mirrored in both trees passes the drift gate but breaks fixture events that were valid under the prior schema.
+
+[ADR-004 §S10](adrs/adr-004-configuration-boundary.md#s10-shape-definition-versioning-and-evolution) commits to additive evolution as the default; non-additive changes are the "exceptional path" with explicit acknowledgment. A regression check against persisted fixture events is the concrete test that the exceptional path is in fact exceptional.
+
+### Trigger
+
+Any Ship that proposes a non-additive shape change OR Ship-4 if its scenarios introduce shape edits that any reviewer flags as potentially non-additive.
+
+### Gate
+
+All required:
+
+1. A fixture set of representative events per shape lives in [`contracts/fixtures/`](../contracts/fixtures/) (or extend the existing directory). Each fixture is a valid event under the current shape version at the time it was added; the file carries the shape version it was authored against.
+2. A regression check (test or `check-convergence.sh` step 5) loads each fixture and validates against the *current* schema for the same shape version. Pass = backward-compatible. Fail = behavioral regression detected; the change is non-additive and requires the §S10 exceptional-path rationale.
+3. Drift-gate scope statement (header comment in [`scripts/check-convergence.sh`](../scripts/check-convergence.sh)) explicitly references this gate as the second half of "behavioral conformance."
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 closeout Wave 2-A.
+
+---
+
 ## FP-017 — `role_stale` detector wiring (successor to FP-001)
 
 **Status**: OPEN
