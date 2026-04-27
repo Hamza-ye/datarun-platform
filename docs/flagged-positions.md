@@ -825,7 +825,7 @@ All required:
 
 ## FP-019 — Alias-cycle guard implementation tracking
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-04-27 by Ship-3 closeout Wave 3 step (a) — architect dispatch
 **Blocks**: closes inside Ship-3 closeout Wave 3 step (b); does not carry to a future Ship
 **Severity**: A — surfaces a high-irreversibility structural risk (cycle-closing alias events are permanent under [ADR-001 §S1](adrs/adr-001-offline-data-model.md))
@@ -856,6 +856,7 @@ All required:
 ### Resolution log
 
 - **2026-04-27**: Opened by Wave 3 step (a) architect dispatch. Authorities cited: [ADR-006-R](adrs/adr-006-flag-semantics-R.md) (decided same date), [`contracts/flag-catalog.md`](../contracts/flag-catalog.md) row 9 (claimed same date), [`docs/architecture/cycle-guard-contract.md`](architecture/cycle-guard-contract.md) (authored same date as the implementation specification step (b) follows). Awaiting Wave 3 step (b) dispatch.
+- **2026-04-27 — RESOLVED**. Implementation landed in commit `a582e59` (push-path guard wiring); tests landed in commit `0b14607`. Both contract §7 tests pass: `AliasCycleGuardTest#cycleGuard_singleEventPush_persistedGraphCloses` (cross-batch) and `AliasCycleGuardTest#cycleGuard_twoEventBatch_inFlightCloses` (intra-batch forcing case). Flag emission verified against `conflict_detected/v1` shape, `payload.flag_category=cycle_violation`, `actor_ref=system:cycle_guard/cycle_violation`, canonical `cycle_path=[A, B, A]` per contract §4.3. Test count delta +2 (55 → 57). Drift gate PASS.
 
 ---
 
