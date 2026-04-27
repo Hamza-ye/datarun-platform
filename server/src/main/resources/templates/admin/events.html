@@ -12,6 +12,11 @@
         tr.flag td { background: #fff4f4; }
         tr.alert td { background: #fff4f4; }
         .small { color: #666; font-size: 11px; }
+        .ver-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px;
+                     font-weight: bold; background: #eef; color: #225; margin-right: 4px; }
+        .ver-v2 { background: #efe; color: #252; }
+        .deprecated { color: #b85; font-style: italic; }
+        .v2-only { color: #260; }
         pre { margin: 0; white-space: pre-wrap; word-break: break-all; max-width: 400px; }
     </style>
 </head>
@@ -21,7 +26,10 @@
     <a href="/admin/flags">Flags</a>
 </nav>
 <h1>All events</h1>
-<p class="small">Append-only stream. Ordered by sync_watermark ascending.</p>
+<p class="small">Append-only stream. Ordered by sync_watermark ascending. Each row's payload is
+    rendered per its declared <code>shape_ref</code> (Ship-3: per-event branching on
+    <code>shape_ref</code>, never on envelope <code>type</code> — F-A2). Per-request replay,
+    no projection cache (FP-002 (a)).</p>
 <table>
     <thead>
     <tr>
@@ -33,7 +41,12 @@
     <tr th:each="e : ${events}" th:classappend="${e.type == 'alert'} ? 'alert' : ''">
         <td th:text="${e.syncWatermark}"></td>
         <td th:text="${e.type}"></td>
-        <td th:text="${e.shapeRef}"></td>
+        <td>
+            <span class="ver-badge"
+                  th:classappend="${#strings.endsWith(e.shapeRef, '/v2')} ? 'ver-v2' : ''"
+                  th:text="${#strings.substringAfter(e.shapeRef, '/')}">v1</span>
+            <span th:text="${#strings.substringBefore(e.shapeRef, '/')}"></span>
+        </td>
         <td th:text="${e.activityRef}"></td>
         <td>
             <span th:text="${e.subjectType}"></span><br/>
@@ -45,7 +58,43 @@
             <br/>seq=<span th:text="${e.deviceSeq}"></span>
         </td>
         <td class="small" th:text="${e.timestamp}"></td>
-        <td><pre th:text="${e.payload.toString()}"></pre></td>
+        <td>
+            <!--
+                Per-event branching on shape_ref. v1 and v2 render against their own
+                version's field set so a viewer can tell them apart and so payload
+                fidelity is preserved per version. Discriminate on shape_ref ONLY (F-A2);
+                never on envelope type. This is the Ship-3 §6.4 W-10 contract.
+            -->
+            <th:block th:if="${e.shapeRef == 'household_observation/v1'}">
+                <div><b>household_observation v1</b></div>
+                <div>name: <span th:text="${e.payload.path('household_name').asText()}"></span></div>
+                <div>head: <span th:text="${e.payload.path('head_of_household_name').asText()}"></span></div>
+                <div>size: <span th:text="${e.payload.path('household_size').asText()}"></span></div>
+                <div>village_ref: <span class="small"
+                      th:text="${e.payload.path('village_ref').asText()}"></span></div>
+                <div th:if="${!e.payload.path('visit_notes').isNull()}">
+                    visit_notes: <span th:text="${e.payload.path('visit_notes').asText()}"></span>
+                </div>
+                <div class="small">(v1: head_of_household_phone field is not present)</div>
+            </th:block>
+            <th:block th:if="${e.shapeRef == 'household_observation/v2'}">
+                <div><b>household_observation v2</b></div>
+                <div>name: <span th:text="${e.payload.path('household_name').asText()}"></span></div>
+                <div>head: <span th:text="${e.payload.path('head_of_household_name').asText()}"></span></div>
+                <div class="v2-only">phone (v2-only):
+                    <span th:text="${e.payload.path('head_of_household_phone').isNull() or e.payload.path('head_of_household_phone').isMissingNode() ? '(none)' : e.payload.path('head_of_household_phone').asText()}"></span>
+                </div>
+                <div>size: <span th:text="${e.payload.path('household_size').asText()}"></span></div>
+                <div>village_ref: <span class="small"
+                      th:text="${e.payload.path('village_ref').asText()}"></span></div>
+                <div th:if="${!e.payload.path('visit_notes').isNull()}" class="deprecated">
+                    visit_notes (deprecated): <span th:text="${e.payload.path('visit_notes').asText()}"></span>
+                </div>
+            </th:block>
+            <th:block th:if="${!#strings.startsWith(e.shapeRef, 'household_observation/')}">
+                <pre th:text="${e.payload.toString()}"></pre>
+            </th:block>
+        </td>
     </tr>
     </tbody>
 </table>
