@@ -160,14 +160,16 @@ public class SyncController {
             return actorId.toString().equals(targetActor.path("id").asText());
         }
         // 2. Household captures: in scope iff the capture's village_ref is in the actor's scope.
-        if ("household_observation/v1".equals(e.shapeRef())) {
+        //    Ship-3: discriminate on shape_ref *prefix* so v1 and v2 (and any future additive
+        //    versions) are both routed here. Branching on shape_ref, not on envelope type (F-A2).
+        if (e.shapeRef() != null && e.shapeRef().startsWith("household_observation/")) {
             JsonNode v = e.payload().path("village_ref");
             if (!v.isTextual()) return false;
             try { return activeScopes.contains(UUID.fromString(v.asText())); }
             catch (IllegalArgumentException ex) { return false; }
         }
         // 3. Flag events and resolution events: in scope iff the subject they reference is in scope.
-        if ("conflict_detected/v1".equals(e.shapeRef())) {
+        if (e.shapeRef() != null && e.shapeRef().startsWith("conflict_detected/")) {
             return scopeSubjectIds.contains(e.subjectId());
         }
         // Default-deny for Ship-1.
