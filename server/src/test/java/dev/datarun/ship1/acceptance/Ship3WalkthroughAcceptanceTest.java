@@ -48,9 +48,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * preserved verbatim in v2 per Ship-3 §6.1 sub-decision 2, so the prefix scan
  * ({@code findByShapeRefPrefix("household_observation/")}) finds v2 priors when a v1 capture
  * arrives. The mixed-version assertion in W-6 therefore targets the v1-current + v2-prior
- * direction (where the detector activates and the prior-scan crosses versions). The
- * v2-current direction is intentionally not asserted in this Ship — see SHIP-3 BUILD REPORT
- * 'Surprises / deviations' for the discussion.
+ * direction (where the detector activates and the prior-scan crosses versions).
+ * v2-current cross-version detection added at closeout commit {@code dab7e6a} (W1 G-2).
  */
 @SpringBootTest(classes = DatarunApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
