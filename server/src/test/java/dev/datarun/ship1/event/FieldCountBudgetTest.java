@@ -1,9 +1,14 @@
 package dev.datarun.ship1.event;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import org.junit.jupiter.api.Test;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -78,5 +83,74 @@ class FieldCountBudgetTest {
         sb.append("\n  }\n}");
         assertThat(propertyCount).isGreaterThanOrEqualTo(0);
         return FACTORY.getSchema(sb.toString());
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // G-9 closeout — public callable API: validateShapeBudget(JsonNode)
+    //
+    // Spec: ADR-004 §S13 row 1 ("Fields per shape" = 60) enforced at the candidate-schema level,
+    // not just at JAR-bundle time. The public entry point accepts a JsonNode (the schema root)
+    // so any future code path — including the FP-012b deployer-authoring HTTP surface — can call
+    // it without first instantiating a JsonSchema. Until that surface exists, the guard is
+    // exercised at startup and from these tests.
+    // ------------------------------------------------------------------------------------------
+
+    @Test
+    void validateShapeBudget_jsonNode_rejects_61_top_level_properties() throws Exception {
+        JsonNode overlimit =
+                synthesizeJsonNodeWith(ShapePayloadValidator.MAX_FIELDS_PER_SHAPE + 1);
+
+        assertThatThrownBy(() -> ShapePayloadValidator.validateShapeBudget(overlimit))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(String.valueOf(ShapePayloadValidator.MAX_FIELDS_PER_SHAPE + 1))
+                .hasMessageContaining(String.valueOf(ShapePayloadValidator.MAX_FIELDS_PER_SHAPE));
+    }
+
+    @Test
+    void validateShapeBudget_jsonNode_accepts_exactly_60_top_level_properties() throws Exception {
+        JsonNode atLimit = synthesizeJsonNodeWith(ShapePayloadValidator.MAX_FIELDS_PER_SHAPE);
+        // No throw — limit is inclusive (≤ 60 OK; > 60 rejected).
+        ShapePayloadValidator.validateShapeBudget(atLimit);
+    }
+
+    /**
+     * Simulates the {@code @PostConstruct} init-loop body: iterate a deliberately injected map
+     * of {shape_ref → schema-root JsonNode}, call the budget guard on each, expect failure on
+     * the over-budget entry with the offender's shape_ref in the message. This is the
+     * "deliberately injected over-budget map" path called out in the G-9 spec — it proves the
+     * boot-time gate fires <em>and</em> identifies the offender, without requiring a heavy
+     * Spring context-failure test.
+     */
+    @Test
+    void init_loop_gate_throws_with_offender_shape_ref_when_any_bundle_exceeds_budget()
+            throws Exception {
+        Map<String, JsonNode> bundle = new LinkedHashMap<>();
+        bundle.put("good_shape/v1",
+                synthesizeJsonNodeWith(ShapePayloadValidator.MAX_FIELDS_PER_SHAPE));
+        bundle.put("synthetic_overlimit/v1",
+                synthesizeJsonNodeWith(ShapePayloadValidator.MAX_FIELDS_PER_SHAPE + 1));
+
+        assertThatThrownBy(() -> {
+            for (Map.Entry<String, JsonNode> e : bundle.entrySet()) {
+                ShapePayloadValidator.validateShapeBudget(e.getKey(), e.getValue());
+            }
+        })
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("synthetic_overlimit/v1")
+                .hasMessageContaining(String.valueOf(ShapePayloadValidator.MAX_FIELDS_PER_SHAPE + 1))
+                .hasMessageContaining("ADR-004 §S13");
+    }
+
+    private static JsonNode synthesizeJsonNodeWith(int propertyCount) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",")
+                .append("\"type\":\"object\",\"properties\":{");
+        for (int i = 0; i < propertyCount; i++) {
+            if (i > 0) sb.append(',');
+            sb.append("\"f").append(i).append("\":{\"type\":\"string\"}");
+        }
+        sb.append("}}");
+        return mapper.readTree(sb.toString());
     }
 }
