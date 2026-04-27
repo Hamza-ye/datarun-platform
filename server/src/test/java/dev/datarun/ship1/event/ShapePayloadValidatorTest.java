@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Ship-3 unit coverage for {@link ShapePayloadValidator}. Loads the real Spring context so the
@@ -100,6 +101,28 @@ class ShapePayloadValidatorTest {
                 .isEqualTo("household_observation/v1");
         assertThat(ShapePayloadValidator.parseShapeRef("assignment_created.schema.json"))
                 .isEqualTo("assignment_created/v1");
+    }
+
+    /**
+     * G-10 / C3-05 — the validator's filename-pattern matching is bounded. A filename that
+     * matches neither {@code <name>.schema.json} nor {@code <name>.v<N>.schema.json} must
+     * raise at registry-load time rather than be silently coerced into a shape_ref. Pins the
+     * Javadoc claim that the {@code .schema.json} suffix is mandatory; adding a third pattern
+     * (e.g. non-{@code .schema.json} suffix) requires updating both the resolver and the
+     * Javadoc.
+     */
+    @Test
+    void parseShapeRef_rejects_unsupported_filename_patterns() {
+        // Dash-versioned, no .schema. infix.
+        assertThatThrownBy(() -> ShapePayloadValidator.parseShapeRef("weird_format-v1.json"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("weird_format-v1.json");
+        // Right shape but wrong suffix (.json without .schema.).
+        assertThatThrownBy(() -> ShapePayloadValidator.parseShapeRef("household_observation.v3.json"))
+                .isInstanceOf(IllegalArgumentException.class);
+        // Bare .json, no schema marker at all.
+        assertThatThrownBy(() -> ShapePayloadValidator.parseShapeRef("household_observation.json"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
 
