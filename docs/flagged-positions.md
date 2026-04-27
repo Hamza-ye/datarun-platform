@@ -588,6 +588,41 @@ All required:
 
 ---
 
+## FP-018 — `assignment_ended/v1` validated but never consumed in scope reconstruction
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Wave-1 G-7' code-reading finding (commit `8be0ae2`)
+**Blocks**: the first Ship requiring operational end-of-assignment (assignment ends as a separate event, not a pre-set `valid_to` on creation). Likely Ship-4 (S04 supervisor reassignment scenarios) or Ship-5 ([FP-017](#fp-017--role_stale-detector-wiring-successor-to-fp-001) role-action enforcement).
+**Severity**: A — domain-correctness gap; [P04](behavioral_patterns.md) (Responsibility Binding) variation "Whether responsibility... can be delegated or transferred" requires this path
+
+### Context
+
+[`contracts/shapes/assignment_ended.schema.json`](../contracts/shapes/assignment_ended.schema.json) exists and validates events of `shape_ref = "assignment_ended/v1"`. Such events are accepted by the push path and stored. [`ScopeResolver.activeAssignments(actorId, at)`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java) at line 53 iterates **only** `findByShapeRefPrefix("assignment_created/")`. `assignment_ended/v1` events are never read in scope reconstruction.
+
+Practical consequence: the only way to end an assignment in current code is to pre-set `valid_to` on the original `assignment_created/v1` event. But [ADR-001 §S1](adrs/adr-001-offline-data-model.md#s1) is append-only — modifying the original event is structurally forbidden. Tests construct assignments with `valid_to` pre-populated; production has no append-only path that effectively ends an assignment.
+
+Domain anchor: [`access-control-scenario.md`](access-control-scenario.md) "Access can be temporary... When the reason for temporary access ends, the expanded access should end too. But everything done during that period remains on record." Append-only + temporary-access compose only if `assignment_ended/v1` is honored as the end-event.
+
+Why this wasn't caught earlier: [S03](scenarios/03-user-based-assignment.md) (assignment) walkthroughs at Ship-1 covered creation only; Ship-2 added `hasRoleAt` (caller-less); Ship-3 was shape-evolution. No Ship has yet exercised "actor's authority ends, late offline event arrives".
+
+### Trigger
+
+Any Ship spec with a scenario that ends an assignment as a discrete event (not a pre-planned `valid_to`).
+
+### Gate
+
+All required:
+
+1. [`ScopeResolver`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java) reads both `assignment_created/v1` AND `assignment_ended/v1` events. The composition rule for "end" is documented: an `assignment_ended/v1` event with `target.actor_id = A`, `scope_ref = S`, `at = T_end` removes `(A, S)` from the active set for any `at > T_end`.
+2. Test: create assignment of A→V1 at T0; emit `assignment_ended/v1` at T_end; assert `activeGeographicScopes(A, T < T_end)` includes V1; `activeGeographicScopes(A, T > T_end)` excludes V1.
+3. Offline-late case: an `assignment_ended/v1` event arrives via push at wall-clock W > T_end. Captures with `event.timestamp ∈ (T_end, W)` against V1 must fire `scope_violation` (A's scope at event-time excludes V1).
+
+### Resolution log
+
+- **2026-04-27**: Opened by Wave-1 G-7' agent finding (commit `8be0ae2` test report, anomaly #1). Ship-3 closeout chose to flag rather than fix because the gap is not load-bearing in Ship-1/2/3 (tests construct end via pre-set `valid_to`; production has not yet exercised end-of-assignment). The fix is bounded but lands when the first Ship needs it.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
