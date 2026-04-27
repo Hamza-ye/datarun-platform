@@ -50,7 +50,7 @@ Dated entries as work progresses. When RESOLVED, the final entry cites the commi
 
 ## FP-001 — `role_stale` projection-derived role verification
 
-**Status**: OPEN
+**Status**: SUPERSEDED (by [FP-017](#fp-017--role_stale-detector-wiring-successor-to-fp-001))
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding A3)
 **Blocks**: IDR-021 (Role-Action Enforcement)
 **Severity**: A — touches ADR-3 S3 structural constraint
@@ -80,6 +80,7 @@ All three must be true:
 - **2026-04-24** (Ship-1 retro §3.2): `ScopeResolver` confirmed to be event-replay with no cache (Javadoc explicit, no projection table). Gate part 1 met by construction. Gate part 2 (test that would fail under a cache-based implementation) **not yet authored** — Ship-1's W-2 covers correctness at the current scale but does not exercise temporal divergence (role-X-then-Y-then-replay-back-to-X). Carried as live debt.
 - **2026-04-25** (Ship-2 R-4 sweep): does not block Ship-2 (S06 merge/split — identity, not authority). Stays OPEN; next re-evaluation when role-action enforcement first lands (Ship-5 judgment / approvals under the 7-Ship map). The temporal-divergence test remains the outstanding piece of the gate; lands at the Ship that first depends on it.
 - **2026-04-27** (Ship-3 closeout Wave 1 G-7' + Wave 2-A): the original `role_stale` substrate (pre-convergence `dev.datarun.server.integrity.ConflictDetector` lines 226–234, per the original 2026-04-21 line cite) was discarded at Ship-1's clean-slate rebuild and never reinstated under `dev.datarun.ship1`. `grep -r role_stale server/` returns zero matches at Ship-3 HEAD. The 2026-04-24 / 2026-04-25 retro entries silently re-aimed the FP at "scope reconstruction" without re-writing the gate text — a Rule R-1 silent-deferral failure that the closeout caught. The *intent* of gate-2 (projection-time correctness, demonstrated to defeat any cache/request-time regression) is closed by Wave-1 G-7' commit [`8be0ae2`](../server/src/test/java/dev/datarun/ship1/acceptance/ScopeViolationTemporalDivergenceTest.java) — `ScopeViolationTemporalDivergenceTest`'s Event-C forcing property exercises the same invariant against `scope_violation` (the substrate that does exist). The `role_stale` half — a `role_stale` detector that wires [`ScopeResolver.hasRoleAt(...)`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java) (Ship-2, currently caller-less) into the [`ConflictDetector`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) push path — is a Ship-5 concern (judgment / approvals / role-action enforcement). Carved out as [FP-017](#fp-017--role_stale-detector-wiring-successor-to-fp-001) below; FP-001 to be marked **SUPERSEDED** by FP-017 in PM Wave 2-B.
+- **2026-04-27** (Ship-3 closeout Wave 2-B): Status promoted to SUPERSEDED by Ship-3 closeout Wave 2-B. Successor: [FP-017](#fp-017--role_stale-detector-wiring-successor-to-fp-001).
 
 ---
 
