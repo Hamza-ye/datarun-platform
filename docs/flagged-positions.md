@@ -79,6 +79,7 @@ All three must be true:
 - **2026-04-24**: Re-scoped by [Ship-1 spec](ships/ship-1.md) §5. Original gate references discarded pre-convergence code. New gate: Ship-1 retro must confirm scope reconstruction replays `assignment_changed` events (no cache, no envelope field, no snapshot), and a test exists that would fail under a cache-based implementation. Closure deferred to Ship-1 retro; `Blocks:` field (IDR-021) is obsolete — role-action enforcement is a Ship-3 or later concern under the new cadence.
 - **2026-04-24** (Ship-1 retro §3.2): `ScopeResolver` confirmed to be event-replay with no cache (Javadoc explicit, no projection table). Gate part 1 met by construction. Gate part 2 (test that would fail under a cache-based implementation) **not yet authored** — Ship-1's W-2 covers correctness at the current scale but does not exercise temporal divergence (role-X-then-Y-then-replay-back-to-X). Carried as live debt.
 - **2026-04-25** (Ship-2 R-4 sweep): does not block Ship-2 (S06 merge/split — identity, not authority). Stays OPEN; next re-evaluation when role-action enforcement first lands (Ship-5 judgment / approvals under the 7-Ship map). The temporal-divergence test remains the outstanding piece of the gate; lands at the Ship that first depends on it.
+- **2026-04-27** (Ship-3 closeout Wave 1 G-7' + Wave 2-A): the original `role_stale` substrate (pre-convergence `dev.datarun.server.integrity.ConflictDetector` lines 226–234, per the original 2026-04-21 line cite) was discarded at Ship-1's clean-slate rebuild and never reinstated under `dev.datarun.ship1`. `grep -r role_stale server/` returns zero matches at Ship-3 HEAD. The 2026-04-24 / 2026-04-25 retro entries silently re-aimed the FP at "scope reconstruction" without re-writing the gate text — a Rule R-1 silent-deferral failure that the closeout caught. The *intent* of gate-2 (projection-time correctness, demonstrated to defeat any cache/request-time regression) is closed by Wave-1 G-7' commit [`8be0ae2`](../server/src/test/java/dev/datarun/ship1/acceptance/ScopeViolationTemporalDivergenceTest.java) — `ScopeViolationTemporalDivergenceTest`'s Event-C forcing property exercises the same invariant against `scope_violation` (the substrate that does exist). The `role_stale` half — a `role_stale` detector that wires [`ScopeResolver.hasRoleAt(...)`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java) (Ship-2, currently caller-less) into the [`ConflictDetector`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) push path — is a Ship-5 concern (judgment / approvals / role-action enforcement). Carved out as [FP-017](#fp-017--role_stale-detector-wiring-successor-to-fp-001) below; FP-001 to be marked **SUPERSEDED** by FP-017 in PM Wave 2-B.
 
 ---
 
@@ -554,6 +555,36 @@ All required:
 ### Resolution log
 
 - **2026-04-27** (Ship-3 closeout Wave 2-A): Opened. Promoted from Ship-1 retro §3.3 observation that lay un-FP'd for 3 Ships (carried forward as live observation per Rule R-1 candidate-violation; documented as silent-deferral failure in Wave 2-B retro §5). Push-path cleanness confirmed via Wave-1 G-7' ([`ConflictDetector.java`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) line 67 uses `capture.timestamp()`). Pull-path request-time confirmed at [`SyncController.java`](../server/src/main/java/dev/datarun/ship1/sync/SyncController.java) line 114 and [`ConfigController.java`](../server/src/main/java/dev/datarun/ship1/config/ConfigController.java) line 44.
+
+---
+
+## FP-017 — `role_stale` detector wiring (successor to FP-001)
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 closeout (Wave 2-A) — successor to [FP-001](#fp-001--role_stale-projection-derived-role-verification)
+**Blocks**: the first Ship that requires role-action enforcement (Ship-5 territory under the current map: judgment / approvals / multi-step review per [S04](scenarios/04-supervisor-review.md) + S11)
+**Severity**: A — [ADR-003 §S3](adrs/adr-003-authorization-sync.md#s3) (authority-as-projection) requires the substrate to exist before role-keyed detection lands
+
+### Context
+
+[`ScopeResolver.hasRoleAt(actorId, role, at)`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java) exists (Ship-2 commit `ecf3ece`) and replays `assignment_changed` events, but has **no callers**. There is no `role_stale` path in [`ConflictDetector`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) — the pre-convergence detector was discarded at Ship-1 rebuild. The platform supports the invariant *structurally* (event-replay machinery + projection-time anchor on `scope_violation`) but the *role-keyed* detector itself is unbuilt. [ADR-006 §S2](adrs/adr-006-flag-semantics.md) catalog row 5 (`role_stale`, `manual_only`) carries a contract for a detector that does not exist. R-7 (§S–implementation parity, see [Rule R-7](#rule-r-7-simplementation-parity)) would have caught this at Ship-1.
+
+### Trigger
+
+Any Ship spec whose scenarios require role-action enforcement (a CHV cannot review their own work; only a supervisor can approve; etc.). Specifically: [S04](scenarios/04-supervisor-review.md) supervisor review's reviewer-authority check, S11 multi-step approval chain, and any future Ship that asserts "actor X cannot perform action Y because they no longer hold role R".
+
+### Gate
+
+All required:
+
+1. `role_stale` detector wired into [`ConflictDetector`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) push path, calling `ScopeResolver.hasRoleAt(actorId, requiredRole, capture.timestamp())`. Anchor MUST be `capture.timestamp()` (projection-time, [ADR-003 §S3](adrs/adr-003-authorization-sync.md#s3)) — same precedent as `scope_violation`. **No** `Instant.now()` and **no** cache.
+2. Detector emits `conflict_detected/v1` with `payload.flag_category = "role_stale"`, `actor_ref = "system:conflict_detector/role_stale"` ([ADR-008 §S2](adrs/adr-008-envelope-reference-fields.md) system-author format).
+3. Test analogous to `ScopeViolationTemporalDivergenceTest`: actor A holds role X at T1; admin changes role to Y at T2; capture at T_C with T1 < T_C < T2 (offline, late push) MUST NOT fire `role_stale`; capture at T3 > T2 under role X (now stale) MUST fire `role_stale`. Forcing property documented inline.
+4. [FP-018](#fp-018--assignment_endedv1-validated-but-never-consumed-in-scope-reconstruction) (`assignment_ended/v1` consumption) must be resolved before this gate, OR the test must construct role transitions via the same workaround Wave-1 G-7' used (`valid_to` set on the original `assignment_created/v1` event). The dependency is recorded explicitly in this gate so Ship-5 doesn't carry both at once.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 closeout Wave 2-A. Successor to [FP-001](#fp-001--role_stale-projection-derived-role-verification).
 
 ---
 
