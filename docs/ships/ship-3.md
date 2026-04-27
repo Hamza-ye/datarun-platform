@@ -231,10 +231,15 @@ Filled at retro.
 To be filled by the user. Likely items emerging from §6 sub-decisions:
 
 - **OQ-1**: Which shape gets v2? (Default recommendation: `household_observation`.)
+  RESOLVED at §6.1 lock 2026-04-27 — see §6.1 sub-decision 1 (`household_observation`).
 - **OQ-2**: Additive-only or include a deprecation? (Default recommendation: include one deprecation.)
+  RESOLVED at §6.1 lock 2026-04-27 — see §6.1 sub-decision 2 (additive + one deprecation; identity-key fields `village_ref` and `household_name` preserved verbatim per FP-009 closure).
 - **OQ-3**: Shape registry storage pattern — (a) configuration-layer / (b) events-on-demand. (Default recommendation: (a).)
+  RESOLVED at §6.1 lock 2026-04-27 — see §6.1 sub-decision 3 (JAR-bundled fixture continued as a named expedient; events-on-demand projection per FP-002 (a) — no shape-projection cache).
 - **OQ-4**: Is shape v2 registered at deploy time only, or via a coordinator-authored runtime path? (Default recommendation: deploy time only.)
+  RESOLVED at §6.1 lock 2026-04-27 — see §6.1 sub-decision 4 (deploy-time only; coordinator-runtime authoring deferred to FP-012).
 - **OQ-5**: Field-count budget enforcement — walkthrough or unit test? (Decide with OQ-3.)
+  RESOLVED at §6.1 lock 2026-04-27 — see §6.1 sub-decision 5 (unit test — FieldCountBudgetTest at registry-load; the walkthrough infeasibility is the FP-012 trigger evidence per §3.2 DR-2).
 
 ---
 
