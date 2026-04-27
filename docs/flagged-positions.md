@@ -461,10 +461,18 @@ Both:
 
 ## FP-012 — Deployer-authoring surface for shapes/triggers/policies
 
-**Status**: OPEN
+**Status**: SUPERSEDED (decomposed 2026-04-27 by Ship-3 closeout Wave 2-B)
 **Opened**: 2026-04-27 by Ship-3 spec lock (Cleaving A)
 **Blocks**: the first Ship matching any of the three triggers below
 **Severity**: A — [ADR-004 §S6](adrs/adr-004-configuration-boundary.md#s6-atomic-configuration-delivery) / [§S10](adrs/adr-004-configuration-boundary.md#s10-shape-definition-versioning-and-evolution) / [§S13](adrs/adr-004-configuration-boundary.md#s13-complexity-budgets) / [§S14](adrs/adr-004-configuration-boundary.md#s14-deployer-parameterized-policies) architecture is decided; the build is not
+
+**Successors** (decomposition; each carries its own gate, trigger, and severity):
+
+- [FP-015](#fp-015--adr-004-s6-atomic-configuration-publication) — ADR-004 §S6 atomic configuration publication
+- [FP-012b](#fp-012b--adr-004-s13-http-runtime-field-count-budget-enforcement) — ADR-004 §S13 HTTP runtime field-count-budget enforcement
+- [FP-012c](#fp-012c--adr-004-s14-deployer-policies-q7a-q12) — ADR-004 §S14 deployer policies (Q7a, Q12)
+- [FP-012d](#fp-012d--shape-declared-uniqueness-fp-009-deeper) — Shape-declared uniqueness (FP-009 deeper)
+- [FP-012e](#fp-012e--directory-split-link-to-fp-011) — Directory split (link to FP-011)
 
 ### Context
 
@@ -488,6 +496,132 @@ Both:
 ### Resolution log
 
 - **2026-04-27**: Opened by Ship-3 §6 sub-decision 3 lock. Ship-1 + Ship-3 use the JAR-bundled fixture as a named expedient; the architecture (ADR-004 §S6/§S10/§S13/§S14) is not under question — the build is.
+- **2026-04-27** (Ship-3 closeout Wave 2-B): **SUPERSEDED — decomposed** into five sub-concerns, each with its own gate, trigger, and severity: [FP-015](#fp-015--adr-004-s6-atomic-configuration-publication) (§S6 atomicity), [FP-012b](#fp-012b--adr-004-s13-http-runtime-field-count-budget-enforcement) (§S13 HTTP runtime), [FP-012c](#fp-012c--adr-004-s14-deployer-policies-q7a-q12) (§S14 deployer policies), [FP-012d](#fp-012d--shape-declared-uniqueness-fp-009-deeper) (shape-declared uniqueness — FP-009 deeper), [FP-012e](#fp-012e--directory-split-link-to-fp-011) (directory split — link to FP-011). FP-012 was bundling structurally distinct concerns; per Rule R-2 each gate must be expressible as "X is true," and a single bundled gate hid which sub-concern was the active blocker for any given Ship. Decomposition is the corrective action; no architecture changes — the §S claims are unchanged.
+
+---
+
+## FP-012b — ADR-004 §S13 HTTP runtime field-count-budget enforcement
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 closeout Wave 2-B (carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies))
+**Blocks**: any Ship that introduces a new shape OR proposes a non-additive evolution (defensive); otherwise the Ship-N where the concept-ledger row [`field_count_budget`](convergence/concept-ledger.md) is to be promoted from DEFERRED to STABLE
+**Severity**: B — boot-loop already gates registry-load; this is defense-in-depth at the HTTP push boundary
+
+### Context
+
+[ADR-004 §S13](adrs/adr-004-configuration-boundary.md#s13-complexity-budgets) commits a 60-field-per-shape budget. Wave-1 commit [`7540fc2`](../server/src/main/java/dev/datarun/ship1/event/ShapePayloadValidator.java) (G-9) added two pieces of enforcement inside [`ShapePayloadValidator`](../server/src/main/java/dev/datarun/ship1/event/ShapePayloadValidator.java) lines 50–161:
+
+1. `MAX_FIELDS_PER_SHAPE = 60` constant.
+2. `@PostConstruct` registry-load **boot-loop guard**: if any bundled schema has > 60 top-level `properties`, the application fails to start.
+3. `validateShapeBudget(JsonNode)` callable shim — present and unit-tested, but **not invoked on the HTTP push path**.
+
+The HTTP runtime enforcement on the inbound push path is the remaining half: `SyncController.push` (or upstream in the validation pipeline) does not currently call `validateShapeBudget` per-event. A 61-field event under any shape would fail at registry-load *for the bundled fixture*, but a non-bundled or runtime-altered shape could carry a budget violation past the runtime boundary.
+
+### Trigger
+
+Any of the following:
+
+1. A Ship spec opens that introduces a new shape (the §S13 budget gains real load — boot-loop alone is insufficient if shapes are not all JAR-bundled).
+2. A Ship spec opens that proposes a non-additive evolution (defensive — the budget is one of the structural checks the §S10 exceptional path must respect).
+3. The concept-ledger row [`field_count_budget`](convergence/concept-ledger.md) is to be promoted from DEFERRED to STABLE (closure of FP-012b is the §S–implementation parity precondition for that promotion per Rule R-7).
+
+### Gate
+
+All required:
+
+1. `SyncController.push` (or an upstream interceptor on the inbound push pipeline) calls `validateShapeBudget` per-event at the HTTP boundary.
+2. A 61-field event under any shape is rejected at the HTTP surface with an appropriate error code; a 60-field event passes.
+3. Test asserts both the 60 boundary (passes) and the 61 rejection (fails) at the HTTP surface — not just the validator unit test that already exists.
+4. Concept-ledger row [`field_count_budget`](convergence/concept-ledger.md) is promoted from DEFERRED to STABLE in the same Ship that closes FP-012b; the row's annotation is updated to cite the closing commit.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 closeout Wave 2-B as carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies). Partial implementation by Wave-1 G-9 (commit [`7540fc2`](../server/src/main/java/dev/datarun/ship1/event/ShapePayloadValidator.java)) noted: boot-loop guard + callable `validateShapeBudget` shim landed; HTTP runtime per-event invocation remains.
+
+---
+
+## FP-012c — ADR-004 §S14 deployer policies (Q7a, Q12)
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 closeout Wave 2-B (carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies))
+**Blocks**: the first Ship that introduces a deployer-policy-configured boundary case (e.g., a domain-uniqueness rule declared on a deployer shape, or a shape/activity sensitivity classification consumed by the platform)
+**Severity**: B — §S14 architecture is decided; specific Q-questions are implementation-defined
+
+### Context
+
+[ADR-004 §S14](adrs/adr-004-configuration-boundary.md#s14-deployer-parameterized-policies) commits the platform to deployer-configurable policies (flag severity, domain uniqueness, scope composition, sensitivity classification). Two specific questions inside §S14 are left implementation-defined:
+
+- **Q7a** — domain-uniqueness rules declared on a shape (the "shape says: this field must be unique within scope X" mechanism). Connected to [FP-012d](#fp-012d--shape-declared-uniqueness-fp-009-deeper) on the structural side; FP-012c is the policy-surface side.
+- **Q12** — shape / activity-level sensitivity classification (which payload fields are sensitive, and what the platform does with that classification on read paths and audit events).
+
+Promotion of any §S14-backed ledger row to STABLE under Rule R-7 requires either resolving the specific Q-question or explicit ledger acknowledgment that the §S is intentionally underspecified (a `DEFERRED-UNTIL-DEPLOYER` annotation).
+
+### Trigger
+
+A Ship spec opens whose scenarios require a deployer-policy-configured boundary case — a uniqueness rule that is not the platform-bundled `identity_conflict` flow, or a sensitivity classification consumed by the platform on read or audit, or any other §S14 policy that the runtime must honor.
+
+### Gate
+
+All required:
+
+1. Each open Q (Q7a, Q12) either has a documented strategy in [ADR-004 §S14](adrs/adr-004-configuration-boundary.md#s14-deployer-parameterized-policies) or in a successor ADR (with the strategy explicitly cited from the §S), AND an exercised test that drives the strategy end-to-end through a Ship walkthrough.
+2. OR each open Q is recorded in the concept-ledger as `DEFERRED-UNTIL-DEPLOYER` with rationale, naming the future Ship that triggers re-evaluation.
+3. The strategy resolution (or the deferred annotation) cites this FP entry so the parity link is auditable.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 closeout Wave 2-B as carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies).
+
+---
+
+## FP-012d — Shape-declared uniqueness (FP-009 deeper)
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 closeout Wave 2-B (carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies))
+**Blocks**: any Ship whose scenarios introduce a uniqueness constraint that does not fit the existing `identity_conflict` shape (i.e., not a household-name + village dedup but something else)
+**Severity**: B — structural; the deeper variation of FP-009 that the v2-additive close did not absorb
+
+### Context
+
+[FP-009](#fp-009--conflictdetector-field-name-coupling) was closed at Ship-3 by preserving `village_ref` and `household_name` field names verbatim across `household_observation/v1` → `v2`. The **deeper variation** — uniqueness declared *in the shape itself* (a shape says "this field must be unique within scope X"; the detector is shape-driven rather than field-name-coupled) — is unbuilt. ADR-004 has no §S claim on shape-declared uniqueness yet; the Q7a hook in §S14 is the closest position but does not commit a mechanism.
+
+`ConflictDetector` continues to hard-code `village_ref` and `household_name` lookups. A second uniqueness constraint (from a different shape, with different identity-key fields) is not constructible without either a second hard-coded path or a shape-declared mechanism.
+
+### Trigger
+
+A Ship spec opens whose scenarios introduce a uniqueness constraint not handled by the existing `identity_conflict` flow — for example, "two case records with the same case-number within a project must be flagged" or "two assessment records for the same child within a campaign must be flagged."
+
+### Gate
+
+One of the following:
+
+1. ADR-004 (or a successor ADR) commits a §S on shape-declared uniqueness with a documented mechanism, AND `ConflictDetector` is restructured to be shape-driven (uniqueness rules read from the shape's declared metadata; field-name coupling removed or restricted to platform-bundled detectors), AND a test exercises a second uniqueness constraint end-to-end.
+2. OR the trigger Ship explicitly carves out a non-shape-declared mechanism (e.g., "this Ship adds a second hard-coded detector path; the shape-declared mechanism remains FP-012d") with rationale recorded in the Ship spec.
+
+### Resolution log
+
+- **2026-04-27**: Opened by Ship-3 closeout Wave 2-B as carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies). Folds the deeper-FP-009 surface that the additive-only Ship-3 close did not address.
+
+---
+
+## FP-012e — Directory split (link to FP-011)
+
+**Status**: OPEN (placeholder marker)
+**Opened**: 2026-04-27 by Ship-3 closeout Wave 2-B (carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies))
+**Blocks**: defer to [FP-011](#fp-011--household_observation-directory-classification-re-deferral)
+**Severity**: defer to [FP-011](#fp-011--household_observation-directory-classification-re-deferral)
+
+### Context
+
+The contracts-vs-server-bundled schema directory split (platform-bundled shapes vs. deployer-CONFIG shapes occupying separate trees) is already tracked under [FP-011](#fp-011--household_observation-directory-classification-re-deferral) as the live register entry. FP-012e is a **link-only placeholder marker** recording that FP-012's decomposition includes the directory-split concern; the live concern is fully tracked under FP-011.
+
+### Trigger / Gate / Severity
+
+See [FP-011](#fp-011--household_observation-directory-classification-re-deferral) for the live entry. No independent gate, trigger, or severity is recorded under FP-012e; closure of FP-011 closes FP-012e by the same evidence.
+
+### Resolution log
+
+- **2026-04-27**: Opened as placeholder by Ship-3 closeout Wave 2-B. No further entries expected — closure follows FP-011.
 
 ---
 
@@ -555,6 +689,38 @@ All required:
 ### Resolution log
 
 - **2026-04-27** (Ship-3 closeout Wave 2-A): Opened. Promoted from Ship-1 retro §3.3 observation that lay un-FP'd for 3 Ships (carried forward as live observation per Rule R-1 candidate-violation; documented as silent-deferral failure in Wave 2-B retro §5). Push-path cleanness confirmed via Wave-1 G-7' ([`ConflictDetector.java`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) line 67 uses `capture.timestamp()`). Pull-path request-time confirmed at [`SyncController.java`](../server/src/main/java/dev/datarun/ship1/sync/SyncController.java) line 114 and [`ConfigController.java`](../server/src/main/java/dev/datarun/ship1/config/ConfigController.java) line 44.
+
+---
+
+## FP-015 — ADR-004 §S6 atomic configuration publication
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 closeout Wave 2-B (carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies))
+**Blocks**: Ship-4 if its scope touches config publication; otherwise the first Ship that does (likely the Ship that closes [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies) and [FP-013](#fp-013--config-package-wire-versioning-scheme))
+**Severity**: A — [ADR-004 §S6](adrs/adr-004-configuration-boundary.md#s6-atomic-configuration-delivery) commits atomic publication; the position is currently `decided-unexercised` end-to-end
+
+### Context
+
+[ADR-004 §S6](adrs/adr-004-configuration-boundary.md#s6-atomic-configuration-delivery) commits: configuration is delivered to devices as an atomic package; partial / interrupted publication must not produce a half-state observable to clients. Ship-3 simulated §S6 at the HTTP layer (two devices on different `shape_ref` values) without exercising an actual publish-and-rollback path. No Ship has yet driven a config publication test in which a partial / interrupted publish either commits in full or rolls back; the §S is `decided-unexercised` per [Rule R-7](#rule-r-7-simplementation-parity).
+
+This FP was reserved as a placeholder (FP-015) by Ship-3 closeout Wave 2-A; the entry is authored in Wave 2-B as part of the [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies) decomposition.
+
+### Trigger
+
+Ship-4 if its scope touches config publication (e.g., scenarios that require the deployer-authoring surface, or any walkthrough that publishes a config update mid-stream); otherwise the first Ship that does.
+
+### Gate
+
+All required:
+
+1. A config publication test exists in which a partial / interrupted publish either commits in full or rolls back; no half-state is observable to clients between the start and completion of the publish.
+2. The test exercises both the commit-in-full path (publish succeeds; new config is the only one observable to subsequent reads) and the rollback path (publish interrupted; clients continue to observe the prior config; no fragment of the new config is visible).
+3. The atomicity guarantee is reflected as a §S6-cited test name in the Ship retro that closes FP-015.
+4. Concept-ledger row(s) referencing ADR-004 §S6 (currently none promoted to STABLE under the §S6 cite) are updated in the closing Ship.
+
+### Resolution log
+
+- **2026-04-27** (Ship-3 closeout Wave 2-B): Opened by Ship-3 closeout Wave 2-B as carve-out from [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies). Placeholder reserved by Wave 2-A; entry authored here.
 
 ---
 
