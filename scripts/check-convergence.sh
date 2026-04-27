@@ -2,6 +2,23 @@
 #
 # Convergence drift gate.
 #
+# ---------------------------------------------------------------------------
+# Scope statement (2026-04-27, Ship-3 closeout Wave 2-A):
+#
+# This drift gate enforces BYTE-IDENTITY and CITE-DISCIPLINE between
+# convergence artifacts. It does NOT enforce behavioral conformance:
+#   - A schema change that preserves file content but weakens a runtime
+#     constraint (field rename, enum broadening, required→optional swap that
+#     is mirrored in both trees) passes this gate.
+#   - A code change that contradicts an ADR §S position passes this gate
+#     (the ADR §S–implementation parity rule, R-7, is enforced at Ship spec /
+#     retro time, not by this script).
+#
+# Behavioral coverage:
+#   - Fixture-event schema regression: see FP-016.
+#   - §S–implementation parity: see Standing Rule R-7 (charter § Rhythm).
+# ---------------------------------------------------------------------------
+#
 # Runs in pre-commit and CI. During Phase 0–3 it reports counts; at Phase 4
 # freeze it switches to strict mode (any failure = non-zero exit).
 #

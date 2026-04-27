@@ -687,6 +687,20 @@ Items that block the upcoming work must be resolved (or explicitly re-deferred w
 
 If an architectural change (a new ADR, an addendum, a phase spec) makes an FP item obsolete, mark it `SUPERSEDED` with a pointer to the artifact that absorbed it. Do not delete. History matters for traceability.
 
+### Rule R-7: §S–implementation parity
+
+Every ADR §S position carries one of three states:
+
+- `decided-unexercised` — position decided in ADR; no code references it; first exercise is a future Ship.
+- `exercised-met` — code exercises this position and matches the ADR claim.
+- `exercised-violated` — code exercises this position and contradicts the ADR claim. **A retro-blocking finding; cannot tag the Ship until resolved (either code corrected or ADR superseded).**
+
+A concept-ledger row referencing a §S position cannot be marked `STABLE` while the §S is `decided-unexercised`. `STABLE` requires `exercised-met`. A `decided-unexercised` §S whose ledger row is marked `STABLE` is a Rule R-3 violation (status changes only with evidence) and a Rule R-1 candidate violation (silent claim of done-ness for an unbuilt mechanism).
+
+Each Ship spec lists §S positions it transitions from `decided-unexercised` to `exercised-met`, with the walkthrough or test that proves it. Each Ship retro updates the parity table.
+
+This rule was adopted at Ship-3 closeout (2026-04-27) after Ship-3 marked `field_count_budget` STABLE while [ADR-004 §S6](adrs/adr-004-configuration-boundary.md#s6-atomic-configuration-delivery) atomicity was unbuilt (SC-05), [ADR-005](adrs/adr-005-state-progression.md) had zero production exercise yet all §S were assumed STABLE-by-default (SC-03), and [FP-001](#fp-001--role_stale-projection-derived-role-verification) was carried for 3 Ships against a `role_stale` detector that was discarded at Ship-1 rebuild and never reinstated. R-7 is the rule that would have caught all three at Ship-1 retro.
+
 ### Candidate Rule R-6 (NOT yet adopted) — Intra-ADR seam discipline
 
 **Status**: open trip-wire, not a Standing Rule. Triggered by FP-006 (Ship-2 spec review, 2026-04-25).
