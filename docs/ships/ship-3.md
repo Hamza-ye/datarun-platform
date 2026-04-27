@@ -216,7 +216,7 @@ The retro must show, mechanically:
 11. **Composite S20 coverage statement.** Retro records: (a) Ship-3 stressed S20 bullet 1 explicitly under shape evolution; (b) S20 bullet 5 (history of what was done) was additionally stressed via mixed-version `/admin/events` rendering; (c) S05 / S21 unchanged.
 12. **Retro note filed.** `ship-3-retro.md` covers walkthroughs, criteria, R1–R5, §3.2 observations, implementation-grade choices, FPs touched, ledger deltas, Ship-4 handoff, OQs, cosmetic notes.
 13. **`ship-3` tag applied; `ship-2` / `ship-1b` / `ship-1` unmoved.**
-14. **FP-009 closure asserted.** [`ConflictDetector`](../../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) is **unchanged** across Ship-3 (no edits to lines 53–56 — `village_ref` / `household_name` remain the literal field names looked up). W-6 passes against mixed v1+v2 events with the detector firing on duplicate-household. If this row fails, FP-009 stays OPEN and reopens the shape-declared-uniqueness work folded into FP-012 gate (b)/(c).
+14. **FP-009 closure asserted.** [`ConflictDetector`](../../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) is **unchanged** across Ship-3 (no edits to the `detect(...)` payload field-name reads — `village_ref` and `household_name` remain the literal field names looked up). W-6 passes against mixed v1+v2 events with the detector firing on duplicate-household. If this row fails, FP-009 stays OPEN and reopens the shape-declared-uniqueness work folded into FP-012 gate (b)/(c).
 
 ---
 

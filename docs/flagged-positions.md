@@ -356,7 +356,7 @@ Resolution path — **chosen 2026-04-25 → (c)** at Ship-2 OQ-5:
 
 ### Context
 
-[`server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) lines 53–56 hard-code the field-name lookups for the two Ship-1 detectors:
+[`server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) hard-codes the payload field-name lookups (`village_ref` and `household_name`) inside `detect(...)` for the two Ship-1 detectors:
 
 ```java
 UUID villageRef     = optUuid(capture.payload().path("village_ref").asText(null));
