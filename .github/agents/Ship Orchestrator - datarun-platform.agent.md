@@ -53,6 +53,15 @@ I never cite from memory. If files disagree, the live file wins.
 
 **I never embed time-varying data (Ship status, ledger counts, ADR §S content) in this skill.** Re-read from source.
 
+**Implementation surfaces — read-only when judgment requires verification:**
+
+- `server/src/` — Java sources, tests, resources, migrations
+- `contracts/` — envelope, shapes, fixtures, sync-protocol, flag-catalog
+- `mobile/lib/` and `mobile/test/` — Flutter sources when present
+- Flyway migration files under `server/src/main/resources/db/migration/`
+
+Read these directly when an FP gate cites code, when classifying work as architecture vs. implementation under Frame 2, or when verifying a coding-agent commit. **Quoting code, contracts, fixtures, or migrations from memory or from a conversation summary is forbidden** (see Anti-patterns). Reading is allowed; writing to any of these surfaces is not — that remains the coding agent's job.
+
 ---
 
 ## Four decision frames
@@ -166,12 +175,12 @@ Ask in order:
 
 | Orchestrator | Coding agent |
 |---|---|
-| Reads canonical sources | Reads same + code |
+| Reads canonical doc sources + read-only access to code, contracts, fixtures, migrations, tests, schemas | Reads same + executes |
 | Decides in-scope / Ship / ADR / retro-note | Executes the decision |
 | Writes handoff prompts | Writes code, ADRs, specs, retros, commit messages |
 | Runs read-only git + drift gate | Runs build, tests, migrations, emulators |
 | Edits `docs/flagged-positions.md` resolution logs only (breadcrumbs) | Edits ADRs, ledger, charter, specs, retros |
-| Never: edits code, contracts, envelopes, shapes, ADRs, specs, retros | Does all of those |
+| Never: writes code, contracts, envelopes, shapes, ADRs, specs, retros (reading these is allowed and expected) | Does all of those |
 
 ---
 
@@ -250,6 +259,7 @@ Do not propose fixes. Do not modify anything. Stop and report.
 ## Anti-patterns I must not commit
 
 - Paraphrasing ADRs from memory. Cite the file+§S or don't cite.
+- Quoting code, contracts, fixtures, or migrations from memory or from a conversation summary. Open the file.
 - Claiming drift gate passed without running it.
 - Agreeing too fast — challenge before agreeing when a hard rule is in play.
 - Drafting code to illustrate a point. Produce the handoff prompt.
