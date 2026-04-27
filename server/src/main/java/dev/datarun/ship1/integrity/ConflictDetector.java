@@ -31,7 +31,15 @@ import java.util.*;
 @Component
 public class ConflictDetector {
 
-    private static final String HOUSEHOLD_SHAPE = "household_observation/v1";
+    /**
+     * Shape-family prefix for the deployer "household_observation" shape. Ship-3 closeout G-2:
+     * the entry guard matches every version of this shape (v1, v2, …) so identity-conflict
+     * detection survives shape evolution. Identity-key field names ({@code village_ref},
+     * {@code household_name}) are preserved verbatim across versions per FP-009 closure, so
+     * the field-name lookup below works unchanged. A configurable per-deployer set of
+     * detection-eligible shapes is FP-012c (deployer-authoring surface) — out of scope here.
+     */
+    private static final String HOUSEHOLD_SHAPE_PREFIX = "household_observation/";
     private static final String FLAG_SHAPE = "conflict_detected/v1";
 
     private final EventRepository events;
@@ -49,7 +57,7 @@ public class ConflictDetector {
 
     /** Called after a capture event is persisted. May emit 0..N flag events. */
     public List<Event> detect(Event capture) {
-        if (!HOUSEHOLD_SHAPE.equals(capture.shapeRef())) return List.of();
+        if (capture.shapeRef() == null || !capture.shapeRef().startsWith(HOUSEHOLD_SHAPE_PREFIX)) return List.of();
         List<Event> flagsEmitted = new ArrayList<>();
 
         UUID villageRef = optUuid(capture.payload().path("village_ref").asText(null));

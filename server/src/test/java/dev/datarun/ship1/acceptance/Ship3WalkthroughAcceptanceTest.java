@@ -291,6 +291,112 @@ class Ship3WalkthroughAcceptanceTest {
         assertThat(html).contains("v1").contains("v2");
     }
 
+    // =========================================================================== Ship-3 closeout G-2
+
+    /**
+     * Closeout G-2 / SC-01 / S01 — Test A: v2-only identity conflict.
+     *
+     * <p>Two v2 captures with the same normalized {@code household_name} in the same
+     * {@code village_ref} but different {@code subject_id} → second capture fires
+     * {@code identity_conflict}. Defends against the pre-fix bug where ConflictDetector's
+     * entry guard was pinned to {@code household_observation/v1} and silently bypassed
+     * v2 captures (the production gap surfaced in Ship-3 retro / FP-009 close-out).
+     */
+    @Test
+    void closeoutG2_v2_only_identity_conflict_fires() throws Exception {
+        Bootstrap b = bootstrap();
+        UUID device = UUID.randomUUID();
+
+        UUID s1 = UUID.randomUUID();
+        ObjectNode v2first = buildHouseholdCaptureV2(
+                s1, b.chvAActor, device, 1, b.villageA, "Hassan household", 4, "+1-555-1001");
+        push(pushBody(v2first));
+
+        UUID s2 = UUID.randomUUID();
+        ObjectNode v2second = buildHouseholdCaptureV2(
+                s2, b.chvAActor, device, 2, b.villageA, "Hassan household", 5, "+1-555-1002");
+        HttpResponse<String> resp = push(pushBody(v2second));
+        assertThat(resp.statusCode).isEqualTo(200);
+        assertThat(mapper.readTree(resp.body).path("flags_raised").asInt())
+                .describedAs("v2-current with v2-prior must fire identity_conflict (closeout G-2)")
+                .isEqualTo(1);
+
+        // F-A2 / F-A4 discipline: discriminate the emitted flag on shape_ref, not envelope type.
+        JsonNode flags = adminListFlagsRelatedTo(v2first.path("id").asText(), v2second.path("id").asText());
+        assertThat(flags.size()).isEqualTo(1);
+        assertThat(flags.get(0).path("shape_ref").asText()).isEqualTo("conflict_detected/v1");
+        assertThat(flags.get(0).path("type").asText()).isEqualTo("alert");
+        assertThat(flags.get(0).path("actor_id").asText())
+                .isEqualTo("system:conflict_detector/identity_conflict");
+    }
+
+    /**
+     * Closeout G-2 / SC-01 / S01 — Test B: cross-version identity conflict, v1 prior + v2 current.
+     *
+     * <p>This is the direction the pre-fix code missed: a v2 capture entering the detector
+     * (entry guard previously failed for v2). After the prefix-match fix, v2 enters and
+     * finds the v1 prior via the existing prefix scan.
+     */
+    @Test
+    void closeoutG2_cross_version_v1_prior_v2_current_identity_conflict_fires() throws Exception {
+        Bootstrap b = bootstrap();
+        UUID device = UUID.randomUUID();
+
+        UUID s1 = UUID.randomUUID();
+        ObjectNode v1prior = buildHouseholdCaptureV1(
+                s1, b.chvAActor, device, 1, b.villageA, "Bukhari household", 6);
+        push(pushBody(v1prior));
+
+        UUID s2 = UUID.randomUUID();
+        ObjectNode v2current = buildHouseholdCaptureV2(
+                s2, b.chvAActor, device, 2, b.villageA, "Bukhari household", 7, "+1-555-2002");
+        HttpResponse<String> resp = push(pushBody(v2current));
+        assertThat(resp.statusCode).isEqualTo(200);
+        assertThat(mapper.readTree(resp.body).path("flags_raised").asInt())
+                .describedAs("v2-current finds v1-prior under prefix-match entry guard")
+                .isEqualTo(1);
+
+        JsonNode flags = adminListFlagsRelatedTo(v1prior.path("id").asText(), v2current.path("id").asText());
+        assertThat(flags.size()).isEqualTo(1);
+        assertThat(flags.get(0).path("shape_ref").asText()).isEqualTo("conflict_detected/v1");
+        assertThat(flags.get(0).path("type").asText()).isEqualTo("alert");
+        assertThat(flags.get(0).path("actor_id").asText())
+                .isEqualTo("system:conflict_detector/identity_conflict");
+    }
+
+    /**
+     * Closeout G-2 / SC-01 / S01 — Test C: cross-version identity conflict, v2 prior + v1 current.
+     *
+     * <p>Symmetric to Test B. Worked under pre-fix code (v1 entry guard activates) but is
+     * asserted explicitly here to lock in symmetric behaviour after the prefix-match change.
+     */
+    @Test
+    void closeoutG2_cross_version_v2_prior_v1_current_identity_conflict_fires() throws Exception {
+        Bootstrap b = bootstrap();
+        UUID device = UUID.randomUUID();
+
+        UUID s1 = UUID.randomUUID();
+        ObjectNode v2prior = buildHouseholdCaptureV2(
+                s1, b.chvAActor, device, 1, b.villageA, "Qureshi household", 5, "+1-555-3001");
+        push(pushBody(v2prior));
+
+        UUID s2 = UUID.randomUUID();
+        ObjectNode v1current = buildHouseholdCaptureV1(
+                s2, b.chvAActor, device, 2, b.villageA, "Qureshi household", 6);
+        HttpResponse<String> resp = push(pushBody(v1current));
+        assertThat(resp.statusCode).isEqualTo(200);
+        assertThat(mapper.readTree(resp.body).path("flags_raised").asInt())
+                .describedAs("v1-current finds v2-prior — symmetric direction")
+                .isEqualTo(1);
+
+        JsonNode flags = adminListFlagsRelatedTo(v2prior.path("id").asText(), v1current.path("id").asText());
+        assertThat(flags.size()).isEqualTo(1);
+        assertThat(flags.get(0).path("shape_ref").asText()).isEqualTo("conflict_detected/v1");
+        assertThat(flags.get(0).path("type").asText()).isEqualTo("alert");
+        assertThat(flags.get(0).path("actor_id").asText())
+                .isEqualTo("system:conflict_detector/identity_conflict");
+    }
+
     // =========================================================================== helpers
     private record Bootstrap(UUID villageA, UUID villageB, UUID chvAActor, String chvAToken,
                              UUID chvBActor, String chvBToken) {}
