@@ -349,7 +349,7 @@ Resolution path — **chosen 2026-04-25 → (c)** at Ship-2 OQ-5:
 
 ## FP-009 — `ConflictDetector` field-name coupling
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-04-27 by Ship-3 spec lock (Cleaving A)
 **Blocks**: Ship-3 close (closure asserted at retro via W-6)
 **Severity**: B — Ship-1 expedient that becomes load-bearing the moment a shape change touches identity-key fields
@@ -383,6 +383,11 @@ Any future shape change that touches identity-key fields (rename, type change, r
 ### Resolution log
 
 - **2026-04-27**: Opened by Ship-3 spec §6 lock. Closure deferred to Ship-3 retro.
+- **2026-04-27** (Ship-3 close): **RESOLVED**. Gate met by mechanical inspection at Ship-3 HEAD:
+  1. *`ConflictDetector` unchanged across Ship-3*: `git diff ship-2..ship-3 -- server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java` returns zero lines. The `detect(...)` payload field-name reads on `village_ref` and `household_name` are the literal Ship-1 strings, untouched.
+  2. *W-6 passes against a mixed v1+v2 corpus*: [`Ship3WalkthroughAcceptanceTest#walkthrough_W6_*`](../server/src/test/java/dev/datarun/ship1/acceptance/Ship3WalkthroughAcceptanceTest.java) drives the v1-current direction (a v1 capture whose prior duplicate was recorded under v2) and observes `identity_conflict`. The lookup continues to function across the v1/v2 boundary because v2 preserves both field names verbatim per [ship-3 §6.1 sub-decision 2](ships/ship-3.md#61-sub-decisions).
+
+  **Asymmetry note** (recorded so a future agent reads it as a known property, not a regression): the v2-current direction of mixed-version detection is *not* asserted by W-6. The detector's entry guard at [`ConflictDetector.java`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) line 35 — `HOUSEHOLD_SHAPE = "household_observation/v1"` — pins activation to v1-current captures; a v2-current capture whose prior duplicate was recorded under v1 (or v2) does not currently re-enter the detector. The **field-name-coupling concern** that opened FP-009 is closed by this resolution (identity-key field names are preserved across v1/v2). The **version-pinning expedient** is a deeper FP-009-shaped surface that does *not* require a new FP because it folds into [FP-012](#fp-012--deployer-authoring-surface-for-shapestriggerspolicies) gate (b)/(c) — the deployer-authoring surface is where shape-declared uniqueness rules become declarable and the detector becomes shape-driven rather than version-pinned.
 
 ---
 
