@@ -37,6 +37,9 @@ import java.util.regex.Pattern;
 @Component
 public class ShapePayloadValidator {
 
+    /** ADR-004 §S13: hard limit, 60 fields per shape, enforced at registry-load. */
+    static final int MAX_FIELDS_PER_SHAPE = 60;
+
     private static final Pattern VERSIONED_FILE = Pattern.compile("^(.+)\\.v(\\d+)\\.schema\\.json$");
     private static final Pattern PLAIN_FILE = Pattern.compile("^(.+)\\.schema\\.json$");
 
@@ -51,7 +54,9 @@ public class ShapePayloadValidator {
             String filename = Objects.requireNonNull(r.getFilename());
             String shapeRef = parseShapeRef(filename);
             try (InputStream in = r.getInputStream()) {
-                shapesByRef.put(shapeRef, factory.getSchema(in));
+                JsonSchema schema = factory.getSchema(in);
+                enforceFieldCountBudget(shapeRef, schema);
+                shapesByRef.put(shapeRef, schema);
             }
         }
     }
@@ -68,6 +73,23 @@ public class ShapePayloadValidator {
             return p.group(1) + "/v1";
         }
         throw new IllegalArgumentException("unrecognised shape filename: " + filename);
+    }
+
+    /**
+     * ADR-004 §S13 enforcement — count top-level {@code properties} keys; reject at registry-load
+     * if &gt; {@link #MAX_FIELDS_PER_SHAPE}. Top-level-properties is the field-count interpretation
+     * chosen for Ship-3 (nested objects not flattened); recorded in the Ship-3 build report so the
+     * choice can be re-confirmed at retro before further evolution. The check runs before the
+     * shape is registered, so an over-budget shape never enters the live registry.
+     */
+    static void enforceFieldCountBudget(String shapeRef, JsonSchema schema) {
+        JsonNode props = schema.getSchemaNode().path("properties");
+        int count = props.isObject() ? props.size() : 0;
+        if (count > MAX_FIELDS_PER_SHAPE) {
+            throw new IllegalStateException(
+                    "shape " + shapeRef + " declares " + count + " top-level properties; " +
+                            "ADR-004 §S13 hard limit is " + MAX_FIELDS_PER_SHAPE);
+        }
     }
 
     /** Empty list = valid. Single-element list with the {@code shape_unknown:} marker = unknown
