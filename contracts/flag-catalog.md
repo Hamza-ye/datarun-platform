@@ -14,9 +14,9 @@ All flag categories raised by the integrity pipeline. Each flag is persisted as 
 | 6 | `role_stale` | Auth CD | `manual_only` | supervisor actor | 2c |
 | 7 | `domain_uniqueness_violation` | Shape-declared uniqueness CD | `manual_only` | TBD | **Deferred — Phase 4 / IDR-022** |
 | 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | TBD | **Deferred — Phase 4 / IDR-020** |
-| 9 | *reserved* | *reserved* | *reserved* | *reserved* | **Reserved — growth slot; do not claim without ADR amendment** |
+| 9 | `cycle_violation` | Cycle Guard CD | `manual_only` | system | 3 (closeout — Ship-3 Wave 3) |
 
-This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Categories 7 and 8 are specified architecturally but their detectors land with Phase 4. Category 9 is an explicit growth slot — claiming it requires an ADR-level amendment, not an IDR.
+This catalog now lists 9 active categories. Categories 7 and 8 are specified architecturally but their detectors land with Phase 4. Category 9 (`cycle_violation`) was claimed by [ADR-006-R §S5](../docs/adrs/adr-006-flag-semantics-R.md) (the "growth slot" required ADR-level amendment, which ADR-006-R is). The catalog is append-only; further additions require a new ADR.
 
 ## Detection Ordering
 
