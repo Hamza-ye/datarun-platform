@@ -519,6 +519,44 @@ All three must be true:
 
 ---
 
+## FP-014 — Scope-eval pull-class temporal-anchor disambiguation
+
+**Status**: OPEN
+**Opened**: 2026-04-27 by Ship-3 closeout (Wave 2-A)
+**Blocks**: Ship-4 (S04 corrections / S08 case-management opens — both depend on historical event access)
+**Severity**: A — touches [ADR-003 §S2](adrs/adr-003-authorization-sync.md#s2) ("sync scope = access scope"); ADR position is under-specified for pull-class
+
+### Context
+
+The push path already honors event-time semantics: [`ConflictDetector.scope_violation`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) at line 67 evaluates the actor's scope at `capture.timestamp()` (event-time, [ADR-003 §S3](adrs/adr-003-authorization-sync.md#s3) compliant; verified 2026-04-27 by Wave-1 G-7' — this is the correct anchor and the substrate is clean).
+
+The pull path uses request-time. [`SyncController.pull`](../server/src/main/java/dev/datarun/ship1/sync/SyncController.java) at line 114 calls `OffsetDateTime.now()`; [`ConfigController`](../server/src/main/java/dev/datarun/ship1/config/ConfigController.java) at line 44 does the same. ADR-003 §S2 commits "sync scope = access scope" but never disambiguates *which time* anchors the scope evaluation on a pull. Three operational pull-classes have different correct anchors, and the platform conflates them:
+
+- **Live-sync pull** (the device-online steady state). A CHV reassigned away from V1 must NOT receive new V1 events on subsequent live-sync pulls. **Request-time scope is correct.** Domain anchor: [`access-control-scenario.md`](access-control-scenario.md) "Access can be temporary... When the reason for temporary access ends, the expanded access should end too."
+- **Historical / audit pull** (an auditor reconstructing what happened). The auditor must see the event corpus that the actor's then-current scope authorized at event-time. **Event-time scope is correct.** Domain anchor: same scenario, "every action attributable to a specific person acting in a specific role at a specific time" — audit ⇒ event-time reconstruction.
+- **Case-bound pull** ([S08](scenarios/08-case-management.md) case management — a case spans an actor reassignment). A CHV who picks up a case mid-stream must see the full case history. **Subject-anchored scope (the case's persisting `subject_ref`), not actor-time-anchored, is correct.**
+
+The reviews' first-cut prescription ("flip pull to event-time") would break live-sync correctness. The right resolution is **disambiguation by pull-class**, encoded in ADR-003 (or a successor ADR-003-R) before any code change. The push-path cleanness (`capture.timestamp()`) MUST be preserved — push-path correctness is not under question.
+
+### Trigger
+
+Ship-4 spec opening (S04 corrections introduce historical-pull need; S08 case-management introduces case-bound pull). Whichever Ship-4 scope crystallises first.
+
+### Gate
+
+All required:
+
+1. ADR-003-R (or a documented strategy-level position with proof no §S is altered) disambiguates the temporal anchor by pull-class: live-sync = request-time, historical/audit = event-time, case-bound = subject-anchored. Each pull endpoint's class is named explicitly.
+2. [`SyncController.pull`](../server/src/main/java/dev/datarun/ship1/sync/SyncController.java) and [`ConfigController`](../server/src/main/java/dev/datarun/ship1/config/ConfigController.java) paths are routed by pull-class; tests assert each anchor independently. The push-path cleanness ([`ConflictDetector.java`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) line 67, `capture.timestamp()`) is preserved verbatim.
+3. The flag-detection asymmetry between push and pull is reconciled: a capture accepted under push-time projection must remain visible under any pull-class that includes the event under that pull's anchor semantics.
+4. Walkthrough: actor reassignment + event before reassignment + (live-sync pull post-reassignment ⇒ event excluded) + (audit pull post-reassignment ⇒ event included). Both must pass.
+
+### Resolution log
+
+- **2026-04-27** (Ship-3 closeout Wave 2-A): Opened. Promoted from Ship-1 retro §3.3 observation that lay un-FP'd for 3 Ships (carried forward as live observation per Rule R-1 candidate-violation; documented as silent-deferral failure in Wave 2-B retro §5). Push-path cleanness confirmed via Wave-1 G-7' ([`ConflictDetector.java`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) line 67 uses `capture.timestamp()`). Pull-path request-time confirmed at [`SyncController.java`](../server/src/main/java/dev/datarun/ship1/sync/SyncController.java) line 114 and [`ConfigController.java`](../server/src/main/java/dev/datarun/ship1/config/ConfigController.java) line 44.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
