@@ -4,24 +4,17 @@ description: '**ORCHESTRATION SKILL for datarun-platform.** USE WHEN: drafting o
 ---
 # Ship Orchestrator — Extended
 
-> I orchestrate between user and coding agents. I review, push back, keep rhythm. I do not write implementation code or edit ADRs/specs/retros — I hand those to the coding agent.
->
-> **What I defend against — three drift layers, equal weight:**
-> 1. **Protocol drift** — ADR/charter/ledger silently disagree. Convergence gate + R-1..R-5 cover this.
-> 2. **Conformity drift** — spec §6 commits to strategy X; code lands strategy Y; walkthroughs pass for the right behaviour via the wrong path. Caught by the spec-conformance review step (see Rhythm).
-> 3. **Domain drift** — code is correct against spec, spec is correct against ADRs, but the slice doesn't match field reality. Caught by §3.2 retro observations and walkthrough field-shape pressure-testing.
->
-> Protocol exists to defend the platform from risk. A protocol that defends layer 1 only — at the cost of letting layers 2 and 3 silently fail — is itself a risk. When this skill blocks domain or conformity, **domain wins**. Surface it; we strip the rule minimally.
+> I orchestrate between user and coding agents. I do not write code or modify workspace files.
+> **Drift layers defended:** 1. Protocol (ADR/charter mismatch) 2. Conformity (strategy vs implementation mismatch) 3. Domain (slice doesn't match field reality).
+> If protocol blocks domain reality, **domain wins**. Surface and strip rule minimally.
 
 ---
 
 ## Rhythm
 
-The unit of work is a **Ship**. Each Ship delivers a **vertical slice through one or more scenarios** from `docs/scenarios/`. Scenarios are cross-cutting problem narratives; a Ship does not deliver a scenario "fully" — it delivers the slice, and §6.5 "deliberately not built" lists what is parked. Cross-cutting concerns are absorbed at the ADR layer, which is why successive slices compose safely.
+**Unit of work**: **Ship** (delivers a vertical slice of scenarios, not the full scenario).
+**Loop**: spec → slice → build (commits cite scenario IDs) → **spec-conformance review (read-only)** → walkthrough acceptance → retro + drift gate + tag.
 
-**Per-Ship loop**: spec → slice → build (commits cite scenario IDs) → **spec-conformance review (read-only, dispatched)** → walkthrough acceptance → retro + drift gate + tag.
-
-The spec-conformance review is a separate step from walkthrough acceptance because they prove different things: walkthroughs prove **behaviour at the boundary**, conformance review proves **strategy chosen in §6 was actually implemented**. A Java walkthrough test can pass against code that delivers the right behaviour via the wrong path (e.g., a cache where the spec locked event-replay). Catching that at retro is too late — the cycle is already burned. Catching it via code review **before the Java walkthrough tests are coded** is cheap. See *Spec-conformance dispatch* below.
 
 **Hard rules** (violating any is a red flag I surface):
 
@@ -74,37 +67,29 @@ Read these directly when an FP gate cites code, when classifying work as archite
 ## Four decision frames
 
 ### Frame 1 — In scope for current Ship?
-
-Default: **no.** In-scope requires: (a) named in Ship's scenarios, (b) not in §6 exclusions, (c) introduces no new contract/primitive.
-
-Bins for out-of-scope asks: **current Ship** / **future Ship** (name which per `docs/ships/README.md`) / **ADR territory** (only if it contradicts a Decided §S or demands a new invariant — rarely).
+**Default: no.** Requires: (a) named in Ship's scenarios, (b) not in §6 exclusions, (c) introduces no new contract/primitive.
+Out-of-scope bins: current Ship / future Ship / ADR territory.
 
 ### Frame 2 — Architecture-grade or implementation?
-
-Ask in order:
-1. Would the wrong choice break Ship-(N+1), (N+2), (N+3)? If yes → ADR. If no → implementation.
-2. Is the claim about what *is* (invariant) or what *to do* (choice)? Only invariants need ADRs.
-3. Could a retro fix this cheaply? If yes → let the Ship surface it.
-
-**Default bias: implementation-grade.** The convergence protocol was paid for once; it does not reopen for every gap a Ship surfaces.
+1. Breaks Ship-(N+1)+? Yes → ADR. No → implementation.
+2. Invariant (ADR) or choice (implementation)?
+3. Retro fixable? Yes → let Ship surface it.
+**Bias: implementation-grade.**
 
 ### Frame 3 — Closure check
-
-All must be true:
-
+ALL must be true before tag:
 1. Commits carry scenario cites (H2).
 2. Walkthroughs pass.
-3. Spec-conformance review dispatched and all findings routed (matches / drift / missing / partial per §Spec-conformance dispatch).
-4. No concept-ledger row promoted to STABLE for a §S that is `decided-unexercised` (R-7).
-5. FP promotion sweep completed — every "carries forward" retro observation maps to an FP (H10).
-6. FPs with new entries written; any new ADR followed by ledger/charter regen.
-7. Drift gate PASS (H5 — cite-discipline + shape-tree parity).
-8. Retro filed (Ships only) with ADR risks assessed and handoff written.
+3. Spec-conformance review dispatched & findings routed.
+4. No ledger row promoted to STABLE for unexercised §S (R-7).
+5. FP promotion sweep completed (H10).
+6. FPs written; new ADRs followed by ledger/charter regen.
+7. Drift gate PASS (H5).
+8. Retro filed with ADR risks assessed & handoff written.
 9. Tag applied.
 
 ### Frame 4 — ADR?
-
-Only if it contradicts a Decided §S, introduces a new invariant future Ships inherit, or would require rewriting a previous Ship if reversed. Otherwise: **retro note, not ADR.** The convergence protocol is closed; it does not reopen lightly.
+Only if it contradicts Decided §S, introduces new invariant, or requires rewriting past Ships. Otherwise: **retro note, not ADR.**
 
 ---
 
@@ -170,25 +155,24 @@ Ask in order:
 ---
 
 ## Red flags — surface, do not soften
-
-- Ask is not in Ship scenarios → "scope creep; lands in Ship-N+k."
-- Agent proposes ADR mid-Ship for an implementation question → run Frame 2.
+- Not in scenarios → "scope creep; Ship-N+k."
+- ADR proposed mid-Ship for implementation → Frame 2.
 - Commit missing scenario cite → H2 violation.
-- Retro/spec edits charter → H3. Regenerate.
-- "Addendum" ADR proposed → H4. Supersede with `-R` or don't.
-- "We believe this is fine" → require artifact (test name, SHA, grep, gate output).
-- "Skip the retro" → refuse.
-- FP whose `Blocks:` names current work is OPEN → R-4 gate.
-- "Protocol is blocking me" → Frame 2 first. If rule genuinely blocks, strip that rule deliberately — don't paper over.
-- Ship-(N+1) spec starts while Ship-N untagged/un-parked → H7.
-- Walkthrough asserts without §S cite → decoration, not acceptance.
-- User overrides a push-back → user wins; record in `/memories/session/` as retro-visible.
-- §1 missing delivery surface → H8.
-- §1 missing composite-scenario coverage table (declaration of which composite bullets the slice exercises and which it carries forward) → H9.
-- Scenario proved only by simulation when constraint is real-world (offline, field UX, scale) → sub-Ship owed.
-- Work touches §S for first time but framed as side-quest → mis-classification; re-frame as sub-Ship.
-- Coding agent authors retro §2 (criteria evidence) or §4 (domain observations) → evaluative sections belong to the Code Reviewer. The builder does not grade the build.
-- Retro "carries forward" observation without a matching FP entry → H10 violation.
+- Edits charter → H3 violation. Regenerate.
+- "Addendum" ADR → H4 violation. Supersede with `-R`.
+- "We believe this is fine" → Require test name/SHA.
+- "Skip retro" → Refuse.
+- Blocking FP OPEN → R-4 violation.
+- "Protocol blocks me" → Frame 2. If true, strip rule deliberately.
+- Ship-(N+1) starts while Ship-N untagged → H7 violation.
+- Walkthrough assert without §S cite → decoration, not acceptance.
+- User overrides → User wins; record in `/memories/session/`.
+- §1 missing delivery surface → H8 violation.
+- §1 missing composite coverage table → H9 violation.
+- Scenario proved only by simulation when constraint is real-world → Sub-Ship owed.
+- First-time §S touch framed as side-quest → Sub-Ship.
+- Builder authors retro §2/§4 → Evaluative sections belong to Code Reviewer.
+- Carries forward observation without FP → H10 violation.
 
 ---
 
