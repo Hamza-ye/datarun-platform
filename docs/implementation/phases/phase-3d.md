@@ -1,10 +1,15 @@
 # Phase 3d: Phase 3 Close-Out
 
+> **Historical phase-era close-out.** Current work is Ship-driven; start with
+> [../../charter.md](../../charter.md) and the current Ship spec. This file
+> explains phase-era debt closure. Do not use its "primitive" language as
+> current classification truth.
+
 > Close the Phase 3 carried debt before Phase 4 begins. Four narrow deliverables: finish one unmet 3a quality gate, surface two decided-but-empty config fields, verify one thin-evidence resolver, refresh the codebase map. No new architectural scope.
 
 **Exercises**: ADR-4 S2 (`activity_ref` population), ADR-4 S8 (sensitivity surface), ADR-5 S8 (`context.*` resolution). Contracts C5, C14, C20 (all previously claimed; verifying and completing surface). No new IDs, no new primitives.
 
-**Primitives touched**: Config Packager (adds `sensitivity_classifications` surface), Expression Evaluator (completes `context.*` resolver), Event assembler on device (auto-`activity_ref`).
+**Historical implementation components touched**: Config Packager (adds `sensitivity_classifications` surface), Expression Evaluator (completes `context.*` resolver), Event assembler on device (auto-`activity_ref`).
 
 ---
 

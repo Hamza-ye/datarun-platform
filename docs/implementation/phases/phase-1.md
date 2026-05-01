@@ -1,10 +1,15 @@
 # Phase 1: Identity & Integrity
 
+> **Historical phase-era spec.** Current work is Ship-driven; start with
+> [../../charter.md](../../charter.md) and the current Ship spec. This file
+> explains what the old Phase 1 built and proved. Do not use its "primitive"
+> language as current classification truth.
+
 > Multi-subject, multi-device reality. "Two devices capture data about the same subject; conflicts are detected and surfaced for resolution."
 
 **Exercises**: ADR-2 fully.
 
-**Primitives built**: Identity Resolver (alias resolution, merge/split), Conflict Detector (accept-and-flag, 3 flag types), Projection Engine (extended: alias resolution, flagged-event exclusion).
+**Historical implementation components built**: Identity Resolver (alias resolution, merge/split), Conflict Detector (accept-and-flag, 3 flag types), Projection Engine (extended: alias resolution, flagged-event exclusion).
 
 **Contracts exercised**: C3 (ES accepts all events), C4 (PE → CD: projected state), C7 (IR → PE: alias resolution), C8 (CD → PE: flag events).
 

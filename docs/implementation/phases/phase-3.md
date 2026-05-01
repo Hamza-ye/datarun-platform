@@ -1,10 +1,15 @@
 # Phase 3: Configuration
 
+> **Historical phase-era spec.** Current work is Ship-driven; start with
+> [../../charter.md](../../charter.md) and the current Ship spec. This file
+> explains what the old Phase 3 built and proved. Do not use its "primitive"
+> language as current classification truth.
+
 > The system becomes domain-agnostic. "A deployer defines a new data shape, publishes it, and field workers capture data with it — no code change."
 
 **Exercises**: ADR-4 S1–S11, S13 (partial: field + predicate budgets only), S14 (partial: sensitivity only). ADR-5 S8 (`context.*` resolution). Contracts C5, C11, C12, C13, C14, C19, C20. IG-2, IG-6, IG-7, IG-8, IG-9, IG-15.
 
-**Primitives built**: Shape Registry (authoring, versioning, deprecation-only evolution), Expression Evaluator (form L2 + trigger L3 contexts), Deploy-time Validator (hard budgets, composition rules), Config Packager (atomic delivery, at-most-2 versions).
+**Historical implementation components built**: Shape Registry (authoring, versioning, deprecation-only evolution), Expression Evaluator (form L2 + trigger L3 contexts), Deploy-time Validator (hard budgets, composition rules), Config Packager (atomic delivery, at-most-2 versions).
 
 **Contracts exercised**: C5 (PE → EE), C11 (ShR → PE), C12 (ShR → EE), C13 (ShR → DtV), C14 (ShR → CP), C19 (DtV → CP), C20 (CP → sync).
 

@@ -1,6 +1,11 @@
 # Execution Plan
 
-> Actionable build sequence, quality gates, and operational practices for taking the Datarun architecture from documentation to production-grade code. Supplements [plan.md](plan.md) — that document defines *what* gets built (technology stack, module map, schemas, acceptance criteria); this document defines *how* to build it fast without losing quality.
+> **Historical phase-era execution plan.** Current work is Ship-driven; start
+> with [../charter.md](../charter.md), then
+> [../convergence/concept-ledger.md](../convergence/concept-ledger.md), then
+> the current Ship spec under [../ships/](../ships/). This file preserves the
+> quality gates and implementation practices used during the phase plan. Do
+> not use its primitive/module authority model as current architecture truth.
 
 ---
 
@@ -22,12 +27,12 @@
 
 | Decision type | Who decides | How to recognize it |
 |--------------|-------------|--------------------|
-| Structural constraint | Already decided by ADR | Listed in `docs/architecture/primitives.md` with `[N-SX]` trace. Must not violate. |
-| Strategy-protecting constraint | Already decided by ADR | Listed in primitives.md. Must not violate without escalation. |
-| Initial strategy | Already decided by ADR | Listed in primitives.md. May propose revision with evidence, but default is follow. |
-| Implementation-grade | Implementing agent | Listed in `docs/architecture/boundary.md` §3 (15 items). Choose freely within stated constraint boundary. |
-| Outside | Nobody (excluded) | Listed in boundary.md §4 (8 items). If needed, escalate — may require architecture evolution. |
-| Not listed anywhere | Stop and ask | Not every implementation detail is pre-classified. If unsure, escalate. |
+| Structural constraint | Already decided by ADR/charter | Current source: [charter.md](../charter.md) plus owning ADR. Must not violate. |
+| Strategy-protecting constraint | Already decided by ADR/charter | Current source: owning ADR, charter cross-cutting rules, and current Ship spec. Must not violate without escalation. |
+| Initial strategy | Decided unless Ship evidence challenges it | Follow the ADR/Ship spec. Propose revision only with scenario evidence and retro path. |
+| Implementation-grade | Implementing agent within Ship scope | Use IDRs and historical phase docs as context, but stay inside the current Ship spec and ADR boundary. |
+| Outside | Nobody (excluded) | If needed, escalate through Ship spec/retro; may require architecture evolution. |
+| Not classified by charter, ADR, Ship, or IDR | Stop and classify | Do not infer current truth from historical architecture or phase docs. |
 
 ---
 
@@ -57,10 +62,10 @@ When work must **stop** rather than proceed:
 
 | Trigger | Action |
 |---------|--------|
-| Task needs a capability not in the 15 IG items | Stop. May be outside the architecture. |
-| Escape hatch trigger condition met (boundary.md §6) | Stop. Document evidence. Architecture-level decision required. |
+| Task needs a capability outside the current Ship spec or ADR boundary | Stop. May be outside the architecture. |
+| Escape hatch trigger condition met in the relevant ADR/charter rule | Stop. Document evidence. Architecture-level decision required. |
 | Performance threshold exceeded (>200ms projection, >50ms authority) | Stop. Escape hatch activation. Document measurements. |
-| Need to share state between primitives outside contracted interfaces | Stop. Module boundary violation. Contract may need addition. |
+| Need to share state between implementation components outside contracted interfaces | Stop. Module boundary violation. Contract may need addition. |
 | Implementation-grade decision in one module affects another | Stop. Cross-cutting decision. Needs coordination. |
 | Unsure whether something is decided, implementation-grade, or outside | Stop. Classify before proceeding. |
 
@@ -68,12 +73,20 @@ When work must **stop** rather than proceed:
 
 When implementation reveals a design gap (e.g., entity references need richer structure, a new subject category emerges), follow this 3-stage protocol instead of ad-hoc redesign:
 
-**Stage 1 — Classify.** Apply the decision boundary test from [boundary.md](../architecture/boundary.md): Does this change stored event data or cross-device contracts? If yes → architecture-grade, escalate. If no → implementation-grade, proceed to Stage 2.
+**Stage 1 — Classify.** Apply the current decision boundary test: does this
+change stored event data, cross-device contracts, charter invariants, or Ship
+scope? If yes → architecture-grade, escalate. If no → implementation-grade,
+proceed to Stage 2.
 
-**Stage 2 — Bound.** Time-box a spike (max 4 hours). Answer 3 questions: (1) Can existing primitives compose to handle this? (2) Does it affect contracts other modules depend on? (3) Does it change what's stored in the event envelope or event store? Most discoveries are **composition questions** — they resolve as new configuration patterns within existing architecture, not as new primitives.
+**Stage 2 — Bound.** Time-box a spike (max 4 hours). Answer 3 questions: (1)
+Can existing charter mechanisms and contracts compose to handle this? (2) Does
+it affect contracts other modules depend on? (3) Does it change what's stored
+in the event envelope or event store? Most discoveries are **composition
+questions** — they resolve as new configuration patterns within existing
+architecture, not as new primitives.
 
 **Stage 3 — Resolve.** Three possible outcomes:
-- **Compose**: The discovery resolves within existing primitives and contracts. Document the composition in the decision log (§14) and continue.
+- **Compose**: The discovery resolves within existing charter mechanisms and contracts. Document the composition in the decision log (§14) and continue.
 - **Extend**: An implementation-grade item needs a choice that wasn't anticipated. Make the choice within the IG boundary, document it, continue.
 - **Escalate**: The discovery affects stored data, contracts, or constraint boundaries. Stop. Document evidence. This requires architecture evolution before implementation continues.
 
@@ -85,18 +98,21 @@ When implementation reveals a design gap (e.g., entity references need richer st
 
 | Dimension | Standard | How it's verified |
 |-----------|----------|-------------------|
-| **Correctness** | Every contract guarantee from [contracts.md](../architecture/contracts.md) exercised by at least one automated test | CI test suite |
+| **Correctness** | Every contract guarantee cited by the charter/ADRs and implemented in `contracts/` exercised by at least one automated test | CI test suite |
 | **Reliability** | Sync never loses events. Idempotency holds under retry. Offline capture always succeeds. | Dedicated sync & offline test scenarios |
 | **Performance** | Form open < 300ms on reference device (Redmi 9A or equivalent). Projection rebuild < 200ms/subject. Sync of 100 events < 5s on 3G. | Benchmark suite run before each phase boundary |
 | **Deployability** | Server starts from `docker compose up`. Mobile builds from `flutter build apk`. No manual steps. | CI pipeline includes build verification |
 | **Security** | No sensitive data in logs. Sync endpoints reject malformed payloads. SQL injection impossible (parameterized queries only). | Security checklist at each phase boundary |
-| **Maintainability** | Any single-concern change touches ≤ 3 files. Module boundaries match primitive boundaries. | Code review at phase boundaries |
+| **Maintainability** | Any single-concern change touches ≤ 3 files. Module boundaries match current implementation components and contracts. | Code review at phase/Ship boundaries |
 
 These are gate criteria. Code that doesn't meet them doesn't pass the phase boundary — it gets fixed first.
 
 ---
 
 ## 6. Phase Specifications
+
+This section is historical. Phase files remain useful for implementation
+archaeology and IDR context. Current forward work is specified by Ships.
 
 Phase-specific sub-phase breakdowns, quality gates, acceptance criteria, technical specifications, and milestones are maintained in [`phases/`](phases/). Each phase file is created at the start of that phase and combines:
 
@@ -138,7 +154,9 @@ The triage table lives in the phase file, between "Design Decisions" and "Sub-Ph
 
 ## 7. Phase 1–4: Execution Guidance
 
-Phases 1–4 scope, primitives, and acceptance criteria remain as defined in [plan.md](plan.md) §4. This section adds execution structure.
+This section records the historical phase-era execution structure. Do not use
+it to infer current scope, primitives, or acceptance criteria for new work;
+use the current Ship spec.
 
 ### Phase 1: Identity & Integrity
 
@@ -265,7 +283,9 @@ If all 21 contract tests pass, the system composes correctly. Each contract gets
 | C20 (CP → sync: atomic config) | Config v2 deployed → device syncs → device config is v2 (shapes + triggers consistent). No v1 shapes + v2 triggers. |
 | C21 (TE → ES: trigger output events) | Trigger fires → exactly one output event written to ES with `system` actor identity and `source_event_ref` → output type ≠ input type → event enters normal pipeline (detection, projection, sync). |
 
-Tests are written incrementally — each phase adds the contract tests for its primitives.
+Tests were written incrementally in the phase plan. For current work, Ships add
+the tests needed to prove the scenario slice and the ADR positions they
+exercise.
 
 ### Pipeline tests
 
@@ -383,19 +403,21 @@ Every phase boundary is a checkpoint. The project does not advance to the next p
 
 ---
 
-## 12. Module Spec Template
+## 12. Historical Module Spec Template
 
-One document per primitive, produced before that primitive is implemented. Used for agent briefing — a focused extraction from the architecture, not the full architecture.
+This template belongs to the phase-era 11-primitive model. Use it only as a
+historical briefing aid. For current work, a Ship spec is the in-flight scope
+document, and charter/ADRs provide the current classification authority.
 
 Each module spec contains:
 
 | Section | Content | Source |
 |---------|---------|--------|
-| **Invariant** | The one thing that must never be violated | primitives.md |
-| **Contracts provided** | What this module promises to consumers | contracts.md — outgoing contracts |
-| **Contracts consumed** | What this module depends on | contracts.md — incoming contracts |
-| **Decided constraints** | Structural + strategy-protecting positions that bind this module | primitives.md constraint tables |
-| **Implementation-grade decisions** | What the implementer is free to choose | boundary.md IG items |
+| **Invariant** | The one thing that must never be violated | charter + owning ADR |
+| **Contracts provided** | What this module promises to consumers | charter/ADRs + `contracts/` schemas |
+| **Contracts consumed** | What this module depends on | charter/ADRs + `contracts/` schemas |
+| **Decided constraints** | Structural + strategy-protecting positions that bind this module | charter + owning ADR + Ship spec |
+| **Implementation-grade decisions** | What the implementer is free to choose | IDRs + current Ship scope |
 | **Interface definition** | Inputs, outputs, error conditions | Derived from contracts + constraints |
 | **Test contract** | How to verify this module satisfies its obligations | Derived from contracts + invariant |
 
@@ -434,7 +456,9 @@ See [`docs/decisions/README.md`](../decisions/README.md) for the full convention
 
 ### IG Decision Index
 
-Summary of implementation-grade decisions, traced to IG items from [boundary.md](../architecture/boundary.md).
+Historical summary of implementation-grade decisions. Current work should
+consult existing IDRs for code context, then classify new decisions through the
+Ship/ADR boundary.
 
 | IG# | Decision | IDR | Phase |
 |-----|----------|-----|-------|
@@ -458,8 +482,11 @@ A **milestone** (not an IDR) is recorded in the phase spec when a quality gate p
 
 | Document | Role |
 |----------|------|
-| [plan.md](plan.md) | **What** gets built: technology stack, module map, phase summaries, IG schedule, primitive-to-module map |
-| This document | **How** it gets built: decision authority, forbidden patterns, escalation triggers, quality gates, CI/CD, testing strategy, module spec template, risk mitigation, IDR convention |
+| [../charter.md](../charter.md) | **Current settled truth**: invariants, primitives, contracts, cross-cutting rules, Ship rhythm |
+| [../convergence/concept-ledger.md](../convergence/concept-ledger.md) | **Current classification inventory** behind the charter |
+| [../ships/](../ships/) | **Current execution unit**: scenario-driven Ship specs, evidence, retros |
+| [plan.md](plan.md) | Historical technology stack, module map, phase summaries, IG schedule, primitive-to-module map |
+| This document | Historical execution practices: decision authority, forbidden patterns, escalation triggers, quality gates, CI/CD, testing strategy, module spec template, risk mitigation, IDR convention |
 | [ux-model.md](ux-model.md) | **How the mobile app works**: screen topology, navigation, component contracts, progressive disclosure |
-| [phases/](phases/) | **Phase-specific detail**: scope, sub-phase breakdowns, quality gates, technical specs, acceptance criteria, milestones |
-| [Architecture](../architecture/) | **What the platform IS**: primitives, contracts, cross-cutting concerns, boundaries — the authoritative reference for all implementation decisions |
+| [phases/](phases/) | Historical phase-specific detail: scope, sub-phase breakdowns, quality gates, technical specs, acceptance criteria, milestones |
+| [Architecture](../architecture/) | Historical/reference architecture surface. Do not use over the charter for current classification. |

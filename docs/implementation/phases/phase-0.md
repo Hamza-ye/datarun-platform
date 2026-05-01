@@ -1,10 +1,15 @@
 # Phase 0: Core Loop
 
+> **Historical phase-era spec.** Current work is Ship-driven; start with
+> [../../charter.md](../../charter.md) and the current Ship spec. This file
+> explains what the old Phase 0 built and proved. Do not use its "primitive"
+> language as current classification truth.
+
 > S00 end-to-end — the P7 benchmark. "A field worker captures data offline, syncs, and the data appears on the server."
 
 **Exercises**: ADR-1 (partially). SY-1, SY-2, SY-3, SY-4.
 
-**Primitives built**: Event Store (device + server), Projection Engine (minimal: per-subject state derivation), Shape Registry (minimal: load shapes from config, no authoring UI).
+**Historical implementation components built**: Event Store (device + server), Projection Engine (minimal: per-subject state derivation), Shape Registry (minimal: load shapes from config, no authoring UI).
 
 **Contracts exercised**: C1 (event integrity), C2 (stream → projection), C11 (shape versions available).
 

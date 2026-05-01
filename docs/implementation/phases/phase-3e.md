@@ -1,10 +1,15 @@
 # Phase 3e: Envelope Type Vocabulary Retrofit
 
+> **Historical phase-era retrofit.** Current work is Ship-driven; start with
+> [../../charter.md](../../charter.md) and the current Ship spec. This file
+> documents the envelope-type drift repair that preceded convergence. Do not
+> use its "primitive" language as current classification truth.
+
 > Retrofit code, tests, fixtures, and prose to match [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md). Four string literals (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) were persisted as envelope `type` values during Phases 1–2, contradicting ADR-4 S3's closed 6-type vocabulary. They are **shape names**, not envelope types. Phase 3e is the narrowest migration that brings the code into conformance.
 
 **Exercises**: ADR-4 S3 (envelope type closure), ADR-2 S6/S8 (identity events), IDR-017 (shape storage), IDR-019 (config package bundled shapes), [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md) (authorship-based type mapping for `conflict_resolved/v1`).
 
-**Primitives touched**: Event Envelope (vocabulary tightening, no field change), Shape Registry (four platform-bundled internal shapes added), Conflict Detector (emission rewrite), Identity Resolver (emission rewrite), Projection Engine (filter predicate rewrite, mobile), Config Packager (bundled-shape registration), Sync pipeline (scoped-pull system-event predicate).
+**Historical implementation components touched**: Event Envelope (vocabulary tightening, no field change), Shape Registry (four platform-bundled internal shapes added), Conflict Detector (emission rewrite), Identity Resolver (emission rewrite), Projection Engine (filter predicate rewrite, mobile), Config Packager (bundled-shape registration), Sync pipeline (scoped-pull system-event predicate).
 
 **Not introducing new primitives. Not introducing new wire fields. Not changing ADR decisions.** Phase 3e is execution of the addendum, not a decision surface.
 

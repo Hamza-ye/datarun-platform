@@ -11,6 +11,7 @@ server/.mvn/wrapper/maven-wrapper.jar
 
 # IDE
 .idea/
+.codex
 *.iml
 .vscode/
 *.swp

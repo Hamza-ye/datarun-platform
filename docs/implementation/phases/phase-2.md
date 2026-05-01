@@ -1,10 +1,15 @@
 # Phase 2: Authorization & Multi-Actor
 
+> **Historical phase-era spec.** Current work is Ship-driven; start with
+> [../../charter.md](../../charter.md) and the current Ship spec. This file
+> explains what the old Phase 2 built and proved. Do not use its "primitive"
+> language as current classification truth.
+
 > An organization's people see and act on only what's relevant to their responsibilities. "A supervisor sees only their team's data. Sync delivers only authorized events."
 
 **Exercises**: ADR-3 fully (10 positions: S1–S10). Contracts C6, C10. IG-4, IG-14 (deferred — see §7).
 
-**Primitives built**: Scope Resolver (assignment-based access, scope-containment test, 3 scope types). Projection Engine extended (authority reconstruction from assignment timeline).
+**Historical implementation components built**: Scope Resolver (assignment-based access, scope-containment test, 3 scope types). Projection Engine extended (authority reconstruction from assignment timeline).
 
 **Contracts exercised**: C6 (PE → SR: authority context as projection), C10 (SR → sync: scope-filtered payload).
 

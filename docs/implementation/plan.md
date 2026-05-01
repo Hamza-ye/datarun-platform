@@ -1,6 +1,11 @@
 # Implementation Plan
 
-> Technology stack, repository structure, module boundaries, and phased build order. Every choice traces to an architectural constraint or an operational reality from [constraints.md](../constraints.md).
+> **Historical phase-era plan.** Current work is Ship-driven; start with
+> [../charter.md](../charter.md), then
+> [../convergence/concept-ledger.md](../convergence/concept-ledger.md), then
+> the current Ship spec under [../ships/](../ships/). This file preserves the
+> technology and phase planning context used before convergence. Do not use
+> its "primitive" or phase-status language as current classification truth.
 
 ---
 
@@ -70,17 +75,24 @@ datarun-platform/
 
 ### Contracts module
 
-The `contracts/` directory is the authoritative definition of what crosses process boundaries. Both `server/` and `mobile/` validate against these schemas. The `admin/` UI reads them for form generation.
+The `contracts/` directory is the implementation source for schemas and
+formats that cross process boundaries. It is not the classification authority;
+for current contract classification, use the charter and ADR-007/ADR-008.
+Both `server/` and `mobile/` validate against these schemas. The `admin/` UI
+reads them for form generation.
 
 This is NOT a code library. It's a set of JSON Schema files and protocol specifications. Each codebase generates or hand-writes its own types from these schemas.
 
 ---
 
-## 3. Primitive-to-Module Map
+## 3. Historical Primitive-to-Module Map
 
-The 11 primitives from the [Architecture Description](../architecture/primitives.md) split across device and server based on two architectural constraints: triggers execute server-only [4-S5], and flags are created server-side [SG-1]. Merge/split are online-only [2-S10].
+The table below is a phase-era implementation map. It uses the old
+11-primitive vocabulary from [architecture/primitives.md](../architecture/primitives.md),
+which is historical after ADR-009 and the charter. Read these entries as
+implementation components/modules, not current platform primitives.
 
-| Primitive | Server | Device | Notes |
+| Historical component | Server | Device | Notes |
 |-----------|:------:|:------:|-------|
 | Event Store | ✓ | ✓ | PostgreSQL on server, SQLite on device. Same envelope, different storage engines. |
 | Projection Engine | ✓ | ✓ | Server: full state (conflict detection, triggers, aggregation). Device: per-subject state (UI, form context). |
@@ -109,7 +121,7 @@ The 11 primitives from the [Architecture Description](../architecture/primitives
 
 **Exercises**: ADR-1 (partially). SY-1, SY-2, SY-3, SY-4.
 
-**Primitives built**:
+**Historical implementation components built**:
 - Event Store (device + server)
 - Projection Engine (minimal: per-subject state derivation)
 - Shape Registry (minimal: load shapes from config, no authoring UI)
@@ -130,7 +142,7 @@ The 11 primitives from the [Architecture Description](../architecture/primitives
 
 **Exercises**: ADR-2 fully.
 
-**Primitives built**:
+**Historical implementation components built**:
 - Identity Resolver (4 typed categories, alias resolution, merge/split)
 - Conflict Detector (accept-and-flag pipeline, single-writer resolution, detect-before-act)
 - Projection Engine (extended: alias resolution, flagged-event exclusion, source-chain traversal)
@@ -149,7 +161,7 @@ The 11 primitives from the [Architecture Description](../architecture/primitives
 
 **Exercises**: ADR-3 fully. SY-5, SY-8.
 
-**Primitives built**:
+**Historical implementation components built**:
 - Scope Resolver (assignment-based access, scope-containment test, 3 scope types)
 - Sync (extended: scope-filtered payload, selective-retain on scope contraction)
 
@@ -167,7 +179,7 @@ The 11 primitives from the [Architecture Description](../architecture/primitives
 
 **Exercises**: ADR-4 fully. SY-7.
 
-**Primitives built**:
+**Historical implementation components built**:
 - Shape Registry (full: authoring, versioning, deprecation-only evolution)
 - Expression Evaluator (both contexts: form L2 + trigger L3)
 - Deploy-time Validator (hard budgets, composition rules)
@@ -188,7 +200,7 @@ The 11 primitives from the [Architecture Description](../architecture/primitives
 
 **Exercises**: ADR-5 fully. SY-6.
 
-**Primitives built**:
+**Historical implementation components built**:
 - Pattern Registry (4 patterns: capture_with_review, case_management, multi_step_approval, transfer_with_acknowledgment)
 - Trigger Engine (L3a event-reaction, L3b deadline-check, auto-resolution)
 - Command Validator (advisory on-device)
@@ -201,7 +213,9 @@ The 11 primitives from the [Architecture Description](../architecture/primitives
 
 ## 5. Implementation-Grade Decision Schedule
 
-The 15 implementation-grade items from [boundary.md](../architecture/boundary.md#3-implementation-grade-items) are scheduled across phases. Each is resolved within its phase — not before — following the last responsible moment principle.
+The following implementation-grade items were scheduled across the historical
+phase plan. Treat this as planning archaeology and IDR context, not current
+Ship scope.
 
 | IG# | Item | Phase | Approach direction |
 |-----|------|:-----:|-------------------|

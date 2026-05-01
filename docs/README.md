@@ -1,5 +1,11 @@
 # Datarun — Documentation
 
+> **Current authority**: Start with [charter.md](charter.md) for settled
+> architecture and status, then [convergence/concept-ledger.md](convergence/concept-ledger.md),
+> then the current Ship spec under [ships/](ships/). Older architecture,
+> implementation-phase, and exploration docs explain lineage; they are not
+> current truth unless the charter or a decided ADR re-promotes them.
+
 ## What This Project Is
 
 Datarun is an operations platform for organizations that need to **collect information, coordinate work, track progress, and maintain accountability** across people, places, and time — reliably, even in environments with poor or no connectivity.
@@ -40,47 +46,41 @@ Datarun's ambition is to **eliminate that rebuilding**. Instead of bespoke syste
 
 ### Reading guide
 
-An evaluator assessing the architecture should read in this order:
+For current work, read in this order:
 
-1. **Problem definition**: [Constraints](constraints.md) → [Scenar   ios](scenarios/README.md) → [Access Control](access-control-scenario.md)
+1. **Settled state**: [Charter](charter.md)
+2. **Classification inventory**: [Concept Ledger](convergence/concept-ledger.md)
+3. **In-flight work**: current Ship spec under [Ships](ships/)
+4. **Open verification debt**: [Flagged Positions](flagged-positions.md)
+5. **Owning decisions**: relevant ADRs under [ADRs](adrs/)
+
+For historical reconstruction, read in this order:
+
+1. **Problem definition**: [Constraints](constraints.md) → [Scenarios](scenarios/README.md) → [Access Control](access-control-scenario.md)
 2. **Viability analysis**: [Viability Assessment](viability-assessment.md)
 3. **Design foundations**: [Principles](principles.md) → [Behavioral Patterns](behavioral_patterns.md)
-4. **Architecture description**: [Architecture](architecture/) — the consolidated reference: primitives, contracts, cross-cutting concerns, boundaries
-5. **Architecture decisions**: [ADR-001](adrs/adr-001-offline-data-model.md) → [002](adrs/adr-002-identity-conflict.md) → [003](adrs/adr-003-authorization-sync.md) → [004](adrs/adr-004-configuration-boundary.md) → [005](adrs/adr-005-state-progression.md) *(dependency order — each builds on the last)*
-6. **Implementation**: [Implementation plan](implementation/plan.md) — technology stack, module boundaries, phased build order
-7. **Decision reasoning** *(optional)*: [Exploration index](exploration/) — the event storms, stress tests, and coherence audits behind each ADR
+4. **Exploration proof**: [Exploration index](exploration/) and ADR guides
+5. **Initial ADR sequence**: [ADR-001](adrs/adr-001-offline-data-model.md) → [002](adrs/adr-002-identity-conflict.md) → [003](adrs/adr-003-authorization-sync.md) → [004](adrs/adr-004-configuration-boundary.md) → [005](adrs/adr-005-state-progression.md)
+6. **Convergence ADRs**: [ADR-006](adrs/adr-006-flag-semantics.md) → [ADR-007](adrs/adr-007-envelope-type-closure.md) → [ADR-008](adrs/adr-008-envelope-reference-fields.md) → [ADR-009](adrs/adr-009-platform-fixed-vs-deployer-configured.md)
 
 ### By area
 
 
 | Area                                            | Contents                                                                                                                    |
 | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [Charter](charter.md)                           | Current decided state and Ship cadence. Start here for settled truth.                                                       |
+| [Concept Ledger](convergence/concept-ledger.md) | Classification inventory used by convergence and charter generation.                                                        |
+| [Ships](ships/)                                 | Current scenario-driven execution cadence, specs, evidence, and retros.                                                     |
+| [Flagged Positions](flagged-positions.md)       | Append-only register for deferred verification and quiet-decision markers.                                                  |
 | [Scenarios](scenarios/README.md)                | 21 real-world operational situations the platform must support — domain perspective, no solution prescription              |
 | [Constraints](constraints.md)                   | Operational context and boundaries — target users, connectivity, scale, data sensitivity                                   |
 | [Access Control](access-control-scenario.md)    | Cross-cutting concern: who can see and do what, under what circumstances                                                    |
 | [Principles](principles.md)                     | 7 working principles — all confirmed through 5 ADRs                                                                        |
 | [Viability Assessment](viability-assessment.md) | Platform viability analysis — vision vs. use cases gap analysis, GO/NO-GO*(pre dates adrs, and implementation decisions)*  |
 | [Behavioral Patterns](behavioral_patterns.md)   | 12 behavioral patterns extracted from scenarios — the first narrowing step                                                 |
-| [Architecture](architecture/)                   | Consolidated architecture description — 11 primitives, 21 contracts, 8 cross-cutting concerns, 29 boundary classifications |
-| [ADRs](adrs/)                                   | 5 Architecture Decision Records — the decided architecture                                                                 |
-| [Exploration](exploration/)                     | Decision analyses grouped by ADR — event storms, stress tests, coherence audits                                            |
+| [Architecture](architecture/)                   | Historical/reference architecture surface. Do not use over the charter for current classification.                         |
+| [ADRs](adrs/)                                   | Architecture Decision Records. ADR-006 through ADR-009 repair convergence-era classification drift.                        |
+| [Exploration](exploration/)                     | Historical decision proof — event storms, stress tests, coherence audits.                                                  |
 | [Experiments](experiments/)                     | Prototypes and scenario walk-throughs                                                                                       |
-| [Implementation](implementation/)               | Technology stack, module boundaries, phased build order, IDRs                                                               |
-| [Checkpoints](checkpoints/)                     | Periodic project status progress checkpoints                                                                                |
-
----
-
-## Current Status
-
-The project has completed its **initial architecture sequence**:
-
-1. ✅ Scenarios defined — 21 domain-pure, solution-independent scenarios
-2. ✅ Cross-cutting concerns identified — offline work, access control
-3. ✅ Architectural constraint decisions — five ADRs decided
-   - **[ADR-001: Offline Data Model](adrs/adr-001-offline-data-model.md)** — immutable events, append-only, client-generated UUIDs (*[Reading Guide](exploration/guide-adr-001.md)*)
-   - **[ADR-002: Identity Model and Conflict Resolution](adrs/adr-002-identity-conflict.md)** — 4 identity types, accept-and-flag, alias merges (*[Reading Guide](exploration/guide-adr-002.md)*)
-   - **[ADR-003: Authorization and Selective Sync](adrs/adr-003-authorization-sync.md)** — assignment-based access, sync=scope, authority-as-projection (*[Reading Guide](exploration/guide-adr-003.md)*)
-   - **[ADR-004: Configuration Paradigm and Boundary](adrs/adr-004-configuration-boundary.md)** — typed shapes, platform-fixed types, four-layer gradient (*[Reading Guide](exploration/guide-adr-004.md)*)
-   - **[ADR-005: State Progression and Workflow](adrs/adr-005-state-progression.md)** — projection-derived state machines, Pattern Registry, composition rules (*[Reading Guide](exploration/guide-adr-005.md)*)
-4. ✅ Architecture Description — consolidated reference in [architecture/](architecture/) (11 primitives, 21 contracts, 8 cross-cutting concerns, 29 boundary classifications)
-5. 🔄 [Implementation](implementation/README.md).
+| [Implementation](implementation/)               | Historical phase-era implementation plans and IDRs. Current code work is Ship-driven.                                      |
+| [Checkpoints](checkpoints/)                     | Historical project status snapshots.                                                                                        |

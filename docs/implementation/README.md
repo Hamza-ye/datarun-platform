@@ -1,8 +1,16 @@
 # Implementation
 
-> How the architecture gets built. Technology choices, module boundaries, build order, and phase specifications.
+> **Historical phase-era surface.** Current work is Ship-driven; start with
+> [../charter.md](../charter.md), then [../convergence/concept-ledger.md](../convergence/concept-ledger.md),
+> then the current Ship spec under [../ships/](../ships/). The files in this
+> directory explain prior implementation choices and phase plans. They are not
+> current architecture authority unless a Ship, ADR, or charter claim cites
+> them.
 
-The [Architecture Description](../architecture/) defines **what** to build — 11 primitives, 21 contracts, 8 cross-cutting concerns. This directory defines **how** — technology stack, repository structure, and a phased build order that produces a working system at every phase boundary.
+This directory records the phase-era implementation plan: technology stack,
+repository structure, module boundaries, build sequencing, phase specs, and
+IDRs. Treat the old "11 primitives" and phase-boundary language as historical
+scaffolding. For current classifications, use the charter and concept ledger.
 
 ---
 
@@ -10,16 +18,21 @@ The [Architecture Description](../architecture/) defines **what** to build — 1
 
 | Document | Purpose |
 |----------|---------|
-| [plan.md](plan.md) | **What** gets built: technology stack, repository structure, primitive-to-module mapping, 5-phase build order, IG decision schedule, agent collaboration plan |
-| [execution-plan.md](execution-plan.md) | **How** it gets built: decision authority, forbidden patterns, escalation triggers, quality gates, CI/CD pipeline, testing strategy (21 contract tests + pipeline tests + compliance checks), module spec template, risk mitigation, IDR convention |
+| [plan.md](plan.md) | Historical technology stack, repository structure, primitive-to-module map, 5-phase build order, IG decision schedule, agent collaboration plan |
+| [execution-plan.md](execution-plan.md) | Historical execution mechanics: decision authority, forbidden patterns, escalation triggers, quality gates, CI/CD pipeline, testing strategy, module spec template, risk mitigation, IDR convention |
 | [ux-model.md](ux-model.md) | **How the mobile app works**: screen topology, navigation flow, component contracts, offline patterns, progressive disclosure |
-| [phases/](phases/) | **Phase specs**: scope, sub-phase breakdowns, quality gates, technical specs, acceptance criteria, milestones. One file per phase, created at phase start. |
-| [decisions/](../decisions/) | **Why this way**: Implementation Decision Records (IDRs) — micro-decisions with context, alternatives, consequences, and code traces. Separate from ADRs (architecture-grade). |
+| [phases/](phases/) | Historical phase specs: scope, sub-phase breakdowns, quality gates, technical specs, acceptance criteria, milestones |
+| [decisions/](../decisions/) | Implementation Decision Records (IDRs): micro-decisions with context, alternatives, consequences, and code traces. Separate from ADRs. |
 
 ---
 
 ## Relationship to Architecture
 
-The architecture intentionally left 15 items at implementation-grade — decisions where multiple valid approaches exist within the decided constraints ([boundary.md § Implementation-Grade Items](../architecture/boundary.md#3-implementation-grade-items)). Those decisions are recorded as [IDRs](../decisions/) when they're made during implementation.
+Phase-era architecture intentionally left implementation-grade decisions where
+multiple valid approaches existed within the decided constraints. Those choices
+were recorded as [IDRs](../decisions/) when made.
 
-Implementation decisions follow the same discipline as architecture decisions: stated, traced, reversible where possible. The difference: architecture decisions constrain stored data and contracts across offline devices. Implementation decisions constrain code and tooling — they're reversible with engineering effort, not data migration.
+Current rule: ADRs and the charter govern architecture. IDRs explain
+implementation choices and remain useful when touching code that depends on
+them, but they do not classify platform concepts and do not supersede ADRs,
+the charter, or Ship retros.
