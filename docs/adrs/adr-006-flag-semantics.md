@@ -2,6 +2,7 @@
 
 > Status: **Decided**
 > Date: 2026-04-22
+> Superseded-By: [ADR-006-R](adr-006-flag-semantics-R.md) (full supersede; §S1–§S4 carried forward by reference, §S5 adds `cycle_violation`)
 > Convergence round: 1 (Phase 2 ADR #1)
 > Upstream: ADR-001, ADR-002, ADR-002 Addendum
 > Downstream: ADR-007 (will cite this for the integrity-shape invariant)

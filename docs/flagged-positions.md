@@ -767,7 +767,7 @@ All required:
 
 ### Context
 
-[`ScopeResolver.hasRoleAt(actorId, role, at)`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java) exists (Ship-2 commit `ecf3ece`) and replays `assignment_changed` events, but has **no callers**. There is no `role_stale` path in [`ConflictDetector`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) — the pre-convergence detector was discarded at Ship-1 rebuild. The platform supports the invariant *structurally* (event-replay machinery + projection-time anchor on `scope_violation`) but the *role-keyed* detector itself is unbuilt. [ADR-006 §S2](adrs/adr-006-flag-semantics.md) catalog row 5 (`role_stale`, `manual_only`) carries a contract for a detector that does not exist. R-7 (§S–implementation parity, see [Rule R-7](#rule-r-7-simplementation-parity)) would have caught this at Ship-1.
+[`ScopeResolver.hasRoleAt(actorId, role, at)`](../server/src/main/java/dev/datarun/ship1/scope/ScopeResolver.java) exists (Ship-2 commit `ecf3ece`) and replays `assignment_changed` events, but has **no callers**. There is no `role_stale` path in [`ConflictDetector`](../server/src/main/java/dev/datarun/ship1/integrity/ConflictDetector.java) — the pre-convergence detector was discarded at Ship-1 rebuild. The platform supports the invariant *structurally* (event-replay machinery + projection-time anchor on `scope_violation`) but the *role-keyed* detector itself is unbuilt. [ADR-006-R §S2](adrs/adr-006-flag-semantics-R.md) catalog row 5 (`role_stale`, `manual_only`) carries a contract for a detector that does not exist. R-7 (§S–implementation parity, see [Rule R-7](#rule-r-7-simplementation-parity)) would have caught this at Ship-1.
 
 ### Trigger
 

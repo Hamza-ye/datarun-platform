@@ -17,11 +17,11 @@
 
 **Convergence phase**: 2 — **CLOSED** (2026-04-23). Protocol dormant; re-enters only if a Ship retro triggers a cross-cutting ADR round.
 **Forward cadence**: scenario-driven Ships (see *Rhythm* section).
-**Active ship**: Ship-3 tagged `2c201b0`; closeout corrections in progress (Wave 2-B). S06b shape-evolution half (additive evolution + deprecation under multi-version load) under S19; composite [S20](scenarios/20-chv-field-operations.md) bullets 1 + 5 stressed under shape evolution. Four new walkthroughs (W-6 additive happy path with FP-009 closure, W-7 deprecation with verbatim storage, W-8 unknown `shape_ref` rejection, W-10 backward-compat mixed-version admin render) pass via real HTTP (`Ship3WalkthroughAcceptanceTest`); Ship-1 / 1b / 2 walkthroughs unchanged and green (46/46 total, was 33/33 at Ship-2 close). FP-009 RESOLVED (`ConflictDetector` unchanged across Ship-3, v1-current direction asserted; v2-current asymmetry folds into FP-012's successors — see decomposition note). Ship-3 retro: [`ships/ship-3-retro.md`](ships/ship-3-retro.md). Wave 2-B closeout corrections: FP-012 decomposed into FP-015 + FP-012b..e; FP-001 SUPERSEDED by FP-017; concept-ledger row `field_count_budget` demoted STABLE → DEFERRED per Standing Rule R-7 (§S–implementation parity, adopted at this closeout); R-7 added to § Rhythm.
-**Next action**: Ship-4 spec authoring pending. Likely scope S04 (corrections) + start of S08 (case management referencing existing UUIDs); FP-005, FP-006, FP-008 become candidates for closure; deactivation-while-referenced (S06b parked surface) lands here. R-4 sweep required before spec drafting.
-**Last ADR landed**: ADR-009 (platform-fixed mechanism vs. deployer-configured instance). No new ADR drafted during Ship-1, Ship-1b, Ship-2, or Ship-3.
-**Active FPs**: FP-004 OPEN, FP-005 OPEN, FP-006 OPEN, FP-008 OPEN, FP-010 OPEN, FP-011 OPEN (re-deferred), FP-012b OPEN, FP-012c OPEN, FP-012d OPEN, FP-012e OPEN (placeholder, link to FP-011), FP-013 OPEN, FP-014 OPEN, FP-015 OPEN, FP-016 OPEN, FP-017 OPEN, FP-018 OPEN. Superseded: FP-001 (by FP-017), FP-012 (decomposed into FP-015 + FP-012b..e). Resolved: FP-002, FP-003, FP-007, FP-009.
-**Ledger state**: 257 STABLE / 8 DEFERRED / 11 OBSOLETE / 0 OPEN / 276 total. Drift gate: PASS.
+**Active ship**: Ship-3 tagged `2c201b0`; post-tag closeout completed through Wave 3/W4. S06b shape-evolution half (additive evolution + deprecation under multi-version load) under S19; composite [S20](scenarios/20-chv-field-operations.md) bullets 1 + 5 stressed under shape evolution. Four new walkthroughs (W-6 additive happy path with FP-009 closure, W-7 deprecation with verbatim storage, W-8 unknown `shape_ref` rejection, W-10 backward-compat mixed-version admin render) pass via real HTTP (`Ship3WalkthroughAcceptanceTest`); Ship-1 / 1b / 2 walkthroughs unchanged and green (46/46 total, was 33/33 at Ship-2 close). FP-009 RESOLVED (`ConflictDetector` unchanged across Ship-3, v1-current direction asserted; v2-current asymmetry folds into FP-012's successors — see decomposition note). Ship-3 retro: [`ships/ship-3-retro.md`](ships/ship-3-retro.md). Wave 2-B closeout corrections: FP-012 decomposed into FP-015 + FP-012b..e; FP-001 SUPERSEDED by FP-017; concept-ledger row `field_count_budget` demoted STABLE → DEFERRED per Standing Rule R-7 (§S–implementation parity, adopted at this closeout); R-7 added to § Rhythm. Wave 3/W4 closeout: ADR-006-R superseded ADR-006, catalog row 9 `cycle_violation` landed, `CycleGuard` implemented the push-path alias-cycle guard, and FP-019 RESOLVED with `AliasCycleGuardTest`.
+**Next action**: Ship-4 spec authoring pending after truth-freshness check is FRESH. Likely scope S04 (corrections) + start of S08 (case management referencing existing UUIDs); FP-005, FP-006, FP-008 become candidates for closure; deactivation-while-referenced (S06b parked surface) lands here. R-4 sweep required before spec drafting.
+**Last ADR landed**: ADR-006-R (full supersede of ADR-006; §S1-§S4 carried forward, §S5 adds `cycle_violation` alias-cycle prevention).
+**Active FPs**: FP-004 OPEN, FP-005 OPEN, FP-006 OPEN, FP-008 OPEN, FP-010 OPEN, FP-011 OPEN (re-deferred), FP-012b OPEN, FP-012c OPEN, FP-012d OPEN, FP-012e OPEN (placeholder, link to FP-011), FP-013 OPEN, FP-014 OPEN, FP-015 OPEN, FP-016 OPEN, FP-017 OPEN, FP-018 OPEN. Superseded: FP-001 (by FP-017), FP-012 (decomposed into FP-015 + FP-012b..e). Resolved: FP-002, FP-003, FP-007, FP-009, FP-019.
+**Ledger state**: 258 STABLE / 8 DEFERRED / 11 OBSOLETE / 0 OPEN / 277 total. Drift gate: PASS.
 
 ---
 
@@ -29,9 +29,9 @@
 
 > One line per invariant. Each cites the ADR that established it.
 
-- **Accept-and-flag.** A validly-structured event is never rejected for state-based reasons; state anomalies surface as flag events, never as rejections or modifications. ([ADR-006 §S1](adrs/adr-006-flag-semantics.md))
-- **Flag as canonical anomaly surface (event stream).** Flags are the canonical representation of state anomalies on the event stream; no parallel anomaly-record surface exists or is permitted on the event stream. Scoped to representation and emission — does not govern non-event-stream surfaces (telemetry, metrics, operational logs). ([ADR-006 §S2](adrs/adr-006-flag-semantics.md))
-- **Server-side flag creation (default).** Flags are created server-side during sync processing; device-side creation is additively evolvable. ([ADR-006 §S4](adrs/adr-006-flag-semantics.md))
+- **Accept-and-flag.** A validly-structured event is never rejected for state-based reasons; state anomalies surface as flag events, never as rejections or modifications. ([ADR-006-R §S1](adrs/adr-006-flag-semantics-R.md))
+- **Flag as canonical anomaly surface (event stream).** Flags are the canonical representation of state anomalies on the event stream; no parallel anomaly-record surface exists or is permitted on the event stream. Scoped to representation and emission — does not govern non-event-stream surfaces (telemetry, metrics, operational logs). ([ADR-006-R §S2](adrs/adr-006-flag-semantics-R.md))
+- **Server-side flag creation (default).** Flags are created server-side during sync processing; device-side creation is additively evolvable. ([ADR-006-R §S4](adrs/adr-006-flag-semantics-R.md))
 - **Envelope type vocabulary is closed at six values.** Allowed: `capture`, `review`, `alert`, `task_created`, `task_completed`, `assignment_changed`. Extension is architecture-grade. `type` answers *which pipeline*; `shape_ref` answers *what fact*; `actor_ref` answers *who authored*. ([ADR-007 §S1](adrs/adr-007-envelope-type-closure.md); first-decision cite [ADR-004 §S3](adrs/adr-004-configuration-boundary.md))
 - **Platform-fixed mechanism vs. deployer-configured instance (duality rule).** When a platform concept exposes both a closed mechanism (set, grammar, protocol, or typed interface owned by the platform) and a parameterized instance surface (named and authored by deployers), the two are classified in separate ledger rows: the mechanism PRIMITIVE, the instance CONFIG. Conflating them is a classification error. ([ADR-009 §S1](adrs/adr-009-platform-fixed-vs-deployer-configured.md))
 
@@ -94,11 +94,11 @@ Envelope extension is architecture-grade. The six envelope `type` values (`captu
 
 ### Accept-and-flag lifecycle
 
-Anomalies surface as flag events alongside the accepted event — never as rejections or modifications. The pipeline is a closed loop: Event Store → Conflict Detector (detect) → Projection Engine (exclude flagged events from state derivation) → Trigger Engine (auto-resolution or manual path) → Event Store (resolution persisted) → Projection Engine (state re-derived). Settled by [ADR-006 §S1, §S2, §S4](adrs/adr-006-flag-semantics.md).
+Anomalies surface as flag events alongside the accepted event — never as rejections or modifications. The pipeline is a closed loop: Event Store → Conflict Detector (detect) → Projection Engine (exclude flagged events from state derivation) → Trigger Engine (auto-resolution or manual path) → Event Store (resolution persisted) → Projection Engine (state re-derived). Settled by [ADR-006-R §S1, §S2, §S4](adrs/adr-006-flag-semantics-R.md).
 
 ### Detect-before-act
 
-Flagged events do not (a) trigger policies, (b) advance state machines, or (c) authorize downstream work. The Conflict Detector is the sole provider of this guarantee. Settled by [ADR-006 §S1](adrs/adr-006-flag-semantics.md); authorization-blocking vs. informational mode is deployer-configurable per [ADR-003 §S7](adrs/adr-003-authorization-sync.md).
+Flagged events do not (a) trigger policies, (b) advance state machines, or (c) authorize downstream work. The Conflict Detector is the sole provider of this guarantee. Settled by [ADR-006-R §S1](adrs/adr-006-flag-semantics-R.md); authorization-blocking vs. informational mode is deployer-configurable per [ADR-003 §S7](adrs/adr-003-authorization-sync.md).
 
 ### Four-layer configuration gradient
 
@@ -115,7 +115,7 @@ Beyond L3 is **platform evolution** (new types, new patterns, new `context.*` pr
 
 ### Sync contract
 
-Sync is not a primitive — it is eight guarantees decomposed from Event Store, Scope Resolver, Conflict Detector, and Config Packager. Events are the sync unit; sync is idempotent, append-only, order-independent, and scope-filtered. Conflict detection precedes policy execution on synced events. Configuration is delivered atomically; at most 2 versions coexist on-device. Merge/split/resolution events sync like any other event, filtered by scope. Settled by [ADR-001 §S4](adrs/adr-001-offline-data-model.md), [ADR-002 §S1](adrs/adr-002-identity-conflict.md), [ADR-003 §S2](adrs/adr-003-authorization-sync.md), [ADR-004 §S6](adrs/adr-004-configuration-boundary.md), [ADR-006 §S1](adrs/adr-006-flag-semantics.md).
+Sync is not a primitive — it is eight guarantees decomposed from Event Store, Scope Resolver, Conflict Detector, and Config Packager. Events are the sync unit; sync is idempotent, append-only, order-independent, and scope-filtered. Conflict detection precedes policy execution on synced events. Configuration is delivered atomically; at most 2 versions coexist on-device. Merge/split/resolution events sync like any other event, filtered by scope. Settled by [ADR-001 §S4](adrs/adr-001-offline-data-model.md), [ADR-002 §S1](adrs/adr-002-identity-conflict.md), [ADR-003 §S2](adrs/adr-003-authorization-sync.md), [ADR-004 §S6](adrs/adr-004-configuration-boundary.md), [ADR-006-R §S1](adrs/adr-006-flag-semantics-R.md).
 
 ### Flag catalog (9 categories)
 
@@ -129,9 +129,9 @@ Sync is not a primitive — it is eight guarantees decomposed from Event Store, 
 | 6 | `temporal_authority_expired` | ADR-003 | `auto_eligible` |
 | 7 | `domain_uniqueness_violation` | ADR-004 | `manual_only` |
 | 8 | `transition_violation` | ADR-005 | `auto_eligible` |
-| 9 | *(reserved — catalog is append-only)* | — | — |
+| 9 | `cycle_violation` | ADR-006-R | `manual_only` |
 
-Resolvability is platform-defined per [ADR-006 §S4](adrs/adr-006-flag-semantics.md). Severity (blocking vs. informational) is deployer-configurable per [ADR-004 §S14](adrs/adr-004-configuration-boundary.md) — but the precise severity/uniqueness policy surface is an open item (ledger: `sensitive-subject-classification` DEFERRED; will be pinned when the Ship that needs it defines the requirement).
+Resolvability is platform-defined per [ADR-006-R §S4](adrs/adr-006-flag-semantics-R.md). Severity (blocking vs. informational) is deployer-configurable per [ADR-004 §S14](adrs/adr-004-configuration-boundary.md) — but the precise severity/uniqueness policy surface is an open item (ledger: `sensitive-subject-classification` DEFERRED; will be pinned when the Ship that needs it defines the requirement).
 
 ### Aggregation interface
 
