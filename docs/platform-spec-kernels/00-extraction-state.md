@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 19 in progress
+Status: Iteration 20 paused for assessment
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -154,7 +154,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 19
+Current iteration: 20
 
 Processed sources:
 
@@ -194,10 +194,11 @@ Processed sources:
 - `docs/exploration/archive/04-decision-audit.md`
 - `docs/exploration/archive/05-adr2-event-storm-identity.md`
 - `docs/exploration/archive/07-adr2-phase2-stress-test-results.md`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md`
 
 Next source:
 
-- `docs/exploration/archive/09-adr2-phase3-classification-results.md`
+- Paused before continuing source scan. Next action should be either ADR-002 reconciliation or ADR-002 extraction, not automatic continuation.
 
 Ignored-as-source:
 
@@ -225,7 +226,7 @@ Allowed outcomes when the owning source is processed:
 
 Current deferred candidates:
 
-- `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `07-adr2-phase2-stress-test-results.md`: refined into survivor mechanisms with required modifications. Still open pending Phase 3 classification and ADR-002.
+- `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `09-adr2-phase3-classification-results.md`: classified into ADR-002 Bucket 1 constraints, ADR-002 Bucket 2 strategies, Bucket 3 deferrals to ADR-4/5, and Bucket 4 accepted risks. Final verification still owned by ADR-002.
 - `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Owning sources: ADR-003 exploration files and ADR-003.
 - `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
 - `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
@@ -365,6 +366,20 @@ Current deferred candidates:
 - `Device Sequence Sync Watermark Survivor` — conditional causal-ordering survivor.
 - `Device Time Advisory Requirement` — conditional event-envelope/ordering invariant.
 - `Pending Match Bijective Constraint` — conditional invariant for unresolved-reference matching.
+- `ADR-002 Phase 3 Classification Boundary` — settled extraction rule from `docs/exploration/archive/09-adr2-phase3-classification-results.md`; classification map, not final ADR.
+- `ADR-002 Irreversibility Classification Rule` — settled classification method; stored-event/envelope changes are constraints, code/projection/UI changes are strategies or deferrals.
+- `ADR-002 Event Envelope Constraint Set` — conditional Phase 3 closure; device_id, device_sequence, sync_watermark, and typed identity references pending ADR-002 verification.
+- `Device Time Advisory Constraint` — conditional Phase 3 closure; device_time is not structural.
+- `Merge Alias Projection Constraint` — conditional Phase 3 closure; merge uses alias-in-projection, never physical re-reference.
+- `Corrective Split Constraint` — conditional Phase 3 closure; no SubjectsUnmerged event type.
+- `Split Frozen-History Acyclicity Constraint` — conditional Phase 3 closure; split archives source and lineage is DAG by construction.
+- `SubjectSplit Online-Only Constraint` — conditional Phase 3 closure; split is server-validated and not offline.
+- `Conflict Resolution And Detection Constraints` — conditional Phase 3 closure; single-writer resolution, detect-before-act sync processing, raw-reference conflict detection.
+- `Accept Stale Events Constraint` — conditional Phase 3 closure; validly structured stale-state events are accepted and flagged, not rejected.
+- `ADR-002 Strategy Classification Set` — conditional strategy set; evolvable ADR-002 implementation/read-model choices.
+- `ADR-002 Cross-ADR Deferral Set` — open deferral set; ADR-4/5 must close pending match generality, domain conflict rules, and workflow cascades.
+- `ADR-002 Accepted Risk Set` — conditional accepted-risk set with revisit triggers.
+- `ADR-002 Simplicity Validation` — conditional validation that Bucket 1 constraints do not materially complicate S00.
 
 ## Iteration History
 
@@ -447,3 +462,7 @@ Processed `docs/exploration/archive/05-adr2-event-storm-identity.md` as ADR-002 
 ### Iteration 19
 
 Processed `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` as ADR-002 Phase 2 stress-test evidence. Extracted survivor mechanisms and required modifications: accept-and-flag with single-writer resolution, root-cause metadata, batch resolution, detect-before-act sync processing, alias table with eager closure/acyclicity/corrective split, device sequence plus sync watermark, advisory device time, and pending-match constraints. Kept all as conditional stress-test findings pending Phase 3 classification and ADR-002.
+
+### Iteration 20
+
+Processed `docs/exploration/archive/09-adr2-phase3-classification-results.md` as ADR-002 Phase 3 classification. Extracted Bucket 1 irreversible constraints, Bucket 2 evolvable strategies, Bucket 3 cross-ADR deferrals, Bucket 4 accepted risks, and simplicity validation. Updated the deferred closure register so ADR-002 forward-projection claims are classified but still pending ADR-002 verification. Paused source scanning for assessment before choosing ADR-002 reconciliation or ADR-002 extraction.

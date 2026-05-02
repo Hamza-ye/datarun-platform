@@ -802,3 +802,560 @@ ADR-002 must decide whether pending match is general identity infrastructure or 
 Platform specification note:
 
 Use as lineage for unresolved-reference handling.
+
+## Kernel: ADR-002 Phase 3 Classification Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/09-adr2-phase3-classification-results.md` classifies ADR-002 Phase 2 findings by irreversibility boundary: ADR-002 constraints, ADR-002 strategies, deferrals to other ADRs, and accepted risks. It produces the ADR-002 decision skeleton, but final platform closure still requires ADR-002 extraction.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / supersession notice
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / opening phase, method, and output consumer
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `## The Boundary Test Applied`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `## ADR-2 Decision Skeleton`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to ADR-002 classification, cross-ADR assumption handling, and decision-skeleton lineage.
+
+Non-goals:
+
+Does not replace ADR-002 and does not close ADR-004 or ADR-005 deferrals.
+
+Forbidden interpretations:
+
+- Do not treat Bucket 2 strategies as irreversible constraints.
+- Do not let Bucket 3 deferrals become hidden ADR-002 decisions.
+- Do not ignore Bucket 1 constraints when extracting ADR-002.
+
+Open edges:
+
+ADR-002 must be extracted to verify final accepted decisions and any wording changes.
+
+Platform specification note:
+
+Use as the main ADR-002 pre-ADR classification map.
+
+## Kernel: ADR-002 Irreversibility Classification Rule
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+ADR-002 classifies a finding as an irreversible constraint when changing it would require data migration or reinterpretation across deployed devices and stored events. Findings that only require code, projection, read-model, UI, policy, or configuration changes are strategies or deferrals.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `## The Boundary Test Applied`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `## Classification Summary Table`
+
+Closure basis:
+
+Settled as ADR-002 classification method.
+
+Scope:
+
+Applies to interpreting Bucket 1, Bucket 2, Bucket 3, and Bucket 4 in Phase 3.
+
+Non-goals:
+
+Does not decide the final ADR text.
+
+Forbidden interpretations:
+
+- Do not promote read-model strategies into event-envelope constraints.
+- Do not defer envelope semantics that would make old events ambiguous.
+
+Open edges:
+
+ADR-002 extraction must confirm which Bucket 1 items were committed.
+
+Platform specification note:
+
+Use to preserve why each ADR-002 kernel is structural or evolvable.
+
+## Kernel: ADR-002 Event Envelope Constraint Set
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+The ADR-002 decision skeleton requires each event to carry hardware-bound `device_id`, monotonically increasing per-device `device_sequence`, `sync_watermark` from the last-known server state at creation time, and typed identity references of the form `{type, id}` for subject, actor, process, and assignment references.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S1: Event Envelope — Causal Ordering Fields`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S2: Event Envelope — Typed Identity References`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S4: Device Sequence and Sync Watermark Persistence`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S5: Device Identity Is Hardware-Bound`
+
+Closure basis:
+
+Conditional Phase 3 classification closure. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to ADR-002 additions to the ADR-001 event envelope.
+
+Non-goals:
+
+Does not decide full event payload schema, device provisioning, actor authentication, or future identity types.
+
+Forbidden interpretations:
+
+- Do not use untyped UUID references where identity type ambiguity would affect interpretation.
+- Do not tie `device_id` to user accounts.
+- Do not reuse `(device_id, device_sequence)`.
+
+Open edges:
+
+ADR-002 must verify final envelope contract and exact terminology.
+
+Platform specification note:
+
+Likely platform event-envelope contract pending ADR-002 verification.
+
+## Kernel: Device Time Advisory Constraint
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+`device_time` is advisory for display and audit only. Projection logic, conflict detection, and protocol correctness must not depend on `device_time`; intra-device ordering uses `device_sequence`, and cross-device concurrency uses `sync_watermark`.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### C3 / Assumption A8 / Q10: device_time is advisory, not structural`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S3: device_time Is Advisory`
+
+Closure basis:
+
+Conditional Phase 3 classification closure. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to event ordering, conflict detection, projections, and timestamp interpretation.
+
+Non-goals:
+
+Does not decide clock-anomaly flag thresholds or clock synchronization.
+
+Forbidden interpretations:
+
+- Do not structurally order events by device clock timestamps.
+- Do not use device time to decide conflict winners.
+
+Open edges:
+
+ADR-002 must verify final timestamp semantics.
+
+Platform specification note:
+
+Likely event-envelope invariant pending ADR-002 verification.
+
+## Kernel: Merge Alias Projection Constraint
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+`SubjectsMerged` creates an alias mapping from retired identity to surviving identity. No existing event is modified or physically re-referenced. Projections resolve retired references for reads, and the alias mapping itself is represented as an event that syncs normally.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### Q2: Merge is alias-in-projection, never physical re-reference`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S6: Merge Is Alias-in-Projection, Never Re-Reference`
+
+Closure basis:
+
+Conditional Phase 3 classification closure. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to subject merge semantics.
+
+Non-goals:
+
+Does not decide alias-table implementation strategy, eager/lazy closure, or sync optimization.
+
+Forbidden interpretations:
+
+- Do not rewrite stored events to replace retired IDs.
+- Do not hide the original identity reference from audit/conflict detection.
+
+Open edges:
+
+ADR-002 must verify final merge semantics.
+
+Platform specification note:
+
+Likely identity-evolution contract pending ADR-002 verification.
+
+## Kernel: Corrective Split Constraint
+
+Status: Conditional
+Kind: rejected-alternative
+
+Specification statement:
+
+The ADR-002 classification rejects `SubjectsUnmerged` as an event type. Incorrect merges are corrected by splitting the surviving subject and creating a successor for the wrongly merged entity; post-merge events default to the surviving subject, with optional manual re-attribution.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### B6: No SubjectsUnmerged event type — wrong merges are corrected by corrective split`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S7: No SubjectsUnmerged — Wrong Merges Use Corrective Split`
+
+Closure basis:
+
+Conditional Phase 3 classification closure. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to wrong-merge correction and unmerge rejection.
+
+Non-goals:
+
+Does not decide attribution workflow details or corrective split payload shape.
+
+Forbidden interpretations:
+
+- Do not introduce symmetric unmerge without reopening ADR-002.
+- Do not require automatic re-attribution of merge-window events.
+
+Open edges:
+
+ADR-002 must verify rejection of `SubjectsUnmerged`.
+
+Platform specification note:
+
+Likely rejected-alternative and correction contract pending ADR-002 verification.
+
+## Kernel: Split Frozen-History Acyclicity Constraint
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+`SubjectSplit` archives the source subject as a terminal state. Historical events remain under the source ID; new events go to successors; post-split events referencing the archived source are accepted and flagged. `SubjectsMerged` requires active operands, and archived subjects cannot be merge targets, split again, or reactivated, guaranteeing a DAG lineage graph.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### Q3: Split freezes historical events under the source ID`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### B4 / Assumption A6: Lineage graph acyclicity is enforced by aggregate validation rules`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S8: Split Freezes History; Source Is Permanently Archived`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S9: Lineage Graph Acyclicity By Construction`
+
+Closure basis:
+
+Conditional Phase 3 classification closure. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to subject split, merge operands, archived lifecycle state, and lineage graph validity.
+
+Non-goals:
+
+Does not decide UI for archived subjects or manual attribution workflow.
+
+Forbidden interpretations:
+
+- Do not reassign historical source events to successors by mutation.
+- Do not allow archived subjects to become active again.
+- Do not permit merge/split events that create lineage cycles.
+
+Open edges:
+
+ADR-002 must verify final split and lineage rules.
+
+Platform specification note:
+
+Likely lineage invariant pending ADR-002 verification.
+
+## Kernel: SubjectSplit Online-Only Constraint
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+`SubjectSplit` is online-only and server-validated. Offline split commands are not supported; the server verifies the source has not already been split or archived before writing `SubjectSplit`, and successor IDs are generated during the server-validated transaction.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### Assumption A11: SubjectSplit is an online-only operation`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S10: SubjectSplit Is Online-Only`
+
+Closure basis:
+
+Conditional Phase 3 classification closure. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to subject split command execution.
+
+Non-goals:
+
+Does not decide online-only status for other identity actions.
+
+Forbidden interpretations:
+
+- Do not allow disconnected coordinators to split the same source independently.
+- Do not let clients mint competing successor sets for one source.
+
+Open edges:
+
+ADR-002 must verify final split execution rule.
+
+Platform specification note:
+
+Likely command-validity rule pending ADR-002 verification.
+
+## Kernel: Conflict Resolution And Detection Constraints
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-002 classification requires single-writer conflict resolution, conflict detection before policy execution during sync, and conflict detection using raw event references before alias resolution. Every `ConflictDetected` event designates one resolver; only that resolver's `ConflictResolved` event is canonical. Flagged events do not trigger policies until resolved.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### A2 / M1 / Assumption A7: Conflict resolution is single-writer per conflict`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### Assumption A12: Sync processing runs conflict detection before policies fire`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### B2: Conflict detection operates on raw event references before alias resolution`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S11: Single-Writer Conflict Resolution`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S12: Conflict Detection Before Policy Execution`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S13: Conflict Detection Uses Raw References`
+
+Closure basis:
+
+Conditional Phase 3 classification closure. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to conflict detection, conflict resolution, sync processing order, and alias/conflict ordering.
+
+Non-goals:
+
+Does not decide conflict queue UI, delegation rules, flag event full schema, or resolution location strategy.
+
+Forbidden interpretations:
+
+- Do not allow competing canonical conflict resolutions.
+- Do not run downstream policies before conflict detection on incoming sync events.
+- Do not alias-resolve away retired-reference provenance before conflict detection.
+
+Open edges:
+
+ADR-002 must verify final conflict contract.
+
+Platform specification note:
+
+Likely conflict contract pending ADR-002 verification.
+
+## Kernel: Accept Stale Events Constraint
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+The platform never rejects a validly structured event because it was recorded against stale subject state. Events against deactivated, merged, split, reclassified, or otherwise changed subjects are accepted and stored; state anomalies are surfaced as separate `ConflictDetected` events.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### Q12: Events against stale state are always accepted, never rejected`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `### S14: Events Are Never Rejected for State Staleness`
+
+Closure basis:
+
+Conditional Phase 3 classification closure. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to sync acceptance of validly structured events under stale state.
+
+Non-goals:
+
+Does not decide invalid payload handling, malformed event rejection, flag severity, or resolution outcome.
+
+Forbidden interpretations:
+
+- Do not drop field work merely because the subject state changed while offline.
+- Do not conflate event acceptance with semantic approval.
+
+Open edges:
+
+ADR-002 must verify final stale-event acceptance rule.
+
+Platform specification note:
+
+Likely offline/immutability invariant pending ADR-002 verification.
+
+## Kernel: ADR-002 Strategy Classification Set
+
+Status: Conditional
+Kind: conditional-validity
+
+Specification statement:
+
+Phase 3 classifies several ADR-002 findings as evolvable strategies rather than irreversible constraints: server-side flags initially; root-cause metadata and batch grouping as payload/read-model strategy; flag annotation after identity changes; configurable auto-resolution; projection rebuild strategy and server-computed projection fallback; eager alias closure behind a resolve interface; post-split attribution workflow; uniform typed UUID references; central conflict queue with delegation; iterative cascading resolution; post-merge local sync resolution; and compound flag grouping by root event.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `## Bucket 2: ADR-2 Strategies (Detail)`
+
+Closure basis:
+
+Conditional strategy classification. Final ADR-002 may carry some as notes or constraints, but Phase 3 marks them evolvable.
+
+Scope:
+
+Applies to ADR-002 strategy and implementation-boundary lineage.
+
+Non-goals:
+
+Does not decide ADR-3 sync topology, ADR-4 configuration boundary, or ADR-5 workflow details.
+
+Forbidden interpretations:
+
+- Do not mistake these strategies for event-envelope constraints unless ADR-002 later commits them as such.
+- Do not omit their interfaces where Phase 3 says an interface is required.
+
+Open edges:
+
+ADR-002 extraction must verify which strategies are carried forward and how they are worded.
+
+Platform specification note:
+
+Use to keep final platform spec from over-constraining evolvable implementation choices.
+
+## Kernel: ADR-002 Cross-ADR Deferral Set
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Phase 3 explicitly defers downstream work invalidation cascade to ADR-005, pending-match timeout and bijective matching to ADR-005 with some ADR-4 aspects, domain-specific conflict definition boundary to ADR-004, and pending-match generality to ADR-4/ADR-5. ADR-002 should support unresolved references and structural conflict detection without deciding those downstream policies.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `## Bucket 3: Deferred to Other ADRs (Detail)`
+
+Closure basis:
+
+Open cross-ADR deferral from Phase 3.
+
+Scope:
+
+Applies to ADR-004 and ADR-005 deferred assumptions discovered during ADR-002 exploration.
+
+Non-goals:
+
+Does not decide workflow cascade behavior, matching algorithms, timeouts, confidence thresholds, or configurable business conflict rules.
+
+Forbidden interpretations:
+
+- Do not let ADR-002 decide workflow cancellation cascades.
+- Do not let ADR-002 decide domain-specific conflict rule configuration.
+- Do not bury pending-match generality without revisiting it in ADR-4/5 extraction.
+
+Open edges:
+
+ADR-004 and ADR-005 sources must promote, adapt, reject, or leave these assumptions open.
+
+Platform specification note:
+
+Use as cross-ADR assumption register for later reconciliation.
+
+## Kernel: ADR-002 Accepted Risk Set
+
+Status: Conditional
+Kind: conditional-validity
+
+Specification statement:
+
+Phase 3 accepts several ADR-002 risks with revisit triggers: concurrent state changes require human resolution; batch conflict detection is computationally feasible, with sync-time trigger for optimization; same-actor cross-device ordering is best-effort, with a trigger to consider actor-sequence fields if it causes excessive false flags; S19 deactivation/observation conflict detection is confirmed; unmerge attribution risk is eliminated if corrective split remains adopted.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `## Bucket 4: Accepted Risks (Detail)`
+
+Closure basis:
+
+Conditional accepted-risk classification. Final ADR-002 must confirm.
+
+Scope:
+
+Applies to operational risk and revisit criteria for ADR-002 mechanisms.
+
+Non-goals:
+
+Does not decide monitoring implementation or future ADR amendment process.
+
+Forbidden interpretations:
+
+- Do not treat accepted risks as absent risks.
+- Do not add actor-sequence fields now unless the revisit trigger is met or ADR-002 changes.
+
+Open edges:
+
+ADR-002 extraction must verify whether accepted risks and triggers are carried forward.
+
+Platform specification note:
+
+Use to preserve conditional validity and future-change triggers.
+
+## Kernel: ADR-002 Simplicity Validation
+
+Status: Conditional
+Kind: conditional-validity
+
+Specification statement:
+
+Phase 3 validates that the Bucket 1 ADR-002 constraints do not materially complicate the simple S00 path: a worker records one observation, the event gains three lightweight envelope fields plus typed references, one aggregate validates the write, and sync remains a single server round-trip with conflict check, store, and projection.
+
+Source basis:
+
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md` / `## Simplicity Validation`
+
+Closure basis:
+
+Conditional Phase 3 validation. Final ADR-002 must confirm accepted constraints.
+
+Scope:
+
+Applies to simplicity pressure for basic capture under ADR-002 constraints.
+
+Non-goals:
+
+Does not prove complex identity/conflict cases are simple.
+
+Forbidden interpretations:
+
+- Do not use ADR-002 complexity in edge cases to claim the simple capture path is overburdened.
+- Do not use S00 simplicity to ignore identity/conflict edge-case constraints.
+
+Open edges:
+
+ADR-002 extraction must verify final constraints before this validation becomes settled.
+
+Platform specification note:
+
+Use as evidence that irreversible ADR-002 metadata does not violate simplicity baseline.
