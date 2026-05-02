@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 10 in progress
+Status: Iteration 11 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -39,6 +39,7 @@ Ground-truth document handling:
 - `docs/viability-assessment.md` is the first architecture-toned narrowing pass. It evaluates whether the domain ground truth and scenarios describe a buildable platform. It may create viability, tension, risk, blind-spot, and conditional-scope kernels, but it does not close final architecture or implementation decisions.
 - Terms such as "primitive" in `docs/viability-assessment.md` are candidate abstraction language from pre-architecture narrowing, not final platform primitive classification.
 - `docs/principles.md` sets pre-architecture decision guidance derived from vision, constraints, and behavioral patterns. Its later confirmation annotations can mark principles as validated guidance, but embedded ADR examples must not be used to close detailed platform interfaces before ADR extraction.
+- Archive processing begins with `docs/exploration/archive/01-architecture-landscape.md` before `00-exploration-framework.md`. Although numerically second, it was the first architecture-landscape exploration artifact and guided the ADR order and framework shape. It is superseded/raw exploration, so it can create lineage, tradeoff, prior-art, and candidate-decision-order kernels, but not final architecture closure.
 
 ## Output Goal
 
@@ -144,7 +145,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 10
+Current iteration: 11
 
 Processed sources:
 
@@ -177,6 +178,7 @@ Processed sources:
 - `docs/behavioral_patterns.md`
 - `docs/viability-assessment.md`
 - `docs/principles.md`
+- `docs/exploration/archive/01-architecture-landscape.md`
 
 Next source:
 
@@ -266,6 +268,14 @@ Rest-state merge note:
 - `Conflict Surfacing Principle` — settled validated principle from `docs/principles.md`; flag/conflict mechanisms unresolved until ADR extraction.
 - `Contextual Auditable Authority Principle` — settled validated principle from `docs/principles.md`; authority contract unresolved until ADR extraction.
 - `Simplicity Baseline Principle` — settled validated principle from `docs/principles.md`; technical simplicity proof unresolved until ADR extraction.
+- `Architecture Landscape Superseded Boundary` — settled extraction rule from `docs/exploration/archive/01-architecture-landscape.md`; raw exploration cannot close final architecture.
+- `Constraint Filter Survivors` — settled exploration finding from `docs/exploration/archive/01-architecture-landscape.md`; final mechanisms unresolved.
+- `Prior-Art Failure Mode Set` — settled exploration evidence from `docs/exploration/archive/01-architecture-landscape.md`; used as design guardrails.
+- `Hybrid Architecture Candidate` — candidate exploration direction from `docs/exploration/archive/01-architecture-landscape.md`; final decision unresolved until ADRs.
+- `Offline Data Model Dependency Root` — candidate decision-order finding from `docs/exploration/archive/01-architecture-landscape.md`; later ADR closure required.
+- `Configuration Boundary Depends On Upstream Decisions` — candidate decision-order correction from `docs/exploration/archive/01-architecture-landscape.md`; later ADR closure required.
+- `Critical Decision Coupling Map` — candidate exploration map from `docs/exploration/archive/01-architecture-landscape.md`; dependency closure required.
+- `ADR Exploration Sequence Candidate` — candidate exploration sequence from `docs/exploration/archive/01-architecture-landscape.md`; final ADR bodies close outcomes.
 
 ## Iteration History
 
@@ -312,3 +322,7 @@ Processed `docs/viability-assessment.md` as the first architecture-toned narrowi
 ### Iteration 10
 
 Processed `docs/principles.md` as validated pre-architecture decision guidance. Extracted the seven principles and their testing lifecycle. Did not use embedded ADR confirmation examples to close detailed interfaces or mechanisms; those remain for ADR extraction.
+
+### Iteration 11
+
+Processed `docs/exploration/archive/01-architecture-landscape.md` before `00-exploration-framework.md`, per user correction. Extracted constraint-filter survivors, prior-art lessons, viable architecture families, hybrid candidate direction, and decision-coupling/ADR-order lineage. The document is superseded raw exploration; no final architecture closure was promoted.
