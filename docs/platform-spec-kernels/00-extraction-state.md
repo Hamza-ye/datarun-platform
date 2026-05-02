@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 24 ADR-003 phase2 extracted
+Status: Iteration 25 ADR-003 course correction extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -155,7 +155,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 24
+Current iteration: 25
 
 Processed sources:
 
@@ -198,10 +198,11 @@ Processed sources:
 - `docs/exploration/archive/09-adr2-phase3-classification-results.md`
 - `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md`
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md`
+- `docs/exploration/archive/12-adr3-course-correction.md`
 
 Next source:
 
-- `docs/exploration/archive/12-adr3-course-correction.md`
+- `docs/adrs/adr-003-authorization-sync.md`
 
 Ignored-as-source:
 
@@ -230,7 +231,7 @@ Allowed outcomes when the owning source is processed:
 Current deferred candidates:
 
 - `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `09-adr2-phase3-classification-results.md`: classified into ADR-002 Bucket 1 constraints, ADR-002 Bucket 2 strategies, Bucket 3 deferrals to ADR-4/5, and Bucket 4 accepted risks. Final verification still owned by ADR-002.
-- `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Outcome after `11-adr3-phase2-stress-test.md`: Phase 1 candidates were stress-tested into constraint candidates, strategy candidates, rejected unsafe options, and open operational gaps. Final closure still owned by `12-adr3-course-correction.md` and ADR-003.
+- `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Outcome after `12-adr3-course-correction.md`: authority-context envelope candidates were superseded by authority-as-projection; four Phase 2 findings were promoted as constraint candidates; several Phase 2 Bucket 1 claims were reclassified as strategies, implementation, ADR-004/configuration, or deferred risk. Final closure now owned by ADR-003.
 - `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
 - `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
 - `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Outcome after `04-decision-audit.md`: promoted by audit toward typed immutable events/event-log source of truth, with final verification still owned by ADR-001.
@@ -398,7 +399,7 @@ Current deferred candidates:
 - `ADR-003 Upstream Assumption Compatibility` — settled extraction context; ADR-003 Phase 1 accepts ADR-001/ADR-002 commitments as inputs.
 - `Authorization Staleness Accept-And-Flag Candidate` — candidate interaction rule; stale authorization work is accepted as factual and flagged, not rejected.
 - `Assignment-Based Authorization Candidate` — candidate primitive; assignment as actor-role-scope-duration/process authorization unit.
-- `Authority Context Envelope Candidate` — candidate contract; event authority context records actor, assignment, and optional process references.
+- `Authority Context Envelope Candidate` — superseded Phase 1 candidate; course correction replaces envelope authority context with authority-as-projection pending ADR-003 verification.
 - `Sync Scope As Offline Authorization Candidate` — candidate interaction rule; server sync scope is primary offline authorization mechanism.
 - `Subject-Scoped Sync Candidate` — candidate sync rule; in-scope subject history is not limited by event author.
 - `Scope Composition Candidate` — open high-severity question; standing and campaign assignments may compose but final scope algebra is undecided.
@@ -424,13 +425,20 @@ Current deferred candidates:
 - `Sensitive Subject Authorization Exception Open` — open design-constraint collision between accept-and-flag and sensitive-data compliance.
 - `Projection Freshness Metadata Candidate` — conditional contract; summaries and projections need visible freshness/consistency metadata.
 - `Incremental Projection Update Strategy` — conditional strategy; incremental updates are normal path, full rebuild recovery path.
-- `Authority Context Bounded Reference Candidate` — conditional envelope candidate; primary plus optional secondary assignment refs.
+- `Authority Context Bounded Reference Candidate` — superseded Phase 2 envelope candidate; course correction rejects assignment refs in the ADR-003 envelope path.
 - `Authority Context Assertion Semantics Candidate` — conditional audit invariant; authority context records device belief, not server-verified fact.
-- `Platform Actor For System Events Candidate` — conditional primitive; system-generated events use reserved platform actor identity.
+- `Platform Actor For System Events Candidate` — superseded Phase 2 candidate tied to mandatory authority context; course correction says no platform actor is needed for ADR-003 authority context if authority is projected.
 - `Shared Device Per-Actor Session Candidate` — conditional invariant; shared devices need actor partitioning and per-actor sync knowledge or explicit limitation.
 - `Auditor Access Structural Additions Open` — open auditor gap; capability, query scope, and data expiry may be structural.
 - `Missing Operational Path Set` — open Phase 2 gap set; case reassignment, referral, coordinator transactionality, expired assignments, deactivated actor assessments.
 - `ADR-003 Phase 2 Candidate Classification Set` — open handoff register of constraint and strategy candidates awaiting course correction/ADR-003.
+- `ADR-003 Course-Correction Boundary` — settled extraction rule from `docs/exploration/archive/12-adr3-course-correction.md`; reconciliation source, not final ADR.
+- `Authority-As-Projection Candidate` — conditional course-correction decision; no authority-context envelope field, authority derived from assignment/process timelines.
+- `Assignment Sync Ordering Requirement Candidate` — conditional requirement implied by authority-as-projection; assignment events must be available before/with authorized work events.
+- `ADR-003 Course-Correction Constraint Promotion Set` — conditional promotion set; scope containment, alias-respects-original-scope, online-only conflict resolution, authorization detect-before-act.
+- `ADR-003 Strategy Reclassification Set` — conditional reclassification; priority sync, purge policy, freshness metadata, auto-resolution, shared-device sessions are strategies.
+- `ADR-003 Stress-Test Overcall Correction Set` — conditional correction; sensitive subjects, actor-partitioned storage, actor-as-subject visibility, and auditor access are not treated as ADR-003 envelope constraints by this source.
+- `ADR-003 Course-Correction Residual Risk` — open pre-ADR checklist; verify sync ordering, strategy carry-forward, and deferred/owned risks in ADR-003.
 
 ## Iteration History
 
@@ -533,3 +541,7 @@ Processed `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md` as ADR-0
 ### Iteration 24
 
 Processed `docs/exploration/archive/11-adr3-phase2-stress-test.md` as ADR-003 Phase 2 adversarial evidence. Extracted stress-tested constraint candidates, strategy candidates, unsafe/rejected policy options, and open operational gaps. Preserved Phase 2 `RESOLVED` claims as conditional stress-test closure rather than ADR-settled closure. Updated the ADR-003 deferred register so final closure remains with `12-adr3-course-correction.md` and ADR-003.
+
+### Iteration 25
+
+Processed `docs/exploration/archive/12-adr3-course-correction.md` as ADR-003 irreversibility filtering and stress-test reconciliation. Superseded Phase 1/2 authority-context envelope candidates in favor of authority-as-projection, promoted four Phase 2 findings as constraint candidates, reclassified several Phase 2 findings as strategies or non-ADR-003 structural concerns, and recorded residual risks for final ADR-003 verification. Set next source to `docs/adrs/adr-003-authorization-sync.md` rather than ADR-004 archive scanning so ADR-003 can close or correct the reconciliation.

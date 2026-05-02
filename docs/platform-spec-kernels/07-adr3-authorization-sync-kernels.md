@@ -170,22 +170,24 @@ Use as candidate authorization primitive lineage.
 
 ## Kernel: Authority Context Envelope Candidate
 
-Status: Candidate
+Status: Superseded
 Kind: contract
 
 Specification statement:
 
-Events need authority context that records the grant under which the action was performed. Phase 1 identifies the authority context as actor reference, assignment reference, and optionally process reference, rather than a simple role field.
+Events need authority context that records the grant under which the action was performed. Phase 1 identified the authority context as actor reference, assignment reference, and optionally process reference, rather than a simple role field. ADR-003 course correction supersedes this envelope-field candidate in favor of deriving authority from assignment/process timelines during sync.
 
 Source basis:
 
 - `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md` / S09 `Act 3`
 - `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md` / `### Coordinated Campaign Summary`
 - `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md` / `### EQ-1: Authority Context in the Event Envelope`
+- `docs/exploration/archive/12-adr3-course-correction.md` / `The Envelope Question -- Let's Settle It`
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Stress Test Impact and Classification`
 
 Closure basis:
 
-Candidate ADR-003 Phase 1 finding. Final envelope fields must be decided by ADR-003 and later envelope ADRs if applicable.
+Superseded by ADR-003 course-correction lineage, pending final ADR-003 verification.
 
 Scope:
 
@@ -199,6 +201,7 @@ Forbidden interpretations:
 
 - Do not preserve only actor identity while losing the assignment/process authority that authorized the action.
 - Do not infer that every event must reference a process.
+- Do not treat Phase 1 authority-context-in-envelope as still preferred after the course-correction source chooses authority-as-projection.
 
 Open edges:
 
@@ -206,7 +209,7 @@ Scope composition and authority context shape remain high-severity Phase 1 hot s
 
 Platform specification note:
 
-Use as candidate event-envelope addition for authorization context.
+Use as superseded lineage explaining why authority reconstruction was considered.
 
 ## Kernel: Sync Scope As Offline Authorization Candidate
 
@@ -1198,22 +1201,23 @@ Use as Phase 2 validation of tiered projection strategy.
 
 ## Kernel: Authority Context Bounded Reference Candidate
 
-Status: Conditional
-Kind: contract
+Status: Superseded
+Kind: rejected-alternative
 
 Specification statement:
 
-To avoid an unbounded variable-length envelope field, Phase 2 proposes bounded authority context references: `primary_assignment_ref` for the most-specific active assignment and optional `secondary_assignment_ref` for the standing assignment when the primary assignment is a campaign overlay.
+To avoid an unbounded variable-length envelope field, Phase 2 proposes bounded authority context references: `primary_assignment_ref` for the most-specific active assignment and optional `secondary_assignment_ref` for the standing assignment when the primary assignment is a campaign overlay. ADR-003 course correction supersedes this proposal because Option (c) stores no authority-context assignment references in the event envelope.
 
 Source basis:
 
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding E2
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md` / hot spot HS-7
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 candidate summary
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Findings That Strengthen Our Option (c) Choice`
 
 Closure basis:
 
-Conditional Phase 2 envelope constraint candidate. ADR-003 and later envelope ADRs must confirm final field shape.
+Superseded by ADR-003 course-correction lineage, pending final ADR-003 verification.
 
 Scope:
 
@@ -1227,14 +1231,15 @@ Forbidden interpretations:
 
 - Do not use an unbounded list of assignment references without later ADR support.
 - Do not lose campaign-vs-standing attribution when both assignments cover an event.
+- Do not keep primary/secondary assignment references as the current preferred ADR-003 envelope solution after Option (c).
 
 Open edges:
 
-Future support beyond two assignment references remains unresolved.
+Authority reconstruction correctness and assignment sync ordering remain unresolved until ADR-003 verification.
 
 Platform specification note:
 
-Use as event-envelope lineage for assignment authority.
+Use as rejected/superseded envelope-option lineage.
 
 ## Kernel: Authority Context Assertion Semantics Candidate
 
@@ -1276,22 +1281,23 @@ Use as audit semantics for authority context.
 
 ## Kernel: Platform Actor For System Events Candidate
 
-Status: Conditional
-Kind: primitive
+Status: Superseded
+Kind: rejected-alternative
 
 Specification statement:
 
-System-generated events need a reserved platform actor identity so `authority_context` can remain present and parseable on every event without null-special cases. The platform actor represents system authority for sync processing and other generated events.
+System-generated events need a reserved platform actor identity if `authority_context` is mandatory on every event. ADR-003 course correction supersedes this need by choosing authority-as-projection with no authority-context envelope field; system events can be identified by event type under this lineage.
 
 Source basis:
 
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding E5
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md` / invariant report I2
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 candidate summary
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Findings That Strengthen Our Option (c) Choice`
 
 Closure basis:
 
-Conditional Phase 2 envelope/identity constraint candidate.
+Superseded by ADR-003 course-correction lineage, pending final ADR-003 verification.
 
 Scope:
 
@@ -1305,14 +1311,15 @@ Forbidden interpretations:
 
 - Do not treat absent authority context on system events as unrestricted authority.
 - Do not require event readers to infer a missing actor from event type alone.
+- Do not keep platform-actor identity as a required ADR-003 primitive if no authority-context envelope field is committed.
 
 Open edges:
 
-Final representation of platform actor identity requires ADR-003 and identity/envelope reconciliation.
+Final ADR-003 must verify that system-event identification by event type is sufficient.
 
 Platform specification note:
 
-Use as a candidate primitive for system-authored events.
+Use as superseded lineage tied to the rejected mandatory authority-context envelope path.
 
 ## Kernel: Shared Device Per-Actor Session Candidate
 
@@ -1432,20 +1439,21 @@ Use as a checklist to prevent hidden architecture gaps.
 
 ## Kernel: ADR-003 Phase 2 Candidate Classification Set
 
-Status: Open
+Status: Conditional
 Kind: open-question
 
 Specification statement:
 
-Phase 2 classifies several findings as Bucket 1 constraint candidates and Bucket 2 strategy candidates. Constraint candidates include bounded authority references, assignment scope-containment, authorization detect-before-act, alias-respects-original-scope, online-only conflict resolution, platform actor identity, sensitive-subject classification, and actor-partitioned shared-device storage. Strategy candidates include selective retain purge, priority sync, watermark-based auto-resolution, per-actor sync sessions, incremental projections, and batch flag resolution.
+Phase 2 classifies several findings as Bucket 1 constraint candidates and Bucket 2 strategy candidates. Constraint candidates include bounded authority references, assignment scope-containment, authorization detect-before-act, alias-respects-original-scope, online-only conflict resolution, platform actor identity, sensitive-subject classification, and actor-partitioned shared-device storage. Strategy candidates include selective retain purge, priority sync, watermark-based auto-resolution, per-actor sync sessions, incremental projections, and batch flag resolution. Course correction later reconciles this classification by superseding the authority-context envelope path, promoting four constraints, and reclassifying several overcalled constraints as strategies or non-ADR-003 structural concerns.
 
 Source basis:
 
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## Summary: What ADR-003 Must Decide as Constraints`
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Stress Test Impact and Classification`
 
 Closure basis:
 
-Open classification awaiting ADR-003 course correction and final ADR-003 verification.
+Conditional classification after course-correction reconciliation. Final verification remains owned by ADR-003.
 
 Scope:
 
@@ -1462,8 +1470,282 @@ Forbidden interpretations:
 
 Open edges:
 
-Next source must reconcile this classification with ADR-003 course correction.
+ADR-003 must verify which course-correction classifications are committed, deferred, or contradicted.
 
 Platform specification note:
 
 Use as the Phase 2 handoff register for ADR-003 closure.
+
+## Kernel: ADR-003 Course-Correction Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/12-adr3-course-correction.md` is ADR-003 Phase 3 irreversibility filtering and stress-test reconciliation. It narrows ADR-003's claimed irreversible surface, chooses authority-as-projection over authority-context-in-envelope, and reconciles Phase 2 stress-test findings. It remains superseded exploration and must be verified against ADR-003 before final platform closure.
+
+Source basis:
+
+- `docs/exploration/archive/12-adr3-course-correction.md` / supersession notice
+- `docs/exploration/archive/12-adr3-course-correction.md` / opening contribution and two-stage description
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Stress Test Impact and Classification`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all ADR-003 course-correction lineage.
+
+Non-goals:
+
+Does not itself settle final ADR-003 platform constraints.
+
+Forbidden interpretations:
+
+- Do not treat this source as final ADR-003 text.
+- Do not let its reclassification erase Phase 2 risks unless it explicitly explains the replacement classification.
+
+Open edges:
+
+Final verification is owned by `docs/adrs/adr-003-authorization-sync.md`.
+
+Platform specification note:
+
+Use as the reconciliation checkpoint before ADR-003 extraction.
+
+## Kernel: Authority-As-Projection Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-003 course correction chooses Option (c): events do not store `authority_context` in the immutable envelope. Authority is reconstructed on sync from the actor, subject/process references, assignment timeline, event creation context, and sync knowledge state. Authority is therefore a projection rather than a stored device assertion.
+
+Source basis:
+
+- `docs/exploration/archive/12-adr3-course-correction.md` / `The Envelope Question -- Let's Settle It`
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Stress Test Impact and Classification`
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Evolvability Analysis` S3
+
+Closure basis:
+
+Conditional ADR-003 course-correction decision. Final ADR-003 must verify whether it is committed.
+
+Scope:
+
+Applies to event envelope design, assignment timeline reconstruction, authority validation on sync, campaign/process attribution, and audit interpretation.
+
+Non-goals:
+
+Does not decide storage/indexing of assignment timelines or all performance optimizations.
+
+Forbidden interpretations:
+
+- Do not require `assignment_ref`, assignment-ref lists, or platform actor authority context in every event under this lineage.
+- Do not treat derived authority as unknowable merely because it is not stored in the event envelope.
+
+Open edges:
+
+Assignment events must be reliably available before or with work events for reconstruction. This sync-ordering requirement remains to be verified by ADR-003.
+
+Platform specification note:
+
+Use as the current ADR-003 envelope candidate pending ADR verification.
+
+## Kernel: Assignment Sync Ordering Requirement Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Authority-as-projection is valid only if assignment events needed to reconstruct authority are synced before, or atomically with, the work events they authorize. If a work event reaches the server before the relevant assignment history, authority cannot be reconstructed at that moment.
+
+Source basis:
+
+- `docs/exploration/archive/12-adr3-course-correction.md` / Option (c) verdict and important note
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Evolvability Analysis` S3
+
+Closure basis:
+
+Conditional requirement implied by the chosen Option (c). Final ADR-003 must confirm whether this becomes a sync invariant or strategy.
+
+Scope:
+
+Applies to assignment event delivery, sync ordering, partial sync, first sync, campaign assignment sync, and authority reconstruction.
+
+Non-goals:
+
+Does not define transport-level bundling or retry protocol.
+
+Forbidden interpretations:
+
+- Do not choose authority-as-projection while leaving assignment/work sync ordering unspecified.
+
+Open edges:
+
+Need final classification of assignment-before-work delivery as constraint, protocol strategy, or accepted risk.
+
+Platform specification note:
+
+Use as the key viability condition for authority-as-projection.
+
+## Kernel: ADR-003 Course-Correction Constraint Promotion Set
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+The course-correction source promotes four Phase 2 stress-test findings as genuine ADR-003 constraint-level updates: server-side scope containment on assignment creation, alias-respects-original-scope authorization evaluation, online-only conflict resolution, and detect-before-act coverage for authorization flags.
+
+Source basis:
+
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Findings That Require ADR-003 Updates (Constraint-level)`
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Evolvability Analysis` S4, S5, S6, S7
+
+Closure basis:
+
+Conditional course-correction promotion pending ADR-003 verification.
+
+Scope:
+
+Applies to assignment writes, scope-crossing identity merge projection, conflict-resolution transactions, and sync-time flag processing.
+
+Non-goals:
+
+Does not settle per-flag severity configuration or all future scope types.
+
+Forbidden interpretations:
+
+- Do not bury these four findings as mere implementation concerns after the course-correction source promotes them.
+- Do not treat all Phase 2 Bucket 1 candidates as equally promoted.
+
+Open edges:
+
+ADR-003 must verify whether these are committed as S4-S7 or otherwise named commitments.
+
+Platform specification note:
+
+Use as pre-ADR checklist for ADR-003 extraction.
+
+## Kernel: ADR-003 Strategy Reclassification Set
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+The course-correction source reclassifies several Phase 2 findings as strategies rather than irreversible constraints: priority sync, data removal policy, supervisor freshness metadata, watermark-based auto-resolution, and shared-device per-actor sessions.
+
+Source basis:
+
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Findings Correctly Classified as Strategies`
+
+Closure basis:
+
+Conditional course-correction classification pending ADR-003 verification.
+
+Scope:
+
+Applies to sync optimization, local data lifecycle policy, summary metadata, flag auto-resolution logic, and shared-device sync sessions.
+
+Non-goals:
+
+Does not say these items are unimportant or optional for every deployment.
+
+Forbidden interpretations:
+
+- Do not promote these items to immutable envelope constraints from Phase 2 alone.
+- Do not discard them as irrelevant; they remain required strategy pressure where the platform supports the corresponding deployment conditions.
+
+Open edges:
+
+Final ADR-003 must confirm which are explicit strategies, accepted risks, or deferred items.
+
+Platform specification note:
+
+Use to prevent over-hardening evolvable ADR-003 strategy items.
+
+## Kernel: ADR-003 Stress-Test Overcall Correction Set
+
+Status: Conditional
+Kind: forbidden-interpretation
+
+Specification statement:
+
+The course-correction source explicitly says Phase 2 overcalled several findings as structural constraints: sensitive-subject classification is strategy/configuration with a structural capability boundary, actor-partitioned local storage is implementation, actor-as-subject visibility is sync filter logic rather than a new assignment primitive, and auditor access is deferred/evolvable through roles, capabilities, assignment configuration, and sync behavior.
+
+Source basis:
+
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Findings That the Stress Test Overcalls`
+
+Closure basis:
+
+Conditional course-correction classification pending ADR-003 verification.
+
+Scope:
+
+Applies to sensitive-subject sync behavior, shared-device local storage, actor-as-subject assessment delivery, and auditor access.
+
+Non-goals:
+
+Does not resolve the operational need for these capabilities or their final ADR ownership.
+
+Forbidden interpretations:
+
+- Do not treat Phase 2's Bucket 1 label as final for these items.
+- Do not silently remove the risks; reclassify them with explicit ownership.
+
+Open edges:
+
+ADR-003 and later ADR-004/flag sources must verify ownership and closure.
+
+Platform specification note:
+
+Use as a correction layer over Phase 2 classification.
+
+## Kernel: ADR-003 Course-Correction Residual Risk
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+The course-correction source addresses the largest Phase 2 classification conflict by choosing no authority-context envelope field, but it leaves residual verification needs: whether assignment sync ordering is strong enough for authority reconstruction, whether reclassified strategy items are explicitly carried as strategies or deferred, and whether auditor/sensitive/shared-device risks are intentionally out of ADR-003's constraint surface.
+
+Source basis:
+
+- `docs/exploration/archive/12-adr3-course-correction.md` / Option (c) important note
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Findings Correctly Classified as Strategies`
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Findings That the Stress Test Overcalls`
+- `docs/exploration/archive/12-adr3-course-correction.md` / `Evolvability Analysis`
+
+Closure basis:
+
+Open pre-ADR verification risk.
+
+Scope:
+
+Applies to ADR-003 extraction and later cross-ADR ownership checks.
+
+Non-goals:
+
+Does not reopen ADR-002 or decide ADR-004/ADR-005.
+
+Forbidden interpretations:
+
+- Do not equate "not irreversible" with "not platform-relevant."
+- Do not accept Option (c) without checking final ADR-003 for assignment-sync ordering and reconstruction semantics.
+
+Open edges:
+
+Final ADR-003 extraction must confirm closure, deferral, or contradiction for each residual risk.
+
+Platform specification note:
+
+Use as the ADR-003 final-extraction checklist.
