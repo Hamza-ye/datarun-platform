@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 13 in progress
+Status: Iteration 14 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -152,7 +152,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 13
+Current iteration: 14
 
 Processed sources:
 
@@ -187,10 +187,11 @@ Processed sources:
 - `docs/principles.md`
 - `docs/exploration/archive/01-architecture-landscape.md`
 - `docs/exploration/archive/00-exploration-framework.md`
+- `docs/exploration/archive/02-adr1-offline-data-model.md`
 
 Next source:
 
-- `docs/exploration/archive/02-adr1-offline-data-model.md`
+- `docs/exploration/archive/03-adr1-forward-projection.md`
 
 Ignored-as-source:
 
@@ -291,6 +292,17 @@ Rest-state merge note:
 - `Irreversibility Filter Method` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; stress depth scales by permanence.
 - `Decision Audit Gate Method` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; audit checks assumptions, scope bleed, gaps, and decision placement.
 - `ADR Scope Hygiene Method` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; ADRs commit decisions, exploration preserves journey.
+- `ADR-001 Exploration Boundary` — settled extraction rule from `docs/exploration/archive/02-adr1-offline-data-model.md`; exploration narrows but ADR-001 decides.
+- `Offline Data Model Irreversibility` — settled ADR-001 exploration risk classification; storage primitive migration is high-irreversibility.
+- `Offline Data Model Subdecision Coupling` — settled ADR-001 exploration structure; record mutability, write granularity, identity generation, sync unit, and conflict semantics are coupled.
+- `Append-Only Storage Forced` — conditional ADR-001 exploration conclusion; final closure waits for ADR-001.
+- `Storage Unit Option Set` — open ADR-001 exploration question; snapshots vs events vs action log remains for ADR-001.
+- `Snapshot Workflow Weakness` — conditional rejected-alternative lineage; final rejection waits for ADR-001.
+- `Client-Generated Identity Forced` — conditional ADR-001 exploration conclusion; final closure waits for ADR-001 and ADR-002.
+- `Immutable Record Sync Shape` — conditional ADR-001 exploration conclusion; ADR-003 closes scope/auth behavior.
+- `Conflict Surfacing Default` — conditional ADR-001 exploration conclusion; later ADRs close policy.
+- `Materialized Reads Required For Performance` — conditional event-like-model performance invariant; ADR-001 closes read model obligations.
+- `ADR-001 Downstream Constraint Set` — conditional dependency map for ADR-002 through ADR-005.
 
 ## Iteration History
 
@@ -349,3 +361,7 @@ Processed `docs/exploration/archive/00-exploration-framework.md` as methodology 
 ### Iteration 13
 
 Housekeeping-only split for context control. Replaced the oversized single working draft with a staging index plus four temporary staging files: domain requirement kernels, behavioral/viability/principle kernels, architecture-lineage kernels, and methodology/extraction-rule kernels. No source was processed, no cursor advanced, and no kernel status changed.
+
+### Iteration 14
+
+Processed `docs/exploration/archive/02-adr1-offline-data-model.md`, the first ADR-specific exploration source. Extracted ADR-001 lineage around forced append-only storage, client-generated identity, immutable-record sync shape, conflict surfacing, materialized-read pressure, snapshot workflow weakness, and downstream constraints. Kept the central storage-unit choice open because the source is superseded and explicitly says ADR-001 finalizes the decision.
