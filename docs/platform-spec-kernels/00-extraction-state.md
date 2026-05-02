@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 21 ADR-002 reconciliation complete
+Status: Iteration 22 ADR-002 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -154,7 +154,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 21
+Current iteration: 22
 
 Processed sources:
 
@@ -198,7 +198,7 @@ Processed sources:
 
 Next source:
 
-- ADR-002 extraction from `docs/adrs/` is the recommended next action before continuing archive source scan.
+- `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md`
 
 Ignored-as-source:
 
@@ -381,6 +381,16 @@ Current deferred candidates:
 - `ADR-002 Accepted Risk Set` — conditional accepted-risk set with revisit triggers.
 - `ADR-002 Simplicity Validation` — conditional validation that Bucket 1 constraints do not materially complicate S00.
 - `ADR-002 Pre-ADR Reconciliation Checkpoint` — housekeeping reconciliation; verifies what ADR-002 must confirm, keep strategy-bounded, defer, or preserve as accepted risk.
+- `ADR-002 Decision Boundary` — settled ADR extraction rule from `docs/adrs/adr-002-identity-conflict.md`.
+- `ADR-002 Envelope Contract` — ADR-settled event envelope additions and typed identity references.
+- `ADR-002 Device Time Advisory Invariant` — ADR-settled timestamp/ordering invariant.
+- `ADR-002 Identity Evolution Contract` — ADR-settled merge/split/corrective split contract.
+- `ADR-002 Lineage Validation Contract` — ADR-settled DAG and online-only merge/split contract.
+- `ADR-002 Conflict Contract` — ADR-settled single-writer, detect-before-act, raw-reference conflict contract.
+- `ADR-002 Stale Event Acceptance Invariant` — ADR-settled accept-and-flag invariant for state staleness.
+- `ADR-002 Explicit Deferral Contract` — ADR-settled deferral map to ADR-003, ADR-004, and ADR-005.
+- `ADR-002 Accepted Risk Contract` — ADR-settled conditional validity and revisit triggers.
+- `ADR-002 Reconciliation Result` — settled finding that ADR-002 confirms Phase 3 Bucket 1, preserves strategies, and defers cross-ADR items without contradiction.
 
 ## Iteration History
 
@@ -471,3 +481,7 @@ Processed `docs/exploration/archive/09-adr2-phase3-classification-results.md` as
 ### Iteration 21
 
 Housekeeping-only ADR-002 reconciliation pass. Added a pre-ADR checklist to `06-adr2-identity-conflict-kernels.md` covering Phase 3 Bucket 1 verification, Bucket 2 strategy boundaries, Bucket 3 cross-ADR deferrals, accepted risks, and user risk-note handling. No source was processed and no kernel status was promoted. The recommended next action is ADR-002 extraction before continuing archive source scan.
+
+### Iteration 22
+
+Processed `docs/adrs/adr-002-identity-conflict.md` against the ADR-002 reconciliation checkpoint. Confirmed ADR-002 carries the Phase 3 Bucket 1 constraints, keeps Bucket 2 items as strategies, explicitly defers Bucket 3 items to ADR-003/004/005, and preserves accepted risks with revisit triggers. Added ADR-settled kernels for envelope contract, device-time advisory semantics, identity evolution, lineage validation, conflict contract, stale-event acceptance, explicit deferrals, accepted risks, and reconciliation result. Did not use `docs/adrs/adr-002-addendum-type-vocabulary.md` as authority in this pass.

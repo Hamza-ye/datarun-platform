@@ -1435,3 +1435,402 @@ De-risking rule:
 ### Reconciliation Result Before ADR-002
 
 Current standing is coherent enough to read ADR-002 next. The extraction machinery is catching cross-ADR assumptions by using explicit source boundaries, deferred closure candidates, Bucket 1/2/3/4 classification, and conditional statuses. The main remaining risk is not process weakness; it is whether ADR-002's final prose omitted, softened, or shifted Phase 3 constraints. That must be checked explicitly during ADR-002 extraction.
+
+## Kernel: ADR-002 Decision Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/adrs/adr-002-identity-conflict.md` is the decided ADR for identity model and conflict resolution. It finalizes ADR-002 commitments but explicitly defers authorization/sync, configuration conflict rules, pending-match workflow details, and downstream cascade behavior to later ADRs.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / status line
+- `docs/adrs/adr-002-identity-conflict.md` / `## Decision`
+- `docs/adrs/adr-002-identity-conflict.md` / `## What This Does NOT Decide`
+
+Closure basis:
+
+ADR-settled extraction boundary.
+
+Scope:
+
+Applies to ADR-002 identity and conflict kernels.
+
+Non-goals:
+
+Does not make `docs/adrs/adr-002-addendum-type-vocabulary.md` authoritative for this extraction; the session rule keeps it non-authoritative unless later ADRs carry points forward.
+
+Forbidden interpretations:
+
+- Do not use ADR-002 to decide ADR-003 sync scope or authorization.
+- Do not use ADR-002 to decide ADR-004 configuration boundary.
+- Do not use ADR-002 to decide ADR-005 workflow cascade or pending-match mechanics.
+- Do not read the addendum as source of platform closure in this pass.
+
+Open edges:
+
+Later ADRs must close the deferred concerns, and later authoritative ADRs may carry forward addendum vocabulary if applicable.
+
+Platform specification note:
+
+Use ADR-002 as the closure source for identity/conflict constraints while preserving its explicit deferrals.
+
+## Kernel: ADR-002 Envelope Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+Every event carries `device_id`, `device_sequence`, and `sync_watermark`; identity references carry a type discriminator and UUID for `subject`, `actor`, `process`, or `assignment`. `device_id` is hardware-bound or app-installation-bound, not user-account-bound; `device_sequence` is monotonic per device and globally unique with `device_id`; `sync_watermark` records the last-known server state version at event creation.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / `### S1: Event Envelope — Causal Ordering Fields`
+- `docs/adrs/adr-002-identity-conflict.md` / `### S2: Event Envelope — Typed Identity References`
+- `docs/adrs/adr-002-identity-conflict.md` / `### S4: Device Sequence and Sync Watermark Persistence`
+- `docs/adrs/adr-002-identity-conflict.md` / `### S5: Device Identity Is Hardware-Bound`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to the event envelope additions and identity reference format decided by ADR-002.
+
+Non-goals:
+
+Does not decide code-level type vocabulary beyond the four identity categories; the non-authoritative addendum is not used here.
+
+Forbidden interpretations:
+
+- Do not use untyped identity UUID references in events.
+- Do not reuse `(device_id, device_sequence)`.
+- Do not tie device sequence namespace to actor identity.
+
+Open edges:
+
+Future identity categories or code vocabulary refinements require later authoritative closure.
+
+Platform specification note:
+
+This is a core Platform Specification event-envelope contract.
+
+## Kernel: ADR-002 Device Time Advisory Invariant
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+`device_time` is recorded for display and audit only. Projection logic, conflict detection, and protocol correctness must not depend on `device_time` for ordering or structural decisions; intra-device ordering uses `device_sequence`, and cross-device concurrency detection uses `sync_watermark`.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / `### S3: device_time Is Advisory`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to event ordering, projection correctness, conflict detection, and audit/display timestamp interpretation.
+
+Non-goals:
+
+Does not decide exact implausible-time thresholds or clock-anomaly UI.
+
+Forbidden interpretations:
+
+- Do not structurally order events by device clock time.
+- Do not infer causal order from device time.
+
+Open edges:
+
+Clock anomaly representation remains a projection/strategy detail unless later ADRs decide it.
+
+Platform specification note:
+
+Use as event ordering invariant in the Platform Specification.
+
+## Kernel: ADR-002 Identity Evolution Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+Subject merge is alias-in-projection: `SubjectsMerged` creates `retired_id -> surviving_id` and no existing event is modified. The platform does not define `SubjectsUnmerged`; wrong merges are corrected by splitting the surviving subject. `SubjectSplit` archives the source as terminal, leaves historical events under the source ID, sends new events to successors, and accepts post-split events against the archived source with flags.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / `### S6: Merge Is Alias-in-Projection, Never Re-Reference`
+- `docs/adrs/adr-002-identity-conflict.md` / `### S7: No SubjectsUnmerged — Wrong Merges Use Corrective Split`
+- `docs/adrs/adr-002-identity-conflict.md` / `### S8: Split Freezes History; Source Is Permanently Archived`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to subject merge, wrong-merge correction, split, archived source identity, and historical event attribution.
+
+Non-goals:
+
+Does not decide UI or workflow for optional manual re-attribution.
+
+Forbidden interpretations:
+
+- Do not physically re-reference stored events during merge.
+- Do not introduce symmetric unmerge.
+- Do not mutate historical source events during split.
+
+Open edges:
+
+Post-split attribution workflow remains strategy/workflow detail unless later ADRs decide it.
+
+Platform specification note:
+
+Use as identity-evolution contract.
+
+## Kernel: ADR-002 Lineage Validation Contract
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+The identity lineage graph is a DAG by construction. `SubjectsMerged` requires both surviving and retired operands to be active at write time. `SubjectSplit` transitions the source to archived, and archived subjects cannot be merge targets, split again, or reactivated. `SubjectsMerged` and `SubjectSplit` are online-only, server-validated operations.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / `### S9: Lineage Graph Acyclicity By Construction`
+- `docs/adrs/adr-002-identity-conflict.md` / `### S10: SubjectsMerged and SubjectSplit Are Online-Only Operations`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to subject lineage event validation and execution location.
+
+Non-goals:
+
+Does not decide authorization eligibility for merge/split actors; ADR-002 defers authorization to ADR-003.
+
+Forbidden interpretations:
+
+- Do not permit offline merge/split.
+- Do not permit lifecycle events that create lineage cycles.
+- Do not allow archived subjects to return to active lifecycle.
+
+Open edges:
+
+Who may perform merge/split is an ADR-003 authorization decision.
+
+Platform specification note:
+
+Use as subject lineage invariant and command-validity contract.
+
+## Kernel: ADR-002 Conflict Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+Every `ConflictDetected` event designates one resolver identity; only that resolver's `ConflictResolved` event is canonical. During server-side sync processing, conflict detection runs before reactive policies execute, and flagged events do not trigger policies until resolved. Conflict detection evaluates raw event subject references before alias resolution.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / `### S11: Single-Writer Conflict Resolution`
+- `docs/adrs/adr-002-identity-conflict.md` / `### S12: Conflict Detection Before Policy Execution`
+- `docs/adrs/adr-002-identity-conflict.md` / `### S13: Conflict Detection Uses Raw References`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to conflict detection, conflict resolution, sync ingestion ordering, raw-reference provenance, and alias/detection ordering.
+
+Non-goals:
+
+Does not decide who is eligible to be a resolver; ADR-002 defers authorization to ADR-003.
+
+Forbidden interpretations:
+
+- Do not allow competing canonical conflict resolutions.
+- Do not let flagged incoming events trigger downstream policies before resolution.
+- Do not hide retired-reference provenance through pre-detection aliasing.
+
+Open edges:
+
+Resolver eligibility and conflict-resolution authorization belong to ADR-003.
+
+Platform specification note:
+
+Use as core conflict contract.
+
+## Kernel: ADR-002 Stale Event Acceptance Invariant
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+The platform never rejects a validly structured event based on subject state staleness. Events recorded against deactivated, merged, split, reclassified, or otherwise changed subjects are accepted and stored; anomalies are surfaced as separate `ConflictDetected` events. Structural validation still applies to malformed envelopes, invalid event types, and payload/shape mismatch.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / `### S14: Events Are Never Rejected for State Staleness`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to stale-state event acceptance during sync.
+
+Non-goals:
+
+Does not decide anomaly severity, flag resolution outcome, or malformed event handling beyond ADR-002's distinction.
+
+Forbidden interpretations:
+
+- Do not discard valid field work because central state changed while the device was offline.
+- Do not treat accepted stale events as semantically clean.
+
+Open edges:
+
+Resolution policies and workflow consequences remain downstream where ADR-002 defers them.
+
+Platform specification note:
+
+Use as offline/immutability invariant.
+
+## Kernel: ADR-002 Explicit Deferral Contract
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-002 explicitly defers domain-level conflict rules and pending-match generality to ADR-004; downstream cascade behavior and pending-match matching/timeout/bijective constraints to ADR-005; conflict resolver authorization, merge/split authorization, sync scope, and projection delivery to ADR-003; and projection rebuild, flag location, auto-resolution, batch resolution, and flag grouping as strategies.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / `## What This Does NOT Decide`
+- `docs/adrs/adr-002-identity-conflict.md` / `## Consequences`
+
+Closure basis:
+
+ADR-settled as deferral, open for owning ADRs.
+
+Scope:
+
+Applies to cross-ADR assumptions and downstream closure tracking.
+
+Non-goals:
+
+Does not decide any deferred concern.
+
+Forbidden interpretations:
+
+- Do not treat ADR-002 consequence bullets as downstream decisions.
+- Do not close ADR-003, ADR-004, or ADR-005 items from ADR-002.
+
+Open edges:
+
+ADR-003, ADR-004, and ADR-005 must promote, adapt, reject, or leave these deferred items open.
+
+Platform specification note:
+
+Use as cross-ADR boundary map.
+
+## Kernel: ADR-002 Accepted Risk Contract
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+ADR-002 accepts risks with revisit triggers: concurrent state changes require human resolution; same-actor cross-device ordering is best-effort; batch merge volume may strain low-end sync; and post-split manual attribution may not scale. The unmerge attribution risk remains eliminated only while corrective split replaces unmerge.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md` / `### Risks accepted`
+
+Closure basis:
+
+ADR-settled conditional validity.
+
+Scope:
+
+Applies to ADR-002 operational risks and revisit conditions.
+
+Non-goals:
+
+Does not implement monitoring or auto-resolution policy.
+
+Forbidden interpretations:
+
+- Do not treat accepted risks as absent risks.
+- Do not add actor-wide sequence fields unless the stated trigger is met or ADR-002 is amended.
+- Do not reintroduce unmerge without reopening the decision.
+
+Open edges:
+
+Revisit triggers may require later ADR amendment or strategy changes if observed in deployment.
+
+Platform specification note:
+
+Use as conditional validity and future-change trigger record.
+
+## Kernel: ADR-002 Reconciliation Result
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+ADR-002 confirms the Phase 3 Bucket 1 constraints, preserves Bucket 2 items as strategies, explicitly defers Bucket 3 cross-ADR items, and carries accepted risks with revisit triggers. No contradiction was found against the ADR-002 reconciliation checkpoint.
+
+Source basis:
+
+- `docs/platform-spec-kernels/06-adr2-identity-conflict-kernels.md` / `## ADR-002 Pre-ADR Reconciliation Checkpoint`
+- `docs/adrs/adr-002-identity-conflict.md`
+
+Closure basis:
+
+Settled reconciliation finding from approved source comparison.
+
+Scope:
+
+Applies to the transition from ADR-002 exploration lineage to ADR-002 decision extraction.
+
+Non-goals:
+
+Does not verify later ADRs or the non-authoritative addendum.
+
+Forbidden interpretations:
+
+- Do not infer that ADR-003/004/005 deferrals are closed.
+- Do not use the addendum as authority in this session.
+
+Open edges:
+
+ADR-003 archive sources should be processed next, carrying forward ADR-002's explicit sync/auth deferrals.
+
+Platform specification note:
+
+Use as checkpoint that ADR-002 lineage is coherent enough to proceed to ADR-003 archive sources.
