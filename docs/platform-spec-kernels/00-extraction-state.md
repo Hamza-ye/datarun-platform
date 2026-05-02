@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 2 in progress
+Status: Iteration 3 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -31,6 +31,11 @@ Special ADR handling:
 - `docs/adrs/adr-002-addendum-type-vocabulary.md` is not authoritative. It may be treated only as drift-history context where a later authoritative ADR absorbs, supersedes, or restates a point.
 - `docs/adrs/adr-006-flag-semantics.md` is superseded by `docs/adrs/adr-006-flag-semantics-R.md`. Use ADR-006-R as the authoritative source for flag semantics. ADR-006 text is usable only where ADR-006-R carries it forward.
 - ADR-006 through ADR-009 may contain valid closed points, but their convergence/classification style requires stricter extraction than ADR-001 through ADR-005.
+
+Ground-truth document handling:
+
+- `docs/*.md` files in the approved ground-truth set and `docs/scenarios/` are domain, vision, ambition, and requirements sources. They predate exploration and ADRs and must not be read as implying a specific architecture or implementation path unless they explicitly state a requirement.
+- If an approved ground-truth file contains links or reading-order instructions to forbidden docs, those links and instructions are ignored for extraction purposes.
 
 ## Output Goal
 
@@ -125,16 +130,17 @@ For every processed source:
 
 ## Scan Cursor
 
-Current iteration: 2
+Current iteration: 3
 
 Processed sources:
 
 - `docs/access-control-scenario.md`
 - `docs/constraints.md`
+- `docs/README.md`
 
 Next source:
 
-- `docs/README.md`
+- `docs/scenarios/`
 
 Ignored-as-source:
 
@@ -164,6 +170,11 @@ No conflicts recorded yet.
 - `Interoperability Compatibility` — settled operational constraint from `docs/constraints.md`; integration implementation deferred.
 - `Responsiveness By Work Tier` — settled operational constraint from `docs/constraints.md`; latency budgets are requirement-level only.
 - `Configuration Changes Propagate On Sync` — settled operational constraint from `docs/constraints.md`; versioning and conflict mechanics unresolved.
+- `Common Operational Substrate` — settled vision requirement from `docs/README.md`; concrete platform primitives unresolved.
+- `Setup Not Built` — settled vision requirement from `docs/README.md`; configuration boundary unresolved.
+- `Coherent Single-System Experience` — settled vision requirement from `docs/README.md`; common contracts and concepts unresolved.
+- `Operational Adaptability Without Rebuild` — settled vision requirement from `docs/README.md`; evolution mechanisms unresolved.
+- `Domain-Agnostic Field Operations` — settled ambition constraint from `docs/README.md`; cross-domain validation remains evidence-driven.
 
 ## Iteration History
 
@@ -178,3 +189,7 @@ Processed `docs/access-control-scenario.md`. Extracted access-control requiremen
 ### Iteration 2
 
 Processed `docs/constraints.md`. Extracted operational-environment requirements as settled constraints, with concrete data, sync, configuration, and interface mechanisms left open for later approved sources.
+
+### Iteration 3
+
+Processed `docs/README.md`. Extracted vision and ambition kernels only. Ignored current-authority and documentation-reading-guide content because it points to excluded docs and is not domain/requirements content for this extraction.

@@ -1,6 +1,6 @@
 # Platform Specification Kernel Working Draft
 
-Status: Iteration 2 in progress
+Status: Iteration 3 in progress
 
 This file stages atomic platform-specification kernels in one place until the approved source set reaches rest state. Sections may be rewritten, merged, split, or demoted during extraction. Final atomic files must not be created from these sections until the conflict checks and closure pass are complete.
 
@@ -734,6 +734,200 @@ Configuration versioning and stale-config reconciliation remain to be extracted 
 Platform specification note:
 
 The platform specification should treat configuration propagation as sync-mediated and version-sensitive.
+
+## Kernel: Common Operational Substrate
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+The platform exists to provide a shared operational substrate for collecting information, coordinating work, tracking progress, and maintaining accountability across people, places, and time. It should absorb common operational foundations that organizations otherwise rebuild for each initiative.
+
+Source basis:
+
+- `docs/README.md` / `## What This Project Is`
+- `docs/README.md` / `## Ambition`
+
+Closure basis:
+
+Settled as a vision requirement. Not yet closed as a concrete primitive set, service boundary, data model, or implementation architecture.
+
+Scope:
+
+Applies to field operations across information capture, responsibility assignment, review, progress tracking, coordination, oversight, and traceability.
+
+Non-goals:
+
+This kernel does not decide which primitives implement the substrate or how the platform is decomposed internally.
+
+Forbidden interpretations:
+
+- Do not reduce the platform to a single-purpose domain application.
+- Do not treat every initiative as requiring bespoke foundational software.
+
+Open edges:
+
+The concrete reusable primitives, contracts, and interactions remain to be extracted from scenarios, exploration, and ADRs.
+
+Platform specification note:
+
+The platform specification should start from the operational substrate role before naming technical constructs.
+
+## Kernel: Setup Not Built
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+Operational activities should be set up by describing what information is collected, who is responsible, what rhythms and oversight structures apply, and what should happen under relevant conditions. Standing up a new operational activity should not require rebuilding software foundations.
+
+Source basis:
+
+- `docs/README.md` / `## Vision`
+- `docs/README.md` / `### Core Commitments` / `Set up, not built`
+
+Closure basis:
+
+Settled as a vision requirement. The concrete configuration boundary remains open until later approved sources close it.
+
+Scope:
+
+Applies to operational activity setup, information needs, responsibility, cadence, oversight, and condition-driven behavior.
+
+Non-goals:
+
+This kernel does not imply unlimited configurability, deployer-authored programming, or a specific configuration language.
+
+Forbidden interpretations:
+
+- Do not equate setup with per-deployment software development.
+- Do not infer an unbounded rules engine or fully programmable platform from this vision statement.
+
+Open edges:
+
+The boundary between deployer configuration and platform evolution remains to be extracted from viability, exploration, and ADRs.
+
+Platform specification note:
+
+The platform specification should treat setup as a bounded capability whose technical boundary must be specified explicitly.
+
+## Kernel: Coherent Single-System Experience
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+The platform must feel like one coherent system across different operational work types. Recording observations, reviewing work, tracking distribution, following up on cases, and similar activities should use consistent concepts, contracts, and ways of seeing what happened and what remains pending.
+
+Source basis:
+
+- `docs/README.md` / `## Vision`
+- `docs/README.md` / `### Core Commitments` / `One system, not many`
+
+Closure basis:
+
+Settled as a vision requirement. Not yet closed as a concrete vocabulary, primitive set, UI model, or contract set.
+
+Scope:
+
+Applies across simple capture, reporting, review, distribution, case follow-up, oversight, and complex operational campaigns.
+
+Non-goals:
+
+This kernel does not require all activities to share identical screens, workflows, data shapes, or policies.
+
+Forbidden interpretations:
+
+- Do not model each operational activity as an isolated product with unrelated concepts.
+- Do not force uniformity where the source requires coherent consistency.
+
+Open edges:
+
+The common concepts and contracts that create coherence remain to be extracted from later sources.
+
+Platform specification note:
+
+The platform specification should distinguish coherence of platform concepts from sameness of activity-specific configuration.
+
+## Kernel: Operational Adaptability Without Rebuild
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+The platform must allow operational needs to evolve without rebuilding existing foundations. New information needs, responsibilities, oversight rules, and added complexity should be introduced without rethinking or breaking existing work.
+
+Source basis:
+
+- `docs/README.md` / `## Vision`
+- `docs/README.md` / `### Core Commitments` / `Grows without breaking`
+
+Closure basis:
+
+Settled as a vision requirement. Not yet closed as schema evolution, configuration versioning, migration, compatibility, or primitive-extension mechanics.
+
+Scope:
+
+Applies to evolving information collection, responsibility, oversight, coordination patterns, and growth from simple to more complex operational work.
+
+Non-goals:
+
+This kernel does not decide that every possible future need must be deployer-configurable or backward-compatible without platform evolution.
+
+Forbidden interpretations:
+
+- Do not require existing deployments to be rebuilt when adding ordinary operational complexity.
+- Do not treat growth as permission to mutate historical records or erase old meanings.
+
+Open edges:
+
+Concrete evolution mechanisms remain to be extracted from scenarios, principles, exploration, and ADRs.
+
+Platform specification note:
+
+The platform specification should define how stable foundations and evolvable setup coexist.
+
+## Kernel: Domain-Agnostic Field Operations
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+The platform ambition spans field operations in multiple domains, including health, logistics, agriculture, humanitarian response, and other operational settings. The platform must model common operational behaviors without hard-coding one domain's concepts as the core.
+
+Source basis:
+
+- `docs/README.md` / `## Ambition`
+
+Closure basis:
+
+Settled as an ambition constraint. Concrete proof across domains remains evidence-driven and must come from scenarios, viability assessment, exploration, and later decisions.
+
+Scope:
+
+Applies to core platform concepts, naming, contracts, and reusable behaviors.
+
+Non-goals:
+
+This kernel does not require all domain-specific validation or content to be platform-generic.
+
+Forbidden interpretations:
+
+- Do not hard-code health, logistics, agriculture, or humanitarian concepts as platform primitives solely because examples mention them.
+- Do not treat domain-agnosticism as absence of domain-specific deployer content.
+
+Open edges:
+
+The boundary between domain-agnostic mechanisms and domain-specific configured content remains to be extracted from later approved sources.
+
+Platform specification note:
+
+The platform specification should keep core terminology operational and domain-neutral unless an approved source closes a domain-specific concept as platform-owned.
 
 ## Pending Split Targets
 
