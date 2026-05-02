@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 26 ADR-003 extracted
+Status: Iteration 27 ADR-004 session1 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -68,6 +68,7 @@ Rest state means:
 - `05-methodology-and-extraction-rules.md`: temporary staging file for extraction-methodology kernels.
 - `06-adr2-identity-conflict-kernels.md`: temporary staging file for ADR-002 identity and conflict lineage kernels.
 - `07-adr3-authorization-sync-kernels.md`: temporary staging file for ADR-003 authorization and selective-sync lineage kernels.
+- `08-adr4-configuration-boundary-kernels.md`: temporary staging file for ADR-004 configuration-boundary lineage kernels.
 
 Final atomic files must not be created until rest state is reached.
 
@@ -155,7 +156,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 26
+Current iteration: 27
 
 Processed sources:
 
@@ -200,10 +201,11 @@ Processed sources:
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md`
 - `docs/exploration/archive/12-adr3-course-correction.md`
 - `docs/adrs/adr-003-authorization-sync.md`
+- `docs/exploration/archive/13-adr4-session1-scoping.md`
 
 Next source:
 
-- `docs/exploration/archive/13-adr4-session1-scoping.md`
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md`
 
 Ignored-as-source:
 
@@ -454,6 +456,17 @@ Current deferred candidates:
 - `ADR-003 Explicit Deferral Contract` — ADR-settled handoff to ADR-004, ADR-005, implementation, and strategy.
 - `ADR-003 Accepted Risk Contract` — ADR-settled accepted risks and revisit triggers.
 - `ADR-003 Reconciliation Result` — settled result confirming course-correction path and closing ADR-003 lineage.
+- `ADR-004 Session 1 Scoping Boundary` — settled extraction rule from `docs/exploration/archive/13-adr4-session1-scoping.md`; Session 1 scopes but does not decide ADR-004.
+- `ADR-004 Decision Surface` — open twelve-question ADR-004 boundary surface.
+- `ADR-004 Irreversibility Focus Set` — candidate stress-focus map; Q1, Q3, and Q11 potentially touch stored events.
+- `Configuration Boundary Anti-Pattern Set` — candidate ADR-004 guardrail set from prior art.
+- `Expression And Trigger Ceiling Candidate` — candidate configuration/code boundary for pure expressions and bounded triggers.
+- `Schema Evolution First-Class Requirement` — candidate schema versioning/coexistence requirement.
+- `Unified Configuration Artifact Pipeline Candidate` — candidate invariant against overlapping configuration authorities.
+- `Configuration Gradient Hypothesis` — candidate four-layer configuration model plus parameterize/extend dimension.
+- `Configuration Complexity Budget Candidate` — candidate governor-limit approach for configuration complexity.
+- `Domain-Agnostic Configuration Vocabulary Guard` — candidate guardrail against domain-specific internal vocabulary.
+- `ADR-004 Session 2 Charter` — open handoff to scenario walkthroughs.
 
 ## Iteration History
 
@@ -564,3 +577,7 @@ Processed `docs/exploration/archive/12-adr3-course-correction.md` as ADR-003 irr
 ### Iteration 26
 
 Processed `docs/adrs/adr-003-authorization-sync.md`. Confirmed ADR-003 commits the course-correction path: no new envelope fields, authority-as-projection, assignment-based access, sync scope as access scope, original-subject authorization after merge, assignment scope containment, online-only conflict resolution, and detect-before-act for authorization flags. Captured tiered projection, authorization staleness, and scope-change data handling as ADR-settled initial strategies. Recorded ADR-004/ADR-005 deferrals and accepted risks with revisit triggers. Next source returns to archive scan at `docs/exploration/archive/13-adr4-session1-scoping.md`.
+
+### Iteration 27
+
+Processed `docs/exploration/archive/13-adr4-session1-scoping.md` as ADR-004 Session 1 scoping and prior-art analysis. Created `08-adr4-configuration-boundary-kernels.md`. Extracted the twelve-question ADR-004 decision surface, the Q1/Q3/Q11 irreversibility focus set, six configuration anti-patterns, inherited constraint stack, candidate four-layer configuration gradient, complexity-budget hypothesis, unified artifact pipeline guard, domain-agnostic vocabulary guard, and Session 2 charter. Kept all design claims candidate/open except the source boundary.
