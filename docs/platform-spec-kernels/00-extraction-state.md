@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 25 ADR-003 course correction extracted
+Status: Iteration 26 ADR-003 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -155,7 +155,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 25
+Current iteration: 26
 
 Processed sources:
 
@@ -199,10 +199,11 @@ Processed sources:
 - `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md`
 - `docs/exploration/archive/11-adr3-phase2-stress-test.md`
 - `docs/exploration/archive/12-adr3-course-correction.md`
+- `docs/adrs/adr-003-authorization-sync.md`
 
 Next source:
 
-- `docs/adrs/adr-003-authorization-sync.md`
+- `docs/exploration/archive/13-adr4-session1-scoping.md`
 
 Ignored-as-source:
 
@@ -231,7 +232,7 @@ Allowed outcomes when the owning source is processed:
 Current deferred candidates:
 
 - `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `09-adr2-phase3-classification-results.md`: classified into ADR-002 Bucket 1 constraints, ADR-002 Bucket 2 strategies, Bucket 3 deferrals to ADR-4/5, and Bucket 4 accepted risks. Final verification still owned by ADR-002.
-- `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Outcome after `12-adr3-course-correction.md`: authority-context envelope candidates were superseded by authority-as-projection; four Phase 2 findings were promoted as constraint candidates; several Phase 2 Bucket 1 claims were reclassified as strategies, implementation, ADR-004/configuration, or deferred risk. Final closure now owned by ADR-003.
+- `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Outcome after ADR-003: promoted into assignment-based access, sync-scope-as-access, authority-as-projection, original-subject authorization, assignment scope containment, online-only resolution, authorization detect-before-act, tiered projection strategy, authorization stale-flag strategy, scope-change data strategy, accepted risks, and explicit ADR-004/ADR-005 deferrals.
 - `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
 - `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
 - `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Outcome after `04-decision-audit.md`: promoted by audit toward typed immutable events/event-log source of truth, with final verification still owned by ADR-001.
@@ -439,6 +440,20 @@ Current deferred candidates:
 - `ADR-003 Strategy Reclassification Set` — conditional reclassification; priority sync, purge policy, freshness metadata, auto-resolution, shared-device sessions are strategies.
 - `ADR-003 Stress-Test Overcall Correction Set` — conditional correction; sensitive subjects, actor-partitioned storage, actor-as-subject visibility, and auditor access are not treated as ADR-003 envelope constraints by this source.
 - `ADR-003 Course-Correction Residual Risk` — open pre-ADR checklist; verify sync ordering, strategy carry-forward, and deferred/owned risks in ADR-003.
+- `ADR-003 Decision Boundary` — settled ADR extraction rule from `docs/adrs/adr-003-authorization-sync.md`.
+- `ADR-003 Assignment Access Contract` — ADR-settled assignment-based authorization contract.
+- `ADR-003 Sync Scope Access Invariant` — ADR-settled sync-scope-equals-access-scope invariant.
+- `ADR-003 Authority-As-Projection Contract` — ADR-settled no-new-envelope-fields authority reconstruction contract.
+- `ADR-003 Alias Original Scope Invariant` — ADR-settled original-subject authorization invariant after merges.
+- `ADR-003 Assignment Creation Scope-Containment Contract` — ADR-settled server-side assignment creation validation.
+- `ADR-003 Conflict Resolution Online-Only Invariant` — ADR-settled server-validated conflict-resolution invariant.
+- `ADR-003 Authorization Detect-Before-Act Contract` — ADR-settled extension of detect-before-act to authorization flags.
+- `ADR-003 Tiered Projection Strategy` — ADR-settled initial evolvable projection/sync topology.
+- `ADR-003 Authorization Staleness Strategy` — ADR-settled initial stale-authorization flag strategy.
+- `ADR-003 Scope Change Data Handling Strategy` — ADR-settled initial selective-retain/local-data policy.
+- `ADR-003 Explicit Deferral Contract` — ADR-settled handoff to ADR-004, ADR-005, implementation, and strategy.
+- `ADR-003 Accepted Risk Contract` — ADR-settled accepted risks and revisit triggers.
+- `ADR-003 Reconciliation Result` — settled result confirming course-correction path and closing ADR-003 lineage.
 
 ## Iteration History
 
@@ -545,3 +560,7 @@ Processed `docs/exploration/archive/11-adr3-phase2-stress-test.md` as ADR-003 Ph
 ### Iteration 25
 
 Processed `docs/exploration/archive/12-adr3-course-correction.md` as ADR-003 irreversibility filtering and stress-test reconciliation. Superseded Phase 1/2 authority-context envelope candidates in favor of authority-as-projection, promoted four Phase 2 findings as constraint candidates, reclassified several Phase 2 findings as strategies or non-ADR-003 structural concerns, and recorded residual risks for final ADR-003 verification. Set next source to `docs/adrs/adr-003-authorization-sync.md` rather than ADR-004 archive scanning so ADR-003 can close or correct the reconciliation.
+
+### Iteration 26
+
+Processed `docs/adrs/adr-003-authorization-sync.md`. Confirmed ADR-003 commits the course-correction path: no new envelope fields, authority-as-projection, assignment-based access, sync scope as access scope, original-subject authorization after merge, assignment scope containment, online-only conflict resolution, and detect-before-act for authorization flags. Captured tiered projection, authorization staleness, and scope-change data handling as ADR-settled initial strategies. Recorded ADR-004/ADR-005 deferrals and accepted risks with revisit triggers. Next source returns to archive scan at `docs/exploration/archive/13-adr4-session1-scoping.md`.

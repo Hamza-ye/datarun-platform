@@ -1749,3 +1749,557 @@ Final ADR-003 extraction must confirm closure, deferral, or contradiction for ea
 Platform specification note:
 
 Use as the ADR-003 final-extraction checklist.
+
+## Kernel: ADR-003 Decision Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/adrs/adr-003-authorization-sync.md` is the decided ADR-003 source for authorization and selective sync. It commits assignment-based access control, sync scope as offline authorization, authority-as-projection, alias-respects-original-scope, scope containment for assignment creation, online-only conflict resolution, detect-before-act coverage for authorization flags, and initial evolvable strategies for projection, staleness handling, and scope-change data handling.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / status and `## Decision`
+- `docs/adrs/adr-003-authorization-sync.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled extraction boundary.
+
+Scope:
+
+Applies to ADR-003 kernels and their closure status.
+
+Non-goals:
+
+Does not decide ADR-004 configuration boundary or ADR-005 workflow behavior.
+
+Forbidden interpretations:
+
+- Do not use ADR-003 exploration files to override the decided ADR where the ADR commits a different classification.
+- Do not treat ADR-003 strategies as immutable event-envelope constraints unless the ADR marks them structural.
+
+Open edges:
+
+ADR-004 and ADR-005 deferrals remain open until their owning sources are processed.
+
+Platform specification note:
+
+Use ADR-003 as the closure source for authorization and selective-sync kernels.
+
+## Kernel: ADR-003 Assignment Access Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+Every access rule reduces to checking whether the actor has an active assignment whose scope contains the target entity and whose role permits the intended action. The assignment is a structured typed grant; role qualification is secondary to scope containment, and role-action permissions are deployment configuration owned by ADR-004.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S1
+- `docs/adrs/adr-003-authorization-sync.md` / `What This Does NOT Decide`
+- `docs/adrs/adr-003-authorization-sync.md` / `Consequences`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to authorization checks for actor operations against subjects, processes, assignments, and configured action types.
+
+Non-goals:
+
+Does not define concrete roles, role hierarchies, role-action permission tables, or all scope types.
+
+Forbidden interpretations:
+
+- Do not model ADR-003 authorization as generic RBAC without scope.
+- Do not model ADR-003 authorization as generic open-ended ABAC.
+- Do not hard-code deployment role permissions as ADR-003 structural platform rules.
+
+Open edges:
+
+ADR-004 must close how assignments, scope definitions, and role-action tables are configured and synced.
+
+Platform specification note:
+
+Use as the platform authorization contract.
+
+## Kernel: ADR-003 Sync Scope Access Invariant
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Sync scope equals access scope. A device receives exactly the data its actor is authorized to act on, computed server-side from the actor's active assignments at sync time. Device-side access control is UI behavior, not authoritative policy enforcement.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S2
+- `docs/adrs/adr-003-authorization-sync.md` / `Consequences` / Sync protocol
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to offline field devices, selective sync, server sync filtering, scope expansion, and scope contraction.
+
+Non-goals:
+
+Does not decide pagination, priority ordering, compression, low-bandwidth optimization, or local data purge mechanics.
+
+Forbidden interpretations:
+
+- Do not deliver data outside the actor's authorized scope as a convenience cache.
+- Do not require a full offline policy engine on the device for core scope enforcement.
+- Do not treat UI hiding as a substitute for server-side sync filtering.
+
+Open edges:
+
+Implementation strategies for bandwidth, shared devices, and data removal remain evolvable or deferred as ADR-003 states.
+
+Platform specification note:
+
+Use as the selective-sync authorization invariant.
+
+## Kernel: ADR-003 Authority-As-Projection Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+ADR-003 adds no new event-envelope fields. Authority context is derived from the assignment event timeline rather than stored in events. Assignment events are expected to be on the server before the work events they authorize, because assignments are created by online actors, delivered to workers by sync, and work events sync back to a server that already has the authorizing assignments.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S3
+- `docs/adrs/adr-003-authorization-sync.md` / `Consequences` / Event envelope
+- `docs/adrs/adr-003-authorization-sync.md` / `Risks accepted`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to event envelopes, authority reconstruction, assignment timelines, audit reconstruction, and future envelope extensibility.
+
+Non-goals:
+
+Does not forbid a future ADR from adding `authority_context` to new events through ADR-001 envelope extensibility.
+
+Forbidden interpretations:
+
+- Do not add ADR-003 `assignment_ref`, assignment-ref lists, process refs, or platform actor authority fields to the event envelope.
+- Do not treat missing `authority_context` as an absence of auditable authority.
+- Do not treat authority reconstruction performance risk as a reason to reclassify ADR-003 S3 without a revisit trigger.
+
+Open edges:
+
+Authority reconstruction performance is an accepted risk with revisit trigger. ADR-004 still owns configurable role/scope definitions.
+
+Platform specification note:
+
+Use as the final ADR-003 answer to the authority-context envelope question.
+
+## Kernel: ADR-003 Alias Original Scope Invariant
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Authorization for an event is evaluated against the original `subject_ref` written into the immutable event, not against the post-merge surviving subject's scope. Identity aliasing is projection behavior and does not create authorization grants.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S4
+- `docs/adrs/adr-003-authorization-sync.md` / `Consequences` / Authorization after merges
+- `docs/adrs/adr-003-authorization-sync.md` / `Traceability`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to scope-crossing subject merges, alias projection, stale references, and authorization evaluation for historical events.
+
+Non-goals:
+
+Does not redefine ADR-002 alias mechanics or subject merge validation.
+
+Forbidden interpretations:
+
+- Do not evaluate historical event authority against the surviving subject's current scope after a merge.
+- Do not treat an identity merge as authorization expansion.
+
+Open edges:
+
+Flag metadata and UI treatment for scope-crossing merged events may still be refined by implementation or later flag semantics sources.
+
+Platform specification note:
+
+Use as the authorization rule that preserves ADR-002 identity aliasing without scope escalation.
+
+## Kernel: ADR-003 Assignment Creation Scope-Containment Contract
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+An `AssignmentCreated` command must be validated server-side so the new assignment's scope is contained within the creating actor's own assignment scope. The invariant may be relaxed for specific configured role types such as super-coordinators, but default behavior is containment.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S5
+- `docs/adrs/adr-003-authorization-sync.md` / `Traceability`
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to assignment creation, coordinator authority, campaign assignment creation, and server precondition validation.
+
+Non-goals:
+
+Does not define concrete super-coordinator roles or all delegation policies.
+
+Forbidden interpretations:
+
+- Do not rely on UI or app-layer convention for assignment scope containment.
+- Do not accept assignment creation that bypasses server-side creator-scope validation.
+
+Open edges:
+
+ADR-004 owns configuration of role types and scope definitions.
+
+Platform specification note:
+
+Use as the assignment-write authorization invariant.
+
+## Kernel: ADR-003 Conflict Resolution Online-Only Invariant
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+`ConflictResolved` events can only be created through a server-validated transaction. This extends the ADR-002 online-only precedent for merge/split operations to conflict resolution so resolver authority is verified before the resolution event is committed.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S6
+- `docs/adrs/adr-003-authorization-sync.md` / `Consequences` / ADR-5
+
+Closure basis:
+
+ADR-settled.
+
+Scope:
+
+Applies to conflict resolution, authorization of resolvers, meta-flag prevention, and workflow consequences of conflict resolution.
+
+Non-goals:
+
+Does not decide whether specific low-severity flag types may later be relaxed by deployment strategy.
+
+Forbidden interpretations:
+
+- Do not allow offline conflict resolution where resolver authority cannot be validated before commit.
+- Do not allow stale resolver decisions to create recursive authority flag chains.
+
+Open edges:
+
+ADR-005 owns workflow behavior when conflict resolution invalidates downstream state or interacts with approval chains.
+
+Platform specification note:
+
+Use as the conflict-resolution authorization invariant.
+
+## Kernel: ADR-003 Authorization Detect-Before-Act Contract
+
+Status: Settled
+Kind: algorithm
+
+Specification statement:
+
+ADR-002 detect-before-act extends to all flag types, including authorization flags. Blocking flags prevent downstream policy execution until resolved. Per-flag severity is configurable; ADR-003 initial configuration treats `ScopeStaleFlag` and `TemporalAuthorityExpiredFlag` as informational and `RoleStaleFlag` as blocking for capability-restricted actions.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S7
+- `docs/adrs/adr-003-authorization-sync.md` / S9
+- `docs/adrs/adr-003-authorization-sync.md` / `Consequences` / ADR-4 and ADR-5
+
+Closure basis:
+
+ADR-settled for mechanism scope; per-flag severity remains configurable.
+
+Scope:
+
+Applies to sync processing, authorization flags, downstream policy execution, and workflow interaction with blocking flags.
+
+Non-goals:
+
+Does not decide all future flag types, final severity taxonomy, or flag UI.
+
+Forbidden interpretations:
+
+- Do not let blocking authorization flags trigger irreversible downstream policy actions before resolution.
+- Do not hard-code all flag severities as platform constants.
+
+Open edges:
+
+ADR-004 owns per-flag-type severity configuration. ADR-005 owns whether blocking flags suspend in-progress workflow steps or only prevent new ones.
+
+Platform specification note:
+
+Use as the authorization extension of ADR-002 conflict processing.
+
+## Kernel: ADR-003 Tiered Projection Strategy
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+ADR-003 initial projection strategy is tiered: field workers use device-local projections from raw events; supervisors use hybrid sync with raw events for review visits plus server-computed summaries; coordinators use server-computed projections online. Devices sync directly with the server rather than relaying through supervisors.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S8
+- `docs/adrs/adr-003-authorization-sync.md` / `Risks accepted`
+
+Closure basis:
+
+ADR-settled as initial evolvable strategy, not immutable envelope constraint.
+
+Scope:
+
+Applies to projection location, direct sync topology, supervisor review, and coordinator dashboards.
+
+Non-goals:
+
+Does not make supervisor hybrid projection permanent if revisit triggers fire.
+
+Forbidden interpretations:
+
+- Do not require one projection location for all tiers.
+- Do not infer supervisor relay sync topology.
+
+Open edges:
+
+Supervisor hybrid projection is an accepted risk with revisit trigger.
+
+Platform specification note:
+
+Use as initial projection/sync topology strategy.
+
+## Kernel: ADR-003 Authorization Staleness Strategy
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+Authorization staleness uses ADR-002 accept-and-flag. ADR-003 introduces `ScopeStaleFlag`, `RoleStaleFlag`, and `TemporalAuthorityExpiredFlag`; assigns multiple flags on one event to one broadest-scope resolver; and uses watermark-based auto-resolution for `ScopeStaleFlag` where the event watermark predates the triggering assignment-end watermark.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S9
+- `docs/adrs/adr-003-authorization-sync.md` / S7
+
+Closure basis:
+
+ADR-settled as initial evolvable strategy, constrained by detect-before-act.
+
+Scope:
+
+Applies to stale scope, stale role, expired temporal authority, resolver assignment, and batch/auto-resolution.
+
+Non-goals:
+
+Does not finalize all flag semantics or severity configuration.
+
+Forbidden interpretations:
+
+- Do not reject validly structured offline events solely due to authorization staleness.
+- Do not resolve multiple flags on one event independently when the ADR assigns them to one broadest-scope resolver.
+
+Open edges:
+
+Later flag semantics ADRs and ADR-004 may refine severity, configuration, and flag taxonomy.
+
+Platform specification note:
+
+Use as initial authorization-staleness handling.
+
+## Kernel: ADR-003 Scope Change Data Handling Strategy
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+Scope expansion is additive. For scope contraction, ADR-003 initial strategy is selective retain: own events are retained; others' events about out-of-scope subjects are candidates for device-side removal. Non-sensitive data may retain all; sensitive personal data recommends crash-safe journaled selective purge. Retain-but-hide is not recommended for sensitive data.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S10
+- `docs/adrs/adr-003-authorization-sync.md` / `Risks accepted`
+
+Closure basis:
+
+ADR-settled as initial evolvable strategy and policy boundary.
+
+Scope:
+
+Applies to reassignment, campaign end, scope narrowing, local data lifecycle, and device-side storage policy.
+
+Non-goals:
+
+Does not define the exact purge protocol, crash journal format, or deployment sensitivity classes.
+
+Forbidden interpretations:
+
+- Do not represent device-side purge as a server sync instruction required by ADR-003.
+- Do not treat retain-but-hide as recommended for sensitive data.
+
+Open edges:
+
+ADR-004 owns sensitivity classification. Selective-retain storage accumulation is an accepted risk with revisit trigger.
+
+Platform specification note:
+
+Use as scope-change local data policy lineage.
+
+## Kernel: ADR-003 Explicit Deferral Contract
+
+Status: Settled
+Kind: open-question
+
+Specification statement:
+
+ADR-003 explicitly defers subject-based scope, auditor access, device sharing, sync pagination/priority/bandwidth, assessment visibility to assessed worker, sensitive-subject classification, grace-period policy, role-action permission tables, and cross-level distribution visibility to ADR-004, strategy, implementation, or deployment policy as named in the ADR. ADR-005 owns workflow interactions with assignment changes, conflict resolution invalidation, blocking flags, and approval chains.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / `What This Does NOT Decide`
+- `docs/adrs/adr-003-authorization-sync.md` / `Consequences`
+- `docs/adrs/adr-003-authorization-sync.md` / `Next Decision`
+
+Closure basis:
+
+ADR-settled deferral map.
+
+Scope:
+
+Applies to ADR-003 cross-ADR boundaries and residual Phase 2/course-correction risks.
+
+Non-goals:
+
+Does not decide the deferred items.
+
+Forbidden interpretations:
+
+- Do not promote deferred configuration or implementation items into ADR-003 structural constraints.
+- Do not drop deferred concerns from later extraction passes.
+
+Open edges:
+
+ADR-004 and ADR-005 must close or carry the relevant deferrals.
+
+Platform specification note:
+
+Use as the handoff contract from ADR-003 to ADR-004/ADR-005.
+
+## Kernel: ADR-003 Accepted Risk Contract
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+ADR-003 accepts specific risks with revisit triggers: authority reconstruction may be slow, selective-retain may accumulate out-of-scope own-event data, blocking flags may delay valid work, supervisor hybrid projection is least validated, shared-device causal ordering is known to be corrupt without per-actor sessions, and first-sync on 2G may be prohibitive without priority sync.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / `Risks accepted`
+
+Closure basis:
+
+ADR-settled accepted-risk contract.
+
+Scope:
+
+Applies to ADR-003 operational validity and future revisit conditions.
+
+Non-goals:
+
+Does not resolve the risks immediately.
+
+Forbidden interpretations:
+
+- Do not treat accepted risks as forgotten issues.
+- Do not treat shared-device causal ordering as reliable until per-actor sessions or another mitigation is implemented.
+
+Open edges:
+
+Revisit triggers and later ADR ownership determine when these risks require redesign or strategy change.
+
+Platform specification note:
+
+Use as ADR-003 conditional validity and monitoring context.
+
+## Kernel: ADR-003 Reconciliation Result
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+ADR-003 confirms the course-correction reconciliation: authority context is not stored in the event envelope; authority-as-projection is committed; Phase 2 bounded-reference and platform-actor envelope candidates are rejected/superseded; the four course-correction constraint promotions are carried into S4-S7; and Phase 2 overcalled items are either strategies, ADR-004/configuration items, implementation items, accepted risks, or explicit deferrals.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md` / S3 through S10
+- `docs/adrs/adr-003-authorization-sync.md` / `What This Does NOT Decide`
+- `docs/adrs/adr-003-authorization-sync.md` / `Traceability`
+
+Closure basis:
+
+ADR-settled reconciliation result.
+
+Scope:
+
+Applies to resolving ADR-003 Phase 1, Phase 2, and course-correction lineage.
+
+Non-goals:
+
+Does not close ADR-004 or ADR-005 deferrals.
+
+Forbidden interpretations:
+
+- Do not continue treating Phase 2 authority-context envelope candidates as live options for ADR-003.
+- Do not ignore Phase 2 risks that ADR-003 explicitly accepts or defers.
+
+Open edges:
+
+ADR-004 is the next decision source for configuration boundary, including role-action tables, scope types, sensitivity, and flag severity.
+
+Platform specification note:
+
+Use as the final ADR-003 lineage reconciliation before moving to ADR-004.
