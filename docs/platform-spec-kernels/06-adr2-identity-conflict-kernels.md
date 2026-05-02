@@ -402,3 +402,403 @@ ADR-002 must decide whether pending match is a general identity/reference patter
 Platform specification note:
 
 Use as lineage for ambiguous references and process-scoped identity.
+
+## Kernel: ADR-002 Phase 2 Stress-Test Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/07-adr2-phase2-stress-test-results.md` is ADR-002 Phase 2 adversarial workflow stress-test evidence. It tests proposed identity/conflict mechanisms, records breaks and weakenings, and hands required modifications to Phase 3. It does not itself make the final ADR-002 decision.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / supersession notice
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / opening phase, method, and output consumer
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `## 8. Verdict`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-002 Phase 2 stress testing.
+
+Non-goals:
+
+Does not accept ADR-002, decide final event types, or close all identity/conflict mechanisms.
+
+Forbidden interpretations:
+
+- Do not treat "holds with modifications" as final platform closure.
+- Do not ignore modifications attached to a surviving mechanism.
+- Do not promote tested event names into final vocabulary without later ADR support.
+
+Open edges:
+
+Phase 3 synthesis and ADR-002 must decide which modifications become final.
+
+Platform specification note:
+
+Use this source to separate survivor mechanisms from rejected or incomplete mechanism variants.
+
+## Kernel: Accept-And-Flag Stress-Test Survivor
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+Accept-and-flag survives stress testing only with modifications: immutable events are preserved, anomalies are surfaced as separate events, and resolutions are events, but the model requires single-writer conflict resolution, structured root-cause metadata, batch resolution, conflict detection before policy reactions, and configurable auto-resolution for low-severity flags.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `## 1. Mechanism A Findings (Accept-and-Flag)`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Mechanism A: Accept-and-Flag`
+
+Closure basis:
+
+Conditional stress-test survivor. Final ADR-002 must decide the concrete mechanism.
+
+Scope:
+
+Applies to stale references, duplicate identity, revoked authority, lifecycle conflicts, and other anomalies surfaced during sync or review.
+
+Non-goals:
+
+Does not decide flag event schema, flag severity model, UI, reviewer roles, or auto-resolution policy language.
+
+Forbidden interpretations:
+
+- Do not accept unbounded flag queues as viable.
+- Do not allow multiple independent final resolutions for one conflict.
+- Do not let policies fire on incoming events before conflict detection if those events may later be invalidated.
+
+Open edges:
+
+Phase 3 and ADR-002 must close flag ownership, deduplication, resolution authority, batching, and backlog rules.
+
+Platform specification note:
+
+Use as candidate conflict-surfacing contract only with the required modifications attached.
+
+## Kernel: Single-Writer Conflict Resolution Requirement
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Conflict resolution must have a termination rule. The stress test identifies multiple authorized offline reviewers resolving the same conflict differently as a structural break unless each conflict has a single designated resolver, a resolution lock, or an escalation path with a terminating top authority.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### A2: Reviewer Offline — Conflicting Resolutions`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Mechanism A: Accept-and-Flag`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Overall Verdict`
+
+Closure basis:
+
+Conditional stress-test requirement. The exact termination strategy remains to be decided by ADR-002.
+
+Scope:
+
+Applies to conflict-resolution events and reviewer authority.
+
+Non-goals:
+
+Does not decide resolver assignment, lock semantics, hierarchy model, or escalation workflow.
+
+Forbidden interpretations:
+
+- Do not permit unbounded meta-conflict recursion.
+- Do not assume "authorized actor" is sufficient if multiple authorized actors can emit incompatible resolutions.
+
+Open edges:
+
+ADR-002 must choose the resolution termination model.
+
+Platform specification note:
+
+Use as a hard candidate invariant for conflict resolution.
+
+## Kernel: Structured Flag Root Cause And Batch Resolution Requirement
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+Flag events must carry structured root-cause metadata so related flags can be grouped and resolved in batches. Large stale-state bursts, bulk operations, and repeated flags for one subject are not operationally viable as one-by-one review queues.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### A3: Flag Backlog Accumulation`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### A6: Unbounded Flag Backlog Growth`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### M7: Bulk Operation Conflict Amplification`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Mechanism A: Accept-and-Flag`
+
+Closure basis:
+
+Conditional stress-test requirement. Final grouping and policy semantics remain for ADR-002 or later owning sources.
+
+Scope:
+
+Applies to conflict/flag events, reviewer queues, backlog management, and bulk operation aftermath.
+
+Non-goals:
+
+Does not decide root-cause schema, severity taxonomy, auto-resolution thresholds, or UI.
+
+Forbidden interpretations:
+
+- Do not model every flag as an unrelated review item.
+- Do not allow unresolved flag backlog to grow without visibility, grouping, or escalation.
+
+Open edges:
+
+ADR-002 must close batchability requirements; configuration ownership of auto-resolution policies may intersect ADR-004.
+
+Platform specification note:
+
+Use as operational scalability lineage for conflict handling.
+
+## Kernel: Detect Before Act Sync Processing Requirement
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+During sync, conflict detection must run before policies or downstream reactions fire on received events. Otherwise downstream work can be created from events that are later flagged or rejected, causing cascading invalidation.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### A5: Flagged Event Triggered Downstream Work Before Flag Was Noticed`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### A12` in `## 7. Assumptions Register`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Overall Verdict`
+
+Closure basis:
+
+Conditional stress-test requirement. Final sync pipeline details remain to be confirmed by ADR-002 and ADR-003.
+
+Scope:
+
+Applies to sync ingestion ordering, conflict detection, and policy-triggered downstream work.
+
+Non-goals:
+
+Does not decide quarantine windows, downstream flag propagation, or policy engine implementation.
+
+Forbidden interpretations:
+
+- Do not trigger review assignments, allocations, or workflow reactions before conflict eligibility is evaluated.
+- Do not rely on rollback of immutable downstream events as the normal correction path.
+
+Open edges:
+
+ADR-002 must close conflict-detection ordering; ADR-003/ADR-005 may own sync topology and downstream workflow consequences.
+
+Platform specification note:
+
+Use as lineage for sync ingestion algorithm constraints.
+
+## Kernel: Alias Table Stress-Test Survivor
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+Alias-table projection for merges survives stress testing only with modifications: transitive alias closure should be eager, lineage acyclicity must be enforced, unmerge should be replaced or redefined as corrective split, post-split events require attribution workflow, and projection rebuild cost must be bounded with possible server-computed projection fallback.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `## 2. Mechanism B Findings (Alias Table in Projection)`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Mechanism B: Alias Table in Projection`
+
+Closure basis:
+
+Conditional stress-test survivor. Final ADR-002 must decide the concrete identity-evolution mechanism.
+
+Scope:
+
+Applies to subject merge, split, retired ID resolution, projection rebuild, and local alias state.
+
+Non-goals:
+
+Does not decide alias storage schema, sync protocol, projection implementation, or complete lifecycle event vocabulary.
+
+Forbidden interpretations:
+
+- Do not treat unmerge as a safe symmetric inverse of merge.
+- Do not allow alias lookup chains to grow without bound.
+- Do not assume split can be resolved by one-to-one aliasing.
+
+Open edges:
+
+Phase 3 and ADR-002 must close alias semantics, corrective split, post-split attribution, and performance bounds.
+
+Platform specification note:
+
+Use as candidate identity-evolution contract only with the required modifications attached.
+
+## Kernel: Corrective Split Over Unmerge Requirement
+
+Status: Conditional
+Kind: rejected-alternative
+
+Specification statement:
+
+The stress test finds `SubjectsUnmerged` structurally unsound as a symmetric reverse of merge because events recorded during the merge window cannot be automatically re-attributed under immutability. A wrong merge should instead be corrected by a corrective split or equivalent lineage annotation, with optional human re-attribution of affected events.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### B6: Unmerge — Events Recorded After Merge But Before Unmerge`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### M5: Unmerge Event Attribution`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Mechanism B: Alias Table in Projection`
+
+Closure basis:
+
+Conditional stress-test rejection of symmetric unmerge. Final rejection waits for ADR-002.
+
+Scope:
+
+Applies to mistaken merges and post-merge event attribution.
+
+Non-goals:
+
+Does not decide the exact corrective split event shape or attribution workflow.
+
+Forbidden interpretations:
+
+- Do not assume immutable historical events can be rewritten to undo a merge.
+- Do not require automatic attribution of merge-window events without evidence.
+
+Open edges:
+
+ADR-002 must decide the correction model for wrong merges.
+
+Platform specification note:
+
+Use as rejected-alternative lineage for unmerge.
+
+## Kernel: Device Sequence Sync Watermark Survivor
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+Device sequence plus sync watermark survives stress testing as the ADR-002 causal-ordering foundation: device sequence gives per-device total order, sync watermark detects staleness and concurrency, and the model intentionally does not decide winners for concurrent state changes. Concurrent state changes require human resolution.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `## 3. Mechanism C Findings (Device-Sequence + Sync-Watermark)`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Mechanism C: Device-Sequence + Sync-Watermark`
+
+Closure basis:
+
+Conditional stress-test survivor. Final ADR-002 must confirm the mechanism.
+
+Scope:
+
+Applies to causal ordering, staleness detection, conflict detection, and same-device event ordering.
+
+Non-goals:
+
+Does not decide global ordering, vector clocks, HLC rejection, or human-resolution workflow details.
+
+Forbidden interpretations:
+
+- Do not use this mechanism to pick a winner between concurrent state changes.
+- Do not assume events from the same actor across unsynced different devices are totally ordered.
+
+Open edges:
+
+ADR-002 must close mechanism choice, ordering scope, and persistence requirements.
+
+Platform specification note:
+
+Use as candidate causal-ordering algorithm lineage.
+
+## Kernel: Device Time Advisory Requirement
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Device time must be advisory for display and audit, not structural for ordering or conflict detection. Ordering should use device sequence within a device and sync watermark across knowledge epochs; implausible device times should be accepted but annotated with a clock-anomaly flag.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### C3: Device Clock Reset — What Breaks?`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Mechanism C: Device-Sequence + Sync-Watermark`
+
+Closure basis:
+
+Conditional stress-test clarification. Final ADR-002 must confirm envelope semantics.
+
+Scope:
+
+Applies to event ordering, conflict detection, projections, display, and audit timestamps.
+
+Non-goals:
+
+Does not decide clock-anomaly thresholds, time synchronization, or full event envelope schema.
+
+Forbidden interpretations:
+
+- Do not sort projections structurally by untrusted device time.
+- Do not use device time to determine causal ordering.
+
+Open edges:
+
+ADR-002 must confirm timestamp and ordering semantics.
+
+Platform specification note:
+
+Use as candidate event-envelope invariant.
+
+## Kernel: Pending Match Bijective Constraint
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Pending-match resolution for events with unresolved identity references must enforce matching constraints appropriate to the process. In shipment-like handoffs, matching must be bijective at the handoff level: each shipment matches at most one receipt and each receipt matches at most one shipment. Multi-candidate matches require human resolution.
+
+Source basis:
+
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Scenario Gamma: Shipment Receipt Offline with Identity Collision`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### Pending Match` in `## 5. Invariant Survival Report`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` / `### M6: Pending Match Timeout`
+
+Closure basis:
+
+Conditional stress-test requirement for pending match. Final generality and ownership remain open.
+
+Scope:
+
+Applies to pending identity/reference matching, especially shipment receipt-like workflows.
+
+Non-goals:
+
+Does not decide matching confidence algorithms, timeout policy, retroactive process creation, or whether pending match is a general platform primitive.
+
+Forbidden interpretations:
+
+- Do not auto-resolve ambiguous matches below a defined confidence threshold.
+- Do not allow one pending event to be silently matched to multiple process identities.
+
+Open edges:
+
+ADR-002 must decide whether pending match is general identity infrastructure or domain-specific workflow behavior; ADR-005 may own workflow-specific matching.
+
+Platform specification note:
+
+Use as lineage for unresolved-reference handling.

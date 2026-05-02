@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 18 in progress
+Status: Iteration 19 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -154,7 +154,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 18
+Current iteration: 19
 
 Processed sources:
 
@@ -193,10 +193,11 @@ Processed sources:
 - `docs/exploration/archive/03-adr1-forward-projection.md`
 - `docs/exploration/archive/04-decision-audit.md`
 - `docs/exploration/archive/05-adr2-event-storm-identity.md`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md`
 
 Next source:
 
-- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md`
+- `docs/exploration/archive/09-adr2-phase3-classification-results.md`
 
 Ignored-as-source:
 
@@ -224,7 +225,7 @@ Allowed outcomes when the owning source is processed:
 
 Current deferred candidates:
 
-- `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `05-adr2-event-storm-identity.md`: supported and refined as event-level identity/conflict discovery, but still open pending ADR-002 stress testing, classification, and ADR-002.
+- `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `07-adr2-phase2-stress-test-results.md`: refined into survivor mechanisms with required modifications. Still open pending Phase 3 classification and ADR-002.
 - `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Owning sources: ADR-003 exploration files and ADR-003.
 - `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
 - `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
@@ -354,6 +355,16 @@ Current deferred candidates:
 - `Causal Ordering Mechanism Open` — open ADR-002 mechanism decision; device time alone insufficient.
 - `Assignment Identity Axis Candidate` — candidate identity primitive linking actor, scope, responsibility, and temporal authority.
 - `Process Identity And Pending Match Candidate` — candidate identity primitive/pattern for shipment-like processes and unknown references.
+- `ADR-002 Phase 2 Stress-Test Boundary` — settled extraction rule from `docs/exploration/archive/07-adr2-phase2-stress-test-results.md`; stress-test evidence, not final decision.
+- `Accept-And-Flag Stress-Test Survivor` — conditional survivor with required modifications.
+- `Single-Writer Conflict Resolution Requirement` — conditional requirement; termination rule for conflict resolution.
+- `Structured Flag Root Cause And Batch Resolution Requirement` — conditional requirement; scalable flag grouping and backlog management.
+- `Detect Before Act Sync Processing Requirement` — conditional algorithm requirement; conflict detection before downstream policies fire.
+- `Alias Table Stress-Test Survivor` — conditional survivor with required modifications.
+- `Corrective Split Over Unmerge Requirement` — conditional rejected-alternative lineage for symmetric unmerge.
+- `Device Sequence Sync Watermark Survivor` — conditional causal-ordering survivor.
+- `Device Time Advisory Requirement` — conditional event-envelope/ordering invariant.
+- `Pending Match Bijective Constraint` — conditional invariant for unresolved-reference matching.
 
 ## Iteration History
 
@@ -432,3 +443,7 @@ Processed `docs/exploration/archive/04-decision-audit.md` as the ADR-001 audit a
 ### Iteration 18
 
 Processed `docs/exploration/archive/05-adr2-event-storm-identity.md` as ADR-002 Phase 1 event discovery. Created `06-adr2-identity-conflict-kernels.md` for ADR-002 staging. Extracted candidate identity taxonomy, subject lifecycle, merge/split lineage, conflict taxonomy, stale-state accept-and-flag pressure, causal-ordering open question, assignment identity, and process/pending-match identity. Did not promote discovered events, commands, or proposed aggregates as final platform primitives.
+
+### Iteration 19
+
+Processed `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` as ADR-002 Phase 2 stress-test evidence. Extracted survivor mechanisms and required modifications: accept-and-flag with single-writer resolution, root-cause metadata, batch resolution, detect-before-act sync processing, alias table with eager closure/acyclicity/corrective split, device sequence plus sync watermark, advisory device time, and pending-match constraints. Kept all as conditional stress-test findings pending Phase 3 classification and ADR-002.
