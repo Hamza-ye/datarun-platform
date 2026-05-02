@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 31 ADR-004 session3 part3 extracted
+Status: Iteration 32 ADR-004 session3 part4 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -156,7 +156,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 31
+Current iteration: 32
 
 Processed sources:
 
@@ -206,10 +206,11 @@ Processed sources:
 - `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md`
 - `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md`
 - `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`
 
 Next source:
 
-- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`
+- `docs/adrs/adr-004-configuration-boundary.md`
 
 Ignored-as-source:
 
@@ -511,6 +512,15 @@ Current deferred candidates:
 - `Configuration Limit Light-Validation Result` — conditional light validation for 60-field shape budget and trigger DAG max path length two as evolvable validation strategies.
 - `Pre-Resolved Context Scope Candidate` — candidate expression-scope refinement; bounded `context.*` scope may avoid arbitrary cross-entity queries but needs later validation.
 - `ADR-004 Part 4 Handoff From Stress Tests` — open handoff for Q7 breaking-change policy, `context.*`, possible ADR-005 `status_changed`, and same-shape activity validation warnings.
+- `ADR-004 Session 3 Part 4 Remaining Question Boundary` — settled extraction rule from `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`; remaining-question synthesis, not final ADR closure.
+- `Domain Uniqueness Constraint Candidate` — conditional Q7a position; shape-level declarative uniqueness rules checked optimistically on device and authoritatively on server, producing ADR-002 conflict flags.
+- `Domain Conflict Resolution Deferral` — open Q7b deferral to ADR-005 for automated resolution strategies.
+- `Flag Severity Configuration Candidate` — conditional Q9 position; per-deployment severity overrides over platform-defined flag types and defaults.
+- `Platform-Fixed Composable Scope Types Candidate` — conditional Q10 position; geographic, subject_list, and activity scope dimensions with AND composition and no deployer-defined containment logic.
+- `Sensitivity Classification Candidate` — conditional Q12 position; shape/activity-level sensitivity levels affect sync, retention, audit, and display without envelope fields.
+- `Schema Evolution Default Strategy Refinement` — conditional B10 refinement; additive/deprecation by default, breaking changes exceptional with server-side validation and deployer confirmation.
+- `Deploy-Time Configuration Validation Capability Candidate` — conditional synthesis finding; validates artifacts, budgets, references, trigger DAGs, uniqueness rules, and same-shape activity warnings before deployment.
+- `ADR-004 Session 3 Synthesis Result` — conditional pre-ADR synthesis; all twelve ADR-004 questions resolved or explicitly deferred, no envelope additions from Q7/Q9/Q10/Q12.
 
 ## Iteration History
 
@@ -641,3 +651,7 @@ Processed `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filte
 ### Iteration 31
 
 Processed `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` as ADR-004 Session 3 Part 3 adversarial evidence. Confirmed the Tier 1 envelope candidates survive without field changes: optional `activity_ref` remains correct with device auto-population when activity context exists, mandatory `shape_ref` preserves event interpretability while projection/migration policy remains separate, and the six-type structural vocabulary covers ADR-004 scenarios with future append-only growth reserved for distinct platform processing. Captured light validation for 60-field shape budgets and trigger DAG depth two, plus the candidate `context.*` expression scope and Part 4 handoff items.
+
+### Iteration 32
+
+Processed `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` as ADR-004 Session 3 Part 4 remaining-question resolution and synthesis. Extracted conditional Q7a domain uniqueness constraints, Q9 flag severity configuration, Q10 platform-fixed composable scope types, Q12 shape/activity-level sensitivity classification, and the refined deprecation-first schema-evolution strategy. Preserved Q7b conflict-resolution automation, `context.*`, and possible `status_changed` as ADR-005 deferrals or candidates. Recorded the Session 3 synthesis that all twelve ADR-004 questions are resolved or explicitly deferred and that Q7/Q9/Q10/Q12 add no envelope fields. Next source is ADR-004 itself for closure verification before ADR-005 archive processing.

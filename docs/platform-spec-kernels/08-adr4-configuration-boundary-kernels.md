@@ -1,6 +1,6 @@
 # ADR-004 Configuration Boundary Kernel Staging
 
-Status: Iteration 31 staging
+Status: Iteration 32 staging
 
 This temporary staging file holds ADR-004 configuration-boundary lineage kernels. It is not a final atomic document.
 
@@ -2017,3 +2017,365 @@ Next source must resolve or defer Q7, Q9, Q10, and Q12 and account for these str
 Platform specification note:
 
 Use as the immediate handoff to `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`.
+
+## Kernel: ADR-004 Session 3 Part 4 Remaining Question Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` is ADR-004 Session 3 Part 4 remaining-question resolution and Session 3 synthesis. It resolves or defers Q7, Q9, Q10, and Q12; integrates Part 3 carry-forward items; and prepares ADR-004 writing. It does not make final ADR-004 decisions.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / supersession notice
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / opening purpose
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / `## Session 3 Complete Synthesis`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-004 Session 3 Part 4.
+
+Non-goals:
+
+Does not replace ADR-004 as final decision source and does not settle ADR-005-owned workflow/state-machine questions.
+
+Forbidden interpretations:
+
+- Do not treat Part 4 `Confirmed` labels as ADR-settled closure before ADR-004 extraction.
+- Do not let Q7b, `context.*`, or `status_changed` drift into ADR-004 closure when this source defers them to ADR-005.
+
+Open edges:
+
+ADR-004 must verify, accept, revise, or reject the Session 3 synthesis.
+
+Platform specification note:
+
+Use as the pre-ADR-004 synthesis source.
+
+## Kernel: Domain Uniqueness Constraint Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 Part 4 resolves Q7a by allowing deployer-defined domain uniqueness constraints as shape-level declarative rules. These rules define scope, period, and action for acceptable event patterns, are checked optimistically on device against local data and authoritatively on the server at sync, and violations reuse ADR-002 conflict-flag infrastructure.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q7
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Position on Q7a
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q7 Summary
+
+Closure basis:
+
+Conditional Session 3 position pending ADR-004 verification.
+
+Scope:
+
+Applies to domain conflict detection, shape definitions, uniqueness rules, offline optimistic checks, server authoritative sync checks, and conflict flag generation.
+
+Non-goals:
+
+Does not allow arbitrary conflict-detection expressions or decide automated conflict resolution strategies.
+
+Forbidden interpretations:
+
+- Do not confuse structural ADR-002 conflicts with deployer-defined domain uniqueness constraints.
+- Do not use L2 form-only validation for cross-event uniqueness rules that require event history.
+- Do not reject accepted events at sync solely because a domain uniqueness violation exists; reuse accept-and-flag semantics unless a later source says otherwise.
+
+Open edges:
+
+ADR-004 must confirm the configuration boundary and ADR-005 owns Q7b domain conflict resolution automation.
+
+Platform specification note:
+
+Use as Q7a lineage connecting ADR-004 configuration to ADR-002 conflict infrastructure.
+
+## Kernel: Domain Conflict Resolution Deferral
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-004 Part 4 defers Q7b domain-specific conflict resolution strategies to ADR-005. Automated precedence rules, merge behavior, resolver selection, and state-machine-integrated resolution are workflow/state-progression concerns. Until ADR-005 decides otherwise, ADR-002 single-writer human resolution remains the resolution model.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Position on Q7b
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q7 Summary
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Deferred to ADR-5
+
+Closure basis:
+
+Open ADR-005 deferral.
+
+Scope:
+
+Applies to domain conflict resolution automation, precedence policies, merge behavior, escalation, and workflow/state-machine integration.
+
+Non-goals:
+
+Does not defer domain uniqueness detection itself; only resolution automation is deferred.
+
+Forbidden interpretations:
+
+- Do not implement deployer-configured auto-resolution as ADR-004 configuration closure.
+- Do not conflate flag severity with conflict resolution semantics.
+
+Open edges:
+
+ADR-005 must decide whether and how domain conflict resolution can be automated.
+
+Platform specification note:
+
+Use as a strict ADR-004/ADR-005 boundary line.
+
+## Kernel: Flag Severity Configuration Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 Part 4 resolves Q9 as per-deployment flag severity configuration. The platform defines the flag type vocabulary and possible severities, initially blocking and informational; deployers may override platform defaults at deployment level. Per-activity severity is a future growth path, not the initial commitment.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q9
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q9 Summary
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Session 3 Complete Synthesis
+
+Closure basis:
+
+Conditional Session 3 position pending ADR-004 verification.
+
+Scope:
+
+Applies to ADR-002 structural conflicts, ADR-003 authorization flags, ADR-004 domain uniqueness flags, detect-before-act behavior, and deployment configuration.
+
+Non-goals:
+
+Does not define new flag detection mechanisms and does not make severity per-activity in the initial strategy.
+
+Forbidden interpretations:
+
+- Do not let deployments invent arbitrary flag types through severity configuration.
+- Do not treat severity overrides as automated resolution.
+- Do not hide platform defaults; deployer overrides are overrides of known platform flag categories.
+
+Open edges:
+
+ADR-004 must confirm defaults and whether severity values remain only blocking/informational.
+
+Platform specification note:
+
+Use as Q9 lineage implementing ADR-003's flag-severity deferral.
+
+## Kernel: Platform-Fixed Composable Scope Types Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 Part 4 resolves Q10 as platform-fixed, composable scope types. Initial scope dimensions are `geographic`, `subject_list`, and `activity`. Assignments may combine dimensions, all non-null dimensions must pass, and null means unrestricted for that dimension. Deployers cannot define custom scope types or containment logic; new scope types are platform evolution.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q10
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Position on Q10
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q10 Summary
+
+Closure basis:
+
+Conditional Session 3 position pending ADR-004 verification.
+
+Scope:
+
+Applies to assignment configuration, sync scope computation, authorization checks, geographic hierarchy, explicit subject access, activity/program restrictions, and multi-dimensional stakeholder access.
+
+Non-goals:
+
+Does not add scope type information to stored event envelopes and does not allow deployer-authored access-control rules.
+
+Forbidden interpretations:
+
+- Do not make access-control containment logic deployer-programmable.
+- Do not treat a new scope type as a deployment configuration change when it changes platform authorization semantics.
+- Do not use OR composition under this candidate; all non-null dimensions use AND composition.
+
+Open edges:
+
+ADR-004 must verify the initial scope vocabulary and relationship to ADR-003 assignment-based access.
+
+Platform specification note:
+
+Use as Q10 lineage and as a security boundary against configurable access-control rule engines.
+
+## Kernel: Sensitivity Classification Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 Part 4 resolves Q12 as shape-level or activity-level sensitivity classification. Deployers may classify shapes or activities as `standard`, `elevated`, or `restricted`. Sensitivity affects sync scope filtering, device retention policy, audit level, and possible display masking. It is not stored as a new event-envelope field.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q12
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Position on Q12
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Q12 Summary
+
+Closure basis:
+
+Conditional Session 3 position pending ADR-004 verification.
+
+Scope:
+
+Applies to sensitive subjects or activities, synced data eligibility, local data retention after scope contraction, audit behavior, and UI masking strategy.
+
+Non-goals:
+
+Does not implement regulatory compliance, right-to-erasure, de-identification, field encryption, or payload-level key management.
+
+Forbidden interpretations:
+
+- Do not support field-level sensitivity under this candidate because immutable events cannot safely purge or redact individual fields.
+- Do not add sensitivity fields to the event envelope.
+- Do not treat sensitivity classification as a complete compliance mechanism.
+
+Open edges:
+
+ADR-004 must verify whether the three-level vocabulary and shape/activity granularity are accepted initial strategy.
+
+Platform specification note:
+
+Use as Q12 lineage and as a boundary preserving ADR-001 event immutability.
+
+## Kernel: Schema Evolution Default Strategy Refinement
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 Part 4 integrates Part 3's schema-evolution finding by refining B10: additive changes and deprecation are the default evolution path; breaking changes are exceptional operations requiring deployer acknowledgment, server-side validation, and deployer confirmation. The detailed breaking-change migration mechanism remains implementation strategy.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Part 3 Carry-Forward Integration / CF-1
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Session 3 Complete Synthesis
+
+Closure basis:
+
+Conditional strategy refinement pending ADR-004 verification.
+
+Scope:
+
+Applies to shape evolution, deprecated fields, breaking schema changes, migration validation, and deployer workflow.
+
+Non-goals:
+
+Does not design migration syntax or require device-side arbitrary migration execution.
+
+Forbidden interpretations:
+
+- Do not treat destructive shape changes as ordinary version evolution.
+- Do not require every breaking-change policy detail to be stored in the event envelope.
+
+Open edges:
+
+ADR-004 must decide how much of this default strategy becomes committed decision text versus implementation guidance.
+
+Platform specification note:
+
+Use as the refined Q3/Q4 schema-evolution strategy candidate.
+
+## Kernel: Deploy-Time Configuration Validation Capability Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+ADR-004 Part 4 identifies deploy-time validation as a recurring platform capability. It checks configuration artifacts before deployment for complexity budgets, invalid references, trigger DAG violations, domain uniqueness declarations, same-shape multi-activity warnings, and other known pitfalls. This capability guards configuration safety without adding event-envelope fields.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Part 3 Carry-Forward Integration / CF-4
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / Session 3 Complete Synthesis
+
+Closure basis:
+
+Conditional synthesis finding pending ADR-004 verification.
+
+Scope:
+
+Applies to configuration package validation, artifact dependency checks, complexity budgets, uniqueness constraints, same-shape activity overlap, trigger graphs, and deployer-facing warnings.
+
+Non-goals:
+
+Does not define the final diagnostic schema, UI, or exact warning/error taxonomy.
+
+Forbidden interpretations:
+
+- Do not rely on runtime failure for configuration errors that can be detected at deployment time.
+- Do not treat deploy-time warnings as event data.
+
+Open edges:
+
+ADR-004 must confirm which validations are hard errors versus warnings or implementation details.
+
+Platform specification note:
+
+Use as the ADR-004 validation capability lineage.
+
+## Kernel: ADR-004 Session 3 Synthesis Result
+
+Status: Conditional
+Kind: conditional-validity-rule
+
+Specification statement:
+
+ADR-004 Session 3 synthesis says all twelve ADR-004 questions are resolved or explicitly deferred. The Tier 1 envelope candidates remain unchanged; Tier 2 gains security/immutability guardrails for no deployer-defined scope logic and no field-level sensitivity; Tier 3 gains domain uniqueness, flag severity, composable scope dimensions, sensitivity classification, and deprecation-first schema evolution. The event envelope remains the same eleven fields.
+
+Source basis:
+
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / `## Session 3 Complete Synthesis`
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / `### Envelope after Session 3 — UNCHANGED`
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` / `### Items resolved vs. remaining`
+
+Closure basis:
+
+Conditional pre-ADR synthesis pending ADR-004 verification.
+
+Scope:
+
+Applies to ADR-004 final extraction, question closure tracking, envelope stability, tier classification, and ADR-005 deferral boundaries.
+
+Non-goals:
+
+Does not mark ADR-004 decisions as final before the ADR body is processed.
+
+Forbidden interpretations:
+
+- Do not add Q7, Q9, Q10, or Q12 envelope fields; this source says all four resolve through configuration or deferral.
+- Do not drop partial deferrals merely because the question table says resolved; Q7b, `context.*`, and `status_changed` are explicitly ADR-005 handoffs.
+
+Open edges:
+
+Next ADR-004 source or ADR body must consolidate and verify these positions.
+
+Platform specification note:
+
+Use as the pre-ADR checklist for ADR-004 extraction.
