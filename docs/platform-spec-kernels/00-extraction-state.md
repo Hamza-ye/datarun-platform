@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 11 in progress
+Status: Iteration 12 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -40,6 +40,7 @@ Ground-truth document handling:
 - Terms such as "primitive" in `docs/viability-assessment.md` are candidate abstraction language from pre-architecture narrowing, not final platform primitive classification.
 - `docs/principles.md` sets pre-architecture decision guidance derived from vision, constraints, and behavioral patterns. Its later confirmation annotations can mark principles as validated guidance, but embedded ADR examples must not be used to close detailed platform interfaces before ADR extraction.
 - Archive processing begins with `docs/exploration/archive/01-architecture-landscape.md` before `00-exploration-framework.md`. Although numerically second, it was the first architecture-landscape exploration artifact and guided the ADR order and framework shape. It is superseded/raw exploration, so it can create lineage, tradeoff, prior-art, and candidate-decision-order kernels, but not final architecture closure.
+- `docs/exploration/archive/00-exploration-framework.md` is methodology only. It describes how agents should explore and write ADRs. Its sample ADR dependency order is optimistic/non-authoritative and must not be treated as a final ordering or as architecture closure.
 
 ## Output Goal
 
@@ -145,7 +146,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 11
+Current iteration: 12
 
 Processed sources:
 
@@ -179,10 +180,11 @@ Processed sources:
 - `docs/viability-assessment.md`
 - `docs/principles.md`
 - `docs/exploration/archive/01-architecture-landscape.md`
+- `docs/exploration/archive/00-exploration-framework.md`
 
 Next source:
 
-- `docs/exploration/archive/00-exploration-framework.md`
+- `docs/exploration/archive/02-adr1-offline-data-model.md`
 
 Ignored-as-source:
 
@@ -276,6 +278,13 @@ Rest-state merge note:
 - `Configuration Boundary Depends On Upstream Decisions` — candidate decision-order correction from `docs/exploration/archive/01-architecture-landscape.md`; later ADR closure required.
 - `Critical Decision Coupling Map` — candidate exploration map from `docs/exploration/archive/01-architecture-landscape.md`; dependency closure required.
 - `ADR Exploration Sequence Candidate` — candidate exploration sequence from `docs/exploration/archive/01-architecture-landscape.md`; final ADR bodies close outcomes.
+- `Exploration Framework Methodology Boundary` — settled extraction rule from `docs/exploration/archive/00-exploration-framework.md`; framework is process, not architecture.
+- `Assumption Discipline` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; assumptions must not become decisions silently.
+- `Exploration Narrowing Not Decision` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; directional leans are not final commitments.
+- `Flagged Upstream Problem Handling` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; blocking/informational flags preserve conditionality.
+- `Irreversibility Filter Method` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; stress depth scales by permanence.
+- `Decision Audit Gate Method` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; audit checks assumptions, scope bleed, gaps, and decision placement.
+- `ADR Scope Hygiene Method` — settled methodology rule from `docs/exploration/archive/00-exploration-framework.md`; ADRs commit decisions, exploration preserves journey.
 
 ## Iteration History
 
@@ -326,3 +335,7 @@ Processed `docs/principles.md` as validated pre-architecture decision guidance. 
 ### Iteration 11
 
 Processed `docs/exploration/archive/01-architecture-landscape.md` before `00-exploration-framework.md`, per user correction. Extracted constraint-filter survivors, prior-art lessons, viable architecture families, hybrid candidate direction, and decision-coupling/ADR-order lineage. The document is superseded raw exploration; no final architecture closure was promoted.
+
+### Iteration 12
+
+Processed `docs/exploration/archive/00-exploration-framework.md` as methodology only. Extracted assumption discipline, narrowing-vs-decision separation, flag handling, irreversibility filtering, decision audit, and ADR scope hygiene. Did not treat its sample ADR dependency order as authoritative.
