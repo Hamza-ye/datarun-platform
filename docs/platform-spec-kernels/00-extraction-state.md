@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 28 ADR-004 session2 extracted
+Status: Iteration 29 ADR-004 session3 part1 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -156,7 +156,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 28
+Current iteration: 29
 
 Processed sources:
 
@@ -203,10 +203,11 @@ Processed sources:
 - `docs/adrs/adr-003-authorization-sync.md`
 - `docs/exploration/archive/13-adr4-session1-scoping.md`
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md`
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md`
 
 Next source:
 
-- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md`
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md`
 
 Ignored-as-source:
 
@@ -480,6 +481,18 @@ Current deferred candidates:
 - `Role Action Permission Activity Parameter Candidate` — conditional Q8 position; role-action permissions as activity configuration.
 - `ADR-004 Session 2 Unstressed Question Set` — open gap set for Q7, Q9, Q10, and Q12.
 - `ADR-004 Session 3 Charter` — open handoff to stress testing.
+- `ADR-004 Session 3 Part 1 Structural Coherence Boundary` — settled extraction rule from `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md`; coherence evidence, not final ADR.
+- `Configuration Artifact Lifecycle Model Candidate` — conditional two-lifecycle model: event-coupled shapes and config-package artifacts.
+- `Configuration Dependency Validation Candidate` — conditional deploy-time validation and acyclic dependency graph.
+- `Device Server Evaluation Contract Candidate` — conditional split; L3 triggers revised to server-only, L2 handles device feedback.
+- `Single Expression Language Candidate` — conditional one expression language with form/trigger contexts and zero functions.
+- `Pattern Framework Structure Candidate` — conditional platform-fixed pattern framework with ADR-005 inventory dependency.
+- `ADR-004 Envelope Composition Candidate` — conditional complete/non-redundant envelope with `shape_ref` and optional `activity_ref`.
+- `System Actor Reference Candidate` — conditional `system:trigger/{trigger_id}` actor reference for trigger-generated events.
+- `Layer Boundary Formalization Candidate` — conditional formal layer-boundary and side-effect definitions.
+- `Anti-Pattern Guard Formalization Candidate` — conditional AP-1/AP-2/AP-5 guard formalization.
+- `Platform Capability Boundary Candidate` — conditional cross-subject aggregation belongs to platform capabilities.
+- `ADR-004 Part 2 Reframe Result` — open handoff to irreversibility filtering with added system actor format question.
 
 ## Iteration History
 
@@ -598,3 +611,7 @@ Processed `docs/exploration/archive/13-adr4-session1-scoping.md` as ADR-004 Sess
 ### Iteration 28
 
 Processed `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` as ADR-004 Session 2 scenario evidence. Extracted conditional positions for Q1 platform-fixed structural event types plus deployment-defined shapes, Q3 mandatory `shape_ref`, Q11 optional `activity_ref`, Q4 shape-version coexistence, Q8 role-action permissions as activity parameters, revised gradient validation, bounded Trigger Engine, Projection Rule artifact, campaign progress as platform capability, unstressed residual questions, and Session 3 stress-test charter. Kept Session 2 `Decided` claims conditional because the source says they are pending Session 3 stress test.
+
+### Iteration 29
+
+Processed `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` as ADR-004 Session 3 Part 1 structural-coherence audit. Extracted conditional findings for artifact lifecycle, dependency validation, device/server evaluation split, expression language, pattern framework, envelope composition, system actor references, layer boundaries, anti-pattern guards, and platform capability boundary. Revised the Trigger Engine candidate so both 3a and 3b triggers are server-only, with L2 handling immediate device feedback. Updated campaign progress from one capability into aggregate projection, target comparison, and time windowing. Next source is Part 2 irreversibility filtering.

@@ -687,17 +687,19 @@ Kind: algorithm
 
 Specification statement:
 
-Session 2 identifies a Trigger Engine candidate with two bounded policy subtypes: event reactions evaluated synchronously at ingestion, and deadline checks evaluated asynchronously server-side. Both produce at most one event, are non-recursive, obey predicate/trigger/escalation limits, and restrict trigger output payload mapping to static values plus direct field references.
+Session 2 identifies a Trigger Engine candidate with two bounded policy subtypes: event reactions evaluated synchronously at ingestion, and deadline checks evaluated asynchronously server-side. Session 3 Part 1 revises event-reaction triggers to server-only, so both trigger subtypes run on the server. Both produce at most one event, are non-recursive, obey predicate/trigger/escalation limits, and restrict trigger output payload mapping to static values plus direct field references.
 
 Source basis:
 
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S12 walkthrough
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / Layer 3 sub-type revision
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / primitives map update
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (c)
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / primitives map update
 
 Closure basis:
 
-Conditional candidate primitive pending Session 3 stress test and ADR-004 verification.
+Conditional candidate primitive revised by Session 3 Part 1, pending irreversibility filtering and ADR-004 verification.
 
 Scope:
 
@@ -711,10 +713,11 @@ Forbidden interpretations:
 
 - Do not allow trigger output payload mapping to perform expressions, lookups, or arbitrary computation.
 - Do not allow unbounded trigger chains or device-side deadline evaluation across incomplete event timelines.
+- Do not run Layer 3 event-reaction triggers on devices under the Part 1 coherence revision; use Layer 2 logic for immediate device feedback.
 
 Open edges:
 
-Session 3 must stress escalation depth and trigger composition.
+Part 2 must carry forward the server-only trigger contract and system actor format question.
 
 Platform specification note:
 
@@ -767,17 +770,18 @@ Kind: configuration-boundary
 
 Specification statement:
 
-Session 2 identifies campaign progress monitoring as a platform-provided capability rather than deployer-built configuration. Deployers parameterize targets, scope granularity, thresholds, and reporting frequency, while the platform performs aggregate progress projection and alerting.
+Session 2 identifies campaign progress monitoring as a platform-provided capability rather than deployer-built configuration. Session 3 Part 1 decomposes campaign progress into three orthogonal platform capabilities: aggregate projection, target comparison, and time windowing. Deployers parameterize these capabilities at Layer 0; they do not build cross-subject aggregate query logic in configuration.
 
 Source basis:
 
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S09 progress monitoring wall
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `### 6.4 New Artifacts Discovered`
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / Session 3 unresolved questions
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (i)
 
 Closure basis:
 
-Candidate platform capability pending Session 3 and ADR-004 verification.
+Candidate platform capability boundary revised by Session 3 Part 1, pending ADR-004 verification.
 
 Scope:
 
@@ -791,10 +795,11 @@ Forbidden interpretations:
 
 - Do not expose arbitrary aggregate query expressions in Layer 3 merely to implement campaign progress.
 - Do not force every recurring aggregate operational pattern into deployment-authored triggers.
+- Do not conflate aggregate counting, target comparison, and time windowing into one campaign-only special case.
 
 Open edges:
 
-Session 3 must decide which operational patterns belong in the platform capability library.
+Part 2 and later ADR-004 closure must verify platform capability boundaries and pattern inventory.
 
 Platform specification note:
 
@@ -913,3 +918,466 @@ Next source must stress-test or structurally classify these positions.
 Platform specification note:
 
 Use as the immediate handoff to ADR-004 Session 3.
+
+## Kernel: ADR-004 Session 3 Part 1 Structural Coherence Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` is ADR-004 Session 3 Part 1 structural-coherence audit. It checks whether the five Session 2 scenario solutions compose into one artifact lifecycle, dependency graph, device/server contract, expression language, pattern framework, and event envelope. It produces revisions and clarifications for Part 2 but does not make final ADR-004 decisions.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / supersession notice
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / opening purpose
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / overall verdict and updated overall verdict
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-004 Session 3 Part 1.
+
+Non-goals:
+
+Does not decide final ADR-004 constraints, final envelope format, or final pattern inventory.
+
+Forbidden interpretations:
+
+- Do not treat "composes" verdicts as final ADR decisions.
+- Do not ignore the one structural revision: Layer 3 triggers become server-only.
+
+Open edges:
+
+Part 2 irreversibility filtering and later ADR-004 sources must confirm, revise, or reject these findings.
+
+Platform specification note:
+
+Use as structural-coherence evidence before irreversibility classification.
+
+## Kernel: Configuration Artifact Lifecycle Model Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+ADR-004 Session 3 Part 1 finds that configuration artifacts compose into two lifecycle models. Shapes are event-coupled and explicitly versioned in events through `shape_ref`. Activities, logic rules, triggers, projection rules, and campaigns are config-package artifacts whose changes affect future behavior without rewriting stored events, while activity identity may be referenced by stable ID through optional `activity_ref`.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (a)
+
+Closure basis:
+
+Conditional structural-coherence finding pending ADR-004 verification.
+
+Scope:
+
+Applies to shapes, activities, logic rules, triggers, projection rules, campaigns, config package delivery, and event references.
+
+Non-goals:
+
+Does not decide exact config package version format or delivery implementation.
+
+Forbidden interpretations:
+
+- Do not version every config artifact in the event envelope.
+- Do not treat activity definition mutation as invalidating historical events that carry the activity identity.
+
+Open edges:
+
+Config package versioning and atomicity remain strategy/implementation items to specify later.
+
+Platform specification note:
+
+Use as artifact lifecycle lineage for ADR-004.
+
+## Kernel: Configuration Dependency Validation Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Configuration artifact dependencies form an acyclic graph with a uniform cascade rule: invalid references caused by shape, trigger, pattern, or artifact changes are caught at deploy-time package validation, not at runtime. Inconsistent packages are rejected before deployment.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (b)
+
+Closure basis:
+
+Conditional structural-coherence finding pending ADR-004 verification.
+
+Scope:
+
+Applies to shape dependencies from activities, logic rules, triggers, and projection rules; trigger-to-trigger deadline dependencies; pattern references; and config package validation.
+
+Non-goals:
+
+Does not define final tooling UI or exact error schema.
+
+Forbidden interpretations:
+
+- Do not allow runtime configuration dependency failures when deploy-time validation could detect them.
+- Do not allow cyclic trigger dependencies or invalid references to deprecated fields to enter a deployed package.
+
+Open edges:
+
+Tooling should surface dependency impact, but final user-facing workflow remains outside this source.
+
+Platform specification note:
+
+Use as configuration package validation lineage.
+
+## Kernel: Device Server Evaluation Contract Candidate
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+ADR-004 Session 3 Part 1 defines a clean device/server split. Devices run form behavior, local validation, local event storage, assignment resolution from synced state, and scoped projections. Servers additionally run trigger evaluation, deadline scheduling, scope resolution, configuration packaging, conflict detection, merge/split, and global projections. Layer 3 event-reaction triggers are revised to server-only; Layer 2 logic rules provide immediate device feedback.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (c)
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Revision 1
+
+Closure basis:
+
+Conditional structural-coherence revision pending ADR-004 verification.
+
+Scope:
+
+Applies to device engines, server engines, trigger latency, deduplication avoidance, validation, projections, and offline UX.
+
+Non-goals:
+
+Does not decide implementation architecture or exact sync frequency.
+
+Forbidden interpretations:
+
+- Do not run the same L3 trigger on both device and server without a deduplication protocol.
+- Do not use Layer 3 for immediate on-device guidance that Layer 2 can handle.
+
+Open edges:
+
+Part 2 must account for the reduced trigger contract surface and system-generated actor format.
+
+Platform specification note:
+
+Use as device/server evaluation boundary lineage.
+
+## Kernel: Single Expression Language Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+L2 logic rules and L3 trigger conditions share one operators-only expression language with context-specific data scope. L2 form context may reference `payload.*` and `entity.*`; L3 trigger context may reference `payload.*` only and returns boolean conditions. L1 validation remains declarative, and trigger `payload_map` is a separate minimal mapping DSL.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (d)
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (h) AP-2
+
+Closure basis:
+
+Conditional structural-coherence finding pending ADR-004 verification.
+
+Scope:
+
+Applies to L2 form logic, L3 trigger conditions, expression syntax, evaluation contexts, computed attributes, and payload mapping.
+
+Non-goals:
+
+Does not decide final serialization format for expressions.
+
+Forbidden interpretations:
+
+- Do not create separate expression languages for L2 and L3.
+- Do not add functions to the expression language under this candidate; computed values belong in platform projections.
+- Do not treat `payload_map` as an expression language.
+
+Open edges:
+
+Part 2 notes expression syntax is configuration, not envelope; final ADR-004 must verify the zero-function ceiling.
+
+Platform specification note:
+
+Use as expression-language boundary lineage.
+
+## Kernel: Pattern Framework Structure Candidate
+
+Status: Conditional
+Kind: primitive
+
+Specification statement:
+
+Patterns are a platform-fixed vocabulary of operational structures that deployers parameterize and compose at activity or stage level. A pattern defines participant roles, structural event types, valid event sequences, auto-generated projections, and parameterization points. Deployers cannot invent new patterns; ADR-5 may expand the inventory for state progression and workflow patterns.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (e)
+
+Closure basis:
+
+Conditional structural-coherence finding with intentional ADR-005 dependency.
+
+Scope:
+
+Applies to `capture_only`, `capture_with_review`, `periodic_capture`, campaign, transfer, case management, approval chains, and lifecycle patterns.
+
+Non-goals:
+
+Does not settle final pattern inventory.
+
+Forbidden interpretations:
+
+- Do not let deployments define arbitrary new pattern semantics as configuration.
+- Do not nest patterns recursively; compose them as lists at activity or stage level.
+
+Open edges:
+
+ADR-005 owns state-progression-dependent pattern contents.
+
+Platform specification note:
+
+Use as pattern-framework lineage, with inventory deferred.
+
+## Kernel: ADR-004 Envelope Composition Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+Session 3 Part 1 finds the proposed event envelope complete and non-redundant across the tested scenarios: `id`, `type`, `shape_ref`, optional `activity_ref`, `subject_ref`, `actor_ref`, `device_id`, `device_seq`, `sync_watermark`, advisory `timestamp`, and `payload`. No new envelope fields are needed beyond `shape_ref` and optional `activity_ref` for ADR-004.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (f)
+
+Closure basis:
+
+Conditional structural-coherence finding pending Part 2 irreversibility filter and ADR-004 verification.
+
+Scope:
+
+Applies to all tested scenario events, event envelope fields, routing, schema validation, activity context, identity, device ordering, and payload.
+
+Non-goals:
+
+Does not settle final serialized field names or system actor format.
+
+Forbidden interpretations:
+
+- Do not add `target_ref` or `source_event_ref` to the envelope under this candidate; those remain payload concerns.
+- Do not treat `type` and `shape_ref` as redundant.
+
+Open edges:
+
+Part 2 must stress `shape_ref`, optional `activity_ref`, structural type vocabulary, and system actor format.
+
+Platform specification note:
+
+Use as ADR-004 envelope-composition lineage.
+
+## Kernel: System Actor Reference Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+System-generated trigger output events should populate `actor_ref` with a stable system actor identity of the form `system:trigger/{trigger_id}`. This preserves attribution without adding new envelope fields.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (f)
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Clarification 1
+
+Closure basis:
+
+Conditional envelope-format clarification pending Part 2 and ADR-004 verification.
+
+Scope:
+
+Applies to trigger-generated alerts, tasks, escalations, and future system-generated events.
+
+Non-goals:
+
+Does not decide all system actor namespaces.
+
+Forbidden interpretations:
+
+- Do not leave `actor_ref` null for system-generated events.
+- Do not add a separate system-author envelope field for trigger outputs.
+
+Open edges:
+
+Part 2 must include system actor format in irreversibility filtering.
+
+Platform specification note:
+
+Use as system-generated event attribution lineage.
+
+## Kernel: Layer Boundary Formalization Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+Session 3 Part 1 formalizes layer boundaries: L0 references shapes and patterns by name without knowing internals; L1 projection rules are static value-to-output mappings, not conditional logic; L2 `set` changes form state before submission and is not a persistent side effect; L3 creates new persistent events; L3a and L3b have distinct schemas.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (g)
+
+Closure basis:
+
+Conditional layer-integrity finding pending ADR-004 verification.
+
+Scope:
+
+Applies to L0/L1/L2/L3 boundaries, projection rules, form logic, trigger schemas, and side-effect definition.
+
+Non-goals:
+
+Does not decide final authoring UI.
+
+Forbidden interpretations:
+
+- Do not let L1 projection rules gain conditional/multi-field computation.
+- Do not classify L2 form `set` as system-authored event creation.
+- Do not blur deadline checks and event reactions into one ambiguous trigger schema.
+
+Open edges:
+
+Part 2 and later stress tests must verify whether these boundaries hold under adversarial cases.
+
+Platform specification note:
+
+Use as formal layer-boundary lineage.
+
+## Kernel: Anti-Pattern Guard Formalization Candidate
+
+Status: Conditional
+Kind: forbidden-interpretation
+
+Specification statement:
+
+Session 3 Part 1 formalizes anti-pattern guards: payload mapping can reference only source envelope fields or one flat payload field; shapes have no nested object payloads under this candidate; the expression language has zero functions; computed values are projection-derived attributes; trigger dependencies form a DAG with maximum path length of two edges and only deadline checks watching trigger outputs.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (h)
+
+Closure basis:
+
+Conditional anti-pattern guard formalization pending ADR-004 verification.
+
+Scope:
+
+Applies to AP-1, AP-2, AP-5, payload mapping, shape type system, computed attributes, and trigger dependency validation.
+
+Non-goals:
+
+Does not decide final field type inventory.
+
+Forbidden interpretations:
+
+- Do not introduce nested object fields or expression functions without reopening the corresponding guard.
+- Do not allow trigger dependency cycles.
+- Do not allow a fourth trigger in a dependency path under the max-depth-two rule.
+
+Open edges:
+
+Part 2 must decide which guards are irreversible, strategy, or ADR-004 constraints.
+
+Platform specification note:
+
+Use as hard-boundary lineage for avoiding inner-platform and trigger escalation failures.
+
+## Kernel: Platform Capability Boundary Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+Cross-subject aggregation belongs to platform capabilities, not deployer-authored configuration logic. Session 3 Part 1 decomposes campaign progress into aggregate projection, target comparison, and time windowing, each parameterized at Layer 0 and reusable beyond campaigns.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / Check (i)
+
+Closure basis:
+
+Conditional platform/deployer boundary finding pending ADR-004 verification.
+
+Scope:
+
+Applies to campaign progress, coverage reporting, stock aggregation, case-load metrics, target comparisons, time-windowed reporting, and aggregate dashboards.
+
+Non-goals:
+
+Does not decide full platform capability inventory.
+
+Forbidden interpretations:
+
+- Do not expose cross-subject aggregate query languages as deployer configuration merely to avoid platform capability work.
+- Do not treat per-subject overdue detection and cross-subject overdue reporting as one mechanism.
+
+Open edges:
+
+Part 2 and ADR-004 must classify these capabilities as platform-fixed, strategy, or later-platform inventory.
+
+Platform specification note:
+
+Use as a deployer-vs-platform boundary line for aggregation.
+
+## Kernel: ADR-004 Part 2 Reframe Result
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Session 3 Part 1 says Part 2 needs no structural reframe. Part 2 should proceed with irreversibility filtering on `shape_ref`, optional `activity_ref`, structural type vocabulary, plus the added system actor format question. Expression format and platform capability decomposition are configuration or code concerns, not envelope irreversibility concerns.
+
+Source basis:
+
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` / `Part 2 Reframe Assessment`
+
+Closure basis:
+
+Open handoff to ADR-004 Session 3 Part 2.
+
+Scope:
+
+Applies to next source processing and ADR-004 irreversibility classification.
+
+Non-goals:
+
+Does not perform the Part 2 irreversibility filter.
+
+Forbidden interpretations:
+
+- Do not re-run Session 2 scenario walkthroughs before Part 2 unless a later source contradicts the coherence result.
+
+Open edges:
+
+Next source must classify irreversible versus evolvable ADR-004 decisions.
+
+Platform specification note:
+
+Use as immediate handoff to Part 2.
