@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 1 in progress
+Status: Iteration 2 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -23,6 +23,7 @@ Forbidden for this extraction:
 - Any docs outside the source set above.
 - Any markdown files directly under `docs/exploration/` that are not inside `docs/exploration/archive/`.
 - Architecture, implementation, ships, convergence, reviews, flagged positions, checkpoints, experiments, code, git history, and prior assistant memory.
+- `docs/flagged-positions.md`, `docs/charter.md`, and `docs/status.md` are explicitly excluded. They must not be referenced, scanned, inferred from, or treated as existing context for this extraction.
 - `docs/exploration/archive/22-system-evolution-map.md` as a source of taxonomy, conclusions, closure, or strategy. It may be acknowledged only as timeline context and must not influence extraction output.
 
 Special ADR handling:
@@ -124,15 +125,16 @@ For every processed source:
 
 ## Scan Cursor
 
-Current iteration: 1
+Current iteration: 2
 
 Processed sources:
 
 - `docs/access-control-scenario.md`
+- `docs/constraints.md`
 
 Next source:
 
-- `docs/constraints.md`
+- `docs/README.md`
 
 Ignored-as-source:
 
@@ -152,6 +154,16 @@ No conflicts recorded yet.
 - `Access Rule Evolvability` — settled requirement from `docs/access-control-scenario.md`; configuration boundary unresolved.
 - `Offline Access Divergence` — settled requirement from `docs/access-control-scenario.md`; reconciliation behavior unresolved.
 - `Authority-Context Attribution` — settled requirement from `docs/access-control-scenario.md`; storage/reconstruction model unresolved.
+- `Tiered Operator Contexts` — settled operational constraint from `docs/constraints.md`; persona-specific UI and data contracts unresolved.
+- `Offline Primary Field Operations` — settled operational constraint from `docs/constraints.md`; sync and storage mechanics unresolved.
+- `Synced-State Oversight` — settled operational constraint from `docs/constraints.md`; freshness representation unresolved.
+- `Large Deployment Scale Envelope` — settled operational constraint from `docs/constraints.md`; performance budgets unresolved.
+- `Continuous Record Accumulation` — settled operational constraint from `docs/constraints.md`; retention and local lifecycle mechanics unresolved.
+- `Concurrent Activities In One Platform` — settled operational constraint from `docs/constraints.md`; activity/configuration mechanics unresolved.
+- `Compliance Mechanism Boundary` — settled operational constraint from `docs/constraints.md`; jurisdiction-specific policy content out of scope.
+- `Interoperability Compatibility` — settled operational constraint from `docs/constraints.md`; integration implementation deferred.
+- `Responsiveness By Work Tier` — settled operational constraint from `docs/constraints.md`; latency budgets are requirement-level only.
+- `Configuration Changes Propagate On Sync` — settled operational constraint from `docs/constraints.md`; versioning and conflict mechanics unresolved.
 
 ## Iteration History
 
@@ -162,3 +174,7 @@ Created the extraction state and working draft structure. No source claims have 
 ### Iteration 1
 
 Processed `docs/access-control-scenario.md`. Extracted access-control requirements as settled ground-truth kernels, with concrete mechanisms left open for later approved sources.
+
+### Iteration 2
+
+Processed `docs/constraints.md`. Extracted operational-environment requirements as settled constraints, with concrete data, sync, configuration, and interface mechanisms left open for later approved sources.
