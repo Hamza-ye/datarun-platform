@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 12 in progress
+Status: Iteration 13 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -60,9 +60,15 @@ Rest state means:
 ## Working Documents
 
 - `00-extraction-state.md`: source boundary, scan cursor, closure rules, conflict log, and iteration history.
-- `01-kernel-working-draft.md`: atomic kernel sections staged in one file until the full source set is processed.
+- `01-kernel-working-draft.md`: staging index, kernel template, and rest-state split targets.
+- `02-domain-requirement-kernels.md`: temporary staging file for ground-truth, scenario-index, and early scenario requirement kernels.
+- `03-behavioral-viability-principle-kernels.md`: temporary staging file for behavioral-pattern, viability-assessment, and principle kernels.
+- `04-architecture-lineage-kernels.md`: temporary staging file for architecture-landscape and ADR-lineage kernels.
+- `05-methodology-and-extraction-rules.md`: temporary staging file for extraction-methodology kernels.
 
 Final atomic files must not be created until rest state is reached.
+
+The numbered staging files are context-management groups only. They are not final atomic documents and must not define final platform-spec organization.
 
 ## Kernel Definition
 
@@ -146,7 +152,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 12
+Current iteration: 13
 
 Processed sources:
 
@@ -339,3 +345,7 @@ Processed `docs/exploration/archive/01-architecture-landscape.md` before `00-exp
 ### Iteration 12
 
 Processed `docs/exploration/archive/00-exploration-framework.md` as methodology only. Extracted assumption discipline, narrowing-vs-decision separation, flag handling, irreversibility filtering, decision audit, and ADR scope hygiene. Did not treat its sample ADR dependency order as authoritative.
+
+### Iteration 13
+
+Housekeeping-only split for context control. Replaced the oversized single working draft with a staging index plus four temporary staging files: domain requirement kernels, behavioral/viability/principle kernels, architecture-lineage kernels, and methodology/extraction-rule kernels. No source was processed, no cursor advanced, and no kernel status changed.
