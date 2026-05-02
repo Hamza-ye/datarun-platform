@@ -50,6 +50,8 @@ The working draft has been split for context control. These files are temporary 
 - `03-behavioral-viability-principle-kernels.md`: behavioral-pattern, viability-assessment, and principle kernels.
 - `04-architecture-lineage-kernels.md`: architecture-landscape and ADR-lineage kernels.
 - `05-methodology-and-extraction-rules.md`: methodology and extraction-rule kernels.
+- `06-adr2-identity-conflict-kernels.md`: ADR-002 identity and conflict lineage kernels.
+- `07-adr3-authorization-sync-kernels.md`: ADR-003 authorization and selective-sync lineage kernels.
 
 New kernels should be added to the smallest relevant staging file. Final atomic files must not be created until rest state is reached.
 

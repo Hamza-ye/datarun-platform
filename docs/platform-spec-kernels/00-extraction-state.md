@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 22 ADR-002 extracted
+Status: Iteration 23 ADR-003 phase1 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -67,6 +67,7 @@ Rest state means:
 - `04-architecture-lineage-kernels.md`: temporary staging file for architecture-landscape and ADR-lineage kernels.
 - `05-methodology-and-extraction-rules.md`: temporary staging file for extraction-methodology kernels.
 - `06-adr2-identity-conflict-kernels.md`: temporary staging file for ADR-002 identity and conflict lineage kernels.
+- `07-adr3-authorization-sync-kernels.md`: temporary staging file for ADR-003 authorization and selective-sync lineage kernels.
 
 Final atomic files must not be created until rest state is reached.
 
@@ -154,7 +155,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 22
+Current iteration: 23
 
 Processed sources:
 
@@ -195,10 +196,11 @@ Processed sources:
 - `docs/exploration/archive/05-adr2-event-storm-identity.md`
 - `docs/exploration/archive/07-adr2-phase2-stress-test-results.md`
 - `docs/exploration/archive/09-adr2-phase3-classification-results.md`
+- `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md`
 
 Next source:
 
-- `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md`
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md`
 
 Ignored-as-source:
 
@@ -227,7 +229,7 @@ Allowed outcomes when the owning source is processed:
 Current deferred candidates:
 
 - `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `09-adr2-phase3-classification-results.md`: classified into ADR-002 Bucket 1 constraints, ADR-002 Bucket 2 strategies, Bucket 3 deferrals to ADR-4/5, and Bucket 4 accepted risks. Final verification still owned by ADR-002.
-- `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Owning sources: ADR-003 exploration files and ADR-003.
+- `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Outcome after `10-adr3-phase1-policy-scenarios.md`: partially supported as candidate/open lineage through sync-scope-as-access, subject-scoped sync, stale-authorization accept-and-flag, tiered projection/sync topology, and unresolved scope contraction/composition/transition hot spots. Final closure still owned by later ADR-003 exploration files and ADR-003.
 - `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
 - `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
 - `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Outcome after `04-decision-audit.md`: promoted by audit toward typed immutable events/event-log source of truth, with final verification still owned by ADR-001.
@@ -391,6 +393,23 @@ Current deferred candidates:
 - `ADR-002 Explicit Deferral Contract` — ADR-settled deferral map to ADR-003, ADR-004, and ADR-005.
 - `ADR-002 Accepted Risk Contract` — ADR-settled conditional validity and revisit triggers.
 - `ADR-002 Reconciliation Result` — settled finding that ADR-002 confirms Phase 3 Bucket 1, preserves strategies, and defers cross-ADR items without contradiction.
+- `ADR-003 Phase 1 Policy Scenario Boundary` — settled extraction rule from `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md`; Phase 1 scenario analysis does not decide ADR-003.
+- `ADR-003 Upstream Assumption Compatibility` — settled extraction context; ADR-003 Phase 1 accepts ADR-001/ADR-002 commitments as inputs.
+- `Authorization Staleness Accept-And-Flag Candidate` — candidate interaction rule; stale authorization work is accepted as factual and flagged, not rejected.
+- `Assignment-Based Authorization Candidate` — candidate primitive; assignment as actor-role-scope-duration/process authorization unit.
+- `Authority Context Envelope Candidate` — candidate contract; event authority context records actor, assignment, and optional process references.
+- `Sync Scope As Offline Authorization Candidate` — candidate interaction rule; server sync scope is primary offline authorization mechanism.
+- `Subject-Scoped Sync Candidate` — candidate sync rule; in-scope subject history is not limited by event author.
+- `Scope Composition Candidate` — open high-severity question; standing and campaign assignments may compose but final scope algebra is undecided.
+- `Temporal Authority Server-Side Enforcement Candidate` — candidate interaction rule; device time is advisory and temporal enforcement occurs on sync.
+- `Tiered Projection And Sync Topology Candidate` — candidate conditional topology; field/supervisor/coordinator tiers may need different raw/summary projection placement.
+- `Scope Contraction Data Handling Open` — open high-severity question; local data behavior after scope narrowing is undecided.
+- `Hierarchical Scope Model Candidate` — candidate scope model; primary axis appears geographic/organizational hierarchy with possible subject-based exceptions.
+- `Scope Transition Atomicity Open` — open sync-protocol question; assignment change and new-scope data delivery must avoid inconsistent partial transitions.
+- `Shared Device Actor Scope Open` — open device/auth boundary; sync scope is actor-scoped while ADR-002 device identity is hardware-bound.
+- `Resolver Designation Candidate` — candidate interaction rule; conflict resolver designation appears assignment-derived.
+- `ADR-003 Phase 1 Hot Spot Set` — open ADR-003 risk checklist from Phase 1.
+- `Auditor Access Exception Open` — open cross-boundary access exception not stressed by Phase 1.
 
 ## Iteration History
 
@@ -485,3 +504,7 @@ Housekeeping-only ADR-002 reconciliation pass. Added a pre-ADR checklist to `06-
 ### Iteration 22
 
 Processed `docs/adrs/adr-002-identity-conflict.md` against the ADR-002 reconciliation checkpoint. Confirmed ADR-002 carries the Phase 3 Bucket 1 constraints, keeps Bucket 2 items as strategies, explicitly defers Bucket 3 items to ADR-003/004/005, and preserves accepted risks with revisit triggers. Added ADR-settled kernels for envelope contract, device-time advisory semantics, identity evolution, lineage validation, conflict contract, stale-event acceptance, explicit deferrals, accepted risks, and reconciliation result. Did not use `docs/adrs/adr-002-addendum-type-vocabulary.md` as authority in this pass.
+
+### Iteration 23
+
+Processed `docs/exploration/archive/10-adr3-phase1-policy-scenarios.md` as ADR-003 Phase 1 scenario-driven policy analysis. Created `07-adr3-authorization-sync-kernels.md` for ADR-003 staging. Extracted assignment-based authorization, authority context, sync scope as offline authorization, subject-scoped sync, temporal authority, tiered projection/sync topology, resolver designation, and the Phase 1 open hot spots. Kept all architecture claims candidate/open except the source boundary and upstream-assumption compatibility context.
