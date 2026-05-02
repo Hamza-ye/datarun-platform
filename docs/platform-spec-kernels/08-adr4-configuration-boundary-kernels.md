@@ -438,3 +438,478 @@ Event type vocabulary, activity as first-class concept, shape authoring format, 
 Platform specification note:
 
 Use as the immediate handoff to ADR-004 Session 2.
+
+## Kernel: ADR-004 Session 2 Scenario Walkthrough Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` is ADR-004 Session 2 scenario walkthrough evidence. It tests the Session 1 configuration-gradient hypothesis against selected scenarios, forms positions on Q1/Q3/Q11 and several evolvable questions, revises the gradient, and defines Session 3 stress-test targets. It does not make final ADR-004 decisions.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / supersession notice
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / opening purpose
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `## 10. Key Findings Summary`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-004 Session 2.
+
+Non-goals:
+
+Does not decide final ADR-004 envelope fields, configuration layer boundaries, artifact formats, or platform pattern inventory.
+
+Forbidden interpretations:
+
+- Do not treat Session 2 `Decided` labels as ADR-settled; the source itself says they are pending Session 3 stress test.
+- Do not treat hypothetical artifact syntax as final format.
+
+Open edges:
+
+Session 3 must stress-test the positions formed here, and ADR-004 must verify final closure.
+
+Platform specification note:
+
+Use as scenario-grounded evidence for ADR-004.
+
+## Kernel: Platform Structural Type Vocabulary Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-004 Session 2 forms a hybrid Q1 position: the stored event `type` is a platform-fixed closed structural vocabulary, while deployment-specific meaning is expressed through deployment-defined `shape_ref` values. The platform routes and processes events by structural type; deployers extend vocabulary through shapes, not event types.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S00 envelope observations
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `### 6.2 Positions on Envelope Questions` / Q1
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `## 10. Key Findings Summary`
+
+Closure basis:
+
+Conditional Session 2 position pending Session 3 stress test and ADR-004 verification.
+
+Scope:
+
+Applies to stored event `type`, platform routing semantics, deployer vocabulary extension, and shape-based domain meaning.
+
+Non-goals:
+
+Does not settle the complete structural type list.
+
+Forbidden interpretations:
+
+- Do not allow deployments to invent arbitrary structural event types under this candidate.
+- Do not encode domain-specific event meaning directly in the platform `type` field.
+
+Open edges:
+
+Session 3 must test structural type vocabulary completeness.
+
+Platform specification note:
+
+Use as the current Q1 candidate.
+
+## Kernel: Shape Reference Envelope Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-004 Session 2 forms a Q3 position that every event carries mandatory `shape_ref` in the format `{shape_name}/v{version}`. The shape registry maps that reference to a full shape snapshot; shapes may be authored as deltas but are stored as full versioned snapshots. All shape versions remain valid forever.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S00 envelope observations
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S06 schema evolution walkthrough
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `### 6.2 Positions on Envelope Questions` / Q3
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / Session 3 irreversibility filter
+
+Closure basis:
+
+Conditional high-irreversibility Session 2 position pending Session 3 stress test and ADR-004 verification.
+
+Scope:
+
+Applies to event envelope, shape registry, payload validation, projection across versions, and offline config coexistence.
+
+Non-goals:
+
+Does not decide final namespace syntax, registry storage implementation, or authoring format.
+
+Forbidden interpretations:
+
+- Do not store payloads without a shape/version reference if ADR-004 carries this candidate forward.
+- Do not invalidate old events because a newer shape version exists.
+- Do not treat shape deltas as the device-resolved runtime representation when the candidate says full snapshots are stored.
+
+Open edges:
+
+Session 3 must stress removal, rename, type changes, and format recovery cost.
+
+Platform specification note:
+
+Use as the current Q3 candidate.
+
+## Kernel: Optional Activity Reference Envelope Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-004 Session 2 forms a Q11 position that events may carry optional `activity_ref` when shape alone does not disambiguate the operational context, especially campaigns and overlapping programs. Events whose shape uniquely identifies context may omit it or carry null.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S06 Q11 discussion
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S09 activity reference wall
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S20 activity reference check
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `### 6.2 Positions on Envelope Questions` / Q11
+
+Closure basis:
+
+Conditional medium-irreversibility Session 2 position pending Session 3 stress test and ADR-004 verification.
+
+Scope:
+
+Applies to campaigns, overlapping activities, reporting, progress monitoring, cross-activity coordination, and event envelope design.
+
+Non-goals:
+
+Does not decide final activity identity format or whether activity is a process identity, configuration object, or another reference type.
+
+Forbidden interpretations:
+
+- Do not infer campaign membership only from timestamp, actor assignment, or scope when the same shape can be used by multiple activities.
+- Do not force activity reference overhead on scenarios where shape alone disambiguates.
+
+Open edges:
+
+Session 3 must stress multiple overlapping activities sharing the same shape.
+
+Platform specification note:
+
+Use as the current Q11 candidate.
+
+## Kernel: Shape Version Coexistence Rule Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+In-progress work completes under the shape version it started with. Devices apply new configuration after completing in-progress work and may keep current plus previous configuration versions for coexistence. Events captured offline under older shape versions remain valid when synced later.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S06 schema evolution scenario
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / Q4 position
+
+Closure basis:
+
+Conditional Session 2 configuration-delivery position.
+
+Scope:
+
+Applies to offline devices, in-progress forms, config package sync, shape version validity, and projection across versions.
+
+Non-goals:
+
+Does not decide exact config package format or whether "current + previous" is the final retention limit.
+
+Forbidden interpretations:
+
+- Do not switch an in-progress capture to a newer shape mid-form.
+- Do not reject events from offline devices solely because they used the previously active shape version.
+
+Open edges:
+
+Session 3 must stress breaking schema changes and offline coexistence limits.
+
+Platform specification note:
+
+Use as Q4 configuration coexistence lineage.
+
+## Kernel: ADR-004 Gradient Validation Result
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+Session 2 validates the four-layer configuration gradient across S00, S06, S09, S12, and S20, with revisions: Layer 3 splits into event-reaction and deadline-check policies; Layer 1 expands to include cross-shape projection rules; Layer 0 needs platform-provided campaign patterns; trigger payload mapping is limited to static values and direct field references; Layer 2 expressions may read the event payload and one subject entity's attributes.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `### 6.1 Gradient Hypothesis Validation`
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `## 10. Key Findings Summary`
+
+Closure basis:
+
+Conditional Session 2 validation pending Session 3 stress test and ADR-004 verification.
+
+Scope:
+
+Applies to configuration layers, artifact types, trigger limits, projection rules, entity attribute access, and platform pattern inventory.
+
+Non-goals:
+
+Does not settle final artifact formats or exact hard numeric limits.
+
+Forbidden interpretations:
+
+- Do not keep the original Session 1 gradient unchanged after Session 2.
+- Do not put aggregate campaign progress or cross-shape derivation into arbitrary trigger payload logic.
+
+Open edges:
+
+Session 3 must stress projection-rule scoping, shape complexity, expression data scope, and escalation depth.
+
+Platform specification note:
+
+Use as revised gradient lineage.
+
+## Kernel: Bounded Trigger Engine Candidate
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+Session 2 identifies a Trigger Engine candidate with two bounded policy subtypes: event reactions evaluated synchronously at ingestion, and deadline checks evaluated asynchronously server-side. Both produce at most one event, are non-recursive, obey predicate/trigger/escalation limits, and restrict trigger output payload mapping to static values plus direct field references.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S12 walkthrough
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / Layer 3 sub-type revision
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / primitives map update
+
+Closure basis:
+
+Conditional candidate primitive pending Session 3 stress test and ADR-004 verification.
+
+Scope:
+
+Applies to event-triggered actions, deadline escalation, generated task/alert/escalation events, response matching, and trigger complexity limits.
+
+Non-goals:
+
+Does not decide final trigger artifact syntax or full event type vocabulary.
+
+Forbidden interpretations:
+
+- Do not allow trigger output payload mapping to perform expressions, lookups, or arbitrary computation.
+- Do not allow unbounded trigger chains or device-side deadline evaluation across incomplete event timelines.
+
+Open edges:
+
+Session 3 must stress escalation depth and trigger composition.
+
+Platform specification note:
+
+Use as trigger primitive lineage.
+
+## Kernel: Projection Rule Artifact Candidate
+
+Status: Candidate
+Kind: primitive
+
+Specification statement:
+
+Session 2 discovers projection rules as a new Layer 1 artifact type. Projection rules declare cross-shape data relationships for the projection engine, such as deriving supply usage from treatment fields in encounter events, without creating synthetic trigger events.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S20 cross-activity data flow
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `### 6.4 New Artifacts Discovered`
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / Session 3 unresolved questions
+
+Closure basis:
+
+Candidate artifact type pending Session 3 stress testing and ADR-004 verification.
+
+Scope:
+
+Applies to cross-shape projection composition, supply derivation, mapping tables, and projection engine configuration.
+
+Non-goals:
+
+Does not decide whether all cross-activity data flows can be handled through projection rules.
+
+Forbidden interpretations:
+
+- Do not implement cross-shape derivation by adding lookup/computation power to trigger payload maps if projection rules are the chosen path.
+- Do not allow projection-rule chaining without later explicit closure.
+
+Open edges:
+
+Projection rule count, chaining, and scope limits need Session 3 stress testing.
+
+Platform specification note:
+
+Use as cross-shape projection configuration lineage.
+
+## Kernel: Campaign Progress Platform Capability Candidate
+
+Status: Candidate
+Kind: configuration-boundary
+
+Specification statement:
+
+Session 2 identifies campaign progress monitoring as a platform-provided capability rather than deployer-built configuration. Deployers parameterize targets, scope granularity, thresholds, and reporting frequency, while the platform performs aggregate progress projection and alerting.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S09 progress monitoring wall
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `### 6.4 New Artifacts Discovered`
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / Session 3 unresolved questions
+
+Closure basis:
+
+Candidate platform capability pending Session 3 and ADR-004 verification.
+
+Scope:
+
+Applies to campaigns, aggregate progress monitoring, targets, coordinator dashboards, and platform pattern inventory.
+
+Non-goals:
+
+Does not decide full inventory of platform-provided patterns.
+
+Forbidden interpretations:
+
+- Do not expose arbitrary aggregate query expressions in Layer 3 merely to implement campaign progress.
+- Do not force every recurring aggregate operational pattern into deployment-authored triggers.
+
+Open edges:
+
+Session 3 must decide which operational patterns belong in the platform capability library.
+
+Platform specification note:
+
+Use as platform-pattern lineage.
+
+## Kernel: Role Action Permission Activity Parameter Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+Session 2 forms a Q8 position that role-action permission mappings are Layer 0 activity parameters. Each activity declares which roles can perform which actions on which shapes, and the permission table is delivered to devices as part of the configuration package.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / Q8 position
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / S20 walkthrough
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / primitives map update
+
+Closure basis:
+
+Conditional Session 2 position pending later ADR-004 closure.
+
+Scope:
+
+Applies to ADR-003 role-action permission deferral, activity definitions, command validation, and synced configuration.
+
+Non-goals:
+
+Does not define complete permission table syntax or all role semantics.
+
+Forbidden interpretations:
+
+- Do not require an expression language for basic role-action permissions.
+- Do not hide role-action permissions outside deployable configuration artifacts.
+
+Open edges:
+
+ADR-004 must verify final configuration location and delivery.
+
+Platform specification note:
+
+Use as Q8 lineage.
+
+## Kernel: ADR-004 Session 2 Unstressed Question Set
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Session 2 did not resolve Q7 conflict rule configuration, Q9 flag-type severity configuration, Q10 scope type extensibility, or Q12 sensitive-subject classification. It recommends later stress testing or deferral according to each question's risk and evolvability.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `### 6.5 What the Walk-throughs Didn't Stress`
+
+Closure basis:
+
+Open Session 2 gap set.
+
+Scope:
+
+Applies to ADR-002 conflict deferrals, ADR-003 flag/scope/sensitivity deferrals, and ADR-004 remaining decision surface.
+
+Non-goals:
+
+Does not decide these questions.
+
+Forbidden interpretations:
+
+- Do not infer closure from absence of stress in S00/S06/S09/S12/S20.
+
+Open edges:
+
+Session 3 or later owning ADR sections must stress or explicitly defer these items.
+
+Platform specification note:
+
+Use as ADR-004 residual question tracker.
+
+## Kernel: ADR-004 Session 3 Charter
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Session 3 must stress-test the Session 2 positions by applying irreversibility tests to `shape_ref` and `activity_ref`, then attacking shape complexity, cross-entity expressions, trigger/deadline chains, multi-activity shared shapes, and breaking schema changes. It must also examine platform pattern inventory, shape format, projection-rule scoping, and structural type vocabulary completeness.
+
+Source basis:
+
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` / `## 9. Session 3 Charter`
+
+Closure basis:
+
+Open handoff to ADR-004 Session 3.
+
+Scope:
+
+Applies to next ADR-004 exploration sources and final ADR-004 closure.
+
+Non-goals:
+
+Does not decide Session 3 outcomes.
+
+Forbidden interpretations:
+
+- Do not promote Q1/Q3/Q11 positions to final closure before Session 3 stress testing and ADR-004 verification.
+
+Open edges:
+
+Next source must stress-test or structurally classify these positions.
+
+Platform specification note:
+
+Use as the immediate handoff to ADR-004 Session 3.

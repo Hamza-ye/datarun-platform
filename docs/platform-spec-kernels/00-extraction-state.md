@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 27 ADR-004 session1 extracted
+Status: Iteration 28 ADR-004 session2 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -156,7 +156,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 27
+Current iteration: 28
 
 Processed sources:
 
@@ -202,10 +202,11 @@ Processed sources:
 - `docs/exploration/archive/12-adr3-course-correction.md`
 - `docs/adrs/adr-003-authorization-sync.md`
 - `docs/exploration/archive/13-adr4-session1-scoping.md`
+- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md`
 
 Next source:
 
-- `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md`
+- `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md`
 
 Ignored-as-source:
 
@@ -467,6 +468,18 @@ Current deferred candidates:
 - `Configuration Complexity Budget Candidate` — candidate governor-limit approach for configuration complexity.
 - `Domain-Agnostic Configuration Vocabulary Guard` — candidate guardrail against domain-specific internal vocabulary.
 - `ADR-004 Session 2 Charter` — open handoff to scenario walkthroughs.
+- `ADR-004 Session 2 Scenario Walkthrough Boundary` — settled extraction rule from `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md`; scenario evidence, not final ADR.
+- `Platform Structural Type Vocabulary Candidate` — conditional Q1 position; platform-fixed structural event types plus deployment-defined shapes.
+- `Shape Reference Envelope Candidate` — conditional Q3 position; mandatory `shape_ref` in `{shape_name}/v{version}` format.
+- `Optional Activity Reference Envelope Candidate` — conditional Q11 position; optional `activity_ref` when shape alone does not disambiguate.
+- `Shape Version Coexistence Rule Candidate` — conditional Q4 position for in-progress work and offline shape-version coexistence.
+- `ADR-004 Gradient Validation Result` — conditional validation and revision of four-layer gradient.
+- `Bounded Trigger Engine Candidate` — conditional primitive for event-reaction and deadline-check policies.
+- `Projection Rule Artifact Candidate` — candidate Layer 1 artifact for cross-shape projection composition.
+- `Campaign Progress Platform Capability Candidate` — candidate platform capability, deployer-parameterized but not deployer-built.
+- `Role Action Permission Activity Parameter Candidate` — conditional Q8 position; role-action permissions as activity configuration.
+- `ADR-004 Session 2 Unstressed Question Set` — open gap set for Q7, Q9, Q10, and Q12.
+- `ADR-004 Session 3 Charter` — open handoff to stress testing.
 
 ## Iteration History
 
@@ -581,3 +594,7 @@ Processed `docs/adrs/adr-003-authorization-sync.md`. Confirmed ADR-003 commits t
 ### Iteration 27
 
 Processed `docs/exploration/archive/13-adr4-session1-scoping.md` as ADR-004 Session 1 scoping and prior-art analysis. Created `08-adr4-configuration-boundary-kernels.md`. Extracted the twelve-question ADR-004 decision surface, the Q1/Q3/Q11 irreversibility focus set, six configuration anti-patterns, inherited constraint stack, candidate four-layer configuration gradient, complexity-budget hypothesis, unified artifact pipeline guard, domain-agnostic vocabulary guard, and Session 2 charter. Kept all design claims candidate/open except the source boundary.
+
+### Iteration 28
+
+Processed `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` as ADR-004 Session 2 scenario evidence. Extracted conditional positions for Q1 platform-fixed structural event types plus deployment-defined shapes, Q3 mandatory `shape_ref`, Q11 optional `activity_ref`, Q4 shape-version coexistence, Q8 role-action permissions as activity parameters, revised gradient validation, bounded Trigger Engine, Projection Rule artifact, campaign progress as platform capability, unstressed residual questions, and Session 3 stress-test charter. Kept Session 2 `Decided` claims conditional because the source says they are pending Session 3 stress test.
