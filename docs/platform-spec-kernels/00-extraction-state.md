@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 20 paused for assessment
+Status: Iteration 21 ADR-002 reconciliation complete
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -154,7 +154,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 20
+Current iteration: 21
 
 Processed sources:
 
@@ -198,7 +198,7 @@ Processed sources:
 
 Next source:
 
-- Paused before continuing source scan. Next action should be either ADR-002 reconciliation or ADR-002 extraction, not automatic continuation.
+- ADR-002 extraction from `docs/adrs/` is the recommended next action before continuing archive source scan.
 
 Ignored-as-source:
 
@@ -380,6 +380,7 @@ Current deferred candidates:
 - `ADR-002 Cross-ADR Deferral Set` — open deferral set; ADR-4/5 must close pending match generality, domain conflict rules, and workflow cascades.
 - `ADR-002 Accepted Risk Set` — conditional accepted-risk set with revisit triggers.
 - `ADR-002 Simplicity Validation` — conditional validation that Bucket 1 constraints do not materially complicate S00.
+- `ADR-002 Pre-ADR Reconciliation Checkpoint` — housekeeping reconciliation; verifies what ADR-002 must confirm, keep strategy-bounded, defer, or preserve as accepted risk.
 
 ## Iteration History
 
@@ -466,3 +467,7 @@ Processed `docs/exploration/archive/07-adr2-phase2-stress-test-results.md` as AD
 ### Iteration 20
 
 Processed `docs/exploration/archive/09-adr2-phase3-classification-results.md` as ADR-002 Phase 3 classification. Extracted Bucket 1 irreversible constraints, Bucket 2 evolvable strategies, Bucket 3 cross-ADR deferrals, Bucket 4 accepted risks, and simplicity validation. Updated the deferred closure register so ADR-002 forward-projection claims are classified but still pending ADR-002 verification. Paused source scanning for assessment before choosing ADR-002 reconciliation or ADR-002 extraction.
+
+### Iteration 21
+
+Housekeeping-only ADR-002 reconciliation pass. Added a pre-ADR checklist to `06-adr2-identity-conflict-kernels.md` covering Phase 3 Bucket 1 verification, Bucket 2 strategy boundaries, Bucket 3 cross-ADR deferrals, accepted risks, and user risk-note handling. No source was processed and no kernel status was promoted. The recommended next action is ADR-002 extraction before continuing archive source scan.

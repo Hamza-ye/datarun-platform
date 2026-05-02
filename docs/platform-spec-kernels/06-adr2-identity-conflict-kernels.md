@@ -1359,3 +1359,79 @@ ADR-002 extraction must verify final constraints before this validation becomes 
 Platform specification note:
 
 Use as evidence that irreversible ADR-002 metadata does not violate simplicity baseline.
+
+## ADR-002 Pre-ADR Reconciliation Checkpoint
+
+Status: Iteration 21 reconciliation
+
+Purpose:
+
+This checkpoint reconciles ADR-002 exploration before reading ADR-002. It does not add new source claims. It turns Phase 1 discovery, Phase 2 stress testing, and Phase 3 classification into a verification checklist for ADR-002 extraction.
+
+### Must Verify In ADR-002
+
+ADR-002 must be checked for whether it commits, adapts, omits, or contradicts the Phase 3 Bucket 1 constraints:
+
+- Event envelope carries hardware-bound `device_id`, monotonic `device_sequence`, `sync_watermark`, and typed identity references.
+- `device_time` is advisory, not structural.
+- Merge is alias-in-projection and never physical re-reference.
+- `SubjectsUnmerged` is not defined; wrong merges use corrective split.
+- Split freezes historical events under the source ID and archives the source terminally.
+- Lineage acyclicity is enforced by merge/split validation.
+- `SubjectSplit` is online-only and server-validated.
+- Conflict resolution is single-writer per conflict.
+- Sync processing runs conflict detection before reactive policies.
+- Conflict detection uses raw event references before alias resolution.
+- Validly structured stale-state events are accepted and flagged, not rejected.
+
+### Must Keep Strategy-Bounded
+
+These items may appear in ADR-002, but Phase 3 classified them as evolvable strategies unless ADR-002 explicitly escalates them:
+
+- Server-side flag creation initially, with device-side flagging deferred.
+- Root-cause metadata and batch flag grouping.
+- Flag annotations after identity changes.
+- Configurable auto-resolution policies for low-severity flags.
+- Projection rebuild strategy and server-computed projection fallback.
+- Eager alias closure behind a `resolve(id)` abstraction.
+- Post-split attribution workflow.
+- Central conflict queue with delegation capability.
+- Iterative cascading resolution rather than compound resolution.
+- Local post-merge sync processing, with server-computed projections as an ADR-3 optimization.
+- Compound flag grouping by root event.
+
+### Must Keep Deferred
+
+ADR-002 must not silently decide the following cross-ADR items:
+
+- Downstream work invalidation cascade after conflict resolution: ADR-005.
+- Pending-match timeout, matching algorithms, confidence thresholds, and bijective process matching: ADR-005, with configuration aspects in ADR-004.
+- Domain-specific conflict rule boundary: ADR-004.
+- Pending-match generality as a platform pattern: ADR-004/ADR-005.
+- Sync topology and projection delivery optimization: ADR-003.
+- Authorization and resolver delegation rules beyond event semantics: ADR-003.
+
+### Accepted Risks To Preserve
+
+ADR-002 may accept these risks only if it preserves the revisit conditions or equivalent conditional validity:
+
+- Concurrent state changes require human resolution.
+- Batch conflict detection is computationally feasible; flag volume is the real pressure.
+- Same-actor cross-device ordering is best-effort unless devices sync between use.
+- S19 deactivation/observation conflict is detectable via sync watermark.
+- Unmerge attribution risk is eliminated only if corrective split remains adopted.
+
+### User Risk Note Handling
+
+The user's concern that identity, conflict, flags, sync ordering, workflow cascade, and configuration-defined conflict rules overlap heavily is valid as an extraction risk, not as an independent architectural source. It should be used to check boundaries and closure, not to create new platform requirements.
+
+De-risking rule:
+
+- If ADR-002 omits a Phase 3 Bucket 1 constraint, record an omission or contradiction before deciding whether ADR-002 intentionally adapted it.
+- If ADR-002 includes a Bucket 2 strategy, keep it strategy-bounded unless ADR-002 explicitly makes it structural.
+- If ADR-002 decides a Bucket 3 deferral, record a cross-ADR boundary conflict unless later approved sources carry that decision forward.
+- If ADR-002 leaves an accepted risk without a revisit condition, preserve the risk as conditional rather than treating it as closed.
+
+### Reconciliation Result Before ADR-002
+
+Current standing is coherent enough to read ADR-002 next. The extraction machinery is catching cross-ADR assumptions by using explicit source boundaries, deferred closure candidates, Bucket 1/2/3/4 classification, and conditional statuses. The main remaining risk is not process weakness; it is whether ADR-002's final prose omitted, softened, or shifted Phase 3 constraints. That must be checked explicitly during ADR-002 extraction.
