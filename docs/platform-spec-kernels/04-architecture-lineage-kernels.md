@@ -786,7 +786,7 @@ Kind: forbidden-interpretation
 
 Specification statement:
 
-Forward-projected claims about ADR-002 through ADR-005 must be classified as consequences of ADR-001 options unless a later approved source decides them. They may constrain ADR-001 evaluation, but they must not close downstream identity, authorization, configuration, or workflow behavior by themselves.
+Forward-projected claims about ADR-002 through ADR-005 must be classified as consequences of ADR-001 options or as deferred downstream closure candidates unless a later approved source decides them. They may constrain ADR-001 evaluation and may later become real downstream decisions, but they must not close downstream identity, authorization, configuration, or workflow behavior by themselves.
 
 Source basis:
 
@@ -803,16 +803,17 @@ Applies to projected ADR-2 identity/conflict, ADR-3 authorization/sync, ADR-4 co
 
 Non-goals:
 
-Does not discard downstream projections. It only prevents premature closure.
+Does not discard downstream projections or demote them permanently. It prevents premature closure while preserving the claims for later reconciliation.
 
 Forbidden interpretations:
 
 - Do not mark projected downstream mechanisms as settled platform contracts from this file alone.
 - Do not erase projected downstream friction; keep it as ADR-001 selection pressure.
+- Do not lose projected claims that later ADRs may actually commit.
 
 Open edges:
 
-Each downstream projected claim must be rechecked when its own exploration and ADR files are processed.
+Each downstream projected claim must be rechecked when its own exploration and ADR files are processed. The allowed outcomes are promoted, abandoned, contradicted, conditional, or open.
 
 Platform specification note:
 

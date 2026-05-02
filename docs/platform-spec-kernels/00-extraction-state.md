@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 15 in progress
+Status: Iteration 16 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -41,7 +41,7 @@ Ground-truth document handling:
 - `docs/principles.md` sets pre-architecture decision guidance derived from vision, constraints, and behavioral patterns. Its later confirmation annotations can mark principles as validated guidance, but embedded ADR examples must not be used to close detailed platform interfaces before ADR extraction.
 - Archive processing begins with `docs/exploration/archive/01-architecture-landscape.md` before `00-exploration-framework.md`. Although numerically second, it was the first architecture-landscape exploration artifact and guided the ADR order and framework shape. It is superseded/raw exploration, so it can create lineage, tradeoff, prior-art, and candidate-decision-order kernels, but not final architecture closure.
 - `docs/exploration/archive/00-exploration-framework.md` is methodology only. It describes how agents should explore and write ADRs. Its sample ADR dependency order is optimistic/non-authoritative and must not be treated as a final ordering or as architecture closure.
-- ADR-001-specific handling: `docs/exploration/archive/02-adr1-offline-data-model.md` is the primary ADR-001 exploration lineage source, and `docs/exploration/archive/04-decision-audit.md` is the primary ADR-001 audit/closure lineage source. `docs/exploration/archive/03-adr1-forward-projection.md` is valid ADR-001 lineage, but each claim must be classified as either an ADR-001 consequence, a candidate ADR-001 selection pressure, or downstream spillover into ADR-002 through ADR-005. Do not let forward projection decide downstream ADRs.
+- ADR-001-specific handling: `docs/exploration/archive/02-adr1-offline-data-model.md` is the primary ADR-001 exploration lineage source, and `docs/exploration/archive/04-decision-audit.md` is the primary ADR-001 audit/closure lineage source. `docs/exploration/archive/03-adr1-forward-projection.md` is valid ADR-001 lineage, but each claim must be classified as either an ADR-001 consequence, a candidate ADR-001 selection pressure, or a deferred downstream closure candidate owned by ADR-002 through ADR-005. Do not let forward projection decide downstream ADRs by itself, and do not discard a projected claim merely because it belongs to downstream territory. Later owning ADR sources may promote, abandon, contradict, or keep it conditional.
 
 ## Output Goal
 
@@ -153,7 +153,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 15
+Current iteration: 16
 
 Processed sources:
 
@@ -206,6 +206,26 @@ No blocking conflicts recorded yet.
 Rest-state merge note:
 
 - Iterations 6 and 7 extracted S00/S01 granular scenario kernels before the compressed behavioral pass. They remain valid as scenario evidence, but later rest-state cleanup may merge or cross-reference them under behavioral kernels such as `Structured Recording Behavior`, `Subject Linkage Behavior`, `Shape Evolution Behavior`, and `Offline-First Work Behavior`.
+
+## Deferred Closure Register
+
+Deferred closure candidates are claims that appeared in an earlier source but belong to a later owning ADR or later closure source. They must survive until the owning sources are processed.
+
+Allowed outcomes when the owning source is processed:
+
+- `promoted`: later source commits or carries the claim forward.
+- `abandoned`: later source drops the claim or chooses a different model without carrying it.
+- `contradicted`: later source reverses the claim.
+- `conditional`: later source keeps the claim valid only under named assumptions.
+- `open`: later source explicitly leaves the claim unresolved.
+
+Current deferred candidates:
+
+- `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Owning sources: ADR-002 exploration files and ADR-002.
+- `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Owning sources: ADR-003 exploration files and ADR-003.
+- `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
+- `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
+- `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Owning sources: `docs/exploration/archive/04-decision-audit.md` and ADR-001.
 
 ## Candidate Kernel Register
 
@@ -377,3 +397,7 @@ Processed `docs/exploration/archive/02-adr1-offline-data-model.md`, the first AD
 ### Iteration 15
 
 Processed `docs/exploration/archive/03-adr1-forward-projection.md` as ADR-001 forward-projection lineage. Extracted downstream consequence pressure without letting it decide ADR-002 through ADR-005. Captured the strong Events selection pressure, snapshot structural ceiling, action-log convergence/dual-write risk, and projection-infrastructure risk. Final ADR-001 closure remains for `docs/exploration/archive/04-decision-audit.md` and ADR-001.
+
+### Iteration 16
+
+Housekeeping-only correction to ADR-001 forward-projection handling. Added a deferred closure register so claims from `03-adr1-forward-projection.md` that may later become real ADR-002 through ADR-005 decisions are preserved until their owning exploration and ADR sources are processed. No source was processed, no cursor advanced, and no kernel status changed.
