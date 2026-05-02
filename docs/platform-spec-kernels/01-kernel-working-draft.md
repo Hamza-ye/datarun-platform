@@ -1,6 +1,6 @@
 # Platform Specification Kernel Working Draft
 
-Status: Iteration 8 compressed behavioral pass
+Status: Iteration 9 in progress
 
 This file stages atomic platform-specification kernels in one place until the approved source set reaches rest state. Sections may be rewritten, merged, split, or demoted during extraction. Final atomic files must not be created from these sections until the conflict checks and closure pass are complete.
 
@@ -1941,6 +1941,512 @@ Technical sufficiency and architecture closure remain to be established by viabi
 Platform specification note:
 
 Use as a domain-level sufficiency claim for behavioral coverage, not as a final technical specification.
+
+## Kernel: Conditional Platform Viability
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+The platform approach is viable as a conditional go: the Phase 1 scenario set, offline cross-cut, access-control concern, constraints, and vision form a coherent enough problem space to proceed into architecture exploration, provided specific scope and boundary conditions are respected.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `## Executive Summary`
+- `docs/viability-assessment.md` / `### Recommendation: CONDITIONAL GO`
+
+Closure basis:
+
+Settled as a pre-architecture viability verdict. Not settled as final architecture.
+
+Scope:
+
+Applies to the decision to proceed from domain/scenario analysis into architecture exploration.
+
+Non-goals:
+
+Does not decide technical architecture, primitives, implementation sequence, or platform specification content.
+
+Forbidden interpretations:
+
+- Do not treat conditional go as unconditional architecture approval.
+- Do not treat the viability assessment as final ADR closure.
+
+Open edges:
+
+The named conditions and risks must be closed or bounded by later exploration and ADRs.
+
+Platform specification note:
+
+The platform specification should inherit the viability conditions as historical constraints only where later sources confirm or refine them.
+
+## Kernel: No Hard Scenario Conflicts
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+The approved scenario set contains no hard conflicts that make a unified platform impossible. The observed conflicts are design trade-offs and tensions, not contradictions that invalidate the platform concept.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `## 3. Conflict Check`
+
+Closure basis:
+
+Settled as a viability finding over the scenario and domain-ground-truth set.
+
+Scope:
+
+Applies to scenario coherence and the decision to continue architecture exploration.
+
+Non-goals:
+
+Does not prove any particular technical solution or eliminate implementation risk.
+
+Forbidden interpretations:
+
+- Do not treat absence of hard conflicts as proof that every scenario should drive initial architecture equally.
+- Do not ignore documented tensions because no hard conflict was found.
+
+Open edges:
+
+Each tension still requires technical closure or explicit deferral.
+
+Platform specification note:
+
+Use as context for why the platform can be specified as one coherent system, while preserving documented tensions.
+
+## Kernel: Configuration Boundary Collapse Risk
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+The line between "set up" and "built" is the most architecturally significant viability risk. If configuration becomes too expressive, it collapses into a programming language and undermines the platform promise.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `T2: Configuration simplicity vs. expressive power`
+- `docs/viability-assessment.md` / `Risk Flags` / `R1`
+- `docs/viability-assessment.md` / `Condition 1 — Configuration boundary first`
+
+Closure basis:
+
+Settled as a high-severity viability risk and architecture-entry condition. Not closed as the final configuration model.
+
+Scope:
+
+Applies to shape evolution, dynamic targeting, event-triggered actions, multi-audience views, analytics-derived flows, and any future deployer-authored logic.
+
+Non-goals:
+
+Does not decide the layers, syntax, rule language, admin UI, extension model, or deployer capabilities.
+
+Forbidden interpretations:
+
+- Do not infer unlimited deployer-authored logic from "set up, not built."
+- Do not hide software development inside a configuration language.
+
+Open edges:
+
+The concrete configuration boundary remains to be closed by exploration and ADRs.
+
+Platform specification note:
+
+The platform specification must make the configuration boundary explicit and should preserve this risk as the reason the boundary exists.
+
+## Kernel: Offline Reactivity Eventual-Consistency Tension
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+Reactive behavior and timely response must be reconciled with offline-first work. In the viability assessment, triggers and oversight reactions are framed as eventually consistent: they can occur when information becomes centrally visible, not necessarily when the field observation happened.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `T1: Offline-first vs. real-time reactivity`
+
+Closure basis:
+
+Settled as a viability tension and direction. Not closed as a trigger mechanism or timing contract.
+
+Scope:
+
+Applies to dynamic targeting, event-triggered actions, emergency response pressure, oversight delay, and sync-mediated visibility.
+
+Non-goals:
+
+Does not decide trigger timing, notification channels, sync protocol, or whether later ADRs preserve this exact mechanism.
+
+Forbidden interpretations:
+
+- Do not assume field-recorded events can always trigger immediate central action.
+- Do not design reactive behavior as inherently real-time unless later authoritative sources close that.
+
+Open edges:
+
+Reactive semantics and sync/freshness contracts remain to be closed by later sources.
+
+Platform specification note:
+
+The platform specification should treat real-time reactivity as constrained by offline-first operation unless later decisions introduce bounded exceptions.
+
+## Kernel: Domain Mechanism Content Separation
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+Domain-agnosticism is viable if the platform provides mechanisms while deploying organizations provide domain content: what conditions mean, which thresholds matter, what "resolved" means, and which validations apply.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `T3: Domain-agnosticism vs. domain-specific validation`
+
+Closure basis:
+
+Settled as a viability direction. Not closed as a specific configuration, validation, or rule model.
+
+Scope:
+
+Applies to case management, dynamic targeting, event-triggered actions, domain-specific validation, and business rules.
+
+Non-goals:
+
+Does not decide rule expressiveness, validation language, domain content schema, or which rules require code.
+
+Forbidden interpretations:
+
+- Do not hard-code domain content into platform mechanisms.
+- Do not claim domain-agnosticism requires the platform to know no domain-specific content at deployment time.
+
+Open edges:
+
+The mechanism/content boundary remains to be closed by later sources.
+
+Platform specification note:
+
+The platform specification should separate platform-owned mechanism from deployer-provided domain content.
+
+## Kernel: Trustworthy Records Offline Correction Tension
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+Traceable records and offline correction create a real trade-off: preserving full history and surfacing conflicts adds operational complexity, but silent overwrite or erasure would violate the trustworthy-records promise.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `T4: Trustworthy records vs. offline correction`
+- `docs/scenarios/00-basic-structured-capture.md` / `## What makes this hard`
+
+Closure basis:
+
+Settled as a viability tension. Not closed as append-only storage, event sourcing, or conflict-resolution policy.
+
+Scope:
+
+Applies to corrections, offline arrival order, conflicting corrections, trustworthy records, and human judgment pressure.
+
+Non-goals:
+
+Does not decide storage mutability, conflict categories, flagging, or resolution workflow.
+
+Forbidden interpretations:
+
+- Do not silently merge or overwrite where traceability is required.
+- Do not minimize the operational complexity introduced by full-history preservation.
+
+Open edges:
+
+Write model and conflict behavior remain to be closed by exploration and ADRs.
+
+Platform specification note:
+
+The platform specification should preserve this tension as the motivation for whatever record-history and conflict semantics are later closed.
+
+## Kernel: Phase 2 Deferral Guardrail
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+Scenarios 15, 16, and 18 are compatible with the platform ambition but should remain deferred as initial architecture drivers because they introduce view-composition, crisis-authority, and analytics-infrastructure pressures that can distort the Phase 1 core.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `Executive Summary`
+- `docs/viability-assessment.md` / `Condition 3 — Keep Phase 2 deferred`
+- `docs/scenarios/README.md` / `## Phasing`
+
+Closure basis:
+
+Settled as a viability guardrail. Not settled as permanent exclusion or final platform scope.
+
+Scope:
+
+Applies to multi-audience views, emergency response, analytics-derived flows, authority override, and analytics-driven initiation.
+
+Non-goals:
+
+Does not decide that deferred scenarios are invalid, out of scope forever, or unsupported by future platform evolution.
+
+Forbidden interpretations:
+
+- Do not let deferred scenarios drive initial core architecture.
+- Do not design the Phase 1 core around crisis mode or analytics infrastructure.
+- Do not actively block future compatibility unless later sources close that trade-off.
+
+Open edges:
+
+Future support and exact compatibility constraints remain to be closed by later sources.
+
+Platform specification note:
+
+The platform specification should distinguish core constraints from deferred extension pressures.
+
+## Kernel: Setup Experience Blind Spot
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+The setup/configuration experience is the least-tested core promise in the scenario set. Scenarios describe field operations, not the administrator's experience of setting up an operational activity.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `Vision Guarantee Coverage` / `V2`
+- `docs/viability-assessment.md` / `Blind spot 1: The setup/configuration experience`
+
+Closure basis:
+
+Open as a viability blind spot.
+
+Scope:
+
+Applies to administrator setup, activity configuration, setup usability, and the credibility of "set up, not built."
+
+Non-goals:
+
+Does not decide the admin UI, configuration layers, or authoring workflow.
+
+Forbidden interpretations:
+
+- Do not treat setup UX as already scenario-proven.
+- Do not let field-operation scenarios alone prove the setup promise.
+
+Open edges:
+
+Setup experience evidence and configuration authoring semantics remain open.
+
+Platform specification note:
+
+The platform specification should avoid overstating setup usability until later sources close the boundary and authoring model.
+
+## Kernel: Retention And Archival Blind Spot
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+The domain ground truth establishes large, accumulating records, but no scenario directly addresses archival, retention policy, or the operational experience of years of accumulated data.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `Blind spot 2: Data archival and retention`
+- `docs/constraints.md` / `## Scale`
+
+Closure basis:
+
+Open as a viability blind spot.
+
+Scope:
+
+Applies to old records, retention policy, archival, compliance, performance, local storage, and long-running deployments.
+
+Non-goals:
+
+Does not decide deletion, summarization, local eviction, central retention, or archive access.
+
+Forbidden interpretations:
+
+- Do not assume data lifecycle is solved by the scenarios.
+- Do not ignore accumulated-data pressure on low-end devices.
+
+Open edges:
+
+Retention and archival mechanics remain open.
+
+Platform specification note:
+
+The platform specification should mark data lifecycle as unresolved unless later decisions close it.
+
+## Kernel: Onboarding And Role Transition Blind Spot
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+User onboarding and role-transition operations are not covered by a dedicated scenario, even though access-control requirements mention promotion, transfer, leave, coverage, and responsibility handoff.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `Blind spot 3: User onboarding and role transitions`
+- `docs/access-control-scenario.md`
+
+Closure basis:
+
+Open as a viability blind spot.
+
+Scope:
+
+Applies to onboarding, transfer, leave, role changes, responsibility handoff, and lifecycle events for workers.
+
+Non-goals:
+
+Does not decide actor lifecycle, assignment lifecycle, HR integration, or handoff workflow.
+
+Forbidden interpretations:
+
+- Do not assume role lifecycle UX is scenario-proven.
+- Do not erase responsibility continuity when roles change.
+
+Open edges:
+
+Actor and responsibility lifecycle mechanics remain open.
+
+Platform specification note:
+
+The platform specification should avoid overclaiming role lifecycle coverage until later closure.
+
+## Kernel: Reporting Aggregation Blind Spot
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+The scenarios cover capture, oversight, and coordination, but do not directly cover decision-maker aggregation such as cross-district totals or monthly resolved-case counts. Scenario 15 is related but deferred.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `Blind spot 4: Reporting and aggregation for decision-makers`
+
+Closure basis:
+
+Open as a viability blind spot.
+
+Scope:
+
+Applies to aggregate reporting, decision-maker views, summaries, and cross-scope metrics.
+
+Non-goals:
+
+Does not decide analytics, dashboards, materialized views, reporting schema, or Phase 1 inclusion.
+
+Forbidden interpretations:
+
+- Do not assume detailed aggregation requirements are covered by capture scenarios.
+- Do not silently pull deferred multi-audience view complexity into the core.
+
+Open edges:
+
+Aggregation scope and reporting semantics remain open.
+
+Platform specification note:
+
+The platform specification should distinguish operational oversight from analytical aggregation unless later sources close them together.
+
+## Kernel: Domain-Agnosticism Proof Gap
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Core scenarios are domain-pure, but composite validation examples are health-oriented. Domain-agnosticism is plausible but not fully proven by a second non-health composite scenario in the ground-truth set.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `Vision Guarantee Coverage` / `V6`
+- `docs/viability-assessment.md` / `Risk Flags` / `R4`
+
+Closure basis:
+
+Open as a low-medium viability proof gap.
+
+Scope:
+
+Applies to domain-neutral core terminology, cross-domain validation, and risk of implicit health-domain assumptions.
+
+Non-goals:
+
+Does not reject the platform's domain-agnostic ambition.
+
+Forbidden interpretations:
+
+- Do not bake health-domain assumptions into platform core because composite examples are health-oriented.
+- Do not treat absence of a second-domain composite as a hard contradiction.
+
+Open edges:
+
+Additional non-health validation remains useful for confidence.
+
+Platform specification note:
+
+The platform specification should keep core terms domain-neutral and cite domain-specific examples only as examples.
+
+## Kernel: Low-End Device Scale Risk
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+Scale on low-end devices is a medium viability risk: millions of records, low-end Android phones, offline operation, and years of accumulated data can exceed local storage or query performance if not addressed explicitly.
+
+Source basis:
+
+- `docs/viability-assessment.md` / `Risk Flags` / `R5`
+- `docs/constraints.md` / `## Scale`
+
+Closure basis:
+
+Settled as a viability risk. Not closed as a selective-sync, local lifecycle, archive, or performance design.
+
+Scope:
+
+Applies to local storage, query performance, selective data availability, accumulated records, and field-device constraints.
+
+Non-goals:
+
+Does not decide local database design, sync filtering, archive strategy, or performance budgets.
+
+Forbidden interpretations:
+
+- Do not assume every device can hold the full deployment dataset.
+- Do not ignore local lifecycle just because central records can accumulate.
+
+Open edges:
+
+Selective sync, local lifecycle, and performance design remain to be closed by later sources.
+
+Platform specification note:
+
+The platform specification should include low-end device and scale constraints wherever it defines local data availability.
 
 ## Pending Split Targets
 

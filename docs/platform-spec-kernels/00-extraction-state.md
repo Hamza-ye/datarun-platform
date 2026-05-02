@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 8 compressed behavioral pass
+Status: Iteration 9 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -36,6 +36,8 @@ Ground-truth document handling:
 
 - `docs/*.md` files in the approved ground-truth set and `docs/scenarios/` are domain, vision, ambition, and requirements sources. They predate exploration and ADRs and must not be read as implying a specific architecture or implementation path unless they explicitly state a requirement.
 - If an approved ground-truth file contains links or reading-order instructions to forbidden docs, those links and instructions are ignored for extraction purposes.
+- `docs/viability-assessment.md` is the first architecture-toned narrowing pass. It evaluates whether the domain ground truth and scenarios describe a buildable platform. It may create viability, tension, risk, blind-spot, and conditional-scope kernels, but it does not close final architecture or implementation decisions.
+- Terms such as "primitive" in `docs/viability-assessment.md` are candidate abstraction language from pre-architecture narrowing, not final platform primitive classification.
 
 ## Output Goal
 
@@ -141,7 +143,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 8
+Current iteration: 9
 
 Processed sources:
 
@@ -172,10 +174,11 @@ Processed sources:
 - `docs/scenarios/21-chv-supervisor-operations.md`
 - `docs/scenarios/22-coordinated-distribution-campaign-across-grouped-locations.md`
 - `docs/behavioral_patterns.md`
+- `docs/viability-assessment.md`
 
 Next source:
 
-- `docs/viability-assessment.md`
+- `docs/principles.md`
 
 Ignored-as-source:
 
@@ -240,6 +243,19 @@ Rest-state merge note:
 - `Shape Evolution Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; shape/version mechanism unresolved.
 - `Offline-First Work Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; sync/reconciliation mechanism unresolved.
 - `Behavioral Composition Without New Patterns` — settled behavioral validation from `docs/behavioral_patterns.md`; architecture decomposition unresolved.
+- `Conditional Platform Viability` — settled viability verdict from `docs/viability-assessment.md`; architecture exploration allowed under conditions.
+- `No Hard Scenario Conflicts` — settled viability finding from `docs/viability-assessment.md`; not a proof of final architecture.
+- `Configuration Boundary Collapse Risk` — settled high-severity viability risk from `docs/viability-assessment.md`; boundary unresolved.
+- `Offline Reactivity Eventual-Consistency Tension` — settled viability tension from `docs/viability-assessment.md`; reactive mechanism unresolved.
+- `Domain Mechanism Content Separation` — settled viability direction from `docs/viability-assessment.md`; validation/configuration mechanism unresolved.
+- `Trustworthy Records Offline Correction Tension` — settled viability tension from `docs/viability-assessment.md`; write/conflict model unresolved.
+- `Phase 2 Deferral Guardrail` — settled viability condition from `docs/viability-assessment.md`; deferred pressures must not drive initial architecture.
+- `Setup Experience Blind Spot` — settled viability blind spot from `docs/viability-assessment.md`; setup/admin evidence missing in scenarios.
+- `Retention And Archival Blind Spot` — settled viability blind spot from `docs/viability-assessment.md`; data lifecycle unresolved.
+- `Onboarding And Role Transition Blind Spot` — settled viability blind spot from `docs/viability-assessment.md`; lifecycle UX unresolved.
+- `Reporting Aggregation Blind Spot` — settled viability blind spot from `docs/viability-assessment.md`; aggregation scope unresolved.
+- `Domain-Agnosticism Proof Gap` — settled viability blind spot from `docs/viability-assessment.md`; non-health composite validation not yet strong.
+- `Low-End Device Scale Risk` — settled viability risk from `docs/viability-assessment.md`; selective sync/local lifecycle unresolved.
 
 ## Iteration History
 
@@ -278,3 +294,7 @@ Processed `docs/scenarios/01-entity-linked-capture.md`. Extracted subject-linked
 ### Iteration 8
 
 Processed the remaining scenario files (`docs/scenarios/02-*` through `22-*`, excluding nonexistent sequence numbers) together with `docs/behavioral_patterns.md` as a compressed behavioral-domain pass. This pass deliberately avoids architecture boundaries, implementation scope, and later ADR assumptions. It extracts the common domain behaviors and composition evidence only. Earlier S00/S01 granular kernels remain as evidence seeds and may be merged or cross-referenced during rest-state cleanup.
+
+### Iteration 9
+
+Processed `docs/viability-assessment.md` as the first architecture-toned narrowing pass. Extracted conditional viability, tensions, risks, guardrails, and blind spots. Did not treat candidate primitive language or mitigation suggestions as final architecture; later exploration and ADR sources must close or correct those points.
