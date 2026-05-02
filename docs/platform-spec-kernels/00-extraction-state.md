@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 3 in progress
+Status: Iteration 4 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -130,17 +130,18 @@ For every processed source:
 
 ## Scan Cursor
 
-Current iteration: 3
+Current iteration: 4
 
 Processed sources:
 
 - `docs/access-control-scenario.md`
 - `docs/constraints.md`
 - `docs/README.md`
+- `docs/scenarios/README.md`
 
 Next source:
 
-- `docs/scenarios/`
+- `docs/scenarios/00-basic-structured-capture.md`
 
 Ignored-as-source:
 
@@ -175,6 +176,10 @@ No conflicts recorded yet.
 - `Coherent Single-System Experience` — settled vision requirement from `docs/README.md`; common contracts and concepts unresolved.
 - `Operational Adaptability Without Rebuild` — settled vision requirement from `docs/README.md`; evolution mechanisms unresolved.
 - `Domain-Agnostic Field Operations` — settled ambition constraint from `docs/README.md`; cross-domain validation remains evidence-driven.
+- `Scenario Problem-Space Boundary` — settled extraction rule from `docs/scenarios/README.md`; scenarios do not prescribe constructs or architecture.
+- `Operational Complexity Progression` — settled scenario-ordering context from `docs/scenarios/README.md`; not an implementation sequence.
+- `Scenario Phase Boundary` — settled requirements-scope classification from `docs/scenarios/README.md`; Phase 2 scenarios are compatible but deferred as drivers.
+- `Foundational Scenario Evidence Set` — settled extraction priority from `docs/scenarios/README.md`; foundational scenarios must be read before compositional scenarios.
 
 ## Iteration History
 
@@ -193,3 +198,7 @@ Processed `docs/constraints.md`. Extracted operational-environment requirements 
 ### Iteration 3
 
 Processed `docs/README.md`. Extracted vision and ambition kernels only. Ignored current-authority and documentation-reading-guide content because it points to excluded docs and is not domain/requirements content for this extraction.
+
+### Iteration 4
+
+Processed `docs/scenarios/README.md` as the index for the scenario directory. Extracted scenario-directory guardrails and scan plan only. Scenario files will be processed individually in filename order, starting with `docs/scenarios/00-basic-structured-capture.md`, so scenario evidence does not get compressed into one oversized pass.

@@ -1,6 +1,6 @@
 # Platform Specification Kernel Working Draft
 
-Status: Iteration 3 in progress
+Status: Iteration 4 in progress
 
 This file stages atomic platform-specification kernels in one place until the approved source set reaches rest state. Sections may be rewritten, merged, split, or demoted during extraction. Final atomic files must not be created from these sections until the conflict checks and closure pass are complete.
 
@@ -928,6 +928,161 @@ The boundary between domain-agnostic mechanisms and domain-specific configured c
 Platform specification note:
 
 The platform specification should keep core terminology operational and domain-neutral unless an approved source closes a domain-specific concept as platform-owned.
+
+## Kernel: Scenario Problem-Space Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+Scenario files define real-world problem-space situations from the perspective of people and organizations doing the work. They do not name platform constructs, decompose capabilities, prescribe architecture, define sync protocols, choose conflict strategies, or imply implementation paths.
+
+Source basis:
+
+- `docs/scenarios/README.md` / `## Purpose`
+- `docs/scenarios/README.md` / `## What These Scenarios Are Not`
+
+Closure basis:
+
+Settled as an extraction and interpretation rule for all scenario-derived kernels.
+
+Scope:
+
+Applies to every file under `docs/scenarios/`, including foundational, structural, compositional, deferred, cross-cutting, and composite scenarios.
+
+Non-goals:
+
+This kernel does not extract any platform primitive or interface from a scenario by itself.
+
+Forbidden interpretations:
+
+- Do not convert scenario prose directly into platform constructs.
+- Do not infer an implementation mechanism from a scenario unless a later approved exploration or ADR closes it.
+- Do not treat scenario ordering as an implementation plan.
+
+Open edges:
+
+Concrete constructs and decisions remain to be extracted from exploration and ADR sources after scenario evidence is captured.
+
+Platform specification note:
+
+The platform specification should use scenarios as requirement evidence and acceptance context, not as technical design authority.
+
+## Kernel: Operational Complexity Progression
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+The scenario set is ordered by increasing operational complexity: recording things, recurring obligations, oversight and judgment, coordination across people and places, and reactive or emergent work. This order supports reasoning over the problem space but does not prescribe architecture or implementation order.
+
+Source basis:
+
+- `docs/scenarios/README.md` / `## Ordering Rationale`
+
+Closure basis:
+
+Settled as scenario-index context.
+
+Scope:
+
+Applies to scenario reading order and extraction sequencing.
+
+Non-goals:
+
+This kernel does not decide platform phases, delivery order, implementation milestones, or technical dependencies.
+
+Forbidden interpretations:
+
+- Do not treat scenario ordering as proof that later scenarios depend technically on earlier scenarios.
+- Do not use ordering to promote constructs before later decision sources close them.
+
+Open edges:
+
+Actual architecture dependencies remain to be extracted from exploration and ADRs.
+
+Platform specification note:
+
+The platform specification may use this progression to explain requirement coverage, not to define system layering.
+
+## Kernel: Scenario Phase Boundary
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+Scenarios 00 through 14 and 22 form the Phase 1 core problem set. Scenarios 15, 16, and 18 are compatible extensions but deferred as initial architecture drivers. Scenario 19 is cross-cutting offline reality, not a separate operational situation. Scenarios 20 and 21 are composite real-world validation contexts.
+
+Source basis:
+
+- `docs/scenarios/README.md` / `## Phasing`
+
+Closure basis:
+
+Settled as scenario-scope classification. Not settled as a technical release plan.
+
+Scope:
+
+Applies to scenario evidence weighting during extraction.
+
+Non-goals:
+
+This kernel does not decide platform feature phases, implementation sequence, or ADR scope by itself.
+
+Forbidden interpretations:
+
+- Do not let deferred scenarios 15, 16, and 18 drive initial core architecture without later closure.
+- Do not ignore scenario 19 simply because it is cross-cutting rather than numbered into the core sequence.
+- Do not treat composite scenarios 20 and 21 as new primitive sources without checking whether they compose earlier requirements.
+
+Open edges:
+
+Whether deferred or composite scenario pressures become closed platform rules depends on later viability, exploration, and ADR sources.
+
+Platform specification note:
+
+The platform specification should distinguish core, deferred, cross-cutting, and composite scenario evidence when explaining requirement coverage.
+
+## Kernel: Foundational Scenario Evidence Set
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+Scenarios 00, 01, 06, and 19 plus the access-control cross-cut form the foundational evidence set for later architecture exploration. They are foundational because they expose simplicity, identity, mutability, shape evolution, offline reconciliation, authority, and visibility pressures.
+
+Source basis:
+
+- `docs/scenarios/README.md` / `## Architectural Significance` / `Foundational`
+
+Closure basis:
+
+Settled as scenario evidence priority. Not settled as architecture or construct definition.
+
+Scope:
+
+Applies to extraction order, conflict checks, and later closure review.
+
+Non-goals:
+
+This kernel does not decide the technical solutions for recording, identity, schema evolution, sync, conflict, access control, or visibility.
+
+Forbidden interpretations:
+
+- Do not skip foundational scenario pressures when judging later platform kernels.
+- Do not convert the "foundational" label into an architecture layer without later decision evidence.
+
+Open edges:
+
+The technical closure of these pressures remains to be extracted from exploration and ADRs.
+
+Platform specification note:
+
+The platform specification should be traceable back to these foundational scenario pressures where it defines core platform contracts.
 
 ## Pending Split Targets
 
