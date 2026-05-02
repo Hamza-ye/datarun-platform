@@ -1,6 +1,6 @@
 # Platform Specification Kernel Working Draft
 
-Status: Iteration 6 in progress
+Status: Iteration 7 in progress
 
 This file stages atomic platform-specification kernels in one place until the approved source set reaches rest state. Sections may be rewritten, merged, split, or demoted during extraction. Final atomic files must not be created from these sections until the conflict checks and closure pass are complete.
 
@@ -1238,6 +1238,160 @@ The storage and correction semantics remain to be extracted from exploration and
 Platform specification note:
 
 The platform specification should make correction traceability a baseline audit requirement and later bind it to the decided write model.
+
+## Kernel: Subject-Linked Record History
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+The platform must support records tied to recognizable, real-world subjects such as places, equipment, organizational units, people, or other identifiable things. Over time, it must be possible to review what has been recorded about a subject, when, and by whom.
+
+Source basis:
+
+- `docs/scenarios/01-entity-linked-capture.md`
+- Probe cross-check: `docs/behavioral_patterns.md` identifies this as Subject Linkage (P02), but that document is not formally processed yet.
+
+Closure basis:
+
+Settled as an S01 domain requirement. Not yet closed as a subject primitive, reference shape, identity key, or registry model.
+
+Scope:
+
+Applies to recognizable subjects and the accumulated history of observations or reports associated with them.
+
+Non-goals:
+
+This kernel does not decide what counts as a platform subject, how subjects are identified, or how records reference subjects.
+
+Forbidden interpretations:
+
+- Do not treat subject-linked history as merely a current-state lookup.
+- Do not infer a concrete identity representation from the scenario wording.
+
+Open edges:
+
+The subject identity model and reference contract remain to be extracted from exploration and ADRs.
+
+Platform specification note:
+
+The platform specification should preserve subject-linked history as a core requirement before introducing technical identity constructs.
+
+## Kernel: Duplicate Subject Identity Pressure
+
+Status: Settled
+Kind: open-question
+
+Specification statement:
+
+The same real-world subject may be recorded under different identities by different people. These duplicate identities can accumulate over time and may not be obvious at the moment of recording.
+
+Source basis:
+
+- `docs/scenarios/01-entity-linked-capture.md` / `## What makes this hard`
+
+Closure basis:
+
+Settled as an S01 domain pressure. The platform response is open at this source level and must be closed by later exploration and ADRs.
+
+Scope:
+
+Applies to duplicate representations of facilities, people, equipment, organizational units, or other real-world subjects.
+
+Non-goals:
+
+This kernel does not decide duplicate detection, merge policy, aliasing, canonical identity, user review, or automated matching.
+
+Forbidden interpretations:
+
+- Do not assume real-world subjects are always recorded under one identity.
+- Do not assume duplicate identity is always detectable at capture time.
+
+Open edges:
+
+Duplicate detection and identity resolution behavior remain to be extracted from later sources.
+
+Platform specification note:
+
+The platform specification should treat duplicate subject identity separately from duplicate record capture, even though both may interact.
+
+## Kernel: Identity Ambiguity Over Time
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+A subject's identity may become ambiguous or change over time through split, merge, reassignment, relabeling, or similar domain events. Records created before the change and records created after the change must both remain meaningful.
+
+Source basis:
+
+- `docs/scenarios/01-entity-linked-capture.md` / `## What makes this hard`
+- Probe cross-check: `docs/behavioral_patterns.md` identifies mutable subject linkage as a variation of P02, but that document is not formally processed yet.
+
+Closure basis:
+
+Settled as an S01 domain pressure. Not yet closed as an identity lifecycle model.
+
+Scope:
+
+Applies to facilities splitting, households merging, equipment reassignment or relabeling, and any comparable subject-identity change.
+
+Non-goals:
+
+This kernel does not decide whether historical references are rewritten, aliased, frozen, migrated, split, merged, or projected.
+
+Forbidden interpretations:
+
+- Do not make historical records unintelligible after identity changes.
+- Do not assume identity changes only affect future records.
+
+Open edges:
+
+Identity lifecycle semantics remain to be extracted from exploration and ADRs.
+
+Platform specification note:
+
+The platform specification should require meaningful historical and future subject references across identity changes, then bind that requirement to the decided identity model.
+
+## Kernel: Subject History Ordering Under Sync
+
+Status: Settled
+Kind: open-question
+
+Specification statement:
+
+Records about a subject may be created offline by multiple people and arrive centrally out of order. The apparent central history of a subject can differ from the order in which observations actually happened.
+
+Source basis:
+
+- `docs/scenarios/01-entity-linked-capture.md` / `## What makes this hard`
+
+Closure basis:
+
+Settled as an S01 domain pressure. The ordering model is open at this source level.
+
+Scope:
+
+Applies to subject-linked observations and reports created offline, synced later, and interleaved with records from other actors.
+
+Non-goals:
+
+This kernel does not decide timestamps, causal ordering, event sequence fields, conflict detection, or projection ordering.
+
+Forbidden interpretations:
+
+- Do not equate central arrival order with actual work order.
+- Do not assume subject history is simple append-by-arrival when offline work exists.
+
+Open edges:
+
+Ordering, causality, and projection semantics remain to be extracted from later sources.
+
+Platform specification note:
+
+The platform specification should distinguish observed time, sync arrival, and subject-history interpretation once later sources close the technical model.
 
 ## Pending Split Targets
 

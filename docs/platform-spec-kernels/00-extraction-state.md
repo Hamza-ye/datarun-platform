@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 6 in progress
+Status: Iteration 7 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -141,7 +141,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 6
+Current iteration: 7
 
 Processed sources:
 
@@ -150,10 +150,11 @@ Processed sources:
 - `docs/README.md`
 - `docs/scenarios/README.md`
 - `docs/scenarios/00-basic-structured-capture.md`
+- `docs/scenarios/01-entity-linked-capture.md`
 
 Next source:
 
-- `docs/scenarios/01-entity-linked-capture.md`
+- `docs/scenarios/02-periodic-reporting.md`
 
 Ignored-as-source:
 
@@ -196,6 +197,10 @@ No conflicts recorded yet.
 - `Coexisting Record Shapes` — settled scenario requirement from `docs/scenarios/00-basic-structured-capture.md`; versioning mechanism unresolved.
 - `Duplicate Independent Capture Pressure` — settled scenario pressure from `docs/scenarios/00-basic-structured-capture.md`; identity/conflict mechanism unresolved.
 - `Traceable Record Correction` — settled scenario requirement from `docs/scenarios/00-basic-structured-capture.md`; correction model unresolved.
+- `Subject-Linked Record History` — settled scenario requirement from `docs/scenarios/01-entity-linked-capture.md`; subject identity model unresolved.
+- `Duplicate Subject Identity Pressure` — settled scenario pressure from `docs/scenarios/01-entity-linked-capture.md`; duplicate identity handling unresolved.
+- `Identity Ambiguity Over Time` — settled scenario pressure from `docs/scenarios/01-entity-linked-capture.md`; identity lifecycle semantics unresolved.
+- `Subject History Ordering Under Sync` — settled scenario pressure from `docs/scenarios/01-entity-linked-capture.md`; ordering model unresolved.
 
 ## Iteration History
 
@@ -226,3 +231,7 @@ Probe-only pass over `docs/scenarios/*.md` and `docs/behavioral_patterns.md`. No
 ### Iteration 6
 
 Processed `docs/scenarios/00-basic-structured-capture.md`. Extracted S00 as the structured-capture simplicity baseline and captured its domain pressures around shape coexistence, duplicate independent capture, and traceable correction. No storage, event, schema, sync, or conflict mechanism was promoted.
+
+### Iteration 7
+
+Processed `docs/scenarios/01-entity-linked-capture.md`. Extracted subject-linked capture requirements and identity pressures around duplicate identities, changing or ambiguous identity, and out-of-order offline subject history. No identity model, merge/split mechanism, aliasing model, or ordering protocol was promoted.
