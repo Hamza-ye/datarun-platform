@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 7 in progress
+Status: Iteration 8 compressed behavioral pass
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -137,11 +137,11 @@ Current probe notes:
 - `docs/scenarios/*.md` were probed after `docs/scenarios/README.md`. The files are small and can be processed file-by-file or in small coherent batches without context pressure.
 - `docs/behavioral_patterns.md` was probed before formal processing. It is a behavioral narrowing document, not an architectural source. It should inform scenario extraction by naming recurring behaviors, but it must not be treated as deciding platform primitives, storage models, interfaces, or implementation mechanisms.
 - Scenario extraction should use behavioral patterns as a cross-check after each scenario: capture the scenario's domain pressure first, then note which behavioral pattern evidence it supports if the mapping is explicit or later confirmed.
-- Do not add behavioral-pattern kernels until `docs/behavioral_patterns.md` reaches its formal turn after scenario and viability processing, unless the user explicitly changes scan order.
+- User-approved scan-order adjustment: `docs/behavioral_patterns.md` is formally processed with the compressed scenario pass before `docs/viability-assessment.md`, because it is a behavioral, pre-architecture narrowing over the scenario set and helps avoid scenario-file overfitting.
 
 ## Scan Cursor
 
-Current iteration: 7
+Current iteration: 8
 
 Processed sources:
 
@@ -151,10 +151,31 @@ Processed sources:
 - `docs/scenarios/README.md`
 - `docs/scenarios/00-basic-structured-capture.md`
 - `docs/scenarios/01-entity-linked-capture.md`
+- `docs/scenarios/02-periodic-reporting.md`
+- `docs/scenarios/03-user-based-assignment.md`
+- `docs/scenarios/04-supervisor-review.md`
+- `docs/scenarios/05-supervision-audit-visits.md`
+- `docs/scenarios/06-entity-registry-lifecycle.md`
+- `docs/scenarios/07-resource-distribution.md`
+- `docs/scenarios/08-case-management.md`
+- `docs/scenarios/09-coordinated-campaign.md`
+- `docs/scenarios/10-dynamic-targeting.md`
+- `docs/scenarios/11-multi-step-approval.md`
+- `docs/scenarios/12-event-triggered-actions.md`
+- `docs/scenarios/13-cross-flow-linking.md`
+- `docs/scenarios/14-multi-level-distribution.md`
+- `docs/scenarios/15-cross-program-overlays.md`
+- `docs/scenarios/16-emergency-rapid-response.md`
+- `docs/scenarios/18-advanced-analytics-derived-flows.md`
+- `docs/scenarios/19-offline-capture-and-sync.md`
+- `docs/scenarios/20-chv-field-operations.md`
+- `docs/scenarios/21-chv-supervisor-operations.md`
+- `docs/scenarios/22-coordinated-distribution-campaign-across-grouped-locations.md`
+- `docs/behavioral_patterns.md`
 
 Next source:
 
-- `docs/scenarios/02-periodic-reporting.md`
+- `docs/viability-assessment.md`
 
 Ignored-as-source:
 
@@ -162,7 +183,11 @@ Ignored-as-source:
 
 ## Conflict Log
 
-No conflicts recorded yet.
+No blocking conflicts recorded yet.
+
+Rest-state merge note:
+
+- Iterations 6 and 7 extracted S00/S01 granular scenario kernels before the compressed behavioral pass. They remain valid as scenario evidence, but later rest-state cleanup may merge or cross-reference them under behavioral kernels such as `Structured Recording Behavior`, `Subject Linkage Behavior`, `Shape Evolution Behavior`, and `Offline-First Work Behavior`.
 
 ## Candidate Kernel Register
 
@@ -201,6 +226,20 @@ No conflicts recorded yet.
 - `Duplicate Subject Identity Pressure` — settled scenario pressure from `docs/scenarios/01-entity-linked-capture.md`; duplicate identity handling unresolved.
 - `Identity Ambiguity Over Time` — settled scenario pressure from `docs/scenarios/01-entity-linked-capture.md`; identity lifecycle semantics unresolved.
 - `Subject History Ordering Under Sync` — settled scenario pressure from `docs/scenarios/01-entity-linked-capture.md`; ordering model unresolved.
+- `Behavioral Pattern Boundary` — settled extraction rule from `docs/behavioral_patterns.md`; behavioral patterns are not architecture.
+- `Structured Recording Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; technical recording primitive unresolved.
+- `Subject Linkage Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; subject identity mechanism unresolved.
+- `Temporal Rhythm Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; scheduling mechanism unresolved.
+- `Responsibility Binding Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; assignment/access mechanism unresolved.
+- `Hierarchical Visibility Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; visibility model unresolved.
+- `Review And Judgment Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; workflow/review mechanism unresolved.
+- `Transfer With Acknowledgment Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; transfer protocol unresolved.
+- `State Progression Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; state model unresolved.
+- `Condition-Triggered Action Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; trigger mechanism unresolved.
+- `Cross-Reference Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; linking mechanism unresolved.
+- `Shape Evolution Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; shape/version mechanism unresolved.
+- `Offline-First Work Behavior` — settled behavioral requirement from scenarios and `docs/behavioral_patterns.md`; sync/reconciliation mechanism unresolved.
+- `Behavioral Composition Without New Patterns` — settled behavioral validation from `docs/behavioral_patterns.md`; architecture decomposition unresolved.
 
 ## Iteration History
 
@@ -235,3 +274,7 @@ Processed `docs/scenarios/00-basic-structured-capture.md`. Extracted S00 as the 
 ### Iteration 7
 
 Processed `docs/scenarios/01-entity-linked-capture.md`. Extracted subject-linked capture requirements and identity pressures around duplicate identities, changing or ambiguous identity, and out-of-order offline subject history. No identity model, merge/split mechanism, aliasing model, or ordering protocol was promoted.
+
+### Iteration 8
+
+Processed the remaining scenario files (`docs/scenarios/02-*` through `22-*`, excluding nonexistent sequence numbers) together with `docs/behavioral_patterns.md` as a compressed behavioral-domain pass. This pass deliberately avoids architecture boundaries, implementation scope, and later ADR assumptions. It extracts the common domain behaviors and composition evidence only. Earlier S00/S01 granular kernels remain as evidence seeds and may be merged or cross-referenced during rest-state cleanup.

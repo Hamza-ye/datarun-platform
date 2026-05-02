@@ -1,6 +1,6 @@
 # Platform Specification Kernel Working Draft
 
-Status: Iteration 7 in progress
+Status: Iteration 8 compressed behavioral pass
 
 This file stages atomic platform-specification kernels in one place until the approved source set reaches rest state. Sections may be rewritten, merged, split, or demoted during extraction. Final atomic files must not be created from these sections until the conflict checks and closure pass are complete.
 
@@ -1392,6 +1392,555 @@ Ordering, causality, and projection semantics remain to be extracted from later 
 Platform specification note:
 
 The platform specification should distinguish observed time, sync arrival, and subject-history interpretation once later sources close the technical model.
+
+## Kernel: Behavioral Pattern Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+The behavioral patterns extracted from scenarios name recurring behaviors the platform must support. They are not platform constructs, database tables, technology choices, implementation mechanisms, or architecture primitives.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `## 1. Purpose`
+- `docs/scenarios/README.md` / `## What These Scenarios Are Not`
+
+Closure basis:
+
+Settled as an interpretation rule for scenario and behavioral-pattern extraction.
+
+Scope:
+
+Applies to all scenario-derived and behavioral-pattern-derived kernels.
+
+Non-goals:
+
+This kernel does not decide the platform primitive vocabulary or architecture decomposition.
+
+Forbidden interpretations:
+
+- Do not convert a behavioral pattern name directly into a platform primitive.
+- Do not treat the behavioral pattern catalog as a database or interface design.
+- Do not treat the pattern decomposition as implementation scope.
+
+Open edges:
+
+Technical closure remains to be extracted from viability, exploration, and ADR sources.
+
+Platform specification note:
+
+The platform specification may use behavioral pattern names as requirement categories only where later sources do not require a stricter technical term.
+
+## Kernel: Structured Recording Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Someone captures a predefined set of details about something observed, done, or received. The structure exists before capture, and the resulting record remains available for later reference.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P01 — Structured Recording`
+- Scenario evidence: S00, S01, S05, S20, S21
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as a technical recording primitive.
+
+Scope:
+
+Applies to structured capture across standalone records, subject-linked records, visits, field work, and assessments.
+
+Non-goals:
+
+Does not decide form, event, document, schema, or storage representation.
+
+Forbidden interpretations:
+
+- Do not require unrelated workflow machinery for the basic recording behavior.
+- Do not treat "record" as a technical storage decision at this stage.
+
+Open edges:
+
+Recording contract and storage model remain open until exploration/ADR closure.
+
+Platform specification note:
+
+Use as the behavioral baseline for any technical recording contract.
+
+## Kernel: Subject Linkage Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+A record may be tied to a recognizable, persistent real-world subject whose identity survives across multiple interactions over time, even when that identity is stable, changing, ambiguous, or resolved later.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P02 — Subject Linkage`
+- Scenario evidence: S01, S06, S08, S13, S20
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as a subject primitive, reference contract, or identity lifecycle model.
+
+Scope:
+
+Applies to people, places, households, equipment, organizational units, cases, and comparable operational subjects.
+
+Non-goals:
+
+Does not decide identifiers, aliasing, merge/split, registry structure, or reference fields.
+
+Forbidden interpretations:
+
+- Do not assume subject identity is always stable.
+- Do not assume subject linkage requires one specific technical identity model.
+
+Open edges:
+
+Identity and reference mechanics remain open until exploration/ADR closure.
+
+Platform specification note:
+
+Use as the behavioral basis for later subject, reference, and identity semantics.
+
+## Kernel: Temporal Rhythm Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Some work is expected on a predictable rhythm. A missing expected occurrence is meaningful, not merely absence of data.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P03 — Temporal Rhythm`
+- Scenario evidence: S02, S05, S06, S09
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as a scheduling, deadline, task, or projection mechanism.
+
+Scope:
+
+Applies to recurring reports, planned visits, registry reconfirmation, campaign windows, and follow-up expectations.
+
+Non-goals:
+
+Does not decide calendars, task generation, reminders, timers, or rule evaluation.
+
+Forbidden interpretations:
+
+- Do not treat missing work as indistinguishable from no expected work.
+- Do not assume all rhythms are fixed calendar schedules.
+
+Open edges:
+
+Temporal representation and enforcement remain open until later sources close them.
+
+Platform specification note:
+
+Use to justify explicit representation of expected work and gaps once the technical model is closed.
+
+## Kernel: Responsibility Binding Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+A specific person may be accountable for a specific scope of work, making it clear who should have done something and whether they did.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P04 — Responsibility Binding`
+- Scenario evidence: S03, S09, S14, S20, S21
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as an assignment model, access model, or actor-scope contract.
+
+Scope:
+
+Applies to explicit assignments, role-based responsibility, geographic responsibility, subject-set responsibility, work-type responsibility, and time-windowed responsibility.
+
+Non-goals:
+
+Does not decide assignment events, role vocabulary, scope fields, or authorization mechanics.
+
+Forbidden interpretations:
+
+- Do not model accountability without named responsible actors or actor groups where the scenario requires specificity.
+- Do not equate responsibility with visibility or authority in every context.
+
+Open edges:
+
+Responsibility, access, and sync mechanics remain open until later sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for later assignment and authority contracts.
+
+## Kernel: Hierarchical Visibility Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Different people see different scopes of information and work based on organizational, geographic, programmatic, or exceptional visibility relationships. Seeing more is not the same as being authorized to do more.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P05 — Hierarchical Visibility`
+- Scenario evidence: S03, S04, S05, S09, S11, S14, S15, S21
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as a hierarchy model, scope model, or access-control implementation.
+
+Scope:
+
+Applies to supervision, regional oversight, campaign monitoring, multi-level distribution, approvals, cross-program overlays, and auditor-like exceptions.
+
+Non-goals:
+
+Does not decide containment logic, sync scope, read permissions, write permissions, or exception encoding.
+
+Forbidden interpretations:
+
+- Do not collapse visibility and action authority.
+- Do not assume hierarchy has no exceptions.
+
+Open edges:
+
+Visibility and authority mechanics remain open until later sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for separating visibility from authority in later technical contracts.
+
+## Kernel: Review And Judgment Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Work completed by one person may pass through another person's assessment before it is final. The assessment may approve, reject, return, question, or escalate the work, and the outcome is part of the record.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P06 — Review and Judgment`
+- Scenario evidence: S04, S05, S11, S21
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as a workflow, state machine, review event, or approval protocol.
+
+Scope:
+
+Applies to supervisor review, audit visits, multi-step approval, and supervisor assessment.
+
+Non-goals:
+
+Does not decide review states, transition rules, reviewer assignment, or finalization mechanics.
+
+Forbidden interpretations:
+
+- Do not lose who reviewed what, when, and with what decision.
+- Do not assume every review is single-level or same-role.
+
+Open edges:
+
+Review and state progression mechanics remain open until later sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for auditable review semantics.
+
+## Kernel: Transfer With Acknowledgment Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Something may move from one party to another, and the receiver confirms receipt, disputes quantity or condition, or notes a discrepancy. The transfer is not behaviorally complete until acknowledgment or discrepancy is recorded.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P07 — Transfer with Acknowledgment`
+- Scenario evidence: S07, S14, S20, S22
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as inventory, logistics, transaction, or workflow mechanism.
+
+Scope:
+
+Applies to goods, supplies, resources, authority, responsibility, and related handoff behaviors.
+
+Non-goals:
+
+Does not decide inventory accounting, transfer event shape, chain-of-custody model, or discrepancy resolution.
+
+Forbidden interpretations:
+
+- Do not treat send as equivalent to received.
+- Do not erase discrepancies from the transfer history.
+
+Open edges:
+
+Transfer representation and reconciliation remain open until later sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for handoff and acknowledgment contracts.
+
+## Kernel: State Progression Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Work may move through meaningful stages. Earlier stages constrain later stages, progress is recorded, and current status matters for what can happen next.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P08 — State Progression`
+- Scenario evidence: S04, S07, S08, S09, S11, S12, S14, S20, S22
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as stored status, state machine, projection, or workflow engine.
+
+Scope:
+
+Applies to review, transfer, case management, campaigns, approvals, event-triggered responses, and multi-level distribution.
+
+Non-goals:
+
+Does not decide whether state is stored, derived, configured, or enforced by a platform mechanism.
+
+Forbidden interpretations:
+
+- Do not assume all progression is linear.
+- Do not assume current state can be understood without history where the behavior requires progression.
+
+Open edges:
+
+State representation and transition semantics remain open until later sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for later state and workflow decisions without naming their implementation.
+
+## Kernel: Condition-Triggered Action Behavior
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+Observed conditions, thresholds, patterns, gaps, or elapsed expectations may determine that something needs attention. The resulting action may be notification, assignment, escalation, or new work, and previous actions may influence future needs.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P09 — Condition-Triggered Action`
+- Scenario evidence: S10, S12, S18
+
+Closure basis:
+
+Settled as a behavioral requirement, with S18 representing deferred extension pressure. Not closed as a trigger engine or rules language.
+
+Scope:
+
+Applies to dynamic targeting, event-triggered responses, escalation, analytics-derived flows, and feedback loops.
+
+Non-goals:
+
+Does not decide trigger timing, real-time semantics, rule expressiveness, notification channels, or automated work creation.
+
+Forbidden interpretations:
+
+- Do not assume all triggered action is real-time.
+- Do not infer an unbounded rules engine from the behavior.
+
+Open edges:
+
+Trigger boundaries and mechanism remain open until viability, exploration, and ADR sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for reactive work while preserving configuration-boundary caution.
+
+## Kernel: Cross-Reference Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Separate activities may be related because understanding one requires context from another. The connection should be visible without forcing independent activities into one rigid process.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P10 — Cross-Reference`
+- Scenario evidence: S08, S13, S18, S22
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as reference fields, links, joins, projections, or relationship contracts.
+
+Scope:
+
+Applies to case context, supply-to-campaign context, prior audit findings, analytics-derived relationships, and related but independent flows.
+
+Non-goals:
+
+Does not decide link representation, referential integrity, activity identity, or coupling rules.
+
+Forbidden interpretations:
+
+- Do not force related activities into a single workflow solely because they are connected.
+- Do not hide meaningful operational relationships between otherwise independent activities.
+
+Open edges:
+
+Cross-reference representation and interaction rules remain open until later sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for explicit but non-rigid linking semantics.
+
+## Kernel: Shape Evolution Behavior
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+The expected structure of information may change over time. Old records remain valid under the shape that was active when captured, while new work may follow the updated shape.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P11 — Shape Definition and Evolution`
+- Scenario evidence: S00, S06
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as schema versioning, shape registry, migration, or validation mechanism.
+
+Scope:
+
+Applies to fixed and evolving expected information structures, old/new record coexistence, and records from different periods.
+
+Non-goals:
+
+Does not decide whether shape changes are migrated, versioned, projected, or read through compatibility layers.
+
+Forbidden interpretations:
+
+- Do not invalidate older records because the expected structure changed.
+- Do not require all old and new records to share the same current shape.
+
+Open edges:
+
+Shape/version mechanics remain open until later sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for later configuration and record-shape contracts.
+
+## Kernel: Offline-First Work Behavior
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Meaningful work happens without connectivity. Records, decisions, and state progression may be created locally and later reconciled with shared state when connectivity returns.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `P12 — Offline-First Work`
+- Scenario evidence: S19 and cross-cutting pressure across field scenarios, including S22
+
+Closure basis:
+
+Settled as a behavioral requirement. Not closed as sync protocol, local storage, conflict detection, or reconciliation model.
+
+Scope:
+
+Applies to field capture, decisions, stale local state, conflicting offline work, sync arrival, and cross-user reconciliation.
+
+Non-goals:
+
+Does not decide offline feature subset, conflict policy, data replication strategy, or user-visible sync behavior.
+
+Forbidden interpretations:
+
+- Do not require connectivity for field work.
+- Do not assume local and central state are always current with each other.
+- Do not equate sync arrival time with work time.
+
+Open edges:
+
+Offline storage, sync, ordering, and reconciliation mechanics remain open until later sources close them.
+
+Platform specification note:
+
+Use as behavioral evidence for offline-first architecture decisions without preselecting those decisions.
+
+## Kernel: Behavioral Composition Without New Patterns
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+The Phase 1 scenario set decomposes into the behavioral pattern catalog without requiring new patterns, and composite scenarios decompose into the same atomic behavioral patterns as their constituent scenarios.
+
+Source basis:
+
+- `docs/behavioral_patterns.md` / `## 4. Scenario Decomposition Table`
+- `docs/behavioral_patterns.md` / `## 6. Validation`
+- Scenario evidence: S00-S14, S19, S20, S21, with S22 providing an additional composite core scenario in the scenario index.
+
+Closure basis:
+
+Settled as behavioral validation. Not closed as architectural primitive sufficiency.
+
+Scope:
+
+Applies to behavioral decomposition and cross-scenario reuse.
+
+Non-goals:
+
+Does not prove any particular architecture, primitive set, implementation phase, or platform module boundary.
+
+Forbidden interpretations:
+
+- Do not treat "no new behavioral pattern" as "no new technical mechanism."
+- Do not treat composite scenario decomposition as evidence that every implementation detail is already closed.
+
+Open edges:
+
+Technical sufficiency and architecture closure remain to be established by viability, exploration, and ADR sources.
+
+Platform specification note:
+
+Use as a domain-level sufficiency claim for behavioral coverage, not as a final technical specification.
 
 ## Pending Split Targets
 
