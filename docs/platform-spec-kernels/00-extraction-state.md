@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 14 in progress
+Status: Iteration 15 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -41,6 +41,7 @@ Ground-truth document handling:
 - `docs/principles.md` sets pre-architecture decision guidance derived from vision, constraints, and behavioral patterns. Its later confirmation annotations can mark principles as validated guidance, but embedded ADR examples must not be used to close detailed platform interfaces before ADR extraction.
 - Archive processing begins with `docs/exploration/archive/01-architecture-landscape.md` before `00-exploration-framework.md`. Although numerically second, it was the first architecture-landscape exploration artifact and guided the ADR order and framework shape. It is superseded/raw exploration, so it can create lineage, tradeoff, prior-art, and candidate-decision-order kernels, but not final architecture closure.
 - `docs/exploration/archive/00-exploration-framework.md` is methodology only. It describes how agents should explore and write ADRs. Its sample ADR dependency order is optimistic/non-authoritative and must not be treated as a final ordering or as architecture closure.
+- ADR-001-specific handling: `docs/exploration/archive/02-adr1-offline-data-model.md` is the primary ADR-001 exploration lineage source, and `docs/exploration/archive/04-decision-audit.md` is the primary ADR-001 audit/closure lineage source. `docs/exploration/archive/03-adr1-forward-projection.md` is valid ADR-001 lineage, but each claim must be classified as either an ADR-001 consequence, a candidate ADR-001 selection pressure, or downstream spillover into ADR-002 through ADR-005. Do not let forward projection decide downstream ADRs.
 
 ## Output Goal
 
@@ -152,7 +153,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 14
+Current iteration: 15
 
 Processed sources:
 
@@ -188,10 +189,11 @@ Processed sources:
 - `docs/exploration/archive/01-architecture-landscape.md`
 - `docs/exploration/archive/00-exploration-framework.md`
 - `docs/exploration/archive/02-adr1-offline-data-model.md`
+- `docs/exploration/archive/03-adr1-forward-projection.md`
 
 Next source:
 
-- `docs/exploration/archive/03-adr1-forward-projection.md`
+- `docs/exploration/archive/04-decision-audit.md`
 
 Ignored-as-source:
 
@@ -303,6 +305,12 @@ Rest-state merge note:
 - `Conflict Surfacing Default` — conditional ADR-001 exploration conclusion; later ADRs close policy.
 - `Materialized Reads Required For Performance` — conditional event-like-model performance invariant; ADR-001 closes read model obligations.
 - `ADR-001 Downstream Constraint Set` — conditional dependency map for ADR-002 through ADR-005.
+- `ADR-001 Forward Projection Boundary` — settled extraction rule from `docs/exploration/archive/03-adr1-forward-projection.md`; downstream projections inform ADR-001 but do not decide ADR-002 through ADR-005.
+- `Snapshot Structural Ceiling` — candidate rejected-alternative lineage; snapshots undercut configurable workflow and are lossy to migrate from.
+- `Events Irreversibility Advantage` — candidate ADR-001 selection pressure; events preserve the safest migration path toward action-log-style views.
+- `Action Log Convergence And Dual-Write Risk` — candidate ADR-001 selection pressure; hard cases push action log toward event-style reprojection while dual-write gaps risk traceability/current-state divergence.
+- `Events Projection Infrastructure Risk` — conditional ADR-001 risk; events depend on reliable projection across versions, out-of-order arrival, and low-end devices.
+- `Downstream Projection Spillover Guard` — settled extraction rule; projected ADR-002 through ADR-005 consequences must remain consequences unless later sources decide them.
 
 ## Iteration History
 
@@ -365,3 +373,7 @@ Housekeeping-only split for context control. Replaced the oversized single worki
 ### Iteration 14
 
 Processed `docs/exploration/archive/02-adr1-offline-data-model.md`, the first ADR-specific exploration source. Extracted ADR-001 lineage around forced append-only storage, client-generated identity, immutable-record sync shape, conflict surfacing, materialized-read pressure, snapshot workflow weakness, and downstream constraints. Kept the central storage-unit choice open because the source is superseded and explicitly says ADR-001 finalizes the decision.
+
+### Iteration 15
+
+Processed `docs/exploration/archive/03-adr1-forward-projection.md` as ADR-001 forward-projection lineage. Extracted downstream consequence pressure without letting it decide ADR-002 through ADR-005. Captured the strong Events selection pressure, snapshot structural ceiling, action-log convergence/dual-write risk, and projection-infrastructure risk. Final ADR-001 closure remains for `docs/exploration/archive/04-decision-audit.md` and ADR-001.

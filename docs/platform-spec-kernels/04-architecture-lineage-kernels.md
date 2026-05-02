@@ -737,3 +737,246 @@ Later exploration files and ADRs must close each downstream constraint.
 Platform specification note:
 
 Use as a dependency checklist while extracting ADR-002 through ADR-005.
+
+## Kernel: ADR-001 Forward Projection Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/03-adr1-forward-projection.md` projects ADR-001 surviving options through ADR-002 through ADR-005 to reveal downstream consequences. It informs the ADR-001 decision by showing option propagation, but it does not revisit ADR-001 analysis and does not decide downstream ADRs.
+
+Source basis:
+
+- `docs/exploration/archive/03-adr1-forward-projection.md` / supersession notice
+- `docs/exploration/archive/03-adr1-forward-projection.md` / opening description
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## How To Read This Document`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-001 forward projection.
+
+Non-goals:
+
+Does not decide identity, conflict-resolution policy, authorization, selective sync, configuration language, workflow semantics, or the final ADR-001 storage choice.
+
+Forbidden interpretations:
+
+- Do not treat downstream projections as ADR-002 through ADR-005 decisions.
+- Do not treat projection examples as final platform interfaces.
+- Do not ignore useful ADR-001 selection pressure merely because the consequence appears in downstream territory.
+
+Open edges:
+
+ADR-001 closure remains with `docs/exploration/archive/04-decision-audit.md` and ADR-001. Downstream decisions remain with their own exploration and ADR sources.
+
+Platform specification note:
+
+Use this source to explain why the storage primitive constrains later primitives, without importing later ADR decisions prematurely.
+
+## Kernel: Downstream Projection Spillover Guard
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+Forward-projected claims about ADR-002 through ADR-005 must be classified as consequences of ADR-001 options unless a later approved source decides them. They may constrain ADR-001 evaluation, but they must not close downstream identity, authorization, configuration, or workflow behavior by themselves.
+
+Source basis:
+
+- `docs/exploration/archive/03-adr1-forward-projection.md` / opening description
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## How To Read This Document`
+
+Closure basis:
+
+Settled as an extraction guardrail for ADR-001 forward projection.
+
+Scope:
+
+Applies to projected ADR-2 identity/conflict, ADR-3 authorization/sync, ADR-4 configuration, and ADR-5 workflow statements in this file.
+
+Non-goals:
+
+Does not discard downstream projections. It only prevents premature closure.
+
+Forbidden interpretations:
+
+- Do not mark projected downstream mechanisms as settled platform contracts from this file alone.
+- Do not erase projected downstream friction; keep it as ADR-001 selection pressure.
+
+Open edges:
+
+Each downstream projected claim must be rechecked when its own exploration and ADR files are processed.
+
+Platform specification note:
+
+Use as a traceability guard so final atomic docs do not mix ADR-001 consequence analysis with later ADR decisions.
+
+## Kernel: Snapshot Structural Ceiling
+
+Status: Candidate
+Kind: rejected-alternative
+
+Specification statement:
+
+Snapshots create a structural ceiling under workflow-heavy platform scope: they fuse action and state, force full-state copies for workflow transitions, push behavior into application code instead of configuration, and make migration to event-like models lossy for workflow history.
+
+Source basis:
+
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## ADR-4: Configuration Paradigm and Boundary` / `Under Snapshots (A)`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## ADR-5: State Progression and Workflow` / `Under Snapshots (A)`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `### Where Option A could fail`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## Summary`
+
+Closure basis:
+
+Candidate rejected-alternative lineage for ADR-001. Final rejection depends on `04-decision-audit.md` and ADR-001.
+
+Scope:
+
+Applies to snapshots as the primary appended storage unit for configurable, workflow-heavy operations.
+
+Non-goals:
+
+Does not reject snapshots as derived views, summaries, exports, or repair artifacts.
+
+Forbidden interpretations:
+
+- Do not treat snapshot simplicity for capture as sufficient for workflow-heavy platform behavior.
+- Do not hide the cost that snapshot workflow migration loses action-level history.
+
+Open edges:
+
+ADR-001 must confirm whether snapshots are rejected as the storage primitive.
+
+Platform specification note:
+
+Use as lineage for any final rejection of snapshot-primary storage.
+
+## Kernel: Events Irreversibility Advantage
+
+Status: Candidate
+Kind: conditional-validity
+
+Specification statement:
+
+Events have the safest irreversibility position among the projected ADR-001 options: moving from events to action-log-style materialized views is additive, while moving from snapshots to events/action log is lossy and moving from action log to events requires proving log completeness despite dual-write risk.
+
+Source basis:
+
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `### Irreversibility`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `### The irreversibility gradient`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## Summary`
+
+Closure basis:
+
+Candidate ADR-001 selection pressure from forward projection. Final selection remains with audit and ADR-001.
+
+Scope:
+
+Applies to migration direction among snapshots, events, and action log as storage primitives.
+
+Non-goals:
+
+Does not by itself select Events as final architecture.
+
+Forbidden interpretations:
+
+- Do not treat an additive B to C path as proof that C is equivalent to B.
+- Do not ignore history loss when migrating from snapshots.
+- Do not assume action-log completeness if dual writes may have missed log entries.
+
+Open edges:
+
+`04-decision-audit.md` and ADR-001 must determine whether this selection pressure closes the storage primitive choice.
+
+Platform specification note:
+
+Use as lineage for why final storage selection may prefer the model with the least destructive escape hatch.
+
+## Kernel: Action Log Convergence And Dual-Write Risk
+
+Status: Candidate
+Kind: conditional-validity
+
+Specification statement:
+
+Action Log has a pragmatic development model but converges toward event-style projection under hard cases such as conflict resolution, view reconciliation after offline conflicts, and hierarchical visibility. Its distinct risk is dual-write consistency: missed view updates create stale user state, while missed log entries lose traceability.
+
+Source basis:
+
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## ADR-2: Identity and Conflict Resolution` / `Under Action Log (C)`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## ADR-5: State Progression and Workflow` / `Under Action Log (C)`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `### The narrowing insight`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `### Where Option C could fail`
+
+Closure basis:
+
+Candidate ADR-001 selection pressure from forward projection. Final selection remains with audit and ADR-001.
+
+Scope:
+
+Applies to Action Log as the primary storage/read model with co-primary log and materialized views.
+
+Non-goals:
+
+Does not reject materialized views as read models layered over a canonical event/log store.
+
+Forbidden interpretations:
+
+- Do not assume dual-write discipline is a structural guarantee.
+- Do not treat view-primary normal operation and log-primary conflict repair as one simple path.
+
+Open edges:
+
+Audit and ADR-001 must determine whether action log remains viable or is rejected.
+
+Platform specification note:
+
+Use as lineage for any final decision that makes projections canonical or treats materialized views as derived/repairable read models.
+
+## Kernel: Events Projection Infrastructure Risk
+
+Status: Conditional
+Kind: conditional-validity
+
+Specification statement:
+
+Events depend on reliable projection infrastructure. Projection must handle multiple schema versions, out-of-order event arrival, low-end device performance, and projector bugs that could corrupt current-state views. If this risk materializes, the projected escape hatch is to keep events as source of truth while adding materialized views for reads.
+
+Source basis:
+
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `### Where Option B could fail`
+- `docs/exploration/archive/03-adr1-forward-projection.md` / `## Summary`
+
+Closure basis:
+
+Conditional ADR-001 risk from forward projection.
+
+Scope:
+
+Applies if Events are selected as the storage primitive or source of truth.
+
+Non-goals:
+
+Does not decide projection algorithms, schemas, rebuild strategy, or event type vocabulary.
+
+Forbidden interpretations:
+
+- Do not present Events as free of operational complexity.
+- Do not require every screen load to replay from the event stream if materialized reads are required.
+- Do not demote the event log's traceability role merely because materialized views are added.
+
+Open edges:
+
+ADR-001 must decide projection obligations if Events are selected.
+
+Platform specification note:
+
+Use to ensure the platform specification includes projection reliability obligations rather than only event-storage benefits.
