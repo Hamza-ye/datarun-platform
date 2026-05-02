@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 29 ADR-004 session3 part1 extracted
+Status: Iteration 30 ADR-004 session3 part2 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -156,7 +156,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 29
+Current iteration: 30
 
 Processed sources:
 
@@ -204,10 +204,11 @@ Processed sources:
 - `docs/exploration/archive/13-adr4-session1-scoping.md`
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md`
 - `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md`
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md`
 
 Next source:
 
-- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md`
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`
 
 Ignored-as-source:
 
@@ -493,6 +494,15 @@ Current deferred candidates:
 - `Anti-Pattern Guard Formalization Candidate` — conditional AP-1/AP-2/AP-5 guard formalization.
 - `Platform Capability Boundary Candidate` — conditional cross-subject aggregation belongs to platform capabilities.
 - `ADR-004 Part 2 Reframe Result` — open handoff to irreversibility filtering with added system actor format question.
+- `ADR-004 Session 3 Part 2 Irreversibility Filter Boundary` — settled extraction rule from `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md`; permanence classification, not final ADR closure.
+- `ADR-004 Irreversibility Tier Classification Candidate` — conditional tier map separating Tier 1 structural envelope constraints, Tier 2 strategy-protecting constraints, and Tier 3 initial strategies.
+- `Shape Reference Structural Constraint Candidate` — conditional Tier 1 candidate; mandatory `shape_ref`, `{shape_name}/v{version}`, constrained shape names, integer versions.
+- `Activity Reference Structural Constraint Candidate` — conditional Tier 1 candidate; optional `activity_ref` as deployer-chosen activity instance identifier.
+- `Structural Event Type Vocabulary Constraint Candidate` — conditional Tier 1 candidate; platform-fixed append-only structural type vocabulary with six initial types.
+- `System Actor Format Strategy-Protecting Constraint Candidate` — conditional Tier 2 candidate; non-null system actor references using `system:{source_type}/{source_id}` convention.
+- `Configuration Architecture Strategy Classification Candidate` — conditional classification that most non-envelope configuration architecture choices are initial strategies, while server-only triggers and atomic packages are strategy-protecting constraints.
+- `Platform Capability Strategy Classification Candidate` — conditional classification that platform capability inventory and limits are strategy, not stored-event locks.
+- `ADR-004 Part 3 Stress Scope Candidate` — open handoff narrowing Part 3 to Tier 1 envelope stress tests with lighter validation for Tier 2/3 items.
 
 ## Iteration History
 
@@ -615,3 +625,7 @@ Processed `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md` as
 ### Iteration 29
 
 Processed `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md` as ADR-004 Session 3 Part 1 structural-coherence audit. Extracted conditional findings for artifact lifecycle, dependency validation, device/server evaluation split, expression language, pattern framework, envelope composition, system actor references, layer boundaries, anti-pattern guards, and platform capability boundary. Revised the Trigger Engine candidate so both 3a and 3b triggers are server-only, with L2 handling immediate device feedback. Updated campaign progress from one capability into aggregate projection, target comparison, and time windowing. Next source is Part 2 irreversibility filtering.
+
+### Iteration 30
+
+Processed `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` as ADR-004 Session 3 Part 2 irreversibility classification. Extracted the Tier 1/Tier 2/Tier 3 permanence map, with `shape_ref`, optional `activity_ref`, and structural `type` vocabulary as conditional Tier 1 envelope constraints. Reclassified system actor format, server-only triggers, atomic config packages, and deployer identifier naming rules as strategy-protecting constraints, while most configuration architecture and platform capability positions remain initial strategies. Narrowed the next-source stress scope to Tier 1 envelope attacks plus lighter validation for Tier 2/3 guardrails.

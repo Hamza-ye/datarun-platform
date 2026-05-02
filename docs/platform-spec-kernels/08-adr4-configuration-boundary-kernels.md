@@ -1,6 +1,6 @@
 # ADR-004 Configuration Boundary Kernel Staging
 
-Status: Iteration 27 staging
+Status: Iteration 30 staging
 
 This temporary staging file holds ADR-004 configuration-boundary lineage kernels. It is not a final atomic document.
 
@@ -1381,3 +1381,357 @@ Next source must classify irreversible versus evolvable ADR-004 decisions.
 Platform specification note:
 
 Use as immediate handoff to Part 2.
+
+## Kernel: ADR-004 Session 3 Part 2 Irreversibility Filter Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` is ADR-004 Session 3 Part 2 irreversibility classification. It applies stored-state, contract-surface, and recovery-cost tests to ADR-004 positions and narrows full adversarial treatment to envelope-touching choices. It does not make final ADR-004 decisions.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / supersession notice
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / opening purpose
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `## Summary: ADR-4's Irreversibility Surface`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-004 Session 3 Part 2.
+
+Non-goals:
+
+Does not decide the final ADR-004 envelope, type vocabulary, shape reference format, activity semantics, or configuration architecture.
+
+Forbidden interpretations:
+
+- Do not promote Part 2 classifications to ADR-settled closure before ADR-004 verification.
+- Do not give equal permanence to all ADR-004 positions after this source distinguishes envelope locks from evolvable strategy.
+
+Open edges:
+
+Part 3 must adversarially stress Tier 1 envelope decisions, and ADR-004 must close or correct the classifications.
+
+Platform specification note:
+
+Use as ADR-004 permanence-classification lineage.
+
+## Kernel: ADR-004 Irreversibility Tier Classification Candidate
+
+Status: Conditional
+Kind: conditional-validity-rule
+
+Specification statement:
+
+ADR-004 Session 3 Part 2 classifies ADR-004 positions into three tiers. Tier 1 structural constraints are `shape_ref`, optional `activity_ref`, and the platform-fixed append-only `type` vocabulary. Tier 2 strategy-protecting constraints are system actor value format, server-only triggers, atomic config packages, and deployer identifier naming rules. Tier 3 initial strategies include the remaining configuration architecture, platform capability, and boundary decisions that do not touch stored events.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `## Irreversibility Filter: Position by Position`
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `## Category B-D: Bulk Classification`
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `### Irreversibility Tier Classification`
+
+Closure basis:
+
+Conditional Part 2 classification pending Part 3 stress testing and ADR-004 verification.
+
+Scope:
+
+Applies to ADR-004 closure discipline, stress-test priority, and later platform-spec promotion.
+
+Non-goals:
+
+Does not make all Tier 2 and Tier 3 items optional or irrelevant; it only classifies their recovery cost and migration surface.
+
+Forbidden interpretations:
+
+- Do not treat configuration-layer choices as envelope constraints solely because they are architecturally important.
+- Do not omit Tier 2 strategy-protecting constraints from later closure; they protect invariants even when their implementation is evolvable.
+
+Open edges:
+
+ADR-004 must verify which Tier 2 and Tier 3 positions it adopts, defers, or revises.
+
+Platform specification note:
+
+Use as the permanence map when extracting ADR-004 final decisions.
+
+## Kernel: Shape Reference Structural Constraint Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+`shape_ref` is classified as ADR-004's highest-irreversibility structural constraint: every event carries a mandatory `shape_ref`; the value identifies both shape name and shape version using `{shape_name}/v{version}`; shape names must match `[a-z][a-z0-9_]*`; and versions are monotonic integers. Shape contents, registry implementation, authoring format, and adding new shapes remain evolvable.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / A1 `shape_ref`
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `Full Envelope After ADR-4 Irreversibility Filter`
+
+Closure basis:
+
+Conditional Tier 1 structural constraint pending Part 3 adversarial stress test and ADR-004 verification.
+
+Scope:
+
+Applies to event envelope, shape registry lookup, payload validation, projection, conflict detection, sync, and offline shape coexistence.
+
+Non-goals:
+
+Does not settle registry storage, sync packaging, authoring UI, or multi-tenant namespace policy beyond naming-rule compatibility.
+
+Forbidden interpretations:
+
+- Do not treat shape authoring format as locked by the stored `shape_ref` format.
+- Do not allow shape names with separators or characters that make `{shape_name}/v{version}` ambiguous under this candidate.
+
+Open edges:
+
+Part 3 must stress breaking schema changes under this reference format.
+
+Platform specification note:
+
+Use as the current ADR-004 Q3 structural-envelope candidate.
+
+## Kernel: Activity Reference Structural Constraint Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+`activity_ref` is classified as a lower-blast-radius structural envelope constraint: events may carry optional `activity_ref`, null by default, when operational context is not disambiguated by shape alone. The value is a deployer-chosen identifier matching `[a-z][a-z0-9_]*` and references an activity instance, not an activity template or definition.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / A2 `activity_ref`
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `Full Envelope After ADR-4 Irreversibility Filter`
+
+Closure basis:
+
+Conditional Tier 1 structural constraint pending Part 3 adversarial stress test and ADR-004 verification.
+
+Scope:
+
+Applies to campaign instances, overlapping activities, activity-based reporting, progress grouping, and event envelope design.
+
+Non-goals:
+
+Does not decide activity template syntax, activity package schema, reporting implementation, or future multi-tenancy namespace policy.
+
+Forbidden interpretations:
+
+- Do not interpret `activity_ref` as a reference to a reusable activity definition when the source classifies it as an activity instance reference.
+- Do not make the field mandatory for all events under this candidate; optionality is the recovery escape hatch.
+
+Open edges:
+
+Part 3 must stress shared shapes across multiple activities and decide whether optionality is sufficient.
+
+Platform specification note:
+
+Use as the current ADR-004 Q11 structural-envelope candidate.
+
+## Kernel: Structural Event Type Vocabulary Constraint Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-004 Session 3 Part 2 classifies event `type` as a platform-fixed, closed, append-only structural vocabulary. The initial candidate vocabulary is six stable processing types: `capture`, `review`, `alert`, `task_created`, `task_completed`, and `assignment_changed`. New structural types may be added later, but existing stored type values cannot be renamed or removed once events carry them. Domain-specific meaning remains in shapes and payload, not `type`.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / A3 `type`
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `Full Envelope After ADR-4 Irreversibility Filter`
+
+Closure basis:
+
+Conditional Tier 1 structural constraint pending Part 3 adversarial stress test and ADR-004 verification.
+
+Scope:
+
+Applies to event routing, projection behavior, trigger matching, sync/conflict behavior, form selection, and structural vocabulary evolution.
+
+Non-goals:
+
+Does not decide all future structural types, ADR-005 state-progression types, or processing implementation for each type.
+
+Forbidden interpretations:
+
+- Do not let deployers define arbitrary event `type` values under this candidate.
+- Do not encode program-domain event meaning in `type` instead of `shape_ref` and payload.
+- Do not keep `escalation` as a distinct initial structural type under this candidate; Part 2 merges escalation into `alert` with payload-distinguished metadata.
+
+Open edges:
+
+Part 3 must stress whether the six-type initial vocabulary covers the current ADR-004 scenarios, while ADR-005 may add workflow/state-progression types later.
+
+Platform specification note:
+
+Use as the current ADR-004 Q1 structural-envelope candidate.
+
+## Kernel: System Actor Format Strategy-Protecting Constraint Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+System-generated events have non-null `actor_ref`. ADR-004 Session 3 Part 2 classifies the system actor value format as strategy-protecting rather than fully structural: the convention is `system:{source_type}/{source_id}`, initially including trigger-generated events as `system:trigger/{trigger_id}`. The `actor_ref` field itself remains owned by ADR-002; ADR-004 only classifies this value-format convention for system-generated events.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / A4 system actor identity
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / Tier 2 strategy-protecting constraints
+
+Closure basis:
+
+Conditional Tier 2 strategy-protecting constraint pending ADR-004 verification.
+
+Scope:
+
+Applies to trigger-generated alerts, tasks, system-created events, audit attribution, and actor reference parsing conventions.
+
+Non-goals:
+
+Does not add a new envelope field and does not settle the full future set of system source types.
+
+Forbidden interpretations:
+
+- Do not leave system-generated events unattributed.
+- Do not treat the system actor value convention as equivalent in irreversibility to adding a new envelope field.
+
+Open edges:
+
+Part 3 may lightly test system actor identity collision; final source-type vocabulary remains extensible.
+
+Platform specification note:
+
+Use as system-event attribution lineage without overstating envelope permanence.
+
+## Kernel: Configuration Architecture Strategy Classification Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 Session 3 Part 2 classifies non-envelope configuration architecture positions as evolvable. The four-layer gradient, L3a/L3b split, expression language shape, zero-function ceiling, payload-map restrictions, projection-rule lookup-table form, trigger DAG depth, shape registry delta/snapshot authoring, change classification, and two-version device policy are initial strategies unless later ADR-004 text makes a narrower constraint binding. Server-only triggers and atomic config packages are stronger strategy-protecting constraints because they guard device simplicity and package consistency.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / Category B bulk classification
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / Tier 2 and Tier 3 classification
+
+Closure basis:
+
+Conditional Part 2 classification pending ADR-004 verification.
+
+Scope:
+
+Applies to configuration layers, trigger execution placement, expression language, payload mapping, projection rules, schema evolution workflow, config package sync, and device config retention.
+
+Non-goals:
+
+Does not reject these architecture choices; it classifies their migration permanence.
+
+Forbidden interpretations:
+
+- Do not treat zero functions, trigger depth two, or max two config versions as stored-event locks solely because they are useful guards.
+- Do not weaken server-only triggers or atomic config delivery without explicitly reopening the invariant they protect.
+
+Open edges:
+
+ADR-004 must decide which initial strategies become accepted initial platform strategies and which remain outside the platform specification.
+
+Platform specification note:
+
+Use to prevent overfitting evolvable configuration choices into irreversible platform contracts.
+
+## Kernel: Platform Capability Strategy Classification Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 Session 3 Part 2 classifies platform capability architecture as initial strategy rather than stored-event constraint. Platform-fixed patterns, aggregate projection, target comparison, time windowing, escalation-depth limits, and campaign progress decomposition do not touch stored events. They may still be important platform/deployer boundary choices, but their exact inventory and limits can evolve through code or configuration changes.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / Category C bulk classification
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / Tier 3 initial strategies
+
+Closure basis:
+
+Conditional Part 2 classification pending ADR-004 verification and ADR-005-dependent inventory closure.
+
+Scope:
+
+Applies to patterns, campaign progress, aggregate projection, target comparison, time windows, escalation depth, and platform capability inventory.
+
+Non-goals:
+
+Does not let deployer-authored configuration absorb cross-subject aggregation or arbitrary workflow semantics.
+
+Forbidden interpretations:
+
+- Do not confuse evolvability with deployer ownership; a capability can be platform-owned while its exact implementation remains strategy.
+- Do not read the campaign decomposition as the complete future capability inventory.
+
+Open edges:
+
+ADR-004 and ADR-005 must close platform capability boundaries and inventory dependencies.
+
+Platform specification note:
+
+Use as the current permanence classification for platform/deployer capability boundaries.
+
+## Kernel: ADR-004 Part 3 Stress Scope Candidate
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Part 2 narrows Part 3 adversarial stress testing to Tier 1 envelope decisions: activity-reference optionality under multi-activity shared shapes, shape-reference versioning under breaking schema changes, and structural event type vocabulary completeness. Complexity budgets, expression scope, trigger-depth limits, and system actor identity collision require lighter validation because they are strategy or strategy-protecting concerns rather than stored-event locks.
+
+Source basis:
+
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `## Part 3 Stress Test Scope`
+- `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` / `## Part 3 Reframe Assessment`
+
+Closure basis:
+
+Open handoff to ADR-004 Session 3 Part 3.
+
+Scope:
+
+Applies to next-source processing and ADR-004 final verification.
+
+Non-goals:
+
+Does not perform Part 3 adversarial tests.
+
+Forbidden interpretations:
+
+- Do not spend full irreversibility stress-test effort on positions Part 2 classified as code/configuration strategy unless Part 3 reopens them.
+- Do not skip Tier 2 validation entirely; it remains relevant to invariant protection.
+
+Open edges:
+
+Next source must confirm, revise, or reject this narrowed stress scope.
+
+Platform specification note:
+
+Use as the immediate handoff to `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`.
