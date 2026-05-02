@@ -678,3 +678,792 @@ Later ADR-003 sources must decide whether auditor access is in initial scope or 
 Platform specification note:
 
 Use as cross-boundary access exception tracking.
+
+## Kernel: ADR-003 Phase 2 Stress-Test Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/11-adr3-phase2-stress-test.md` is ADR-003 Phase 2 adversarial stress-test evidence. It tests Phase 1 mechanisms against security, scale, bandwidth, staleness, projection, envelope, shared-device, and auditor scenarios. Its findings can narrow, reject, or promote Phase 1 candidates into constraint candidates, but final ADR-003 closure remains outside this source.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / supersession notice
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 1. Mechanisms Tested`
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## Summary: What ADR-003 Must Decide as Constraints`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-003 Phase 2.
+
+Non-goals:
+
+Does not decide final ADR-003 constraints, final event envelope fields, final sync protocol, or final authorization model.
+
+Forbidden interpretations:
+
+- Do not treat Phase 2 `RESOLVED` labels as ADR-settled decisions.
+- Do not discard Phase 2 `BREAKS` findings unless later ADR-003 sources explicitly correct or reject them.
+
+Open edges:
+
+ADR-003 course correction and ADR-003 must confirm, adapt, or reject Phase 2 constraint candidates.
+
+Platform specification note:
+
+Use this source as adversarial evidence and closure pressure for ADR-003.
+
+## Kernel: Assignment Model Structural Extension Set
+
+Status: Conditional
+Kind: conditional-validity
+
+Specification statement:
+
+The Phase 1 assignment model survives as a foundation only if extended beyond a single role-plus-geographic-scope containment check. Stress testing requires actor-as-subject visibility, assignment data lifecycle policy, scope-transition sync atomicity, explicit multiple-assignment tagging, and alias-respects-original-scope handling.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding A1
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 9. Assumptions Surfaced` P1
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 11. Hot Spot Resolutions` HS-2, HS-3, HS-6, HS-7, HS-12
+
+Closure basis:
+
+Conditional Phase 2 stress-test survivor. Later ADR-003 sources must decide whether each extension becomes a constraint, strategy, deferral, or rejection.
+
+Scope:
+
+Applies to assignment-based authorization, actor-as-subject events, local data lifecycle, scope transitions, campaign overlays, and scope-crossing identity merges.
+
+Non-goals:
+
+Does not decide exact assignment event shape, role vocabulary, or scope-type implementation.
+
+Forbidden interpretations:
+
+- Do not describe ADR-003 authorization as only one simple geographic containment check after this stress-test point.
+- Do not treat actor-as-subject visibility or alias-cross-scope behavior as cosmetic edge cases.
+
+Open edges:
+
+Course correction must classify which additions are irreversible constraints and which are evolvable strategies.
+
+Platform specification note:
+
+Use as the central Phase 2 correction to the Phase 1 authorization model.
+
+## Kernel: Assignment Creation Scope-Containment Invariant Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Creating an assignment must be validated server-side so that the new assignment scope is contained within the creating actor's authorized scope. Without this invariant, a coordinator can grant out-of-scope access and cause the sync engine to deliver unauthorized data.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding A3
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / invariant report I2
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 candidate summary
+
+Closure basis:
+
+Conditional Phase 2 constraint candidate. Final ADR-003 must confirm or replace it.
+
+Scope:
+
+Applies to `AssignmentCreated` commands/events, coordinator authority, campaign assignment creation, and emergency assignment creation.
+
+Non-goals:
+
+Does not define the complete assignment aggregate or all coordinator permissions.
+
+Forbidden interpretations:
+
+- Do not rely on UI convention or deployment policy to prevent out-of-scope assignment creation.
+- Do not accept a valid-looking assignment event without validating creator authority.
+
+Open edges:
+
+Transactional behavior for coordinator assignment creation remains an open operational path.
+
+Platform specification note:
+
+Likely platform invariant candidate for assignment-write validation.
+
+## Kernel: Role And Capability Enforcement Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+Role-action compatibility must be validated server-side for every incoming event, independent of device-side checks. Role hierarchy or role-permission tables are a hidden dependency on configuration, and auditor/read-only cases introduce a possible capability dimension beyond role name.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Findings A2, A4, A5
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Combo delta
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 9. Assumptions Surfaced` P6
+
+Closure basis:
+
+Conditional Phase 2 finding with ADR-004 dependency. ADR-003 must decide the structural boundary; ADR-004 may own configurable permission content.
+
+Scope:
+
+Applies to role hierarchy, role incompatibility, capability-restricted actions, read-only auditor access, and rooted-device bypass detection.
+
+Non-goals:
+
+Does not decide concrete role names, permission table syntax, or domain-specific action rules.
+
+Forbidden interpretations:
+
+- Do not trust device-local role checks as authoritative.
+- Do not let simultaneous incompatible role grants silently accumulate privileges.
+- Do not hide the ADR-004 dependency for role permission definitions.
+
+Open edges:
+
+Role-incompatibility invariants, capability fields, and deployer-configured permission tables need later closure.
+
+Platform specification note:
+
+Use as a cross-ADR boundary marker between authorization structure and configurable permission content.
+
+## Kernel: Sync Scope Expansion And Resumption Strategy
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+Server-side sync-scope computation is feasible at the tested scale, but first sync and large scope expansion break on 2G without mitigation. The stress test requires priority sync, resumable partial delivery, and either per-subject watermarks or an equivalent delivered-through marker.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Findings B1, B3
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 9. Assumptions Surfaced` P2
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 2 candidate summary
+
+Closure basis:
+
+Conditional Phase 2 strategy candidate. Later ADR-003 sources must decide whether any part is promoted to protocol constraint.
+
+Scope:
+
+Applies to new-worker first sync, large reassignment, historical backfill, low-bandwidth operation, and interrupted sync.
+
+Non-goals:
+
+Does not define packet format, transport protocol, compression, or UI progress behavior.
+
+Forbidden interpretations:
+
+- Do not assume global `sync_watermark` alone is enough to resume large first-sync payloads on unreliable 2G.
+- Do not treat bandwidth failure as only a performance concern if it prevents operational readiness.
+
+Open edges:
+
+Priority order and resume markers need protocol-level classification.
+
+Platform specification note:
+
+Use as sync-protocol pressure for initial scope delivery and historical backfill.
+
+## Kernel: Scope Contraction Purge Constraint Candidate
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+For sensitive personal data, scope contraction requires active device data removal rather than retain-and-hide or indefinite retention. The stress-test survivor is crash-safe purge with selective retain: keep the actor's own events where needed for work-history continuity, and purge other events for subjects no longer in scope.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Findings B2, B4
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / invariant report I3
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / hot spot HS-3
+
+Closure basis:
+
+Conditional Phase 2 stress-test conclusion. Final ADR-003 must decide if purge is a hard constraint for all data or conditional on sensitivity.
+
+Scope:
+
+Applies to reassignment, campaign end, time-limited access, auditor expiry, local storage lifecycle, and data minimization.
+
+Non-goals:
+
+Does not define exact purge journal format, encryption policy, or retention law policy.
+
+Forbidden interpretations:
+
+- Do not treat retain-but-hide as acceptable for sensitive health data.
+- Do not treat absence of future sync delivery as equivalent to local data removal.
+
+Open edges:
+
+Crash-safe purge mechanics, own-event retention boundaries, and sensitivity-conditioned policy remain to be closed.
+
+Platform specification note:
+
+Use as a likely sync/local-data lifecycle constraint candidate.
+
+## Kernel: Retain-Hide And Indefinite Retain Rejection For Sensitive Data
+
+Status: Conditional
+Kind: rejected-alternative
+
+Specification statement:
+
+For sensitive personal data on field devices, retaining no-longer-in-scope data while hiding it in the UI, or retaining it indefinitely, is rejected by the Phase 2 stress test. Both alternatives preserve sensitive data on physically vulnerable devices after authorization has narrowed and fail the data-minimization pressure that scope contraction is meant to enforce.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding B4
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / hot spot HS-3
+
+Closure basis:
+
+Conditional rejected-alternative lineage for sensitive-data deployments. Final ADR-003 must decide whether the rejection applies globally or only to sensitive data classes.
+
+Scope:
+
+Applies to sensitive health or personal data retained on field devices after reassignment, role downgrade, campaign end, or other scope narrowing.
+
+Non-goals:
+
+Does not reject local retention of the actor's own events where selective retain is later chosen.
+
+Forbidden interpretations:
+
+- Do not treat UI hiding as a platform-level access control once data remains locally stored.
+- Do not treat indefinite local retention as compatible with data minimization for sensitive field data.
+
+Open edges:
+
+Whether lower-sensitivity operational data may use a different local-retention policy remains to be closed.
+
+Platform specification note:
+
+Use as rejected-alternative guardrail for scope-contraction policy.
+
+## Kernel: Authorization Flag Detect-Before-Act Candidate
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+Detect-before-act processing must extend to authorization flags. Role-stale or capability-violating events that could trigger downstream policies must be intercepted before policy execution, otherwise invalid actions can propagate before review.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding C2
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / hot spot HS-5
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 candidate summary
+
+Closure basis:
+
+Conditional Phase 2 constraint candidate extending ADR-002 detect-before-act semantics. Final ADR-003 and later flag semantics sources must confirm the exact scope.
+
+Scope:
+
+Applies to `RoleStaleFlag`, `ScopeStaleFlag`, capability-restricted actions, and downstream policy execution.
+
+Non-goals:
+
+Does not decide final flag names, severity vocabulary, or UI flow.
+
+Forbidden interpretations:
+
+- Do not let authorization flags behave as post-hoc queue items when downstream irreversible policy actions may fire.
+- Do not assume ADR-002 identity-conflict interception automatically covers authorization flags without ADR-003 closure.
+
+Open edges:
+
+Flag taxonomy and blocking semantics require later ADR-003 and flag ADR reconciliation.
+
+Platform specification note:
+
+Use as the main cross-ADR assumption to carry from ADR-002 conflict processing into ADR-003 authorization.
+
+## Kernel: Authorization Flag Coordination Candidate
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+Multiple flags on a single event cannot be resolved independently when they affect different validity dimensions. Triple staleness requires either bundling all flags for one coordinating resolver with sufficient scope, or a defined resolution order where clinical/capability validity can make attribution flags moot.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding C3
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 9. Assumptions Surfaced` P7
+
+Closure basis:
+
+Conditional Phase 2 finding. Later ADR-003 and flag semantics sources must decide resolution coordination.
+
+Scope:
+
+Applies to events with combined role, scope, and identity staleness; resolver designation; batch resolution; and projection consequences.
+
+Non-goals:
+
+Does not define the final resolver selection algorithm or all precedence rules.
+
+Forbidden interpretations:
+
+- Do not allow independent contradictory resolutions for flags attached to the same event.
+- Do not assume identity, scope, and role flags are symmetric.
+
+Open edges:
+
+Single coordinating resolver versus ordered resolution remains open.
+
+Platform specification note:
+
+Use as flag-resolution coordination lineage.
+
+## Kernel: Conflict Resolution Online-Only Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Conflict resolution should be online-only so resolver authority can be verified at resolution time and stale resolver decisions do not generate recursive meta-flags. This mirrors the ADR-002 online-only precedent for merge/split operations.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding C4
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / hot spot HS-13
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 candidate summary
+
+Closure basis:
+
+Conditional Phase 2 constraint candidate. ADR-003 must confirm, adapt, or defer.
+
+Scope:
+
+Applies to resolver authority, `ConflictResolved`-style events, reassigned resolvers, and administrative conflict handling.
+
+Non-goals:
+
+Does not decide all operations that must be online-only.
+
+Forbidden interpretations:
+
+- Do not allow offline conflict resolution if resolver authority cannot be validated before committing the resolution.
+
+Open edges:
+
+Final conflict-resolution event shape and resolver reassignment protocol remain to be closed.
+
+Platform specification note:
+
+Use as a likely authorization-side invariant for resolution operations.
+
+## Kernel: Sensitive Subject Authorization Exception Open
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Accept-and-flag breaks for deployments where unauthorized collection or transmission of sensitive-subject data is itself a regulatory violation. Phase 2 proposes sensitive-subject classification and modified sync or authorization behavior for high-sensitivity data, but this creates tension with ADR-002 stale-event acceptance.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding C5
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 9. Assumptions Surfaced` P3
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 candidate summary
+
+Closure basis:
+
+Open Phase 2 design-constraint collision. Later ADR sources must decide whether this is accepted limitation, configuration option, or structural constraint.
+
+Scope:
+
+Applies to high-sensitivity subjects, health privacy, data minimization, sync filtering, and exceptions to uniform accept-and-flag behavior.
+
+Non-goals:
+
+Does not decide legal compliance policy or jurisdiction-specific sensitive categories.
+
+Forbidden interpretations:
+
+- Do not treat a review flag as sufficient protection when the unauthorized data is already permanently stored.
+- Do not silently weaken ADR-002's stale-event acceptance without explicit later closure.
+
+Open edges:
+
+Need reconciliation between append-only/no-data-loss guarantees and sensitive-data access restrictions.
+
+Platform specification note:
+
+Use as a high-risk open issue for ADR-003/flag/configuration reconciliation.
+
+## Kernel: Projection Freshness Metadata Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+Projection and summary consumers need freshness metadata: per-worker last-known-sync time for supervisor summaries, data-as-of metadata for assessments, and server projection consistency watermarks for coordinator views during batch rebuilds.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Findings D2, D3, D4
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / invariant report I5
+
+Closure basis:
+
+Conditional Phase 2 finding carried from the ground-truth eventual-consistency requirement. Later ADR-003 sources must decide exact metadata contracts.
+
+Scope:
+
+Applies to supervisor dashboards, assessments made from stale projections, coordinator server queries, and batch merge projection consistency.
+
+Non-goals:
+
+Does not define UI copy, dashboard layout, or projection storage implementation.
+
+Forbidden interpretations:
+
+- Do not present absent activity as no activity when the worker has not synced.
+- Do not hide partial projection rebuild state from coordinator-facing reads.
+
+Open edges:
+
+Exact metadata fields and projection consistency guarantees remain to be closed.
+
+Platform specification note:
+
+Use as projection/sync visibility contract lineage.
+
+## Kernel: Incremental Projection Update Strategy
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+Supervisor projection performance holds if incremental updates are the normal operational path and full rebuild from raw events is reserved for recovery. Hybrid supervisor sync remains viable: raw events for drill-down and offline review, plus server summaries for aggregate dashboards.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding D1
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / hot spots HS-4 and HS-11
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 2 candidate summary
+
+Closure basis:
+
+Conditional Phase 2 strategy finding. ADR-003 must decide projection topology, while implementation can evolve incremental mechanics.
+
+Scope:
+
+Applies to supervisor devices, raw-event local projections, server-computed summaries, and projection rebuild recovery.
+
+Non-goals:
+
+Does not decide projection implementation language, indexing strategy, or exact rebuild SLA.
+
+Forbidden interpretations:
+
+- Do not make full rebuild the routine path for supervisor views.
+- Do not drop raw supervisor events if offline drill-down/review remains required.
+
+Open edges:
+
+Final tiered sync topology still requires ADR-003 closure.
+
+Platform specification note:
+
+Use as Phase 2 validation of tiered projection strategy.
+
+## Kernel: Authority Context Bounded Reference Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+To avoid an unbounded variable-length envelope field, Phase 2 proposes bounded authority context references: `primary_assignment_ref` for the most-specific active assignment and optional `secondary_assignment_ref` for the standing assignment when the primary assignment is a campaign overlay.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding E2
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / hot spot HS-7
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 candidate summary
+
+Closure basis:
+
+Conditional Phase 2 envelope constraint candidate. ADR-003 and later envelope ADRs must confirm final field shape.
+
+Scope:
+
+Applies to event authority context, campaign overlays, standing assignments, and immutable envelope schema.
+
+Non-goals:
+
+Does not decide final field names beyond source terminology or all possible future assignment types.
+
+Forbidden interpretations:
+
+- Do not use an unbounded list of assignment references without later ADR support.
+- Do not lose campaign-vs-standing attribution when both assignments cover an event.
+
+Open edges:
+
+Future support beyond two assignment references remains unresolved.
+
+Platform specification note:
+
+Use as event-envelope lineage for assignment authority.
+
+## Kernel: Authority Context Assertion Semantics Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Authority context is a device assertion about the authorization believed to be in effect at capture time, not a server-verified fact. The server validates the assertion on sync against assignment activity and the event's knowledge state.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding E3
+
+Closure basis:
+
+Conditional Phase 2 interpretation. Later ADR-003 must confirm this semantic contract.
+
+Scope:
+
+Applies to authority audit, stale assignment validation, `sync_watermark`, and authorization flags.
+
+Non-goals:
+
+Does not decide exact validation algorithm.
+
+Forbidden interpretations:
+
+- Do not treat `authority_context` as proof that authority was active.
+- Do not erase the distinction between device belief and server validation outcome.
+
+Open edges:
+
+How server knowledge-state validation is encoded remains to be closed.
+
+Platform specification note:
+
+Use as audit semantics for authority context.
+
+## Kernel: Platform Actor For System Events Candidate
+
+Status: Conditional
+Kind: primitive
+
+Specification statement:
+
+System-generated events need a reserved platform actor identity so `authority_context` can remain present and parseable on every event without null-special cases. The platform actor represents system authority for sync processing and other generated events.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Finding E5
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / invariant report I2
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 candidate summary
+
+Closure basis:
+
+Conditional Phase 2 envelope/identity constraint candidate.
+
+Scope:
+
+Applies to conflict detection, generated flags, merge/split processing where system events are emitted, and all event readers.
+
+Non-goals:
+
+Does not decide whether human-initiated administrative events can ever omit assignment references.
+
+Forbidden interpretations:
+
+- Do not treat absent authority context on system events as unrestricted authority.
+- Do not require event readers to infer a missing actor from event type alone.
+
+Open edges:
+
+Final representation of platform actor identity requires ADR-003 and identity/envelope reconciliation.
+
+Platform specification note:
+
+Use as a candidate primitive for system-authored events.
+
+## Kernel: Shared Device Per-Actor Session Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Shared devices break if local storage and sync knowledge state are only device-scoped. Phase 2 requires actor-partitioned local storage for shared-device scenarios and either per-actor sync sessions/watermarks or an explicit limitation that shared devices make causal staleness analysis unreliable.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Combo beta
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 9. Assumptions Surfaced` P5
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Bucket 1 and Bucket 2 candidate summaries
+
+Closure basis:
+
+Conditional Phase 2 finding. ADR-003 must decide whether shared devices are supported structurally or explicitly limited.
+
+Scope:
+
+Applies to hardware-bound `device_id`, actor-scoped sync payloads, local storage partitioning, `sync_watermark`, and device sequence behavior.
+
+Non-goals:
+
+Does not reinterpret ADR-002 `device_id` as actor-bound.
+
+Forbidden interpretations:
+
+- Do not share one actor's sync watermark as another actor's knowledge state without explicit closure.
+- Do not store shared-device data in a way that relies only on query filtering for actor isolation.
+
+Open edges:
+
+Per-actor watermark/session model versus unsupported/limited shared devices remains to be closed.
+
+Platform specification note:
+
+Use as the key Phase 2 correction to shared-device handling.
+
+## Kernel: Auditor Access Structural Additions Open
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Auditor access is not a simple geographic assignment special case. Stress testing requires at least auditor role, read-only or capability-restricted access, query-based scope for cross-hierarchy review, and device-side data expiry for time-limited grants.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / Combo delta
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 9. Assumptions Surfaced` P6 and P8
+
+Closure basis:
+
+Open Phase 2 structural gap. Later sources must decide initial scope, deferral, or constraint promotion.
+
+Scope:
+
+Applies to external auditors, temporary cross-boundary access, query-scoped access, read-only capabilities, audit findings, and data expiry.
+
+Non-goals:
+
+Does not decide concrete auditor workflows or compliance policy.
+
+Forbidden interpretations:
+
+- Do not assume geographic hierarchy plus role name fully covers auditor access.
+- Do not defer auditor access silently if envelope or assignment fields would later be locked.
+
+Open edges:
+
+Initial-platform inclusion versus explicit deferral remains unresolved.
+
+Platform specification note:
+
+Use as auditor access closure tracker before finalizing assignment/envelope fields.
+
+## Kernel: Missing Operational Path Set
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Phase 2 surfaces operational paths not addressed by Phase 1: active case reassignment, cross-CHW referral, coordinator connectivity loss during assignment creation, accumulation of expired campaign assignments, and assessments of deactivated actors.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## 10. Missing Operational Paths`
+
+Closure basis:
+
+Open Phase 2 gap set.
+
+Scope:
+
+Applies to case responsibility, referral-driven temporary scope, assignment transactionality, expired assignment filtering, actor lifecycle, and flag taxonomy.
+
+Non-goals:
+
+Does not decide which gaps belong to ADR-003 versus ADR-004/ADR-005 or later phases.
+
+Forbidden interpretations:
+
+- Do not let the Phase 2 constraint set ignore these paths merely because they were missing from Phase 1.
+
+Open edges:
+
+Each path needs ownership classification in later ADR-003 or cross-ADR reconciliation.
+
+Platform specification note:
+
+Use as a checklist to prevent hidden architecture gaps.
+
+## Kernel: ADR-003 Phase 2 Candidate Classification Set
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Phase 2 classifies several findings as Bucket 1 constraint candidates and Bucket 2 strategy candidates. Constraint candidates include bounded authority references, assignment scope-containment, authorization detect-before-act, alias-respects-original-scope, online-only conflict resolution, platform actor identity, sensitive-subject classification, and actor-partitioned shared-device storage. Strategy candidates include selective retain purge, priority sync, watermark-based auto-resolution, per-actor sync sessions, incremental projections, and batch flag resolution.
+
+Source basis:
+
+- `docs/exploration/archive/11-adr3-phase2-stress-test.md` / `## Summary: What ADR-003 Must Decide as Constraints`
+
+Closure basis:
+
+Open classification awaiting ADR-003 course correction and final ADR-003 verification.
+
+Scope:
+
+Applies to ADR-003 constraint/strategy classification and cross-ADR deferral handling.
+
+Non-goals:
+
+Does not settle any candidate by itself.
+
+Forbidden interpretations:
+
+- Do not promote Bucket 1 candidates to settled platform constraints until an owning later source commits them.
+- Do not drop Bucket 2 strategies if later sources rely on them for feasibility.
+
+Open edges:
+
+Next source must reconcile this classification with ADR-003 course correction.
+
+Platform specification note:
+
+Use as the Phase 2 handoff register for ADR-003 closure.
