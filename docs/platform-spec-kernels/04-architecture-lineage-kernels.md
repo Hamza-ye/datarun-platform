@@ -981,3 +981,398 @@ ADR-001 must decide projection obligations if Events are selected.
 Platform specification note:
 
 Use to ensure the platform specification includes projection reliability obligations rather than only event-storage benefits.
+
+## Kernel: ADR-001 Decision Audit Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/04-decision-audit.md` is the ADR-001 audit and normalization source. It identifies which ADR-001 decisions belong to the offline data model, which claims overreach into downstream ADR territory, what was missing from ADR-001, and what must remain undecided until later ADRs.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / supersession notice
+- `docs/exploration/archive/04-decision-audit.md` / opening purpose
+- `docs/exploration/archive/04-decision-audit.md` / status line
+
+Closure basis:
+
+Settled as an ADR-001 audit boundary. Final ADR text still needs extraction to verify what it carried forward.
+
+Scope:
+
+Applies to ADR-001 lineage, normalization, overreach detection, and deferred downstream ownership.
+
+Non-goals:
+
+Does not decide ADR-002 through ADR-005 and does not replace the final ADR-001 text.
+
+Forbidden interpretations:
+
+- Do not treat every ADR-001 consequence as an ADR-001 decision.
+- Do not drop lineage merely because the final ADR is shorter than the audit.
+- Do not use the audit to close downstream ADRs before their sources are processed.
+
+Open edges:
+
+ADR-001 must be extracted to verify which audit changes were carried into the final decision text.
+
+Platform specification note:
+
+Use this source as the ADR-001 closure map and downstream deferral map.
+
+## Kernel: ADR-001 Event Storage Audit Closure
+
+Status: Conditional
+Kind: primitive
+
+Specification statement:
+
+The ADR-001 audit identifies the correctly scoped storage primitive as typed immutable events in an append-only event log, with the event log as the single source of truth, rebuildable projections, client-generated UUIDs, immutable-event sync, idempotent append-only order-independent sync properties, and an extensible envelope with minimum identity, type, payload, and timestamp.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `## 2. ADR-001 Decision Breakdown` / `### Correctly scoped to ADR-001`
+
+Closure basis:
+
+Conditional audit closure for ADR-001. The audit says ADR-001's open questions were settled, but the final ADR-001 text must still be checked before marking platform-settled.
+
+Scope:
+
+Applies to the offline storage primitive and its core guarantees.
+
+Non-goals:
+
+Does not decide downstream identity lifecycle, authorization model, sync topology, configuration boundary, workflow model, event vocabulary, or final envelope field schema.
+
+Forbidden interpretations:
+
+- Do not treat action log as the selected source-of-truth model if the event log is the single source of truth.
+- Do not treat projections as co-primary state.
+- Do not infer the full envelope schema from the audit's minimum envelope list.
+
+Open edges:
+
+ADR-001 extraction must verify final wording and acceptance status.
+
+Platform specification note:
+
+Likely ADR-001 platform primitive kernel, pending ADR text verification.
+
+## Kernel: Write-Path Discipline Requirement
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+Every state change must enter through the event store. Projections and views are derived from events, whether maintained eagerly or lazily, and must not be written independently. If a projection is corrupt or stale, the repair path is to rebuild from events rather than patch the projection directly.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `### Missing from ADR-001 but required`
+- `docs/exploration/archive/04-decision-audit.md` / `### Issue 3: Escape hatch is aspirational, not operational`
+- `docs/exploration/archive/04-decision-audit.md` / `### Change 1: Add write-path discipline rule`
+
+Closure basis:
+
+Conditional audit-required invariant. The audit marks this as required for ADR-001 to be operationally correct, but ADR-001 extraction must verify whether it was applied.
+
+Scope:
+
+Applies to all writes that change operational state and to projection/view repair.
+
+Non-goals:
+
+Does not decide projection implementation, eager versus lazy materialization, or caching strategy.
+
+Forbidden interpretations:
+
+- Do not write directly to projections as a shortcut around the event store.
+- Do not patch projections as the canonical fix for stale or corrupt state.
+- Do not claim single source of truth if writes can bypass the event log.
+
+Open edges:
+
+ADR-001 must confirm whether this discipline became part of the accepted decision.
+
+Platform specification note:
+
+This is a candidate hard invariant for the platform specification because it preserves traceability, source-of-truth integrity, and the B to C escape hatch.
+
+## Kernel: Projection Rebuild Scope Deferral
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-001 may state that projections are rebuildable from the event stream, but the audit identifies a necessary scope distinction: a device can only rebuild from the subset of events it holds locally, and the event subset held by each device belongs to ADR-003 sync-scope decisions.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `### Missing from ADR-001 but required`
+- `docs/exploration/archive/04-decision-audit.md` / `### Change 5: State projection rebuild scope (M2)`
+
+Closure basis:
+
+Open/deferred by audit. ADR-001 should state the guarantee; ADR-003 resolves per-device scope.
+
+Scope:
+
+Applies to projection rebuild guarantees on devices and servers.
+
+Non-goals:
+
+Does not decide sync scope, summary sync, re-sync requirements, or projection cache invalidation.
+
+Forbidden interpretations:
+
+- Do not assume every device can rebuild global projections from local data.
+- Do not treat rebuildability as meaning every actor holds the full event stream.
+
+Open edges:
+
+ADR-003 must close device/server event subset and rebuild behavior.
+
+Platform specification note:
+
+Use to keep projection guarantees precise in the platform specification.
+
+## Kernel: ADR-001 Downstream Overreach Audit
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+The audit identifies ADR-001 consequence claims that crossed into downstream territory: event type ownership belongs to ADR-004; state machines from projection rules and data/workflow event separation belong to ADR-005; two-tier sync, projection location, and local authorization evaluability belong to ADR-003.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `### Decided in ADR-001 but belongs elsewhere`
+- `docs/exploration/archive/04-decision-audit.md` / `## 4. Issues Detected`
+- `docs/exploration/archive/04-decision-audit.md` / `## 5. Required Changes to ADR-001`
+
+Closure basis:
+
+Settled audit finding about scope ownership.
+
+Scope:
+
+Applies to X1 through X6 in the audit.
+
+Non-goals:
+
+Does not reject the claims as wrong. It relocates their closure to the owning ADRs.
+
+Forbidden interpretations:
+
+- Do not let ADR-001 decide the configuration boundary.
+- Do not let ADR-001 decide the workflow model.
+- Do not let ADR-001 decide sync topology, projection location, or authorization model details.
+
+Open edges:
+
+ADR-003, ADR-004, and ADR-005 must determine which relocated claims are promoted, revised, contradicted, or left open.
+
+Platform specification note:
+
+Use as a boundary correction so final atomic docs do not inherit ADR-001 overreach.
+
+## Kernel: ADR-002 Scope From Audit
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-002 owns subject identity representation, duplicate real-world subject handling, subject lifecycle events, causal ordering, conflict definition, resolution strategy, and event reference semantics.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `### ADR-002: Identity Model and Conflict Resolution`
+- `docs/exploration/archive/04-decision-audit.md` / `## 6. Next ADRs to Create`
+
+Closure basis:
+
+Open scope map from audit. Actual decisions remain for ADR-002 sources.
+
+Scope:
+
+Applies to extraction planning for ADR-002.
+
+Non-goals:
+
+Does not decide HLC versus vector clocks, merge/split semantics, conflict policies, or reference vocabulary.
+
+Forbidden interpretations:
+
+- Do not treat audit subdecision lists as ADR-002 decisions.
+
+Open edges:
+
+ADR-002 exploration and ADR-002 must close or defer each subdecision.
+
+Platform specification note:
+
+Use as the checklist for reconciling ADR-002 lineage.
+
+## Kernel: ADR-003 Scope From Audit
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-003 owns authorization representation, on-device enforcement, sync scope, sync topology, projection location, projection rebuild scope per device, stale access handling, and the evaluability constraint for authorization against local state.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `### ADR-003: Authorization and Selective Sync`
+- `docs/exploration/archive/04-decision-audit.md` / `## 6. Next ADRs to Create`
+
+Closure basis:
+
+Open scope map from audit. Actual decisions remain for ADR-003 sources.
+
+Scope:
+
+Applies to extraction planning for ADR-003.
+
+Non-goals:
+
+Does not decide one-tier versus two-tier sync, summary sync, projection placement, authorization model, or stale-access policy.
+
+Forbidden interpretations:
+
+- Do not treat ADR-001 forward projection as settling ADR-003 topology.
+
+Open edges:
+
+ADR-003 exploration and ADR-003 must close or defer each subdecision.
+
+Platform specification note:
+
+Use to reconcile sync/auth lineage without importing ADR-001 overreach.
+
+## Kernel: ADR-004 Scope From Audit
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-004 owns the configuration paradigm and boundary: event type vocabulary ownership, shape/schema definition mechanics, configuration propagation, configuration versioning and coexistence, activity context or correlation metadata, and the boundary between configuration and programming language.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `### ADR-004: Configuration Paradigm and Boundary`
+- `docs/exploration/archive/04-decision-audit.md` / `## 6. Next ADRs to Create`
+- `docs/exploration/archive/04-decision-audit.md` / `## 7. What Must NOT Be Decided Yet`
+
+Closure basis:
+
+Open scope map from audit. Actual decisions remain for ADR-004 sources.
+
+Scope:
+
+Applies to extraction planning for ADR-004.
+
+Non-goals:
+
+Does not decide whether event types are platform-fixed or configurable, nor the configuration syntax or format.
+
+Forbidden interpretations:
+
+- Do not let ADR-001 decide the event type ownership boundary.
+- Do not define the configuration language before ADR-004 closes the T2 boundary.
+
+Open edges:
+
+ADR-004 exploration and ADR-004 must close or defer each subdecision.
+
+Platform specification note:
+
+Use to keep configuration-boundary lineage separate from storage-primitive closure.
+
+## Kernel: ADR-005 Scope From Audit
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-005 owns state progression and workflow: whether state machines are projection-derived, explicit primitives, or both; whether data and workflow events are separate types; projection rules for state computation; multi-step and multi-actor workflow composition; and offline workflow conflict handling.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `### ADR-005: State Progression and Workflow`
+- `docs/exploration/archive/04-decision-audit.md` / `## 6. Next ADRs to Create`
+- `docs/exploration/archive/04-decision-audit.md` / `## 7. What Must NOT Be Decided Yet`
+
+Closure basis:
+
+Open scope map from audit. Actual decisions remain for ADR-005 sources.
+
+Scope:
+
+Applies to extraction planning for ADR-005.
+
+Non-goals:
+
+Does not decide projection-derived state machines, explicit state-machine primitives, event separation, or workflow conflict handling.
+
+Forbidden interpretations:
+
+- Do not let ADR-001 decide the workflow model.
+- Do not assume state machines must be projection-derived until ADR-005 closes that question.
+
+Open edges:
+
+ADR-005 exploration and ADR-005 must close or defer each subdecision.
+
+Platform specification note:
+
+Use to keep workflow lineage open until the owning sources are processed.
+
+## Kernel: ADR-001 Normalization Safety Check
+
+Status: Conditional
+Kind: conditional-validity
+
+Specification statement:
+
+The audit concludes that, after applying its required changes, ADR-001 can proceed cleanly to ADR-002 because ADR-001 then decides only the storage primitive and its guarantees, while downstream concerns are opened as possibilities rather than committed.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md` / `## 8. Final Safety Check`
+
+Closure basis:
+
+Conditional audit conclusion. It depends on the required ADR-001 changes being applied and must be verified against ADR-001.
+
+Scope:
+
+Applies to readiness to proceed from ADR-001 to ADR-002.
+
+Non-goals:
+
+Does not prove that later ADRs are correct or that final ADR-001 text applied every change.
+
+Forbidden interpretations:
+
+- Do not mark ADR-001 accepted from this audit alone without checking ADR-001.
+- Do not treat downstream possibilities as committed.
+
+Open edges:
+
+ADR-001 extraction must verify accepted status and applied normalization.
+
+Platform specification note:
+
+Use as the transition checkpoint from ADR-001 lineage to ADR-002 lineage.

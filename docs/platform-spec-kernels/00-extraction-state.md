@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 16 in progress
+Status: Iteration 17 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -153,7 +153,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 16
+Current iteration: 17
 
 Processed sources:
 
@@ -190,10 +190,11 @@ Processed sources:
 - `docs/exploration/archive/00-exploration-framework.md`
 - `docs/exploration/archive/02-adr1-offline-data-model.md`
 - `docs/exploration/archive/03-adr1-forward-projection.md`
+- `docs/exploration/archive/04-decision-audit.md`
 
 Next source:
 
-- `docs/exploration/archive/04-decision-audit.md`
+- `docs/exploration/archive/05-adr2-event-storm-identity.md`
 
 Ignored-as-source:
 
@@ -225,7 +226,7 @@ Current deferred candidates:
 - `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Owning sources: ADR-003 exploration files and ADR-003.
 - `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
 - `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
-- `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Owning sources: `docs/exploration/archive/04-decision-audit.md` and ADR-001.
+- `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Outcome after `04-decision-audit.md`: promoted by audit toward typed immutable events/event-log source of truth, with final verification still owned by ADR-001.
 
 ## Candidate Kernel Register
 
@@ -331,6 +332,16 @@ Current deferred candidates:
 - `Action Log Convergence And Dual-Write Risk` — candidate ADR-001 selection pressure; hard cases push action log toward event-style reprojection while dual-write gaps risk traceability/current-state divergence.
 - `Events Projection Infrastructure Risk` — conditional ADR-001 risk; events depend on reliable projection across versions, out-of-order arrival, and low-end devices.
 - `Downstream Projection Spillover Guard` — settled extraction rule; projected ADR-002 through ADR-005 consequences must remain consequences unless later sources decide them.
+- `ADR-001 Decision Audit Boundary` — settled extraction rule from `docs/exploration/archive/04-decision-audit.md`; audit normalizes ADR-001 scope and downstream ownership.
+- `ADR-001 Event Storage Audit Closure` — conditional ADR-001 audit closure; typed immutable events, event-log source of truth, rebuildable projections, client UUIDs, immutable-event sync, and extensible envelope pending ADR-001 verification.
+- `Write-Path Discipline Requirement` — conditional audit-required invariant; all state changes enter through event store and projections are derived.
+- `Projection Rebuild Scope Deferral` — open audit deferral; local rebuild depends on ADR-003 sync scope.
+- `ADR-001 Downstream Overreach Audit` — settled audit finding; X1-X6 belong to ADR-003 through ADR-005, not ADR-001.
+- `ADR-002 Scope From Audit` — open owning-scope map for identity and conflict resolution.
+- `ADR-003 Scope From Audit` — open owning-scope map for authorization, selective sync, projection location, and stale access.
+- `ADR-004 Scope From Audit` — open owning-scope map for configuration boundary and activity context.
+- `ADR-005 Scope From Audit` — open owning-scope map for state progression and workflow.
+- `ADR-001 Normalization Safety Check` — conditional audit conclusion; proceed to ADR-002 only after ADR-001 changes are verified.
 
 ## Iteration History
 
@@ -401,3 +412,7 @@ Processed `docs/exploration/archive/03-adr1-forward-projection.md` as ADR-001 fo
 ### Iteration 16
 
 Housekeeping-only correction to ADR-001 forward-projection handling. Added a deferred closure register so claims from `03-adr1-forward-projection.md` that may later become real ADR-002 through ADR-005 decisions are preserved until their owning exploration and ADR sources are processed. No source was processed, no cursor advanced, and no kernel status changed.
+
+### Iteration 17
+
+Processed `docs/exploration/archive/04-decision-audit.md` as the ADR-001 audit and normalization source. Extracted conditional ADR-001 event-storage closure, required write-path discipline, projection rebuild-scope deferral, downstream overreach correction, ADR-002 through ADR-005 owning-scope maps, and the audit safety check. Promoted the `03` ADR-001 selection pressure toward typed immutable events at audit level, but kept final platform closure pending ADR-001 extraction.
