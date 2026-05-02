@@ -1,6 +1,6 @@
 # Platform Specification Kernel Working Draft
 
-Status: Iteration 4 in progress
+Status: Iteration 6 in progress
 
 This file stages atomic platform-specification kernels in one place until the approved source set reaches rest state. Sections may be rewritten, merged, split, or demoted during extraction. Final atomic files must not be created from these sections until the conflict checks and closure pass are complete.
 
@@ -1083,6 +1083,161 @@ The technical closure of these pressures remains to be extracted from exploratio
 Platform specification note:
 
 The platform specification should be traceable back to these foundational scenario pressures where it defines core platform contracts.
+
+## Kernel: Structured Capture Baseline
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+The platform must support recording a known set of details about something observed, done, or received. The expected information shape is known before capture, the completed record is kept for later reference, and users must be able to look up what was recorded.
+
+Source basis:
+
+- `docs/scenarios/00-basic-structured-capture.md`
+- Probe cross-check: `docs/behavioral_patterns.md` identifies this as Structured Recording (P01), but that document is not formally processed yet.
+
+Closure basis:
+
+Settled as an S00 domain requirement. Not yet closed as a form model, event model, schema model, or database representation.
+
+Scope:
+
+Applies to the simplest recording workflow: known details, completion, future lookup, and confidence that required details were captured.
+
+Non-goals:
+
+This kernel does not decide whether records are events, submissions, forms, rows, documents, or another construct.
+
+Forbidden interpretations:
+
+- Do not require advanced workflow, identity, review, or coordination machinery for the simplest capture case.
+- Do not infer a platform construct name from the scenario wording.
+
+Open edges:
+
+The technical recording primitive and validation contract remain to be extracted from exploration and ADRs.
+
+Platform specification note:
+
+The platform specification should preserve S00 as the minimum viable expression of recording work and use it as a simplicity check for later contracts.
+
+## Kernel: Coexisting Record Shapes
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+When the expected set of details changes, records captured under the old shape and records captured under the updated shape must both remain valid and retrievable.
+
+Source basis:
+
+- `docs/scenarios/00-basic-structured-capture.md` / `## What makes this hard`
+- Probe cross-check: `docs/behavioral_patterns.md` identifies this as Shape Definition and Evolution (P11), but that document is not formally processed yet.
+
+Closure basis:
+
+Settled as an S00 domain requirement. Not yet closed as a schema-versioning mechanism or projection rule.
+
+Scope:
+
+Applies to old and new expected information shapes coexisting after capture has already occurred.
+
+Non-goals:
+
+This kernel does not decide whether old records are migrated, transformed, interpreted through versioned schemas, or handled through another mechanism.
+
+Forbidden interpretations:
+
+- Do not invalidate existing records merely because the expected details changed later.
+- Do not require all historical records to look identical to current records.
+
+Open edges:
+
+The shape/version contract and read behavior remain to be extracted from later sources.
+
+Platform specification note:
+
+The platform specification should state that recorded information remains valid under the shape active when it was captured, once later sources close the technical mechanism.
+
+## Kernel: Duplicate Independent Capture Pressure
+
+Status: Settled
+Kind: open-question
+
+Specification statement:
+
+Different people may independently record information about the same real-world occurrence or thing, producing duplicate records that are not identical. The platform must account for this pressure without assuming users know about each other's work at capture time.
+
+Source basis:
+
+- `docs/scenarios/00-basic-structured-capture.md` / `## What makes this hard`
+
+Closure basis:
+
+Settled as an S00 domain pressure. The platform response is open at this source level and must be closed by later exploration and ADRs.
+
+Scope:
+
+Applies to duplicate capture of the same event or subject, with differing details, times, or actors.
+
+Non-goals:
+
+This kernel does not decide deduplication, identity resolution, conflict detection, merge behavior, or whether duplicates are automatically or manually resolved.
+
+Forbidden interpretations:
+
+- Do not assume duplicate records are always identical.
+- Do not assume duplicate prevention is always possible at capture time.
+
+Open edges:
+
+Identity, duplicate detection, conflict classification, and reconciliation behavior remain to be extracted from later sources.
+
+Platform specification note:
+
+The platform specification should include duplicate independent capture as a pressure on identity and reconciliation contracts, not as a scenario-level solution.
+
+## Kernel: Traceable Record Correction
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+A completed record may need correction, and the correction must be traceable: who changed what, when, and why. The original must not be erased. Offline corrections add ordering pressure because originals and corrections may arrive centrally out of order or after another correction has already occurred.
+
+Source basis:
+
+- `docs/scenarios/00-basic-structured-capture.md` / `## What makes this hard`
+
+Closure basis:
+
+Settled as an S00 domain requirement. Not yet closed as append-only storage, correction event shape, audit model, or conflict rule.
+
+Scope:
+
+Applies to post-completion correction, correction attribution, preservation of the original, offline correction arrival order, and multiple corrections.
+
+Non-goals:
+
+This kernel does not decide the technical correction primitive, storage mutability rule, or resolution algorithm.
+
+Forbidden interpretations:
+
+- Do not erase the original record when correcting it.
+- Do not lose correction attribution.
+- Do not assume central arrival order equals the order in which work was done.
+
+Open edges:
+
+The storage and correction semantics remain to be extracted from exploration and ADRs.
+
+Platform specification note:
+
+The platform specification should make correction traceability a baseline audit requirement and later bind it to the decided write model.
 
 ## Pending Split Targets
 

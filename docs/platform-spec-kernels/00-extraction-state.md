@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 5 probe complete
+Status: Iteration 6 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -141,7 +141,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 5
+Current iteration: 6
 
 Processed sources:
 
@@ -149,10 +149,11 @@ Processed sources:
 - `docs/constraints.md`
 - `docs/README.md`
 - `docs/scenarios/README.md`
+- `docs/scenarios/00-basic-structured-capture.md`
 
 Next source:
 
-- `docs/scenarios/00-basic-structured-capture.md`
+- `docs/scenarios/01-entity-linked-capture.md`
 
 Ignored-as-source:
 
@@ -191,6 +192,10 @@ No conflicts recorded yet.
 - `Operational Complexity Progression` — settled scenario-ordering context from `docs/scenarios/README.md`; not an implementation sequence.
 - `Scenario Phase Boundary` — settled requirements-scope classification from `docs/scenarios/README.md`; Phase 2 scenarios are compatible but deferred as drivers.
 - `Foundational Scenario Evidence Set` — settled extraction priority from `docs/scenarios/README.md`; foundational scenarios must be read before compositional scenarios.
+- `Structured Capture Baseline` — settled scenario requirement from `docs/scenarios/00-basic-structured-capture.md`; storage primitive unresolved.
+- `Coexisting Record Shapes` — settled scenario requirement from `docs/scenarios/00-basic-structured-capture.md`; versioning mechanism unresolved.
+- `Duplicate Independent Capture Pressure` — settled scenario pressure from `docs/scenarios/00-basic-structured-capture.md`; identity/conflict mechanism unresolved.
+- `Traceable Record Correction` — settled scenario requirement from `docs/scenarios/00-basic-structured-capture.md`; correction model unresolved.
 
 ## Iteration History
 
@@ -217,3 +222,7 @@ Processed `docs/scenarios/README.md` as the index for the scenario directory. Ex
 ### Iteration 5
 
 Probe-only pass over `docs/scenarios/*.md` and `docs/behavioral_patterns.md`. No kernels were promoted and no source was marked processed. The result is a persisted scenario extraction strategy: process scenarios from domain pressure first, use behavioral patterns only as a non-architectural cross-check, and keep formal behavioral-pattern extraction for its later scan turn.
+
+### Iteration 6
+
+Processed `docs/scenarios/00-basic-structured-capture.md`. Extracted S00 as the structured-capture simplicity baseline and captured its domain pressures around shape coexistence, duplicate independent capture, and traceable correction. No storage, event, schema, sync, or conflict mechanism was promoted.
