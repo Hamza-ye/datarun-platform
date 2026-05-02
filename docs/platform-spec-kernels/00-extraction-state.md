@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 4 in progress
+Status: Iteration 5 probe complete
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -128,9 +128,20 @@ For every processed source:
 5. Run a local conflict check.
 6. Record open conflicts or closure changes here before moving on.
 
+## Probe Handling
+
+Probe reads are allowed only inside the approved source boundary and only to improve extraction sequencing. A probe read does not mark a source as processed, does not promote kernels, and does not change closure.
+
+Current probe notes:
+
+- `docs/scenarios/*.md` were probed after `docs/scenarios/README.md`. The files are small and can be processed file-by-file or in small coherent batches without context pressure.
+- `docs/behavioral_patterns.md` was probed before formal processing. It is a behavioral narrowing document, not an architectural source. It should inform scenario extraction by naming recurring behaviors, but it must not be treated as deciding platform primitives, storage models, interfaces, or implementation mechanisms.
+- Scenario extraction should use behavioral patterns as a cross-check after each scenario: capture the scenario's domain pressure first, then note which behavioral pattern evidence it supports if the mapping is explicit or later confirmed.
+- Do not add behavioral-pattern kernels until `docs/behavioral_patterns.md` reaches its formal turn after scenario and viability processing, unless the user explicitly changes scan order.
+
 ## Scan Cursor
 
-Current iteration: 4
+Current iteration: 5
 
 Processed sources:
 
@@ -202,3 +213,7 @@ Processed `docs/README.md`. Extracted vision and ambition kernels only. Ignored 
 ### Iteration 4
 
 Processed `docs/scenarios/README.md` as the index for the scenario directory. Extracted scenario-directory guardrails and scan plan only. Scenario files will be processed individually in filename order, starting with `docs/scenarios/00-basic-structured-capture.md`, so scenario evidence does not get compressed into one oversized pass.
+
+### Iteration 5
+
+Probe-only pass over `docs/scenarios/*.md` and `docs/behavioral_patterns.md`. No kernels were promoted and no source was marked processed. The result is a persisted scenario extraction strategy: process scenarios from domain pressure first, use behavioral patterns only as a non-architectural cross-check, and keep formal behavioral-pattern extraction for its later scan turn.
