@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 17 in progress
+Status: Iteration 18 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -66,6 +66,7 @@ Rest state means:
 - `03-behavioral-viability-principle-kernels.md`: temporary staging file for behavioral-pattern, viability-assessment, and principle kernels.
 - `04-architecture-lineage-kernels.md`: temporary staging file for architecture-landscape and ADR-lineage kernels.
 - `05-methodology-and-extraction-rules.md`: temporary staging file for extraction-methodology kernels.
+- `06-adr2-identity-conflict-kernels.md`: temporary staging file for ADR-002 identity and conflict lineage kernels.
 
 Final atomic files must not be created until rest state is reached.
 
@@ -153,7 +154,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 17
+Current iteration: 18
 
 Processed sources:
 
@@ -191,10 +192,11 @@ Processed sources:
 - `docs/exploration/archive/02-adr1-offline-data-model.md`
 - `docs/exploration/archive/03-adr1-forward-projection.md`
 - `docs/exploration/archive/04-decision-audit.md`
+- `docs/exploration/archive/05-adr2-event-storm-identity.md`
 
 Next source:
 
-- `docs/exploration/archive/05-adr2-event-storm-identity.md`
+- `docs/exploration/archive/07-adr2-phase2-stress-test-results.md`
 
 Ignored-as-source:
 
@@ -222,7 +224,7 @@ Allowed outcomes when the owning source is processed:
 
 Current deferred candidates:
 
-- `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Owning sources: ADR-002 exploration files and ADR-002.
+- `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `05-adr2-event-storm-identity.md`: supported and refined as event-level identity/conflict discovery, but still open pending ADR-002 stress testing, classification, and ADR-002.
 - `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Owning sources: ADR-003 exploration files and ADR-003.
 - `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
 - `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
@@ -342,6 +344,16 @@ Current deferred candidates:
 - `ADR-004 Scope From Audit` — open owning-scope map for configuration boundary and activity context.
 - `ADR-005 Scope From Audit` — open owning-scope map for state progression and workflow.
 - `ADR-001 Normalization Safety Check` — conditional audit conclusion; proceed to ADR-002 only after ADR-001 changes are verified.
+- `ADR-002 Event Storm Boundary` — settled extraction rule from `docs/exploration/archive/05-adr2-event-storm-identity.md`; Phase 1 discovers but does not decide.
+- `Identity As Load-Bearing Event Reference` — candidate ADR-002 framing; identity makes event references meaningful.
+- `Identity Type Taxonomy Candidate` — candidate taxonomy; subject, actor, process, and assignment identities.
+- `Subject Identity Lifecycle Candidate` — candidate lifecycle; create, reference, update attributes, deactivate, merge, split, ambiguous.
+- `Identity Merge And Split Lineage Candidate` — candidate invariant; lineage preserved, historical events not rewritten.
+- `Conflict Taxonomy Candidate` — candidate taxonomy; additive, state, duplicate, stale, content, revoked-authority, cross-lifecycle conflicts.
+- `Accept-And-Flag Stale Identity Work Candidate` — candidate interaction rule; stale offline work accepted as factual but flagged.
+- `Causal Ordering Mechanism Open` — open ADR-002 mechanism decision; device time alone insufficient.
+- `Assignment Identity Axis Candidate` — candidate identity primitive linking actor, scope, responsibility, and temporal authority.
+- `Process Identity And Pending Match Candidate` — candidate identity primitive/pattern for shipment-like processes and unknown references.
 
 ## Iteration History
 
@@ -416,3 +428,7 @@ Housekeeping-only correction to ADR-001 forward-projection handling. Added a def
 ### Iteration 17
 
 Processed `docs/exploration/archive/04-decision-audit.md` as the ADR-001 audit and normalization source. Extracted conditional ADR-001 event-storage closure, required write-path discipline, projection rebuild-scope deferral, downstream overreach correction, ADR-002 through ADR-005 owning-scope maps, and the audit safety check. Promoted the `03` ADR-001 selection pressure toward typed immutable events at audit level, but kept final platform closure pending ADR-001 extraction.
+
+### Iteration 18
+
+Processed `docs/exploration/archive/05-adr2-event-storm-identity.md` as ADR-002 Phase 1 event discovery. Created `06-adr2-identity-conflict-kernels.md` for ADR-002 staging. Extracted candidate identity taxonomy, subject lifecycle, merge/split lineage, conflict taxonomy, stale-state accept-and-flag pressure, causal-ordering open question, assignment identity, and process/pending-match identity. Did not promote discovered events, commands, or proposed aggregates as final platform primitives.
