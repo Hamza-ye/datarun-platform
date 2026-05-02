@@ -1,6 +1,6 @@
 # Platform Specification Kernel Working Draft
 
-Status: Iteration 9 in progress
+Status: Iteration 10 in progress
 
 This file stages atomic platform-specification kernels in one place until the approved source set reaches rest state. Sections may be rewritten, merged, split, or demoted during extraction. Final atomic files must not be created from these sections until the conflict checks and closure pass are complete.
 
@@ -2447,6 +2447,311 @@ Selective sync, local lifecycle, and performance design remain to be closed by l
 Platform specification note:
 
 The platform specification should include low-end device and scale constraints wherever it defines local data availability.
+
+## Kernel: Principle Validation Lifecycle
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+Principles begin as hypotheses derived from vision, constraints, and behavioral patterns. Constraint decisions test them; a principle can be confirmed, refined, challenged, revised, or retired before later decisions proceed.
+
+Source basis:
+
+- `docs/principles.md` / opening section
+- `docs/principles.md` / `## How Principles Get Tested`
+
+Closure basis:
+
+Settled as the principle lifecycle described by the approved source.
+
+Scope:
+
+Applies to the relationship between pre-architecture principles and later constraint decisions.
+
+Non-goals:
+
+Does not decide any specific architecture mechanism.
+
+Forbidden interpretations:
+
+- Do not treat initial principles as untested final architecture.
+- Do not ignore principle challenges; the source requires revision before proceeding.
+
+Open edges:
+
+Detailed decision closure remains with exploration and ADR sources.
+
+Platform specification note:
+
+The platform specification should use principles as decision rationale and guardrails, not as substitutes for detailed contracts.
+
+## Kernel: Offline Default Principle
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Offline operation is the default. Every behavior that works online must work offline unless later approved sources explicitly narrow it. Connectivity is for synchronization, not for primary operation.
+
+Source basis:
+
+- `docs/principles.md` / `P1: Offline is the default, not the exception`
+
+Closure basis:
+
+Settled as a validated working principle in this source. Detailed mechanisms remain outside this source.
+
+Scope:
+
+Applies to platform behavior under field-level disconnection and intermittent connectivity.
+
+Non-goals:
+
+Does not decide local storage, sync unit, conflict detection, or which coordinator-only operations may require reliable connectivity.
+
+Forbidden interpretations:
+
+- Do not require connectivity for primary field operation.
+- Do not model offline support as an optional exception path.
+
+Open edges:
+
+Offline mechanisms remain to be extracted from exploration and ADRs.
+
+Platform specification note:
+
+Use as the governing principle for offline-first platform contracts.
+
+## Kernel: Bounded Configuration Principle
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+"Set up, not built" does not mean infinitely configurable. Configuration should combine and parameterize platform-provided capabilities within explicit boundaries; needs outside those boundaries require platform evolution or are out of scope.
+
+Source basis:
+
+- `docs/principles.md` / `P2: Configuration has boundaries`
+
+Closure basis:
+
+Settled as a validated working principle. Final configuration layers and boundary details remain to be extracted from later sources.
+
+Scope:
+
+Applies to deployer setup, activity configuration, rules, policies, pattern selection, and platform evolution.
+
+Non-goals:
+
+Does not decide configuration syntax, layer count, expression language, policy model, or extension mechanism.
+
+Forbidden interpretations:
+
+- Do not turn configuration into a general-purpose programming language.
+- Do not create hidden workarounds for needs outside the configured boundary.
+
+Open edges:
+
+Concrete configuration boundary remains to be closed by exploration and ADRs.
+
+Platform specification note:
+
+The platform specification should make deployer configurability explicit and bounded.
+
+## Kernel: Append-Only History Principle
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Records are append-only and history is preserved. Corrections append rather than replace, and the full history of who did what, when, under what shape, and under what authority remains recoverable.
+
+Source basis:
+
+- `docs/principles.md` / `P3: Records are append-only; history is sacred`
+
+Closure basis:
+
+Settled as a validated working principle. Detailed write model remains to be extracted from ADRs.
+
+Scope:
+
+Applies to corrections, amendments, provenance, schema evolution, authority context, and record history.
+
+Non-goals:
+
+Does not decide event sourcing, envelope shape, storage deletion policy, projection behavior, or correction event contracts.
+
+Forbidden interpretations:
+
+- Do not overwrite or delete history for convenience.
+- Do not replace corrections in a way that loses original provenance.
+
+Open edges:
+
+The technical write model and retention/delete semantics remain to be extracted from later sources.
+
+Platform specification note:
+
+Use as the governing principle for record-history and correction semantics.
+
+## Kernel: Composition Over Exceptions Principle
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Real-world complexity should be handled by composing a small set of behavioral patterns rather than adding one-off exceptions. Platform growth should happen through composition and controlled evolution, not by modifying existing behavior for every special case.
+
+Source basis:
+
+- `docs/principles.md` / `P4: Patterns compose; the platform evolves through composition, not modification`
+
+Closure basis:
+
+Settled as a validated working principle. Final platform primitive or mechanism vocabulary remains to be extracted from ADRs.
+
+Scope:
+
+Applies to scenario support, behavioral pattern reuse, platform growth, and exception pressure.
+
+Non-goals:
+
+Does not decide the final primitive list, module boundaries, implementation components, or extension process.
+
+Forbidden interpretations:
+
+- Do not add one-off behavior for every scenario variation.
+- Do not treat composition as permission to blur behavioral categories into architecture prematurely.
+
+Open edges:
+
+Technical composition rules remain to be extracted from later sources.
+
+Platform specification note:
+
+Use as a guardrail against special-case platform design.
+
+## Kernel: Conflict Surfacing Principle
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Conflict should be surfaced rather than silently resolved. Automatic resolution is acceptable only when the resolution is provably correct and reversible.
+
+Source basis:
+
+- `docs/principles.md` / `P5: Conflict is surfaced, not silently resolved`
+
+Closure basis:
+
+Settled as a validated working principle. Detailed conflict and flag semantics remain to be extracted from ADRs.
+
+Scope:
+
+Applies to offline edits, concurrent decisions, schema mismatches, identity ambiguity, correction conflicts, and other independent-work conflicts.
+
+Non-goals:
+
+Does not decide conflict categories, flag shapes, resolution workflow, or auto-resolution criteria.
+
+Forbidden interpretations:
+
+- Do not silently overwrite ambiguous independent work.
+- Do not auto-resolve unless correctness and reversibility are established by later decisions.
+
+Open edges:
+
+Conflict detection, flagging, and resolution mechanisms remain to be extracted from later sources.
+
+Platform specification note:
+
+Use as the governing principle for anomaly and reconciliation behavior.
+
+## Kernel: Contextual Auditable Authority Principle
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Authority is contextual and auditable. What someone can see and do depends on who they are, what role they hold, what scope they operate in, and when they act. Every action must remain attributable to its authority context.
+
+Source basis:
+
+- `docs/principles.md` / `P6: Authority is always contextual and auditable`
+
+Closure basis:
+
+Settled as a validated working principle. Detailed authority model remains to be extracted from ADRs.
+
+Scope:
+
+Applies to access control, visibility, offline enforcement, role changes, review authority, and audit reconstruction.
+
+Non-goals:
+
+Does not decide assignments, sync scope, actor references, scope fields, or authority projection.
+
+Forbidden interpretations:
+
+- Do not model authority as a global role only.
+- Do not lose the context under which an action was performed.
+
+Open edges:
+
+Authority representation and enforcement remain to be extracted from later sources.
+
+Platform specification note:
+
+Use as the governing principle for access-control and attribution contracts.
+
+## Kernel: Simplicity Baseline Principle
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+The simplest structured-capture scenario must remain simple. Complexity is opt-in; platform machinery required by richer workflows must not burden scenarios that do not need it.
+
+Source basis:
+
+- `docs/principles.md` / `P7: The simplest scenario stays simple`
+
+Closure basis:
+
+Settled as a validated working principle. Detailed simplicity proof remains to be extracted from ADRs.
+
+Scope:
+
+Applies to S00 and any platform mechanism that could impose unnecessary ceremony on basic capture.
+
+Non-goals:
+
+Does not decide which artifacts or fields are required for S00.
+
+Forbidden interpretations:
+
+- Do not make users understand concepts irrelevant to their simple capture task.
+- Do not make advanced workflow, identity, review, trigger, or state machinery mandatory for simple capture.
+
+Open edges:
+
+The concrete minimal contract for S00 remains to be extracted from later sources.
+
+Platform specification note:
+
+Use as a regression check against overcomplicated platform specifications.
 
 ## Pending Split Targets
 

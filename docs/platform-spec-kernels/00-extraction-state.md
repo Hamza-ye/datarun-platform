@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 9 in progress
+Status: Iteration 10 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -38,6 +38,7 @@ Ground-truth document handling:
 - If an approved ground-truth file contains links or reading-order instructions to forbidden docs, those links and instructions are ignored for extraction purposes.
 - `docs/viability-assessment.md` is the first architecture-toned narrowing pass. It evaluates whether the domain ground truth and scenarios describe a buildable platform. It may create viability, tension, risk, blind-spot, and conditional-scope kernels, but it does not close final architecture or implementation decisions.
 - Terms such as "primitive" in `docs/viability-assessment.md` are candidate abstraction language from pre-architecture narrowing, not final platform primitive classification.
+- `docs/principles.md` sets pre-architecture decision guidance derived from vision, constraints, and behavioral patterns. Its later confirmation annotations can mark principles as validated guidance, but embedded ADR examples must not be used to close detailed platform interfaces before ADR extraction.
 
 ## Output Goal
 
@@ -143,7 +144,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 9
+Current iteration: 10
 
 Processed sources:
 
@@ -175,10 +176,11 @@ Processed sources:
 - `docs/scenarios/22-coordinated-distribution-campaign-across-grouped-locations.md`
 - `docs/behavioral_patterns.md`
 - `docs/viability-assessment.md`
+- `docs/principles.md`
 
 Next source:
 
-- `docs/principles.md`
+- `docs/exploration/archive/00-exploration-framework.md`
 
 Ignored-as-source:
 
@@ -256,6 +258,14 @@ Rest-state merge note:
 - `Reporting Aggregation Blind Spot` — settled viability blind spot from `docs/viability-assessment.md`; aggregation scope unresolved.
 - `Domain-Agnosticism Proof Gap` — settled viability blind spot from `docs/viability-assessment.md`; non-health composite validation not yet strong.
 - `Low-End Device Scale Risk` — settled viability risk from `docs/viability-assessment.md`; selective sync/local lifecycle unresolved.
+- `Principle Validation Lifecycle` — settled process rule from `docs/principles.md`; principles guide decisions and can be confirmed/refined/challenged.
+- `Offline Default Principle` — settled validated principle from `docs/principles.md`; detailed sync/storage mechanics unresolved.
+- `Bounded Configuration Principle` — settled validated principle from `docs/principles.md`; final configuration boundary unresolved.
+- `Append-Only History Principle` — settled validated principle from `docs/principles.md`; detailed write model unresolved until ADR extraction.
+- `Composition Over Exceptions Principle` — settled validated principle from `docs/principles.md`; final primitive vocabulary unresolved.
+- `Conflict Surfacing Principle` — settled validated principle from `docs/principles.md`; flag/conflict mechanisms unresolved until ADR extraction.
+- `Contextual Auditable Authority Principle` — settled validated principle from `docs/principles.md`; authority contract unresolved until ADR extraction.
+- `Simplicity Baseline Principle` — settled validated principle from `docs/principles.md`; technical simplicity proof unresolved until ADR extraction.
 
 ## Iteration History
 
@@ -298,3 +308,7 @@ Processed the remaining scenario files (`docs/scenarios/02-*` through `22-*`, ex
 ### Iteration 9
 
 Processed `docs/viability-assessment.md` as the first architecture-toned narrowing pass. Extracted conditional viability, tensions, risks, guardrails, and blind spots. Did not treat candidate primitive language or mitigation suggestions as final architecture; later exploration and ADR sources must close or correct those points.
+
+### Iteration 10
+
+Processed `docs/principles.md` as validated pre-architecture decision guidance. Extracted the seven principles and their testing lifecycle. Did not use embedded ADR confirmation examples to close detailed interfaces or mechanisms; those remain for ADR extraction.
