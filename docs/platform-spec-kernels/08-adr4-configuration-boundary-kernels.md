@@ -1,6 +1,6 @@
 # ADR-004 Configuration Boundary Kernel Staging
 
-Status: Iteration 32 staging
+Status: Iteration 33 staging
 
 This temporary staging file holds ADR-004 configuration-boundary lineage kernels. It is not a final atomic document.
 
@@ -2379,3 +2379,409 @@ Next ADR-004 source or ADR body must consolidate and verify these positions.
 Platform specification note:
 
 Use as the pre-ADR checklist for ADR-004 extraction.
+
+## Kernel: ADR-004 Decision Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/adrs/adr-004-configuration-boundary.md` is the decided ADR-004 source for configuration boundary closure. It commits fourteen sub-decisions grouped as structural constraints, strategy-protecting constraints, and initial strategies. Its reference to `docs/adrs/adr-002-addendum-type-vocabulary.md` does not make the addendum authoritative for this extraction beyond points ADR-004 itself carries forward.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / status
+- `docs/adrs/adr-004-configuration-boundary.md` / `## Decision`
+- `docs/adrs/adr-004-configuration-boundary.md` / related addendum note
+
+Closure basis:
+
+Settled as ADR extraction boundary.
+
+Scope:
+
+Applies to all ADR-004 closure kernels.
+
+Non-goals:
+
+Does not decide ADR-005 state progression, `status_changed`, workflow composition, `context.*`, or automated conflict resolution.
+
+Forbidden interpretations:
+
+- Do not use the ADR-002 addendum as independent authority in this session; only ADR-004-carried statements are extracted here.
+- Do not treat implementation/tooling sections as final platform primitives unless ADR-004 states the semantic decision.
+
+Open edges:
+
+ADR-005 owns the workflow/state-progression questions listed by ADR-004.
+
+Platform specification note:
+
+Use as the ADR-004 closure anchor.
+
+## Kernel: ADR-004 Envelope Configuration Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+ADR-004 commits two new event envelope fields and finalizes the initial event envelope at eleven fields. `shape_ref` is mandatory, uses `{shape_name}/v{version}`, requires shape names matching `[a-z][a-z0-9_]*`, and uses monotonically increasing positive integer versions. `activity_ref` is optional, uses a deployer-chosen identifier matching `[a-z][a-z0-9_]*` or null, references an activity instance, is auto-populated for human capture from activity UI context, and is inherited by trigger outputs.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / S1
+- `docs/adrs/adr-004-configuration-boundary.md` / S2
+- `docs/adrs/adr-004-configuration-boundary.md` / envelope table after S3
+
+Closure basis:
+
+ADR-settled structural constraint.
+
+Scope:
+
+Applies to event envelope shape/version references, activity correlation, human capture, trigger outputs, imports, and schema-version interpretability.
+
+Non-goals:
+
+Does not settle shape registry implementation, configuration authoring format, projection merge strategy, or breaking-change migration tooling.
+
+Forbidden interpretations:
+
+- Do not store events without `shape_ref`.
+- Do not require `activity_ref` for imported historical data with unknown provenance.
+- Do not treat activity definitions/templates as what `activity_ref` references; it references an instance.
+
+Open edges:
+
+No ADR-004 envelope-field open edge remains. Future envelope additions are exceptional under ADR-001 extensibility.
+
+Platform specification note:
+
+Use as the platform-spec event-envelope configuration contract.
+
+## Kernel: ADR-004 Structural Event Type Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+ADR-004 commits a platform-fixed, closed, append-only structural event type vocabulary. The initial six types are `capture`, `review`, `alert`, `task_created`, `task_completed`, and `assignment_changed`. Event types represent platform processing behavior, not domain meaning; domain meaning lives in shapes. New types may be added only when different platform processing behavior is required; existing stored type values cannot be removed or renamed.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / S3
+- `docs/adrs/adr-004-configuration-boundary.md` / `## Consequences`
+- `docs/adrs/adr-004-configuration-boundary.md` / `## Next Decision`
+
+Closure basis:
+
+ADR-settled structural constraint.
+
+Scope:
+
+Applies to event routing, validation, projection behavior, trigger matching, sync/conflict processing, deployer/domain modeling, and future type additions.
+
+Non-goals:
+
+Does not decide `status_changed` or other ADR-005-dependent type additions.
+
+Forbidden interpretations:
+
+- Do not allow deployers to invent event `type` values.
+- Do not add structural types merely to mirror domain vocabulary.
+- Do not remove or rename a type after events carry it.
+
+Open edges:
+
+ADR-005 must decide whether state progression requires a seventh structural type such as `status_changed`.
+
+Platform specification note:
+
+Use as the platform-spec structural event type contract.
+
+## Kernel: ADR-004 Strategy-Protecting Constraint Contract
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+ADR-004 commits five strategy-protecting constraints: system events use `actor_ref` convention `system:{source_type}/{source_id}`; all L3 triggers execute server-only; configuration is delivered atomically and at most current plus previous configuration versions coexist on device; deployers cannot author access-control scope types or containment logic; and sensitivity classification is shape/activity-level, never field-level.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / S4
+- `docs/adrs/adr-004-configuration-boundary.md` / S5
+- `docs/adrs/adr-004-configuration-boundary.md` / S6
+- `docs/adrs/adr-004-configuration-boundary.md` / S7
+- `docs/adrs/adr-004-configuration-boundary.md` / S8
+
+Closure basis:
+
+ADR-settled strategy-protecting constraint set.
+
+Scope:
+
+Applies to system event attribution, trigger execution placement, device configuration package application, access-control scope evaluation, and sensitivity boundaries.
+
+Non-goals:
+
+Does not freeze implementation details for schedulers/import/migration actor sources, config packaging protocols, or future platform-added scope types.
+
+Forbidden interpretations:
+
+- Do not run deployer-authored containment logic on the authorization path.
+- Do not run L3 triggers on devices under the initial platform contract.
+- Do not support field-level sensitivity by partial event redaction or purge.
+- Do not apply partially updated configuration on device.
+
+Open edges:
+
+Future platform evolution may add system actor source types or scope types as code changes without event migration.
+
+Platform specification note:
+
+Use as the platform-spec invariant guard set for configuration safety.
+
+## Kernel: ADR-004 Configuration Gradient Contract
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 commits a four-layer configuration gradient. L0 assembly covers activities, role-action mappings, flag severity, sensitivity levels, and deployment parameters. L1 shape covers field definitions, projection rules, and uniqueness constraints. L2 logic covers show/hide conditions, computed defaults, and conditional warnings with form-scoped side effects only. L3 policy covers event-reaction and deadline-check triggers that create persistent events. The explicit boundary is L3 to code/platform evolution.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / S9
+- `docs/adrs/adr-004-configuration-boundary.md` / `## Consequences`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to deployer mental model, activity assembly, shape definitions, form logic, trigger policy, persistent side effects, and configuration/code boundary.
+
+Non-goals:
+
+Does not decide authoring UI format, visual builder behavior, or final pattern inventory.
+
+Forbidden interpretations:
+
+- Do not let L2 logic create persistent records.
+- Do not hide the L3-to-code ceiling behind unbounded configuration features.
+- Do not collapse all configuration layers into one undifferentiated surface.
+
+Open edges:
+
+Pattern inventory remains ADR-005/implementation-owned.
+
+Platform specification note:
+
+Use as the platform-spec configuration boundary model.
+
+## Kernel: ADR-004 Shape Evolution And Logic Strategy Contract
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 commits typed, versioned shapes and bounded logic strategies. Shapes are authored as deltas and stored as full snapshots; additive changes and deprecation are the default evolution path; breaking changes require explicit deployer acknowledgment and server-side migration support. One expression language serves form and trigger contexts with operators and field references only, zero functions, no dynamic queries, and no aggregation. Trigger payload mapping uses static values and source event field references only. Projection rules are L1 value-to-value lookup tables.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / S10
+- `docs/adrs/adr-004-configuration-boundary.md` / S11
+- `docs/adrs/adr-004-configuration-boundary.md` / `## What This Does NOT Decide`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to shape registry semantics, schema evolution, expression evaluation, trigger output mapping, projection rules, and cross-version event interpretation.
+
+Non-goals:
+
+Does not decide breaking-change migration implementation, projection merge strategy across schema versions, or `context.*` expression scope.
+
+Forbidden interpretations:
+
+- Do not treat destructive shape changes as ordinary evolution.
+- Do not add functions, dynamic queries, cross-entity references, or aggregation to expressions under ADR-004.
+- Do not put expressions inside trigger output payload maps.
+
+Open edges:
+
+ADR-005 owns possible `context.*` expression scope; implementation owns migration tooling and projection merge strategy.
+
+Platform specification note:
+
+Use as the platform-spec shape and logic strategy contract.
+
+## Kernel: ADR-004 Trigger And Complexity Budget Contract
+
+Status: Settled
+Kind: algorithm
+
+Specification statement:
+
+ADR-004 commits two L3 trigger mechanisms and deploy-time complexity budgets. Event-reaction triggers are synchronous server-side single-event conditions that may produce exactly one output event. Deadline-check triggers are asynchronous server-side non-occurrence detectors that may produce exactly one output event. Triggers are non-recursive and form a DAG with maximum path length two. Deploy-time validation enforces budgets: 60 fields per shape, 3 predicates per condition, 5 triggers per event type, 50 triggers per deployment, and escalation depth of 2 levels.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / S12
+- `docs/adrs/adr-004-configuration-boundary.md` / S13
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to trigger engine behavior, deadline checks, trigger graph validation, shape budgets, expression predicate budgets, and deployment-scale configuration limits.
+
+Non-goals:
+
+Does not freeze these budget numbers as irreversible event-envelope constraints; ADR-004 classifies them as initial strategy adjustable by platform update.
+
+Forbidden interpretations:
+
+- Do not allow recursive trigger chains or cycles.
+- Do not allow a trigger to emit more than one event.
+- Do not treat complexity budgets as advisory.
+
+Open edges:
+
+Budgets may be tuned by platform update if real deployments prove them unreasonable.
+
+Platform specification note:
+
+Use as the platform-spec trigger and deploy-time budget contract.
+
+## Kernel: ADR-004 Deployer Policy Configuration Contract
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-004 commits four deployer-parameterized policy areas over platform-owned vocabularies and mechanisms. Flag severity is a per-deployment override over platform-defined flag types and blocking/informational severities. Shapes declare domain uniqueness constraints evaluated optimistically on-device and authoritatively on-server, producing ADR-002 conflict flags. Assignments compose the platform-fixed `geographic`, `subject_list`, and `activity` scope types. Shapes and activities declare sensitivity level `standard`, `elevated`, or `restricted`, affecting sync scope, retention, and audit behavior without envelope fields.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / S14
+- `docs/adrs/adr-004-configuration-boundary.md` / `## Consequences`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to flag severity, domain uniqueness, role-action/activity parameters, scope composition, sensitivity classification, sync filtering, retention behavior, and audit level.
+
+Non-goals:
+
+Does not decide domain conflict resolution automation, per-activity flag severity, regulatory compliance, or field-level encryption.
+
+Forbidden interpretations:
+
+- Do not allow deployers to define new flag types, scope containment logic, or field-level sensitivity through policy configuration.
+- Do not treat domain uniqueness detection as automated conflict resolution.
+- Do not add envelope fields for sensitivity, scope type, flag severity, or uniqueness rules.
+
+Open edges:
+
+ADR-005 owns conflict resolution automation; per-activity severity and compliance mechanisms are growth paths or implementation/platform evolution.
+
+Platform specification note:
+
+Use as the platform-spec deployer policy configuration contract.
+
+## Kernel: ADR-004 Explicit Deferral Contract
+
+Status: Settled
+Kind: open-question
+
+Specification statement:
+
+ADR-004 explicitly defers state machines/state progression, `status_changed` as a possible seventh event type, domain conflict resolution automation, `context.*` expression scope, breaking-change migration mechanism, configuration authoring format, projection merge strategy across schema versions, deploy-time validator UX, and pattern inventory.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / `## What This Does NOT Decide`
+- `docs/adrs/adr-004-configuration-boundary.md` / `## Next Decision`
+
+Closure basis:
+
+ADR-settled deferral map.
+
+Scope:
+
+Applies to ADR-005 handoff, implementation handoff, and platform evolution boundaries.
+
+Non-goals:
+
+Does not leave ADR-004's fourteen decisions open.
+
+Forbidden interpretations:
+
+- Do not resolve ADR-005-owned workflow/state-machine questions from ADR-004 exploration alone.
+- Do not treat implementation-deferred tooling as absent from the platform obligations when ADR-004 decides the semantic model.
+
+Open edges:
+
+Next source is ADR-005 archive scoping after ADR-004 closure checkpoint.
+
+Platform specification note:
+
+Use as the ADR-004-to-ADR-005 handoff contract.
+
+## Kernel: ADR-004 Reconciliation Result
+
+Status: Settled
+Kind: conditional-validity-rule
+
+Specification statement:
+
+ADR-004 verifies the Session 3 synthesis without contradiction. The exploration candidates for envelope fields, structural type vocabulary, trigger placement, atomic configuration, scope-type security boundary, sensitivity granularity, four-layer gradient, shape evolution, expression limits, trigger limits, complexity budgets, domain uniqueness, flag severity, scope composition, and sensitivity parameterization are carried forward as ADR decisions. Q7b, `context.*`, and `status_changed` remain explicitly deferred.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md` / `## Decision`
+- `docs/adrs/adr-004-configuration-boundary.md` / `## What This Does NOT Decide`
+- `docs/adrs/adr-004-configuration-boundary.md` / `## Next Decision`
+
+Closure basis:
+
+Settled ADR-004 reconciliation result.
+
+Scope:
+
+Applies to ADR-004 lineage closure and transition to ADR-005.
+
+Non-goals:
+
+Does not rest-state all later ADR-006 through ADR-009 material.
+
+Forbidden interpretations:
+
+- Do not keep ADR-004 Session 3 candidates open where ADR-004 commits them.
+- Do not treat ADR-004's implementation deferrals as reversals of the corresponding semantic decisions.
+
+Open edges:
+
+ADR-005 must close or continue the explicit workflow-related deferrals.
+
+Platform specification note:
+
+Use as the closure marker for ADR-004 before ADR-005 extraction.

@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 32 ADR-004 session3 part4 extracted
+Status: Iteration 33 ADR-004 decision extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -156,7 +156,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 32
+Current iteration: 33
 
 Processed sources:
 
@@ -207,10 +207,11 @@ Processed sources:
 - `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md`
 - `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`
 - `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`
+- `docs/adrs/adr-004-configuration-boundary.md`
 
 Next source:
 
-- `docs/adrs/adr-004-configuration-boundary.md`
+- `docs/exploration/archive/19-adr5-session1-scoping.md`
 
 Ignored-as-source:
 
@@ -521,6 +522,16 @@ Current deferred candidates:
 - `Schema Evolution Default Strategy Refinement` — conditional B10 refinement; additive/deprecation by default, breaking changes exceptional with server-side validation and deployer confirmation.
 - `Deploy-Time Configuration Validation Capability Candidate` — conditional synthesis finding; validates artifacts, budgets, references, trigger DAGs, uniqueness rules, and same-shape activity warnings before deployment.
 - `ADR-004 Session 3 Synthesis Result` — conditional pre-ADR synthesis; all twelve ADR-004 questions resolved or explicitly deferred, no envelope additions from Q7/Q9/Q10/Q12.
+- `ADR-004 Decision Boundary` — settled ADR extraction rule from `docs/adrs/adr-004-configuration-boundary.md`; ADR-002 addendum remains non-authoritative except statements carried by ADR-004 itself.
+- `ADR-004 Envelope Configuration Contract` — ADR-settled `shape_ref`, optional `activity_ref`, and eleven-field initial envelope closure.
+- `ADR-004 Structural Event Type Contract` — ADR-settled six-type platform-fixed append-only structural vocabulary.
+- `ADR-004 Strategy-Protecting Constraint Contract` — ADR-settled guard set for system actor convention, server-only triggers, atomic configuration, no deployer access-control logic, and no field-level sensitivity.
+- `ADR-004 Configuration Gradient Contract` — ADR-settled four-layer configuration boundary and L3-to-code ceiling.
+- `ADR-004 Shape Evolution And Logic Strategy Contract` — ADR-settled typed/versioned shapes, deprecation-first evolution, expression limits, payload-map limits, and projection-rule lookup-table strategy.
+- `ADR-004 Trigger And Complexity Budget Contract` — ADR-settled trigger architecture and deploy-time budget defaults.
+- `ADR-004 Deployer Policy Configuration Contract` — ADR-settled flag severity, domain uniqueness, scope composition, and sensitivity parameterization.
+- `ADR-004 Explicit Deferral Contract` — ADR-settled handoff to ADR-005 and implementation for workflow/state/projection/tooling questions.
+- `ADR-004 Reconciliation Result` — settled result confirming ADR-004 carries forward Session 3 synthesis without contradiction.
 
 ## Iteration History
 
@@ -655,3 +666,7 @@ Processed `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-te
 ### Iteration 32
 
 Processed `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md` as ADR-004 Session 3 Part 4 remaining-question resolution and synthesis. Extracted conditional Q7a domain uniqueness constraints, Q9 flag severity configuration, Q10 platform-fixed composable scope types, Q12 shape/activity-level sensitivity classification, and the refined deprecation-first schema-evolution strategy. Preserved Q7b conflict-resolution automation, `context.*`, and possible `status_changed` as ADR-005 deferrals or candidates. Recorded the Session 3 synthesis that all twelve ADR-004 questions are resolved or explicitly deferred and that Q7/Q9/Q10/Q12 add no envelope fields. Next source is ADR-004 itself for closure verification before ADR-005 archive processing.
+
+### Iteration 33
+
+Processed `docs/adrs/adr-004-configuration-boundary.md` as the decided ADR-004 source. Promoted the carried-forward Session 3 positions into ADR-settled contracts: `shape_ref`, optional `activity_ref`, six structural event types, system actor convention, server-only triggers, atomic configuration, no deployer-authored access-control logic, no field-level sensitivity, four-layer configuration gradient, shape evolution, expression and projection limits, trigger architecture, complexity budgets, and deployer policy configuration. Preserved explicit ADR-005 and implementation deferrals for state progression, `status_changed`, domain conflict resolution automation, `context.*`, breaking-change migration tooling, authoring format, projection merge strategy, validator UX, and pattern inventory. ADR-004 lineage closes without contradiction; next source is ADR-005 Session 1 scoping.
