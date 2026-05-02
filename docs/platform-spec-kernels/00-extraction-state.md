@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 30 ADR-004 session3 part2 extracted
+Status: Iteration 31 ADR-004 session3 part3 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -156,7 +156,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 30
+Current iteration: 31
 
 Processed sources:
 
@@ -205,10 +205,11 @@ Processed sources:
 - `docs/exploration/archive/14-adr4-session2-scenario-walkthrough.md`
 - `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.md`
 - `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md`
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`
 
 Next source:
 
-- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`
+- `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`
 
 Ignored-as-source:
 
@@ -503,6 +504,13 @@ Current deferred candidates:
 - `Configuration Architecture Strategy Classification Candidate` — conditional classification that most non-envelope configuration architecture choices are initial strategies, while server-only triggers and atomic packages are strategy-protecting constraints.
 - `Platform Capability Strategy Classification Candidate` — conditional classification that platform capability inventory and limits are strategy, not stored-event locks.
 - `ADR-004 Part 3 Stress Scope Candidate` — open handoff narrowing Part 3 to Tier 1 envelope stress tests with lighter validation for Tier 2/3 items.
+- `ADR-004 Session 3 Part 3 Adversarial Stress Boundary` — settled extraction rule from `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`; stress evidence, not final ADR closure.
+- `Activity Reference Optionality Stress-Test Survivor` — conditional survivor; optional schema field with normal activity-context auto-population and null for imports/unknown context.
+- `Shape Reference Versioning Stress-Test Survivor` — conditional survivor; envelope format survives breaking-schema attack while migration/projection policy remains separate.
+- `Structural Event Type Vocabulary Stress-Test Survivor` — conditional survivor; six initial structural types sufficient for ADR-004 scenarios, with new types justified only by different platform processing.
+- `Configuration Limit Light-Validation Result` — conditional light validation for 60-field shape budget and trigger DAG max path length two as evolvable validation strategies.
+- `Pre-Resolved Context Scope Candidate` — candidate expression-scope refinement; bounded `context.*` scope may avoid arbitrary cross-entity queries but needs later validation.
+- `ADR-004 Part 4 Handoff From Stress Tests` — open handoff for Q7 breaking-change policy, `context.*`, possible ADR-005 `status_changed`, and same-shape activity validation warnings.
 
 ## Iteration History
 
@@ -629,3 +637,7 @@ Processed `docs/exploration/archive/15-adr4-session3-part1-structural-coherence.
 ### Iteration 30
 
 Processed `docs/exploration/archive/16-adr4-session3-part2-irreversibility-filter.md` as ADR-004 Session 3 Part 2 irreversibility classification. Extracted the Tier 1/Tier 2/Tier 3 permanence map, with `shape_ref`, optional `activity_ref`, and structural `type` vocabulary as conditional Tier 1 envelope constraints. Reclassified system actor format, server-only triggers, atomic config packages, and deployer identifier naming rules as strategy-protecting constraints, while most configuration architecture and platform capability positions remain initial strategies. Narrowed the next-source stress scope to Tier 1 envelope attacks plus lighter validation for Tier 2/3 guardrails.
+
+### Iteration 31
+
+Processed `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` as ADR-004 Session 3 Part 3 adversarial evidence. Confirmed the Tier 1 envelope candidates survive without field changes: optional `activity_ref` remains correct with device auto-population when activity context exists, mandatory `shape_ref` preserves event interpretability while projection/migration policy remains separate, and the six-type structural vocabulary covers ADR-004 scenarios with future append-only growth reserved for distinct platform processing. Captured light validation for 60-field shape budgets and trigger DAG depth two, plus the candidate `context.*` expression scope and Part 4 handoff items.

@@ -1,6 +1,6 @@
 # ADR-004 Configuration Boundary Kernel Staging
 
-Status: Iteration 30 staging
+Status: Iteration 31 staging
 
 This temporary staging file holds ADR-004 configuration-boundary lineage kernels. It is not a final atomic document.
 
@@ -1735,3 +1735,285 @@ Next source must confirm, revise, or reject this narrowed stress scope.
 Platform specification note:
 
 Use as the immediate handoff to `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`.
+
+## Kernel: ADR-004 Session 3 Part 3 Adversarial Stress Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` is ADR-004 Session 3 Part 3 adversarial validation. It attempts to break the three Tier 1 envelope-touching positions from Part 2 and lightly validates selected Tier 3 configuration limits. It does not make final ADR-004 decisions.
+
+Source basis:
+
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / supersession notice
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / opening purpose
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / `## Cross-Attack Synthesis`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-004 Session 3 Part 3.
+
+Non-goals:
+
+Does not decide final ADR-004 envelope fields, configuration limits, schema-evolution policy, expression scope, or future ADR-005 type additions.
+
+Forbidden interpretations:
+
+- Do not treat stress-test survival as ADR-settled closure before ADR-004 extraction.
+- Do not treat light validation findings as equal in permanence to Tier 1 envelope stress outcomes.
+
+Open edges:
+
+Part 4 must resolve Q7/Q9/Q10/Q12 and carry forward the remaining schema-evolution, context-scope, type-growth, and validation-warning implications.
+
+Platform specification note:
+
+Use as adversarial evidence for ADR-004 final verification.
+
+## Kernel: Activity Reference Optionality Stress-Test Survivor
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+Optional `activity_ref` survives the multi-activity same-shape attack. Same-shape concurrent activities require `activity_ref` to disambiguate event attribution, while imported historical data and events with no known activity context require null to avoid fabricated provenance. Human-authored events are effectively activity-scoped in normal operation because the device captures them within an activity UI and can auto-populate the current activity instance.
+
+Source basis:
+
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Attack 1
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Verdict on Attack 1
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Cross-Attack Synthesis
+
+Closure basis:
+
+Conditional stress-test survivor pending ADR-004 verification.
+
+Scope:
+
+Applies to activity context stamping, same-shape activity overlap, imports, trigger output inheritance, reporting attribution, and projection grouping.
+
+Non-goals:
+
+Does not make `activity_ref` schema-mandatory for every event and does not decide full activity artifact syntax.
+
+Forbidden interpretations:
+
+- Do not infer activity membership from shape, actor, timestamp, subject, or assignment when multiple concurrent activities share the same shape.
+- Do not force import tools to invent an activity reference when historical provenance is unknown.
+- Do not read optionality as deployer-discretionary omission for normal human captures when an activity context exists.
+
+Open edges:
+
+Deploy-time validation should warn when multiple activities use the same shape; final ADR-004 must decide whether to carry that as tooling strategy.
+
+Platform specification note:
+
+Use as Q11 stress-test evidence for optional-but-auto-populated `activity_ref`.
+
+## Kernel: Shape Reference Versioning Stress-Test Survivor
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+Mandatory `shape_ref` survives the breaking-schema-change attack. The stored reference format correctly preserves event interpretability across `facility/v1`, `facility/v2`, and `facility/v3`; the hard problem is cross-version projection and migration policy, not envelope format. The default schema-evolution posture should be additive plus deprecation, with breaking changes treated as extraordinary server-side migration operations.
+
+Source basis:
+
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Attack 2
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Verdict on Attack 2
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Cross-Attack Synthesis
+
+Closure basis:
+
+Conditional stress-test survivor pending ADR-004 verification.
+
+Scope:
+
+Applies to shape version references, historical event interpretation, shape registry retention, projection across versions, and schema evolution policy.
+
+Non-goals:
+
+Does not design the migration system, projection merge algorithm, rollback procedure, or deployer migration UI.
+
+Forbidden interpretations:
+
+- Do not treat `shape_ref` format as responsible for solving projection migration semantics.
+- Do not allow ordinary shape evolution to remove or rename fields without explicit breaking-change handling.
+- Do not require devices to run arbitrary migration logic as a consequence of this envelope candidate.
+
+Open edges:
+
+Part 4 must address Q7-related schema evolution policy and whether deprecation-only default plus exceptional server-side migration becomes an ADR-004 strategy.
+
+Platform specification note:
+
+Use as Q3 stress-test evidence and as a schema-evolution policy handoff.
+
+## Kernel: Structural Type Vocabulary Stress-Test Survivor
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+The six-type structural vocabulary survives the domain-event exhaustion attack. Candidate deployer event names such as case opened, case resolved, feedback, referral accepted, and stock received map to `capture` with different shapes; transfer maps to `assignment_changed` or to two events when transfer includes both authority change and notes. A new structural type is justified only when the platform must process it differently, not when the domain label differs.
+
+Source basis:
+
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Attack 3
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Verdict on Attack 3
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Cross-Attack Synthesis
+
+Closure basis:
+
+Conditional stress-test survivor pending ADR-004 verification.
+
+Scope:
+
+Applies to structural event type selection, deployer/domain terminology, activity templates, shape routing, projection behavior, and future type additions.
+
+Non-goals:
+
+Does not decide ADR-005 state-machine design or forbid append-only future structural type additions.
+
+Forbidden interpretations:
+
+- Do not add a structural event type merely to mirror deployer domain vocabulary.
+- Do not overload `assignment_changed` with capture payload semantics when a data-bearing transfer can be represented as authority change plus separate capture.
+- Do not expose structural type vocabulary as the deployer's primary modeling language when deployer tooling can present domain operations.
+
+Open edges:
+
+`status_changed` remains a plausible ADR-005-dependent future structural type if state machines require distinct platform processing.
+
+Platform specification note:
+
+Use as Q1 stress-test evidence and as the current rule for structural type growth.
+
+## Kernel: Configuration Limit Light-Validation Result
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+Part 3 lightly validates selected Tier 3 limits. A 60-field shape budget is reasonable because larger forms should split into smaller shapes and stages; trigger DAG max path length two is justified by escalation latency, out-of-system boundaries, and inspectability; both limits remain deploy-time validation strategies that can evolve without event migration.
+
+Source basis:
+
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Light Validation V1
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Light Validation V3
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Cross-Attack Synthesis
+
+Closure basis:
+
+Conditional light-validation result pending ADR-004 verification.
+
+Scope:
+
+Applies to shape field budgets, large-form splitting, multi-stage activities, trigger dependency DAGs, escalation depth, and deploy-time configuration validation.
+
+Non-goals:
+
+Does not freeze the exact numeric limits as irreversible platform contracts.
+
+Forbidden interpretations:
+
+- Do not use one oversized form when the activity can be composed from multiple smaller captures.
+- Do not treat trigger depth as an automation escape hatch for out-of-system operational escalation.
+
+Open edges:
+
+ADR-004 must decide whether these limits are included as initial strategies, hard validation defaults, or implementation guidance.
+
+Platform specification note:
+
+Use as evidence for bounded configuration defaults without overstating permanence.
+
+## Kernel: Pre-Resolved Context Scope Candidate
+
+Status: Candidate
+Kind: configuration-boundary
+
+Specification statement:
+
+Part 3 identifies `context.*` as a plausible bounded extension to form-context expressions. Expressions may need actor or location facts, such as assigned-facility attributes, without becoming arbitrary cross-entity queries. The candidate solution is a pre-resolved, read-only, static context scope loaded at form-open time, alongside `payload.*` and one subject `entity.*`.
+
+Source basis:
+
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Light Validation V2
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / Cross-Attack Synthesis
+
+Closure basis:
+
+Candidate light-validation insight. The source explicitly says this needs further validation before commitment.
+
+Scope:
+
+Applies to L2 form expressions, actor operational context, assigned-location facts, pre-resolved projections, and avoidance of cross-entity query semantics.
+
+Non-goals:
+
+Does not commit `context.*` to ADR-004, does not allow arbitrary entity joins, and does not decide ADR-005 state-progression expression needs.
+
+Forbidden interpretations:
+
+- Do not turn expression evaluation into a live query engine over arbitrary entities.
+- Do not treat `context.*` as equivalent to unrestricted cross-entity references.
+- Do not promote this light-validation idea to final closure before later source verification.
+
+Open edges:
+
+The source recommends deferring this to ADR-5 validation or later ADR-004 closure rather than committing from Part 3 alone.
+
+Platform specification note:
+
+Use as a guarded candidate for expression-scope refinement.
+
+## Kernel: ADR-004 Part 4 Handoff From Stress Tests
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+Part 3 carries four items forward: Q7-related breaking-change policy, possible `context.*` expression scope deferral, possible ADR-005 `status_changed` type growth, and deploy-time validation warnings for same-shape multi-activity configurations. The event envelope itself remains unchanged after the attacks.
+
+Source basis:
+
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / `### Envelope status after attacks`
+- `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md` / `### Items carrying forward to Part 4`
+
+Closure basis:
+
+Open handoff to ADR-004 Session 3 Part 4 and later ADR-004 verification.
+
+Scope:
+
+Applies to next-source processing, schema evolution, expression scope, structural type growth, activity validation warnings, and final envelope verification.
+
+Non-goals:
+
+Does not resolve Q7/Q9/Q10/Q12.
+
+Forbidden interpretations:
+
+- Do not reopen the 11-field envelope solely because Part 3 produced strategy and tooling follow-ups.
+- Do not drop the carry-forward items because the Tier 1 attacks survived.
+
+Open edges:
+
+Next source must resolve or defer Q7, Q9, Q10, and Q12 and account for these stress-test follow-ups.
+
+Platform specification note:
+
+Use as the immediate handoff to `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`.
