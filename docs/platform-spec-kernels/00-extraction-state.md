@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 0 setup
+Status: Iteration 1 in progress
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -124,15 +124,15 @@ For every processed source:
 
 ## Scan Cursor
 
-Current iteration: 0
+Current iteration: 1
 
 Processed sources:
 
-- None.
+- `docs/access-control-scenario.md`
 
 Next source:
 
-- `docs/access-control-scenario.md`
+- `docs/constraints.md`
 
 Ignored-as-source:
 
@@ -144,10 +144,21 @@ No conflicts recorded yet.
 
 ## Candidate Kernel Register
 
-No candidate kernels extracted yet.
+- `Contextual Authority` — settled requirement from `docs/access-control-scenario.md`; concrete mechanism unresolved.
+- `Access Scope Partitioning` — settled requirement from `docs/access-control-scenario.md`; sync/projection mechanics unresolved.
+- `Temporary Access Lifecycle` — settled requirement from `docs/access-control-scenario.md`; grant/revocation protocol unresolved.
+- `Role And Responsibility Transition Preservation` — settled requirement from `docs/access-control-scenario.md`; lifecycle representation unresolved.
+- `Hierarchical Visibility With Exceptions` — settled requirement from `docs/access-control-scenario.md`; hierarchy/exception mechanism unresolved.
+- `Access Rule Evolvability` — settled requirement from `docs/access-control-scenario.md`; configuration boundary unresolved.
+- `Offline Access Divergence` — settled requirement from `docs/access-control-scenario.md`; reconciliation behavior unresolved.
+- `Authority-Context Attribution` — settled requirement from `docs/access-control-scenario.md`; storage/reconstruction model unresolved.
 
 ## Iteration History
 
 ### Iteration 0
 
 Created the extraction state and working draft structure. No source claims have been promoted.
+
+### Iteration 1
+
+Processed `docs/access-control-scenario.md`. Extracted access-control requirements as settled ground-truth kernels, with concrete mechanisms left open for later approved sources.
