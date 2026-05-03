@@ -1,6 +1,6 @@
 # ADR-005 State Progression Kernel Staging
 
-Status: Iteration 35 staging
+Status: Iteration 36 staging
 
 This temporary staging file holds ADR-005 state-progression and workflow lineage kernels. It is not a final atomic document.
 
@@ -887,3 +887,368 @@ Next source is `docs/exploration/archive/21-adr5-session3-part1-structural-coher
 Platform specification note:
 
 Use as the immediate handoff to ADR-005 Session 3.
+
+## Kernel: ADR-005 Session 3 Coherence Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` is ADR-005 Session 3 structural-coherence audit evidence. It verifies ADR-005 positions against ADR-001 through ADR-004, checks internal consistency, confirms envelope integrity and anti-pattern containment, and passes the gate for ADR-005 writing. It does not replace final ADR-005 decision text.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / supersession notice
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / opening purpose
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Overall Verdict`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Gate Decision`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-005 Session 3 structural coherence.
+
+Non-goals:
+
+Does not promote ADR-005 exploration positions into ADR-settled contracts before processing `docs/adrs/adr-005-state-progression.md`.
+
+Forbidden interpretations:
+
+- Do not treat the audit primitive map's `Settled` labels as final platform closure before ADR-005 extraction.
+- Do not collapse flag category, flag creation, source-chain projection, flag exclusion from state derivation, and flag resolution into one undifferentiated flag mechanism.
+
+Open edges:
+
+ADR-005 must confirm, revise, or reject the coherence audit's carry-forward clarifications and primitive map.
+
+Platform specification note:
+
+Use as the final pre-ADR coherence gate.
+
+## Kernel: ADR-005 Structural Coherence Audit Result
+
+Status: Conditional
+Kind: conditional-validity-rule
+
+Specification statement:
+
+ADR-005 Session 3 audits nine checks and finds that all ADR-005 positions compose with ADR-001 through ADR-004 and with each other. State-as-projection composes with append-only events; `transition_violation`, source-only flagging, and detect-before-act compose with ADR-002; Pattern Registry roles compose with assignment-based access; patterns, `context.*`, and auto-resolution fit ADR-004's gradient and trigger architecture; internal dependencies are acyclic; primitives interact without runtime cycles; the event envelope remains unchanged; anti-patterns are contained; and all seven principles hold.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Method`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / checks `(a)` through `(i)`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Overall Verdict`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Gate Decision`
+
+Closure basis:
+
+Conditional coherence-audit result pending ADR-005 verification.
+
+Scope:
+
+Applies to ADR-005 integration with prior ADRs, internal consistency, primitive interactions, envelope stability, anti-pattern containment, principle alignment, and readiness for final ADR extraction.
+
+Non-goals:
+
+Does not itself settle ADR-005 sub-decisions.
+
+Forbidden interpretations:
+
+- Do not skip ADR-005 final extraction because the coherence audit passes.
+- Do not treat absence of structural contradiction as proof that every implementation detail is decided.
+
+Open edges:
+
+ADR-005 must provide the final decision source.
+
+Platform specification note:
+
+Use as the ADR-005 pre-ADR reconciliation checkpoint.
+
+## Kernel: Flagged Events State-Derivation Clarification
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+ADR-005 Session 3 clarifies that events carrying unresolved flags are excluded from state machine evaluation in the projection engine. They remain visible in the event timeline but do not change `current_state`. If a flag is resolved as accepted, projections re-derive state including the event; if resolved as rejected or invalid, state derivation continues to exclude it.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Check (b): ADR-2 Integration -- Accept-and-Flag, Detect-Before-Act`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Clarifications to Carry into ADR-005`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Primitives Map -- Final State After ADR-5`
+
+Closure basis:
+
+Conditional coherence-audit clarification pending ADR-005 verification.
+
+Scope:
+
+Applies to unresolved flags, workflow state derivation, projection replay, current-state computation, flag resolution effects, and event timeline visibility.
+
+Non-goals:
+
+Does not decide final ADR-006 flag semantics, severity, queues, lifecycle states, or UI presentation.
+
+Forbidden interpretations:
+
+- Do not hide flagged events from timelines.
+- Do not let unresolved flagged events advance workflow state.
+- Do not treat this as changing event acceptance; flagged events remain stored.
+- Do not conflate exclusion from state derivation with exclusion from all projections or all reports.
+
+Open edges:
+
+ADR-005 must confirm this clarification, and later flag-semantics extraction must preserve or refine its boundary without conflating it with unrelated flag semantics.
+
+Platform specification note:
+
+Use as the careful boundary between accept-and-flag storage, detect-before-act policy execution, and workflow state projection.
+
+## Kernel: Auto-Resolution System Actor Format Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-005 Session 3 clarifies that auto-resolution events use `actor_ref` format `system:auto_resolution/{policy_id}`. This extends ADR-004's `system:{source_type}/{source_id}` system actor convention by adding `auto_resolution` as a source type alongside `trigger`.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Clarifications to Carry into ADR-005`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Check (i): Principle Alignment`
+
+Closure basis:
+
+Conditional coherence-audit clarification pending ADR-005 verification.
+
+Scope:
+
+Applies to system-authored auto-resolution events, actor attribution, auditability, policy identity, and ADR-004 system actor convention extension.
+
+Non-goals:
+
+Does not define all system actor source types or all flag resolution payload fields.
+
+Forbidden interpretations:
+
+- Do not use a null actor for auto-resolution events.
+- Do not hide the auto-resolution policy identity.
+- Do not treat auto-resolution as unaudited background mutation.
+
+Open edges:
+
+ADR-005 must verify the actor format and final event representation.
+
+Platform specification note:
+
+Use as ADR-005 lineage for auditable auto-resolution.
+
+## Kernel: ADR-005 Envelope Integrity Confirmation Candidate
+
+Status: Conditional
+Kind: invariant
+
+Specification statement:
+
+ADR-005 Session 3 confirms that no ADR-005 position requires a new event envelope field. Workflow state is derived rather than stored; `status_changed` is not added; pattern assignment is derived from `shape_ref`, `activity_ref`, and configuration rather than a `pattern_ref`; source-chain traversal uses payload references; `context.*` is form-open computation; and auto-resolution uses standard events and existing `actor_ref`.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Check (g): Envelope Integrity -- Zero Changes Confirmed`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `### The pattern_ref question`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Overall Verdict`
+
+Closure basis:
+
+Conditional coherence-audit confirmation pending ADR-005 verification.
+
+Scope:
+
+Applies to state storage, structural event type vocabulary, pattern references, source-chain traversal, `context.*`, auto-resolution, and event envelope stability.
+
+Non-goals:
+
+Does not prevent future platform evolution from adding fields through a later approved decision.
+
+Forbidden interpretations:
+
+- Do not add `pattern_ref` to the envelope for ADR-005.
+- Do not store `current_state` in the envelope or payload as an authoritative workflow state.
+- Do not add `status_changed` from ADR-005 coherence evidence.
+
+Open edges:
+
+ADR-005 must settle whether this confirmation becomes final ADR closure.
+
+Platform specification note:
+
+Use as the strongest ADR-005 envelope-stability lineage.
+
+## Kernel: ADR-005 Configuration Gradient Integration Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-005 Session 3 maps workflow features into ADR-004's configuration gradient without adding layers: pattern skeletons are platform-fixed below L0; pattern selection, shape mapping, and role mapping are L0 assembly; state-aware form logic uses L2 `context.*`; workflow deadlines and auto-resolution are L3b; transition validation is server-side conflict detection; and new configuration checks remain deploy-time validations.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Check (d): ADR-4 Integration -- Four-Layer Gradient, Type Vocabulary, Expression Language`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / deploy-time validation table
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Overall Verdict`
+
+Closure basis:
+
+Conditional coherence-audit integration finding pending ADR-005 verification.
+
+Scope:
+
+Applies to Pattern Registry placement, L0 assembly, L2 form expressions, L3b policies, conflict detection, trigger budgets, and deploy-time validation.
+
+Non-goals:
+
+Does not define exact authoring UI or full pattern schema syntax.
+
+Forbidden interpretations:
+
+- Do not create a new configuration layer for workflow.
+- Do not let deployers author platform pattern skeletons.
+- Do not make `context.*` available to trigger expressions.
+- Do not exclude auto-resolution policies from L3b budget checks.
+
+Open edges:
+
+ADR-005 must verify the final boundary and later rest-state cleanup must reconcile it with ADR-004 configuration kernels.
+
+Platform specification note:
+
+Use as ADR-005-to-ADR-004 boundary evidence.
+
+## Kernel: ADR-005 Primitive Interaction Map Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-005 Session 3 describes a primitive interaction map in which the Pattern Registry supplies state-machine definitions to the Projection Engine, transition rules to the Conflict Detector, role declarations to the Assignment Resolver, and configuration constraints to deploy-time validation. The Projection Engine supplies pre-resolved `context.*` values to the Expression Evaluator. The Conflict Detector supplies flag status that affects projection state derivation. The L3b Trigger Engine creates resolution events that resolve flags. The audit finds these relationships acyclic and incremental.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Check (f): Primitives Composition -- New and Expanded Primitives`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Primitives Map -- Final State After ADR-5`
+
+Closure basis:
+
+Conditional primitive-composition finding pending ADR-005 verification.
+
+Scope:
+
+Applies to Pattern Registry, Projection Engine, Conflict Detector, Assignment Resolver, Deploy-Time Validator, Expression Evaluator, and Trigger Engine interactions.
+
+Non-goals:
+
+Does not settle final primitive inventory before ADR-005.
+
+Forbidden interpretations:
+
+- Do not introduce runtime feedback loops among pattern, projection, conflict, expression, and trigger primitives.
+- Do not add a new device-side engine for ADR-005 workflow.
+- Do not move server-side flag generation onto the device under this candidate.
+
+Open edges:
+
+ADR-005 must confirm the primitive map and final primitive statuses.
+
+Platform specification note:
+
+Use as pre-ADR primitive reconciliation evidence.
+
+## Kernel: ADR-005 Anti-Pattern Containment Candidate
+
+Status: Conditional
+Kind: conditional-validity-rule
+
+Specification statement:
+
+ADR-005 Session 3 finds ADR-005 anti-pattern risks contained: platform-fixed `context.*` and pattern vocabularies contain AP-1; structural auto-resolution parameters contain AP-2; AP-3 is monitored but the S00 simplicity floor remains; platform-managed pattern evolution contains AP-4; detect-before-act, depth limits, and input/output separation contain AP-5; and definition-versus-enforcement separation plus mutually exclusive manual/auto resolution contain AP-6.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Check (h): Anti-Pattern Check -- AP-1 Through AP-6`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Overall Verdict`
+
+Closure basis:
+
+Conditional coherence-audit finding pending ADR-005 verification.
+
+Scope:
+
+Applies to configuration-language boundaries, pattern governance, auto-resolution configuration, schema/pattern evolution, trigger cascade control, and authority separation.
+
+Non-goals:
+
+Does not remove the need to monitor configuration complexity after implementation.
+
+Forbidden interpretations:
+
+- Do not treat auto-resolution as a general rule language.
+- Do not treat pattern transition definitions and conflict detection as overlapping authorities; one defines validity, the other evaluates events.
+- Do not allow one flag instance to be both auto-resolved and manually resolved.
+
+Open edges:
+
+ADR-005 must verify which anti-pattern guards become final decision text or accepted risk.
+
+Platform specification note:
+
+Use as ADR-005 guardrail evidence.
+
+## Kernel: ADR-005 Writing Gate
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+After ADR-005 Session 3, the next extraction source is the final ADR-005 decision document. The coherence audit passes, no structural revision is required, and ADR-005 writing may proceed.
+
+Source basis:
+
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` / `## Gate Decision`
+
+Closure basis:
+
+Open handoff to `docs/adrs/adr-005-state-progression.md`.
+
+Scope:
+
+Applies to immediate next-source processing and final ADR-005 verification.
+
+Non-goals:
+
+Does not itself extract the ADR.
+
+Forbidden interpretations:
+
+- Do not continue to ADR-006 sources before processing ADR-005.
+- Do not treat the gate as equivalent to ADR-settled closure.
+
+Open edges:
+
+Next source is `docs/adrs/adr-005-state-progression.md`.
+
+Platform specification note:
+
+Use as the handoff from archive exploration into ADR-005 final decision extraction.

@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 35 ADR-005 session2 extracted
+Status: Iteration 36 ADR-005 session3 coherence extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -154,10 +154,11 @@ Current probe notes:
 - `docs/behavioral_patterns.md` was probed before formal processing. It is a behavioral narrowing document, not an architectural source. It should inform scenario extraction by naming recurring behaviors, but it must not be treated as deciding platform primitives, storage models, interfaces, or implementation mechanisms.
 - Scenario extraction should use behavioral patterns as a cross-check after each scenario: capture the scenario's domain pressure first, then note which behavioral pattern evidence it supports if the mapping is explicit or later confirmed.
 - User-approved scan-order adjustment: `docs/behavioral_patterns.md` is formally processed with the compressed scenario pass before `docs/viability-assessment.md`, because it is a behavioral, pre-architecture narrowing over the scenario set and helps avoid scenario-file overfitting.
+- User caution for ADR-005 and later flag extraction: flag-related interactions were a prior source of confused implementation understanding after identity/conflict detection, configuration boundaries, and stale-role explorations. During ADR-005 and final closure, keep flag category creation, conflict detection timing, source-only cascade/projection lineage, unresolved-flag state-derivation effects, flag resolution/auto-resolution, and later ADR-006 flag semantics as separate boundaries unless an approved source explicitly merges them.
 
 ## Scan Cursor
 
-Current iteration: 35
+Current iteration: 36
 
 Processed sources:
 
@@ -211,10 +212,11 @@ Processed sources:
 - `docs/adrs/adr-004-configuration-boundary.md`
 - `docs/exploration/archive/19-adr5-session1-scoping.md`
 - `docs/exploration/archive/20-adr5-session2-stress-test.md`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md`
 
 Next source:
 
-- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md`
+- `docs/adrs/adr-005-state-progression.md`
 
 Ignored-as-source:
 
@@ -557,6 +559,15 @@ Current deferred candidates:
 - `Pattern Inventory Scope Boundary Candidate` — conditional scope split: ADR-005 owns pattern architecture; exact pattern inventory belongs to platform specification or implementation documentation.
 - `Advisory Command Validator Candidate` — conditional clarification: device warns, server flags, neither rejects stale offline workflow events.
 - `ADR-005 Session 3 Charter` — open handoff to structural coherence audit and ADR-005 writing.
+- `ADR-005 Session 3 Coherence Boundary` — settled extraction rule from `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md`; coherence audit and writing gate, not final ADR closure.
+- `ADR-005 Structural Coherence Audit Result` — conditional audit result: all nine checks compose with prior ADRs, internal model, envelope integrity, anti-pattern guards, and principles.
+- `Flagged Events State-Derivation Clarification` — conditional clarification: unresolved flagged events remain visible but are excluded from workflow state-machine evaluation until resolution.
+- `Auto-Resolution System Actor Format Candidate` — conditional clarification: auto-resolution uses `system:auto_resolution/{policy_id}` actor references.
+- `ADR-005 Envelope Integrity Confirmation Candidate` — conditional confirmation: no new envelope fields, no `pattern_ref`, no `current_state`, no `status_changed`.
+- `ADR-005 Configuration Gradient Integration Candidate` — conditional integration finding: patterns below/L0, `context.*` L2 form-only, auto-resolution L3b, new checks deploy-time.
+- `ADR-005 Primitive Interaction Map Candidate` — conditional primitive-composition finding: Pattern Registry, Projection Engine, Conflict Detector, Assignment Resolver, validator, Expression Evaluator, and Trigger Engine interact acyclically.
+- `ADR-005 Anti-Pattern Containment Candidate` — conditional guardrail result for AP-1 through AP-6.
+- `ADR-005 Writing Gate` — open handoff to final ADR-005 extraction.
 
 ## Iteration History
 
@@ -703,3 +714,7 @@ Processed `docs/exploration/archive/19-adr5-session1-scoping.md` as ADR-005 Sess
 ### Iteration 35
 
 Processed `docs/exploration/archive/20-adr5-session2-stress-test.md` as ADR-005 Session 2 stress-test and irreversibility-filter evidence. Refined Session 1's Q3-Q6 open leans into conditional high-confidence candidates: five workflow composition rules, source-only flag cascade with source-chain traversal, bounded form-only `context.*` scope with seven platform-fixed properties, L3b-style auto-resolution, platform-defined flag resolvability classifications, and advisory command validation. Extracted the Session 2 permanence map: no Tier 1 envelope changes, no `status_changed` type addition, one mild Tier 2 item for `transition_violation`, and all other positions as Tier 3 strategies. Recorded the pattern-inventory scope boundary and Session 3 handoff to structural coherence audit before ADR-005 final extraction.
+
+### Iteration 36
+
+Processed `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` as ADR-005 Session 3 structural-coherence audit evidence. Extracted the nine-check audit result: ADR-005 positions compose with ADR-001 append-only events, ADR-002 accept-and-flag/detect-before-act, ADR-003 assignment/sync scope, ADR-004 gradient/type/expression/trigger boundaries, each other, the primitive interaction map, envelope integrity, anti-pattern guards, and the seven principles. Preserved the audit's `Settled` primitive-map labels as conditional pre-ADR lineage rather than final closure. Added explicit flag-boundary kernels for unresolved flagged events being visible but excluded from state-machine evaluation until resolution, source-only cascade staying projection-derived, and auto-resolution using `system:auto_resolution/{policy_id}`. Confirmed the next source is `docs/adrs/adr-005-state-progression.md` for final ADR-005 verification.
