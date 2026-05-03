@@ -300,6 +300,37 @@ Priority:
 
 - P2 for implementation planning.
 
+### Structured Import Export Compatibility
+
+Classification: Implementation/tooling gap with platform-spec compatibility constraint
+
+Affected baseline:
+
+- Event envelope
+- Storage model
+- Configuration boundary
+- Reporting and aggregation
+
+Why open:
+
+`../../constraints.md` requires the platform to remain capable of structured record exchange with external systems, but it explicitly does not require real-time integration or Phase 1 delivery. ADR-001 through ADR-005 preserve a stable event/envelope/schema direction but do not close import/export contracts, external standards, or integration timing.
+
+Later-source assessment:
+
+Claims must preserve immutable event history, envelope stability, deployer shape/activity boundaries, projection derivation, and access-scope constraints. External exchange requirements must not make an external system schema canonical for platform records.
+
+Closure path:
+
+- Platform-spec detailing for import/export compatibility obligations if included in the spec skeleton.
+- Implementation/tooling design for concrete import/export jobs, mapping, validation, and operational delivery.
+- Operational policy definition where external exchange is driven by compliance, reporting, or deployment-specific data-sharing obligations.
+- Formal architecture decision only if interoperability requirements alter canonical event, envelope, access, or lifecycle semantics.
+
+Priority:
+
+- P3 unless first deployments require structured external exchange.
+- P2 before implementation planning for import/export or external reporting surfaces.
+
 ### Configuration Authoring And Deployment UX
 
 Classification: Implementation/tooling gap

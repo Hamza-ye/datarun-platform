@@ -27,6 +27,7 @@ This folder formalizes that operating model.
 - `13-adr009-duality-rule-assessment.md`: later-source assessment of ADR-009 platform-fixed mechanism versus deployer-configured instance classification against the accepted baseline.
 - `14-pattern-inventory-walkthrough-assessment.md`: assessment of the historical pattern-inventory walkthrough as candidate material for Pattern Registry inventory and schema gaps.
 - `15-conflict-flag-offline-boundary-control.md`: dependency-aware overlay that keeps conflict detection, accept-and-flag, detect-before-act, flag lifecycle, and offline-default behavior from collapsing into one broad boundary during atomization.
+- `16-operational-constraints-boundary-control.md`: dependency-aware overlay that preserves `constraints.md` as operational envelope authority without turning it into architecture or implementation authority.
 
 ## Current Standing
 
@@ -39,6 +40,7 @@ This folder formalizes that operating model.
 - `13-adr009-duality-rule-assessment.md` classifies ADR-009 as mostly consistent platform/deployer-boundary elaboration: platform-fixed mechanisms and deployer-configured instances must be split during atomization.
 - `14-pattern-inventory-walkthrough-assessment.md` treats `28-pattern-inventory-walkthrough.md` as candidate material for pattern inventory/schema, not as authority or final pattern specification.
 - `15-conflict-flag-offline-boundary-control.md` keeps the validated principles visible while routing accepted conflict, flag, and offline-default behavior through the stabilized boundaries before platform-spec atomization.
+- `16-operational-constraints-boundary-control.md` routes operational constraints such as offline field work, low-end devices, compliance support, interoperability compatibility, responsiveness, and configuration propagation into accepted mechanisms or explicit gaps.
 - ADR-006-R through ADR-009 are quarantined assessment material until the baseline is accepted and gap-checked.
 
 ## Working Rule
@@ -47,4 +49,4 @@ Do not continue broad extraction when the next problem is baseline clarity. Use 
 
 ## Current Next Step
 
-Use `15-conflict-flag-offline-boundary-control.md` to draft the first atomization plan for the ingestion and anomaly pipeline before writing final platform-spec atoms.
+Use `15-conflict-flag-offline-boundary-control.md` and `16-operational-constraints-boundary-control.md` to draft the first atomization plan for the ingestion and anomaly pipeline before writing final platform-spec atoms.

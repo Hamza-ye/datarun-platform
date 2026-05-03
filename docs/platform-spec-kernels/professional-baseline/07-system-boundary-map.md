@@ -677,6 +677,7 @@ Each known gap has one primary owning boundary. Secondary boundaries may be affe
 | Bounded context expression details | Projection / Workflow State | Configuration | Platform-spec detailing plus implementation/tooling design |
 | Projection performance and caching | Event Log / Storage | Projection / Workflow State | Implementation/tooling design |
 | Event schema and versioning tooling | Event Envelope / Schema | Event Log / Storage; Configuration | Implementation/tooling design plus platform-spec detailing |
+| Structured import/export compatibility | Event Envelope / Schema | Event Log / Storage; Configuration; Reporting / Aggregation | Platform-spec detailing plus implementation/tooling design; formal decision only if canonical semantics change |
 | Configuration authoring and deployment UX | Configuration | Trigger / Reactivity | Implementation/tooling design |
 | Auto-resolution authoring and monitoring | Flag / Resolution | Reporting / Aggregation | Implementation/tooling design plus platform-spec detailing if audit surfaces are needed |
 | Sync delivery mechanics | Assignment / Authority / Sync | Local Data Lifecycle | Implementation/tooling design |
