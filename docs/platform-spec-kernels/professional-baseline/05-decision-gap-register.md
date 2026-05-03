@@ -18,6 +18,15 @@ Primary references:
 - Operational policy gap: deployment or organization policy, not core architecture.
 - Later-source assessment gap: ADR-006-R through ADR-009 may contain relevant claims, but those claims must be assessed through change control.
 
+## Closure Paths
+
+- Formal architecture decision: write a focused decision memo or ADR that explicitly names the baseline item it changes or extends.
+- Platform-spec detailing: write platform-spec language under the existing architecture boundary; no new ADR unless the detail changes the boundary.
+- Implementation/tooling design: write an engineering design, prototype, or tickets; preserve the baseline constraints.
+- Operational policy definition: define product/operations policy; escalate only if policy requires architecture change.
+- Later-source assessment: classify later ADR claims through `02-change-control.md`; do not absorb them directly.
+- No action until product need appears: keep the gap visible but do not spend engineering time until a concrete need appears.
+
 ## Architecture Decision Gaps
 
 ### Domain Conflict Automation Outside Workflow
@@ -38,6 +47,16 @@ Later-source assessment:
 
 ADR-006-R through ADR-009 may contain relevant claims. Classify them as open-gap closure candidates, conflicts, or implementation details before accepting any change.
 
+Closure path:
+
+- Formal architecture decision if general domain conflict automation is needed beyond ADR-005 workflow auto-resolution.
+- Later-source assessment for any ADR-006-R through ADR-009 claim that appears to close or redefine this area.
+
+Priority:
+
+- P1 if platform spec must define non-workflow conflict behavior.
+- P2 if implementation can start with ADR-005 workflow-only handling and defer general automation.
+
 ### Subject-Based Scope And Auditor Access
 
 Classification: Architecture decision gap
@@ -55,6 +74,16 @@ Later-source assessment:
 
 Later ADRs may elaborate access/visibility only if they do not contradict assignment-derived access and sync scope as access scope.
 
+Closure path:
+
+- Formal architecture decision if subject-based or auditor access requires new scope semantics.
+- Operational policy definition if it can be expressed with existing assignment, role, capability, and sync-scope mechanisms.
+
+Priority:
+
+- P1 if auditor or subject-based scope is in first target deployment.
+- P3 if no near-term deployment needs it.
+
 ### Shared Device Actor Scope
 
 Classification: Architecture decision gap
@@ -71,6 +100,17 @@ The baseline separates hardware-bound device identity from actor-scoped access, 
 Later-source assessment:
 
 Assess later claims for consistency with original-subject authorization, actor assignment, and immutable event authorship.
+
+Closure path:
+
+- Formal architecture decision if shared devices are a supported platform mode.
+- No action until product need appears if shared devices can be declared unsupported or limited initially.
+- Implementation/tooling design if support only needs actor-partitioned local sessions under existing baseline constraints.
+
+Priority:
+
+- P1 if shared devices are required for initial deployments.
+- P3 if deployment model assumes one actor session per device.
 
 ## Platform-Spec Detail Gaps
 
@@ -90,6 +130,15 @@ Later-source assessment:
 
 Later claims may propose inventory, but must not change projection-derived workflow state or add envelope/event-type structure without formal reopen.
 
+Closure path:
+
+- Platform-spec detailing.
+- Implementation/tooling design for authoring, packaging, and validation of initial pattern definitions.
+
+Priority:
+
+- P1 for platform specification skeleton.
+
 ### Formal Pattern Schema Format
 
 Classification: Platform-spec detail gap
@@ -107,6 +156,15 @@ Later-source assessment:
 
 Later claims may be deferred spec details unless they alter platform/deployer boundaries.
 
+Closure path:
+
+- Platform-spec detailing for the contract shape.
+- Implementation/tooling design for concrete serialization, validation, and authoring.
+
+Priority:
+
+- P1 for platform specification skeleton.
+
 ### Source-Chain Traversal Limits
 
 Classification: Platform-spec detail gap
@@ -123,6 +181,15 @@ Later-source assessment:
 
 Claims about traversal limits should be assessed as platform-spec details unless they introduce stored derived flags or alter source-only lineage.
 
+Closure path:
+
+- Platform-spec detailing for normative traversal semantics and minimum required behavior.
+- Implementation/tooling design for performance limits and rendering.
+
+Priority:
+
+- P1 if the platform spec includes source-only flag lineage.
+
 ### Bounded Context Expression Details
 
 Classification: Platform-spec detail gap
@@ -138,6 +205,15 @@ ADR-005 closes the allowed `context.*` surface but leaves caching internals and 
 Later-source assessment:
 
 Later claims must not expand `context.*` beyond form-only seven-value scope without formal reopen.
+
+Closure path:
+
+- Platform-spec detailing for evaluation timing and value semantics.
+- Implementation/tooling design for caching internals.
+
+Priority:
+
+- P2 unless first implementation includes state-aware forms immediately.
 
 ## Implementation / Tooling Gaps
 
@@ -158,6 +234,15 @@ Later-source assessment:
 
 Later claims should normally be implementation details unless they weaken event-log source-of-truth or projection rebuild discipline.
 
+Closure path:
+
+- Implementation/tooling design.
+- No formal architecture decision unless proposed performance strategy weakens source-of-truth or rebuild invariants.
+
+Priority:
+
+- P2 for implementation planning.
+
 ### Event Schema And Versioning Tooling
 
 Classification: Implementation/tooling gap
@@ -176,6 +261,15 @@ Later-source assessment:
 
 Claims must preserve immutable event validity and envelope stability.
 
+Closure path:
+
+- Implementation/tooling design for migration, schema registry, and projection compatibility.
+- Platform-spec detailing for immutable event versioning obligations.
+
+Priority:
+
+- P2 for implementation planning.
+
 ### Configuration Authoring And Deployment UX
 
 Classification: Implementation/tooling gap
@@ -191,6 +285,15 @@ Configuration authoring format, deployment packaging UX, deploy-time validator U
 Later-source assessment:
 
 Claims must preserve bounded configuration, atomic configuration packages, and no deployer-authored arbitrary access-control logic.
+
+Closure path:
+
+- Implementation/tooling design for authoring and validator UX.
+- Platform-spec detailing only for required package/validation behavior.
+
+Priority:
+
+- P2 for implementation planning.
 
 ### Auto-Resolution Authoring And Monitoring
 
@@ -208,6 +311,15 @@ Later-source assessment:
 
 Claims must preserve explicit resolution events and `system:auto_resolution/{policy_id}` attribution.
 
+Closure path:
+
+- Implementation/tooling design for authoring and monitoring.
+- Platform-spec detailing for required audit surfaces if needed.
+
+Priority:
+
+- P2 after workflow/flag implementation planning starts.
+
 ### Sync Delivery Mechanics
 
 Classification: Implementation/tooling gap
@@ -223,6 +335,15 @@ Sync pagination, priority, bandwidth handling, transport details, and operationa
 Later-source assessment:
 
 Claims must preserve immutable event sync, scope filtering, idempotency, append-only behavior, and order independence.
+
+Closure path:
+
+- Implementation/tooling design.
+- No architecture decision unless delivery mechanics change sync invariants.
+
+Priority:
+
+- P2 for sync-engine implementation planning.
 
 ## Operational Policy Gaps
 
@@ -242,6 +363,15 @@ Later-source assessment:
 
 Any policy must preserve immutable event history constraints or explicitly request baseline reconsideration.
 
+Closure path:
+
+- Operational policy definition.
+- Formal architecture decision only if retention requires deletion, redaction, or mutation of canonical events.
+
+Priority:
+
+- P3 unless legal/compliance requirements are known now.
+
 ### Setup Experience And Onboarding
 
 Classification: Operational policy gap
@@ -259,6 +389,16 @@ Later-source assessment:
 
 Later claims should be treated as UX/policy/tooling unless they change assignment, authority, or configuration boundaries.
 
+Closure path:
+
+- Operational policy definition for onboarding/role-transition process.
+- Implementation/tooling design for setup flows.
+- Formal architecture decision only if setup requires new authority/configuration semantics.
+
+Priority:
+
+- P3 unless initial deployment onboarding is blocked.
+
 ### Reporting And Aggregation
 
 Classification: Operational policy gap
@@ -275,6 +415,16 @@ Reporting aggregation and workflow-aware reporting remain open after ADR-005.
 Later-source assessment:
 
 Claims must preserve event-log source of truth, projection derivation, and access-scope constraints.
+
+Closure path:
+
+- Platform-spec detailing for aggregate capability boundaries.
+- Implementation/tooling design for reporting projections.
+- Operational policy definition for decision-maker reporting requirements.
+
+Priority:
+
+- P2 for platform spec skeleton if reporting capabilities are included.
 
 ## Later-Source Assessment Gaps
 
@@ -298,6 +448,14 @@ Assessment rule:
 
 Each later claim must be classified as consistent elaboration, open-gap closure candidate, deferred implementation/spec detail, new unauthorized claim, conflict with closed baseline, or valid dispute requiring formal reopen.
 
+Closure path:
+
+- Later-source assessment after baseline acceptance and gap triage.
+
+Priority:
+
+- P1 before using ADR-006-R through ADR-009 in any baseline/spec document.
+
 ### General Flag Semantics
 
 Classification: Later-source assessment gap
@@ -314,6 +472,15 @@ ADR-005 closes workflow-specific flag interactions but explicitly does not close
 Assessment rule:
 
 Keep flag category creation, conflict detection timing, source-only cascade, unresolved-flag state derivation, flag resolution/auto-resolution, and general flag semantics separate.
+
+Closure path:
+
+- Later-source assessment for ADR-006/ADR-006-R carried claims.
+- Formal architecture decision only for claims that alter closed ADR-001 through ADR-005 flag boundaries or close a genuinely open flag-semantics gap.
+
+Priority:
+
+- P1 if flag semantics are needed for the platform spec skeleton.
 
 ## Non-Gaps
 

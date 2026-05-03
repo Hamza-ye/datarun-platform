@@ -17,6 +17,7 @@ This folder formalizes that operating model.
 - `03-artifact-definitions.md`: the expected artifacts and what each one is allowed to contain.
 - `04-architecture-baseline-v0.md`: current engineering-facing baseline generated from the ADR-001 through ADR-005 closure overlay.
 - `05-decision-gap-register.md`: unresolved post-baseline gaps classified before later ADR assessment or implementation planning.
+- `06-baseline-stabilization-plan.md`: ordered stabilization steps for accepting the baseline, assigning closure paths, triaging gaps, and only then assessing later ADRs.
 
 ## Current Standing
 
@@ -27,3 +28,7 @@ This folder formalizes that operating model.
 ## Working Rule
 
 Do not continue broad extraction when the next problem is baseline clarity. Use the closure overlay to produce engineering-facing baseline artifacts, then assess later ADRs only against explicit gaps or disputes.
+
+## Current Next Step
+
+Follow `06-baseline-stabilization-plan.md`: accept or correct `04-architecture-baseline-v0.md`, confirm closure paths and priorities in `05-decision-gap-register.md`, then assess ADR-006-R through ADR-009 only against the stabilized gaps.

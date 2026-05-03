@@ -122,6 +122,22 @@ Rules:
 - not generated directly from ADRs or exploration files
 - should be stable enough for engineering review
 
+## Baseline Stabilization Plan
+
+Purpose:
+
+- define the operating order for accepting the baseline, assigning closure paths, triaging gaps, and assessing later ADRs without broad re-extraction
+
+Current file:
+
+- `06-baseline-stabilization-plan.md`
+
+Rules:
+
+- use it before assessing ADR-006-R through ADR-009
+- do not use it as source evidence for platform behavior
+- update it only when the operating process changes
+
 ## Final Atomic Kernel Files
 
 Purpose:
