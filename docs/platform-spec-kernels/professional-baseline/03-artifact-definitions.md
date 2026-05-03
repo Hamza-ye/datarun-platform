@@ -77,6 +77,10 @@ Purpose:
 
 - identify what still needs a decision before final spec or implementation
 
+Current file:
+
+- `05-decision-gap-register.md`
+
 Each gap should include:
 
 - short name
