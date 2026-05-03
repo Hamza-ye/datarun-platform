@@ -26,6 +26,7 @@ This folder formalizes that operating model.
 - `12-adr008-reference-fields-assessment.md`: later-source assessment of ADR-008 reference-field contracts and reference-vs-referent classification against the accepted baseline.
 - `13-adr009-duality-rule-assessment.md`: later-source assessment of ADR-009 platform-fixed mechanism versus deployer-configured instance classification against the accepted baseline.
 - `14-pattern-inventory-walkthrough-assessment.md`: assessment of the historical pattern-inventory walkthrough as candidate material for Pattern Registry inventory and schema gaps.
+- `15-conflict-flag-offline-boundary-control.md`: dependency-aware overlay that keeps conflict detection, accept-and-flag, detect-before-act, flag lifecycle, and offline-default behavior from collapsing into one broad boundary during atomization.
 
 ## Current Standing
 
@@ -37,6 +38,7 @@ This folder formalizes that operating model.
 - `12-adr008-reference-fields-assessment.md` classifies ADR-008 as mostly consistent reference-boundary elaboration: `*_ref` fields are envelope contracts, while referents keep separate lifecycle ownership and classification.
 - `13-adr009-duality-rule-assessment.md` classifies ADR-009 as mostly consistent platform/deployer-boundary elaboration: platform-fixed mechanisms and deployer-configured instances must be split during atomization.
 - `14-pattern-inventory-walkthrough-assessment.md` treats `28-pattern-inventory-walkthrough.md` as candidate material for pattern inventory/schema, not as authority or final pattern specification.
+- `15-conflict-flag-offline-boundary-control.md` keeps the validated principles visible while routing accepted conflict, flag, and offline-default behavior through the stabilized boundaries before platform-spec atomization.
 - ADR-006-R through ADR-009 are quarantined assessment material until the baseline is accepted and gap-checked.
 
 ## Working Rule
@@ -45,4 +47,4 @@ Do not continue broad extraction when the next problem is baseline clarity. Use 
 
 ## Current Next Step
 
-Follow `06-baseline-stabilization-plan.md`: validate `07-system-boundary-map.md` against the accepted baseline, gap priorities, and identity boundary-control overlay, then assess ADR-006-R through ADR-009 only against the stabilized gaps and boundaries.
+Use `15-conflict-flag-offline-boundary-control.md` to draft the first atomization plan for the ingestion and anomaly pipeline before writing final platform-spec atoms.
