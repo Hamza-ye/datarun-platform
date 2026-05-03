@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 36 ADR-005 session3 coherence extracted
+Status: Iteration 37 ADR-005 decision extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -30,7 +30,7 @@ Special ADR handling:
 
 - `docs/adrs/adr-002-addendum-type-vocabulary.md` is not authoritative. It may be treated only as drift-history context where a later authoritative ADR absorbs, supersedes, or restates a point.
 - `docs/adrs/adr-006-flag-semantics.md` is superseded by `docs/adrs/adr-006-flag-semantics-R.md`. Use ADR-006-R as the authoritative source for flag semantics. ADR-006 text is usable only where ADR-006-R carries it forward.
-- ADR-006 through ADR-009 may contain valid closed points, but their convergence/classification style requires stricter extraction than ADR-001 through ADR-005.
+- ADR-006 through ADR-009 may contain valid points, but their convergence/classification style requires stricter extraction than ADR-001 through ADR-005. They do not supersede ADR-001 through ADR-005 during this extraction. Treat ADR-006 through ADR-009 claims as valid only where they address open points not already closed by ADR-001 through ADR-005, or where they are consistent elaborations of already closed kernels. If they conflict with closed kernels, classify the later claim as contradicted/rejected/contextual rather than silently revising the closure baseline.
 
 Ground-truth document handling:
 
@@ -158,7 +158,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 36
+Current iteration: 37
 
 Processed sources:
 
@@ -213,10 +213,11 @@ Processed sources:
 - `docs/exploration/archive/19-adr5-session1-scoping.md`
 - `docs/exploration/archive/20-adr5-session2-stress-test.md`
 - `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md`
+- `docs/adrs/adr-005-state-progression.md`
 
 Next source:
 
-- `docs/adrs/adr-005-state-progression.md`
+- `docs/adrs/adr-001-offline-data-model.md`
 
 Ignored-as-source:
 
@@ -246,8 +247,8 @@ Current deferred candidates:
 
 - `03-forward-projection / ADR-002 identity-conflict`: event/action-log stream-linking, event-level conflict context, action-log view conflict state, and snapshot full-state merge friction. Outcome after `09-adr2-phase3-classification-results.md`: classified into ADR-002 Bucket 1 constraints, ADR-002 Bucket 2 strategies, Bucket 3 deferrals to ADR-4/5, and Bucket 4 accepted risks. Final verification still owned by ADR-002.
 - `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Outcome after ADR-003: promoted into assignment-based access, sync-scope-as-access, authority-as-projection, original-subject authorization, assignment scope containment, online-only resolution, authorization detect-before-act, tiered projection strategy, authorization stale-flag strategy, scope-change data strategy, accepted risks, and explicit ADR-004/ADR-005 deferrals.
-- `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Owning sources: ADR-004 exploration files and ADR-004.
-- `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Owning sources: ADR-005 exploration files and ADR-005.
+- `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Outcome after ADR-004: promoted into platform-fixed structural event vocabulary, deployer-defined shapes and activity configuration, bounded projection-rule strategy, and explicit ADR-005/implementation deferrals.
+- `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Outcome after ADR-005: promoted into projection-derived workflow state, source-only flag lineage, flagged-event state-derivation exclusion, Pattern Registry, composition rules, and explicit implementation/platform-spec deferrals.
 - `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Outcome after `04-decision-audit.md`: promoted by audit toward typed immutable events/event-log source of truth, with final verification still owned by ADR-001.
 
 ## Candidate Kernel Register
@@ -568,6 +569,21 @@ Current deferred candidates:
 - `ADR-005 Primitive Interaction Map Candidate` — conditional primitive-composition finding: Pattern Registry, Projection Engine, Conflict Detector, Assignment Resolver, validator, Expression Evaluator, and Trigger Engine interact acyclically.
 - `ADR-005 Anti-Pattern Containment Candidate` — conditional guardrail result for AP-1 through AP-6.
 - `ADR-005 Writing Gate` — open handoff to final ADR-005 extraction.
+- `ADR-005 Decision Boundary` — settled extraction rule from `docs/adrs/adr-005-state-progression.md`; final ADR-005 closure source.
+- `ADR-005 No Structural Change Contract` — ADR-settled invariant: no envelope fields, no new type, no `status_changed`, no `current_state`, no `pattern_ref`.
+- `ADR-005 Transition Violation Flag Contract` — ADR-settled strategy-protecting constraint: server conflict detector raises `transition_violation` for invalid derived-state transitions while accepting the event.
+- `ADR-005 Flagged Event State Derivation Contract` — ADR-settled strategy-protecting constraint: unresolved flagged events remain visible but do not affect workflow `current_state`.
+- `ADR-005 Flag Resolvability Classification Contract` — ADR-settled strategy-protecting constraint: platform-defined `auto_eligible`/`manual_only` classes and initial category mapping.
+- `ADR-005 Projection-Derived State Machine Contract` — ADR-settled initial strategy: state derives from events plus patterns; device validator warns, server flags.
+- `ADR-005 Pattern Registry Contract` — ADR-settled initial strategy: platform-fixed workflow skeleton vocabulary selected and parameterized at L0.
+- `ADR-005 Pattern Composition Contract` — ADR-settled initial strategy: five composition rules for subject-level, event-level, embedded approval, cross-activity, and shape-mapping behavior.
+- `ADR-005 Source-Only Flagging Contract` — ADR-settled initial strategy: root event only is flagged; downstream flagged-source state is projection-computed through source-chain traversal.
+- `ADR-005 Context Expression Scope Contract` — ADR-settled initial strategy: seven platform-fixed, pre-resolved, form-only `context.*` values.
+- `ADR-005 Auto-Resolution L3b Contract` — ADR-settled initial strategy: auto-resolution is L3b server-side policy for `auto_eligible` flags with explicit `ConflictResolved` output.
+- `ADR-005 Auto-Resolution Actor Contract` — ADR-settled actor attribution: `system:auto_resolution/{policy_id}`.
+- `ADR-005 Explicit Non-Decisions` — open deferral set for pattern inventory/schema, projection optimization, traversal depth, caching, authoring UX, reporting, and platform-spec consolidation.
+- `ADR-005 Accepted Risk Set` — settled accepted risks and revisit triggers for projection cost, pattern coverage, source-only visibility, auto-resolution audit, and form/projection dependency.
+- `ADR-005 Reconciliation Result` — settled closure result for ADR-005 decision surface and handoff into later-source judgment.
 
 ## Iteration History
 
@@ -718,3 +734,7 @@ Processed `docs/exploration/archive/20-adr5-session2-stress-test.md` as ADR-005 
 ### Iteration 36
 
 Processed `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md` as ADR-005 Session 3 structural-coherence audit evidence. Extracted the nine-check audit result: ADR-005 positions compose with ADR-001 append-only events, ADR-002 accept-and-flag/detect-before-act, ADR-003 assignment/sync scope, ADR-004 gradient/type/expression/trigger boundaries, each other, the primitive interaction map, envelope integrity, anti-pattern guards, and the seven principles. Preserved the audit's `Settled` primitive-map labels as conditional pre-ADR lineage rather than final closure. Added explicit flag-boundary kernels for unresolved flagged events being visible but excluded from state-machine evaluation until resolution, source-only cascade staying projection-derived, and auto-resolution using `system:auto_resolution/{policy_id}`. Confirmed the next source is `docs/adrs/adr-005-state-progression.md` for final ADR-005 verification.
+
+### Iteration 37
+
+Processed `docs/adrs/adr-005-state-progression.md` as the final ADR-005 decision source. Promoted ADR-005 lineage into ADR-settled contracts: no envelope/type changes, rejected `status_changed`, `transition_violation`, flagged-event state-derivation exclusion, platform-defined flag resolvability classification, projection-derived state machines, Pattern Registry, five composition rules, source-only flagging with source-chain traversal, seven-value form-only `context.*`, L3b auto-resolution, and `system:auto_resolution/{policy_id}` actor attribution. Preserved explicit ADR-005 non-decisions for pattern inventory/schema, projection optimization, traversal depth, context caching, authoring UX, reporting, and platform-spec consolidation. Recorded accepted risks and revisit triggers. Maintained the boundary that ADR-006 through ADR-009 must be judged against ADR-001 through ADR-005 closure rather than superseding it. The next source is the unprocessed `docs/adrs/adr-001-offline-data-model.md` decision check before moving into ADR-006 onward.

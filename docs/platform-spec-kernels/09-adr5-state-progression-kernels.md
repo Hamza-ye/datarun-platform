@@ -1,6 +1,6 @@
 # ADR-005 State Progression Kernel Staging
 
-Status: Iteration 36 staging
+Status: Iteration 37 staging
 
 This temporary staging file holds ADR-005 state-progression and workflow lineage kernels. It is not a final atomic document.
 
@@ -1252,3 +1252,612 @@ Next source is `docs/adrs/adr-005-state-progression.md`.
 Platform specification note:
 
 Use as the handoff from archive exploration into ADR-005 final decision extraction.
+
+## Kernel: ADR-005 Decision Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/adrs/adr-005-state-progression.md` is the decided ADR-005 source for state progression and workflow. It closes ADR-004's six deferred state-progression questions by committing projection-derived state machines, platform-fixed workflow patterns, source-only workflow flag cascade behavior, bounded form-context `context.*`, and L3b auto-resolution. ADR-005 does not decide broad ADR-006 flag semantics or implementation inventory details.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / status and context
+- `docs/adrs/adr-005-state-progression.md` / `## Decision`
+- `docs/adrs/adr-005-state-progression.md` / `## What This Does NOT Decide`
+
+Closure basis:
+
+ADR-settled extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-005.
+
+Non-goals:
+
+Does not let later ADR-006 through ADR-009 claims supersede ADR-005 closure.
+
+Forbidden interpretations:
+
+- Do not reopen ADR-005 closed workflow/state-progression decisions from later convergence prose.
+- Do not treat ADR-005 as deciding complete flag lifecycle semantics beyond the workflow-specific flag interactions it names.
+- Do not treat pattern inventory or formal pattern schemas as committed by ADR-005.
+
+Open edges:
+
+Later extraction must judge ADR-006 through ADR-009 against the ADR-001 through ADR-005 closure baseline.
+
+Platform specification note:
+
+Use as the final ADR-005 closure boundary.
+
+## Kernel: ADR-005 No Structural Change Contract
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+ADR-005 adds no event envelope fields and no structural event type. The event envelope remains at eleven fields and the structural type vocabulary remains at six types. ADR-005 rejects adding `status_changed` because workflow state transitions require no distinct platform processing behavior beyond existing event types plus shape and pattern definitions.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `## Decision`
+- `docs/adrs/adr-005-state-progression.md` / `#### S4: State Machines as Projection Patterns`
+- `docs/adrs/adr-005-state-progression.md` / `### What is now constrained`
+
+Closure basis:
+
+ADR-settled invariant and rejected alternative.
+
+Scope:
+
+Applies to ADR-005 envelope stability, structural type vocabulary, `status_changed`, `current_state`, and pattern references.
+
+Non-goals:
+
+Does not prevent a future approved ADR from adding a new type if a later scenario proves different platform processing behavior.
+
+Forbidden interpretations:
+
+- Do not add `status_changed` for ADR-005 workflow.
+- Do not add `current_state` or `pattern_ref` to the event envelope for ADR-005.
+- Do not encode domain lifecycle labels in structural event `type`.
+
+Open edges:
+
+Future type additions remain possible only through explicit platform evolution.
+
+Platform specification note:
+
+Use as the ADR-005 confirmation that workflow is carried by projection, shapes, and patterns rather than stored-event structure.
+
+## Kernel: ADR-005 Transition Violation Flag Contract
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+The Conflict Detector evaluates incoming events against pattern-defined state machine rules and raises a `transition_violation` flag when an accepted event represents a state transition invalid under the subject's current derived state. The event is stored and accepted; the flag surfaces the anomaly for resolution. `transition_violation` is a strategy-protecting flag category because its type string appears in stored `ConflictDetected` events.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S1: Transition Violation Flag Category`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled strategy-protecting constraint.
+
+Scope:
+
+Applies to workflow transition validation, conflict detection, stale offline work, flag creation, and sync-time processing.
+
+Non-goals:
+
+Does not decide broad flag semantics, flag queues, severity, or UI behavior outside the workflow-transition context.
+
+Forbidden interpretations:
+
+- Do not reject stale/offline events solely because they violate current workflow state.
+- Do not treat `transition_violation` as a structural event type.
+- Do not run workflow transition flag generation on device; device validation remains advisory under ADR-005.
+
+Open edges:
+
+Later flag-semantics extraction must preserve this workflow-specific category unless a valid source explicitly narrows non-conflicting details.
+
+Platform specification note:
+
+Use as ADR-005's workflow-specific extension to accept-and-flag conflict detection.
+
+## Kernel: ADR-005 Flagged Event State Derivation Contract
+
+Status: Settled
+Kind: algorithm
+
+Specification statement:
+
+Events carrying unresolved flags are excluded from state machine evaluation in the projection engine. They remain visible in the event timeline but do not change `current_state`. When a flag is resolved as accepted, the projection re-derives state including the event. When a flag is resolved as rejected, the projection remains unchanged.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S2: Flagged Events Excluded from State Machine Evaluation`
+- `docs/adrs/adr-005-state-progression.md` / `### What is now constrained`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled strategy-protecting constraint.
+
+Scope:
+
+Applies to unresolved flags, workflow state projection, current-state computation, event timeline visibility, and flag resolution effects.
+
+Non-goals:
+
+Does not decide all ADR-006 flag lifecycle semantics, severity behavior, queues, or general reporting rules.
+
+Forbidden interpretations:
+
+- Do not hide flagged events from timelines.
+- Do not let unresolved flagged events advance workflow state.
+- Do not conflate exclusion from state derivation with event rejection, deletion, or invisibility.
+- Do not infer that all non-workflow projections must exclude flagged events unless a source explicitly says so.
+
+Open edges:
+
+ADR-006-R may refine broader flag lifecycle semantics only if it does not contradict this ADR-005 workflow-state rule.
+
+Platform specification note:
+
+Use as the core boundary separating accept-and-store, timeline visibility, policy execution, and workflow state derivation.
+
+## Kernel: ADR-005 Flag Resolvability Classification Contract
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+Each flag category carries a platform-defined resolvability classification: `auto_eligible` or `manual_only`. Auto-resolution policies can target only `auto_eligible` flag types, and deployers cannot change a flag type's classification. Initial classifications are: `transition_violation` and `stale_reference` are `auto_eligible`; `scope_violation`, `identity_conflict`, `concurrent_state_change`, and `domain_uniqueness_violation` are `manual_only`.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S3: Flag Resolvability Classification`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled strategy-protecting constraint.
+
+Scope:
+
+Applies to auto-resolution eligibility, deployer policy boundaries, and initial flag category classification.
+
+Non-goals:
+
+Does not define all future flag categories or complete ADR-006 flag semantics.
+
+Forbidden interpretations:
+
+- Do not let deployers make `manual_only` flag categories auto-resolvable.
+- Do not silently auto-resolve scope, identity, concurrent-state, or domain-uniqueness flags under ADR-005.
+- Do not treat resolvability classification as deployer-authored configuration.
+
+Open edges:
+
+Future platform code changes may promote or add classifications through explicit platform evolution; ADR-006-R must be checked against this baseline.
+
+Platform specification note:
+
+Use as ADR-005's guardrail preventing auto-resolution from swallowing security- or judgment-heavy flags.
+
+## Kernel: ADR-005 Projection-Derived State Machine Contract
+
+Status: Settled
+Kind: algorithm
+
+Specification statement:
+
+Subject lifecycle state is derived from the event sequence by the Projection Engine using pattern-defined state machine rules. State is never stored in events, and the platform does not enforce workflow transitions by rejecting events; it flags violations. The on-device Command Validator is advisory and may warn users, while server-side sync processing evaluates the same transition rules and creates `transition_violation` flags when needed.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S4: State Machines as Projection Patterns`
+- `docs/adrs/adr-005-state-progression.md` / `### What is now constrained`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to workflow state derivation, command validation, stale offline work, event acceptance, shape/pattern meaning, and projection rebuildability.
+
+Non-goals:
+
+Does not define projection rebuild optimization strategy or final validator UX.
+
+Forbidden interpretations:
+
+- Do not make connectivity required for workflow progression.
+- Do not reject offline work because the current server projection would mark the transition invalid.
+- Do not store authoritative workflow state in event payloads or envelope fields.
+- Do not treat advisory device warnings as flag creation.
+
+Open edges:
+
+Projection rebuild strategy and validator user experience remain implementation-owned.
+
+Platform specification note:
+
+Use as ADR-005's core state progression model.
+
+## Kernel: ADR-005 Pattern Registry Contract
+
+Status: Settled
+Kind: primitive
+
+Specification statement:
+
+The platform provides a Pattern Registry: a closed vocabulary of platform-fixed workflow skeletons that deployers select and parameterize at Layer 0. Patterns define participant roles, participating structural event types, state machine skeletons, auto-maintained projections, and deployer parameterization points. Pattern definitions sync to devices as part of ADR-004 atomic configuration packages, and are consumed by the Projection Engine and Conflict Detector.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S5: Pattern Registry`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to workflow skeleton governance, deployer pattern selection, role mapping, state derivation, transition validity, and configuration package contents.
+
+Non-goals:
+
+Does not commit exact initial pattern inventory, exact state machine skeletons, or formal YAML/JSON schema syntax.
+
+Forbidden interpretations:
+
+- Do not let deployers author arbitrary state machines.
+- Do not freeze example patterns as the complete platform inventory.
+- Do not treat pattern addition as deployment configuration; it is platform evolution.
+
+Open edges:
+
+Pattern inventory and formal schemas remain platform specification or implementation work.
+
+Platform specification note:
+
+Use as the ADR-005 workflow primitive; final rest-state cleanup should separate architecture from inventory.
+
+## Kernel: ADR-005 Pattern Composition Contract
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+Five rules govern pattern composition. One activity binds at most one subject-level state machine to a subject. Event-level patterns compose freely. Approval sub-flows may embed within subject patterns when scoped to a specific submission event. Cross-activity linking uses `activity_ref` or payload cross-references, not shared patterns. Shape-to-pattern mapping is unique within an activity. The Projection Engine maintains one subject-level state per `(subject, activity, pattern)` tuple and multiple event-level states per `(event_id, pattern)`.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S6: Pattern Composition Rules`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to subject-level state, event-level state, embedded approvals, cross-activity links, deploy-time validation, and projection state keys.
+
+Non-goals:
+
+Does not define every pattern-specific transition table.
+
+Forbidden interpretations:
+
+- Do not allow competing subject-level lifecycle state machines in one activity.
+- Do not let one shape be claimed by multiple patterns in the same activity.
+- Do not make one pattern span multiple activities.
+
+Open edges:
+
+Pattern-specific details remain inventory/specification work.
+
+Platform specification note:
+
+Use as ADR-005's composition contract and AP-6 guardrail.
+
+## Kernel: ADR-005 Source-Only Flagging Contract
+
+Status: Settled
+Kind: algorithm
+
+Specification statement:
+
+When an upstream event is retroactively flagged, only the root-cause event receives a flag. Downstream events created from flagged sources do not receive additional stored flags. Downstream dependency on a flagged source is computed by projection through source-chain traversal over existing payload references such as `source_event_ref`. Resolving the root flag removes the downstream flagged-source indicator from projections.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S7: Source-Only Flagging`
+- `docs/adrs/adr-005-state-progression.md` / accepted risk on downstream contamination markers
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to retroactive flags, downstream trigger/review events, projection lineage traversal, root-cause resolution, and workflow provenance display.
+
+Non-goals:
+
+Does not define complete UI treatment or broad ADR-006 flag queue semantics.
+
+Forbidden interpretations:
+
+- Do not create derived stored flags on every downstream event merely because a source event is flagged.
+- Do not hide downstream dependency on flagged roots; source-chain traversal is a required projection capability.
+- Do not retroactively invalidate trigger outputs that were valid when created.
+
+Open edges:
+
+Source-chain traversal depth limits and rendering details remain implementation-owned.
+
+Platform specification note:
+
+Use as ADR-005's flag-cascade boundary: root flag is stored; downstream contamination is projected.
+
+## Kernel: ADR-005 Context Expression Scope Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+The Expression Evaluator gains a form-context-only `context.*` data scope with seven pre-resolved read-only values: `context.subject_state`, `context.subject_pattern`, `context.activity_stage`, `context.actor.role`, `context.actor.scope_name`, `context.days_since_last_event`, and `context.event_count`. Values are resolved on device from local projection and assignment state at form-open time and remain static during form fill. Trigger expressions do not access `context.*`.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S8: Context Expression Scope`
+- `docs/adrs/adr-005-state-progression.md` / `### What is now constrained`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to L2 form expressions, workflow-aware forms, local projection reads, actor assignment context, and platform-fixed expression namespace governance.
+
+Non-goals:
+
+Does not define on-device caching internals or make context available to trigger expressions.
+
+Forbidden interpretations:
+
+- Do not let deployers define arbitrary `context.*` properties.
+- Do not use `context.*` for dynamic joins, aggregate queries, or arbitrary projection access.
+- Do not add expression functions or grammar changes for ADR-005.
+- Do not make `context.*` live-update during form fill.
+
+Open edges:
+
+Property caching and exact rendering are implementation-owned.
+
+Platform specification note:
+
+Use as ADR-005's closure of ADR-004's `context.*` deferral.
+
+## Kernel: ADR-005 Auto-Resolution L3b Contract
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+Deployers can configure auto-resolution policies as an L3b deadline-check subtype for `auto_eligible` flags. A policy watches a flag type and structural condition, waits for a same-subject resolution-enabling event within a time window, and then creates an explicit `ConflictResolved` event or escalates/manual-review outcome when the deadline expires. Auto-resolution uses the same server-side trigger execution model and loop-prevention guards as L3b deadline checks.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S9: Auto-Resolution as L3b Sub-Type`
+- `docs/adrs/adr-005-state-progression.md` / `### What is now constrained`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled initial strategy.
+
+Scope:
+
+Applies to auto-eligible flag resolution, watched event conditions, time windows, explicit resolution events, L3b trigger budgets, and loop prevention.
+
+Non-goals:
+
+Does not allow device-side auto-resolution, silent mutation, or general rule-language policies.
+
+Forbidden interpretations:
+
+- Do not auto-resolve `manual_only` flags.
+- Do not resolve flags without explicit auditable resolution events.
+- Do not bypass detect-before-act, DAG max path two, or input/output separation.
+- Do not exclude auto-resolution policies from L3b deployment-wide budget.
+
+Open edges:
+
+Auto-resolution authoring UX remains implementation-owned.
+
+Platform specification note:
+
+Use as ADR-005's closure of domain conflict resolution automation within a bounded workflow/flag mechanism.
+
+## Kernel: ADR-005 Auto-Resolution Actor Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+Auto-resolution events use `actor_ref` format `system:auto_resolution/{policy_id}`. This extends ADR-004's system actor convention by adding `auto_resolution` as a system source type. Every auto-resolution remains attributable to the policy that produced it.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `#### S9: Auto-Resolution as L3b Sub-Type`
+- `docs/adrs/adr-005-state-progression.md` / principles confirmed
+
+Closure basis:
+
+ADR-settled contract.
+
+Scope:
+
+Applies to system-authored auto-resolution events, actor attribution, policy identity, and auditability.
+
+Non-goals:
+
+Does not define all possible system actor source types.
+
+Forbidden interpretations:
+
+- Do not use null or anonymous actors for auto-resolution.
+- Do not hide policy identity when recording auto-resolution.
+- Do not treat auto-resolution as unaudited background correction.
+
+Open edges:
+
+Detailed `ConflictResolved` payload schema remains implementation/specification work unless closed elsewhere.
+
+Platform specification note:
+
+Use as ADR-005's auditable-authority contract for auto-resolution.
+
+## Kernel: ADR-005 Explicit Non-Decisions
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-005 explicitly leaves several concerns outside ADR closure: exact pattern inventory and skeletons; formal pattern schema format; workflow projection rebuild optimization; source-chain traversal depth limits; `context.*` caching internals; auto-resolution authoring UX; workflow-aware reporting and aggregation; and the consolidated platform specification document.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `## What This Does NOT Decide`
+
+Closure basis:
+
+Open explicit deferral set.
+
+Scope:
+
+Applies to implementation, platform specification, reporting capability, authoring UX, and performance tuning work after ADR-005.
+
+Non-goals:
+
+Does not reopen ADR-005's decided architecture and interaction contracts.
+
+Forbidden interpretations:
+
+- Do not infer exact pattern inventory from ADR-005 examples.
+- Do not treat performance strategy or authoring format as decided by ADR-005.
+- Do not use deferred implementation details to weaken settled ADR-005 contracts.
+
+Open edges:
+
+Deferred items must be handled by platform specification, implementation, or later valid decisions without contradicting ADR-005.
+
+Platform specification note:
+
+Use as ADR-005's boundary for what remains open after final decision.
+
+## Kernel: ADR-005 Accepted Risk Set
+
+Status: Settled
+Kind: conditional-validity-rule
+
+Specification statement:
+
+ADR-005 accepts five risks with revisit triggers: workflow projection rebuild cost, insufficient pattern inventory, missed downstream contamination under source-only flagging, auto-resolution masking legitimate issues, and form-to-projection dependency from `context.*`. Mitigations include ADR-001 B-to-C maintained views, platform evolution for new patterns, required source-chain traversal rendering, auditable `ConflictResolved` events, and pre-resolved static form context.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `### Risks accepted`
+
+Closure basis:
+
+ADR-settled accepted-risk set.
+
+Scope:
+
+Applies to projection performance, pattern coverage, source-only flagging UX, auto-resolution audit, and context-dependent form behavior.
+
+Non-goals:
+
+Does not convert accepted risks into unresolved architecture decisions.
+
+Forbidden interpretations:
+
+- Do not ignore source-chain traversal rendering; ADR-005 treats it as mitigation for source-only flagging.
+- Do not treat auto-resolution as safe from audit.
+- Do not treat insufficient pattern inventory as permission for deployer-authored state machines.
+
+Open edges:
+
+Revisit triggers may drive future platform evolution if thresholds are met.
+
+Platform specification note:
+
+Use to preserve ADR-005's known risk posture.
+
+## Kernel: ADR-005 Reconciliation Result
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+ADR-005 carries forward the Session 1 through Session 3 lineage without contradiction and settles the ADR-005 decision surface. Q1 closes as projection-derived state machines; Q2 closes with no `status_changed`; Q3 closes with five composition rules; Q4 closes as source-only flagging with source-chain traversal; Q5 closes as bounded form-only `context.*`; Q6 closes as L3b auto-resolution gated by flag resolvability. ADR-005 leaves implementation and platform-specification details explicitly open.
+
+Source basis:
+
+- `docs/adrs/adr-005-state-progression.md` / `## Decision`
+- `docs/adrs/adr-005-state-progression.md` / `## What This Does NOT Decide`
+- `docs/adrs/adr-005-state-progression.md` / `## Traceability`
+
+Closure basis:
+
+ADR-settled reconciliation result.
+
+Scope:
+
+Applies to ADR-005 final extraction, closure of ADR-004 deferrals, and transition to later ADR judgment.
+
+Non-goals:
+
+Does not validate ADR-006 through ADR-009 claims.
+
+Forbidden interpretations:
+
+- Do not allow later ADR-006 through ADR-009 convergence prose to silently supersede this ADR-005 closure.
+- Do not merge workflow-specific flag contracts into broad flag semantics without source-backed compatibility.
+
+Open edges:
+
+Next extraction should move to the next source in the approved scan order while judging later ADRs against the ADR-001 through ADR-005 closure baseline.
+
+Platform specification note:
+
+Use as the closure marker for ADR-005 before evaluating later ADRs.
