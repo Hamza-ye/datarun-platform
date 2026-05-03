@@ -23,6 +23,7 @@ This folder formalizes that operating model.
 - `09-identity-boundary-control.md`: dependency-aware overlay that prevents ADR-002's broad identity/conflict document shape from becoming broad implementation coupling.
 - `10-adr006r-flag-semantics-assessment.md`: later-source assessment of ADR-006-R flag-semantics and alias-cycle claims against the accepted baseline and validated boundaries.
 - `11-adr007-envelope-type-assessment.md`: later-source assessment of ADR-007 envelope-type closure and shape-based fact discrimination against the accepted baseline.
+- `12-adr008-reference-fields-assessment.md`: later-source assessment of ADR-008 reference-field contracts and reference-vs-referent classification against the accepted baseline.
 
 ## Current Standing
 
@@ -31,6 +32,7 @@ This folder formalizes that operating model.
 - `08-baseline-acceptance-check.md` accepts the baseline as stable enough for boundary validation, targeted later-source assessment, and platform-spec skeleton work.
 - `10-adr006r-flag-semantics-assessment.md` classifies ADR-006-R S1 through S4 as mostly compatible general-flag-semantics candidates, while routing ADR-006-R S5 alias-cycle behavior as a formal decision gap before identity/flag atomization if in scope.
 - `11-adr007-envelope-type-assessment.md` classifies ADR-007 as mostly consistent envelope-boundary elaboration: `type` remains the six-value processing axis, while domain/integrity facts are discriminated by `shape_ref`.
+- `12-adr008-reference-fields-assessment.md` classifies ADR-008 as mostly consistent reference-boundary elaboration: `*_ref` fields are envelope contracts, while referents keep separate lifecycle ownership and classification.
 - ADR-006-R through ADR-009 are quarantined assessment material until the baseline is accepted and gap-checked.
 
 ## Working Rule
