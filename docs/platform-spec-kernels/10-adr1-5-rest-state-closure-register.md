@@ -1,6 +1,6 @@
 # ADR-001 To ADR-005 Rest-State Closure Register
 
-Status: Iteration 39 closure overlay
+Status: Iteration 40 validated closure overlay
 
 This file is a compact closure overlay for ADR-001 through ADR-005. It does not replace the larger staging files and does not delete lineage. The staging files remain the evidence trail; this register records the current rest-state baseline that later platform-spec atomization and ADR-006+ assessment must preserve.
 
@@ -66,6 +66,19 @@ Covered by:
 - `ADR-002 Identity Evolution Contract`
 - `ADR-002 Lineage Validation Contract`
 - `ADR-002 Conflict Contract`
+
+### Event Ordering And Device-Time Semantics
+
+Device time is recorded for display and audit, but projection logic, conflict detection, and protocol correctness do not depend on device clock time for ordering. Intra-device ordering uses `device_sequence`; cross-device concurrency detection uses `sync_watermark`; the device identity namespace is hardware/app-installation-bound rather than actor-bound.
+
+Source basis:
+
+- `docs/adrs/adr-002-identity-conflict.md`
+
+Covered by:
+
+- `ADR-002 Envelope Contract`
+- `ADR-002 Device Time Advisory Invariant`
 
 ### Immutable Event Sync And Access-Scoped Delivery
 
@@ -148,6 +161,33 @@ Covered by:
 - `ADR-004 Trigger And Complexity Budget Contract`
 - `ADR-004 Deployer Policy Configuration Contract`
 
+### Deployer Policy Configuration Boundaries
+
+Deployers may configure policy values over platform-owned vocabularies and mechanisms, but they do not own the vocabularies or mechanisms themselves. This includes per-deployment flag severity overrides, domain uniqueness constraints evaluated optimistically on device and authoritatively on server, composition of platform-fixed scope types, and shape/activity-level sensitivity classification. These policy surfaces must not add envelope fields or become deployer-authored platform logic.
+
+Source basis:
+
+- `docs/adrs/adr-004-configuration-boundary.md`
+
+Covered by:
+
+- `ADR-004 Deployer Policy Configuration Contract`
+- `ADR-004 Configuration Gradient Contract`
+- `ADR-004 Strategy-Protecting Constraint Contract`
+
+### Scope-Change Local Data Strategy
+
+Scope expansion is additive. For scope contraction, ADR-003's initial strategy is selective retain: an actor's own events are retained, while other actors' events about out-of-scope subjects are candidates for device-side removal. Sensitive deployments require stronger local lifecycle handling than retain-and-hide.
+
+Source basis:
+
+- `docs/adrs/adr-003-authorization-sync.md`
+
+Covered by:
+
+- `ADR-003 Scope Change Data Handling Strategy`
+- `ADR-003 Accepted Risk Contract`
+
 ### Projection-Derived Workflow State
 
 Workflow state is derived from immutable event sequences plus pattern definitions. State is not stored as canonical event state, invalid transitions are accepted and flagged rather than rejected, and unresolved flagged events remain visible in timeline while excluded from workflow state-machine evaluation until accepted resolution re-derives state.
@@ -219,7 +259,9 @@ Source/covered-by anchors:
 - Server-allocated identifiers for offline event/subject/record creation are rejected.
 - Last-write-wins and invisible automatic merge are rejected for operational conflicts requiring judgment.
 - Stored immutable `authority_context` in the event envelope is rejected by ADR-003.
+- Structural ordering by `device_time` is rejected; device time is advisory for display and audit only.
 - Deployer-authored arbitrary access-control logic and field-level sensitivity are rejected by ADR-004.
+- Retain-but-hide is not recommended for sensitive data under ADR-003 scope-contraction strategy.
 - `status_changed`, `current_state`, and `pattern_ref` are rejected as ADR-005 structural additions.
 - Workflow invalid-transition rejection is rejected; invalid transitions are accepted and flagged under the ADR-005 workflow contract.
 
@@ -227,7 +269,9 @@ Source/covered-by anchors:
 
 - `ADR-001 Rejected Storage Alternatives`
 - `ADR-002 Conflict Contract`
+- `ADR-002 Device Time Advisory Invariant`
 - `ADR-003 Authority-As-Projection Contract`
+- `ADR-003 Scope Change Data Handling Strategy`
 - `ADR-004 Strategy-Protecting Constraint Contract`
 - `ADR-004 Deployer Policy Configuration Contract`
 - `ADR-005 No Structural Change Contract`

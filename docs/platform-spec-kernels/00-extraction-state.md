@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 39 ADR-001 through ADR-005 closure overlay created
+Status: Iteration 40 ADR-001 through ADR-005 closure register validated
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -159,7 +159,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 39
+Current iteration: 40
 
 Processed sources:
 
@@ -232,6 +232,7 @@ No blocking conflicts recorded yet.
 Closure overlay note:
 
 - Iteration 39 created `docs/platform-spec-kernels/10-adr1-5-rest-state-closure-register.md` as a compact ADR-001 through ADR-005 rest-state overlay. It does not replace staging files `02` through `09`, does not create final atomic platform-spec files, and does not use ADR-006-R through ADR-009 as closure sources.
+- Iteration 40 validated the closure overlay against ADR-001 through ADR-005 decision/reconciliation anchors and patched compression gaps for device-time ordering, ADR-004 deployer policy configuration boundaries, and ADR-003 scope-change local data strategy. The engineering-facing baseline and gap register should be checked against the validated overlay before further stabilization steps.
 
 Rest-state merge note:
 
@@ -765,3 +766,7 @@ Processed `docs/adrs/adr-001-offline-data-model.md` as the final ADR-001 decisio
 ### Iteration 39
 
 Created `docs/platform-spec-kernels/10-adr1-5-rest-state-closure-register.md` as a compact closure overlay for ADR-001 through ADR-005. The overlay represents settled platform kernels, open questions, rejected alternatives, deferred implementation/specification details, and a quarantine/assessment lane for ADR-006-R through ADR-009. It does not process a new source, does not rewrite staging files `02` through `09`, does not create final atomic platform-spec files, and does not use ADR-006-R through ADR-009 as closure authority. Updated ADR-006+ handling so ADR-006-R only supersedes ADR-006 inside the ADR-006 revision lineage and all ADR-006 through ADR-009 claims must be assessed against the ADR-001 through ADR-005 closure baseline after that baseline rests cleanly.
+
+### Iteration 40
+
+Validated `docs/platform-spec-kernels/10-adr1-5-rest-state-closure-register.md` before moving forward. Confirmed ADR-001 through ADR-005 decision/reconciliation anchors are represented, explicit deferrals remain open/deferred, ADR-006-R through ADR-009 are not used as closure sources, and `git diff --check` passes. Patched register compression gaps by adding explicit settled coverage for ADR-002 device-time advisory ordering, ADR-004 deployer policy configuration boundaries, and ADR-003 scope-change local data strategy, plus rejected-path guardrails for structural ordering by `device_time` and sensitive-data retain-but-hide. No new source was processed and no final atomic platform-spec files were created.
