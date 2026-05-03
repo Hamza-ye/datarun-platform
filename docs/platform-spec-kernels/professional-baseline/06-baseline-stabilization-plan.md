@@ -13,6 +13,7 @@ The stabilized state should answer:
 - what is decided now
 - what is explicitly not decided
 - what work closes each gap
+- which system boundary owns each mechanism or gap
 - what later ADR claims may be assessed
 - what must not be reopened without formal change control
 
@@ -70,14 +71,24 @@ Outcome:
 - a short ordered list of next gap work
 - no parallel reopening of unrelated decisions
 
-### Step 4: Targeted Later-Source Assessment
+### Step 4: Boundary Map Validation
+
+Validate `07-system-boundary-map.md` against the accepted baseline and gap register.
+
+Outcome:
+
+- settled mechanisms have owning boundaries
+- every gap has one primary owning boundary
+- later claims have a routing surface before classification
+
+### Step 5: Targeted Later-Source Assessment
 
 Assess ADR-006-R through ADR-009 only against gaps or explicit baseline disputes.
 
 Allowed outcomes:
 
-- consistent elaboration
-- open-gap closure candidate
+- consistent elaboration of a settled boundary
+- open-gap closure candidate for a named boundary-owned gap
 - deferred implementation/spec detail
 - new unauthorized claim
 - conflict with closed baseline
@@ -88,7 +99,7 @@ Outcome:
 - later claims are classified, not absorbed
 - baseline remains unchanged unless a formal change is accepted
 
-### Step 5: Platform Spec Skeleton
+### Step 6: Platform Spec Skeleton
 
 After baseline acceptance and gap triage, draft the first platform spec skeleton.
 
@@ -96,6 +107,7 @@ Inputs:
 
 - accepted `04-architecture-baseline-v0.md`
 - triaged `05-decision-gap-register.md`
+- validated `07-system-boundary-map.md`
 - `02-change-control.md`
 
 Do not generate the skeleton directly from ADRs or exploration files.
@@ -114,14 +126,16 @@ A production team at this stage would stabilize the baseline first, then move th
 
 1. Confirm the accepted architecture baseline.
 2. Decide which open items actually block engineering.
-3. Turn platform-spec details into spec sections.
-4. Turn implementation/tooling items into design docs or tickets.
-5. Turn policy gaps into product/operations decisions.
-6. Use later ADRs only as assessed inputs, not as superseding truth.
+3. Route settled mechanisms and gaps through system boundaries.
+4. Turn platform-spec details into spec sections.
+5. Turn implementation/tooling items into design docs or tickets.
+6. Turn policy gaps into product/operations decisions.
+7. Use later ADRs only as assessed inputs, not as superseding truth.
 
 ## Current Recommended Next Work
 
 1. Perform Step 1 baseline acceptance check.
 2. Perform Step 2 closure-path assignment in the gap register.
 3. Perform Step 3 priority triage.
-4. Only then assess ADR-006-R through ADR-009.
+4. Validate the system boundary map.
+5. Only then assess ADR-006-R through ADR-009.

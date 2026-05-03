@@ -98,6 +98,34 @@ Allowed classifications:
 - operational policy gap
 - later-source assessment gap
 
+## System Boundary Map
+
+Purpose:
+
+- route settled mechanisms, gaps, later claims, and future spec artifacts through explicit engineering boundaries
+
+Current file:
+
+- `07-system-boundary-map.md`
+
+Each boundary should include:
+
+- what it owns
+- what it does not own
+- inputs and outputs
+- how crossing the boundary is allowed
+- settled mechanisms
+- open/deferred items
+- forbidden coupling
+
+Rules:
+
+- it is generated from the closure overlay, architecture baseline, and gap register
+- viability primitive groupings may be used only as lineage/context, not authority
+- every gap should have one primary owning boundary
+- ADR-006-R through ADR-009 claims must be classified against boundaries before they can affect the baseline
+- boundary names are routing surfaces, not implementation module names
+
 ## Platform Spec Skeleton
 
 Purpose:
@@ -119,6 +147,7 @@ Expected sections:
 Rules:
 
 - generated from the accepted architecture baseline and gap register
+- routed through the system boundary map
 - not generated directly from ADRs or exploration files
 - should be stable enough for engineering review
 
