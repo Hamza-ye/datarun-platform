@@ -25,6 +25,7 @@ This folder formalizes that operating model.
 - `11-adr007-envelope-type-assessment.md`: later-source assessment of ADR-007 envelope-type closure and shape-based fact discrimination against the accepted baseline.
 - `12-adr008-reference-fields-assessment.md`: later-source assessment of ADR-008 reference-field contracts and reference-vs-referent classification against the accepted baseline.
 - `13-adr009-duality-rule-assessment.md`: later-source assessment of ADR-009 platform-fixed mechanism versus deployer-configured instance classification against the accepted baseline.
+- `14-pattern-inventory-walkthrough-assessment.md`: assessment of the historical pattern-inventory walkthrough as candidate material for Pattern Registry inventory and schema gaps.
 
 ## Current Standing
 
@@ -35,6 +36,7 @@ This folder formalizes that operating model.
 - `11-adr007-envelope-type-assessment.md` classifies ADR-007 as mostly consistent envelope-boundary elaboration: `type` remains the six-value processing axis, while domain/integrity facts are discriminated by `shape_ref`.
 - `12-adr008-reference-fields-assessment.md` classifies ADR-008 as mostly consistent reference-boundary elaboration: `*_ref` fields are envelope contracts, while referents keep separate lifecycle ownership and classification.
 - `13-adr009-duality-rule-assessment.md` classifies ADR-009 as mostly consistent platform/deployer-boundary elaboration: platform-fixed mechanisms and deployer-configured instances must be split during atomization.
+- `14-pattern-inventory-walkthrough-assessment.md` treats `28-pattern-inventory-walkthrough.md` as candidate material for pattern inventory/schema, not as authority or final pattern specification.
 - ADR-006-R through ADR-009 are quarantined assessment material until the baseline is accepted and gap-checked.
 
 ## Working Rule
