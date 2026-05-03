@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 34 ADR-005 session1 extracted
+Status: Iteration 35 ADR-005 session2 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -157,7 +157,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 34
+Current iteration: 35
 
 Processed sources:
 
@@ -210,10 +210,11 @@ Processed sources:
 - `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`
 - `docs/adrs/adr-004-configuration-boundary.md`
 - `docs/exploration/archive/19-adr5-session1-scoping.md`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md`
 
 Next source:
 
-- `docs/exploration/archive/20-adr5-session2-stress-test.md`
+- `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md`
 
 Ignored-as-source:
 
@@ -546,6 +547,16 @@ Current deferred candidates:
 - `Context Scope Directional Lean` — open Q5 lean toward bounded pre-resolved `context.*` for form expressions.
 - `Auto-Resolution Directional Lean` — open Q6 lean toward L3b server-side auto-resolution through explicit resolution events.
 - `ADR-005 Session 2 Charter` — open handoff to stress-test Q3-Q6 and run irreversibility filtering.
+- `ADR-005 Session 2 Stress-Test Boundary` — settled extraction rule from `docs/exploration/archive/20-adr5-session2-stress-test.md`; stress-test and irreversibility evidence, not final ADR closure.
+- `ADR-005 Composition Rule Candidate` — conditional high-confidence Q3 refinement: one subject-level pattern per activity, event-level patterns compose, approval sub-flows embed, cross-activity links use `activity_ref`, and shape-to-pattern mapping is unique.
+- `Source-Only Flag Cascade Candidate` — conditional high-confidence Q4 refinement: root-cause event only receives the flag, downstream dependency is projection-computed through source-chain traversal.
+- `ADR-005 Pre-Resolved Context Scope Candidate` — conditional high-confidence Q5 refinement: platform-fixed form-only `context.*` properties resolved at form open from local projection/configuration/assignment data.
+- `Auto-Resolution L3b Candidate` — conditional high-confidence Q6 refinement: server-side deadline-policy subtype that creates explicit resolution events or escalations.
+- `Flag Resolvability Classification Candidate` — conditional guardrail: platform-defined `auto_eligible` versus `manual_only` classifications with initial flag-type assignments.
+- `ADR-005 Irreversibility Classification Candidate` — conditional Session 2 permanence map: zero Tier 1 envelope items, one mild Tier 2 `transition_violation` flag category, all others Tier 3 strategies.
+- `Pattern Inventory Scope Boundary Candidate` — conditional scope split: ADR-005 owns pattern architecture; exact pattern inventory belongs to platform specification or implementation documentation.
+- `Advisory Command Validator Candidate` — conditional clarification: device warns, server flags, neither rejects stale offline workflow events.
+- `ADR-005 Session 3 Charter` — open handoff to structural coherence audit and ADR-005 writing.
 
 ## Iteration History
 
@@ -688,3 +699,7 @@ Processed `docs/adrs/adr-004-configuration-boundary.md` as the decided ADR-004 s
 ### Iteration 34
 
 Processed `docs/exploration/archive/19-adr5-session1-scoping.md` as ADR-005 Session 1 scoping and event-storm evidence. Created `09-adr5-state-progression-kernels.md`. Extracted the ADR-005 six-question decision surface, irreversibility prediction, projection-derived workflow state candidate, conditional rejection of `status_changed`, Pattern Registry candidate, `transition_violation` flag candidate, and open directional leans for independent pattern composition, source-only flag cascade, bounded `context.*`, and L3b-style auto-resolution. Kept Session 1 claims conditional/open because the source is superseded exploration and sends Q3-Q6 to Session 2 stress testing.
+
+### Iteration 35
+
+Processed `docs/exploration/archive/20-adr5-session2-stress-test.md` as ADR-005 Session 2 stress-test and irreversibility-filter evidence. Refined Session 1's Q3-Q6 open leans into conditional high-confidence candidates: five workflow composition rules, source-only flag cascade with source-chain traversal, bounded form-only `context.*` scope with seven platform-fixed properties, L3b-style auto-resolution, platform-defined flag resolvability classifications, and advisory command validation. Extracted the Session 2 permanence map: no Tier 1 envelope changes, no `status_changed` type addition, one mild Tier 2 item for `transition_violation`, and all other positions as Tier 3 strategies. Recorded the pattern-inventory scope boundary and Session 3 handoff to structural coherence audit before ADR-005 final extraction.

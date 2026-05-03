@@ -1,6 +1,6 @@
 # ADR-005 State Progression Kernel Staging
 
-Status: Iteration 34 staging
+Status: Iteration 35 staging
 
 This temporary staging file holds ADR-005 state-progression and workflow lineage kernels. It is not a final atomic document.
 
@@ -478,3 +478,412 @@ Next source must stress-test the composition model and classify permanence.
 Platform specification note:
 
 Use as the immediate handoff to `docs/exploration/archive/20-adr5-session2-stress-test.md`.
+
+## Kernel: ADR-005 Session 2 Stress-Test Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+`docs/exploration/archive/20-adr5-session2-stress-test.md` is ADR-005 Session 2 stress-test and irreversibility-filter evidence. It tests Session 1's Q3-Q6 directional leans, raises all six ADR-005 questions to high confidence, classifies ADR-005 permanence, and narrows Session 3 to coherence audit plus ADR writing. It does not make final ADR-005 decisions.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / supersession notice
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / opening purpose
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 7. Session 2 Summary`
+
+Closure basis:
+
+Settled as an extraction boundary.
+
+Scope:
+
+Applies to all kernels extracted from ADR-005 Session 2.
+
+Non-goals:
+
+Does not replace ADR-005 final decision text and does not freeze exact workflow pattern inventory.
+
+Forbidden interpretations:
+
+- Do not treat Session 2 `initial strategy` classifications as ADR-settled architecture.
+- Do not treat the expected artifact path in Session 2 prose as changing the archive scan cursor when the archived Session 3 file exists under `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md`.
+
+Open edges:
+
+Session 3 must audit structural coherence before ADR-005 final extraction.
+
+Platform specification note:
+
+Use as high-confidence stress-test lineage before ADR-005 closure.
+
+## Kernel: ADR-005 Composition Rule Candidate
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+ADR-005 Session 2 refines workflow composition into five rules: each activity has at most one subject-level pattern for a subject; event-level patterns such as review and approval compose freely; subject-level patterns may embed approval sub-flows scoped to specific submission events; cross-activity linking uses `activity_ref` or payload references rather than shared patterns; and each shape-to-pattern mapping is unique within an activity.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 1.3 Composition Rules -- Resolution`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 1.4 Q3 Resolution`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 7. Session 2 Summary`
+
+Closure basis:
+
+Conditional high-confidence Session 2 position pending Session 3 coherence audit and ADR-005 verification.
+
+Scope:
+
+Applies to subject-level state, event-level state, embedded approval flows, activity boundaries, shape mapping, deploy-time validation, and projection state keys.
+
+Non-goals:
+
+Does not define exact pattern schemas or all initial pattern skeletons.
+
+Forbidden interpretations:
+
+- Do not allow two competing subject-level lifecycle state machines for the same subject within one activity.
+- Do not treat cross-activity workflow as one shared pattern spanning activities.
+- Do not let two patterns in the same activity claim the same shape.
+
+Open edges:
+
+Session 3 must verify these rules compose with ADR-001 through ADR-004 and with the full ADR-005 position set.
+
+Platform specification note:
+
+Use as the refined Q3 candidate replacing the broader Session 1 independent-composition lean.
+
+## Kernel: Source-Only Flag Cascade Candidate
+
+Status: Conditional
+Kind: algorithm
+
+Specification statement:
+
+ADR-005 Session 2 confirms source-only flagging for workflow cascades. When an upstream event is flagged after downstream events already exist, only the root-cause event receives the flag. Downstream events remain unflagged, while projections compute and display their dependency on a flagged source through source-chain traversal.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 2. Q4 -- Flag Cascade Behavior`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 2.4 Edge Case: Double-Retroactive Flagging`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 2.5 Q4 Resolution`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 7. Session 2 Summary`
+
+Closure basis:
+
+Conditional high-confidence Session 2 position pending Session 3 coherence audit and ADR-005 verification.
+
+Scope:
+
+Applies to root-cause flags, downstream trigger-created events, retroactive flag discovery, projection rendering, source-chain traversal, and resolution effects.
+
+Non-goals:
+
+Does not define UI copy or final projection schema.
+
+Forbidden interpretations:
+
+- Do not multiply flags across downstream events merely because they derive from a flagged source.
+- Do not hide downstream dependence on flagged roots; the projection must surface source-chain flag state.
+- Do not retroactively invalidate trigger outputs that were valid when created.
+
+Open edges:
+
+ADR-005 must verify whether source-chain traversal is carried as projection capability or specification detail.
+
+Platform specification note:
+
+Use as the refined Q4 candidate replacing the Session 1 source-only directional lean.
+
+## Kernel: ADR-005 Pre-Resolved Context Scope Candidate
+
+Status: Conditional
+Kind: contract
+
+Specification statement:
+
+ADR-005 Session 2 refines `context.*` into a pre-resolved, read-only, platform-fixed form-expression scope. Initial properties are `context.subject_state`, `context.subject_pattern`, `context.activity_stage`, `context.actor.role`, `context.actor.scope_name`, `context.days_since_last_event`, and `context.event_count`. Values are resolved from local projection, configuration, and assignment data when the form opens and remain static during form fill.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 3. Q5 -- context.* Expression Scope`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 3.3 What Properties Should Be Available?`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 3.6 Q5 Resolution`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 7. Session 2 Summary`
+
+Closure basis:
+
+Conditional high-confidence Session 2 position pending Session 3 coherence audit and ADR-005 verification.
+
+Scope:
+
+Applies to L2 form expressions, form-open context resolution, workflow-aware forms, actor context, local subject projections, and platform-fixed expression namespaces.
+
+Non-goals:
+
+Does not expose dynamic joins, other subjects' state, aggregate values, arbitrary projection fields, payload fields from other events, or trigger-expression context.
+
+Forbidden interpretations:
+
+- Do not let deployers define arbitrary `context.*` properties.
+- Do not evaluate `context.*` through live queries during form fill.
+- Do not make `context.*` available to server-side trigger expressions under this candidate.
+
+Open edges:
+
+ADR-005 must verify the property list and governance model before final closure.
+
+Platform specification note:
+
+Use as the refined Q5 candidate and as the ADR-005-owned successor to the ADR-004 `context.*` deferral.
+
+## Kernel: Auto-Resolution L3b Candidate
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+ADR-005 Session 2 confirms auto-resolution as an L3b deadline-policy subtype. Auto-resolution policies watch eligible flags and later domain events over a configured time window, then create explicit auditable resolution events or escalate/manual-review outcomes. The mechanism is server-side and reuses deadline-check infrastructure.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 4. Q6 -- Auto-Resolution and State Machine Integration`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 4.2 Scenario Walk-through: Transition Violation Auto-Resolution`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 4.5 Q6 Resolution`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 7. Session 2 Summary`
+
+Closure basis:
+
+Conditional high-confidence Session 2 position pending Session 3 coherence audit and ADR-005 verification.
+
+Scope:
+
+Applies to domain conflict resolution automation, transition violation resolution, server-side delayed evaluation, deadline windows, watched events, resolution events, and escalation/manual-review fallbacks.
+
+Non-goals:
+
+Does not allow device-side auto-resolution or silent flag dismissal.
+
+Forbidden interpretations:
+
+- Do not auto-resolve without creating explicit resolution events.
+- Do not bypass detect-before-act or trigger depth limits.
+- Do not let deployers auto-resolve flag types that the platform marks manual-only.
+
+Open edges:
+
+ADR-005 must verify how resolution events are represented and how this interacts with final flag semantics.
+
+Platform specification note:
+
+Use as the refined Q6 candidate and ADR-005-owned closure candidate for ADR-004's domain-conflict-resolution automation deferral.
+
+## Kernel: Flag Resolvability Classification Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-005 Session 2 introduces platform-defined flag resolvability classifications. `auto_eligible` flag types may have deployer-configured auto-resolution policies; `manual_only` flag types reject auto-resolution at deploy time. Initial classifications mark `transition_violation` and `stale_reference` as auto-eligible, while `scope_violation`, `identity_conflict`, and `concurrent_state_change` remain manual-only.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 4.4 Adversarial Test: Auto-Resolution Overreach`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 4.5 Q6 Resolution`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 5.1 Classification`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### New artifacts from Session 2`
+
+Closure basis:
+
+Conditional high-confidence Session 2 position pending Session 3 coherence audit and ADR-005 verification.
+
+Scope:
+
+Applies to platform flag vocabulary governance, deploy-time validation of auto-resolution policies, security-relevant flag handling, and initial flag classification.
+
+Non-goals:
+
+Does not settle the final complete flag taxonomy or ADR-006 flag semantics.
+
+Forbidden interpretations:
+
+- Do not let deployers change a flag type from manual-only to auto-eligible.
+- Do not auto-resolve scope, identity, or concurrent-state flags under the initial classification.
+- Do not treat resolvability as stored event data under this candidate.
+
+Open edges:
+
+Later ADR-005 and ADR-006 extraction must verify whether this classification is carried forward, refined, or superseded.
+
+Platform specification note:
+
+Use as the auto-resolution guardrail candidate.
+
+## Kernel: ADR-005 Irreversibility Classification Candidate
+
+Status: Conditional
+Kind: conditional-validity-rule
+
+Specification statement:
+
+ADR-005 Session 2 classifies ADR-005 as having no Tier 1 envelope-touching positions, one mild Tier 2 strategy-protecting item in the `transition_violation` flag category, and all other state-progression positions as Tier 3 strategies. The event envelope remains unchanged and the structural event type vocabulary remains at six types.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 5. Irreversibility Filter`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 5.1 Classification`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 5.2 Irreversibility Summary`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 7. Session 2 Summary`
+
+Closure basis:
+
+Conditional Session 2 irreversibility classification pending Session 3 coherence audit and ADR-005 verification.
+
+Scope:
+
+Applies to envelope stability, structural type vocabulary, pattern registry, workflow projection strategy, flag cascade behavior, `context.*`, auto-resolution, `transition_violation`, and flag resolvability classification.
+
+Non-goals:
+
+Does not make final ADR closure and does not prove future ADRs cannot add types or flag categories.
+
+Forbidden interpretations:
+
+- Do not add envelope fields from ADR-005 Session 2.
+- Do not add `status_changed` from ADR-005 Session 2.
+- Do not inflate projection/configuration/server-side strategy decisions into stored-event constraints.
+
+Open edges:
+
+Session 3 must validate structural coherence before ADR-005 final extraction.
+
+Platform specification note:
+
+Use as ADR-005 permanence guidance.
+
+## Kernel: Pattern Inventory Scope Boundary Candidate
+
+Status: Conditional
+Kind: configuration-boundary
+
+Specification statement:
+
+ADR-005 Session 2 separates pattern architecture from pattern inventory. ADR-005 owns the Pattern Registry model, composition rules, state-as-projection, and interactions with flags and expressions. Exact initial pattern skeletons and formal pattern schemas belong to platform specification or implementation documentation as initial strategies and examples, not frozen ADR commitments.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 6.1 The Pattern Inventory -- Scope Decision`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### New artifacts from Session 2`
+
+Closure basis:
+
+Conditional Session 2 scope boundary pending Session 3 coherence audit and ADR-005 verification.
+
+Scope:
+
+Applies to Pattern Registry architecture, pattern examples, initial pattern inventory, formal schemas, and rest-state platform-spec consolidation.
+
+Non-goals:
+
+Does not decide which exact pattern skeletons ship initially.
+
+Forbidden interpretations:
+
+- Do not freeze example workflow skeletons as final ADR commitments.
+- Do not move the Pattern Registry architectural model out of ADR-005 scope.
+
+Open edges:
+
+ADR-005 must verify this ADR-versus-specification boundary.
+
+Platform specification note:
+
+Use to avoid conflating architectural closure with inventory documentation.
+
+## Kernel: Advisory Command Validator Candidate
+
+Status: Conditional
+Kind: interaction-rule
+
+Specification statement:
+
+ADR-005 Session 2 clarifies the Command Validator for workflow transitions: on device it validates against local projection and configured patterns to warn users but does not block event creation; on sync, the server validates the same transition rules and generates `transition_violation` flags where appropriate. The validator is advisory on device and a flag generator on server, never a rejection gate for stale offline work.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 6.2 Command Validator Revisited`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 7. Session 2 Summary`
+
+Closure basis:
+
+Conditional Session 2 clarification pending Session 3 coherence audit and ADR-005 verification.
+
+Scope:
+
+Applies to offline command validation, workflow transition warnings, sync-time validation, server flag generation, and append-only event acceptance.
+
+Non-goals:
+
+Does not define final validator UX or warning override interface.
+
+Forbidden interpretations:
+
+- Do not reject event creation because local projection says a transition is invalid.
+- Do not treat the Command Validator as a hard state-machine enforcement primitive.
+- Do not skip server-side validation merely because the device warned or did not warn.
+
+Open edges:
+
+ADR-005 must verify the validator role with final workflow state and flag semantics.
+
+Platform specification note:
+
+Use as workflow validation lineage tied to projection-derived state.
+
+## Kernel: ADR-005 Session 3 Charter
+
+Status: Open
+Kind: open-question
+
+Specification statement:
+
+ADR-005 Session 3 must perform structural coherence audit across ADR-005 Session 1 and Session 2 positions and ADR-001 through ADR-004, then support final ADR-005 writing. Session 2 narrows Session 3 away from full adversarial stress testing because ADR-005 has zero Tier 1 envelope items and one mild Tier 2 item.
+
+Source basis:
+
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `### 5.3 Stress Test Scope`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md` / `## 8. Session 3 Charter`
+
+Closure basis:
+
+Open handoff to ADR-005 Session 3 and final ADR-005 verification.
+
+Scope:
+
+Applies to next-source processing, structural coherence checks, and ADR-005 final extraction.
+
+Non-goals:
+
+Does not perform the coherence audit or final ADR extraction.
+
+Forbidden interpretations:
+
+- Do not skip Session 3 coherence merely because Session 2 raised confidence to HIGH.
+- Do not treat Session 2 as final ADR-005 closure.
+
+Open edges:
+
+Next source is `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md`.
+
+Platform specification note:
+
+Use as the immediate handoff to ADR-005 Session 3.
