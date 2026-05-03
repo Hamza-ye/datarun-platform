@@ -1,6 +1,6 @@
 # Decision Gap Register
 
-Status: Draft from Architecture Baseline v0
+Status: Accepted gap register from Architecture Baseline v0
 
 This register lists items that remain unresolved after the ADR-001 through ADR-005 baseline. It is not a backlog and not an implementation plan. Its purpose is to prevent later documents from quietly closing gaps without classification and review.
 

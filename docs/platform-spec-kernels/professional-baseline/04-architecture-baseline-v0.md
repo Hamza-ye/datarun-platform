@@ -1,6 +1,6 @@
 # Architecture Baseline v0
 
-Status: Draft baseline from ADR-001 through ADR-005 closure
+Status: Accepted baseline from ADR-001 through ADR-005 closure
 
 This document is the current engineering-facing architecture baseline. It is generated from `../10-adr1-5-rest-state-closure-register.md`, not directly from ADR prose. It is not a final platform specification and does not process ADR-006-R through ADR-009.
 

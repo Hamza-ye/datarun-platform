@@ -134,8 +134,6 @@ A production team at this stage would stabilize the baseline first, then move th
 
 ## Current Recommended Next Work
 
-1. Perform Step 1 baseline acceptance check.
-2. Perform Step 2 closure-path assignment in the gap register.
-3. Perform Step 3 priority triage.
-4. Validate the system boundary map.
-5. Only then assess ADR-006-R through ADR-009.
+1. Validate the system boundary map against `08-baseline-acceptance-check.md`, `04-architecture-baseline-v0.md`, `05-decision-gap-register.md`, and `09-identity-boundary-control.md`.
+2. Correct the boundary map only if ownership, forbidden coupling, or gap routing is inconsistent with the accepted baseline.
+3. Only then assess ADR-006-R through ADR-009 against the stabilized gaps and boundaries.

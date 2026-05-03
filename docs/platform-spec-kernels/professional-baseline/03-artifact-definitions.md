@@ -167,6 +167,57 @@ Rules:
 - do not use it as source evidence for platform behavior
 - update it only when the operating process changes
 
+## Baseline Acceptance Check
+
+Purpose:
+
+- record whether the ADR-001 through ADR-005 baseline is stable enough to build from
+
+Current file:
+
+- `08-baseline-acceptance-check.md`
+
+Expected content:
+
+- accepted closed baseline items
+- accepted open gaps
+- accepted rejected paths
+- suspicious or disputed items
+- immediate next order
+
+Rules:
+
+- it is a sign-off artifact, not another extraction pass
+- it is based only on the closure register, architecture baseline, and decision gap register
+- it may prioritize accepted gaps, but it must not close them
+
+## Identity Boundary Control
+
+Purpose:
+
+- prevent ADR-002's broad identity/conflict decision shape from becoming broad implementation coupling
+
+Current file:
+
+- `09-identity-boundary-control.md`
+
+Expected content:
+
+- accepted ADR-002 core
+- reference-category interpretation
+- responsibility split by owning boundary
+- identity-owned and identity-forbidden areas
+- dependency-aware ADR boundary checks
+- implementation guardrails
+- open coupling risks
+
+Rules:
+
+- it must not re-decide ADR-002
+- it must preserve ADR-003 through ADR-005 assumptions
+- it must separate reference protocol from lifecycle ownership
+- it must keep process, assignment, authority, conflict resolution, and reporting outside subject-lineage ownership
+
 ## Final Atomic Kernel Files
 
 Purpose:

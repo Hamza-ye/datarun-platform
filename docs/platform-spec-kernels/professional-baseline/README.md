@@ -19,11 +19,14 @@ This folder formalizes that operating model.
 - `05-decision-gap-register.md`: unresolved post-baseline gaps classified before later ADR assessment or implementation planning.
 - `06-baseline-stabilization-plan.md`: ordered stabilization steps for accepting the baseline, assigning closure paths, triaging gaps, and only then assessing later ADRs.
 - `07-system-boundary-map.md`: engineering boundary routing map for assigning settled mechanisms, gaps, and later claims to one primary system boundary.
+- `08-baseline-acceptance-check.md`: accepted sign-off for ADR-001 through ADR-005 baseline, including priority tiers for accepted gaps.
+- `09-identity-boundary-control.md`: dependency-aware overlay that prevents ADR-002's broad identity/conflict document shape from becoming broad implementation coupling.
 
 ## Current Standing
 
 - ADR-001 through ADR-005 are the current extracted closure baseline.
 - `../10-adr1-5-rest-state-closure-register.md` is the compact closure overlay.
+- `08-baseline-acceptance-check.md` accepts the baseline as stable enough for boundary validation, targeted later-source assessment, and platform-spec skeleton work.
 - ADR-006-R through ADR-009 are quarantined assessment material until the baseline is accepted and gap-checked.
 
 ## Working Rule
@@ -32,4 +35,4 @@ Do not continue broad extraction when the next problem is baseline clarity. Use 
 
 ## Current Next Step
 
-Follow `06-baseline-stabilization-plan.md`: accept or correct `04-architecture-baseline-v0.md`, confirm closure paths and priorities in `05-decision-gap-register.md`, validate `07-system-boundary-map.md`, then assess ADR-006-R through ADR-009 only against the stabilized gaps and boundaries.
+Follow `06-baseline-stabilization-plan.md`: validate `07-system-boundary-map.md` against the accepted baseline, gap priorities, and identity boundary-control overlay, then assess ADR-006-R through ADR-009 only against the stabilized gaps and boundaries.
