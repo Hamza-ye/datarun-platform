@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 38 ADR-001 decision check extracted
+Status: Iteration 39 ADR-001 through ADR-005 closure overlay created
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -29,8 +29,8 @@ Forbidden for this extraction:
 Special ADR handling:
 
 - `docs/adrs/adr-002-addendum-type-vocabulary.md` is not authoritative. It may be treated only as drift-history context where a later authoritative ADR absorbs, supersedes, or restates a point.
-- `docs/adrs/adr-006-flag-semantics.md` is superseded by `docs/adrs/adr-006-flag-semantics-R.md`. Use ADR-006-R as the authoritative source for flag semantics. ADR-006 text is usable only where ADR-006-R carries it forward.
-- ADR-006 through ADR-009 may contain valid points, but their convergence/classification style requires stricter extraction than ADR-001 through ADR-005. They do not supersede ADR-001 through ADR-005 during this extraction. Treat ADR-006 through ADR-009 claims as valid only where they address open points not already closed by ADR-001 through ADR-005, or where they are consistent elaborations of already closed kernels. If they conflict with closed kernels, classify the later claim as contradicted/rejected/contextual rather than silently revising the closure baseline.
+- `docs/adrs/adr-006-flag-semantics-R.md` may supersede `docs/adrs/adr-006-flag-semantics.md` only inside the ADR-006 revision lineage. It is not authoritative over ADR-001 through ADR-005 and must not be used to redefine already closed decisions.
+- ADR-006 through ADR-009 are post-convergence assessment material, not closure authority for this extraction. They may contain valid points, but they must be assessed against the ADR-001 through ADR-005 closure baseline after that baseline rests cleanly. Treat ADR-006 through ADR-009 claims as valid only where they address explicitly open points not already closed by ADR-001 through ADR-005, where they are consistent elaborations of already closed kernels, or where they raise a valid dispute that is explicitly classified for reconsideration. If they conflict with closed kernels, classify the later claim as contradicted/rejected/contextual rather than silently revising the closure baseline.
 
 Ground-truth document handling:
 
@@ -70,6 +70,7 @@ Rest state means:
 - `07-adr3-authorization-sync-kernels.md`: temporary staging file for ADR-003 authorization and selective-sync lineage kernels.
 - `08-adr4-configuration-boundary-kernels.md`: temporary staging file for ADR-004 configuration-boundary lineage kernels.
 - `09-adr5-state-progression-kernels.md`: temporary staging file for ADR-005 state progression and workflow lineage kernels.
+- `10-adr1-5-rest-state-closure-register.md`: temporary closure overlay for ADR-001 through ADR-005 rest-state consolidation and ADR-006+ quarantine.
 
 Final atomic files must not be created until rest state is reached.
 
@@ -158,7 +159,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 38
+Current iteration: 39
 
 Processed sources:
 
@@ -218,7 +219,7 @@ Processed sources:
 
 Next source:
 
-- `docs/adrs/adr-006-flag-semantics-R.md`
+- No extraction source until the ADR-001 through ADR-005 closure overlay is validated. The next quarantined assessment source remains `docs/adrs/adr-006-flag-semantics-R.md`, but it must not be processed as closure authority.
 
 Ignored-as-source:
 
@@ -227,6 +228,10 @@ Ignored-as-source:
 ## Conflict Log
 
 No blocking conflicts recorded yet.
+
+Closure overlay note:
+
+- Iteration 39 created `docs/platform-spec-kernels/10-adr1-5-rest-state-closure-register.md` as a compact ADR-001 through ADR-005 rest-state overlay. It does not replace staging files `02` through `09`, does not create final atomic platform-spec files, and does not use ADR-006-R through ADR-009 as closure sources.
 
 Rest-state merge note:
 
@@ -597,6 +602,7 @@ Current deferred candidates:
 - `ADR-005 Explicit Non-Decisions` — open deferral set for pattern inventory/schema, projection optimization, traversal depth, caching, authoring UX, reporting, and platform-spec consolidation.
 - `ADR-005 Accepted Risk Set` — settled accepted risks and revisit triggers for projection cost, pattern coverage, source-only visibility, auto-resolution audit, and form/projection dependency.
 - `ADR-005 Reconciliation Result` — settled closure result for ADR-005 decision surface and handoff into later-source judgment.
+- `ADR-001 To ADR-005 Rest-State Closure Register` — closure overlay that compacts settled kernels, open questions, rejected alternatives, deferred implementation/spec details, and ADR-006+ quarantine rules without rewriting staging evidence.
 
 ## Iteration History
 
@@ -755,3 +761,7 @@ Processed `docs/adrs/adr-005-state-progression.md` as the final ADR-005 decision
 ### Iteration 38
 
 Processed `docs/adrs/adr-001-offline-data-model.md` as the final ADR-001 decision check after ADR-005 closure. Confirmed the audit-normalized ADR-001 result: immutable typed events are the foundational append-only event-log source of truth; every state change enters through the event store; projections and views are derived and rebuilt from events rather than patched; events, subjects, and records use client-generated UUIDs; sync transfers unseen immutable events and is idempotent, append-only, order-independent, and scope-filtered; and ADR-001 commits envelope expression requirements for identity, type, payload, and timestamp without deciding the final field schema. Reconciled the ADR-001 deferred selection pressure into rejected snapshot-primary/action-log-primary storage alternatives, accepted projection/schema/developer risks, projection rebuild scope bounded by ADR-003 sync scope, and explicit downstream deferrals to ADR-002 through ADR-005. The ADR-001 through ADR-005 closure baseline is now ready for ADR-006-R evaluation, with ADR-006 through ADR-009 still unable to supersede closed earlier ADR kernels.
+
+### Iteration 39
+
+Created `docs/platform-spec-kernels/10-adr1-5-rest-state-closure-register.md` as a compact closure overlay for ADR-001 through ADR-005. The overlay represents settled platform kernels, open questions, rejected alternatives, deferred implementation/specification details, and a quarantine/assessment lane for ADR-006-R through ADR-009. It does not process a new source, does not rewrite staging files `02` through `09`, does not create final atomic platform-spec files, and does not use ADR-006-R through ADR-009 as closure authority. Updated ADR-006+ handling so ADR-006-R only supersedes ADR-006 inside the ADR-006 revision lineage and all ADR-006 through ADR-009 claims must be assessed against the ADR-001 through ADR-005 closure baseline after that baseline rests cleanly.

@@ -54,6 +54,7 @@ The working draft has been split for context control. These files are temporary 
 - `07-adr3-authorization-sync-kernels.md`: ADR-003 authorization and selective-sync lineage kernels.
 - `08-adr4-configuration-boundary-kernels.md`: ADR-004 configuration-boundary lineage kernels.
 - `09-adr5-state-progression-kernels.md`: ADR-005 state progression and workflow lineage kernels.
+- `10-adr1-5-rest-state-closure-register.md`: compact ADR-001 through ADR-005 rest-state closure overlay and ADR-006+ quarantine lane.
 
 New kernels should be added to the smallest relevant staging file. Final atomic files must not be created until rest state is reached.
 
