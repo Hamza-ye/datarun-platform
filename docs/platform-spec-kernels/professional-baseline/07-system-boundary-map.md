@@ -14,12 +14,17 @@ Primary baseline inputs:
 - `04-architecture-baseline-v0.md`
 - `05-decision-gap-register.md`
 
+Accepted validation overlays:
+
+- `08-baseline-acceptance-check.md`
+- `09-identity-boundary-control.md`
+
 Lineage context only:
 
 - `../../viability-assessment.md`
 - `../00-extraction-state.md` Iteration 9
 
-The viability assessment identified early primitive groupings and architecture pressures, but Iteration 9 preserved them as narrowing context, not final authority. The boundaries below are therefore derived from ADR-001 through ADR-005 closure, with viability used only to check that the original pressure areas still have a place to land.
+The viability assessment identified early primitive groupings and architecture pressures, but Iteration 9 preserved them as narrowing context, not final authority. The boundaries below are therefore derived from ADR-001 through ADR-005 closure, with viability used only to check that the original pressure areas still have a place to land. The acceptance check and identity boundary control overlay constrain this map before it is used for later-source assessment or platform-spec atomization.
 
 ## Boundary Rules
 
@@ -146,36 +151,50 @@ Forbidden coupling:
 
 Owns:
 
-- client-generated subject and record identity for offline creation
+- subject identity continuity for referents with subject-lineage semantics
 - subject alias/projection identity evolution
 - corrective split behavior
 - lineage acyclicity
 - raw-reference preservation for conflict and authorization checks
+- subject-lineage facts needed by conflict and audit consumers
 
 Does not own:
 
+- actor provisioning or authentication
 - actor assignment or access scope
 - device identity as actor identity
+- assignment validity, role, scope, or authority
+- process state machines for shipments, campaigns, cases, reviews, or transfer chains
+- pending-match workflows
+- conflict resolution lifecycle
+- general flag semantics
+- deployer-configured domain matching policy
 - workflow state progression
 - deployer shape ownership
+- reporting projections as source of identity truth
 
 Inputs:
 
 - subject references written into events
 - merge/split/corrective split operations
 - raw historical references
+- typed reference values from the event envelope
 
 Outputs:
 
 - subject identity projection
 - alias lineage
-- conflict inputs for duplicate or stale identity cases
+- original and resolved subject-reference facts
+- lineage state such as merged, split, archived, or stale-reference status
+- conflict inputs for duplicate or stale identity cases, without owning domain-specific matching policy
 
 Crosses boundary through:
 
 - event original-reference contract
+- typed reference contract
 - authorization original-subject check
 - conflict detection before downstream action
+- read-only lineage query/projection contract
 
 Settled mechanisms:
 
@@ -183,17 +202,22 @@ Settled mechanisms:
 - historical event references are not rewritten after identity evolution
 - lineage remains acyclic
 - merge/split operations are online-only where the baseline requires validation
+- raw references are preserved before alias projection for conflict and authorization checks
 
 Open / deferred:
 
-- shared-device actor scope where device identity and actor identity interact operationally
+- secondary input to shared-device actor scope where device identity and actor identity interact operationally
 - user-facing identity resolution UX
+- duplicate-detection policy beyond platform-fixed subject-lineage facts
 
 Forbidden coupling:
 
 - server-allocated identifiers for offline event/subject/record creation
 - rewriting historical event references to express identity evolution
 - using post-merge alias projection as the authorization target for historical events
+- treating actor, assignment, or process references as subject-lineage ownership
+- making shipment, campaign, case, review, or transfer matching a core subject-lineage feature
+- making identity own general flag or conflict-resolution lifecycle
 
 ## Boundary: Assignment / Authority / Sync
 
@@ -336,10 +360,12 @@ Owns:
 - Pattern Registry as platform-owned workflow primitive
 - invalid-transition handling under ADR-005
 - unresolved flagged-event effect on workflow state-machine evaluation
+- process identity and pending-match routing where owned by workflow/process patterns
 
 Does not own:
 
 - event-log canonical truth
+- subject lineage lifecycle
 - general flag semantics outside ADR-005 workflow interactions
 - deployer structural event vocabulary
 - reporting aggregation semantics
@@ -348,12 +374,16 @@ Inputs:
 
 - immutable event sequences
 - pattern definitions
+- process references attached to events
+- unresolved-reference facts from identity/lineage projections
 - source flags and resolution state
 - bounded `context.*` form-expression values
 
 Outputs:
 
 - derived workflow state
+- process-pattern projections
+- pending-match workflow state where later specification includes it
 - timeline visibility behavior for flagged events
 - workflow-specific transition violation flags
 - projection state after accepted resolution
@@ -378,6 +408,7 @@ Open / deferred:
 - exact Pattern Registry inventory
 - pattern skeletons
 - formal pattern schema format
+- process-identity and pending-match specification where required by workflow/process patterns
 - workflow-aware reporting and aggregation
 - projection performance/caching details
 
@@ -386,6 +417,7 @@ Forbidden coupling:
 - `status_changed` as a structural event type
 - `current_state` as canonical event state
 - `pattern_ref` as an event-envelope structural reference
+- process lifecycle or pending match stored as subject-lineage identity state
 - trigger expressions gaining `context.*`
 - dynamic joins, arbitrary projections, aggregates, functions, or live updates through `context.*`
 
@@ -399,11 +431,13 @@ Owns:
 - workflow flag resolvability classification
 - L3b auto-resolution boundary for eligible workflow cases
 - auto-resolution actor attribution
+- surfaced conflict/resolution lifecycle routing where later closed or explicitly assessed
 
 Does not own:
 
 - identity conflict detection itself
 - authorization checks themselves
+- subject lineage facts
 - general ADR-006+ flag semantics
 - all future flag category creation
 - reporting UX for every flag class
@@ -411,6 +445,7 @@ Does not own:
 Inputs:
 
 - source events or source-chain references
+- detector results from identity, authorization, or workflow boundaries
 - workflow transition validation result
 - resolution events
 - auto-resolution policy identity
@@ -418,6 +453,7 @@ Inputs:
 Outputs:
 
 - root/source flags
+- conflict/resolution lifecycle projections for surfaced issues
 - projected contamination/derived flag effects
 - accepted resolution effects
 - `system:auto_resolution/{policy_id}` attribution for eligible auto-resolution events
@@ -425,6 +461,7 @@ Outputs:
 Crosses boundary through:
 
 - detect-before-act contract from conflict/authorization boundaries
+- raw-reference and lineage-fact contract from identity boundaries
 - projection workflow-state exclusion contract
 - resolution event contract
 
@@ -448,6 +485,7 @@ Forbidden coupling:
 
 - storing every downstream projected flag as a canonical source flag
 - merging ADR-005 workflow flag behavior into general flag semantics without later assessment
+- making identity, authorization, or workflow projection own the flag lifecycle for surfaced issues
 - rejecting invalid workflow transitions instead of accepting and flagging
 - treating ADR-006+ as automatic authority over ADR-001 through ADR-005 flag-adjacent decisions
 
@@ -646,7 +684,7 @@ Each known gap has one primary owning boundary. Secondary boundaries may be affe
 | Domain-agnostic proof gap | Configuration | Projection / Workflow State; Reporting / Aggregation | Product validation; formal decision only if new primitives are required |
 | Low-end device scale risk | Local Data Lifecycle | Event Log / Storage; Projection / Workflow State | Implementation/tooling design; formal decision if lifecycle changes canonical constraints |
 | ADR-006-R through ADR-009 assessment | Flag / Resolution | All touched boundaries | Later-source assessment |
-| General flag semantics | Flag / Resolution | Conflict/authorization/projection/reporting boundaries as affected | Later-source assessment; formal decision for baseline changes |
+| General flag semantics | Flag / Resolution | Identity / Lineage; Assignment / Authority / Sync; Projection / Workflow State; Reporting / Aggregation | Later-source assessment; formal decision for baseline changes |
 
 ## Post-ADR Assessment Routing
 
