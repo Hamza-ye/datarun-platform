@@ -207,6 +207,7 @@ Settled mechanisms:
 Open / deferred:
 
 - secondary input to shared-device actor scope where device identity and actor identity interact operationally
+- alias-cycle enforcement, read-side behavior, and resolution semantics
 - user-facing identity resolution UX
 - duplicate-detection policy beyond platform-fixed subject-lineage facts
 
@@ -476,6 +477,7 @@ Settled mechanisms:
 Open / deferred:
 
 - general flag semantics
+- `cycle_violation` flag-category acceptance if alias-cycle semantics are formally closed
 - source-chain traversal depth limits
 - auto-resolution authoring UX
 - auto-resolution monitoring/reporting surface
@@ -663,6 +665,7 @@ Each known gap has one primary owning boundary. Secondary boundaries may be affe
 | Domain conflict automation outside workflow | Flag / Resolution | Projection / Workflow State; Configuration | Formal architecture decision or later-source assessment |
 | Subject-based scope and auditor access | Assignment / Authority / Sync | Reporting / Aggregation; Local Data Lifecycle | Formal architecture decision or operational policy |
 | Shared device actor scope | Assignment / Authority / Sync | Identity / Lineage; Event Envelope / Schema | Formal architecture decision or implementation/tooling design |
+| Alias-cycle enforcement and resolution semantics | Identity / Lineage | Flag / Resolution; Projection / Workflow State; Event Log / Storage | Formal architecture decision before identity/flag atomization if in scope |
 | Assessment visibility | Assignment / Authority / Sync | Reporting / Aggregation | Formal architecture decision or operational policy |
 | Sensitive-subject policy beyond shape/activity sensitivity | Configuration | Assignment / Authority / Sync; Local Data Lifecycle | Operational policy; formal decision if access or lifecycle semantics change |
 | Grace-period policy | Assignment / Authority / Sync | Flag / Resolution; Projection / Workflow State | Formal architecture decision or operational policy |

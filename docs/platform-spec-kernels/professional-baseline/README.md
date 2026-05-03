@@ -21,12 +21,14 @@ This folder formalizes that operating model.
 - `07-system-boundary-map.md`: engineering boundary routing map for assigning settled mechanisms, gaps, and later claims to one primary system boundary.
 - `08-baseline-acceptance-check.md`: accepted sign-off for ADR-001 through ADR-005 baseline, including priority tiers for accepted gaps.
 - `09-identity-boundary-control.md`: dependency-aware overlay that prevents ADR-002's broad identity/conflict document shape from becoming broad implementation coupling.
+- `10-adr006r-flag-semantics-assessment.md`: later-source assessment of ADR-006-R flag-semantics and alias-cycle claims against the accepted baseline and validated boundaries.
 
 ## Current Standing
 
 - ADR-001 through ADR-005 are the current extracted closure baseline.
 - `../10-adr1-5-rest-state-closure-register.md` is the compact closure overlay.
 - `08-baseline-acceptance-check.md` accepts the baseline as stable enough for boundary validation, targeted later-source assessment, and platform-spec skeleton work.
+- `10-adr006r-flag-semantics-assessment.md` classifies ADR-006-R S1 through S4 as mostly compatible general-flag-semantics candidates, while routing ADR-006-R S5 alias-cycle behavior as a formal decision gap before identity/flag atomization if in scope.
 - ADR-006-R through ADR-009 are quarantined assessment material until the baseline is accepted and gap-checked.
 
 ## Working Rule

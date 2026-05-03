@@ -112,6 +112,35 @@ Priority:
 - P1 if shared devices are required for initial deployments.
 - P3 if deployment model assumes one actor session per device.
 
+### Alias-Cycle Enforcement And Resolution Semantics
+
+Classification: Architecture decision gap
+
+Affected baseline:
+
+- Client-generated identity and lineage preservation
+- Detect-before-act and accept-and-flag discipline
+- Closed ADR-005 workflow flag interactions and open general flag semantics
+
+Why open:
+
+ADR-001 through ADR-005 close subject-lineage acyclicity and online-only merge/split validation where required. ADR-006-R raises a later-source claim that a cycle-closing alias event should be accepted and surfaced as `cycle_violation`, while read-side behavior over a cyclic graph and cycle-resolution effects remain undecided.
+
+Later-source assessment:
+
+ADR-006-R is a valid dispute against silently treating subject-lineage acyclicity as mechanically enforced. It is not enough, by itself, to change the accepted baseline. Assess related ADR-007 through ADR-009 claims before accepting any event-shape, flag-catalog, or mechanism/configuration classification implied by the cycle-guard proposal.
+
+Closure path:
+
+- Formal architecture decision if alias-cycle behavior is included in the first identity or flag platform-spec sections.
+- Platform-spec detailing only after the decision states whether cycle-closing alias events are accepted-and-flagged, rejected as structural invalidity, or excluded from lineage projection until resolution.
+- Implementation/tooling design for graph traversal, batch handling, and tests after the architecture decision.
+
+Priority:
+
+- P1 before atomizing identity lineage or general flag semantics if alias-cycle behavior is in scope.
+- P2 if the first platform spec explicitly defers alias-cycle handling.
+
 ## Platform-Spec Detail Gaps
 
 ### Exact Pattern Registry Inventory
