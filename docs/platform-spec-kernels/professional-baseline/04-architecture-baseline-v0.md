@@ -44,6 +44,8 @@ The baseline also includes later ADR-001 through ADR-005 envelope closure:
 - ADR-004 settles `shape_ref`, optional `activity_ref`, structural type vocabulary, and system actor convention.
 - ADR-005 adds no envelope fields and no structural event type.
 
+Device time is recorded for display and audit. Projection logic, conflict detection, and protocol correctness do not depend on device clock time for ordering. Intra-device ordering uses `device_sequence`; cross-device concurrency detection uses `sync_watermark`; the device identity namespace is hardware/app-installation-bound rather than actor-bound.
+
 The event envelope must not be revised by post-baseline material without explicit change control.
 
 ## Identity And References
@@ -77,11 +79,19 @@ Authority is projection-derived rather than stored as immutable `authority_conte
 
 Authorization for an event is checked against the original subject reference written into that event, not against post-merge alias projections.
 
+Scope expansion is additive. For scope contraction, the ADR-003 initial strategy is selective retain: an actor's own events remain on device, while other actors' events about out-of-scope subjects are candidates for device-side removal.
+
+Sensitive deployments require stronger local lifecycle handling than retain-and-hide.
+
 ## Configuration Boundary
 
 The platform owns structural event type vocabulary and processing semantics. Deployers configure within bounded surfaces: shapes, activities, roles, schedules, thresholds, severities, sensitivity parameters, and policy choices.
 
 The baseline fixes six structural event types and rejects `status_changed` as a seventh type.
+
+Deployer policy configuration is closed only as policy values over platform-owned vocabularies and mechanisms. Closed examples include per-deployment flag severity overrides, domain uniqueness constraints evaluated optimistically on device and authoritatively on server, composition of platform-fixed scope types, and shape/activity-level sensitivity classification.
+
+These policy surfaces must not add envelope fields or become deployer-authored platform logic.
 
 Configuration is bounded by:
 
@@ -145,9 +155,11 @@ The following paths are rejected under the current baseline:
 - server-allocated identifiers for offline event/subject/record creation
 - last-write-wins for operational conflicts requiring judgment
 - invisible automatic merge where judgment is required
+- structural ordering by `device_time`
 - stored immutable `authority_context`
 - deployer-authored arbitrary access-control logic
 - field-level sensitivity
+- retain-and-hide as sufficient handling for sensitive local data after scope contraction
 - `status_changed` as ADR-005 workflow structural type
 - `current_state` as canonical event state
 - `pattern_ref` as an event-envelope structural reference
@@ -167,7 +179,7 @@ Current open/deferred areas:
 - subject-based scope and auditor access
 - shared device actor scope
 - assessment visibility
-- sensitive-subject classification
+- sensitive-subject policy beyond shape/activity-level sensitivity classification
 - grace-period policy
 - permission table details
 - cross-level distribution visibility

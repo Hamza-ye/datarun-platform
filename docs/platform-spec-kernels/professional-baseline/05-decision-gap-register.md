@@ -68,7 +68,7 @@ Affected baseline:
 
 Why open:
 
-ADR-003/ADR-004 leave subject-based scope, auditor access, sensitive-subject classification, and related visibility exceptions open or policy-owned.
+ADR-003/ADR-004 leave subject-based scope, auditor access, sensitive-subject policy beyond shape/activity-level sensitivity classification, and related visibility exceptions open or policy-owned.
 
 Later-source assessment:
 
@@ -95,11 +95,11 @@ Affected baseline:
 
 Why open:
 
-The baseline separates hardware-bound device identity from actor-scoped access, but shared-device actor scope remains unresolved.
+The baseline separates hardware/app-installation-bound device identity from actor-scoped access, and treats device time as advisory only. Shared-device actor scope remains unresolved because actor partitioning, session boundaries, and authorship/accountability rules are not closed.
 
 Later-source assessment:
 
-Assess later claims for consistency with original-subject authorization, actor assignment, and immutable event authorship.
+Assess later claims for consistency with original-subject authorization, actor assignment, immutable event authorship, `device_sequence` ordering, and `sync_watermark` concurrency detection.
 
 Closure path:
 
@@ -260,6 +260,7 @@ Event schema/versioning tooling and projection merge strategy across schema vers
 Later-source assessment:
 
 Claims must preserve immutable event validity and envelope stability.
+They must also preserve `device_time` as advisory display/audit data only, not structural ordering input.
 
 Closure path:
 
@@ -335,6 +336,7 @@ Sync pagination, priority, bandwidth handling, transport details, and operationa
 Later-source assessment:
 
 Claims must preserve immutable event sync, scope filtering, idempotency, append-only behavior, and order independence.
+They must also preserve the closed scope-change baseline: scope expansion is additive, and scope contraction uses selective retain unless a later formal decision changes the local lifecycle strategy.
 
 Closure path:
 
@@ -362,6 +364,7 @@ Retention and archival remain open from earlier viability/blind-spot extraction 
 Later-source assessment:
 
 Any policy must preserve immutable event history constraints or explicitly request baseline reconsideration.
+Sensitive-data policy must not treat retain-and-hide as sufficient lifecycle handling after scope contraction.
 
 Closure path:
 
@@ -489,13 +492,19 @@ These are closed under the current baseline and must not be reopened without for
 - immutable event log source of truth
 - append-only writes
 - client-generated UUIDs for offline creation
+- device time as advisory display/audit data only
+- structural ordering by `device_sequence` and concurrency detection by `sync_watermark`
 - immutable event sync
 - no stored immutable `authority_context`
 - assignment-derived access
 - sync scope as access scope
+- scope expansion as additive and scope contraction as selective retain under the ADR-003 initial strategy
 - platform-owned structural event type vocabulary
 - deployer-configured shapes and bounded configuration
+- deployer policy values over platform-owned mechanisms, including flag severity overrides, domain uniqueness constraints, platform-fixed scope composition, and shape/activity-level sensitivity classification
 - no `status_changed` structural type for ADR-005 workflow
+- no structural ordering by `device_time`
+- retain-and-hide is not sufficient sensitive-data handling after scope contraction
 - projection-derived workflow state
 - source-only workflow flag lineage
 - form-only bounded `context.*`
