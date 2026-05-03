@@ -15,6 +15,7 @@ This folder formalizes that operating model.
 - `01-baseline-workflow.md`: the order of work from extracted evidence to usable architecture/spec baseline.
 - `02-change-control.md`: how post-baseline ADRs or new claims are allowed to affect the baseline.
 - `03-artifact-definitions.md`: the expected artifacts and what each one is allowed to contain.
+- `04-architecture-baseline-v0.md`: current engineering-facing baseline generated from the ADR-001 through ADR-005 closure overlay.
 
 ## Current Standing
 

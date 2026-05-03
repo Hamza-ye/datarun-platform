@@ -48,6 +48,10 @@ Purpose:
 
 - give engineering a concise current architecture baseline
 
+Current file:
+
+- `04-architecture-baseline-v0.md`
+
 Expected content:
 
 - storage model
