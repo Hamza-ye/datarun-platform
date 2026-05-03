@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 37 ADR-005 decision extracted
+Status: Iteration 38 ADR-001 decision check extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -158,7 +158,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 37
+Current iteration: 38
 
 Processed sources:
 
@@ -214,10 +214,11 @@ Processed sources:
 - `docs/exploration/archive/20-adr5-session2-stress-test.md`
 - `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.md`
 - `docs/adrs/adr-005-state-progression.md`
+- `docs/adrs/adr-001-offline-data-model.md`
 
 Next source:
 
-- `docs/adrs/adr-001-offline-data-model.md`
+- `docs/adrs/adr-006-flag-semantics-R.md`
 
 Ignored-as-source:
 
@@ -249,7 +250,7 @@ Current deferred candidates:
 - `03-forward-projection / ADR-003 authorization-sync`: event two-tier sync, action-log dual sync paths, snapshot full-snapshot scaling pressure, and stale-access handling consequences. Outcome after ADR-003: promoted into assignment-based access, sync-scope-as-access, authority-as-projection, original-subject authorization, assignment scope containment, online-only resolution, authorization detect-before-act, tiered projection strategy, authorization stale-flag strategy, scope-change data strategy, accepted risks, and explicit ADR-004/ADR-005 deferrals.
 - `03-forward-projection / ADR-004 configuration`: event types as platform vocabulary, configurable shapes/assignments/schedules, projection-rule boundary pressure, action-log view-schema surface, and snapshot behavior-in-code ceiling. Outcome after ADR-004: promoted into platform-fixed structural event vocabulary, deployer-defined shapes and activity configuration, bounded projection-rule strategy, and explicit ADR-005/implementation deferrals.
 - `03-forward-projection / ADR-005 workflow`: separation of data and workflow under events, action-log conflict-time reprojection, snapshot fusion of approval action and data, and state-machine projection pressure. Outcome after ADR-005: promoted into projection-derived workflow state, source-only flag lineage, flagged-event state-derivation exclusion, Pattern Registry, composition rules, and explicit implementation/platform-spec deferrals.
-- `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Outcome after `04-decision-audit.md`: promoted by audit toward typed immutable events/event-log source of truth, with final verification still owned by ADR-001.
+- `03-forward-projection / ADR-001 selection`: snapshot structural ceiling, events irreversibility advantage, action-log convergence/dual-write risk, and events projection-infrastructure risk. Outcome after ADR-001: promoted into immutable event store source of truth, append-only write invariant, write-path source-of-truth discipline, projection rebuild scope boundary, rejected snapshot/action-log-primary storage alternatives, accepted projection/schema/developer risks, and explicit downstream deferrals.
 
 ## Candidate Kernel Register
 
@@ -365,6 +366,18 @@ Current deferred candidates:
 - `ADR-004 Scope From Audit` — open owning-scope map for configuration boundary and activity context.
 - `ADR-005 Scope From Audit` — open owning-scope map for state progression and workflow.
 - `ADR-001 Normalization Safety Check` — conditional audit conclusion; proceed to ADR-002 only after ADR-001 changes are verified.
+- `ADR-001 Decision Boundary` — ADR-settled storage primitive boundary; downstream mechanics remain owned by ADR-002 through ADR-005.
+- `ADR-001 Immutable Event Store Primitive` — ADR-settled primitive; append-only typed immutable events are the event-log source of truth.
+- `ADR-001 Append-Only Write Invariant` — ADR-settled invariant; corrections, reviews, status changes, transfers, and amendments append new records.
+- `ADR-001 Write-Path Source-Of-Truth Discipline` — ADR-settled invariant; all state changes enter through the event store and projections are derived/rebuilt.
+- `ADR-001 Client-Generated Identifier Contract` — ADR-settled contract; events, subjects, and records use client-generated UUIDs for offline creation.
+- `ADR-001 Immutable Event Sync Contract` — ADR-settled interaction rule; sync transfers unseen immutable events and is idempotent, append-only, order-independent, and scope-filtered.
+- `ADR-001 Minimum Event Envelope Expression` — ADR-settled contract; every event envelope must express identity, type, payload, and timestamp while downstream ADRs shape full schema.
+- `ADR-001 Projection Rebuild Scope Boundary` — ADR-settled boundary; projections rebuild from events, but local rebuild scope depends on the event subset held under ADR-003 sync scope.
+- `ADR-001 Rejected Storage Alternatives` — ADR-settled rejection of snapshot-primary and action-log-primary source-of-truth storage.
+- `ADR-001 Explicit Downstream Deferral Contract` — ADR-settled deferral map to ADR-002 through ADR-005.
+- `ADR-001 Accepted Risk Set` — ADR-settled risk set for projection complexity, event-sourcing paradigm shift, and event schema versioning diversity.
+- `ADR-001 Reconciliation Result` — settled finding that final ADR-001 confirms audit-normalized storage closure without downstream overreach.
 - `ADR-002 Event Storm Boundary` — settled extraction rule from `docs/exploration/archive/05-adr2-event-storm-identity.md`; Phase 1 discovers but does not decide.
 - `Identity As Load-Bearing Event Reference` — candidate ADR-002 framing; identity makes event references meaningful.
 - `Identity Type Taxonomy Candidate` — candidate taxonomy; subject, actor, process, and assignment identities.
@@ -738,3 +751,7 @@ Processed `docs/exploration/archive/21-adr5-session3-part1-structural-coherence.
 ### Iteration 37
 
 Processed `docs/adrs/adr-005-state-progression.md` as the final ADR-005 decision source. Promoted ADR-005 lineage into ADR-settled contracts: no envelope/type changes, rejected `status_changed`, `transition_violation`, flagged-event state-derivation exclusion, platform-defined flag resolvability classification, projection-derived state machines, Pattern Registry, five composition rules, source-only flagging with source-chain traversal, seven-value form-only `context.*`, L3b auto-resolution, and `system:auto_resolution/{policy_id}` actor attribution. Preserved explicit ADR-005 non-decisions for pattern inventory/schema, projection optimization, traversal depth, context caching, authoring UX, reporting, and platform-spec consolidation. Recorded accepted risks and revisit triggers. Maintained the boundary that ADR-006 through ADR-009 must be judged against ADR-001 through ADR-005 closure rather than superseding it. The next source is the unprocessed `docs/adrs/adr-001-offline-data-model.md` decision check before moving into ADR-006 onward.
+
+### Iteration 38
+
+Processed `docs/adrs/adr-001-offline-data-model.md` as the final ADR-001 decision check after ADR-005 closure. Confirmed the audit-normalized ADR-001 result: immutable typed events are the foundational append-only event-log source of truth; every state change enters through the event store; projections and views are derived and rebuilt from events rather than patched; events, subjects, and records use client-generated UUIDs; sync transfers unseen immutable events and is idempotent, append-only, order-independent, and scope-filtered; and ADR-001 commits envelope expression requirements for identity, type, payload, and timestamp without deciding the final field schema. Reconciled the ADR-001 deferred selection pressure into rejected snapshot-primary/action-log-primary storage alternatives, accepted projection/schema/developer risks, projection rebuild scope bounded by ADR-003 sync scope, and explicit downstream deferrals to ADR-002 through ADR-005. The ADR-001 through ADR-005 closure baseline is now ready for ADR-006-R evaluation, with ADR-006 through ADR-009 still unable to supersede closed earlier ADR kernels.

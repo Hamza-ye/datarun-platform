@@ -1376,3 +1376,472 @@ ADR-001 extraction must verify accepted status and applied normalization.
 Platform specification note:
 
 Use as the transition checkpoint from ADR-001 lineage to ADR-002 lineage.
+
+## Kernel: ADR-001 Decision Boundary
+
+Status: Settled
+Kind: forbidden-interpretation
+
+Specification statement:
+
+ADR-001 decides the foundational offline storage primitive and its storage-level guarantees only. It selects immutable events, append-only writes, client-generated identifiers, immutable-event sync, and minimum envelope expression requirements, while deferring causal ordering, conflict definition, sync scope, event type vocabulary, projection rules, projection placement, sync topology, and activity context to later ADRs.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / status line
+- `docs/adrs/adr-001-offline-data-model.md` / `## Decision`
+- `docs/adrs/adr-001-offline-data-model.md` / `## What This Does NOT Decide`
+
+Closure basis:
+
+ADR-settled decision boundary.
+
+Scope:
+
+Applies to the offline data model as the root storage contract.
+
+Non-goals:
+
+Does not decide ADR-002 identity/conflict mechanics, ADR-003 authorization/sync topology, ADR-004 configuration boundary, or ADR-005 workflow state progression.
+
+Forbidden interpretations:
+
+- Do not use ADR-001 to pre-decide causal ordering, conflict policy, sync scope, event type ownership, projection rules, projection placement, sync topology, or activity context.
+- Do not let later ADR-006 through ADR-009 text silently revise ADR-001's storage primitive or source-of-truth contract.
+
+Open edges:
+
+Later ADRs may elaborate deferred mechanics only within the ADR-001 event-log source-of-truth boundary.
+
+Platform specification note:
+
+Use as the platform-spec boundary for storage primitive closure.
+
+## Kernel: ADR-001 Immutable Event Store Primitive
+
+Status: Settled
+Kind: primitive
+
+Specification statement:
+
+The platform's foundational storage primitive is an append-only event log of typed immutable events. The event log is the single source of truth; current state is derived from event streams through projections.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `## Decision`
+- `docs/adrs/adr-001-offline-data-model.md` / `### S2: Write Granularity`
+
+Closure basis:
+
+ADR-settled primitive.
+
+Scope:
+
+Applies to operational records created, stored on device, synced, and used to derive current state.
+
+Non-goals:
+
+Does not decide the final event type vocabulary, projection rule language, projection schemas, or physical storage implementation.
+
+Forbidden interpretations:
+
+- Do not treat snapshots or action-log/materialized-view pairs as the canonical source-of-truth model.
+- Do not treat projections as co-primary state.
+
+Open edges:
+
+Projection optimization, materialized-view schema, and projection placement remain owned by later ADRs or implementation/platform specification closure.
+
+Platform specification note:
+
+This is the storage primitive kernel for final atomization.
+
+## Kernel: ADR-001 Append-Only Write Invariant
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+All writes are append-only. Once written, an event is never modified or deleted; corrections, reviews, status changes, transfers, and amendments are represented by new records that reference earlier records.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `### S1: Record Mutability`
+- `docs/adrs/adr-001-offline-data-model.md` / `### S2: Write Granularity`
+
+Closure basis:
+
+ADR-settled invariant.
+
+Scope:
+
+Applies to all writes that express operational facts or state changes.
+
+Non-goals:
+
+Does not require every derived read model, cache, or projection row to be append-only.
+
+Forbidden interpretations:
+
+- Do not mutate or delete canonical events to correct history.
+- Do not use a mutable current-state row plus separate audit log as the canonical record model.
+
+Open edges:
+
+Retention/export policies and derived-cache maintenance remain outside ADR-001.
+
+Platform specification note:
+
+Use as the durable record-history invariant.
+
+## Kernel: ADR-001 Write-Path Source-Of-Truth Discipline
+
+Status: Settled
+Kind: invariant
+
+Specification statement:
+
+Every state change enters through the event store. Projections and views may be maintained eagerly or lazily, but they are derived from events and are never written independently. If a projection is corrupt or stale, the fix is to discard and recompute it from events, not to patch the projection directly.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `### S2: Write Granularity`
+- `docs/adrs/adr-001-offline-data-model.md` / `### Risks accepted`
+
+Closure basis:
+
+ADR-settled invariant; carries forward the audit-required write-path discipline.
+
+Scope:
+
+Applies to state-changing writes and projection/view repair.
+
+Non-goals:
+
+Does not decide eager versus lazy projection maintenance, cache invalidation, or read-model physical design.
+
+Forbidden interpretations:
+
+- Do not bypass the event store for state changes.
+- Do not repair source-of-truth divergence by editing a projection as canonical state.
+- Do not claim the action-log escape hatch is viable if the event log has gaps.
+
+Open edges:
+
+Projection performance strategies and rebuild implementation remain open beyond this invariant.
+
+Platform specification note:
+
+This closes the previous audit-required write-path discipline candidate.
+
+## Kernel: ADR-001 Client-Generated Identifier Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+Events, subjects, and records use client-generated UUIDs so devices can create identifiers without a network roundtrip. Duplicate real-world subjects receiving separate UUIDs is a domain/identity concern, not a storage identifier concern.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `### S3: Identity Generation`
+- `docs/adrs/adr-001-offline-data-model.md` / `## Consequences`
+
+Closure basis:
+
+ADR-settled storage identifier contract, with identity semantics deferred to ADR-002.
+
+Scope:
+
+Applies to storage-level identifier generation for offline creation.
+
+Non-goals:
+
+Does not decide duplicate detection, merge/split semantics, subject lifecycle, or typed identity reference envelope fields.
+
+Forbidden interpretations:
+
+- Do not require server-allocated identifiers for offline event, subject, or record creation.
+- Do not treat UUID assignment as resolving duplicate real-world identity.
+
+Open edges:
+
+ADR-002 owns identity semantics beyond storage-side UUID generation.
+
+Platform specification note:
+
+Use as the offline identifier contract while keeping identity lifecycle separate.
+
+## Kernel: ADR-001 Immutable Event Sync Contract
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+The sync unit is the immutable event. Sync transfers events the receiver has not yet seen, filtered to the receiver's assigned scope. Sync is idempotent, append-only, and order-independent; arrival order does not determine logical order.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `### S4: Sync Unit`
+
+Closure basis:
+
+ADR-settled storage-level sync contract, with sync scope and topology deferred to ADR-003.
+
+Scope:
+
+Applies to the storage unit exchanged during sync.
+
+Non-goals:
+
+Does not decide scope calculation, authorization model, sync topology, summary sync, or transport protocol.
+
+Forbidden interpretations:
+
+- Do not make base sync mutate or delete canonical events on a device.
+- Do not infer causal or workflow order from event arrival order.
+
+Open edges:
+
+ADR-003 owns what data flows to which device and where projections live.
+
+Platform specification note:
+
+Use as the immutable-event sync kernel and connect ADR-003 sync-scope details as elaborations.
+
+## Kernel: ADR-001 Minimum Event Envelope Expression
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+Every event carries a common envelope that must express identity, type, payload, and timestamp. ADR-001 commits to these storage-primitive properties but not to the final field schema; subject association, event references, schema versioning, authorship, and authority context are required concerns shaped by downstream ADRs.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `### S5: Event Envelope Guarantees`
+
+Closure basis:
+
+ADR-settled envelope-expression contract.
+
+Scope:
+
+Applies to the minimum properties every event envelope must carry or be able to express.
+
+Non-goals:
+
+Does not decide full envelope field list, causal metadata, typed identity references, authorization context shape, event reference structures, schema versioning scheme, or activity context.
+
+Forbidden interpretations:
+
+- Do not infer a final envelope schema from ADR-001's minimum property list.
+- Do not use ADR-001 to add downstream-owned fields without the owning ADR closure.
+
+Open edges:
+
+ADR-002, ADR-003, ADR-004, and ADR-005 may shape the exact envelope representation while preserving existing event validity.
+
+Platform specification note:
+
+Use as the floor for envelope semantics, not the complete envelope schema.
+
+## Kernel: ADR-001 Projection Rebuild Scope Boundary
+
+Status: Settled
+Kind: configuration-boundary
+
+Specification statement:
+
+Projections are rebuildable from the event stream, and events win over projections when the two diverge. ADR-001 also bounds this guarantee by stating that what subset of events a device holds, and therefore what it can rebuild locally, is determined by ADR-003 sync scope.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `### S2: Write Granularity`
+- `docs/adrs/adr-001-offline-data-model.md` / `## What This Does NOT Decide`
+
+Closure basis:
+
+ADR-settled boundary; carries forward the audit's rebuild-scope correction.
+
+Scope:
+
+Applies to projection rebuild guarantees on devices and server-side stores.
+
+Non-goals:
+
+Does not decide sync scope, projection placement, summary sync, projection caching, or re-sync protocol.
+
+Forbidden interpretations:
+
+- Do not assume every device can rebuild global current state from its local event subset.
+- Do not treat projection rebuildability as permission to patch projections independently.
+
+Open edges:
+
+ADR-003 owns device event subsets and projection placement.
+
+Platform specification note:
+
+Use to keep projection source-of-truth and sync-scope boundaries separate.
+
+## Kernel: ADR-001 Rejected Storage Alternatives
+
+Status: Rejected
+Kind: rejected-alternative
+
+Specification statement:
+
+Immutable snapshots and unified action-log/materialized-view pairs are rejected as the foundational storage primitive. Snapshots lose workflow/action semantics under migration pressure, while action-log approaches carry dual-write completeness risk; ADR-001 selects immutable events and allows materialized views only as derived projections or an additive escape hatch over a gap-free event log.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `## Context`
+- `docs/adrs/adr-001-offline-data-model.md` / `## Decision`
+- `docs/adrs/adr-001-offline-data-model.md` / `### Risks accepted`
+
+Closure basis:
+
+ADR-settled by selection of immutable events and stated irreversibility reasoning.
+
+Scope:
+
+Applies to foundational source-of-truth storage model selection.
+
+Non-goals:
+
+Does not reject snapshots, materialized views, summaries, or exports as derived read models.
+
+Forbidden interpretations:
+
+- Do not reintroduce snapshot-primary or action-log-primary storage as equivalent options without reopening ADR-001.
+- Do not treat the additive materialized-view escape hatch as replacing the event log source of truth.
+
+Open edges:
+
+Application-maintained views may be added only as derived read paths if projection complexity requires them.
+
+Platform specification note:
+
+Use as rejected-alternative lineage for storage primitive cleanup.
+
+## Kernel: ADR-001 Explicit Downstream Deferral Contract
+
+Status: Settled
+Kind: contract
+
+Specification statement:
+
+ADR-001 explicitly defers causal ordering and conflict definition to ADR-002; sync scope, topology, and projection placement to ADR-003; event type vocabulary, event type ownership, projection-rule boundaries, schema/version configuration, and activity context to ADR-004; and state progression/workflow projection rules to ADR-005.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `## What This Does NOT Decide`
+- `docs/adrs/adr-001-offline-data-model.md` / `## Consequences`
+- `docs/adrs/adr-001-offline-data-model.md` / `## Next Decision`
+
+Closure basis:
+
+ADR-settled deferral map.
+
+Scope:
+
+Applies to ownership boundaries for downstream ADR closure.
+
+Non-goals:
+
+Does not keep downstream questions open after their owning ADRs have been processed.
+
+Forbidden interpretations:
+
+- Do not treat ADR-001 consequence prose as downstream decision closure.
+- Do not let ADR-006 through ADR-009 override closed ADR-001 through ADR-005 boundaries; classify conflicts explicitly.
+
+Open edges:
+
+At this extraction point, ADR-002 through ADR-005 have already supplied later closure for their owned domains and must be reconciled against this deferral contract during rest-state cleanup.
+
+Platform specification note:
+
+Use to trace which downstream kernels are elaborations of ADR-001 versus independent later decisions.
+
+## Kernel: ADR-001 Accepted Risk Set
+
+Status: Settled
+Kind: conditional-validity
+
+Specification statement:
+
+ADR-001 accepts projection complexity on low-end Android, event-sourcing developer paradigm shift, and long-term event schema versioning diversity. The mitigation boundary is that projections provide familiar current-state reads, envelope guarantees remain stable, action-specific payloads vary by type/version, and materialized views may be added only while preserving a gap-free event log.
+
+Source basis:
+
+- `docs/adrs/adr-001-offline-data-model.md` / `### Risks accepted`
+
+Closure basis:
+
+ADR-settled accepted-risk set.
+
+Scope:
+
+Applies to operational and implementation risks introduced by selecting immutable events.
+
+Non-goals:
+
+Does not decide the projection implementation, schema migration tooling, developer tooling, or performance budgets.
+
+Forbidden interpretations:
+
+- Do not present event sourcing as risk-free.
+- Do not mitigate projection complexity by weakening the event-log source-of-truth discipline.
+
+Open edges:
+
+Implementation and platform-spec consolidation must turn accepted risks into concrete projection, schema-versioning, and developer-experience obligations.
+
+Platform specification note:
+
+Use as risk and revisit-trigger context for the final specification.
+
+## Kernel: ADR-001 Reconciliation Result
+
+Status: Settled
+Kind: interaction-rule
+
+Specification statement:
+
+The final ADR-001 text confirms the audit-normalized closure: append-only typed immutable events are the storage primitive; write-path discipline is binding; projections are derived and rebuildable within event-subset limits; client-generated UUIDs are required for offline creation; immutable-event sync is idempotent, append-only, order-independent, and scope-filtered; the envelope minimum is expression-level rather than final schema; and downstream overreach is explicitly deferred to ADR-002 through ADR-005.
+
+Source basis:
+
+- `docs/exploration/archive/04-decision-audit.md`
+- `docs/adrs/adr-001-offline-data-model.md`
+
+Closure basis:
+
+Settled reconciliation between ADR-001 audit lineage and the final ADR-001 decision.
+
+Scope:
+
+Applies to rest-state cleanup of ADR-001 lineage kernels and downstream dependency checks.
+
+Non-goals:
+
+Does not reprocess ADR-002 through ADR-005 decisions or authorize ADR-006 through ADR-009 to revise them.
+
+Forbidden interpretations:
+
+- Do not keep ADR-001 storage-unit selection open after this decision check.
+- Do not leave `status_changed`, projection-derived workflow, configuration boundary, or conflict semantics under ADR-001 ownership.
+
+Open edges:
+
+Remaining rest-state work should reconcile older conditional ADR-001 lineage entries against these settled kernels and then evaluate ADR-006-R onward against the ADR-001 through ADR-005 closure baseline.
+
+Platform specification note:
+
+Use as the closure marker for final ADR-001 extraction.
