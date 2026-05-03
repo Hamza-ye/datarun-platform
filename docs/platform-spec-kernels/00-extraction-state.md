@@ -1,6 +1,6 @@
 # Platform Specification Kernel Extraction State
 
-Status: Iteration 33 ADR-004 decision extracted
+Status: Iteration 34 ADR-005 session1 extracted
 
 This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
 
@@ -69,6 +69,7 @@ Rest state means:
 - `06-adr2-identity-conflict-kernels.md`: temporary staging file for ADR-002 identity and conflict lineage kernels.
 - `07-adr3-authorization-sync-kernels.md`: temporary staging file for ADR-003 authorization and selective-sync lineage kernels.
 - `08-adr4-configuration-boundary-kernels.md`: temporary staging file for ADR-004 configuration-boundary lineage kernels.
+- `09-adr5-state-progression-kernels.md`: temporary staging file for ADR-005 state progression and workflow lineage kernels.
 
 Final atomic files must not be created until rest state is reached.
 
@@ -156,7 +157,7 @@ Current probe notes:
 
 ## Scan Cursor
 
-Current iteration: 33
+Current iteration: 34
 
 Processed sources:
 
@@ -208,10 +209,11 @@ Processed sources:
 - `docs/exploration/archive/17-adr4-session3-part3-adversarial-stress-tests.md`
 - `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolution.md`
 - `docs/adrs/adr-004-configuration-boundary.md`
+- `docs/exploration/archive/19-adr5-session1-scoping.md`
 
 Next source:
 
-- `docs/exploration/archive/19-adr5-session1-scoping.md`
+- `docs/exploration/archive/20-adr5-session2-stress-test.md`
 
 Ignored-as-source:
 
@@ -532,6 +534,18 @@ Current deferred candidates:
 - `ADR-004 Deployer Policy Configuration Contract` — ADR-settled flag severity, domain uniqueness, scope composition, and sensitivity parameterization.
 - `ADR-004 Explicit Deferral Contract` — ADR-settled handoff to ADR-005 and implementation for workflow/state/projection/tooling questions.
 - `ADR-004 Reconciliation Result` — settled result confirming ADR-004 carries forward Session 3 synthesis without contradiction.
+- `ADR-005 Session 1 Scoping Boundary` — settled extraction rule from `docs/exploration/archive/19-adr5-session1-scoping.md`; scoping/event-storm evidence, not final ADR closure.
+- `ADR-005 Decision Surface` — open six-question state progression and workflow decision surface.
+- `ADR-005 Irreversibility Prediction` — candidate prediction that no envelope fields change and `status_changed` is the only possible type-vocabulary surface.
+- `Projection-Derived Workflow State Candidate` — conditional high-confidence Q1 position; state is projection-derived and invalid transitions are flagged, not rejected.
+- `Status Changed Type Rejection Candidate` — conditional Q2 rejection lineage; `status_changed` not needed if state change is shape/pattern significance rather than pipeline behavior.
+- `Pattern Registry Candidate` — conditional primitive candidate for platform-fixed workflow skeletons parameterized by deployers.
+- `Transition Violation Flag Candidate` — conditional flag category candidate for accepted events that violate configured transition rules.
+- `Workflow Composition Directional Lean` — open Q3 lean toward independent pattern composition per subject/activity.
+- `Workflow Flag Cascade Directional Lean` — open Q4 lean toward source-only flagging plus projection traceability.
+- `Context Scope Directional Lean` — open Q5 lean toward bounded pre-resolved `context.*` for form expressions.
+- `Auto-Resolution Directional Lean` — open Q6 lean toward L3b server-side auto-resolution through explicit resolution events.
+- `ADR-005 Session 2 Charter` — open handoff to stress-test Q3-Q6 and run irreversibility filtering.
 
 ## Iteration History
 
@@ -670,3 +684,7 @@ Processed `docs/exploration/archive/18-adr4-session3-part4-remaining-q-resolutio
 ### Iteration 33
 
 Processed `docs/adrs/adr-004-configuration-boundary.md` as the decided ADR-004 source. Promoted the carried-forward Session 3 positions into ADR-settled contracts: `shape_ref`, optional `activity_ref`, six structural event types, system actor convention, server-only triggers, atomic configuration, no deployer-authored access-control logic, no field-level sensitivity, four-layer configuration gradient, shape evolution, expression and projection limits, trigger architecture, complexity budgets, and deployer policy configuration. Preserved explicit ADR-005 and implementation deferrals for state progression, `status_changed`, domain conflict resolution automation, `context.*`, breaking-change migration tooling, authoring format, projection merge strategy, validator UX, and pattern inventory. ADR-004 lineage closes without contradiction; next source is ADR-005 Session 1 scoping.
+
+### Iteration 34
+
+Processed `docs/exploration/archive/19-adr5-session1-scoping.md` as ADR-005 Session 1 scoping and event-storm evidence. Created `09-adr5-state-progression-kernels.md`. Extracted the ADR-005 six-question decision surface, irreversibility prediction, projection-derived workflow state candidate, conditional rejection of `status_changed`, Pattern Registry candidate, `transition_violation` flag candidate, and open directional leans for independent pattern composition, source-only flag cascade, bounded `context.*`, and L3b-style auto-resolution. Kept Session 1 claims conditional/open because the source is superseded exploration and sends Q3-Q6 to Session 2 stress testing.
