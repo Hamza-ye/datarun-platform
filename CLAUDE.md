@@ -1,15 +1,17 @@
 # Datarun Platform — Codebase Map
 
-> **Scope**: this file is a codebase map only. Strategy, phase tracking, invariants, and
-> forward plans live in [`docs/charter.md`](docs/charter.md) and [`docs/ships/`](docs/ships/).
-> Do not record status/test counts/architectural rules here — they drift.
+> **LEGACY CODEBASE MAP ONLY.**
+> Do not use this file for platform-spec atomization, current strategy, phase
+> tracking, invariants, or forward plans. Start atomization at
+> [`docs/platform-spec-kernels/professional-baseline/README.md`](docs/platform-spec-kernels/professional-baseline/README.md).
 >
-> **Before drafting an IDR or starting new work**, read [`docs/flagged-positions.md`](docs/flagged-positions.md).
-> Rule R-4: any FP whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
+> The code/package map below may be useful for implementation orientation only.
+> Status and Ship sections are historical unless refreshed in a dedicated code
+> implementation pass.
 
 ---
 
-## Current Ship
+## Historical Ship Snapshot
 
 **Ship-1 — Offline Structured Capture Under Assigned Scope** — implementation COMPLETE,
 retro pending. Spec: [`docs/ships/ship-1.md`](docs/ships/ship-1.md). Scenarios
@@ -98,12 +100,15 @@ server/                                 # Spring Boot app (fresh Ship-1 build; p
   src/test/java/dev/datarun/ship1/
     acceptance/WalkthroughAcceptanceTest.java    # W-0, W-1, W-2
 
-docs/                                   # Design + ship docs (see charter.md)
-  charter.md                            # Current strategy + status — authoritative
-  ships/ship-1.md                       # Current Ship spec
-  ships/ship-1-retro.md                 # Ship-1 retro (written at close)
-  adrs/                                 # 9 ADRs (all DECIDED)
-  flagged-positions.md                  # Deferred verification register
+docs/
+  README.md                             # Documentation entrypoint
+  platform-spec-kernels/                # Current platform-spec atomization path
+  adrs/                                 # ADR sources; use through professional baseline for atomization
+  scenarios/                            # Domain scenarios
+  constraints.md                        # Operational constraints
+  principles.md                         # Validated principles
+  charter.md, ships/, flagged-positions.md
+                                        # Legacy Ship/convergence/status surfaces; forbidden for atomization
 
 scripts/check-convergence.sh            # Convergence-phase tool (dormant)
 docker-compose.yml, docker-compose.test.yml
@@ -184,13 +189,13 @@ Run: `cd server && ./mvnw test`.
 | F4 | Modify or delete persisted events | Append-only is the foundational invariant (ADR-001 §S1). |
 | F6 | Reject events for state staleness | Accept-and-flag (ADR-006 §S1) — events are never rejected for state. |
 | F11 | Schema changes without migration scripts | Flyway migration per change. |
-| F15 | Silent deferral | If you observe a position correct today but drift-prone, add an FP to [`docs/flagged-positions.md`](docs/flagged-positions.md) before close (Rule R-1). |
+| F15 | Silent deferral | If you observe a position correct today but drift-prone, record it in the current owning gap/control surface before close. For platform-spec atomization, use `docs/platform-spec-kernels/professional-baseline/05-decision-gap-register.md` or the relevant control overlay. |
 
 ---
 
 ## Journal Triggers
 
-Record in the active Ship retro (`docs/ships/ship-N-retro.md`) when:
+For implementation work, record in the active implementation handoff/retro surface when:
 
 1. An implementation-grade choice is made that isn't pre-decided in the spec.
 2. Something is tried and abandoned after >1 hour.
@@ -202,7 +207,8 @@ Record in the active Ship retro (`docs/ships/ship-N-retro.md`) when:
 
 ## Codebase Map Maintenance
 
-This file is the primary context source for new sessions. **At each Ship close**,
-update the Server Package Map + Test Classes to match the tree before tagging.
-Do not move strategy/status/invariants content in here — that belongs to
-[`docs/charter.md`](docs/charter.md) and [`docs/flagged-positions.md`](docs/flagged-positions.md).
+This file is not the primary context source for platform-spec atomization.
+For atomization, start at
+[`docs/platform-spec-kernels/professional-baseline/README.md`](docs/platform-spec-kernels/professional-baseline/README.md).
+Only update this file during implementation-oriented work when the code/package
+map changes.

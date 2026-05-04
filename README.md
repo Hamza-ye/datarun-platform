@@ -2,6 +2,12 @@
 
 Domain-agnostic operations platform for field-based organizations. Offline-first, configurable, append-only event store with sync.
 
+## Documentation
+
+For platform-spec atomization, start at
+[`docs/README.md`](docs/README.md), then
+[`docs/platform-spec-kernels/professional-baseline/README.md`](docs/platform-spec-kernels/professional-baseline/README.md).
+
 ## Status
 
 **Phase 0a — Server Core** ✅
@@ -14,6 +20,17 @@ Domain-agnostic operations platform for field-based organizations. Offline-first
 | PostgreSQL event store | Done |
 | Integration tests (11 tests, 8 quality gates) | Done |
 | CI pipeline (GitHub Actions) | Done |
+
+## Commit Convention
+
+Use small scoped commits:
+
+- `docs(<scope>): <message>`
+- `feat(<scope>): <message>`
+- `test(<scope>): <message>`
+- `chore(<scope>): <message>`
+
+Scopes stay practical, for example `platform-spec`, `server`, `mobile`, `contracts`, or `skill`. Prefer traceability over ceremony.
 
 ## Architecture
 

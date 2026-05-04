@@ -1,5 +1,13 @@
 # Ships — Scenario-Driven Delivery Index
 
+> **FORBIDDEN FOR PLATFORM-SPEC ATOMIZATION.**
+> This directory contains legacy Ship execution specs, retros, and status.
+> Do not use it as authority for the current platform-spec atomization path.
+> Start at
+> [`../platform-spec-kernels/professional-baseline/README.md`](../platform-spec-kernels/professional-baseline/README.md).
+> The legacy instructions below are retained only for historical Ship/convergence
+> context and must not override this warning.
+>
 > Each Ship delivers a **vertical slice through one or more scenarios** from [../scenarios/](../scenarios/). A Ship does not deliver a scenario "fully" — scenarios are cross-cutting problem narratives. The Ship picks the slice, and §6.5 "deliberately not built" lists what the Ship parks for later Ships or FPs. Ships replace the prior phase-driven decomposition at Phase 2 closure (2026-04-23). See [charter.md § Rhythm](../charter.md#rhythm) for the per-Ship loop and anti-drift rules.
 
 ## Map

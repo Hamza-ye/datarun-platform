@@ -1,8 +1,16 @@
 # Datarun Charter — Currently Decided State
 
-> **Start every session here.** This is the single source of truth for "what
-> is settled." Generated from `docs/convergence/concept-ledger.md`. Every
-> claim cites the ADR that decided it. The drift gate
+> **FORBIDDEN FOR PLATFORM-SPEC ATOMIZATION.**
+> This file is a legacy convergence/Ship status surface. Do not use it as
+> authority for the current platform-spec atomization path. Start at
+> [`platform-spec-kernels/professional-baseline/README.md`](platform-spec-kernels/professional-baseline/README.md).
+> The legacy instructions below are retained only for historical Ship/convergence
+> context and must not override this warning.
+>
+> **Legacy convergence instruction**: this file was formerly treated as the
+> single source of truth for "what is settled." Generated from
+> `docs/convergence/concept-ledger.md`. Every claim cites the ADR that decided
+> it. The drift gate
 > (`scripts/check-convergence.sh`) fails any claim missing a cite or pointing
 > to a superseded ADR.
 >

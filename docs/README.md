@@ -1,10 +1,12 @@
 # Datarun — Documentation
 
-> **Current authority**: Start with [charter.md](charter.md) for settled
-> architecture and status, then [convergence/concept-ledger.md](convergence/concept-ledger.md),
-> then the current Ship spec under [ships/](ships/). Older architecture,
-> implementation-phase, and exploration docs explain lineage; they are not
-> current truth unless the charter or a decided ADR re-promotes them.
+> **Current platform-spec entrypoint**:
+> [`platform-spec-kernels/professional-baseline/README.md`](platform-spec-kernels/professional-baseline/README.md).
+>
+> For atomization work, do not start from `charter.md`, `flagged-positions.md`,
+> `ships/`, convergence docs, architecture docs, implementation docs, or git
+> history. Those surfaces are legacy/status/implementation context and can leak
+> stale decisions into the current baseline.
 
 ## What This Project Is
 
@@ -44,43 +46,39 @@ Datarun's ambition is to **eliminate that rebuilding**. Instead of bespoke syste
 
 ## Documentation Structure
 
-### Reading guide
+### Reading Guide
 
-For current work, read in this order:
+For platform-spec atomization, read in this order:
 
-1. **Settled state**: [Charter](charter.md)
-2. **Classification inventory**: [Concept Ledger](convergence/concept-ledger.md)
-3. **In-flight work**: current Ship spec under [Ships](ships/)
-4. **Open verification debt**: [Flagged Positions](flagged-positions.md)
-5. **Owning decisions**: relevant ADRs under [ADRs](adrs/)
+1. **Operating model**: [Professional Baseline README](platform-spec-kernels/professional-baseline/README.md)
+2. **Accepted baseline**: [Architecture Baseline v0](platform-spec-kernels/professional-baseline/04-architecture-baseline-v0.md)
+3. **Open gaps**: [Decision Gap Register](platform-spec-kernels/professional-baseline/05-decision-gap-register.md)
+4. **Boundary routing**: [System Boundary Map](platform-spec-kernels/professional-baseline/07-system-boundary-map.md)
+5. **Control overlays**:
+   [Identity](platform-spec-kernels/professional-baseline/09-identity-boundary-control.md),
+   [Conflict/Flag/Offline](platform-spec-kernels/professional-baseline/15-conflict-flag-offline-boundary-control.md),
+   and [Operational Constraints](platform-spec-kernels/professional-baseline/16-operational-constraints-boundary-control.md)
 
-For historical reconstruction, read in this order:
+For domain and lineage background only, read:
 
 1. **Problem definition**: [Constraints](constraints.md) → [Scenarios](scenarios/README.md) → [Access Control](access-control-scenario.md)
 2. **Viability analysis**: [Viability Assessment](viability-assessment.md)
 3. **Design foundations**: [Principles](principles.md) → [Behavioral Patterns](behavioral_patterns.md)
-4. **Exploration proof**: [Exploration index](exploration/) and ADR guides
-5. **Initial ADR sequence**: [ADR-001](adrs/adr-001-offline-data-model.md) → [002](adrs/adr-002-identity-conflict.md) → [003](adrs/adr-003-authorization-sync.md) → [004](adrs/adr-004-configuration-boundary.md) → [005](adrs/adr-005-state-progression.md)
-6. **Convergence ADRs**: [ADR-006](adrs/adr-006-flag-semantics.md) → [ADR-007](adrs/adr-007-envelope-type-closure.md) → [ADR-008](adrs/adr-008-envelope-reference-fields.md) → [ADR-009](adrs/adr-009-platform-fixed-vs-deployer-configured.md)
+4. **Initial ADR sequence**: [ADR-001](adrs/adr-001-offline-data-model.md) → [002](adrs/adr-002-identity-conflict.md) → [003](adrs/adr-003-authorization-sync.md) → [004](adrs/adr-004-configuration-boundary.md) → [005](adrs/adr-005-state-progression.md)
+5. **Assessed later ADRs**: use the professional-baseline assessments, not the later ADRs as automatic authority.
 
 ### By area
 
 
 | Area                                            | Contents                                                                                                                    |
 | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [Charter](charter.md)                           | Current decided state and Ship cadence. Start here for settled truth.                                                       |
-| [Concept Ledger](convergence/concept-ledger.md) | Classification inventory used by convergence and charter generation.                                                        |
-| [Ships](ships/)                                 | Current scenario-driven execution cadence, specs, evidence, and retros.                                                     |
-| [Flagged Positions](flagged-positions.md)       | Append-only register for deferred verification and quiet-decision markers.                                                  |
+| [Professional Baseline](platform-spec-kernels/professional-baseline/README.md) | Current entrypoint for platform-spec atomization. |
+| [Platform Spec Kernels](platform-spec-kernels/) | Extraction state, staging kernels, ADR-001 through ADR-005 closure register, and professional-baseline controls. |
 | [Scenarios](scenarios/README.md)                | 21 real-world operational situations the platform must support — domain perspective, no solution prescription              |
 | [Constraints](constraints.md)                   | Operational context and boundaries — target users, connectivity, scale, data sensitivity                                   |
 | [Access Control](access-control-scenario.md)    | Cross-cutting concern: who can see and do what, under what circumstances                                                    |
 | [Principles](principles.md)                     | 7 working principles — all confirmed through 5 ADRs                                                                        |
 | [Viability Assessment](viability-assessment.md) | Platform viability analysis — vision vs. use cases gap analysis, GO/NO-GO*(pre dates adrs, and implementation decisions)*  |
 | [Behavioral Patterns](behavioral_patterns.md)   | 12 behavioral patterns extracted from scenarios — the first narrowing step                                                 |
-| [Architecture](architecture/)                   | Historical/reference architecture surface. Do not use over the charter for current classification.                         |
-| [ADRs](adrs/)                                   | Architecture Decision Records. ADR-006 through ADR-009 repair convergence-era classification drift.                        |
-| [Exploration](exploration/)                     | Historical decision proof — event storms, stress tests, coherence audits.                                                  |
-| [Experiments](experiments/)                     | Prototypes and scenario walk-throughs                                                                                       |
-| [Implementation](implementation/)               | Historical phase-era implementation plans and IDRs. Current code work is Ship-driven.                                      |
-| [Checkpoints](checkpoints/)                     | Historical project status snapshots.                                                                                        |
+| [ADRs](adrs/)                                   | Decision records. For atomization, use them through the professional-baseline closure and assessment docs.                 |
+| Legacy/status surfaces                          | `charter.md`, `flagged-positions.md`, `ships/`, convergence docs, architecture docs, implementation docs, experiments, and checkpoints are not atomization authority. |
