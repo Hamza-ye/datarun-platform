@@ -1,6 +1,6 @@
 # Operational Constraints Boundary Control
 
-Status: Draft dependency-aware control overlay
+Status: Atomization-ready dependency-aware control overlay
 
 This document preserves `../../constraints.md` as operational envelope authority without letting it become architecture or implementation authority. The constraints shaped the ADR path, but they do not decide mechanisms by themselves.
 

@@ -1,6 +1,6 @@
 # Baseline Stabilization Plan
 
-Status: Operating plan
+Status: Completed operating plan
 
 This plan defines the order for stabilizing the ADR-001 through ADR-005 baseline and its gaps before any further ADR assessment or platform-spec atomization.
 
@@ -132,8 +132,14 @@ A production team at this stage would stabilize the baseline first, then move th
 6. Turn policy gaps into product/operations decisions.
 7. Use later ADRs only as assessed inputs, not as superseding truth.
 
-## Current Recommended Next Work
+## Completed Stabilization Outcome
 
-1. Validate the system boundary map against `08-baseline-acceptance-check.md`, `04-architecture-baseline-v0.md`, `05-decision-gap-register.md`, and `09-identity-boundary-control.md`.
-2. Correct the boundary map only if ownership, forbidden coupling, or gap routing is inconsistent with the accepted baseline.
-3. Only then assess ADR-006-R through ADR-009 against the stabilized gaps and boundaries.
+This stabilization sequence has been completed through the professional-baseline overlays:
+
+1. `08-baseline-acceptance-check.md` accepted the ADR-001 through ADR-005 baseline.
+2. `07-system-boundary-map.md` was validated and corrected where needed.
+3. ADR-006-R through ADR-009 were assessed against the stabilized gaps and boundaries in `10` through `13`.
+4. Historical pattern-inventory material was assessed in `14`.
+5. Control overlays in `15` and `16` were added before atomization.
+
+Current atomization work should use the accepted baseline, gap register, validated boundary map, later-source assessments, and control overlays rather than restarting this stabilization sequence.

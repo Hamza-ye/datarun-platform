@@ -1,6 +1,6 @@
 # System Boundary Map
 
-Status: Draft boundary routing map from ADR-001 through ADR-005 baseline
+Status: Validated boundary routing map from ADR-001 through ADR-005 baseline
 
 This document maps the current platform baseline into engineering boundaries. It is not a new source of platform behavior and does not replace `04-architecture-baseline-v0.md` or `05-decision-gap-register.md`.
 
@@ -687,12 +687,11 @@ Each known gap has one primary owning boundary. Secondary boundaries may be affe
 | Reporting and aggregation | Reporting / Aggregation | Assignment / Authority / Sync; Projection / Workflow State | Platform-spec detailing, implementation/tooling design, operational policy |
 | Domain-agnostic proof gap | Configuration | Projection / Workflow State; Reporting / Aggregation | Product validation; formal decision only if new primitives are required |
 | Low-end device scale risk | Local Data Lifecycle | Event Log / Storage; Projection / Workflow State | Implementation/tooling design; formal decision if lifecycle changes canonical constraints |
-| ADR-006-R through ADR-009 assessment | Flag / Resolution | All touched boundaries | Later-source assessment |
-| General flag semantics | Flag / Resolution | Identity / Lineage; Assignment / Authority / Sync; Projection / Workflow State; Reporting / Aggregation | Later-source assessment; formal decision for baseline changes |
+| General flag semantics | Flag / Resolution | Identity / Lineage; Assignment / Authority / Sync; Projection / Workflow State; Reporting / Aggregation | Classified candidate material plus formal decision for baseline changes |
 
 ## Post-ADR Assessment Routing
 
-ADR-006-R through ADR-009 must be routed through this map after baseline acceptance and gap triage. A later claim must be classified as one of:
+ADR-006-R through ADR-009 have been routed through this map in `10` through `13`. Any future later claim must be classified as one of:
 
 - consistent elaboration of a settled boundary
 - valid closure candidate for a named gap owned by that boundary

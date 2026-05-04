@@ -98,6 +98,8 @@ No new gap is required from ADR-007 by itself. Existing gaps already cover the d
 - `Event schema and versioning tooling`
 - `Configuration authoring and deployment UX`
 
-## Recommended Next Step
+## Completed Follow-Up
 
-Assess ADR-008 next. ADR-008 should decide how far ADR-007's shape/type separation can be carried into the reference-field boundary without turning reference categories into broad lifecycle ownership.
+ADR-008 was assessed in `12-adr008-reference-fields-assessment.md`.
+
+During atomization, use this assessment to preserve the `type` versus `shape_ref` separation and the listed envelope guardrails.

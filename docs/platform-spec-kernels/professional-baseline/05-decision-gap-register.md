@@ -489,11 +489,11 @@ Priority:
 
 - P2 for platform spec skeleton if reporting capabilities are included.
 
-## Later-Source Assessment Gaps
+## Completed Later-Source Assessment
 
 ### ADR-006-R Through ADR-009 Assessment
 
-Classification: Later-source assessment gap
+Classification: Completed later-source assessment
 
 Affected baseline:
 
@@ -503,21 +503,27 @@ Affected baseline:
 - Configuration boundary
 - Projection and workflow
 
-Why open:
+Why closed:
 
-ADR-006-R through ADR-009 are quarantined until the ADR-001 through ADR-005 baseline and gap register are stable.
+ADR-006-R through ADR-009 were assessed against the accepted ADR-001 through ADR-005 baseline, validated boundary map, and gap register in `10` through `13`.
 
-Assessment rule:
+Assessment rule preserved:
 
 Each later claim must be classified as consistent elaboration, open-gap closure candidate, deferred implementation/spec detail, new unauthorized claim, conflict with closed baseline, or valid dispute requiring formal reopen.
 
-Closure path:
+Closure output:
 
-- Later-source assessment after baseline acceptance and gap triage.
+- `10-adr006r-flag-semantics-assessment.md`
+- `11-adr007-envelope-type-assessment.md`
+- `12-adr008-reference-fields-assessment.md`
+- `13-adr009-duality-rule-assessment.md`
 
-Priority:
+Atomization use:
 
-- P1 before using ADR-006-R through ADR-009 in any baseline/spec document.
+- Use the classified carry-forward candidates and hold-backs from `10` through `13`.
+- Do not treat ADR-006-R through ADR-009 as automatic authority over ADR-001 through ADR-005.
+
+## Later-Source Assessment Gaps
 
 ### General Flag Semantics
 
@@ -538,8 +544,9 @@ Keep flag category creation, conflict detection timing, source-only cascade, unr
 
 Closure path:
 
-- Later-source assessment for ADR-006/ADR-006-R carried claims.
-- Formal architecture decision only for claims that alter closed ADR-001 through ADR-005 flag boundaries or close a genuinely open flag-semantics gap.
+- Use `10-adr006r-flag-semantics-assessment.md` as classified candidate material.
+- Platform-spec detailing only for general flag semantics that do not alter closed ADR-001 through ADR-005 flag boundaries.
+- Formal architecture decision for claims that alter closed ADR-001 through ADR-005 flag boundaries or close a genuinely open flag-semantics gap.
 
 Priority:
 

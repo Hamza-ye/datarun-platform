@@ -129,7 +129,7 @@ Closed baseline items:
 - `system:auto_resolution/{policy_id}` actor attribution
 - unresolved flagged-event exclusion from workflow state-machine derivation until resolution
 
-This is not general flag semantics. ADR-006-R through ADR-009 remain quarantined assessment material.
+This is not general flag semantics. ADR-006-R through ADR-009 remain assessment material rather than automatic baseline authority.
 
 ## Bounded Context Expressions
 

@@ -94,6 +94,8 @@ Required gap/routing updates:
 - Add an explicit architecture decision gap for alias-cycle enforcement, read-side behavior, and resolution semantics.
 - Route that gap primarily to Identity / Lineage, with Flag / Resolution, Projection / Workflow State, and Event Log / Storage as secondary boundaries.
 
-## Recommended Next Step
+## Completed Follow-Up
 
-With the alias-cycle gap and routing recorded, assess ADR-007 next. ADR-007 is likely to determine whether ADR-006-R's references to bundled flag/identity shapes and event-stream anomaly representation can be accepted, narrowed, or rejected.
+The alias-cycle gap and routing were recorded, and ADR-007 through ADR-009 were assessed in `11` through `13`.
+
+During atomization, use this assessment only for the accepted carry-forward candidates and explicit hold-backs listed above.

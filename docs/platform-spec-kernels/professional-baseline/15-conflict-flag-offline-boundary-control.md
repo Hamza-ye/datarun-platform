@@ -1,6 +1,6 @@
 # Conflict Flag Offline Boundary Control
 
-Status: Draft dependency-aware control overlay
+Status: Atomization-ready dependency-aware control overlay
 
 This document prevents the accepted conflict, flag, and offline-default surfaces from collapsing into one broad implementation boundary. It does not re-decide ADR-001 through ADR-005, does not absorb ADR-006-R through ADR-009 as authority, and does not reuse pre-convergence primitive maps as final architecture.
 

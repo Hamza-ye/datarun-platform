@@ -105,6 +105,8 @@ No new gap is required from ADR-008 by itself. Existing gaps and open/deferred i
 - `Formal Pattern Registry schema format`
 - `Configuration authoring and deployment UX`
 
-## Recommended Next Step
+## Completed Follow-Up
 
-Assess ADR-009 next. ADR-009 should decide whether ADR-008's reference-vs-referent distinction composes with platform-fixed versus deployer-configured duality before final platform-spec atomization.
+ADR-009 was assessed in `13-adr009-duality-rule-assessment.md`.
+
+During atomization, use this assessment to preserve the reference-versus-referent distinction without turning reference fields into broad lifecycle ownership.

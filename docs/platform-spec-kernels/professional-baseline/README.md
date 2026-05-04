@@ -41,7 +41,7 @@ This folder formalizes that operating model.
 - `14-pattern-inventory-walkthrough-assessment.md` treats `28-pattern-inventory-walkthrough.md` as candidate material for pattern inventory/schema, not as authority or final pattern specification.
 - `15-conflict-flag-offline-boundary-control.md` keeps the validated principles visible while routing accepted conflict, flag, and offline-default behavior through the stabilized boundaries before platform-spec atomization.
 - `16-operational-constraints-boundary-control.md` routes operational constraints such as offline field work, low-end devices, compliance support, interoperability compatibility, responsiveness, and configuration propagation into accepted mechanisms or explicit gaps.
-- ADR-006-R through ADR-009 are quarantined assessment material until the baseline is accepted and gap-checked.
+- ADR-006-R through ADR-009 remain assessment material. Their claims are classified in `10` through `13`; they are not automatic authority over ADR-001 through ADR-005.
 
 ## Working Rule
 

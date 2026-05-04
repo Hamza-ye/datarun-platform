@@ -10,7 +10,7 @@ This file is a compact closure overlay for ADR-001 through ADR-005. It does not 
 - Source authority remains the approved ADR/exploration sources named in the staging kernels.
 - "Covered by" means the listed staging kernels are represented by the compact closure item; it does not remove or rewrite them.
 - If a later source conflicts with a closed item here, classify the later claim as conflict/dispute/contextual rather than silently changing this baseline.
-- ADR-006-R through ADR-009 are quarantined until this baseline is explicitly accepted as the comparison surface.
+- ADR-006-R through ADR-009 are not closure sources for this register. They must be assessed separately against this baseline rather than silently changing it.
 
 ## Settled Platform Kernels
 
@@ -303,7 +303,7 @@ Source/covered-by anchors:
 
 ## Dispute / Assessment Lane For ADR-006+
 
-ADR-006-R through ADR-009 are quarantined until the ADR-001 through ADR-005 closure baseline is accepted. They are not used as closure sources in this file.
+ADR-006-R through ADR-009 are not used as closure sources in this file. Their claims must be assessed separately against the ADR-001 through ADR-005 closure baseline.
 
 Later assessment must classify each ADR-006-R through ADR-009 claim as one of:
 

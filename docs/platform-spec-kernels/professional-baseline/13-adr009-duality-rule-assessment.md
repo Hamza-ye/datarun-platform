@@ -110,6 +110,8 @@ ADR-007, ADR-008, and ADR-009 together form a useful classification triad:
 - ADR-008: reference is not referent.
 - ADR-009: mechanism is not instance.
 
-## Recommended Next Step
+## Completed Follow-Up
 
-Close the later-source assessment sequence by updating the professional-baseline standing summary, then move into platform-spec atomization using the accepted carry-forward candidates and explicit hold-backs from `10`, `11`, `12`, and this assessment.
+The later-source assessment sequence is closed for ADR-006-R through ADR-009.
+
+During atomization, use the accepted carry-forward candidates and explicit hold-backs from `10`, `11`, `12`, and this assessment together with the later control overlays in `15` and `16`.

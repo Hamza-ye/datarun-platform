@@ -99,8 +99,12 @@ Items that need careful handling during the next passes:
 - Configuration must not become deployer-authored platform logic.
 - Reporting, triggers, and local lifecycle must not redefine event-log source of truth, authority, or sync-scope semantics.
 
-## Next Order
+## Completed Follow-Up
 
-1. Validate `07-system-boundary-map.md` against the accepted baseline and accepted gaps.
-2. Use the validated boundary map to route ADR-006-R through ADR-009 claims.
-3. Draft the first platform-spec skeleton only after later-source claims are classified or explicitly deferred.
+This acceptance check led to the completed boundary-validation and later-source assessment sequence:
+
+1. `07-system-boundary-map.md` was validated against the accepted baseline and accepted gaps.
+2. ADR-006-R through ADR-009 claims were routed through the validated boundary map in `10` through `13`.
+3. Additional control overlays were added for identity, conflict/flag/offline behavior, and operational constraints before platform-spec atomization.
+
+Current atomization input should use the full professional-baseline set through `16-operational-constraints-boundary-control.md`.
