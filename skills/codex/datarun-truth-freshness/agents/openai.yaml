@@ -1,4 +1,0 @@
-interface:
-  display_name: "Datarun Truth Freshness"
-  short_description: "Check charter, ledger, ADR, FP freshness"
-  default_prompt: "Use $datarun-truth-freshness to check whether Datarun's charter, ledger, ADRs, FPs, and git history agree before planning work."
