@@ -10,6 +10,7 @@ hs_err_pid*
 server/.mvn/wrapper/maven-wrapper.jar
 
 # IDE
+.review/
 .idea/
 .codex
 *.iml
