@@ -114,10 +114,11 @@ Domain-specific examples may explain behavior, but the artifact language should 
 - `03-user-roles-and-operational-contexts.md`: current Session 3 product role and operating-context model.
 - `04-core-operational-journeys.md`: current Session 4 reusable operational journey model.
 - `05-information-architecture.md`: current Session 5 product surface and navigation model.
+- `06-product-vocabulary-alignment.md`: current Session 6 vocabulary control and baseline-mapping artifact.
 
 ## Current Next Step
 
-Draft `06-product-vocabulary-alignment.md`, using Sessions 1 through 5 as the immediate product-alignment inputs.
+Draft `07-interaction-state-model.md`, using Sessions 1 through 6 as the immediate product-alignment inputs.
 
 ## Working Rule
 
