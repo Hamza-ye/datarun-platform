@@ -68,6 +68,7 @@ P3, policy/product-timed unless a first deployment needs them:
 - Assessment visibility.
 - Sensitive-subject policy beyond shape/activity sensitivity.
 - Grace-period policy.
+- Temporary authority and offline revocation reconciliation.
 - Permission table details.
 - Cross-level distribution visibility.
 - Domain-agnostic proof gap.
@@ -107,4 +108,4 @@ This acceptance check led to the completed boundary-validation and later-source 
 2. ADR-006-R through ADR-009 claims were routed through the validated boundary map in `10` through `13`.
 3. Additional control overlays were added for identity, conflict/flag/offline behavior, and operational constraints before platform-spec atomization.
 
-Current atomization input should use the full professional-baseline set through `16-operational-constraints-boundary-control.md`.
+Current atomization input should use the full professional-baseline set through `17-authorization-visibility-boundary-control.md`.

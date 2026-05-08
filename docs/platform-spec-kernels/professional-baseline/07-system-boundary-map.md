@@ -665,6 +665,7 @@ Each known gap has one primary owning boundary. Secondary boundaries may be affe
 | Domain conflict automation outside workflow | Flag / Resolution | Projection / Workflow State; Configuration | Formal architecture decision or later-source assessment |
 | Subject-based scope and auditor access | Assignment / Authority / Sync | Reporting / Aggregation; Local Data Lifecycle | Formal architecture decision or operational policy |
 | Shared device actor scope | Assignment / Authority / Sync | Identity / Lineage; Event Envelope / Schema | Formal architecture decision or implementation/tooling design |
+| Temporary authority and offline revocation reconciliation | Assignment / Authority / Sync | Flag / Resolution; Projection / Workflow State; Local Data Lifecycle | Operational policy plus platform-spec detailing; formal decision if sync/projection or scope semantics change |
 | Alias-cycle enforcement and resolution semantics | Identity / Lineage | Flag / Resolution; Projection / Workflow State; Event Log / Storage | Formal architecture decision before identity/flag atomization if in scope |
 | Assessment visibility | Assignment / Authority / Sync | Reporting / Aggregation | Formal architecture decision or operational policy |
 | Sensitive-subject policy beyond shape/activity sensitivity | Configuration | Assignment / Authority / Sync; Local Data Lifecycle | Operational policy; formal decision if access or lifecycle semantics change |

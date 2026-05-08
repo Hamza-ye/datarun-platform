@@ -112,6 +112,36 @@ Priority:
 - P1 if shared devices are required for initial deployments.
 - P3 if deployment model assumes one actor session per device.
 
+### Temporary Authority And Offline Revocation Reconciliation
+
+Classification: Operational policy gap with architecture decision trigger
+
+Affected baseline:
+
+- Authorization and sync
+- Detect-before-act and accept-and-flag discipline
+- Local data lifecycle under scope changes
+- Flag / Resolution if late authorization anomalies are surfaced as flags
+
+Why open:
+
+`../../access-control-scenario.md` requires temporary access grants, clean revocation, graceful role/responsibility changes, and offline enforcement using last-known rules. ADR-003 closes assignment-derived access, sync scope as access scope, authority as projection, additive scope expansion, and selective-retain scope contraction. It does not close the exact policy for temporary grant expiry, grace periods after revocation, role handoff windows, or how late work created under stale local authority is surfaced during sync.
+
+Later-source assessment:
+
+Claims may elaborate this gap only if they preserve assignment-derived access, projection-derived authority, immutable event history, original-reference authorization, and scope-filtered sync. Claims that add stored `authority_context`, group/identity-provider direct authority, arbitrary deployer access logic, or field-level sensitivity conflict with the baseline.
+
+Closure path:
+
+- Operational policy definition if temporary authority, revocation, and handoff behavior can be expressed with existing assignment, role, scope, activity/context, and sync-scope mechanisms.
+- Platform-spec detailing for required projection inputs, sync-time anomaly surfacing, and local last-known enforcement language.
+- Formal architecture decision if the policy requires new scope semantics, new envelope fields, stored authority snapshots, a general authorization-flag invariant, or a different sync/projection rule for stale local authority.
+
+Priority:
+
+- P1 before authorization/sync atomization if the first platform spec includes campaigns, emergency cover, temporary grants, or offline revocation behavior.
+- P3 if initial atomization can explicitly defer temporary-authority workflow and grace-period policy.
+
 ### Alias-Cycle Enforcement And Resolution Semantics
 
 Classification: Architecture decision gap

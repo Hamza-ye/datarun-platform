@@ -181,6 +181,7 @@ Current open/deferred areas:
 - assessment visibility
 - sensitive-subject policy beyond shape/activity-level sensitivity classification
 - grace-period policy
+- temporary authority and offline revocation reconciliation
 - permission table details
 - cross-level distribution visibility
 - domain conflict resolution automation outside closed ADR-005 workflow cases

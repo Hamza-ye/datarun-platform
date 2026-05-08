@@ -28,6 +28,7 @@ This folder formalizes that operating model.
 - `14-pattern-inventory-walkthrough-assessment.md`: assessment of the historical pattern-inventory walkthrough as candidate material for Pattern Registry inventory and schema gaps.
 - `15-conflict-flag-offline-boundary-control.md`: dependency-aware overlay that keeps conflict detection, accept-and-flag, detect-before-act, flag lifecycle, and offline-default behavior from collapsing into one broad boundary during atomization.
 - `16-operational-constraints-boundary-control.md`: dependency-aware overlay that preserves `constraints.md` as operational envelope authority without turning it into architecture or implementation authority.
+- `17-authorization-visibility-boundary-control.md`: dependency-aware overlay that preserves `access-control-scenario.md` as authorization/visibility pressure without mutating ADR-003 or widening deployer access-control authority.
 
 Related pre-operations material:
 
@@ -45,6 +46,7 @@ Related pre-operations material:
 - `14-pattern-inventory-walkthrough-assessment.md` treats `28-pattern-inventory-walkthrough.md` as candidate material for pattern inventory/schema, not as authority or final pattern specification.
 - `15-conflict-flag-offline-boundary-control.md` keeps the validated principles visible while routing accepted conflict, flag, and offline-default behavior through the stabilized boundaries before platform-spec atomization.
 - `16-operational-constraints-boundary-control.md` routes operational constraints such as offline field work, low-end devices, compliance support, interoperability compatibility, responsiveness, and configuration propagation into accepted mechanisms or explicit gaps.
+- `17-authorization-visibility-boundary-control.md` routes contextual authority, hierarchy exceptions, temporary authority, role transitions, and offline authorization disagreement into accepted mechanisms or explicit gaps.
 - ADR-006-R through ADR-009 remain assessment material. Their claims are classified in `10` through `13`; they are not automatic authority over ADR-001 through ADR-005.
 - Pre-operations readiness and decision-board material lives in `../pre-operations/` so assessment/process material and draft briefs do not mix with baseline artifacts.
 
@@ -54,4 +56,4 @@ Do not continue broad extraction when the next problem is baseline clarity. Use 
 
 ## Current Next Step
 
-Use `../pre-operations/04-accepted-pre-atomization-decisions.md`, `15-conflict-flag-offline-boundary-control.md`, and `16-operational-constraints-boundary-control.md` as the small atomization-planning surface. Treat the decision briefs in `../pre-operations/` as stakeholder rationale, not instructions.
+Use `../pre-operations/04-accepted-pre-atomization-decisions.md`, `15-conflict-flag-offline-boundary-control.md`, `16-operational-constraints-boundary-control.md`, and `17-authorization-visibility-boundary-control.md` as the small atomization-planning surface. Treat the decision briefs in `../pre-operations/` as stakeholder rationale, not instructions.
