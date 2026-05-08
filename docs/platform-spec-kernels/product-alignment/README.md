@@ -112,10 +112,11 @@ Domain-specific examples may explain behavior, but the artifact language should 
 - `01-phase-1-scenario-boundary-map.md`: accepted Session 1 boundary and tension map.
 - `02-product-experience-principles.md`: current Session 2 product experience principles.
 - `03-user-roles-and-operational-contexts.md`: current Session 3 product role and operating-context model.
+- `04-core-operational-journeys.md`: current Session 4 reusable operational journey model.
 
 ## Current Next Step
 
-Draft `04-core-operational-journeys.md`, using Sessions 1 through 3 as the immediate product-alignment inputs.
+Draft `05-information-architecture.md`, using Sessions 1 through 4 as the immediate product-alignment inputs.
 
 ## Working Rule
 
