@@ -73,6 +73,7 @@ For domain and lineage background only, read:
 | Area                                            | Contents                                                                                                                    |
 | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | [Professional Baseline](platform-spec-kernels/professional-baseline/README.md) | Current entrypoint for platform-spec atomization. |
+| [Product Alignment](platform-spec-kernels/product-alignment/README.md) | Pre-atomization product/UX alignment track that reconnects Phase 1 scenarios, operational workflows, and user expectations to the accepted architecture baseline. |
 | [Platform Spec Kernels](platform-spec-kernels/) | Extraction state, staging kernels, ADR-001 through ADR-005 closure register, and professional-baseline controls. |
 | [Scenarios](scenarios/README.md)                | 21 real-world operational situations the platform must support — domain perspective, no solution prescription              |
 | [Constraints](constraints.md)                   | Operational context and boundaries — target users, connectivity, scale, data sensitivity                                   |

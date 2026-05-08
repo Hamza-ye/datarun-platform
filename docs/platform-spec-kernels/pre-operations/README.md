@@ -45,6 +45,8 @@ For atomization planning, use only:
 1. `04-accepted-pre-atomization-decisions.md`
 2. `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 3. `../professional-baseline/16-operational-constraints-boundary-control.md`
+4. `../professional-baseline/17-authorization-visibility-boundary-control.md`
+5. `../product-alignment/README.md`
 
 Open the stakeholder briefs only when the accepted record is not enough to understand the tradeoff.
 

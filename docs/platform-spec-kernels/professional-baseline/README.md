@@ -33,6 +33,7 @@ This folder formalizes that operating model.
 Related pre-operations material:
 
 - `../pre-operations/README.md`: readiness assessment, accepted pre-atomization decision record, and decision-board entrypoint for reviewing high-impact choices before affected atomization.
+- `../product-alignment/README.md`: product/UX alignment track for reconnecting Phase 1 scenarios, workflows, user expectations, and the accepted architecture baseline before broad atomization.
 
 ## Current Standing
 
@@ -56,4 +57,4 @@ Do not continue broad extraction when the next problem is baseline clarity. Use 
 
 ## Current Next Step
 
-Use `../pre-operations/04-accepted-pre-atomization-decisions.md`, `15-conflict-flag-offline-boundary-control.md`, `16-operational-constraints-boundary-control.md`, and `17-authorization-visibility-boundary-control.md` as the small atomization-planning surface. Treat the decision briefs in `../pre-operations/` as stakeholder rationale, not instructions.
+Use `../product-alignment/README.md` as the next pre-atomization working surface. It should consume `../pre-operations/04-accepted-pre-atomization-decisions.md`, `15-conflict-flag-offline-boundary-control.md`, `16-operational-constraints-boundary-control.md`, and `17-authorization-visibility-boundary-control.md` as guardrails while stabilizing product behavior before broad atomization resumes. Treat the decision briefs in `../pre-operations/` as stakeholder rationale, not instructions.
