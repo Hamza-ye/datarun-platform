@@ -113,10 +113,11 @@ Domain-specific examples may explain behavior, but the artifact language should 
 - `02-product-experience-principles.md`: current Session 2 product experience principles.
 - `03-user-roles-and-operational-contexts.md`: current Session 3 product role and operating-context model.
 - `04-core-operational-journeys.md`: current Session 4 reusable operational journey model.
+- `05-information-architecture.md`: current Session 5 product surface and navigation model.
 
 ## Current Next Step
 
-Draft `05-information-architecture.md`, using Sessions 1 through 4 as the immediate product-alignment inputs.
+Draft `06-product-vocabulary-alignment.md`, using Sessions 1 through 5 as the immediate product-alignment inputs.
 
 ## Working Rule
 
