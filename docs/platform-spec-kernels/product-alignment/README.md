@@ -49,6 +49,7 @@ Architecture guardrails:
 - `../professional-baseline/04-architecture-baseline-v0.md`
 - `../professional-baseline/05-decision-gap-register.md`
 - `../professional-baseline/07-system-boundary-map.md`
+- `../professional-baseline/09-identity-boundary-control.md`
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
@@ -82,7 +83,7 @@ They may not:
 - add event envelope fields
 - rename architecture mechanisms as if the baseline changed
 - close architecture gaps
-- turn scratch vocabulary into platform vocabulary without mapping
+- turn temporary brainstorming vocabulary into platform vocabulary without mapping
 - treat a UI concept as canonical storage or projection truth
 - bypass `../professional-baseline/02-change-control.md`
 

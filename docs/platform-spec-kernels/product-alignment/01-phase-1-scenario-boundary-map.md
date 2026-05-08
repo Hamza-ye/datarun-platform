@@ -600,7 +600,7 @@ User-role work should separate:
 - auditor / external reviewer
 - system actor only as architecture/product explanation where needed, not a normal user role
 
-Vocabulary alignment must be treated as high risk because scratch product terms are useful but not baseline authority. In particular, later sessions must map:
+Vocabulary alignment must be treated as high risk because product terms can easily drift into architecture claims. In particular, later sessions must map:
 
 - "record" to the accepted event/log/history model
 - "template" to shape/configuration without weakening baseline `shape_ref`

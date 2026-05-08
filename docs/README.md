@@ -57,7 +57,8 @@ For platform-spec atomization, read in this order:
 5. **Control overlays**:
    [Identity](platform-spec-kernels/professional-baseline/09-identity-boundary-control.md),
    [Conflict/Flag/Offline](platform-spec-kernels/professional-baseline/15-conflict-flag-offline-boundary-control.md),
-   and [Operational Constraints](platform-spec-kernels/professional-baseline/16-operational-constraints-boundary-control.md)
+   [Operational Constraints](platform-spec-kernels/professional-baseline/16-operational-constraints-boundary-control.md),
+   and [Authorization/Visibility](platform-spec-kernels/professional-baseline/17-authorization-visibility-boundary-control.md)
 
 For domain and lineage background only, read:
 

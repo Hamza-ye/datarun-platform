@@ -256,13 +256,13 @@ The product needs a coherent language across records, subjects, assignments, rev
 
 Architecture guardrail:
 
-Vocabulary must not collapse reference fields into referent lifecycles, mechanism into instance, product UI state into canonical storage, or scratch terms into baseline authority.
+Vocabulary must not collapse reference fields into referent lifecycles, mechanism into instance, product UI state into canonical storage, or temporary brainstorming language into baseline authority.
 
 Later-session tests:
 
 - Vocabulary alignment must explicitly map high-risk terms: record, subject, target, unit, work item, activity, scope, assignment, review, transfer, case/situation, flag, conflict, alert, report.
 - It must state forbidden interpretations for each high-risk term.
-- Scratch vocabulary may be consulted only as temporary candidate language and must be removed from the repo or dereferenced during closeout.
+- Temporary brainstorming vocabulary may be consulted only as candidate language and must be removed from the repo or dereferenced during closeout.
 
 ## PX12. Product Slices Must Prove Composition Before Breadth
 
