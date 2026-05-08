@@ -29,7 +29,7 @@ Guardrails:
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
 - `../pre-operations/04-accepted-pre-atomization-decisions.md`
 
-Scratch files in `.review/ux-draft-and-brainstorming/` are intentionally not used in this first artifact except as a reminder that product vocabulary must be aligned later. Vocabulary decisions belong in `06-product-vocabulary-alignment.md`.
+Vocabulary decisions belong in `06-product-vocabulary-alignment.md`.
 
 ## Session 1 Finding
 

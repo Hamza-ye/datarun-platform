@@ -54,12 +54,18 @@ Architecture guardrails:
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
 - `../pre-operations/04-accepted-pre-atomization-decisions.md`
 
-Scratch / brainstorming material:
+Temporary scratch / brainstorming material:
 
 - `../../../.review/ux-draft-and-brainstorming/phase-1-platform-spec.md`
 - `../../../.review/ux-draft-and-brainstorming/phase-1-platform-vocabulary.md`
 
-Scratch material is non-authoritative. It may be used only during vocabulary and interaction-model sessions as candidate product language. It must not override the professional baseline, event-envelope closure, gap register, or domain-source wording.
+Scratch material is non-authoritative. It may be used only during the product-alignment process as candidate product language. It must not override the professional baseline, event-envelope closure, gap register, or domain-source wording.
+
+Reference hygiene:
+
+- Keep references to scratch material centralized in this README.
+- Do not cite scratch files from individual product-alignment artifacts unless a session explicitly requires a temporary comparison note.
+- Before this product-alignment track is marked complete, delete the scratch files or move them out of the repo, then remove this subsection.
 
 ## Non-Authority Rule
 
@@ -98,6 +104,16 @@ Domain-specific examples may explain behavior, but the artifact language should 
 8. `08-ux-gap-routing.md`: product/UX gaps routed to the existing gap register or proposed as explicit additions.
 9. `09-first-vertical-slice.md`: first product-backed slice for atomization and implementation progression.
 10. `10-atomization-readiness-from-product.md`: final readiness check before broad atomization resumes.
+11. `11-alignment-closeout.md`: close the product-alignment track, remove temporary scratch references, and state the stable atomization input surface.
+
+## Current Outputs
+
+- `01-phase-1-scenario-boundary-map.md`: accepted Session 1 boundary and tension map.
+- `02-product-experience-principles.md`: current Session 2 product experience principles.
+
+## Current Next Step
+
+Draft `03-user-roles-and-operational-contexts.md`, using `02-product-experience-principles.md` and `01-phase-1-scenario-boundary-map.md` as the immediate product-alignment inputs.
 
 ## Working Rule
 
