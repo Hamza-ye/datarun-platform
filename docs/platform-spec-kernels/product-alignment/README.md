@@ -97,7 +97,7 @@ Domain-specific examples may explain behavior, but the artifact language should 
 
 1. `01-phase-1-scenario-boundary-map.md`: group Phase 1 scenarios by product boundary and tension.
 2. `02-product-experience-principles.md`: product-facing principles derived from domain commitments and operational constraints.
-3. `03-user-roles-and-operational-contexts.md`: user tiers, expectations, and working environments.
+3. `03-user-roles-and-operational-contexts.md`: product operating contexts, expectations, and working environments.
 4. `04-core-operational-journeys.md`: main user journeys and operational workflows.
 5. `05-information-architecture.md`: product navigation and work surfaces.
 6. `06-product-vocabulary-alignment.md`: product terms mapped to baseline terms and forbidden interpretations.
@@ -111,10 +111,11 @@ Domain-specific examples may explain behavior, but the artifact language should 
 
 - `01-phase-1-scenario-boundary-map.md`: accepted Session 1 boundary and tension map.
 - `02-product-experience-principles.md`: current Session 2 product experience principles.
+- `03-user-roles-and-operational-contexts.md`: current Session 3 product role and operating-context model.
 
 ## Current Next Step
 
-Draft `03-user-roles-and-operational-contexts.md`, using `02-product-experience-principles.md` and `01-phase-1-scenario-boundary-map.md` as the immediate product-alignment inputs.
+Draft `04-core-operational-journeys.md`, using Sessions 1 through 3 as the immediate product-alignment inputs.
 
 ## Working Rule
 
