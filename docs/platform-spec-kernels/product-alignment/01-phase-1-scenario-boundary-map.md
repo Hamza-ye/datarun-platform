@@ -23,6 +23,7 @@ Guardrails:
 - `../professional-baseline/04-architecture-baseline-v0.md`
 - `../professional-baseline/05-decision-gap-register.md`
 - `../professional-baseline/07-system-boundary-map.md`
+- `../professional-baseline/09-identity-boundary-control.md`
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
@@ -140,11 +141,16 @@ Guardrail routing:
 - Projection / Workflow State
 - Flag / Resolution
 
+Identity control warning:
+
+`../professional-baseline/09-identity-boundary-control.md` is required guardrail material for this boundary. Product language such as "subject", "target", "unit", "thing", "case", "shipment", "campaign", or "work" must not imply that one broad Identity / Lineage subsystem owns every referent lifecycle. Identity / Lineage owns subject continuity where the referent has subject-lineage semantics. Actor authority, assignment scope, process state, campaign/shipment/case lifecycle, pending match, reporting identity views, and conflict-resolution lifecycle route elsewhere.
+
 Hold-backs:
 
 - alias-cycle behavior
 - user-facing identity resolution UX
 - duplicate-detection policy
+- process identity and pending-match UX
 - product vocabulary for "subject", "target", "unit", and "registry"
 
 ### 3. Responsibility, Authority, And Visibility
@@ -602,6 +608,7 @@ Vocabulary alignment must be treated as high risk because scratch product terms 
 - "activity" to deployer-configured activity and `activity_ref`
 - "scope" to Assignment / Authority / Sync and Configuration boundaries
 - "flag/conflict" to closed workflow flag behavior plus open general flag semantics
+- "subject", "target", "unit", "case", "shipment", and "campaign" without collapsing referent vocabulary into one broad identity lifecycle owner
 
 ## Session 1 Output
 
