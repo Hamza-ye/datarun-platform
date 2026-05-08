@@ -53,6 +53,31 @@ Do not infer from a product term:
 
 When a product term needs a stronger meaning than this artifact allows, route the pressure to `08-ux-gap-routing.md`, the professional-baseline gap register, or change control.
 
+## Vocabulary Layering Rule
+
+Product vocabulary belongs to the operational surface and product translation layer. It does not replace the platform core's language.
+
+Use this layer split:
+
+| Layer | Speaks In | Responsibility |
+|---|---|---|
+| Platform core | events, envelope, assignments, sync scope, projections, configuration, Pattern Registry, flags, lineage | Preserve accepted architecture semantics and invariants |
+| Product translation layer | product projections, read models, action affordances, authority results, freshness, routing, explanations | Translate core facts and decisions into user-facing surfaces |
+| Operational surface | work, records, targets, review, setup, evidence, exceptions, sync status | Help users understand and act without learning platform internals |
+
+The operational surface may present work, records, targets, review, setup, evidence, exceptions, freshness, and sync status. The core still answers through accepted platform mechanisms: immutable events, projection-derived state, assignment-derived authority, scoped sync, bounded configuration, and accepted flag behavior.
+
+This means:
+
+- `Work` may be a surface and read-model concept, but not a core storage primitive.
+- `Record` may be user-facing history language, but events remain canonical storage.
+- `Operational Target` may help users orient, but it does not create broad identity ownership.
+- `Review`, `Transfer`, and `Follow-Up` may be operational flows, but their state remains derived from accepted event and pattern behavior.
+- `Evidence` may organize traceability, but it is not a second source of truth.
+- `Sync Status` may explain local/central visibility, but it does not define sync protocol.
+
+If later atomization needs a product term to become a core primitive, that is not vocabulary cleanup. It is architecture pressure and must route through gap review or change control.
+
 ## Term Classes
 
 Use these classes consistently:
