@@ -1,0 +1,65 @@
+# Platform Specification Atomization Workspace
+
+Status: Planning workspace
+
+This folder is the working area for turning the accepted architecture baseline into small, reviewable, implementation-facing platform specification atoms.
+
+It is not an evidence archive and it is not a replacement for the accepted baseline. Final spec atoms must be drafted from the accepted baseline, the decision gap register, the boundary map, and the boundary-control overlays named below.
+
+## Goal
+
+Turn the accepted baseline into small, reviewable, implementation-facing specs where every atom has:
+
+- one owner
+- one primary boundary
+- explicit contracts
+- explicit forbidden couplings
+- known open gaps
+- a controlled writing and review order
+
+## Source Authority
+
+Primary guardrails:
+
+- `../professional-baseline/04-architecture-baseline-v0.md`
+- `../professional-baseline/05-decision-gap-register.md`
+- `../professional-baseline/07-system-boundary-map.md`
+- `../professional-baseline/09-identity-boundary-control.md`
+- `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
+- `../professional-baseline/16-operational-constraints-boundary-control.md`
+- `../professional-baseline/17-authorization-visibility-boundary-control.md`
+- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../professional-baseline/18-envelope-shape-parametrization-boundary-control.md`
+- `../professional-baseline/19-envelope-shape-parametrization-definitions.md`
+
+Supporting process references:
+
+- `../professional-baseline/02-change-control.md`
+- `../professional-baseline/03-artifact-definitions.md`
+- `../pre-operations/01-decision-board-operating-model.md`
+
+## Folder Contents
+
+- `process/01-atomization-operating-plan.md`: the multi-session professional process for decomposition, drafting, review, and change control.
+- `process/02-spec-atom-template.md`: the required template for every future platform spec atom.
+- `process/03-atom-inventory-and-writing-order.md`: the initial decomposition map and iterative writing order.
+- `atoms/`: reserved for future accepted and draft platform specification atoms.
+
+## Non-Goals
+
+This workspace must not:
+
+- create platform behavior directly from ADR prose or exploration prose
+- close gaps without the change-control process
+- add event-envelope fields, type values, authority shortcuts, tenant/user/group authority, or canonical projection state
+- turn product surfaces, role labels, queues, or workflow labels into platform classes
+- collapse multiple boundaries into one convenience subsystem
+
+## Current Next Step
+
+Use `process/01-atomization-operating-plan.md` to run the first session:
+
+1. confirm source authority and hold-backs
+2. accept the initial atom inventory
+3. draft only the first foundation atom batch
+4. review each atom against the boundary checklist before accepting it
