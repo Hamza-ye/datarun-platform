@@ -62,7 +62,7 @@ atoms:
   - id: SPEC-002
     title: Glossary And Core Definitions
     file: atoms/02-glossary-and-core-definitions.md
-    status: planned
+    status: draft
     batch: 1B
     boundary: cross-boundary-definitions
     owner_role: Architecture Steward
@@ -78,6 +78,11 @@ atoms:
       - SPEC-007
     source_basis:
       - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+      - pre-operations/04-accepted-pre-atomization-decisions.md
       - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
       - professional-baseline/19-envelope-shape-parametrization-definitions.md
     github_issue: null

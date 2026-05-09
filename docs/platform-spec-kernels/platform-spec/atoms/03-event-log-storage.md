@@ -65,13 +65,13 @@ This atom does not own:
 
 | Term | Meaning In This Atom | Must Not Mean |
 |---|---|---|
-| Event log | The append-only canonical store of accepted immutable events | A mutable record table, action-log sidecar, or projection cache |
-| Operational fact | A valid accepted event preserved as historical fact | A guarantee that the event is clean, conflict-free, authorized for all downstream effects, or workflow-valid |
-| Append-only | Accepted events are added as new facts; interpretation changes through later events and projections | No validation, no correction, or no lifecycle policy |
-| Projection | Derived state computed from events and relevant configuration/pattern definitions | Canonical storage or directly patchable truth |
-| Read model | A materialized view, cache, summary, report, or query shape derived from events | Source of truth |
-| Projection rebuild | Recomputing derived state from available event subsets | Rewriting history or repairing canonical state by patching projections |
-| Event subset | The events available to a server or device under sync/access/local lifecycle constraints | Complete global history on every device |
+| Event log | The append-only canonical store of accepted immutable events | Mutable record table, action-log sidecar, projection cache, or queue store |
+| Operational fact | A valid accepted event preserved as historical fact | Proof that every downstream effect is authorized, conflict-free, workflow-valid, or clean |
+| Append-only | Accepted events are added as new facts, and later interpretation changes through later events and projections | No validation, no correction path, no retention policy, or no lifecycle policy |
+| Projection | Derived state or read model computed from events plus relevant configuration and pattern definitions | Canonical truth or directly patchable source of state |
+| Read model | Materialized view, cache, summary, report, queue, status view, or query shape derived from events | Source of operational truth |
+| Projection rebuild | Recomputing derived state from the available event subset and relevant configuration | Rewriting history or repairing canonical state by patching projections |
+| Event subset | Events available to a server or device under sync, access, and local lifecycle constraints | Complete global history on every device |
 
 ## Invariants
 
@@ -180,3 +180,9 @@ Architecture Steward review, 2026-05-10:
 - Pass for draft status. The atom preserves Event Log / Storage as the singular owner of append-only canonical operational facts and keeps projections, reports, queues, dashboards, and UI state derived.
 - Source-basis cleanup: `90-open-decisions.md` and `91-rejected-paths.md` are dependencies and review registers, not accepted source authority for this atom.
 - Acceptance remains gated by the planned glossary reconciliation and the open-gap/register acceptance path; this review does not promote the atom out of Draft.
+
+Glossary reconciliation, 2026-05-10:
+
+- Reconciled local definitions for event log, operational fact, append-only, projection, read model, projection rebuild, and event subset against `02-glossary-and-core-definitions.md`.
+- The atom now consumes glossary terms while retaining Event Log / Storage-specific contracts and invariants.
+- Acceptance remains gated by future atom acceptance review; reconciliation does not promote this atom out of Draft.
