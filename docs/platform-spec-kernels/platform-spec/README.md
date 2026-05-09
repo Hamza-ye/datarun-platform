@@ -40,11 +40,12 @@ Supporting process references:
 
 ## Folder Contents
 
+- `START-HERE.md`: short orientation guide for humans and agents. It routes work without becoming architecture authority.
 - `atom-registry.yml`: compact machine-readable lookup for atom status, owner, boundary, batch, dependencies, and next work. Source-basis paths in the registry are rooted at `docs/platform-spec-kernels/`.
 - `process/01-atomization-operating-plan.md`: the multi-session professional process for decomposition, drafting, review, and change control.
 - `process/02-spec-atom-template.md`: the required template for every future platform spec atom.
 - `process/03-atom-inventory-and-writing-order.md`: the initial decomposition map and iterative writing order.
-- `atoms/`: reserved for future accepted and draft platform specification atoms.
+- `atoms/`: draft and accepted platform specification atoms.
 
 ## Non-Goals
 
@@ -59,16 +60,15 @@ This workspace must not:
 
 ## Agent Start Rule
 
-At the start of each platform-spec session, agents must read `atom-registry.yml` first, then the operating plan, then only the atom and source files needed for the selected work.
+At the start of each platform-spec session, agents must read `START-HERE.md`, then `atom-registry.yml`, then only the operating-plan, atom, dependency, and source-basis files needed for the selected work.
 
 If an atom path, status, owner role, boundary, batch, dependency, or blocking relationship changes, update `atom-registry.yml` in the same commit.
 
 ## Current Next Step
 
-Use `atom-registry.yml` and `process/01-atomization-operating-plan.md` to run the next session:
+Use `START-HERE.md` and `atom-registry.yml` to run the next session:
 
-1. read the registry and operating plan
-2. confirm Batch 1A control atoms still cover the active hold-backs
-3. draft `atoms/02-glossary-and-core-definitions.md`
-4. run the focused design session before `atoms/04-event-envelope-schema.md`
-5. update the registry only if atom metadata changes
+1. read the start guide and registry
+2. confirm `SPEC-002` and `SPEC-003` remain draft foundation atoms
+3. run a focused design session for `atoms/04-event-envelope-schema.md`
+4. update the registry only if atom metadata changes

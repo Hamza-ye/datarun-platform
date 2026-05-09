@@ -6,6 +6,7 @@ canonical_root: docs/platform-spec-kernels/platform-spec
 source_basis_root: docs/platform-spec-kernels
 agent_start:
   read_first:
+    - START-HERE.md
     - atom-registry.yml
     - README.md
     - process/01-atomization-operating-plan.md
@@ -25,7 +26,6 @@ owner_roles:
   - Delivery Lead
   - Product Owner
 next_recommended:
-  - SPEC-002
   - SPEC-004
 atoms:
   - id: SPEC-001

@@ -6,7 +6,7 @@ This document defines the initial platform-spec decomposition and the profession
 
 Paths in this document are relative to `docs/platform-spec-kernels/platform-spec/`.
 
-For fast lookup, agents should read `atom-registry.yml` before this inventory. This inventory explains the writing order; the registry gives the current machine-readable status map.
+For fast lookup, agents should read `START-HERE.md` and `atom-registry.yml` before this inventory. This inventory explains the writing order; the registry gives the current machine-readable status map.
 
 ## Decomposition Principles
 
@@ -21,7 +21,7 @@ For fast lookup, agents should read `atom-registry.yml` before this inventory. T
 | Order | File | Atom | Primary Boundary | Initial Status | Why Here |
 |---:|---|---|---|---|---|
 | 1 | `atoms/01-spec-governance.md` | Spec Governance And Source Authority | Cross-cutting process | Draft | Prevents later atoms from using the wrong source authority. |
-| 2 | `atoms/02-glossary-and-core-definitions.md` | Glossary And Core Definitions | Cross-cutting definitions | Planned | Stabilizes vocabulary before behavior is drafted. |
+| 2 | `atoms/02-glossary-and-core-definitions.md` | Glossary And Core Definitions | Cross-cutting definitions | Draft | Stabilizes vocabulary before behavior is drafted. |
 | 3 | `atoms/03-event-log-storage.md` | Event Log And Storage | Event Log / Storage | Draft | Establishes canonical truth and write-path discipline. |
 | 4 | `atoms/04-event-envelope-schema.md` | Event Envelope And Schema | Event Envelope / Schema | Planned | Freezes the stable envelope contract before references or workflow depend on it. |
 | 5 | `atoms/05-references-and-identity-lineage.md` | References And Identity Lineage | Identity / Lineage | Planned | Keeps subject lineage narrow and prevents identity from absorbing authority or workflow. |

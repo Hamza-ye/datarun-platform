@@ -41,11 +41,12 @@ Do not draft final spec atoms directly from ADR narrative, exploration narrative
 
 At the start of every platform-spec session:
 
-1. Read `atom-registry.yml`.
-2. Identify the requested atom, next recommended atom, or affected hold-back.
-3. Read this operating plan.
-4. Read only the selected atom, its registry-listed dependencies, and the cited source-basis files needed for the work.
-5. Update `atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
+1. Read `START-HERE.md`.
+2. Read `atom-registry.yml`.
+3. Identify the requested atom, next recommended atom, or affected hold-back.
+4. Read this operating plan only when the session needs procedure.
+5. Read only the selected atom, its registry-listed dependencies, and the cited source-basis files needed for the work.
+6. Update `atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
 
 The registry is a fast lookup layer. It is not architecture authority. If the registry and atom file disagree, pause and reconcile them before continuing.
 
