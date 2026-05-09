@@ -11,8 +11,6 @@ Source basis:
 - `../../professional-baseline/07-system-boundary-map.md`
 - `../../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../../professional-baseline/16-operational-constraints-boundary-control.md`
-- `90-open-decisions.md`
-- `91-rejected-paths.md`
 
 Depends on:
 
@@ -168,11 +166,17 @@ This atom does not own:
 
 ## Review Checklist
 
-- [ ] Source basis is accepted and cited.
-- [ ] Owner and boundary are singular.
-- [ ] Scope and non-scope are explicit.
-- [ ] Contracts identify inputs, outputs, and boundary crossings.
-- [ ] Open gaps are not closed accidentally.
-- [ ] Forbidden couplings include storage and projection drift risks.
-- [ ] No envelope field, type value, authority shortcut, or canonical projection state was added without change control.
-- [ ] Product labels, role labels, queues, dashboards, and UI surfaces remain outside canonical storage semantics.
+- [x] Source basis is accepted and cited.
+- [x] Owner and boundary are singular.
+- [x] Scope and non-scope are explicit.
+- [x] Contracts identify inputs, outputs, and boundary crossings.
+- [x] Open gaps are not closed accidentally.
+- [x] Forbidden couplings include storage and projection drift risks.
+- [x] No envelope field, type value, authority shortcut, or canonical projection state was added without change control.
+- [x] Product labels, role labels, queues, dashboards, and UI surfaces remain outside canonical storage semantics.
+
+Architecture Steward review, 2026-05-10:
+
+- Pass for draft status. The atom preserves Event Log / Storage as the singular owner of append-only canonical operational facts and keeps projections, reports, queues, dashboards, and UI state derived.
+- Source-basis cleanup: `90-open-decisions.md` and `91-rejected-paths.md` are dependencies and review registers, not accepted source authority for this atom.
+- Acceptance remains gated by the planned glossary reconciliation and the open-gap/register acceptance path; this review does not promote the atom out of Draft.
