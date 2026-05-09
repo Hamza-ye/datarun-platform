@@ -424,7 +424,7 @@ Product pressure:
 
 - product may need account/session/admin experience later
 - deployments may be cloud or self-hosted
-- scratch vocabulary and old specs sometimes used tenant-like assumptions
+- earlier product pressure sometimes used tenant-like assumptions
 
 Existing guardrails/gaps:
 
@@ -522,4 +522,4 @@ Later product artifacts should use this routing as follows:
 
 - `09-first-vertical-slice.md` should choose a slice that avoids blockers unless the slice explicitly exists to resolve one.
 - `10-atomization-readiness-from-product.md` should verify that every atomization candidate is either safe under this routing or has an explicit gap/change-control path.
-- `11-alignment-closeout.md` should confirm that product alignment did not quietly close professional-baseline gaps and should remove temporary scratch references.
+- `11-alignment-closeout.md` should confirm that product alignment did not quietly close professional-baseline gaps.

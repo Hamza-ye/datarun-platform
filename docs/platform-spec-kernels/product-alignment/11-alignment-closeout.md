@@ -1,0 +1,127 @@
+# Alignment Closeout
+
+Status: Session 11 product-alignment closeout
+
+This document closes the pre-atomization product-alignment track.
+
+It does not redesign the architecture, add platform behavior, or authorize broad atomization. It states the stable product input surface for the next atomization pass.
+
+## Closeout Verdict
+
+Product alignment is complete enough to proceed to selected-slice atomization.
+
+The approved next movement is:
+
+```text
+Atomize the selected slice only.
+```
+
+The selected slice remains:
+
+```text
+Assigned offline capture -> sync visibility -> supervisor review -> returned correction -> evidence/history -> minimal freshness-aware oversight
+```
+
+Broad platform atomization remains intentionally blocked until the selected slice produces concrete atomized obligations and pressure-tested follow-up gaps.
+
+## Stable Product-Alignment Surface
+
+The stable product-alignment surface is:
+
+| Artifact | Role Going Forward |
+|---|---|
+| `01-phase-1-scenario-boundary-map.md` | Scenario pressure grouped by product boundary and tension |
+| `02-product-experience-principles.md` | Product experience constraints for coherence, simplicity, offline, authority, freshness, and progressive complexity |
+| `03-user-roles-and-operational-contexts.md` | Operating contexts, not authority model |
+| `04-core-operational-journeys.md` | Reusable journey model for work, review, setup, oversight, evidence, and sync |
+| `05-information-architecture.md` | Product surface map without creating platform bounded contexts |
+| `06-product-vocabulary-alignment.md` | Vocabulary firewall between platform core, product translation, and operational surface |
+| `07-interaction-state-model.md` | User-visible states and their non-canonical interpretation rules |
+| `08-ux-gap-routing.md` | Product pressure routed to existing gaps, deferrals, product clarifications, or change control |
+| `09-first-vertical-slice.md` | Selected first slice and its scope controls |
+| `10-atomization-readiness-from-product.md` | GO/NO-GO gate for what may be atomized now |
+
+These files are now the product-alignment input package for atomization.
+
+## Stable Atomization Entry Point
+
+The next atomization pass should start from these three artifacts in order:
+
+1. `09-first-vertical-slice.md`
+2. `10-atomization-readiness-from-product.md`
+3. `08-ux-gap-routing.md`
+
+Use the earlier product-alignment files for traceability, vocabulary, and experience rules. Do not atomize directly from archived exploration prose or broad domain scenarios without routing through the selected-slice and readiness gates.
+
+## Required Atomization Shape
+
+Each first-pass atom should include:
+
+- selected-slice behavior served
+- scenario pressure traced
+- primary professional-baseline boundary owner
+- product vocabulary layer used
+- offline walkthrough
+- sync visibility rule
+- history/evidence obligation
+- gap register references touched but not closed
+- change-control triggers
+
+Atoms that cannot provide those fields are not ready. They should be narrowed or routed back to `08-ux-gap-routing.md`.
+
+## What Is Explicitly Closed
+
+This closeout closes only the product-alignment phase.
+
+It closes:
+
+- the question of whether the first atomization pass should start broadly or from one product-backed slice
+- the product-alignment input package for first atomization
+- the rule that product-facing work must remain domain-agnostic while preserving baseline vocabulary boundaries
+
+It does not close:
+
+- authorization model details
+- subject-based scope or auditor access
+- shared-device actor scope
+- temporary authority and offline revocation reconciliation
+- sync delivery mechanics
+- local data lifecycle and sensitive local storage
+- identity merge/split/duplicate/alias-cycle behavior
+- full Pattern Registry inventory or formal schema
+- reporting/aggregation
+- setup/configuration authoring UX
+- transfer/custody/discrepancy
+- broad exception, flag, and conflict semantics
+- import/export, archive, retention, or formal audit packaging
+
+## Forward Rule
+
+From this point forward, atomization should not ask:
+
+```text
+What platform areas can we atomize?
+```
+
+It should ask:
+
+```text
+What obligations does the selected slice force us to atomize, under the accepted boundaries?
+```
+
+That distinction is the guardrail against turning mature architecture into disconnected implementation documents.
+
+## Immediate Next Step
+
+Begin selected-slice atomization with a thin product-backed atomization plan.
+
+The plan should enumerate only the atoms allowed by `10-atomization-readiness-from-product.md`, then validate each one against:
+
+- `../professional-baseline/04-architecture-baseline-v0.md`
+- `../professional-baseline/05-decision-gap-register.md`
+- `../professional-baseline/07-system-boundary-map.md`
+- `../professional-baseline/09-identity-boundary-control.md`
+- `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
+- `../professional-baseline/17-authorization-visibility-boundary-control.md`
+
+If the selected slice cannot proceed without closing a deferred gap, stop and route that pressure through change control instead of hiding it inside atomization.

@@ -494,4 +494,4 @@ Do not atomize broad platform areas yet:
 Later product artifacts should use this selected slice as follows:
 
 - `10-atomization-readiness-from-product.md` should verify that this slice is sufficient to restart atomization narrowly and identify which atoms are safe now.
-- `11-alignment-closeout.md` should record this slice as the product-backed input surface and remove temporary scratch references.
+- `11-alignment-closeout.md` should record this slice as the product-backed input surface.

@@ -169,7 +169,7 @@ An atom should be rejected or narrowed if it introduces:
 Professional sequencing from this point:
 
 1. Close this product-alignment track with `11-alignment-closeout.md`.
-2. Remove temporary scratch references and confirm the stable input surface for atomization.
+2. Confirm the stable input surface for atomization.
 3. Start atomization from the selected slice, not from broad platform categories.
 4. Atomize only the ready and explicitly conditional surfaces listed in this document.
 5. Keep every deferred surface visible in gap routing rather than burying it inside implementation.

@@ -1280,4 +1280,4 @@ Later product artifacts should use this vocabulary as follows:
 - `08-ux-gap-routing.md` should use the vocabulary-to-gap matrix to route unresolved terms and pressure points.
 - `09-first-vertical-slice.md` should choose wording from accepted product-wide and narrow product terms only.
 - `10-atomization-readiness-from-product.md` should verify that atomization candidates do not depend on rejected, restricted, or gap-routed terms as if they were closed.
-- `11-alignment-closeout.md` should remove temporary brainstorming references and confirm this artifact is the stable vocabulary input surface.
+- `11-alignment-closeout.md` should confirm this artifact is the stable vocabulary input surface.

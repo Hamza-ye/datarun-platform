@@ -1,6 +1,6 @@
 # Product Alignment Track
 
-Status: Pre-atomization product/UX alignment track
+Status: Closed pre-atomization product/UX alignment track
 
 This folder reconnects the accepted platform architecture baseline to product behavior, operational workflows, and user expectations before broad platform-spec atomization.
 
@@ -55,19 +55,6 @@ Architecture guardrails:
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
 - `../pre-operations/04-accepted-pre-atomization-decisions.md`
 
-Temporary scratch / brainstorming material:
-
-- `../../../.review/ux-draft-and-brainstorming/phase-1-platform-spec.md`
-- `../../../.review/ux-draft-and-brainstorming/phase-1-platform-vocabulary.md`
-
-Scratch material is non-authoritative. It may be used only during the product-alignment process as candidate product language. It must not override the professional baseline, event-envelope closure, gap register, or domain-source wording.
-
-Reference hygiene:
-
-- Keep references to scratch material centralized in this README.
-- Do not cite scratch files from individual product-alignment artifacts unless a session explicitly requires a temporary comparison note.
-- Before this product-alignment track is marked complete, delete the scratch files or move them out of the repo, then remove this subsection.
-
 ## Non-Authority Rule
 
 Product-alignment artifacts may:
@@ -83,7 +70,7 @@ They may not:
 - add event envelope fields
 - rename architecture mechanisms as if the baseline changed
 - close architecture gaps
-- turn temporary brainstorming vocabulary into platform vocabulary without mapping
+- turn candidate vocabulary into platform vocabulary without mapping
 - treat a UI concept as canonical storage or projection truth
 - bypass `../professional-baseline/02-change-control.md`
 
@@ -105,7 +92,7 @@ Domain-specific examples may explain behavior, but the artifact language should 
 8. `08-ux-gap-routing.md`: product/UX gaps routed to the existing gap register or proposed as explicit additions.
 9. `09-first-vertical-slice.md`: first product-backed slice for atomization and implementation progression.
 10. `10-atomization-readiness-from-product.md`: readiness gate for selected-slice atomization.
-11. `11-alignment-closeout.md`: close the product-alignment track, remove temporary scratch references, and state the stable atomization input surface.
+11. `11-alignment-closeout.md`: close the product-alignment track and state the stable atomization input surface.
 
 ## Current Outputs
 
@@ -119,10 +106,11 @@ Domain-specific examples may explain behavior, but the artifact language should 
 - `08-ux-gap-routing.md`: current Session 8 routing from product pressure to gaps, deferrals, and change-control triggers.
 - `09-first-vertical-slice.md`: current Session 9 selected first product-backed vertical slice.
 - `10-atomization-readiness-from-product.md`: current Session 10 atomization readiness gate for the selected slice.
+- `11-alignment-closeout.md`: current Session 11 closeout and stable atomization input surface.
 
 ## Current Next Step
 
-Draft `11-alignment-closeout.md`, using Sessions 1 through 10 as the stable product-alignment inputs.
+Begin selected-slice atomization from `09-first-vertical-slice.md`, `10-atomization-readiness-from-product.md`, and `08-ux-gap-routing.md`.
 
 ## Working Rule
 
