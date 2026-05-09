@@ -137,7 +137,7 @@ Do not encode these as envelope `type` values:
 - Stored authority snapshots on events.
 - Authorization through post-merge alias shortcuts.
 - Changing sync away from immutable, idempotent, append-only, event-scoped, access-filtered delivery without formal change control.
-- Treating sync scope as different from access scope without formal change control.
+- Treating sync scope as an independent entitlement model separate from assignment-derived access scope.
 
 ### Configuration And Parameterization
 

@@ -70,5 +70,5 @@ Use `atom-registry.yml` and `process/01-atomization-operating-plan.md` to run th
 1. read the registry and operating plan
 2. confirm Batch 1A control atoms still cover the active hold-backs
 3. draft `atoms/02-glossary-and-core-definitions.md`
-4. draft `atoms/03-event-log-storage.md`
+4. run the focused design session before `atoms/04-event-envelope-schema.md`
 5. update the registry only if atom metadata changes

@@ -26,7 +26,6 @@ owner_roles:
   - Product Owner
 next_recommended:
   - SPEC-002
-  - SPEC-003
   - SPEC-004
 atoms:
   - id: SPEC-001
@@ -85,7 +84,7 @@ atoms:
   - id: SPEC-003
     title: Event Log And Storage
     file: atoms/03-event-log-storage.md
-    status: planned
+    status: draft
     batch: 1B
     boundary: Event Log / Storage
     owner_role: Architecture Steward
@@ -103,6 +102,7 @@ atoms:
       - SPEC-012
     source_basis:
       - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
       - professional-baseline/07-system-boundary-map.md
       - professional-baseline/15-conflict-flag-offline-boundary-control.md
       - professional-baseline/16-operational-constraints-boundary-control.md
