@@ -117,10 +117,11 @@ Domain-specific examples may explain behavior, but the artifact language should 
 - `06-product-vocabulary-alignment.md`: current Session 6 vocabulary control and baseline-mapping artifact.
 - `07-interaction-state-model.md`: current Session 7 operational-surface state model.
 - `08-ux-gap-routing.md`: current Session 8 routing from product pressure to gaps, deferrals, and change-control triggers.
+- `09-first-vertical-slice.md`: current Session 9 selected first product-backed vertical slice.
 
 ## Current Next Step
 
-Draft `09-first-vertical-slice.md`, using Sessions 1 through 8 as the immediate product-alignment inputs.
+Draft `10-atomization-readiness-from-product.md`, using Sessions 1 through 9 as the immediate product-alignment inputs.
 
 ## Working Rule
 
