@@ -104,7 +104,7 @@ Domain-specific examples may explain behavior, but the artifact language should 
 7. `07-interaction-state-model.md`: user-visible states, offline/sync states, review states, flag/conflict states, and what remains UI-only.
 8. `08-ux-gap-routing.md`: product/UX gaps routed to the existing gap register or proposed as explicit additions.
 9. `09-first-vertical-slice.md`: first product-backed slice for atomization and implementation progression.
-10. `10-atomization-readiness-from-product.md`: final readiness check before broad atomization resumes.
+10. `10-atomization-readiness-from-product.md`: readiness gate for selected-slice atomization.
 11. `11-alignment-closeout.md`: close the product-alignment track, remove temporary scratch references, and state the stable atomization input surface.
 
 ## Current Outputs
@@ -118,10 +118,11 @@ Domain-specific examples may explain behavior, but the artifact language should 
 - `07-interaction-state-model.md`: current Session 7 operational-surface state model.
 - `08-ux-gap-routing.md`: current Session 8 routing from product pressure to gaps, deferrals, and change-control triggers.
 - `09-first-vertical-slice.md`: current Session 9 selected first product-backed vertical slice.
+- `10-atomization-readiness-from-product.md`: current Session 10 atomization readiness gate for the selected slice.
 
 ## Current Next Step
 
-Draft `10-atomization-readiness-from-product.md`, using Sessions 1 through 9 as the immediate product-alignment inputs.
+Draft `11-alignment-closeout.md`, using Sessions 1 through 10 as the stable product-alignment inputs.
 
 ## Working Rule
 
