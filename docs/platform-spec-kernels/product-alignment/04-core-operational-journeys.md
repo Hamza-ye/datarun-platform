@@ -4,7 +4,7 @@ Status: Session 4 product-alignment artifact
 
 This document describes the recurring operational journeys the product must support across Phase 1 scenarios. It is not a wireframe, not an information architecture, not a workflow schema, and not an implementation plan.
 
-The purpose is to make user-facing movement through the platform explicit before atomization resumes: how work appears, how users act on it, how review and oversight happen, how offline work remains understandable, and where unresolved pressure must route to gaps instead of becoming hidden architecture debt.
+The purpose is to make user-facing movement through the platform explicit before selected-slice atomization: how work appears, how users act on it, how review and oversight happen, how offline work remains understandable, and where unresolved pressure must route to gaps instead of becoming hidden architecture debt.
 
 ## Source Basis
 

@@ -2,7 +2,7 @@
 
 Status: Session 6 product-alignment artifact
 
-This document aligns product vocabulary with the accepted architecture baseline before atomization resumes. It is a vocabulary control artifact, not a glossary for marketing copy and not an architecture rewrite.
+This document aligns product vocabulary with the accepted architecture baseline before selected-slice atomization. It is a vocabulary control artifact, not a glossary for marketing copy and not an architecture rewrite.
 
 The purpose is to let the product use natural, domain-agnostic language without letting product words quietly become canonical storage, service boundaries, permission rules, workflow schemas, or identity ownership claims.
 

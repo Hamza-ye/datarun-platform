@@ -2,7 +2,7 @@
 
 Status: Session 7 product-alignment artifact
 
-This document defines user-visible interaction states for the operational surface before atomization resumes. It describes how the product should label, explain, and route visible states across work, records, operational targets, review, oversight, exceptions, setup, evidence, and sync/local status.
+This document defines user-visible interaction states for the operational surface before selected-slice atomization. It describes how the product should label, explain, and route visible states across work, records, operational targets, review, oversight, exceptions, setup, evidence, and sync/local status.
 
 It is not a workflow schema, not a stored state model, not a projection schema, not a permission table, and not a sync protocol.
 

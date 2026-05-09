@@ -2,7 +2,7 @@
 
 Status: Session 5 product-alignment artifact
 
-This document defines the product's information architecture direction before atomization resumes. It describes how users should find work, records, review, oversight, setup, evidence, exceptions, and sync state as one coherent product.
+This document defines the product's information architecture direction before selected-slice atomization. It describes how users should find work, records, review, oversight, setup, evidence, exceptions, and sync state as one coherent product.
 
 It is not a final sitemap, wireframe set, route table, permission model, data model, or implementation plan.
 

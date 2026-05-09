@@ -2,7 +2,7 @@
 
 Status: Closed pre-atomization product/UX alignment track
 
-This folder reconnects the accepted platform architecture baseline to product behavior, operational workflows, and user expectations before broad platform-spec atomization.
+This folder reconnects the accepted platform architecture baseline to product behavior, operational workflows, and user expectations before selected-slice atomization and implementation progression.
 
 It does not redesign the architecture. It does not create platform behavior authority by itself. It translates the approved domain problem space into product-facing artifacts, then routes any pressure back through the professional baseline, gap register, and change-control rules.
 
@@ -11,6 +11,8 @@ It does not redesign the architecture. It does not create platform behavior auth
 The project reached a strong architecture baseline before the product interaction layer was equally explicit. That creates a real risk: atomized platform specs could become internally correct but weakly grounded in how users actually experience field work, oversight, configuration, sync, review, conflicts, and reporting.
 
 This track reduces that risk by stabilizing product-facing artifacts before implementation progression.
+
+Session output sections in individual artifacts preserve the handoff logic from the time each session was written. For the current forward path, `11-alignment-closeout.md` is the controlling product-alignment closeout artifact.
 
 ## Source Boundary
 
@@ -94,21 +96,21 @@ Domain-specific examples may explain behavior, but the artifact language should 
 10. `10-atomization-readiness-from-product.md`: readiness gate for selected-slice atomization.
 11. `11-alignment-closeout.md`: close the product-alignment track and state the stable atomization input surface.
 
-## Current Outputs
+## Stable Outputs
 
-- `01-phase-1-scenario-boundary-map.md`: accepted Session 1 boundary and tension map.
-- `02-product-experience-principles.md`: current Session 2 product experience principles.
-- `03-user-roles-and-operational-contexts.md`: current Session 3 product role and operating-context model.
-- `04-core-operational-journeys.md`: current Session 4 reusable operational journey model.
-- `05-information-architecture.md`: current Session 5 product surface and navigation model.
-- `06-product-vocabulary-alignment.md`: current Session 6 vocabulary control and baseline-mapping artifact.
-- `07-interaction-state-model.md`: current Session 7 operational-surface state model.
-- `08-ux-gap-routing.md`: current Session 8 routing from product pressure to gaps, deferrals, and change-control triggers.
-- `09-first-vertical-slice.md`: current Session 9 selected first product-backed vertical slice.
-- `10-atomization-readiness-from-product.md`: current Session 10 atomization readiness gate for the selected slice.
-- `11-alignment-closeout.md`: current Session 11 closeout and stable atomization input surface.
+- `01-phase-1-scenario-boundary-map.md`: Session 1 boundary and tension map.
+- `02-product-experience-principles.md`: Session 2 product experience principles.
+- `03-user-roles-and-operational-contexts.md`: Session 3 product role and operating-context model.
+- `04-core-operational-journeys.md`: Session 4 reusable operational journey model.
+- `05-information-architecture.md`: Session 5 product surface and navigation model.
+- `06-product-vocabulary-alignment.md`: Session 6 vocabulary control and baseline-mapping artifact.
+- `07-interaction-state-model.md`: Session 7 operational-surface state model.
+- `08-ux-gap-routing.md`: Session 8 routing from product pressure to gaps, deferrals, and change-control triggers.
+- `09-first-vertical-slice.md`: Session 9 selected first product-backed vertical slice.
+- `10-atomization-readiness-from-product.md`: Session 10 atomization readiness gate for the selected slice.
+- `11-alignment-closeout.md`: Session 11 closeout and stable atomization input surface.
 
-## Current Next Step
+## Next Step
 
 Begin selected-slice atomization from `09-first-vertical-slice.md`, `10-atomization-readiness-from-product.md`, and `08-ux-gap-routing.md`.
 

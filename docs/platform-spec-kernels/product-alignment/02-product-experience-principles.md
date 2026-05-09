@@ -2,7 +2,7 @@
 
 Status: Session 2 product-alignment artifact
 
-This document states product-facing principles for the platform experience before broad atomization resumes. These principles translate the domain ambition, constraints, behavioral patterns, and Session 1 boundary map into testable UX/product expectations.
+This document states product-facing principles for the platform experience before selected-slice atomization. These principles translate the domain ambition, constraints, behavioral patterns, and Session 1 boundary map into testable UX/product expectations.
 
 They are not architecture decisions. They do not rename baseline mechanisms or close gaps. They guide later role, journey, information architecture, vocabulary, interaction-state, and first-slice work.
 
