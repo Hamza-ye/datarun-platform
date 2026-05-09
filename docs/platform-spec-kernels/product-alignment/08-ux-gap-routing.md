@@ -40,9 +40,12 @@ Do not infer:
 - a product clarification changes the baseline
 - a first-slice candidate may depend on a P1 unresolved gap as if it were closed
 - an IA surface or visible state creates a platform primitive
+- a product role label creates a fixed actor class, permission source, or core responsibility type
 - product language can bypass `../professional-baseline/02-change-control.md`
 
 If the product needs behavior that changes assignment-derived access, sync scope, event-envelope closure, projection-derived state, Pattern Registry ownership, field-level sensitivity rejection, or deployer-authored logic rejection, that behavior requires formal change control.
+
+When routing role-related pressure, prefer operation classes over actor labels: offline-capable operation, online/coordination-required operation, or constrained-authority operation that can proceed locally only with later synchronization, warning, or review.
 
 ## Routing Classes
 
@@ -83,7 +86,7 @@ If the product needs behavior that changes assignment-derived access, sync scope
 Product pressure:
 
 - users need to know why work is visible, actionable, read-only, blocked, stale, or missing
-- supervisors need broader visibility without uncontrolled action authority
+- oversight contexts need broader visibility without uncontrolled action authority
 - auditors may need scoped evidence access
 - offline devices may act under last-known authority
 
@@ -118,7 +121,7 @@ Product pressure:
 
 - field work needs to continue offline
 - users need `Saved Locally`, `Pending Sync`, `Synced`, `Sync Problem`, and freshness cues
-- supervisors need to know that central visibility may lag field reality
+- oversight contexts need to know that central visibility may lag field reality
 - scope contraction and sensitive local lifecycle affect trust
 
 Existing gaps:
@@ -212,6 +215,38 @@ Change-control trigger:
 - review UX becomes workflow authoring
 - review labels close general flag semantics
 - reviewer visibility becomes uncontrolled action authority
+
+### Operational Actor Labels And Operation Classes
+
+Product pressure:
+
+- source scenarios use familiar labels such as field worker, supervisor, coordinator, regional lead, auditor, reviewer, and administrator
+- the same person may hold different responsibilities in different activities, places, or time windows
+- implementation agents may accidentally turn those labels into fixed platform classes or service boundaries
+
+Existing gaps:
+
+- permission table details
+- temporary authority and offline revocation reconciliation
+- subject-based scope and auditor access
+- onboarding and role transition details
+
+Product clarification:
+
+- Role labels are operating-context examples and user-facing lenses.
+- They do not define event-envelope fields, actor subtypes, platform classes, module boundaries, or permanent permission shortcuts.
+- Later atoms should state the operation class they need: offline-capable, online/coordination-required, or offline-with-constraints.
+
+First-slice implication:
+
+- The selected slice may use one capture context and one review/oversight context.
+- Do not generalize those contexts into fixed `FieldWorker`, `Supervisor`, `Coordinator`, or `Auditor` platform types.
+
+Change-control trigger:
+
+- adding role-specific core classes, tables, event fields, or service boundaries
+- making a role label the source of authority instead of assignment-derived authorization
+- treating a review or approval process as proof of a permanent responsibility taxonomy
 
 ### Exceptions, Flags, Conflicts, And Resolution
 
@@ -319,7 +354,7 @@ Change-control trigger:
 
 Product pressure:
 
-- supervisors/coordinators need progress, missing/late work, bottlenecks, exceptions, and freshness
+- oversight and coordination contexts need progress, missing/late work, bottlenecks, exceptions, and freshness
 - dashboards need to show useful current interpretation without pretending to be live or canonical
 - missing work can mean not done, not synced, stale, or unknown
 
@@ -339,7 +374,7 @@ Product clarification:
 
 First-slice implication:
 
-- First slice should include minimal freshness-aware oversight if supervisor review is included.
+- First slice should include minimal freshness-aware oversight if review/oversight is included.
 - Avoid broad reporting, cross-level aggregation, export, or management dashboards.
 
 Change-control trigger:
@@ -352,7 +387,7 @@ Change-control trigger:
 
 Product pressure:
 
-- coordinators need setup that feels like assembling operational patterns
+- setup/coordination contexts need setup that feels like assembling operational patterns
 - setup changes need validation, publish, rollout, impact warning, and older-setup-in-use states
 - deployer labels cannot become platform primitives
 
@@ -475,7 +510,7 @@ These are acceptable assumptions for `09-first-vertical-slice.md` if kept narrow
 - one information shape exists
 - field user can capture while offline
 - local work can show saved locally / pending sync / synced
-- submitted work can appear in a supervisor review queue
+- submitted work can appear in an authorized review queue
 - reviewer can approve or return with a reason
 - returned work can be corrected and resubmitted
 - basic history/evidence can show original record, correction, and decision trail

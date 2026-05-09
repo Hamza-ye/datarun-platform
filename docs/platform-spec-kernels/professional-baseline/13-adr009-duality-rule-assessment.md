@@ -45,6 +45,8 @@ The rule is useful because prior implementation work conflated mechanism and ins
 | pattern/activity instances | Configuration | Projection / Workflow State | Deployers bind patterns, shapes, roles, scopes, and parameters into activities. |
 | activity as deployer-configured instance | Configuration | Event Envelope / Schema; Projection / Workflow State; Assignment / Authority / Sync | Activity is L0 configuration; `activity_ref` remains the envelope contract that points to it. |
 
+Concrete role labels and pattern participant bindings sit on the instance side of this split. They may configure who can participate in a workflow capacity, but they do not create platform-fixed actor subclasses.
+
 ## Claim Classification
 
 | ADR-009 Claim | Classification | Assessment |
@@ -71,6 +73,7 @@ The following ADR-009 material is safe to carry forward as candidate platform-sp
 - Scope mechanism belongs to Assignment / Authority / Sync; concrete scope instance values are configuration.
 - Pattern mechanism belongs to Projection / Workflow State; deployer pattern bindings are configuration.
 - Activity is configuration; `activity_ref` is the envelope contract that points to it.
+- Product/deployer role labels and pattern participant mappings are instance/configuration vocabulary, not platform-owned actor types.
 
 These candidates directly reduce the implementation broadness that produced earlier agent confusion.
 
@@ -103,6 +106,7 @@ When drafting platform-spec atoms, do not create a single atom that mixes:
 - a reference field and its referent
 - an envelope processing axis and domain fact shapes
 - a subject-lineage lifecycle and actor/assignment/process/activity lifecycles
+- a product role label or pattern participant name and a platform actor class
 
 ADR-007, ADR-008, and ADR-009 together form a useful classification triad:
 

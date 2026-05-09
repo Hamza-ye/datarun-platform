@@ -19,8 +19,10 @@ Atomize the selected slice only.
 The selected slice remains:
 
 ```text
-Assigned offline capture -> sync visibility -> supervisor review -> returned correction -> evidence/history -> minimal freshness-aware oversight
+Assigned offline capture -> sync visibility -> authorized review -> returned correction -> evidence/history -> minimal freshness-aware oversight
 ```
+
+Where the scenario set says `supervisor review`, that phrase is product shorthand. The atomization-safe interpretation is review by an actor currently authorized for that review context. No role label in the selected slice may be promoted into a fixed platform class, event-envelope field, service boundary, or permanent authority shortcut.
 
 Broad platform atomization remains intentionally blocked until the selected slice produces concrete atomized obligations and pressure-tested follow-up gaps.
 
@@ -61,6 +63,7 @@ Each first-pass atom should include:
 - scenario pressure traced
 - primary professional-baseline boundary owner
 - product vocabulary layer used
+- operation class used: offline-capable, online/coordination-required, or offline-with-constraints
 - offline walkthrough
 - sync visibility rule
 - history/evidence obligation
@@ -123,5 +126,7 @@ The plan should enumerate only the atoms allowed by `10-atomization-readiness-fr
 - `../professional-baseline/09-identity-boundary-control.md`
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
+- `../professional-baseline/18-envelope-shape-parametrization-boundary-control.md`
+- `../professional-baseline/19-envelope-shape-parametrization-definitions.md`
 
 If the selected slice cannot proceed without closing a deferred gap, stop and route that pressure through change control instead of hiding it inside atomization.

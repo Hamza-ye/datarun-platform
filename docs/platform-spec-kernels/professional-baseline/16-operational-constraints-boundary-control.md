@@ -58,7 +58,7 @@ If a constraint creates pressure not closed by ADR-001 through ADR-005, route it
 |---|---|---|---|
 | field users are often offline | client-generated IDs, local event creation, immutable event sync | Event Log / Storage; Event Envelope / Schema; Assignment / Authority / Sync | sync delivery mechanics, local lifecycle, offline conflict reconciliation |
 | supervisors/coordinators see delayed field state | projection-derived views and sync-visible state | Reporting / Aggregation | freshness metadata and reporting consistency surface |
-| coordinators/admins have more reliable infrastructure | online-only coordinator operations allowed where baseline requires validation | Assignment / Authority / Sync; Configuration | setup/onboarding, permission details, configuration deployment UX |
+| coordination/setup/resolution operations often have more reliable infrastructure | online-only operation classes allowed where baseline requires validation | Assignment / Authority / Sync; Configuration | setup/onboarding, permission details, configuration deployment UX |
 | auditors may cut across hierarchy | assignment/scope mechanisms plus explicit auditor-access gap | Assignment / Authority / Sync | subject-based scope and auditor access |
 | low-end Android and intermittent bandwidth | selective sync, scoped projections, deferred sync mechanics | Local Data Lifecycle; Assignment / Authority / Sync | low-end device scale risk, sync pagination/priority/bandwidth |
 | many users and millions of records | immutable event log and projection rebuild discipline | Event Log / Storage | projection performance/caching and retention/archive policy |
@@ -77,7 +77,7 @@ Use these terms narrowly during atomization:
 
 | Term | Control Definition | Not Allowed To Mean |
 |---|---|---|
-| primary field operation | field-level capture, lookup, and decision work needed while disconnected | all coordinator/admin, merge/split, setup, reporting, or resolution operations |
+| primary field operation | field-level capture, lookup, and decision work needed while disconnected | all coordination/admin, merge/split, setup, reporting, or resolution operations |
 | offline constraint | field work must not require a network roundtrip | every platform operation is offline-capable |
 | oversight freshness | centrally visible state may lag field reality and must disclose age where it matters | real-time field feed or hidden sync delay |
 | low-end device envelope | design and implementation must respect limited storage, compute, bandwidth, and literacy | weakening canonical event-log or projection-derived truth |
@@ -85,6 +85,8 @@ Use these terms narrowly during atomization:
 | interoperability compatibility | internal record structure must not block future structured import/export | Phase 1 real-time integration requirement |
 | immediate capture | capture interaction should not wait for network or central validation | immediate central visibility or global conflict certainty |
 | config propagation | changed configuration reaches devices on next sync and old in-progress work can complete under old rules | instant config invalidation of offline work |
+
+Actor-tier labels in `../../constraints.md` are operational examples. During atomization, translate them into operation classes and environmental assumptions. Do not hard-code field worker, supervisor, coordinator, auditor, or regional lead as platform-core responsibility types merely because the constraints use those names.
 
 ## Overread Controls
 

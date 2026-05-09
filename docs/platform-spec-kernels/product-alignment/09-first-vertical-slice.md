@@ -94,7 +94,7 @@ Decision:
 
 Reject as first vertical slice. Keep as an inner path inside the selected slice.
 
-### Candidate B: Configured Assigned Capture With Offline Submission And Supervisor Review
+### Candidate B: Configured Assigned Capture With Offline Submission And Authorized Review
 
 Flow:
 
@@ -104,8 +104,8 @@ Flow:
 - field actor captures structured information while offline
 - product shows saved locally / pending sync / synced
 - submitted work becomes centrally visible after sync
-- supervisor sees review work within the simple assignment/supervision context
-- supervisor approves or returns with a reason
+- an authorized review/oversight context sees review work within the simple assignment context
+- the reviewer approves or returns with a reason where authority allows
 - returned work routes back to field actor
 - field actor corrects/resubmits while preserving history
 - evidence shows original record, correction, and review decision
@@ -159,7 +159,7 @@ Defer as first slice. Allow only optional stable pre-existing target context ins
 
 Flow:
 
-- coordinator creates activity
+- authorized setup actor creates activity
 - defines information shape
 - assigns users
 - publishes setup
@@ -205,7 +205,7 @@ Defer. Consider as a later slice after the selected slice proves the core loop.
 
 Flow:
 
-- supervisor/coordinator sees progress, missing, late, stale, and exception views
+- authorized oversight/coordination context sees progress, missing, late, stale, and exception views
 
 Strengths:
 
@@ -227,21 +227,23 @@ Reject as first slice. Include only minimal freshness-aware oversight in Candida
 Selected slice:
 
 ```text
-Configured assigned capture with offline submission and supervisor review
+Configured assigned capture with offline submission and authorized review
 ```
 
 Short form:
 
 ```text
-Assigned offline capture -> sync visibility -> supervisor review -> returned correction -> evidence/history -> minimal freshness-aware oversight
+Assigned offline capture -> sync visibility -> authorized review -> returned correction -> evidence/history -> minimal freshness-aware oversight
 ```
+
+Where source scenarios call this `supervisor review`, that phrase is product shorthand. The atomized reading is review by an actor whose current assignment, scope, activity context, and policy values authorize that judgment. It is not a fixed `Supervisor` platform class.
 
 This slice is selected because it proves the smallest meaningful operational loop where product behavior and accepted architecture boundaries have to cooperate:
 
 - field work starts from assignment-derived visibility
 - offline capture is normal
 - sync changes central visibility
-- supervisor review creates auditable judgment
+- authorized review creates auditable judgment
 - returned work routes back without rewriting history
 - correction preserves original record and current interpretation
 - oversight reflects the loop without pretending to be live or canonical
@@ -251,13 +253,13 @@ This slice is selected because it proves the smallest meaningful operational loo
 Included:
 
 - one authenticated actor context for field user
-- one authenticated actor context for supervisor
+- one authenticated actor context for review/oversight
 - one configured activity
 - one information shape
 - one simple assignment-derived work context
 - one field capture flow
 - local states: saved locally, pending sync, synced, sync problem where narrow
-- supervisor review queue for submitted work
+- review queue for submitted work in an authorized review/oversight context
 - decisions: approve and return with reason
 - returned correction and resubmission
 - evidence/history for original record, correction, and decision
@@ -323,7 +325,7 @@ Expected behavior:
 - field user captures using the local information shape
 - product shows `Saved Locally`
 - product shows `Pending Sync`
-- product does not imply supervisor can see the work yet
+- product does not imply the review/oversight context can see the work yet
 
 Boundary ownership:
 
@@ -345,7 +347,7 @@ Open gap avoided:
 Expected behavior:
 
 - once synced, product shows work as centrally visible
-- supervisor review queue may now show submitted work
+- the review queue may now show submitted work to the authorized review/oversight context
 - field user can distinguish synced from locally saved
 
 Boundary ownership:
@@ -360,12 +362,12 @@ Open gap avoided:
 - no broad projection performance claims
 - no real-time visibility promise
 
-### Supervisor Review
+### Authorized Review
 
 Expected behavior:
 
-- supervisor sees submitted work within simple assignment/supervision context
-- supervisor can approve or return with a reason
+- an actor in an authorized review/oversight context sees submitted work within a simple assignment-derived context
+- that actor can approve or return with a reason where configured authority allows
 - review decision is visible as evidence/history
 - returned work routes back to field user
 
@@ -407,7 +409,7 @@ Open gap avoided:
 
 Expected behavior:
 
-- supervisor/coordinator can see narrow counts such as assigned, submitted, returned, approved
+- authorized oversight or coordination contexts can see narrow counts such as assigned, submitted, returned, approved
 - product shows freshness cues
 - product does not present oversight as live or canonical
 

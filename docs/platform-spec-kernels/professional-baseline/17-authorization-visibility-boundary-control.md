@@ -87,6 +87,7 @@ Use these classifications during atomization and later review:
 | accounts authenticate, actors author, assignments authorize | consistent elaboration | Carry forward from `../pre-operations/04-accepted-pre-atomization-decisions.md`. |
 | role, scope, activity, time, and subject/context all influence authority | consistent elaboration plus platform-spec detail | Specify as inputs to the authority projection without adding envelope fields or stored authority snapshots. |
 | concrete permission tables, role names, and deployer policy values | platform-spec detail or operational policy | Keep bounded by platform-owned mechanisms and configuration limits. |
+| product role labels used as UI lenses or scenario shorthand | product clarification plus platform-spec detail | Preserve as operating-context language; do not create fixed actor classes or direct authority shortcuts. |
 | auditor access, subject-based scope, or cross-level visibility exceptions | open-gap closure candidate | Close through the named gap if expressible with existing scope mechanisms; require formal decision for new scope semantics. |
 | temporary grants, revocation, and offline grace behavior | open-gap closure candidate | Route through the temporary authority/offline reconciliation gap before authorization/sync atomization if needed now. |
 | user group or identity-provider claim directly grants data access | conflict or new unauthorized claim | Reject unless formal change control changes the baseline. |
@@ -119,6 +120,8 @@ Scope and authority have both platform-owned and deployer-configured parts:
 - deployer-configured instances: concrete roles, assigned actors, areas, teams, activities, schedules, thresholds, sensitivity classifications, and policy values within bounded configuration
 
 Atomized specs must not mix these into one "access-control config language." Deployer configuration supplies instances and policy values. The platform owns the authority mechanism and its limits.
+
+Operational actor labels sit on the instance/product side of this split. `Supervisor`, `Coordinator`, `Auditor`, `Reviewer`, and similar names may be deployer labels, scenario shorthand, or UI lenses; they are not platform-owned actor subclasses unless a later formal decision creates such a mechanism. Authorization atoms should name the authority inputs and operation class they require rather than relying on a persona label.
 
 ## Atomization Readiness Checks
 

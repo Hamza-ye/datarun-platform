@@ -82,6 +82,20 @@ The product model must preserve the ambition from `../../README.md`: the platfor
 
 Domain-specific examples may explain behavior, but the artifact language should prefer domain-agnostic terms unless a scenario is being quoted or summarized.
 
+## Operational Actor Vocabulary Rule
+
+Role labels in this track are operational lenses, not platform-core responsibility types.
+
+Terms such as field-level worker, supervisor, coordinator, administrator, auditor, reviewer, regional lead, or cross-regional coordinator describe common operating contexts from the source scenarios. They must not be atomized into fixed platform classes, service boundaries, envelope fields, or permanent authority shortcuts.
+
+The harder boundary for later atomization is operation behavior:
+
+- operations that must work offline
+- operations that require coordination or connectivity
+- operations that can work offline only with constrained authority, stale-local warnings, or later synchronization
+
+The same person may operate in different contexts across activities, areas, time windows, or assignments. Product labels may help users understand a surface, but implementation and architecture must route authority through assignments, scopes, activities, policy values, projections, and sync behavior under the accepted baseline.
+
 ## Planned Sessions
 
 1. `01-phase-1-scenario-boundary-map.md`: group Phase 1 scenarios by product boundary and tension.

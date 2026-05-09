@@ -177,6 +177,8 @@ Architecture guardrail:
 
 The product must preserve assignment-derived access, sync scope as access scope, projection-derived authority, actor/device separation, and no direct authority from accounts, groups, identity-provider claims, or tenant fields.
 
+Role names in this principle are operational context labels, not core responsibility classes. The platform should explain what the current actor can do in the current context, even when the same person occupies a different role in another activity.
+
 Later-session tests:
 
 - User-role artifact must separate product roles from architecture actors.
@@ -207,11 +209,11 @@ Later-session tests:
 
 Product rule:
 
-Supervisor, coordinator, reporting, and campaign views should make progress, gaps, bottlenecks, and exceptions visible while making the age and completeness of the underlying information understandable.
+Oversight, coordination, reporting, and campaign views should make progress, gaps, bottlenecks, and exceptions visible while making the age and completeness of the underlying information understandable.
 
 Scenario pressure:
 
-Coordinators need progress across areas, supervisors need team state, distribution chains need current location and outstanding handoffs, and field sync may lag reality by hours or days.
+Coordination contexts need progress across areas, team oversight contexts need team state, distribution chains need current location and outstanding handoffs, and field sync may lag reality by hours or days.
 
 Architecture guardrail:
 
@@ -219,7 +221,7 @@ Oversight and reporting must respect access/sync scope, preserve projection deri
 
 Later-session tests:
 
-- Role artifact must distinguish field, supervisor, coordinator/admin, and auditor needs.
+- Role artifact must distinguish field, review/oversight, coordination/setup, and audit/evidence needs.
 - Information architecture must provide oversight surfaces without making them a separate product.
 - UX gap routing must carry reporting/aggregation, freshness metadata, and cross-level visibility as explicit gaps.
 
@@ -227,7 +229,7 @@ Later-session tests:
 
 Product rule:
 
-Coordinators and administrators should experience setup as assembling known operational patterns, defining information shapes, assigning responsibility, and choosing bounded policy values. The product should make the boundary between setup and platform evolution visible.
+Coordination and administration contexts should experience setup as assembling known operational patterns, defining information shapes, assigning responsibility, and choosing bounded policy values. The product should make the boundary between setup and platform evolution visible.
 
 Scenario pressure:
 
@@ -239,7 +241,7 @@ Configuration must remain bounded. Deployers configure shapes, activities, roles
 
 Later-session tests:
 
-- User-role artifact must define coordinator/admin expectations separately from field and supervisor work.
+- User-role artifact must define setup/coordination expectations separately from field and review/oversight work.
 - Journeys must include a setup/configuration journey before atomization readiness.
 - Information architecture must keep admin/configuration surfaces connected to operational concepts without exposing raw internals.
 - UX gap routing must preserve configuration authoring/deployment UX and Pattern Registry inventory/schema gaps.
@@ -291,13 +293,13 @@ Later-session tests:
 | PX1 One coherent system | required | required | required | required | required | required | required |
 | PX2 Domain-agnostic language | required | required | required | required | optional | required | required |
 | PX3 Simple work stays simple | field role | capture journey | required | required | required | required | required |
-| PX4 Offline feels normal | field/supervisor | required | required | optional | required | required | required |
-| PX5 Pending work explains why | field/supervisor | required | required | required | required | required | required |
+| PX4 Offline feels normal | field/review-oversight | required | required | optional | required | required | required |
+| PX5 Pending work explains why | field/review-oversight | required | required | required | required | required | required |
 | PX6 Current state and history | all roles | required | required | required | required | required | required |
 | PX7 Contextual authority | all roles | required | required | required | required | required | required |
-| PX8 Proportionate exceptions | supervisor/admin | required | required | required | required | required | required |
-| PX9 Freshness-aware oversight | supervisor/coordinator | required | required | optional | required | required | required |
-| PX10 Setup, not programming | coordinator/admin | setup journey | admin IA | required | optional | required | maybe |
+| PX8 Proportionate exceptions | review/setup | required | required | required | required | required | required |
+| PX9 Freshness-aware oversight | oversight/coordination | required | required | optional | required | required | required |
+| PX10 Setup, not programming | setup/coordination | setup journey | admin IA | required | optional | required | maybe |
 | PX11 Vocabulary maps to baseline | required | required | required | required | required | required | required |
 | PX12 Composition before breadth | optional | required | required | optional | optional | required | required |
 

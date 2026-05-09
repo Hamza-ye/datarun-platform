@@ -29,6 +29,8 @@ This folder formalizes that operating model.
 - `15-conflict-flag-offline-boundary-control.md`: dependency-aware overlay that keeps conflict detection, accept-and-flag, detect-before-act, flag lifecycle, and offline-default behavior from collapsing into one broad boundary during atomization.
 - `16-operational-constraints-boundary-control.md`: dependency-aware overlay that preserves `constraints.md` as operational envelope authority without turning it into architecture or implementation authority.
 - `17-authorization-visibility-boundary-control.md`: dependency-aware overlay that preserves `access-control-scenario.md` as authorization/visibility pressure without mutating ADR-003 or widening deployer access-control authority.
+- `18-envelope-shape-parametrization-boundary-control.md`: focused ADR-004 lineage and atomization control overlay for envelope `type`, `shape_ref`, platform-fixed structure, and deployer parametrization.
+- `19-envelope-shape-parametrization-definitions.md`: compact definition file for separating envelope type, shape facts, references, patterns, projections, configuration, and product vocabulary during atomization.
 
 Related pre-operations material:
 
@@ -48,6 +50,8 @@ Related pre-operations material:
 - `15-conflict-flag-offline-boundary-control.md` keeps the validated principles visible while routing accepted conflict, flag, and offline-default behavior through the stabilized boundaries before platform-spec atomization.
 - `16-operational-constraints-boundary-control.md` routes operational constraints such as offline field work, low-end devices, compliance support, interoperability compatibility, responsiveness, and configuration propagation into accepted mechanisms or explicit gaps.
 - `17-authorization-visibility-boundary-control.md` routes contextual authority, hierarchy exceptions, temporary authority, role transitions, and offline authorization disagreement into accepted mechanisms or explicit gaps.
+- `18-envelope-shape-parametrization-boundary-control.md` confirms ADR-004 closed the core line correctly and makes the atomization-facing guardrails explicit: `type` is processing behavior, `shape_ref` is fact schema/version, `activity_ref` is context, review is layered, and deployer labels do not become platform classes.
+- `19-envelope-shape-parametrization-definitions.md` is the citable glossary for event-envelope, shape, pattern, reference, projection, and parametrization terms during selected-slice atomization.
 - ADR-006-R through ADR-009 remain assessment material. Their claims are classified in `10` through `13`; they are not automatic authority over ADR-001 through ADR-005.
 - Pre-operations readiness and decision-board material lives in `../pre-operations/` so assessment/process material and draft briefs do not mix with baseline artifacts.
 

@@ -39,11 +39,13 @@ The Phase 1 scenarios are not a feature backlog. They describe a coherent operat
 - people work against known subjects, places, areas, units, resources, and situations
 - people have assigned responsibilities and scoped visibility
 - work waits, ages, moves, gets reviewed, gets handed off, and sometimes triggers follow-up
-- supervisors and coordinators need progress, bottleneck, and exception views
+- oversight and coordination contexts need progress, bottleneck, and exception views
 - configuration must let organizations set up work without turning the product into a programming environment
 - the same product language must make sense for simple capture, periodic reporting, review, case follow-up, and multi-level distribution
 
 The main product risk is not that the scenarios fail to compose. They do compose. The risk is exposing the architecture too literally and making users think in terms of events, projections, sync scopes, flags, and pattern machinery instead of work, history, responsibility, review, exceptions, and progress.
+
+Role labels in this map are scenario-derived operating contexts, not proposed core actor classes. Later artifacts should translate the pressure behind those labels into operation behavior, configured authority, connectivity expectations, sync/freshness handling, and product-surface routing.
 
 ## Product Boundary Groups
 
@@ -182,7 +184,7 @@ How does a user understand what work is theirs, what they are allowed to do, wha
 Product tension:
 
 - Authority must be contextual without making users read policy internals.
-- Supervisors need broader visibility without turning visibility into uncontrolled action authority.
+- Oversight contexts may need broader visibility without turning visibility into uncontrolled action authority.
 - Offline devices may enforce old authority while central assignments changed.
 - Temporary grants and campaign assignments need a clear user experience, but exact grace behavior remains a gap.
 
@@ -437,7 +439,7 @@ Behavioral pressure:
 
 User-facing product question:
 
-How does a supervisor or coordinator see the state of work across people, areas, periods, reviews, and transfers while understanding that field state may be stale?
+How do oversight and coordination contexts see the state of work across people, areas, periods, reviews, and transfers while understanding that field state may be stale?
 
 Product tension:
 
@@ -447,8 +449,8 @@ Product tension:
 
 Likely product surfaces:
 
-- supervisor dashboard
-- coordinator dashboard
+- team or oversight dashboard
+- coordination dashboard
 - progress by area/location
 - backlog and bottleneck views
 - missing/late views
@@ -493,7 +495,7 @@ Product tension:
 
 - Offline should not feel like a degraded exception for field work.
 - The UI must distinguish "done on device" from "visible to others" without requiring users to understand protocol mechanics.
-- Conflict surfacing must be strong enough for trust but not so noisy that supervisors become a permanent cleanup queue.
+- Conflict surfacing must be strong enough for trust but not so noisy that oversight contexts become a permanent cleanup queue.
 
 Likely product surfaces:
 
@@ -535,7 +537,7 @@ Hold-backs:
 | `06b` | Capture And History | Configuration; Offline | Old and new information shapes coexist without confusing users. |
 | `07` | Transfer, Custody, And Discrepancy | Review; Flags; Oversight | Transfer is not complete until receipt or dispute is visible. |
 | `08` | Long-Running Situations And Follow-Up | Responsibility; Cross-Reference; Review | Ongoing work must stay understandable across people and time. |
-| `09` | Oversight, Progress, And Reporting | Responsibility; Queues; Offline | Coordinators need progress and gaps across many locations with stale field state. |
+| `09` | Oversight, Progress, And Reporting | Responsibility; Queues; Offline | Coordination contexts need progress and gaps across many locations with stale field state. |
 | `10` | Long-Running Situations And Follow-Up | Queues; Trigger / Reactivity | Changing conditions create work without becoming an opaque rule engine. |
 | `11` | Review, Judgment, And Approval | Responsibility; Oversight | Approval chain status must be clear without exposing internal workflow machinery. |
 | `12` | Queues, Rhythm, And Due Work | Trigger / Reactivity; Oversight | Responses and escalations must be bounded and explainable. |
@@ -561,7 +563,7 @@ S00 must remain lightweight. Capture should not require users to understand work
 
 ### T3. Offline Normality Versus Trust Signals
 
-Field users should not feel that offline work is second-class. At the same time, supervisors and coordinators need enough freshness and reconciliation signals to trust what they see.
+Field users should not feel that offline work is second-class. At the same time, oversight and coordination contexts need enough freshness and reconciliation signals to trust what they see.
 
 ### T4. Progress Visibility Versus Canonical Truth
 
@@ -592,13 +594,15 @@ Product experience principles should emphasize:
 - freshness-aware oversight
 - configuration that feels bounded, not like programming
 
-User-role work should separate:
+User-role work should describe operating contexts such as:
 
 - field worker
 - supervisor / team lead
 - coordinator / administrator
 - auditor / external reviewer
 - system actor only as architecture/product explanation where needed, not a normal user role
+
+This separation is for product grounding, not a fixed platform taxonomy. The later hard boundaries should be operation class, authority source, offline capability, and synchronization behavior.
 
 Vocabulary alignment must be treated as high risk because product terms can easily drift into architecture claims. In particular, later sessions must map:
 

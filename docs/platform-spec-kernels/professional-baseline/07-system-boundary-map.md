@@ -33,6 +33,7 @@ The viability assessment identified early primitive groupings and architecture p
 - Every unresolved gap has one primary owning boundary, even if other boundaries are affected.
 - ADR-006-R through ADR-009 claims are not absorbed here. Later assessment must classify them against these boundaries.
 - Boundary names are engineering routing surfaces, not implementation modules.
+- Operational actor labels are not boundary names. Field worker, supervisor, coordinator, auditor, reviewer, and similar labels route through assignment, configuration, projection, sync, and product-surface behavior; they do not create fixed platform classes by themselves.
 
 ## Boundary: Event Log / Storage
 
@@ -237,6 +238,7 @@ Does not own:
 - deployer-authored access-control programs
 - general reporting entitlement policy beyond access constraints
 - field-level sensitivity
+- product personas or fixed role-class taxonomy
 
 Inputs:
 
@@ -330,6 +332,7 @@ Settled mechanisms:
 
 - platform owns structural event types and processing semantics
 - deployers configure bounded surfaces
+- role labels are deployer-configured instances and product-surface vocabulary, not platform-owned actor subclasses
 - ADR-004 fixes six structural event types
 - per-deployment flag severity overrides are policy values over platform-owned flags
 - domain uniqueness constraints are evaluated optimistically on device and authoritatively on server

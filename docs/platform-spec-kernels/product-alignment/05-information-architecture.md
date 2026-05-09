@@ -66,6 +66,8 @@ The product should not become:
 
 Different roles may see different default surfaces, counts, labels, and available actions, but they should still feel they are using the same operational system.
 
+Role-scoped means scoped to the user's current operating context and configured authority. It does not mean each label becomes a product silo, backend module, core class, or permanent navigation taxonomy. A concrete implementation may route the same actor into different surfaces in different activities when assignments, scopes, connectivity, or operation constraints differ.
+
 ## IA Layers
 
 ### 1. Operational Home
@@ -79,10 +81,10 @@ Purpose:
 
 Expected behavior:
 
-- Field users land on actionable work and quick capture.
-- Supervisors land on team work, review queues, and exceptions.
-- Coordinators land on operational progress, setup changes, and broad exceptions.
-- Auditors land on scoped evidence, inspection queues, or review contexts where access allows.
+- Field operating contexts land on actionable work and quick capture.
+- Review/oversight contexts land on team work, review queues, and exceptions.
+- Coordination/setup contexts land on operational progress, setup changes, and broad exceptions.
+- Audit/evidence contexts land on scoped evidence, inspection queues, or review contexts where access allows.
 
 Guardrails:
 
@@ -240,13 +242,13 @@ Guardrails:
 - Do not make review surfaces workflow authoring tools.
 - Do not make review status canonical stored state.
 - Do not close general flag semantics through review labels.
-- Do not let supervisor visibility become action authority.
+- Do not let oversight visibility become action authority.
 
 ### Oversight
 
 Purpose:
 
-The oversight surface helps supervisors and coordinators understand progress, gaps, bottlenecks, stale information, and exceptions across a scoped operational area.
+The oversight surface helps review/oversight and coordination contexts understand progress, gaps, bottlenecks, stale information, and exceptions across a scoped operational area.
 
 Includes:
 
@@ -326,7 +328,7 @@ Guardrails:
 
 Purpose:
 
-The setup surface helps coordinators and administrators configure operational work through bounded platform mechanisms.
+The setup surface helps setup and coordination contexts configure operational work through bounded platform mechanisms.
 
 Includes:
 

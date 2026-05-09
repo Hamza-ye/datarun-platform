@@ -48,8 +48,10 @@ Do not resume broad platform atomization yet.
 The product track is ready to feed atomization only for the selected slice:
 
 ```text
-Assigned offline capture -> sync visibility -> supervisor review -> returned correction -> evidence/history -> minimal freshness-aware oversight
+Assigned offline capture -> sync visibility -> authorized review -> returned correction -> evidence/history -> minimal freshness-aware oversight
 ```
+
+Where source scenarios call this `supervisor review`, the atomization-safe reading is an authorized review/oversight context. Atomization must not turn field actor, supervisor, coordinator, auditor, reviewer, or administrator labels into fixed platform classes. It should name the operation class and boundary: offline-capable capture, sync-visible review, online/coordination-required setup or resolution, or offline-with-constraints authority.
 
 This is enough to start atomizing product-backed platform surfaces where product behavior, scenario pressure, and baseline boundary ownership agree.
 
@@ -80,9 +82,9 @@ These surfaces are ready only inside the selected slice.
 | Capture event/history obligations | Event Log/Storage | Original capture, correction, review decision, and preserved history | Does not create mutable canonical records |
 | Accepted envelope use | Event Envelope/Schema | Use the closed envelope for slice events | Does not add `authority_context`, tenant, deployment, group, or user fields |
 | Preconfigured activity and information shape use | Configuration + Event Envelope/Schema | Consume one configured activity and one information shape | Does not close setup-builder UX, schema tooling, or Pattern Registry schema |
-| Simple assignment-derived work visibility | Assignment/Auth/Sync | One field actor, one supervisor actor, one simple assignment context | Does not close permission tables, shared devices, temporary authority, auditor scope, or subject-based scope |
+| Simple assignment-derived work visibility | Assignment/Auth/Sync | One capture context, one review/oversight context, one simple assignment context | Does not close permission tables, shared devices, temporary authority, auditor scope, subject-based scope, or fixed role taxonomy |
 | Offline local status language | Event Log/Storage + Assignment/Auth/Sync + product translation | Saved locally, pending sync, synced, and narrow sync problem | Does not define sync transport, bandwidth, pagination, deletion, or sensitive local lifecycle policy |
-| Supervisor review queue | Projection/Workflow State | Submitted work appears for review after sync visibility | Does not create canonical `WorkItem` storage |
+| Review queue | Projection/Workflow State | Submitted work appears for an authorized review/oversight context after sync visibility | Does not create canonical `WorkItem` storage or fixed `Supervisor` class |
 | Approve/return decision path | Projection/Workflow State + Event Log/Storage | Approve or return with reason, then correction/resubmission | Does not define multi-step approval or full Pattern Registry inventory |
 | Evidence/history view | Event Log/Storage + product translation | Show original, correction, and decision trail | Does not define export, audit retention, or source-chain traversal closure |
 | Minimal freshness-aware oversight | Projection-derived view + Reporting/Aggregation pressure | Narrow counts for assigned, submitted, returned, approved, and stale/pending visibility | Does not close reporting/aggregation |

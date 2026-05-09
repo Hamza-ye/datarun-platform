@@ -66,7 +66,7 @@ Settled as a ground-truth access-control requirement. Not yet closed here as a c
 
 Scope:
 
-Applies to field workers, supervisors, regional leads, auditors, cross-regional coordinators, and any actor whose visibility differs by responsibility or context.
+Applies to any actor whose visibility differs by responsibility or context. Source examples include field workers, supervisors, regional leads, auditors, and cross-regional coordinators, but those labels are operational examples rather than a fixed platform taxonomy.
 
 Non-goals:
 
@@ -170,7 +170,7 @@ Kind: interaction-rule
 
 Specification statement:
 
-Hierarchical visibility generally follows organizational structure, but exceptions must be supported without undermining the hierarchy. Supervisors and regional leads need inherited visibility, while auditors or cross-boundary coordinators may require visibility outside normal reporting lines.
+Hierarchical visibility generally follows organizational structure, but exceptions must be supported without undermining the hierarchy. Oversight contexts may need inherited visibility, while audit or cross-boundary coordination contexts may require visibility outside normal reporting lines.
 
 Source basis:
 
@@ -183,11 +183,13 @@ Settled as a ground-truth access-control requirement. Not yet closed here as a c
 
 Scope:
 
-Applies to organizational hierarchy, regional visibility, supervisor oversight, auditor access, cross-regional coordination, and temporary cross-boundary roles.
+Applies to organizational hierarchy, regional visibility, oversight, audit access, cross-regional coordination, and temporary cross-boundary responsibility.
 
 Non-goals:
 
 This kernel does not decide hierarchy representation, exception encoding, or containment logic.
+
+It also does not define fixed supervisor, regional-lead, auditor, or coordinator platform classes; those are source examples for visibility behavior.
 
 Forbidden interpretations:
 
@@ -347,6 +349,7 @@ Forbidden interpretations:
 
 - Do not design as if coordinators' infrastructure and field workers' infrastructure are equivalent.
 - Do not assume auditors follow the normal organizational hierarchy.
+- Do not turn operator-tier examples into platform-core actor subclasses or permanent responsibility boundaries.
 
 Open edges:
 
@@ -379,7 +382,7 @@ Applies to field-level capture, lookup, decisions, assigned work, and local devi
 
 Non-goals:
 
-This kernel does not decide which operations are primary field operations, which operations require coordinator connectivity, or how local state is stored.
+This kernel does not decide which operations are primary field operations, which operations require coordination/connectivity, or how local state is stored.
 
 Forbidden interpretations:
 
@@ -401,7 +404,7 @@ Kind: interaction-rule
 
 Specification statement:
 
-Oversight and coordination views reflect the most recently synced state, not a live feed of field reality. The platform must make information freshness visible so supervisors and coordinators can account for sync delay.
+Oversight and coordination views reflect the most recently synced state, not a live feed of field reality. The platform must make information freshness visible so review, oversight, and coordination contexts can account for sync delay.
 
 Source basis:
 
@@ -414,7 +417,7 @@ Settled as an operational constraint. Not yet closed as a freshness field, proje
 
 Scope:
 
-Applies to supervisor views, coordinator views, reporting, oversight decisions, and centrally visible field data.
+Applies to review/oversight views, coordination views, reporting, oversight decisions, and centrally visible field data.
 
 Non-goals:
 
@@ -462,6 +465,7 @@ Forbidden interpretations:
 
 - Do not optimize only for pilot-scale deployments.
 - Do not treat the numeric ranges as exact contractual maxima.
+- Do not turn the scale examples into required platform actor subclasses.
 
 Open edges:
 

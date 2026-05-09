@@ -79,6 +79,8 @@ Session 4 stabilizes these core journeys:
 
 These are not separate products. They are reusable movement patterns that later information architecture should compose into one coherent operational system.
 
+Role lenses name who commonly enters a journey. They do not define actor classes or permanent platform boundaries. When a journey needs a hard line, draw it around the operation being performed: offline-capable work, coordination/connectivity-required work, or constrained-authority work that may need later synchronization or review.
+
 ## J1. Find And Start Work
 
 Primary roles:
@@ -200,8 +202,8 @@ Typical entry signals:
 - capture requires a known subject, place, unit, resource, or situation
 - user searches before recording work
 - user discovers a new target while offline
-- supervisor reviews history for a target
-- coordinator manages registry stewardship where policy allows
+- review/oversight context reviews history for a target
+- coordination/setup context manages registry stewardship where policy allows
 
 Normal path:
 
@@ -255,7 +257,7 @@ Typical entry signals:
 - submitted work waiting review
 - returned work reopened by a field worker
 - approval step waiting for a decision
-- planned assessment requiring supervisor judgment
+- planned assessment requiring authorized review judgment
 - exception or discrepancy requiring review
 
 Normal path:
@@ -279,7 +281,7 @@ Architecture guardrails:
 - Do not turn review UX into a general workflow-authoring system.
 - Do not make review status canonical stored state.
 - Do not silently close general flag semantics through review labels.
-- Do not let supervisor visibility become uncontrolled action authority.
+- Do not let oversight visibility become uncontrolled action authority.
 
 Open pressure to route:
 
@@ -314,11 +316,11 @@ Typical entry signals:
 
 Normal path:
 
-1. Coordinator selects an operational pattern or configured activity type.
+1. An authorized setup actor selects an operational pattern or configured activity type.
 2. Product asks for bounded setup values: information shape, rhythm, assignment, scope, review needs, transfer steps, or relevant policy choices.
 3. Product validates setup before publishing.
 4. Product previews expected operational impact, including affected users, active work, offline devices, and reporting surfaces where possible.
-5. Coordinator publishes the configuration change.
+5. The authorized setup actor publishes the configuration change.
 6. Product shows rollout/freshness implications instead of implying instant global effect.
 
 Experience requirements:
@@ -418,7 +420,7 @@ Typical entry signals:
 - resources or materials sent to another person, location, or level
 - user receives expected items
 - user receives partial, damaged, unexpected, or missing items
-- coordinator monitors a multi-hop chain
+- coordination context monitors a multi-hop chain
 - field execution depends on supply availability
 
 Normal path:
@@ -427,7 +429,7 @@ Normal path:
 2. Receiver sees expected receipt work when in scope.
 3. Receiver confirms full receipt or records discrepancy.
 4. Product shows in-transit, received, partial, disputed, or outstanding interpretation.
-5. Supervisor or coordinator sees unresolved discrepancies and chain bottlenecks.
+5. An authorized oversight actor sees unresolved discrepancies and chain bottlenecks.
 6. Related field work can reference supply context without merging into the same process.
 
 Experience requirements:
@@ -472,7 +474,7 @@ Typical entry signals:
 
 - active situation needs another interaction
 - condition changes and creates follow-up
-- supervisor returns or escalates work
+- review/oversight context returns or escalates work
 - related activity provides new context
 - situation is overdue, waiting, resolved, or reopened
 
@@ -580,7 +582,7 @@ Typical entry signals:
 - local work waits to upload
 - central assignments or configuration changed while device was offline
 - duplicate, conflict, stale authority, or discrepancy appears after sync
-- supervisor or coordinator sees stale or incomplete field state
+- oversight or coordination context sees stale or incomplete field state
 
 Normal path:
 
@@ -596,7 +598,7 @@ Experience requirements:
 - Offline must feel normal for field work.
 - The product must not promise real-time visibility.
 - Sync errors and reconciliation issues should be specific enough to act on, not generic failure messages.
-- Supervisors and coordinators must see freshness cues before making decisions from stale views.
+- Oversight and coordination contexts must see freshness cues before making decisions from stale views.
 
 Architecture guardrails:
 

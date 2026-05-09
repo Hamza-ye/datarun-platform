@@ -79,6 +79,8 @@ Authority is projection-derived rather than stored as immutable `authority_conte
 
 Authorization for an event is checked against the original subject reference written into that event, not against post-merge alias projections.
 
+Operational role labels are configuration and product-surface vocabulary, not platform classes. Labels such as field worker, supervisor, coordinator, reviewer, auditor, or regional lead may appear in scenarios and UX artifacts, but hard platform boundaries should be drawn around operation behavior: offline-capable operations, online or coordination-required operations, and operations that can proceed offline only with constrained authority, warnings, or sync-time reconciliation.
+
 Scope expansion is additive. For scope contraction, the ADR-003 initial strategy is selective retain: an actor's own events remain on device, while other actors' events about out-of-scope subjects are candidates for device-side removal.
 
 Sensitive deployments require stronger local lifecycle handling than retain-and-hide.

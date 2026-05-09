@@ -36,6 +36,7 @@ The safe reading is:
 - `actor_ref` authorship is separate from device identity and envelope `type`
 - `activity_ref` is a deployer-chosen configuration reference, not a platform structural type
 - reference categories do not grant Identity / Lineage ownership over actor, assignment, process, activity, or workflow lifecycles
+- `actor_ref` does not encode product role labels, responsibility classes, or the offline/online operation boundary
 
 This is mostly consistent with the accepted baseline and strongly reinforces `09-identity-boundary-control.md`.
 
@@ -78,6 +79,7 @@ The following ADR-008 material is safe to carry forward as candidate platform-sp
 - Referents have separate lifecycle owners and classifications.
 - `subject_ref`, `actor_ref`, and `activity_ref` must not be treated as primitives by themselves.
 - `actor_ref` is the authorship field; `device_id` is not actor identity.
+- `actor_ref` is not a role taxonomy or permission shortcut.
 - `activity_ref` points to deployer configuration and must not become a structural event type.
 - Extending the typed-reference category set is an architecture-grade change.
 

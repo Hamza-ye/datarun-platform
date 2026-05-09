@@ -500,6 +500,7 @@ Allowed use:
 - product role lens
 - reviewer role label
 - coordinator role label
+- pattern participant label where explicitly mapped by configuration
 
 Forbidden interpretations:
 
@@ -508,11 +509,13 @@ Forbidden interpretations:
 - Role is not a user group.
 - Role is not an IdP claim.
 - Role is not an event-envelope field.
+- Role is not the offline/online operation boundary.
 
 Baseline mapping:
 
 - Roles can participate in configured policy values under bounded configuration
 - Effective authority remains assignment-derived through roles, scopes, activity/context, time, and platform-fixed containment semantics
+- Operation capability should be stated separately as offline-capable, online/coordination-required, or offline-with-constraints
 
 Gap routing:
 
@@ -1222,6 +1225,7 @@ Avoid these terms for ordinary field, supervisor, and coordinator workflows unle
 | Sync scope | Assigned area/context, visible work, access | Scope has exact authorization/sync meaning |
 | Authority context | What you can do here, allowed action, read-only | Stored `authority_context` is rejected |
 | Pattern Registry | Setup pattern, review pattern, configured behavior | Exact inventory/schema remains open |
+| Supervisor / coordinator / auditor as platform class | Current review context, oversight context, scoped evidence access | Role labels are operational lenses |
 | Workflow state machine | Review flow, transfer flow, follow-up state | Avoid exposing machinery |
 | Identity lineage | Subject history, possible duplicate, merged/split history | Lineage has narrow baseline ownership |
 | Flag source-chain | Related issue history, source issue | Source-chain details are platform-spec detail |
@@ -1242,6 +1246,7 @@ Avoid these terms for ordinary field, supervisor, and coordinator workflows unle
 | `Tenant boundary` for product access | Rejected | Deployment/tenant does not grant visibility/action authority |
 | `Current state` as stored product object | Rejected | Current state is projection-derived |
 | `Dashboard truth` | Rejected | Oversight/reporting must be freshness-aware and derived |
+| Fixed operational role classes | Rejected for product alignment | Role labels remain deployer/product lenses; hard boundaries route through operation class, assignments, scopes, and sync behavior |
 
 ## Vocabulary-To-Gap Matrix
 

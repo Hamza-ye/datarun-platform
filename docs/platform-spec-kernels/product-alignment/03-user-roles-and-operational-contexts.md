@@ -69,6 +69,8 @@ Use these terms narrowly in this product-alignment track:
 
 These are broad product roles. A deployment may use different names, combine roles, or split them further. The product should support that without changing core concepts.
 
+The same person may also move between these contexts across activities or time. Someone who captures work in one activity may coordinate handoff in another; someone who reviews one workflow may be the subject of review in a different workflow. Later product and implementation design should draw hard lines around operation capability, connectivity needs, synchronization behavior, and configured authority, not around the role labels in this artifact.
+
 ## Field-Level Worker
 
 Operating context:

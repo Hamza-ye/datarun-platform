@@ -35,6 +35,8 @@ The safe reading is:
 - authorship stays in `actor_ref`.
 - identity and integrity facts must not become new envelope types.
 
+The six envelope type values are behavior/pipeline vocabulary, not a taxonomy of operational roles, services, UI surfaces, authority classes, or offline/online operation classes. For example, `review` identifies the processing path for a judgment fact; it does not create a fixed reviewer actor class or a Review subsystem boundary by itself.
+
 This is mostly consistent elaboration of the accepted ADR-001 through ADR-005 baseline.
 
 ## Boundary Routing
@@ -71,6 +73,7 @@ The following ADR-007 material is safe to carry forward as candidate platform-sp
 
 - The envelope `type` vocabulary remains the six ADR-004 structural processing values.
 - `type` answers processing pipeline, not domain fact, authorship, lifecycle ownership, or conflict category.
+- `type` values should remain behavior/pipeline discriminators and must not be promoted into role classes, product surfaces, or service boundaries.
 - Domain/integrity/identity fact discrimination uses `shape_ref`.
 - Consumers must not key identity or integrity fact behavior off extra `type` values such as `conflict_detected`, `conflict_resolved`, `subjects_merged`, or `subject_split`.
 - Adding an envelope `type` value is an architecture-grade change.

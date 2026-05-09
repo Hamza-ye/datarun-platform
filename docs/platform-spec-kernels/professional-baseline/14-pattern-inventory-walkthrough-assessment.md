@@ -31,6 +31,8 @@ ADR-005 closes the Pattern Registry mechanism and composition model but explicit
 
 The walkthrough mostly proposes candidate inventory and schema detail. It should not be read as implementation authority or as already-accepted platform specification.
 
+Participant-role language in this assessment means workflow capacity inside a pattern, such as capturer, reviewer, approver, sender, or receiver. It must not be read as a fixed product persona, actor subclass, permission shortcut, or service boundary. Concrete deployments bind those capacities to configured roles, assignments, scopes, and operation classes.
+
 ## Boundary Routing
 
 | Claim Area | Primary Boundary | Secondary Boundaries | Reason |
@@ -46,7 +48,7 @@ The walkthrough mostly proposes candidate inventory and schema detail. It should
 
 | Walkthrough Claim | Classification | Assessment |
 |---|---|---|
-| Defines normalized pattern fields: states, transitions, roles, projections, parameters, composition type | Open-gap closure candidate | Useful candidate schema surface for the `Formal Pattern Registry Schema Format` gap. Needs rewriting without implementation-era contract IDs and with ADR-009 mechanism/instance split. |
+| Defines normalized pattern fields: states, transitions, roles, projections, parameters, composition type | Open-gap closure candidate | Useful candidate schema surface for the `Formal Pattern Registry Schema Format` gap. Needs rewriting without implementation-era contract IDs, with ADR-009 mechanism/instance split, and with participant roles treated as capacities/bindings rather than actor classes. |
 | Transition tuple `(current_state, event.type, shape_role) -> next_state` | Open-gap closure candidate | Compatible with ADR-005 and ADR-007 if `event.type` remains the six-value processing axis and `shape_role` maps to `shape_ref` through configuration. |
 | Eliminates implicit transitions | Open-gap closure candidate | Useful spec discipline. Not baseline by itself, but likely safe if included in formal pattern schema. |
 | Subject-level vs event-level composition types | Consistent elaboration plus pattern-schema candidate | Directly elaborates ADR-005 composition rules. Exact state keys are spec/implementation detail, not architecture baseline. |
@@ -83,6 +85,7 @@ The following material is safe to carry forward into pattern atomization as cand
 
 - Pattern inventory should start from the four ADR-005 existence-proof patterns, not from arbitrary workflow invention.
 - Pattern definitions should use abstract shape roles mapped to concrete `shape_ref` values by deployer configuration.
+- Pattern participant names should describe capacities in a behavior skeleton, not fixed platform role classes.
 - Pattern definitions should distinguish subject-level and event-level state derivation.
 - Pattern definitions should state roles, transitions, state markers, projections, and parameterization points.
 - Pattern Registry should support activities with no selected workflow pattern.
@@ -98,6 +101,7 @@ The following material is safe to carry forward into pattern atomization as cand
 - Implementation contract IDs from pre-convergence architecture docs.
 - `entity_lifecycle` as accepted initial inventory.
 - Any wording that makes patterns deployer-authored config rather than platform-fixed mechanisms selected and parameterized by deployers.
+- Any wording that turns capturer, reviewer, approver, sender, receiver, supervisor, coordinator, or auditor labels into platform-owned actor subclasses.
 
 ## Baseline Impact
 

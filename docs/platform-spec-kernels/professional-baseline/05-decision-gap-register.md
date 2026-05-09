@@ -173,6 +173,78 @@ Priority:
 
 ## Platform-Spec Detail Gaps
 
+### Operational Actor Vocabulary And Operation-Class Routing
+
+Classification: Platform-spec detail gap
+
+Affected baseline:
+
+- Authorization and sync
+- Configuration boundary
+- Projection and workflow
+- Product-alignment vocabulary and selected-slice atomization
+
+Why open:
+
+Ground-truth and product-alignment sources use operational labels such as field worker, supervisor, coordinator, administrator, regional lead, auditor, and reviewer. These labels are necessary for scenario pressure and UX design, but they can be overread as permanent platform actor classes or core responsibility types. The accepted baseline already routes authority through actors, assignments, roles, scopes, activities, time, projections, and sync scope. It does not decide a fixed responsibility taxonomy.
+
+Later-source assessment:
+
+Later claims may use operational labels as examples only if they preserve assignment-derived authority, bounded configuration, projection-derived state, and the mechanism/instance split. Claims that add fixed role classes, role-specific envelope fields, direct permission shortcuts, or service boundaries named after operational labels should be classified as unauthorized unless a formal decision changes the baseline.
+
+Closure path:
+
+- Platform-spec detailing for each atom to state its operation class: offline-capable, online/coordination-required, or offline-with-constraints.
+- Product/UX design can choose labels, default surfaces, and navigation treatments without changing core mechanisms.
+- Implementation design may use temporary role labels for seed data or tests, but core interfaces should be named for behaviors, capabilities, or boundary responsibilities rather than persona labels.
+- Formal architecture decision only if a future requirement needs fixed platform-owned actor subclasses.
+
+Priority:
+
+- P1 before selected-slice atomization so first-slice review, approval, oversight, setup, and resolution language does not harden into fixed platform classes.
+
+### Envelope Type, Shape Ref, And Parametrization Boundary
+
+Classification: Platform-spec detail gap with control overlay now available
+
+Affected baseline:
+
+- Event envelope
+- Configuration boundary
+- Projection and workflow
+- Product-alignment vocabulary and selected-slice atomization
+
+Why open:
+
+ADR-004 correctly closes `shape_ref`, optional `activity_ref`, and the six-value structural event `type` vocabulary. ADR-005 reinforces that closure by adding no envelope fields or type values and by rejecting `status_changed`. Later assessments clarify related distinctions: `type` is not domain fact, reference is not referent, and platform-fixed mechanism is not deployer-configured instance.
+
+The risk is not an unresolved architecture decision. The risk is atomization drift: future specs or implementation decomposition may collapse the axes and turn domain facts, review labels, workflow states, role labels, product queues, or activity labels into new envelope types, platform classes, or service boundaries.
+
+Later-source assessment:
+
+Later claims may elaborate this area only if they preserve the orthogonal model:
+
+- `type` is platform processing behavior.
+- `shape_ref` is payload fact schema/version.
+- `actor_ref` is authorship.
+- `activity_ref` is activity context.
+- patterns and projections own workflow behavior.
+- assignments, scopes, and sync own authority.
+- deployer labels and role bindings remain configuration/product vocabulary.
+
+Claims that add envelope type values for domain facts, role actions, workflow states, identity/integrity facts, product work items, or offline/sync states should be classified as unauthorized unless formal change control reopens the envelope.
+
+Closure path:
+
+- Use `18-envelope-shape-parametrization-boundary-control.md` as the lineage/control overlay.
+- Use `19-envelope-shape-parametrization-definitions.md` as the atomization definition file.
+- Platform-spec atoms involving events, review, patterns, roles, work queues, or selected-slice behavior must cite the relevant axis rather than relying on overloaded prose.
+- Formal architecture decision only if a future requirement truly needs a new envelope field, new type value, new fixed actor subclass, or new platform-owned mechanism.
+
+Priority:
+
+- P1 before event-envelope, review, Pattern Registry, selected-slice, authorization/sync, or implementation-decomposition atomization.
+
 ### Exact Pattern Registry Inventory
 
 Classification: Platform-spec detail gap
