@@ -40,6 +40,7 @@ Supporting process references:
 
 ## Folder Contents
 
+- `atom-registry.yml`: compact machine-readable lookup for atom status, owner, boundary, batch, dependencies, and next work. Source-basis paths in the registry are rooted at `docs/platform-spec-kernels/`.
 - `process/01-atomization-operating-plan.md`: the multi-session professional process for decomposition, drafting, review, and change control.
 - `process/02-spec-atom-template.md`: the required template for every future platform spec atom.
 - `process/03-atom-inventory-and-writing-order.md`: the initial decomposition map and iterative writing order.
@@ -54,12 +55,20 @@ This workspace must not:
 - add event-envelope fields, type values, authority shortcuts, tenant/user/group authority, or canonical projection state
 - turn product surfaces, role labels, queues, or workflow labels into platform classes
 - collapse multiple boundaries into one convenience subsystem
+- turn the registry into a second source of architecture authority
+
+## Agent Start Rule
+
+At the start of each platform-spec session, agents must read `atom-registry.yml` first, then the operating plan, then only the atom and source files needed for the selected work.
+
+If an atom path, status, owner role, boundary, batch, dependency, or blocking relationship changes, update `atom-registry.yml` in the same commit.
 
 ## Current Next Step
 
-Use `process/01-atomization-operating-plan.md` to run the first session:
+Use `atom-registry.yml` and `process/01-atomization-operating-plan.md` to run the next session:
 
-1. confirm source authority and hold-backs
-2. accept the initial atom inventory
-3. draft only the first foundation atom batch
-4. review each atom against the boundary checklist before accepting it
+1. read the registry and operating plan
+2. confirm Batch 1A control atoms still cover the active hold-backs
+3. draft `atoms/02-glossary-and-core-definitions.md`
+4. draft `atoms/03-event-log-storage.md`
+5. update the registry only if atom metadata changes

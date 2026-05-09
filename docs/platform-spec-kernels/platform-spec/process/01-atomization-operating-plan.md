@@ -37,6 +37,20 @@ Use sources in this order:
 
 Do not draft final spec atoms directly from ADR narrative, exploration narrative, product-alignment prose, or implementation plans.
 
+## Agent Start Procedure
+
+At the start of every platform-spec session:
+
+1. Read `atom-registry.yml`.
+2. Identify the requested atom, next recommended atom, or affected hold-back.
+3. Read this operating plan.
+4. Read only the selected atom, its registry-listed dependencies, and the cited source-basis files needed for the work.
+5. Update `atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
+
+The registry is a fast lookup layer. It is not architecture authority. If the registry and atom file disagree, pause and reconcile them before continuing.
+
+Registry `source_basis` paths are rooted at `docs/platform-spec-kernels/`.
+
 ## Commit Role Convention
 
 Commit history is a traceability surface for this work. Atomization commits should keep the project's existing conventional subject style and add a role line in the commit body.

@@ -6,6 +6,8 @@ This document defines the initial platform-spec decomposition and the profession
 
 Paths in this document are relative to `docs/platform-spec-kernels/platform-spec/`.
 
+For fast lookup, agents should read `atom-registry.yml` before this inventory. This inventory explains the writing order; the registry gives the current machine-readable status map.
+
 ## Decomposition Principles
 
 - Split by ownership boundary, not by ADR number, product surface, role label, or implementation module.
@@ -18,7 +20,7 @@ Paths in this document are relative to `docs/platform-spec-kernels/platform-spec
 
 | Order | File | Atom | Primary Boundary | Initial Status | Why Here |
 |---:|---|---|---|---|---|
-| 1 | `atoms/01-spec-governance.md` | Spec Governance And Source Authority | Cross-cutting process | Planned | Prevents later atoms from using the wrong source authority. |
+| 1 | `atoms/01-spec-governance.md` | Spec Governance And Source Authority | Cross-cutting process | Draft | Prevents later atoms from using the wrong source authority. |
 | 2 | `atoms/02-glossary-and-core-definitions.md` | Glossary And Core Definitions | Cross-cutting definitions | Planned | Stabilizes vocabulary before behavior is drafted. |
 | 3 | `atoms/03-event-log-storage.md` | Event Log And Storage | Event Log / Storage | Planned | Establishes canonical truth and write-path discipline. |
 | 4 | `atoms/04-event-envelope-schema.md` | Event Envelope And Schema | Event Envelope / Schema | Planned | Freezes the stable envelope contract before references or workflow depend on it. |
@@ -30,9 +32,9 @@ Paths in this document are relative to `docs/platform-spec-kernels/platform-spec
 | 10 | `atoms/10-conflict-flag-and-resolution.md` | Conflict, Flag, And Resolution | Flag / Resolution | Planned | Keeps detection source facts separate from flag lifecycle and resolution. |
 | 11 | `atoms/11-trigger-reactivity.md` | Trigger And Reactivity | Trigger / Reactivity | Planned / Conditional | Must respect detect-before-act and event-store write path. |
 | 12 | `atoms/12-reporting-aggregation-and-freshness.md` | Reporting, Aggregation, And Freshness | Reporting / Aggregation | Planned / Conditional | Must remain projection-derived and access-scoped. |
-| 90 | `atoms/90-open-decisions.md` | Open Decisions And Hold-backs | Cross-boundary | Planned | Keeps gaps visible and prevents accidental closure. |
-| 91 | `atoms/91-rejected-paths.md` | Rejected Paths | Cross-boundary | Planned | Makes review guardrails easy to enforce. |
-| 92 | `atoms/92-change-control-log.md` | Change-Control Log | Cross-boundary process | Planned | Records accepted baseline changes, disputes, and formal reopens. |
+| 90 | `atoms/90-open-decisions.md` | Open Decisions And Hold-backs | Cross-boundary | Draft | Keeps gaps visible and prevents accidental closure. |
+| 91 | `atoms/91-rejected-paths.md` | Rejected Paths | Cross-boundary | Draft | Makes review guardrails easy to enforce. |
+| 92 | `atoms/92-change-control-log.md` | Change-Control Log | Cross-boundary process | Draft | Records accepted baseline changes, disputes, and formal reopens. |
 
 ## Batch Plan
 
@@ -41,6 +43,7 @@ Paths in this document are relative to `docs/platform-spec-kernels/platform-spec
 Files:
 
 - `README.md`
+- `atom-registry.yml`
 - `process/01-atomization-operating-plan.md`
 - `process/02-spec-atom-template.md`
 - `process/03-atom-inventory-and-writing-order.md`
@@ -48,12 +51,32 @@ Files:
 Acceptance rule:
 
 - These files define process only. They must not create platform behavior.
+- The registry is a lookup layer only; atom files remain canonical.
 
-### Batch 1: Foundation
+### Batch 1A: Control Foundation
 
 Files:
 
 - `atoms/01-spec-governance.md`
+- `atoms/90-open-decisions.md`
+- `atoms/91-rejected-paths.md`
+- `atoms/92-change-control-log.md`
+
+Primary risks:
+
+- open gaps being silently closed
+- rejected paths returning under new names
+- draft material being treated as implementation authority
+- change-control triggers being handled only from memory
+
+Acceptance rule:
+
+- These files may route and protect decisions, but they must not introduce platform behavior.
+
+### Batch 1B: Foundation Behavior
+
+Files:
+
 - `atoms/02-glossary-and-core-definitions.md`
 - `atoms/03-event-log-storage.md`
 - `atoms/04-event-envelope-schema.md`
@@ -126,7 +149,7 @@ Acceptance rule:
 
 - Operational surfaces preserve core invariants and route unresolved policy to open decisions.
 
-### Batch 5: Control Registers
+### Batch 5: Control Register Maintenance
 
 Files:
 
@@ -136,7 +159,7 @@ Files:
 
 Acceptance rule:
 
-- Every open gap, rejected path, and accepted baseline change has one visible place to land.
+- Every open gap, rejected path, and accepted baseline change continues to have one visible place to land.
 
 ## Per-Atom Drafting Order
 

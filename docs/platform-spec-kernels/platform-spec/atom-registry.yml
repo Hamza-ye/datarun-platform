@@ -1,0 +1,409 @@
+# Machine-readable index for platform-spec atomization.
+# Canonical content remains in the atom files; this registry is only the fast lookup layer.
+version: 1
+status: active
+canonical_root: docs/platform-spec-kernels/platform-spec
+source_basis_root: docs/platform-spec-kernels
+agent_start:
+  read_first:
+    - atom-registry.yml
+    - README.md
+    - process/01-atomization-operating-plan.md
+  rule: "Use this registry to find the next atom and relevant files; use the atom files as authority."
+update_rule: "If an atom path, status, owner_role, boundary, batch, dependencies, or blocking relationship changes, update this registry in the same commit."
+status_values:
+  - planned
+  - draft
+  - accepted
+  - deferred
+  - hold-back
+  - rejected
+owner_roles:
+  - Architecture Steward
+  - Drafting Agent
+  - Challenge Reviewer
+  - Delivery Lead
+  - Product Owner
+next_recommended:
+  - SPEC-002
+  - SPEC-003
+  - SPEC-004
+atoms:
+  - id: SPEC-001
+    title: Spec Governance And Source Authority
+    file: atoms/01-spec-governance.md
+    status: draft
+    batch: 1A
+    boundary: cross-boundary-process
+    owner_role: Architecture Steward
+    depends_on: []
+    blocks:
+      - SPEC-002
+      - SPEC-003
+      - SPEC-004
+      - SPEC-005
+      - SPEC-006
+      - SPEC-007
+      - SPEC-008
+      - SPEC-009
+      - SPEC-010
+      - SPEC-011
+      - SPEC-012
+      - SPEC-090
+      - SPEC-091
+      - SPEC-092
+    source_basis:
+      - professional-baseline/02-change-control.md
+      - professional-baseline/03-artifact-definitions.md
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - pre-operations/04-accepted-pre-atomization-decisions.md
+    github_issue: null
+  - id: SPEC-002
+    title: Glossary And Core Definitions
+    file: atoms/02-glossary-and-core-definitions.md
+    status: planned
+    batch: 1B
+    boundary: cross-boundary-definitions
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-090
+      - SPEC-091
+    blocks:
+      - SPEC-003
+      - SPEC-004
+      - SPEC-005
+      - SPEC-006
+      - SPEC-007
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+      - professional-baseline/19-envelope-shape-parametrization-definitions.md
+    github_issue: null
+  - id: SPEC-003
+    title: Event Log And Storage
+    file: atoms/03-event-log-storage.md
+    status: planned
+    batch: 1B
+    boundary: Event Log / Storage
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-002
+      - SPEC-090
+      - SPEC-091
+    blocks:
+      - SPEC-004
+      - SPEC-005
+      - SPEC-007
+      - SPEC-009
+      - SPEC-010
+      - SPEC-012
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+    github_issue: null
+  - id: SPEC-004
+    title: Event Envelope And Schema
+    file: atoms/04-event-envelope-schema.md
+    status: planned
+    batch: 1B
+    boundary: Event Envelope / Schema
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-002
+      - SPEC-003
+      - SPEC-090
+      - SPEC-091
+    blocks:
+      - SPEC-005
+      - SPEC-006
+      - SPEC-007
+      - SPEC-009
+      - SPEC-010
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+      - professional-baseline/19-envelope-shape-parametrization-definitions.md
+      - pre-operations/04-accepted-pre-atomization-decisions.md
+    github_issue: null
+  - id: SPEC-005
+    title: References And Identity Lineage
+    file: atoms/05-references-and-identity-lineage.md
+    status: planned
+    batch: 2
+    boundary: Identity / Lineage
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-002
+      - SPEC-003
+      - SPEC-004
+      - SPEC-090
+      - SPEC-091
+    blocks:
+      - SPEC-007
+      - SPEC-009
+      - SPEC-010
+      - SPEC-012
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/09-identity-boundary-control.md
+    github_issue: null
+  - id: SPEC-006
+    title: Configuration And Parameterization
+    file: atoms/06-configuration-and-parametrization.md
+    status: planned
+    batch: 2
+    boundary: Configuration
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-002
+      - SPEC-004
+      - SPEC-090
+      - SPEC-091
+    blocks:
+      - SPEC-007
+      - SPEC-009
+      - SPEC-010
+      - SPEC-011
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+      - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+    github_issue: null
+  - id: SPEC-007
+    title: Assignment, Authority, And Sync
+    file: atoms/07-assignment-authority-and-sync.md
+    status: planned
+    batch: 2
+    boundary: Assignment / Authority / Sync
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-002
+      - SPEC-003
+      - SPEC-004
+      - SPEC-005
+      - SPEC-006
+      - SPEC-090
+      - SPEC-091
+    blocks:
+      - SPEC-008
+      - SPEC-009
+      - SPEC-010
+      - SPEC-011
+      - SPEC-012
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+      - pre-operations/04-accepted-pre-atomization-decisions.md
+    github_issue: null
+  - id: SPEC-008
+    title: Local Data Lifecycle
+    file: atoms/08-local-data-lifecycle.md
+    status: planned
+    batch: 4
+    boundary: Local Data Lifecycle
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-003
+      - SPEC-007
+      - SPEC-090
+      - SPEC-091
+    blocks: []
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+    github_issue: null
+  - id: SPEC-009
+    title: Projections, Workflow, And Patterns
+    file: atoms/09-projections-workflow-and-patterns.md
+    status: planned
+    batch: 3
+    boundary: Projection / Workflow State
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-002
+      - SPEC-003
+      - SPEC-004
+      - SPEC-005
+      - SPEC-006
+      - SPEC-007
+      - SPEC-090
+      - SPEC-091
+    blocks:
+      - SPEC-010
+      - SPEC-011
+      - SPEC-012
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+    github_issue: null
+  - id: SPEC-010
+    title: Conflict, Flag, And Resolution
+    file: atoms/10-conflict-flag-and-resolution.md
+    status: planned
+    batch: 3
+    boundary: Flag / Resolution
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-002
+      - SPEC-003
+      - SPEC-004
+      - SPEC-005
+      - SPEC-006
+      - SPEC-007
+      - SPEC-009
+      - SPEC-090
+      - SPEC-091
+    blocks:
+      - SPEC-011
+      - SPEC-012
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+    github_issue: null
+  - id: SPEC-011
+    title: Trigger And Reactivity
+    file: atoms/11-trigger-reactivity.md
+    status: planned
+    batch: 3
+    boundary: Trigger / Reactivity
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-003
+      - SPEC-006
+      - SPEC-007
+      - SPEC-009
+      - SPEC-010
+      - SPEC-090
+      - SPEC-091
+    blocks: []
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+    github_issue: null
+  - id: SPEC-012
+    title: Reporting, Aggregation, And Freshness
+    file: atoms/12-reporting-aggregation-and-freshness.md
+    status: planned
+    batch: 4
+    boundary: Reporting / Aggregation
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-003
+      - SPEC-005
+      - SPEC-007
+      - SPEC-009
+      - SPEC-010
+      - SPEC-090
+      - SPEC-091
+    blocks: []
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+    github_issue: null
+  - id: SPEC-090
+    title: Open Decisions And Hold-backs
+    file: atoms/90-open-decisions.md
+    status: draft
+    batch: 1A
+    boundary: cross-boundary-control-register
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+    blocks:
+      - SPEC-002
+      - SPEC-003
+      - SPEC-004
+      - SPEC-005
+      - SPEC-006
+      - SPEC-007
+      - SPEC-008
+      - SPEC-009
+      - SPEC-010
+      - SPEC-011
+      - SPEC-012
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/09-identity-boundary-control.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+      - pre-operations/04-accepted-pre-atomization-decisions.md
+    github_issue: null
+  - id: SPEC-091
+    title: Rejected Paths
+    file: atoms/91-rejected-paths.md
+    status: draft
+    batch: 1A
+    boundary: cross-boundary-control-register
+    owner_role: Challenge Reviewer
+    depends_on:
+      - SPEC-001
+    blocks:
+      - SPEC-002
+      - SPEC-003
+      - SPEC-004
+      - SPEC-005
+      - SPEC-006
+      - SPEC-007
+      - SPEC-008
+      - SPEC-009
+      - SPEC-010
+      - SPEC-011
+      - SPEC-012
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/09-identity-boundary-control.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+      - pre-operations/04-accepted-pre-atomization-decisions.md
+    github_issue: null
+  - id: SPEC-092
+    title: Change-Control Log
+    file: atoms/92-change-control-log.md
+    status: draft
+    batch: 1A
+    boundary: cross-boundary-process-register
+    owner_role: Architecture Steward
+    depends_on:
+      - SPEC-001
+      - SPEC-090
+      - SPEC-091
+    blocks: []
+    source_basis:
+      - professional-baseline/02-change-control.md
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+    github_issue: null
