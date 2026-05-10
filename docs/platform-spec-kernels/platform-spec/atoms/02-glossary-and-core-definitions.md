@@ -76,8 +76,8 @@ This atom does not own:
 | `device_sequence` | Intra-device ordering signal | Cross-device total order or actor identity |
 | `sync_watermark` | Cross-device concurrency detection signal | Global workflow state, event truth, or access entitlement |
 | `shape_ref` | Payload schema and version reference, formatted as `{shape_name}/v{version}` | Workflow state, authority marker, product surface, online/offline class, role label, tenant identity, or deployment identity |
-| Shape | A typed payload schema, deployer-defined or platform-bundled | Envelope `type`, workflow pattern, actor class, or access rule |
-| Platform-bundled shape | A shape supplied by platform code for a platform-owned fact | New envelope `type` or accepted final bundled-shape inventory |
+| Shape | A typed, versioned payload schema identified by `shape_ref`; shapes are deployer-defined by default | Envelope `type`, workflow pattern, actor class, access rule, or platform-owned domain schema catalog |
+| Platform-bundled shape | Narrow exception for an explicitly accepted platform-owned fact shape | New envelope `type`, general platform-supplied business schema catalog, or accepted final bundled-shape inventory |
 | `activity_ref` | Optional reference to the deployer-configured activity instance in which an event was produced, or null when unknown | Pattern reference, tenant/deployment reference, work-item identity, assignment authority, or immutable authority context |
 | Activity | A deployer-configured operational instance binding shapes, pattern selections, role/action mappings, scope parameters, schedules, thresholds, or policy values | Platform-owned actor class, envelope type, or arbitrary deployer code |
 | `actor_ref` | Reference identifying who or what authored the event | Permission grant, role class, product persona, or complete authentication identity |
@@ -178,13 +178,14 @@ This atom does not own:
 
 - Later atoms may narrow a term for their own boundary if they preserve this glossary's forbidden meanings.
 - New glossary terms may be added when a downstream atom exposes repeated cross-boundary vocabulary.
-- Platform-bundled shapes and Pattern Registry entries may be defined later by the owning atoms without changing the meaning of `shape_ref` or pattern.
+- Platform-bundled shapes may be defined later only as explicit exceptions for platform-owned facts; Pattern Registry entries may be defined later by their owning atoms without changing the meaning of `shape_ref` or pattern.
 - Product and deployer labels may vary by deployment if they map back to platform-owned mechanisms.
 
 ## Forbidden Couplings
 
 - Do not use `type` as a domain-event taxonomy.
 - Do not use `shape_ref` as workflow state, authority, product surface, role, tenant, deployment, or online/offline marker.
+- Do not treat platform-bundled shapes as a general platform-owned domain schema catalog.
 - Do not use `activity_ref` as authority snapshot, pattern identity, tenant/deployment identity, or work-item identity.
 - Do not infer authority from `actor_ref`, role labels, groups, accounts, IdP claims, tenant context, or deployment context.
 - Do not treat projections, reports, queues, dashboards, work items, or status labels as canonical truth.
@@ -197,7 +198,7 @@ This atom does not own:
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
 | Final event-envelope field specification and serialization details | `04-event-envelope-schema.md` | Envelope atom drafting begins. |
-| Final platform-bundled shape inventory | Event Envelope / Schema plus owning behavior atoms | A later atom needs to specify bundled platform facts. |
+| Rules for any platform-owned fact shapes and final platform-bundled shape inventory | Event Envelope / Schema plus owning behavior atoms | A later atom needs to specify a bundled platform fact shape. |
 | Exact Pattern Registry inventory and formal schema | `09-projections-workflow-and-patterns.md` plus Configuration | Workflow atom needs normative pattern skeletons or serialized schema. |
 | General flag semantics outside closed workflow cases | `10-conflict-flag-and-resolution.md` and `90-open-decisions.md` | A later atom needs non-workflow flag creation, blocking, lifecycle, or auto-resolution semantics. |
 | Subject-based scope, auditor access, shared-device actor scope, and temporary authority policy | `07-assignment-authority-and-sync.md` and `90-open-decisions.md` | Assignment/sync atom or first implementation slice requires those cases. |
