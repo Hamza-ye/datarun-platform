@@ -15,7 +15,7 @@ Source basis:
 Depends on:
 
 - `01-spec-governance.md`
-- `02-glossary-and-core-definitions.md` (planned; this atom remains draft until glossary terms are reconciled)
+- `02-glossary-and-core-definitions.md`
 - `90-open-decisions.md`
 - `91-rejected-paths.md`
 
@@ -135,7 +135,7 @@ This atom does not own:
 
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
-| `02-glossary-and-core-definitions.md` is not drafted yet | Cross-boundary definitions | Before this atom can be accepted. |
+| Foundation acceptance review after glossary reconciliation | Architecture Steward plus Challenge Reviewer | Before this atom can be marked Accepted. |
 | Retention and archival | `90-open-decisions.md`; Event Log / Storage plus Local Data Lifecycle | Compliance, self-host, export, or storage-scale requirement needs retention behavior. |
 | Projection optimization and caching | `90-open-decisions.md`; Event Log / Storage plus Projection / Workflow State | Implementation performance design begins. |
 | Event schema/versioning tooling | `90-open-decisions.md`; Event Envelope / Schema | Envelope atom moves from conceptual contract to implementation schema. |
@@ -179,7 +179,7 @@ Architecture Steward review, 2026-05-10:
 
 - Pass for draft status. The atom preserves Event Log / Storage as the singular owner of append-only canonical operational facts and keeps projections, reports, queues, dashboards, and UI state derived.
 - Source-basis cleanup: `90-open-decisions.md` and `91-rejected-paths.md` are dependencies and review registers, not accepted source authority for this atom.
-- Acceptance remains gated by the planned glossary reconciliation and the open-gap/register acceptance path; this review does not promote the atom out of Draft.
+- Acceptance remains gated by the open-gap/register acceptance path; this review does not promote the atom out of Draft.
 
 Glossary reconciliation, 2026-05-10:
 

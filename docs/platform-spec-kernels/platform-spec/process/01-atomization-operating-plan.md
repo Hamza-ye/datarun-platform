@@ -41,12 +41,11 @@ Do not draft final spec atoms directly from ADR narrative, exploration narrative
 
 At the start of every platform-spec session:
 
-1. Read `START-HERE.md`.
-2. Read `atom-registry.yml`.
-3. Identify the requested atom, next recommended atom, or affected hold-back.
-4. Read this operating plan only when the session needs procedure.
-5. Read only the selected atom, its registry-listed dependencies, and the cited source-basis files needed for the work.
-6. Update `atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
+1. Read `atom-registry.yml`.
+2. Identify the requested atom, next recommended atom, or affected hold-back.
+3. Read this operating plan whenever the session drafts, reviews, changes atom status, changes dependencies, touches an open gap, records a rejected path, or handles change control.
+4. Read only the selected atom, its registry-listed dependencies, and the cited source-basis files needed for the work.
+5. Update `atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
 
 The registry is a fast lookup layer. It is not architecture authority. If the registry and atom file disagree, pause and reconcile them before continuing.
 
@@ -80,6 +79,20 @@ Use the role that best describes the responsibility of the change:
 | Product Owner | Records stakeholder priority, accepted deferral, or product-impact decision. |
 
 Do not use the commit role to bypass document status. A commit can record a draft, hold-back, or rejected path without making it accepted platform behavior.
+
+## Role Discipline
+
+Roles are operating constraints, not labels for tone. A person or agent may switch roles in one chat session, but the switch must be explicit and the new role must use the prior role's output as input rather than silently rewriting it.
+
+Use one active role per work unit:
+
+- Drafting Agent drafts scoped atom text from the selected source basis and does not accept atoms, close gaps, or decide change control.
+- Challenge Reviewer records findings, coupling risks, rejected-path matches, and pause triggers; it does not rewrite findings into approval.
+- Architecture Steward routes findings, reconciles source authority, classifies decision pressure, and prepares status recommendations; it does not use stewardship as a shortcut for acceptance.
+- Delivery Lead sequences implementation-facing work and transition artifacts; it does not treat draft atoms as implementation authority.
+- Product Owner states priority, deployment pressure, and product impact; it does not convert product need into architecture closure.
+
+Commits should normally represent one dominant role. If a commit contains reconciliation after review, the trace must name the review or gap being reconciled.
 
 ## Core Anti-Mud Rules
 

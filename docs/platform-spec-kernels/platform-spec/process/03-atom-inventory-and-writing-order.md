@@ -6,7 +6,7 @@ This document defines the initial platform-spec decomposition and the profession
 
 Paths in this document are relative to `docs/platform-spec-kernels/platform-spec/`.
 
-For fast lookup, agents should read `START-HERE.md` and `atom-registry.yml` before this inventory. This inventory explains the writing order; the registry gives the current machine-readable status map.
+For fast lookup, agents should read `atom-registry.yml` before this inventory. This inventory explains the writing order; the registry gives the current machine-readable status map.
 
 ## Decomposition Principles
 
