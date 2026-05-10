@@ -122,11 +122,13 @@ Do not encode these as envelope `type` values:
 ### Identity And References
 
 - Server-allocated identifiers for offline event, subject, or record creation.
+- Central pre-registration of referenceable entities as a prerequisite for structurally valid offline capture.
 - Rewriting historical event references to express identity evolution.
 - Using post-merge alias projection as the authorization target for historical events.
 - Treating actor, assignment, or process references as subject-lineage ownership.
 - Making shipment, campaign, case, review, or transfer matching a core subject-lineage feature.
 - Making identity own general flag or conflict-resolution lifecycle.
+- Treating descriptive attributes, catalog membership, or deployer-defined referent shapes as subject-lineage facts.
 - Treating device identity as actor identity.
 
 ### Authorization, Sync, And Tenancy
@@ -143,6 +145,7 @@ Do not encode these as envelope `type` values:
 
 - Treating deployer configuration as arbitrary platform code.
 - Letting deployers author envelope fields, event type values, scope containment logic, state-machine mechanisms, access-control programs, or arbitrary detector logic.
+- Treating deployer-defined attributes, catalogs, or shapes as a platform-owned domain schema catalog unless a later atom accepts a narrow platform-bundled shape.
 - Treating `shape_ref` as workflow state, authority marker, product surface, online/offline class, role label, tenant identity, or deployment identity.
 - Treating `activity_ref` as immutable authority context, pattern identity, tenant/deployment reference, or work-item identity.
 
