@@ -7,7 +7,12 @@ Primary owner: Architecture Steward
 Source basis:
 
 - `../../professional-baseline/04-architecture-baseline-v0.md`
+- `../../professional-baseline/05-decision-gap-register.md`
 - `../../professional-baseline/07-system-boundary-map.md`
+- `../../professional-baseline/09-identity-boundary-control.md`
+- `../../professional-baseline/15-conflict-flag-offline-boundary-control.md`
+- `../../professional-baseline/16-operational-constraints-boundary-control.md`
+- `../../professional-baseline/17-authorization-visibility-boundary-control.md`
 - `../../professional-baseline/18-envelope-shape-parametrization-boundary-control.md`
 - `../../professional-baseline/19-envelope-shape-parametrization-definitions.md`
 - `../../pre-operations/04-accepted-pre-atomization-decisions.md`
@@ -42,7 +47,7 @@ This atom owns:
 - required `shape_ref` contract for payload schema and version
 - optional `activity_ref` contract for configured activity context
 - `actor_ref` authorship and system actor convention
-- `subject_ref`, device, and causal/typed-reference obligations at the envelope contract level
+- subject, device, causal, and typed-reference obligations where required by the accepted envelope/reference contract or relevant shape
 - device-time advisory semantics, intra-device sequence semantics, and cross-device concurrency metadata semantics
 - envelope-side constraints that prevent deployer policy, workflow state, authority snapshots, tenant/deployment identity, or product labels from becoming envelope fields
 
@@ -75,8 +80,8 @@ This atom does not own:
 | `activity_ref` | Optional reference to the deployer-configured activity instance in which the event was produced, or null when unknown | Pattern reference, tenant/deployment reference, work-item identity, assignment authority, or immutable authority context |
 | `actor_ref` | Reference identifying who or what authored the event | Permission grant, role class, product persona, device identity, or complete authentication identity |
 | System actor | Platform-owned author convention using `system:{source_type}/{source_id}` | Hidden human actor, tenant identity, or deployer-authored authority source |
-| `subject_ref` | Reference identifying what the event is about | Ownership of every lifecycle, authority, matching, workflow, or reporting behavior for that referent |
-| Typed reference | Reference whose category and contract are meaningful to the platform boundary consuming it | Lifecycle ownership claim over the referent |
+| `subject_ref` | Reference identifying what an event is about where the accepted envelope/reference contract or relevant shape requires a subject reference | Ownership of every lifecycle, authority, matching, workflow, or reporting behavior for that referent |
+| Typed reference | Reference whose category and contract are meaningful to the platform boundary consuming it when the accepted contract or relevant shape requires that reference | Lifecycle ownership claim over the referent |
 | Causal reference | Link to a source or cause where required by the accepted envelope/reference contract or the relevant shape | Universal source-event envelope field, workflow state, or pattern reference |
 | `device_id` | Device or app-installation namespace for device semantics | Actor identity or authorization source |
 | `device_time` | Device clock time recorded for display and audit | Structural ordering source |
@@ -85,7 +90,7 @@ This atom does not own:
 
 ## Invariants
 
-- Every event handed to Event Log / Storage must carry the accepted envelope obligations for identity, `type`, `payload`, timestamp, required shape reference, authorship reference, subject/reference contract, and device/concurrency metadata required by the baseline.
+- Every event handed to Event Log / Storage must carry the accepted envelope obligations for identity, `type`, `payload`, timestamp, required shape reference, authorship reference, any subject, causal, device, or typed-reference values required by the accepted envelope/reference contract or relevant shape, and device/concurrency metadata required by the baseline.
 - The envelope is platform-owned. Adding fields, changing field meanings, or adding structural reference categories requires formal change control.
 - The structural `type` vocabulary is fixed to the accepted six values: `capture`, `review`, `alert`, `task_created`, `task_completed`, and `assignment_changed`.
 - Envelope `type` is only a processing-pipeline discriminator; it must not encode domain fact names, lifecycle states, workflow states, product surfaces, role labels, activity labels, sync/display states, tenant/deployment identity, or authority.
@@ -95,7 +100,7 @@ This atom does not own:
 - `activity_ref` is optional and may be null when activity context is unknown. When present, it preserves configured activity-instance context but does not carry authority.
 - `actor_ref` records authorship. Human and system actors can author events, and system actors use the `system:{source_type}/{source_id}` convention.
 - `device_id` is device or app-installation identity, not actor identity.
-- `subject_ref` and other typed references are reference contracts. They do not decide referent lifecycle ownership.
+- `subject_ref` and other typed references, where required, are reference contracts. They do not decide referent lifecycle ownership.
 - `device_time` is advisory for display and audit only. Projection ordering, conflict detection, and protocol correctness must not depend on device clock ordering.
 - `device_sequence` supplies intra-device ordering, and `sync_watermark` supports cross-device concurrency detection. This atom does not define sync transport, pagination, priority, bandwidth handling, or delivery mechanics.
 - The envelope must not store immutable `authority_context`, `tenant_id`, `deployment_id`, `user_id`, `group_id`, `current_state`, or `pattern_ref`.
@@ -111,7 +116,7 @@ This atom does not own:
 - `shape_ref` supplied under the shape/configuration contract
 - optional `activity_ref` supplied under the activity/configuration contract
 - `actor_ref` authorship reference
-- `subject_ref` and any accepted causal, device, or typed-reference values required by the envelope/reference contract or relevant shape
+- subject, causal, device, and typed-reference values where required by the accepted envelope/reference contract or relevant shape
 - timestamp data, including device clock timestamp for display and audit
 - `device_id`, `device_sequence`, and `sync_watermark` metadata required by baseline ordering and concurrency semantics
 
@@ -127,8 +132,8 @@ This atom does not own:
 | Crosses To | Through | Notes |
 |---|---|---|
 | Event Log / Storage | structurally valid event envelope | Storage persists immutable events but does not redefine envelope fields. |
-| Identity / Lineage | `subject_ref`, raw typed references, and event identity discipline | Identity owns subject continuity where applicable; envelope owns only the reference contract. |
-| Assignment / Authority / Sync | `actor_ref`, `subject_ref`, `activity_ref`, device metadata, and sync concurrency metadata | Authority is reconstructed through assignment/sync behavior, not stored in the envelope. |
+| Identity / Lineage | subject or typed references where required, raw reference values, and event identity discipline | Identity owns subject continuity only for referents with subject-lineage semantics; envelope owns only reference contracts. |
+| Assignment / Authority / Sync | `actor_ref`, `activity_ref`, subject or typed references where required, device metadata, and sync concurrency metadata | Authority is reconstructed through assignment/sync behavior, not stored in the envelope. |
 | Configuration | `shape_ref`, `activity_ref`, and platform-owned `type` vocabulary | Configuration may define shapes and activity instances inside bounded mechanisms; it cannot add envelope fields or type values. |
 | Projection / Workflow State | `type`, `shape_ref`, payload, references, and timestamps as event inputs | Workflow state remains projection-derived and is not stored as an envelope field. |
 | Flag / Resolution | `type`, payload, causal/source links where required by shape, and system actor convention | This atom does not define general flag lifecycle or conflict-resolution behavior. |
@@ -166,6 +171,7 @@ This atom does not own:
 | Event schema/versioning tooling | Event Envelope / Schema plus Event Log / Storage and Configuration | Validation, migration, or mixed-version event handling must be implemented. |
 | Projection compatibility across schema versions | Projection / Workflow State plus Event Envelope / Schema | Projections must consume multiple shape or envelope schema versions. |
 | Platform-bundled shape inventory | Owning behavior atoms plus Event Envelope / Schema and Configuration | A platform-owned fact needs a bundled shape contract. |
+| Final reference serialization and active emission sites | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior atoms | A later atom or implementation needs canonical field names, placement, cardinality, or required emission sites for accepted subject, causal, device, process, assignment, or other typed-reference values. |
 | Referent registration, attributes, and catalogs | Event Envelope / Schema for reference contracts; Identity / Lineage, Configuration, Projection / Workflow State, and Assignment / Authority / Sync for lifecycle/configuration ownership | A spec needs subject registration events, referent attribute mutation/projection, deployer-defined catalogs, or platform-bundled registration shapes. |
 | Sync delivery mechanics | Assignment / Authority / Sync plus implementation tooling | Transport, pagination, priority, bandwidth handling, or operational sync delivery must be specified. |
 | Configuration authoring and deploy-time validation UX | Configuration plus implementation tooling | Admin/configuration authoring or deployment validation surfaces are selected for implementation. |
@@ -209,3 +215,9 @@ This atom does not own:
 Drafting Agent note:
 
 - This is a narrow envelope-contract draft. It does not accept serialization format, schema tooling, referent lifecycle, workflow state, sync mechanics, or configuration authoring UX.
+
+Architecture Steward reconciliation, 2026-05-11:
+
+- Challenge Reviewer P1 accepted. Reference wording now qualifies subject, causal, device, and typed references as required only where the accepted envelope/reference contract or relevant shape requires them; final serialization and active emission sites remain an explicit open gap.
+- Challenge Reviewer P2 accepted. Source basis now cites the decision gap register and the identity, conflict/offline, operational-constraint, and authorization-visibility controls used by this atom.
+- Glossary check: no glossary behavior was added here. SPEC-004 consumes cross-boundary definitions while keeping reference emission, referent lifecycle, authority, workflow, and serialization behavior in their owning atoms or open gaps.
