@@ -114,7 +114,7 @@ atoms:
   - id: SPEC-004
     title: Event Envelope And Schema
     file: atoms/04-event-envelope-schema.md
-    status: planned
+    status: draft
     batch: 1B
     boundary: Event Envelope / Schema
     owner_role: Architecture Steward
