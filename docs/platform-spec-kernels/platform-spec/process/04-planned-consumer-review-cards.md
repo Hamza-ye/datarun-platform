@@ -189,7 +189,7 @@ Forbidden hidden assumptions:
 Carried gaps:
 
 - general flag semantics beyond accepted workflow cases
-- final flag event identity and resolution-event type mapping
+- flag event identity, creation location, and resolution-event type mapping
 - platform-bundled integrity/identity/conflict shape inventory
 - alias-cycle read-side behavior and resolution semantics
 - domain conflict automation outside workflow

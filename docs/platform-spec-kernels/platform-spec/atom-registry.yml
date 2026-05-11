@@ -35,7 +35,7 @@ atoms:
     file: atoms/01-spec-governance.md
     status: draft
     batch: 1A
-    boundary: cross-boundary-process
+    boundary: Cross-boundary process
     owner_role: Architecture Steward
     depends_on: []
     blocks:
@@ -54,6 +54,7 @@ atoms:
       - SPEC-091
       - SPEC-092
     source_basis:
+      - platform-spec/atom-registry.yml
       - professional-baseline/02-change-control.md
       - professional-baseline/03-artifact-definitions.md
       - professional-baseline/04-architecture-baseline-v0.md
@@ -61,13 +62,14 @@ atoms:
       - professional-baseline/07-system-boundary-map.md
       - pre-operations/01-decision-board-operating-model.md
       - pre-operations/04-accepted-pre-atomization-decisions.md
+      - platform-spec/process/01-atomization-operating-plan.md
     github_issue: null
   - id: SPEC-002
     title: Glossary And Core Definitions
     file: atoms/02-glossary-and-core-definitions.md
     status: draft
     batch: 1B
-    boundary: cross-boundary-definitions
+    boundary: Cross-boundary definitions
     owner_role: Architecture Steward
     depends_on:
       - SPEC-001
@@ -349,7 +351,7 @@ atoms:
     file: atoms/90-open-decisions.md
     status: draft
     batch: 1A
-    boundary: cross-boundary-control-register
+    boundary: Cross-boundary control register
     owner_role: Architecture Steward
     depends_on:
       - SPEC-001
@@ -382,7 +384,7 @@ atoms:
     file: atoms/91-rejected-paths.md
     status: draft
     batch: 1A
-    boundary: cross-boundary-control-register
+    boundary: Cross-boundary control register
     owner_role: Challenge Reviewer
     depends_on:
       - SPEC-001
@@ -414,7 +416,7 @@ atoms:
     file: atoms/92-change-control-log.md
     status: draft
     batch: 1A
-    boundary: cross-boundary-process-register
+    boundary: Cross-boundary process register
     owner_role: Architecture Steward
     depends_on:
       - SPEC-001
@@ -425,4 +427,6 @@ atoms:
       - professional-baseline/02-change-control.md
       - professional-baseline/04-architecture-baseline-v0.md
       - professional-baseline/05-decision-gap-register.md
+      - platform-spec/process/01-atomization-operating-plan.md
+      - platform-spec/atoms/01-spec-governance.md
     github_issue: null

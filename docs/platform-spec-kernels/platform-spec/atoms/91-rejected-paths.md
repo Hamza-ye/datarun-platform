@@ -156,6 +156,11 @@ Do not encode these as envelope `type` values:
 - Invisible automatic merge where judgment is required.
 - Treating workflow-specific ADR-005 flag behavior as general flag semantics.
 - Treating conflict detection, flag lifecycle, offline operation, and detect-before-act as one universal subsystem.
+- Treating one unified flag catalog as accepted baseline behavior.
+- Treating `cycle_violation` as an accepted baseline flag category.
+- Treating request-time temporal anchoring as a general detector rule.
+- Treating server-side flag creation as a permanent invariant for all flag categories.
+- Extending source-only cascade beyond ADR-005 workflow cases as general flag semantics.
 - Letting flagged or unresolved events create irreversible downstream work before relevant checks run.
 - Auto-resolution for non-workflow or security-relevant conflicts without formal classification.
 
