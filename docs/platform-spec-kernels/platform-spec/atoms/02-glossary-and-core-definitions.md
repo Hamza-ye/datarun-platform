@@ -233,4 +233,4 @@ This atom does not own:
 Architecture Steward review, 2026-05-10:
 
 - Pass for draft status. This atom defines shared terms only and does not introduce behavior, close open gaps, or draft envelope field contracts.
-- SPEC-004 remains undrafted; envelope field contracts and schema details are intentionally left to `04-event-envelope-schema.md`.
+- SPEC-004 now carries the event envelope/schema draft; final serialization and schema tooling remain outside this glossary.

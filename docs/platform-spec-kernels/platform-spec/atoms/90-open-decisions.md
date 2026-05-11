@@ -87,7 +87,7 @@ This register does not own:
 |---|---|---|
 | All behavior atoms | cited open-gap tables | Atoms must carry affected hold-backs forward. |
 | Change-control log | accepted closure entries | Closure belongs in `92-change-control-log.md`, not silent edits here. |
-| Decision board | decision intake | Board-worthy items require separate decision records. |
+| Decision Board | decision intake | Board-worthy items require separate decision records. |
 
 ## Open Decisions And Hold-backs
 
@@ -135,7 +135,7 @@ This register does not own:
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
 | Whether this register should mirror the full decision gap register or only atomization-relevant gaps | Architecture Steward | Before accepting this atom. |
-| Priority order for resolving listed gaps | Decision board / Delivery Lead | Before first implementation planning from accepted atoms. |
+| Priority order for resolving listed gaps | Decision Board / Delivery Lead | Before first implementation planning from accepted atoms. |
 
 ## Rejected Paths
 

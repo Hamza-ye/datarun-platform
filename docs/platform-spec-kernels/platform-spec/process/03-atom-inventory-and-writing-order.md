@@ -18,23 +18,23 @@ For fast lookup, agents should read `atom-registry.yml` before this inventory. T
 
 ## Initial Atom Set
 
-| Order | File | Atom | Primary Boundary | Initial Status | Why Here |
-|---:|---|---|---|---|---|
-| 1 | `atoms/01-spec-governance.md` | Spec Governance And Source Authority | Cross-cutting process | Draft | Prevents later atoms from using the wrong source authority. |
-| 2 | `atoms/02-glossary-and-core-definitions.md` | Glossary And Core Definitions | Cross-cutting definitions | Draft | Stabilizes vocabulary before behavior is drafted. |
-| 3 | `atoms/03-event-log-storage.md` | Event Log And Storage | Event Log / Storage | Draft | Establishes canonical truth and write-path discipline. |
-| 4 | `atoms/04-event-envelope-schema.md` | Event Envelope And Schema | Event Envelope / Schema | Planned | Freezes the stable envelope contract before references or workflow depend on it. |
-| 5 | `atoms/05-references-and-identity-lineage.md` | References And Identity Lineage | Identity / Lineage | Planned | Keeps subject lineage narrow and prevents identity from absorbing authority or workflow. |
-| 6 | `atoms/06-configuration-and-parametrization.md` | Configuration And Parameterization | Configuration | Planned | Defines deployer variation without surrendering platform semantics. |
-| 7 | `atoms/07-assignment-authority-and-sync.md` | Assignment, Authority, And Sync | Assignment / Authority / Sync | Planned | Establishes access, authority reconstruction, and sync scope before derived behavior. |
-| 8 | `atoms/08-local-data-lifecycle.md` | Local Data Lifecycle | Local Data Lifecycle | Planned / Conditional | Needed before sensitive local lifecycle or scope contraction details become implementation work. |
-| 9 | `atoms/09-projections-workflow-and-patterns.md` | Projections, Workflow, And Patterns | Projection / Workflow State | Planned | Builds on events, envelope, configuration, and authority. |
-| 10 | `atoms/10-conflict-flag-and-resolution.md` | Conflict, Flag, And Resolution | Flag / Resolution | Planned | Keeps detection source facts separate from flag lifecycle and resolution. |
-| 11 | `atoms/11-trigger-reactivity.md` | Trigger And Reactivity | Trigger / Reactivity | Planned / Conditional | Must respect detect-before-act and event-store write path. |
-| 12 | `atoms/12-reporting-aggregation-and-freshness.md` | Reporting, Aggregation, And Freshness | Reporting / Aggregation | Planned / Conditional | Must remain projection-derived and access-scoped. |
-| 90 | `atoms/90-open-decisions.md` | Open Decisions And Hold-backs | Cross-boundary | Draft | Keeps gaps visible and prevents accidental closure. |
-| 91 | `atoms/91-rejected-paths.md` | Rejected Paths | Cross-boundary | Draft | Makes review guardrails easy to enforce. |
-| 92 | `atoms/92-change-control-log.md` | Change-Control Log | Cross-boundary process | Draft | Records accepted baseline changes, disputes, and formal reopens. |
+| Order | File | Atom | Primary Boundary | Why Here |
+|---:|---|---|---|---|
+| 1 | `atoms/01-spec-governance.md` | Spec Governance And Source Authority | Cross-cutting process | Prevents later atoms from using the wrong source authority. |
+| 2 | `atoms/02-glossary-and-core-definitions.md` | Glossary And Core Definitions | Cross-cutting definitions | Stabilizes vocabulary before behavior is drafted. |
+| 3 | `atoms/03-event-log-storage.md` | Event Log And Storage | Event Log / Storage | Establishes canonical truth and write-path discipline. |
+| 4 | `atoms/04-event-envelope-schema.md` | Event Envelope And Schema | Event Envelope / Schema | Freezes the stable envelope contract before references or workflow depend on it. |
+| 5 | `atoms/05-references-and-identity-lineage.md` | References And Identity Lineage | Identity / Lineage | Keeps subject lineage narrow and prevents identity from absorbing authority or workflow. |
+| 6 | `atoms/06-configuration-and-parametrization.md` | Configuration And Parameterization | Configuration | Defines deployer variation without surrendering platform semantics. |
+| 7 | `atoms/07-assignment-authority-and-sync.md` | Assignment, Authority, And Sync | Assignment / Authority / Sync | Establishes access, authority reconstruction, and sync scope before derived behavior. |
+| 8 | `atoms/08-local-data-lifecycle.md` | Local Data Lifecycle | Local Data Lifecycle | Needed before sensitive local lifecycle or scope contraction details become implementation work. |
+| 9 | `atoms/09-projections-workflow-and-patterns.md` | Projections, Workflow, And Patterns | Projection / Workflow State | Builds on events, envelope, configuration, and authority. |
+| 10 | `atoms/10-conflict-flag-and-resolution.md` | Conflict, Flag, And Resolution | Flag / Resolution | Keeps detection source facts separate from flag lifecycle and resolution. |
+| 11 | `atoms/11-trigger-reactivity.md` | Trigger And Reactivity | Trigger / Reactivity | Must respect detect-before-act and event-store write path. |
+| 12 | `atoms/12-reporting-aggregation-and-freshness.md` | Reporting, Aggregation, And Freshness | Reporting / Aggregation | Must remain projection-derived and access-scoped. |
+| 90 | `atoms/90-open-decisions.md` | Open Decisions And Hold-backs | Cross-boundary | Keeps gaps visible and prevents accidental closure. |
+| 91 | `atoms/91-rejected-paths.md` | Rejected Paths | Cross-boundary | Makes review guardrails easy to enforce. |
+| 92 | `atoms/92-change-control-log.md` | Change-Control Log | Cross-boundary process | Records accepted baseline changes, disputes, and formal reopens. |
 
 ## Batch Plan
 
@@ -47,6 +47,7 @@ Files:
 - `process/01-atomization-operating-plan.md`
 - `process/02-spec-atom-template.md`
 - `process/03-atom-inventory-and-writing-order.md`
+- `process/04-planned-consumer-review-cards.md`
 
 Acceptance rule:
 
@@ -91,6 +92,11 @@ Primary risks:
 Acceptance rule:
 
 - Later atoms can reference these without re-reading ADR prose.
+- Foundation behavior atoms are accepted as a batch, not promoted one by one.
+- Before acceptance, Challenge Review must check rejected paths and change-control triggers.
+- Before acceptance, Integration Review must check planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007`.
+- Because `SPEC-005`, `SPEC-006`, and `SPEC-007` are still planned, use `process/04-planned-consumer-review-cards.md` as the review surface instead of creating skeleton atom files.
+- Planned-consumer review cards are superseded when their atoms are drafted; they are not downstream contracts.
 
 ### Batch 2: Core Boundaries
 
@@ -178,44 +184,11 @@ For each atom:
 11. run integration review
 12. accept, defer, hold back, reject, or escalate
 
-## First Hold-backs
+## Control Registers
 
-These must remain visible until explicitly closed:
-
-- cloud multi-tenancy and shared-runtime hosting
-- deployment identity in event envelopes
-- external identity-provider authority
-- group-managed authorization
-- shared-device multi-actor sessions
-- auditor access and subject-based scope
-- temporary authority, revocation, and offline grace-period policy
-- general flag semantics beyond accepted workflow cases
-- alias-cycle read-side behavior and resolution semantics
-- exact Pattern Registry inventory and formal pattern schema
-- source-chain traversal depth limits
-- sync delivery mechanics, pagination, priority, and bandwidth policy
-- local purge/lifecycle rules for sensitive data
-- reporting freshness semantics
-- retention and archival
-- structured import/export contracts
-
-## First Rejected Paths Register
-
-Carry these into `atoms/91-rejected-paths.md` when that file is drafted:
-
-- mutable canonical records plus separate audit log
-- snapshot-primary or action-log-primary source of truth
-- direct canonical projection patching
-- structural ordering by `device_time`
-- stored immutable `authority_context`
-- deployer-authored arbitrary access-control logic
-- field-level sensitivity
-- `tenant_id`, `deployment_id`, `user_id`, or `group_id` as event-envelope authority fields
-- `status_changed`, `current_state`, or `pattern_ref` as structural envelope additions
-- role labels as platform actor subclasses
-- queues, work items, review lists, or dashboard items as canonical storage primitives
-- last-write-wins for operational conflicts requiring judgment
-- invisible automatic merge where judgment is required
+Current hold-backs live in `atoms/90-open-decisions.md`.
+Current rejected paths live in `atoms/91-rejected-paths.md`.
+Do not maintain duplicate hold-back or rejected-path lists in this inventory.
 
 ## Completion Definition
 

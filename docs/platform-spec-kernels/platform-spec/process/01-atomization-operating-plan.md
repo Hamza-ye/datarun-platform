@@ -24,6 +24,7 @@ No atom is accepted until it has:
 - known open gaps
 - source basis linked to accepted guardrails
 - review against change-control triggers
+- Challenge Review and Integration Review evidence
 
 ## Source Hierarchy
 
@@ -64,7 +65,7 @@ docs(spec): <short action>
 Commit body format:
 
 ```text
-Role: <Architecture Steward | Drafting Agent | Challenge Reviewer | Delivery Lead | Product Owner>
+Role: <Architecture Steward | Drafting Agent | Challenge Reviewer | Integration Reviewer | Delivery Lead | Product Owner>
 Trace: <baseline, atom, decision, or hold-back touched>
 ```
 
@@ -75,6 +76,7 @@ Use the role that best describes the responsibility of the change:
 | Architecture Steward | Preserves or clarifies architecture boundaries, invariants, or change-control routing. |
 | Drafting Agent | Drafts specs, templates, inventories, or process artifacts under accepted guardrails. |
 | Challenge Reviewer | Records review findings, rejected paths, disputes, or coupling risks. |
+| Integration Reviewer | Checks whether upstream atoms can be consumed by immediate downstream atoms without circular ownership or hidden assumptions. |
 | Delivery Lead | Sequences implementation-facing work, delivery constraints, or build order. |
 | Product Owner | Records stakeholder priority, accepted deferral, or product-impact decision. |
 
@@ -88,6 +90,7 @@ Use one active role per work unit:
 
 - Drafting Agent drafts scoped atom text from the selected source basis and does not accept atoms, close gaps, or decide change control.
 - Challenge Reviewer records findings, coupling risks, rejected-path matches, and pause triggers; it does not rewrite findings into approval.
+- Integration Reviewer checks boundary crossings, dependency direction, and downstream consumption; it does not draft downstream behavior to make an upstream atom look complete.
 - Architecture Steward routes findings, reconciles source authority, classifies decision pressure, and prepares status recommendations; it does not use stewardship as a shortcut for acceptance.
 - Delivery Lead sequences implementation-facing work and transition artifacts; it does not treat draft atoms as implementation authority.
 - Product Owner states priority, deployment pressure, and product impact; it does not convert product need into architecture closure.
@@ -195,12 +198,15 @@ Actions:
 1. check all boundary crossings
 2. remove circular ownership
 3. confirm all dependencies point backward to accepted atoms or accepted guardrails
-4. update the atom inventory
-5. update open decisions and rejected paths
+4. check immediate downstream consumers, including planned atoms, for hidden assumptions
+5. use `process/04-planned-consumer-review-cards.md` when a downstream consumer does not yet have an atom file
+6. update the atom inventory
+7. update open decisions and rejected paths
 
 Exit criteria:
 
 - the atom can be accepted without forcing another atom to accept hidden behavior
+- planned downstream atoms have an explicit non-authoritative consumer review surface, or the upstream atom remains draft
 
 ### Session 5: Acceptance Or Rework
 
@@ -215,6 +221,16 @@ Allowed outcomes:
 - rejected
 
 Avoid vague outcomes such as "later" without a reopen trigger.
+
+Acceptance requires:
+
+- completed Challenge Review
+- completed Integration Review
+- Architecture Steward recommendation
+- Decision Board / Project Owner approval for the status change
+- atom status and registry status updated in the same commit
+
+Draft atoms may be read for planning context, but implementation designs cite accepted atoms only.
 
 ## Writing Batches
 
@@ -250,6 +266,7 @@ Acceptance target:
 
 - stable source hierarchy
 - stable language for event truth, envelope type, shape ref, activity ref, actor ref, subject ref, projections, and parameterization
+- foundation acceptance happens as a batch after planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007` are checked through Integration Review
 
 ### Milestone C: Core Boundary Atoms
 
@@ -322,6 +339,8 @@ Before an atom is accepted:
 - forbidden couplings are concrete
 - rejected paths are not reintroduced
 - downstream atoms know how to consume it
+- immediate planned downstream atoms have been checked through atom files or planned-consumer review cards
+- accepted status has a Decision Board / Project Owner approval record
 - no product alignment language is needed to understand the atom
 
 ## Working Principle

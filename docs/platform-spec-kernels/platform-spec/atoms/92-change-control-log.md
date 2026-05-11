@@ -128,7 +128,7 @@ Use the classifications from `../../professional-baseline/02-change-control.md`:
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
 | Whether change-control entries should receive stable IDs tied to commits | Architecture Steward / Delivery Lead | Before the first accepted baseline-affecting change. |
-| Whether this log remains in platform-spec or moves to a broader decisions folder | Decision board | If change-control volume grows beyond atomization work. |
+| Whether this log remains in platform-spec or moves to a broader decisions folder | Decision Board | If change-control volume grows beyond atomization work. |
 
 ## Review Checklist
 

@@ -9,6 +9,7 @@ Do not add final spec atoms here unless they follow `../process/02-spec-atom-tem
 Current state:
 
 - draft control atoms exist for governance, open decisions, rejected paths, and change-control logging
+- draft foundation behavior atoms exist for glossary, event-log storage, and event envelope/schema
 - no platform behavior atoms have been accepted in this folder yet
 - planning and governance material lives under `../process/`
 - source authority remains under `../../professional-baseline/` and `../../pre-operations/`

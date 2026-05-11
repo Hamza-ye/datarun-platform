@@ -40,8 +40,10 @@ This atom owns:
 - registry use and update rules
 - atom status meanings
 - acceptance and review process
+- acceptance authority and batch status-change procedure
 - change-control trigger routing
 - commit role trace convention
+- integration-review obligations for planned downstream consumers
 - rules for using evidence, product alignment, and implementation pressure
 
 ## Non-Scope
@@ -65,6 +67,9 @@ This atom does not own:
 | Evidence archive | Source-specific extraction and lineage material used to verify disputes | Direct implementation authority |
 | Hold-back | A known unresolved area that must not be accidentally decided by atomization | A forgotten backlog item or implicit approval |
 | Change control | The required process for claims that alter or challenge the accepted baseline | Informal editing or convenient reinterpretation |
+| Acceptance gate | The required review and approval path before an atom's status can become `Accepted` | A commit role, delivery preference, or self-approval by the drafting role |
+| Integration Review | Review that checks whether immediate downstream atoms, including planned atoms, can consume an upstream atom without hidden assumptions or circular ownership | Drafting downstream behavior early or accepting a planned downstream atom |
+| Planned-consumer review card | A non-authoritative review surface for a downstream atom that is still `planned` and has no atom file | A skeleton atom, accepted downstream contract, or implementation plan |
 
 ## Invariants
 
@@ -75,6 +80,9 @@ This atom does not own:
 - No spec atom may silently add envelope fields, type values, authority sources, actor subclasses, canonical projection state, or deployer-authored platform logic.
 - The atom registry is a lookup layer. Atom files remain canonical.
 - Registry changes must be committed with atom changes when status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
+- An atom cannot be marked `Accepted` without completed Challenge Review, completed Integration Review, Architecture Steward recommendation, and Decision Board / Project Owner approval.
+- Integration Review must check immediate downstream consumers. If a downstream consumer is still `planned`, the review uses a planned-consumer review card rather than creating downstream authority early.
+- Foundation behavior atoms are accepted as a batch so dependencies, review notes, and registry statuses remain coherent.
 
 ## Contracts
 
@@ -94,6 +102,8 @@ This atom does not own:
 - accepted, draft, deferred, hold-back, or rejected atom status
 - open-decision entries
 - rejected-path entries
+- challenge-review findings
+- integration-review findings
 - change-control log entries
 - commit-role trace lines for relevant commits
 - registry updates when atom metadata changes
@@ -106,6 +116,7 @@ This atom does not own:
 | Atom registry | metadata update rule | Registry accelerates lookup but does not replace atom content. |
 | Decision Gap Register | open-decision routing | Gaps can be carried forward, but not closed here. |
 | Change Control | change-control triggers and log entries | Baseline changes require explicit records. |
+| Planned downstream atoms | planned-consumer review cards | Planned atoms can be checked for consumption risk without becoming accepted contracts. |
 | Implementation Design | accepted atom status | Implementation designs may consume accepted atoms, not draft claims as architecture. |
 
 ## Source Hierarchy
@@ -155,6 +166,26 @@ Before an atom can be accepted:
 - forbidden couplings must name likely drift risks
 - rejected paths must not be reintroduced
 - change-control triggers must be checked
+- Challenge Review must check rejected-path and change-control risk
+- Integration Review must check immediate downstream consumers, including planned atoms
+- Architecture Steward must record an acceptance recommendation or rework recommendation
+- Decision Board / Project Owner must approve the status change to `Accepted`
+- atom status and registry status must be updated in the same commit
+
+Foundation behavior atoms must be accepted as a coherent batch after their control dependencies and review registers are reconciled. A foundation atom may not be promoted alone if its sibling foundation atoms or control registers still force hidden assumptions into the accepted surface.
+
+Planned downstream atoms do not need full skeleton atom files before an upstream atom can be accepted. When the downstream atom is not drafted yet, Integration Review must use a planned-consumer review card that records:
+
+- what the planned atom needs to consume from the upstream atom
+- which assumptions are explicitly forbidden
+- which open gaps must remain open for the downstream atom
+- whether the upstream atom needs rework before acceptance
+
+A planned-consumer review card is not architecture authority and does not make the downstream atom accepted, drafted, or implementation-consumable.
+
+## Implementation Citation Rule
+
+Implementation designs must cite accepted atom IDs and, where relevant, the commit or review batch that accepted them. Draft atoms may be cited only as planning context or open-gap background, not as normative implementation requirements. If implementation needs behavior that is only present in a draft atom, the work must route through atom acceptance or change control before code relies on it.
 
 ## Change-Control Triggers
 
@@ -186,7 +217,7 @@ docs(spec): <short action>
 Body format:
 
 ```text
-Role: <Architecture Steward | Drafting Agent | Challenge Reviewer | Delivery Lead | Product Owner>
+Role: <Architecture Steward | Drafting Agent | Challenge Reviewer | Integration Reviewer | Delivery Lead | Product Owner>
 Trace: <baseline, atom, decision, or hold-back touched>
 ```
 
@@ -212,9 +243,6 @@ The commit role records responsibility for the change. It does not change atom s
 
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
-| Final acceptance authority for individual atoms | Decision board / project owner | Before marking the first behavior atom as Accepted. |
-| Whether atom acceptance requires human external review | Decision board | Before implementation begins from accepted atoms. |
-| How implementation designs will cite accepted atoms | Delivery Lead / implementation planning | Before the first implementation design is drafted from these specs. |
 | Whether registry validation should be automated | Delivery Lead / implementation tooling | Once atom count or agent concurrency makes manual checking unreliable. |
 
 ## Rejected Paths
@@ -237,4 +265,7 @@ The commit role records responsibility for the change. It does not change atom s
 - [ ] Change-control triggers match the accepted baseline.
 - [ ] Atom statuses are clear.
 - [ ] Commit role convention is trace-only, not approval authority.
+- [ ] Challenge Review and Integration Review are required before acceptance.
+- [ ] Planned downstream atoms can be checked without becoming accepted contracts.
+- [ ] Implementation designs cite accepted atoms only.
 - [ ] Open gaps remain visible.

@@ -22,10 +22,13 @@ owner_roles:
   - Architecture Steward
   - Drafting Agent
   - Challenge Reviewer
+  - Integration Reviewer
   - Delivery Lead
   - Product Owner
 next_recommended:
-  - SPEC-004
+  - SPEC-001
+  - SPEC-090
+  - SPEC-091
 atoms:
   - id: SPEC-001
     title: Spec Governance And Source Authority
