@@ -26,9 +26,9 @@ owner_roles:
 - Delivery Lead
 - Product Owner
 next_recommended:
-- SPEC-001
-- SPEC-090
-- SPEC-091
+- SPEC-005
+- SPEC-006
+- SPEC-007
 atoms:
 - id: SPEC-001
   title: Spec Governance And Source Authority
@@ -67,7 +67,7 @@ atoms:
 - id: SPEC-002
   title: Glossary And Core Definitions
   file: atoms/02-glossary-and-core-definitions.md
-  status: draft
+  status: accepted
   batch: 1B
   boundary: Cross-boundary definitions
   owner_role: Architecture Steward
@@ -96,7 +96,7 @@ atoms:
 - id: SPEC-003
   title: Event Log And Storage
   file: atoms/03-event-log-storage.md
-  status: draft
+  status: accepted
   batch: 1B
   boundary: Event Log / Storage
   owner_role: Architecture Steward
@@ -122,7 +122,7 @@ atoms:
 - id: SPEC-004
   title: Event Envelope And Schema
   file: atoms/04-event-envelope-schema.md
-  status: draft
+  status: accepted
   batch: 1B
   boundary: Event Envelope / Schema
   owner_role: Architecture Steward

@@ -66,7 +66,7 @@ Integration Review question:
 
 - Can `SPEC-005` draft identity-lineage behavior later while consuming foundation references as contracts only, without needing `SPEC-002`, `SPEC-003`, or `SPEC-004` to decide referent lifecycle ownership?
 
-Outcome: Pending Integration Review.
+Outcome: Carry explicit gap.
 
 ## SPEC-006 Planned Consumer Card
 
@@ -105,7 +105,7 @@ Integration Review question:
 
 - Can `SPEC-006` define configuration and validation surfaces later while consuming foundation `shape_ref` and `activity_ref` as narrow contracts, without needing foundation atoms to accept configuration packaging or schema tooling?
 
-Outcome: Pending Integration Review.
+Outcome: Carry explicit gap.
 
 ## SPEC-007 Planned Consumer Card
 
@@ -152,7 +152,7 @@ Integration Review question:
 
 - Can `SPEC-007` draft authority reconstruction and sync delivery later while consuming foundation atoms as event, envelope, reference, and storage contracts only, without needing foundation atoms to decide authority policy or sync mechanics?
 
-Outcome: Pending Integration Review.
+Outcome: Carry explicit gap.
 
 ## SPEC-009 Planned Consumer Card
 
@@ -199,7 +199,7 @@ Integration Review question:
 
 - Can `SPEC-009` draft projection, workflow, and pattern behavior later while consuming `SPEC-002`, `SPEC-003`, and `SPEC-004` as vocabulary, append-only storage, and structural-envelope contracts only, without requiring foundation atoms to decide pattern inventory, workflow state storage, product queue semantics, or configuration-version reconciliation?
 
-Outcome: Pending Integration Review.
+Outcome: Carry explicit gap.
 
 ## SPEC-010 Planned Consumer Card
 
@@ -251,4 +251,4 @@ Integration Review question:
 
 - Can `SPEC-010` draft conflict, flag, and resolution behavior later while consuming `SPEC-002`, `SPEC-003`, and `SPEC-004` as vocabulary, append-only storage, and structural-envelope contracts only, without requiring foundation atoms to decide detector ownership, flag lifecycle, conflict shape inventory, or resolution mapping?
 
-Outcome: Pending Integration Review.
+Outcome: Carry explicit gap.

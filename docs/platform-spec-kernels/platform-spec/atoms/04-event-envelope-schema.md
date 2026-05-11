@@ -1,6 +1,6 @@
 # Event Envelope And Schema
 
-Status: Draft
+Status: Accepted
 Owning boundary: Event Envelope / Schema
 Primary owner: Architecture Steward
 
@@ -220,10 +220,14 @@ This atom does not own:
 
 Drafting Agent note:
 
-- This is a narrow envelope-contract draft. It does not accept serialization format, schema tooling, referent lifecycle, workflow state, sync mechanics, or configuration authoring UX.
+- This is a narrow envelope-contract draft at drafting time. It does not accept serialization format, schema tooling, referent lifecycle, workflow state, sync mechanics, or configuration authoring UX.
 
 Architecture Steward reconciliation, 2026-05-11:
 
 - Challenge Reviewer P1 accepted. Reference wording now qualifies subject, causal, device, and typed references as required only where the accepted envelope/reference contract or relevant shape requires them; final serialization and active emission sites remain an explicit open gap.
 - Challenge Reviewer P2 accepted. Source basis now cites the decision gap register and the identity, conflict/offline, operational-constraint, and authorization-visibility controls used by this atom.
 - Glossary check: no glossary behavior was added here. SPEC-004 consumes cross-boundary definitions while keeping reference emission, referent lifecycle, authority, workflow, and serialization behavior in their owning atoms or open gaps.
+
+Batch 1B acceptance, 2026-05-12:
+
+- Accepted as the event-envelope structural contract and forbidden-envelope-drift guardrail, with carried gaps preserved in `../process/05-batch-1b-acceptance-packet.md`.

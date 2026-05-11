@@ -1,6 +1,6 @@
 # Glossary And Core Definitions
 
-Status: Draft
+Status: Accepted
 Owning boundary: Cross-boundary definitions
 Primary owner: Architecture Steward
 
@@ -128,7 +128,7 @@ This atom does not own:
 - Event-log truth, envelope processing, payload shape, references, projection state, assignment-derived authority, and deployer configuration remain separate axes.
 - Structural validation and accept-and-flag remain separate: malformed envelopes or payloads can be rejected before acceptance, while state-based anomalies route to their owning boundaries.
 - Product labels, role labels, queues, dashboards, work items, and UI statuses do not become platform classes or canonical storage primitives by being named here.
-- Draft glossary wording must not close open decisions from `90-open-decisions.md`.
+- Glossary wording must not close open decisions from `90-open-decisions.md`.
 - Rejected meanings in this glossary remain review triggers for downstream atoms and implementation designs.
 - Any definition that would add an envelope field, type value, authority source, canonical projection state, or deployer-authored platform logic requires change control.
 
@@ -200,7 +200,7 @@ This atom does not own:
 
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
-| Final event-envelope field specification and serialization details | `04-event-envelope-schema.md` | Envelope atom drafting begins. |
+| Formal event-envelope serialization details | Event Envelope / Schema plus implementation tooling | Implementation needs wire format, database representation, or interoperability schema. |
 | Rules for any platform-owned fact shapes and final platform-bundled shape inventory | Event Envelope / Schema plus owning behavior atoms | A later atom needs to specify a bundled platform fact shape. |
 | Exact Pattern Registry inventory and formal schema | `09-projections-workflow-and-patterns.md` plus Configuration | Workflow atom needs normative pattern skeletons or serialized schema. |
 | General flag semantics outside closed workflow cases | `10-conflict-flag-and-resolution.md` and `90-open-decisions.md` | A later atom needs non-workflow flag creation, blocking, lifecycle, or auto-resolution semantics. |
@@ -235,5 +235,9 @@ This atom does not own:
 
 Architecture Steward review, 2026-05-10:
 
-- Pass for draft status. This atom defines shared terms only and does not introduce behavior, close open gaps, or draft envelope field contracts.
-- SPEC-004 now carries the event envelope/schema draft; final serialization and schema tooling remain outside this glossary.
+- Pass for draft status at review time. This atom defines shared terms only and does not introduce behavior, close open gaps, or draft envelope field contracts.
+- SPEC-004 carries the event envelope/schema contract; final serialization and schema tooling remain outside this glossary.
+
+Batch 1B acceptance, 2026-05-12:
+
+- Accepted as glossary vocabulary only, with carried gaps preserved in `../process/05-batch-1b-acceptance-packet.md`.

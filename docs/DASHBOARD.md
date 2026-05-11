@@ -2,15 +2,15 @@
 
 > [!IMPORTANT]
 > **How to sync:** Run `./scripts/sync.sh` (or `python3 scripts/generate-dashboard.py` for local-only) after any change to the registry or gap register.
-> Last regenerated: 2026-05-12 00:02:18
+> Last regenerated: 2026-05-12 02:46:06
 
 ## Execution Summary
 
 | Metric | Value |
 |---|---|
 | Total Atoms | 15 |
-| Accepted | 0 |
-| Draft | 7 |
+| Accepted | 3 |
+| Draft | 4 |
 | Planned | 8 |
 | Open Gaps | 22 |
 
@@ -19,9 +19,9 @@
 | ID | Title | Status | Batch | Boundary | Dependencies | Issue |
 |---|---|---|---|---|---|---|
 | SPEC-001 | [Spec Governance And Source Authority](platform-spec-kernels/platform-spec/atoms/01-spec-governance.md) | draft | 1A | Cross-boundary process | - | [#1](https://github.com/Hamza-ye/datarun-platform/issues/1) |
-| SPEC-002 | [Glossary And Core Definitions](platform-spec-kernels/platform-spec/atoms/02-glossary-and-core-definitions.md) | draft | 1B | Cross-boundary definitions | SPEC-001, SPEC-090, SPEC-091 | [#2](https://github.com/Hamza-ye/datarun-platform/issues/2) |
-| SPEC-003 | [Event Log And Storage](platform-spec-kernels/platform-spec/atoms/03-event-log-storage.md) | draft | 1B | Event Log / Storage | SPEC-001, SPEC-002, SPEC-090, SPEC-091 | [#3](https://github.com/Hamza-ye/datarun-platform/issues/3) |
-| SPEC-004 | [Event Envelope And Schema](platform-spec-kernels/platform-spec/atoms/04-event-envelope-schema.md) | draft | 1B | Event Envelope / Schema | SPEC-001, SPEC-002, SPEC-003, SPEC-090, SPEC-091 | [#4](https://github.com/Hamza-ye/datarun-platform/issues/4) |
+| SPEC-002 | [Glossary And Core Definitions](platform-spec-kernels/platform-spec/atoms/02-glossary-and-core-definitions.md) | accepted | 1B | Cross-boundary definitions | SPEC-001, SPEC-090, SPEC-091 | [#2](https://github.com/Hamza-ye/datarun-platform/issues/2) |
+| SPEC-003 | [Event Log And Storage](platform-spec-kernels/platform-spec/atoms/03-event-log-storage.md) | accepted | 1B | Event Log / Storage | SPEC-001, SPEC-002, SPEC-090, SPEC-091 | [#3](https://github.com/Hamza-ye/datarun-platform/issues/3) |
+| SPEC-004 | [Event Envelope And Schema](platform-spec-kernels/platform-spec/atoms/04-event-envelope-schema.md) | accepted | 1B | Event Envelope / Schema | SPEC-001, SPEC-002, SPEC-003, SPEC-090, SPEC-091 | [#4](https://github.com/Hamza-ye/datarun-platform/issues/4) |
 | SPEC-005 | [References And Identity Lineage](platform-spec-kernels/platform-spec/atoms/05-references-and-identity-lineage.md) | planned | 2 | Identity / Lineage | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-090, SPEC-091 | [#5](https://github.com/Hamza-ye/datarun-platform/issues/5) |
 | SPEC-006 | [Configuration And Parameterization](platform-spec-kernels/platform-spec/atoms/06-configuration-and-parametrization.md) | planned | 2 | Configuration | SPEC-001, SPEC-002, SPEC-004, SPEC-090, SPEC-091 | [#6](https://github.com/Hamza-ye/datarun-platform/issues/6) |
 | SPEC-007 | [Assignment, Authority, And Sync](platform-spec-kernels/platform-spec/atoms/07-assignment-authority-and-sync.md) | planned | 2 | Assignment / Authority / Sync | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-005, SPEC-006, SPEC-090, SPEC-091 | [#7](https://github.com/Hamza-ye/datarun-platform/issues/7) |

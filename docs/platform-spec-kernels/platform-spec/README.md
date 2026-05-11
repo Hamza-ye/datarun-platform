@@ -45,6 +45,7 @@ Supporting process references:
 - `process/02-spec-atom-template.md`: the required template for every future platform spec atom.
 - `process/03-atom-inventory-and-writing-order.md`: the initial decomposition map and iterative writing order.
 - `process/04-planned-consumer-review-cards.md`: non-authoritative integration-review cards for checking whether planned downstream atoms can consume upstream drafts without hidden assumptions.
+- `process/05-batch-1b-acceptance-packet.md`: approval trace for promoted Batch 1B atoms `SPEC-002`, `SPEC-003`, and `SPEC-004`.
 - `atoms/`: draft and accepted platform specification atoms.
 
 ## Non-Goals
@@ -66,10 +67,4 @@ If an atom path, status, owner role, boundary, batch, dependency, blocking relat
 
 ## Current Next Step
 
-Use `atom-registry.yml` and `process/01-atomization-operating-plan.md` to run the next session:
-
-1. read the registry and operating plan
-2. reconcile the control foundation: `SPEC-001`, `SPEC-090`, and `SPEC-091`
-3. prepare the foundation acceptance gate for `SPEC-002`, `SPEC-003`, and `SPEC-004`
-4. use `process/04-planned-consumer-review-cards.md` for planned-consumer Integration Review of `SPEC-005`, `SPEC-006`, `SPEC-007`, and the direct `SPEC-009` projection/workflow and `SPEC-010` conflict/flag risk surfaces
-5. update the registry in the same commit as any atom status or metadata change
+Draft Batch 2 core-boundary atoms next: `SPEC-005`, `SPEC-006`, and `SPEC-007`. Carry the explicit Batch 1B gaps forward when drafting references/identity, configuration/parameterization, and assignment/authority/sync.

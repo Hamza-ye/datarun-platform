@@ -1,6 +1,6 @@
 # Event Log And Storage
 
-Status: Draft
+Status: Accepted
 Owning boundary: Event Log / Storage
 Primary owner: Architecture Steward
 
@@ -135,7 +135,6 @@ This atom does not own:
 
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
-| Foundation acceptance review after glossary reconciliation | Architecture Steward plus Challenge Reviewer | Before this atom can be marked Accepted. |
 | Retention and archival | `90-open-decisions.md`; Event Log / Storage plus Local Data Lifecycle | Compliance, self-host, export, or storage-scale requirement needs retention behavior. |
 | Projection optimization and caching | `90-open-decisions.md`; Event Log / Storage plus Projection / Workflow State | Implementation performance design begins. |
 | Event schema/versioning tooling | `90-open-decisions.md`; Event Envelope / Schema | Envelope atom moves from conceptual contract to implementation schema. |
@@ -177,12 +176,16 @@ This atom does not own:
 
 Architecture Steward review, 2026-05-10:
 
-- Pass for draft status. The atom preserves Event Log / Storage as the singular owner of append-only canonical operational facts and keeps projections, reports, queues, dashboards, and UI state derived.
+- Pass for draft status at review time. The atom preserves Event Log / Storage as the singular owner of append-only canonical operational facts and keeps projections, reports, queues, dashboards, and UI state derived.
 - Source-basis cleanup: `90-open-decisions.md` and `91-rejected-paths.md` are dependencies and review registers, not accepted source authority for this atom.
-- Acceptance remains gated by the open-gap/register acceptance path; this review does not promote the atom out of Draft.
+- Acceptance remained gated by the open-gap/register acceptance path; this review did not promote the atom out of Draft.
 
 Glossary reconciliation, 2026-05-10:
 
 - Reconciled local definitions for event log, operational fact, append-only, projection, read model, projection rebuild, and event subset against `02-glossary-and-core-definitions.md`.
 - The atom now consumes glossary terms while retaining Event Log / Storage-specific contracts and invariants.
-- Acceptance remains gated by future atom acceptance review; reconciliation does not promote this atom out of Draft.
+- Acceptance remained gated by future atom acceptance review; reconciliation did not promote this atom out of Draft.
+
+Batch 1B acceptance, 2026-05-12:
+
+- Accepted as append-only event-log truth with projection/read-model state remaining derived, with carried gaps preserved in `../process/05-batch-1b-acceptance-packet.md`.
