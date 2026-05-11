@@ -98,6 +98,7 @@ This register does not own:
 
 - Adding envelope fields without formal change control.
 - Changing envelope field meaning without formal change control.
+- Adding structural reference categories without formal change control.
 - Structural ordering by `device_time`.
 - Stored immutable `authority_context`.
 - `status_changed` as a structural event type.
@@ -112,6 +113,7 @@ Do not encode these as envelope `type` values:
 
 - domain facts such as case opened, case resolved, feedback, stock received, referral accepted, or inspection completed
 - identity or integrity facts such as conflict detected, conflict resolved, subjects merged, or subject split
+- referent registration or lifecycle markers
 - workflow states such as submitted, pending, approved, returned, resolved, closed, or reopened
 - product surfaces such as queue item, work item, dashboard item, or review item
 - role labels such as supervisor action, coordinator action, auditor action, or field-worker action
@@ -146,6 +148,7 @@ Do not encode these as envelope `type` values:
 - Treating deployer configuration as arbitrary platform code.
 - Letting deployers author envelope fields, event type values, scope containment logic, state-machine mechanisms, access-control programs, or arbitrary detector logic.
 - Treating deployer-defined attributes, catalogs, or shapes as a platform-owned domain schema catalog unless a later atom accepts a narrow platform-bundled shape.
+- Retroactively forcing in-progress offline work created under older configuration to follow newly synced configuration rules.
 - Treating `shape_ref` as workflow state, authority marker, product surface, online/offline class, role label, tenant identity, or deployment identity.
 - Treating `activity_ref` as immutable authority context, pattern identity, tenant/deployment reference, or work-item identity.
 

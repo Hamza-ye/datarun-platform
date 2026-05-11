@@ -94,7 +94,7 @@ Acceptance rule:
 - Later atoms can reference these without re-reading ADR prose.
 - Foundation behavior atoms are accepted as a batch, not promoted one by one.
 - Before acceptance, Challenge Review must check rejected paths and change-control triggers.
-- Before acceptance, Integration Review must check planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007`, plus direct registry consumer `SPEC-010` for the conflict/flag risk surface.
+- Before acceptance, Integration Review must check planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007`, plus direct registry consumers `SPEC-009` for the projection/workflow risk surface and `SPEC-010` for the conflict/flag risk surface.
 - Because these consumers are still planned, use `process/04-planned-consumer-review-cards.md` as the review surface instead of creating skeleton atom files.
 - Planned-consumer review cards are superseded when their atoms are drafted; they are not downstream contracts.
 

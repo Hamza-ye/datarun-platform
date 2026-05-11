@@ -6,9 +6,10 @@ This file gives Integration Review a surface for planned downstream atoms that d
 
 These cards are not spec atoms, not implementation authority, and not accepted downstream contracts. When a planned atom is drafted, its atom file must reconcile or supersede the relevant card.
 
-The foundation acceptance pass uses two card groups:
+The foundation acceptance pass uses three card groups:
 
 - Batch 2 immediate consumers: `SPEC-005`, `SPEC-006`, and `SPEC-007`.
+- Direct registry consumer with projection/workflow risk surface: `SPEC-009`, because workflow state and pattern behavior directly consume foundation vocabulary, event truth, and envelope/shape separation.
 - Direct registry consumer with conflict/flag risk surface: `SPEC-010`, because conflict/flag behavior directly depends on the foundation split between structural validation, append-only fact preservation, and later anomaly surfacing.
 
 ## Use Rule
@@ -97,6 +98,7 @@ Carried gaps:
 - formal envelope serialization details
 - platform-bundled shape inventory
 - formal Pattern Registry schema
+- configuration versioning and stale-configuration reconciliation
 - configuration authoring and deploy-time validation UX
 
 Integration Review question:
@@ -141,6 +143,7 @@ Carried gaps:
 - shared-device multi-actor sessions
 - auditor access and subject-based scope
 - cross-level distribution visibility
+- permission table and activity/context authority details
 - temporary authority, revocation, and offline grace policy
 - sync delivery mechanics
 - local purge/lifecycle rules for sensitive data
@@ -148,6 +151,53 @@ Carried gaps:
 Integration Review question:
 
 - Can `SPEC-007` draft authority reconstruction and sync delivery later while consuming foundation atoms as event, envelope, reference, and storage contracts only, without needing foundation atoms to decide authority policy or sync mechanics?
+
+Outcome: Pending Integration Review.
+
+## SPEC-009 Planned Consumer Card
+
+Consumer: `SPEC-009` Projections, Workflow, And Patterns
+
+Foundation upstream atoms under review:
+
+- `SPEC-002` Glossary And Core Definitions
+- `SPEC-003` Event Log And Storage
+- `SPEC-004` Event Envelope And Schema
+
+Intermediate planned dependencies to reconcile later:
+
+- `SPEC-005` References And Identity Lineage
+- `SPEC-006` Configuration And Parameterization
+- `SPEC-007` Assignment, Authority, And Sync
+
+Consumption needs:
+
+- stable meanings for projection, read model, workflow state, pattern, Pattern Registry, participant capacity, source event, source chain, and event subset
+- append-only event truth where workflow state is rebuilt from immutable events plus relevant configuration and pattern definitions
+- envelope `type`, `shape_ref`, payload, references, and timestamps as projection inputs without making workflow state an envelope field
+- stable distinction between `type=review`, review payload shapes, review patterns, review queues, and reviewer labels
+
+Forbidden hidden assumptions:
+
+- `current_state`, `pattern_ref`, `status_changed`, queue state, review status, or work-item identity is canonical event/envelope state
+- exact Pattern Registry inventory, pattern skeletons, or formal pattern schema are decided by foundation atoms
+- invalid workflow transitions are structurally rejected where the accepted baseline requires accept-and-flag
+- product queues, review lists, returned-work views, oversight counts, pending labels, or stale labels are storage primitives
+- source-chain traversal depth or source-only cascade beyond ADR-005 workflow cases is already accepted as general flag behavior
+- `shape_ref`, `activity_ref`, role labels, or product surfaces can encode workflow state or pattern identity
+
+Carried gaps:
+
+- exact Pattern Registry inventory
+- formal Pattern Registry schema
+- projection compatibility across schema versions
+- source-chain traversal depth limits
+- platform-bundled shape inventory where workflow or review behavior needs a platform-owned fact shape
+- configuration versioning and stale-configuration reconciliation
+
+Integration Review question:
+
+- Can `SPEC-009` draft projection, workflow, and pattern behavior later while consuming `SPEC-002`, `SPEC-003`, and `SPEC-004` as vocabulary, append-only storage, and structural-envelope contracts only, without requiring foundation atoms to decide pattern inventory, workflow state storage, product queue semantics, or configuration-version reconciliation?
 
 Outcome: Pending Integration Review.
 

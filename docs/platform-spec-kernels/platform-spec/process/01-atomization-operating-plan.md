@@ -266,7 +266,7 @@ Acceptance target:
 
 - stable source hierarchy
 - stable language for event truth, envelope type, shape ref, activity ref, actor ref, subject ref, projections, and parameterization
-- foundation acceptance happens as a batch after planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007`, plus direct registry consumer `SPEC-010` for the conflict/flag risk surface, are checked through Integration Review
+- foundation acceptance happens as a batch after planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007`, plus direct registry consumers `SPEC-009` for the projection/workflow risk surface and `SPEC-010` for the conflict/flag risk surface, are checked through Integration Review
 
 ### Milestone C: Core Boundary Atoms
 
