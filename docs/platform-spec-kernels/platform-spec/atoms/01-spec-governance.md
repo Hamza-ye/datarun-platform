@@ -63,7 +63,7 @@ This atom does not own:
 |---|---|---|
 | Accepted baseline | ADR-001 through ADR-005 closure as represented by the professional baseline documents | All ADR prose, later ADR claims, or implementation plans |
 | Spec atom | A small implementation-facing specification unit with one owner, one boundary, contracts, forbidden couplings, and open gaps | A product feature brief or implementation module |
-| Atom registry | A compact machine-readable index of atom status, owner, boundary, batch, dependencies, and blocking relationships | Architecture authority |
+| Atom registry | A compact machine-readable index of atom status, owner, boundary, batch, dependencies, blocking relationships, and source basis | Architecture authority |
 | Evidence archive | Source-specific extraction and lineage material used to verify disputes | Direct implementation authority |
 | Hold-back | A known unresolved area that must not be accidentally decided by atomization | A forgotten backlog item or implicit approval |
 | Change control | The required process for claims that alter or challenge the accepted baseline | Informal editing or convenient reinterpretation |
@@ -79,7 +79,7 @@ This atom does not own:
 - Every unresolved gap must remain visible until accepted, deferred with a trigger, rejected, or formally changed.
 - No spec atom may silently add envelope fields, type values, authority sources, actor subclasses, canonical projection state, or deployer-authored platform logic.
 - The atom registry is a lookup layer. Atom files remain canonical.
-- Registry changes must be committed with atom changes when status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
+- Registry changes must be committed with atom changes when status, path, owner role, boundary, batch, dependencies, blocking relationships, or source basis change.
 - An atom cannot be marked `Accepted` without completed Challenge Review, completed Integration Review, Architecture Steward recommendation, and Decision Board / Project Owner approval.
 - Integration Review must check immediate downstream consumers. If a downstream consumer is still `planned`, the review uses a planned-consumer review card rather than creating downstream authority early.
 - Foundation behavior atoms are accepted as a batch so dependencies, review notes, and registry statuses remain coherent.
@@ -138,7 +138,7 @@ At the start of a platform-spec session:
 1. Read `../atom-registry.yml`.
 2. Select the requested atom or the next recommended atom.
 3. Read the selected atom, its listed dependencies, and only the source-basis files needed for the work.
-4. Update `../atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
+4. Update `../atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, blocking relationships, or source basis change.
 
 If the registry and atom file disagree, pause and reconcile them before continuing. The atom file remains canonical for content and rationale.
 

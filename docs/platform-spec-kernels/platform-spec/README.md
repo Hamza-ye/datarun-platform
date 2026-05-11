@@ -62,7 +62,7 @@ This workspace must not:
 
 At the start of each platform-spec session, agents must read `atom-registry.yml`, then `process/01-atomization-operating-plan.md`, then only the atom, dependency, and source-basis files needed for the selected work.
 
-If an atom path, status, owner role, boundary, batch, dependency, or blocking relationship changes, update `atom-registry.yml` in the same commit.
+If an atom path, status, owner role, boundary, batch, dependency, blocking relationship, or source basis changes, update `atom-registry.yml` in the same commit.
 
 ## Current Next Step
 

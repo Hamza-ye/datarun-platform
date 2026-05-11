@@ -10,7 +10,7 @@ agent_start:
     - README.md
     - process/01-atomization-operating-plan.md
   rule: "Use this registry to find the next atom and relevant files; use the atom files as authority."
-update_rule: "If an atom path, status, owner_role, boundary, batch, dependencies, or blocking relationship changes, update this registry in the same commit."
+update_rule: "If an atom path, status, owner_role, boundary, batch, dependencies, blocking relationship, or source_basis changes, update this registry in the same commit."
 status_values:
   - planned
   - draft
@@ -59,6 +59,7 @@ atoms:
       - professional-baseline/04-architecture-baseline-v0.md
       - professional-baseline/05-decision-gap-register.md
       - professional-baseline/07-system-boundary-map.md
+      - pre-operations/01-decision-board-operating-model.md
       - pre-operations/04-accepted-pre-atomization-decisions.md
     github_issue: null
   - id: SPEC-002
@@ -370,6 +371,8 @@ atoms:
       - professional-baseline/15-conflict-flag-offline-boundary-control.md
       - professional-baseline/16-operational-constraints-boundary-control.md
       - professional-baseline/17-authorization-visibility-boundary-control.md
+      - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+      - professional-baseline/19-envelope-shape-parametrization-definitions.md
       - pre-operations/04-accepted-pre-atomization-decisions.md
     github_issue: null
   - id: SPEC-091
@@ -400,6 +403,8 @@ atoms:
       - professional-baseline/15-conflict-flag-offline-boundary-control.md
       - professional-baseline/16-operational-constraints-boundary-control.md
       - professional-baseline/17-authorization-visibility-boundary-control.md
+      - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+      - professional-baseline/19-envelope-shape-parametrization-definitions.md
       - pre-operations/04-accepted-pre-atomization-decisions.md
     github_issue: null
   - id: SPEC-092

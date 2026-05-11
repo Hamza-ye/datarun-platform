@@ -46,7 +46,7 @@ At the start of every platform-spec session:
 2. Identify the requested atom, next recommended atom, or affected hold-back.
 3. Read this operating plan whenever the session drafts, reviews, changes atom status, changes dependencies, touches an open gap, records a rejected path, or handles change control.
 4. Read only the selected atom, its registry-listed dependencies, and the cited source-basis files needed for the work.
-5. Update `atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, or blocking relationships change.
+5. Update `atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, blocking relationships, or source basis change.
 
 The registry is a fast lookup layer. It is not architecture authority. If the registry and atom file disagree, pause and reconcile them before continuing.
 
