@@ -71,5 +71,5 @@ Use `atom-registry.yml` and `process/01-atomization-operating-plan.md` to run th
 1. read the registry and operating plan
 2. reconcile the control foundation: `SPEC-001`, `SPEC-090`, and `SPEC-091`
 3. prepare the foundation acceptance gate for `SPEC-002`, `SPEC-003`, and `SPEC-004`
-4. use `process/04-planned-consumer-review-cards.md` for planned-consumer Integration Review of `SPEC-005`, `SPEC-006`, and `SPEC-007`
+4. use `process/04-planned-consumer-review-cards.md` for planned-consumer Integration Review of `SPEC-005`, `SPEC-006`, `SPEC-007`, and the direct `SPEC-010` conflict/flag risk surface
 5. update the registry in the same commit as any atom status or metadata change

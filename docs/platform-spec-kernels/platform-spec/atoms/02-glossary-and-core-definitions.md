@@ -69,6 +69,7 @@ This atom does not own:
 | Event log | The append-only canonical store of accepted immutable events | Audit sidecar for mutable records, action-log substitute, projection cache, or queue store |
 | Append-only | Accepted events are added as new facts, and later interpretation changes through later events and projections | No validation, no correction path, no retention policy, or no lifecycle policy |
 | Event envelope | The stable platform-owned contract every event carries so the platform can store, sync, route, attribute, and interpret immutable facts | Deployer-authored schema surface or product-specific record wrapper |
+| Structural validation | Envelope, payload, schema, reference-contract, and platform-vocabulary checks required before an event can be treated as structurally valid | State, authority, workflow, identity-lineage, configured-domain, or reporting correctness |
 | Envelope `type` | Platform-owned processing-pipeline discriminator | Domain fact taxonomy, lifecycle state, role label, product surface, authorship, tenant, deployment, or authority marker |
 | Payload | The shape-conforming fact body carried by an event | Envelope contract, authority snapshot, or canonical workflow state |
 | Timestamp | Event time data required by the envelope | Sole ordering authority for projections, conflict detection, or protocol correctness |
@@ -111,6 +112,7 @@ This atom does not own:
 | Resolution | Later accepted event or process that changes interpretation/projection of prior facts | Rewriting, deleting, or mutating historical events |
 | Source event | Event that caused or directly anchors a flag, review, task, or derived effect | Downstream projected copy stored as a second canonical fact |
 | Source chain | Traversal through source links where a closed workflow case requires it | Open-ended universal traversal rule or accepted depth policy |
+| Accept-and-flag | Validly structured work is accepted as immutable history while state, authority, workflow, identity-lineage, or configured-domain anomalies are surfaced through the owning boundary | Accepting malformed envelopes or payloads, bypassing structural validation, or making every operation offline-capable |
 | Detect-before-act | Checks for conflict and authorization run before downstream policy or workflow effects | Global rejection of stale work at write time |
 | Stale or invalid work | Validly structured work accepted as factual history but surfaced with flags where baseline rules require | Clean workflow progress or invisible automatic correction |
 | Operation class | Architecture lens for offline-capable, online/coordination-required, offline-with-constraints, or configuration/control-plane operations | Product persona or role hierarchy |
@@ -124,6 +126,7 @@ This atom does not own:
 
 - Glossary terms clarify accepted baseline vocabulary; they do not add platform behavior.
 - Event-log truth, envelope processing, payload shape, references, projection state, assignment-derived authority, and deployer configuration remain separate axes.
+- Structural validation and accept-and-flag remain separate: malformed envelopes or payloads can be rejected before acceptance, while state-based anomalies route to their owning boundaries.
 - Product labels, role labels, queues, dashboards, work items, and UI statuses do not become platform classes or canonical storage primitives by being named here.
 - Draft glossary wording must not close open decisions from `90-open-decisions.md`.
 - Rejected meanings in this glossary remain review triggers for downstream atoms and implementation designs.

@@ -43,6 +43,7 @@ This atom defines the stable platform-owned event envelope contract every accept
 This atom owns:
 
 - stable envelope obligations for event identity, `type`, `payload`, and timestamp expression
+- structural validation limited to envelope, payload, schema, reference-contract, and platform-vocabulary correctness
 - platform-owned structural `type` vocabulary and processing meaning
 - required `shape_ref` contract for payload schema and version
 - optional `activity_ref` contract for configured activity context
@@ -61,6 +62,7 @@ This atom does not own:
 - referent registration, referent attributes, catalogs, or referent lifecycle behavior
 - identity merge/split lifecycle behavior
 - assignment-derived authorization, authority reconstruction, or sync delivery mechanics
+- state, authority, workflow, identity-lineage, configured-domain, or reporting anomaly detection
 - workflow state, pattern inventory, pattern schema, or product queue/status behavior
 - flag lifecycle or conflict-resolution behavior
 - configuration authoring format, packaging UX, or deploy-time validator UX
@@ -72,6 +74,7 @@ This atom does not own:
 |---|---|---|
 | Event envelope | Stable platform-owned contract carried by every event so the platform can store, sync, route, attribute, and interpret immutable facts | Deployer-authored schema surface, product-specific wrapper, or mutable record body |
 | Event identity | Envelope identity obligation for the immutable event fact, including baseline client-generated identity discipline | Tenant, deployment, account, group, or product work-item identity |
+| Structural validation | Envelope, payload, schema, reference-contract, and platform-vocabulary checks required before an event can be treated as structurally valid | Proof that the event is state-clean, authority-clean, workflow-valid, conflict-free, or ready for irreversible downstream effects |
 | Envelope `type` | Platform-owned processing-pipeline discriminator | Domain fact taxonomy, lifecycle state, role label, product surface, authorship, online/offline class, tenant, deployment, or authority marker |
 | Payload | Shape-conforming fact body carried by an event | Envelope contract, authority snapshot, workflow state store, or place to redefine envelope fields |
 | Timestamp | Event time data required by the envelope | Sole ordering authority for projections, conflict detection, or protocol correctness |
@@ -91,6 +94,7 @@ This atom does not own:
 ## Invariants
 
 - Every event handed to Event Log / Storage must carry the accepted envelope obligations for identity, `type`, `payload`, timestamp, required shape reference, authorship reference, any subject, causal, device, or typed-reference values required by the accepted envelope/reference contract or relevant shape, and device/concurrency metadata required by the baseline.
+- This atom's structural validation boundary rejects malformed envelope, invalid platform vocabulary, impossible schema reference, payload schema failure, or malformed required reference contract. It does not reject structurally valid events merely because later checks may surface state, authority, workflow, identity-lineage, configured-domain, or reporting anomalies.
 - The envelope is platform-owned. Adding fields, changing field meanings, or adding structural reference categories requires formal change control.
 - The structural `type` vocabulary is fixed to the accepted six values: `capture`, `review`, `alert`, `task_created`, `task_completed`, and `assignment_changed`.
 - Envelope `type` is only a processing-pipeline discriminator; it must not encode domain fact names, lifecycle states, workflow states, product surfaces, role labels, activity labels, sync/display states, tenant/deployment identity, or authority.
@@ -123,7 +127,7 @@ This atom does not own:
 ### Outputs
 
 - structurally valid event envelope for Event Log / Storage persistence
-- envelope validation result before an event is treated as an accepted operational fact
+- structural envelope validation result before an event is treated as an accepted operational fact
 - stable parsing obligations for downstream storage, projection, assignment/sync, identity, flag, reporting, and local lifecycle consumers
 - schema/versioning obligations to be detailed by later tooling work without changing this contract
 
@@ -136,7 +140,7 @@ This atom does not own:
 | Assignment / Authority / Sync | `actor_ref`, `activity_ref`, subject or typed references where required, device metadata, and sync concurrency metadata | Authority is reconstructed through assignment/sync behavior, not stored in the envelope. |
 | Configuration | `shape_ref`, `activity_ref`, and platform-owned `type` vocabulary | Configuration may define shapes and activity instances inside bounded mechanisms; it cannot add envelope fields or type values. |
 | Projection / Workflow State | `type`, `shape_ref`, payload, references, and timestamps as event inputs | Workflow state remains projection-derived and is not stored as an envelope field. |
-| Flag / Resolution | `type`, payload, causal/source links where required by shape, and system actor convention | This atom does not define general flag lifecycle or conflict-resolution behavior. |
+| Flag / Resolution | structurally valid event contract, `type`, payload, causal/source links where required by shape, and system actor convention | This atom separates structural validation from state-anomaly handling; it does not define general flag lifecycle, detector ownership, flag identity, or conflict-resolution behavior. |
 | Reporting / Aggregation | event envelope and shape references as source material | Reports and aggregates consume derived/read models; they are not envelope truth. |
 | Local Data Lifecycle | event identity, references, and scoped event subsets | Local retain/remove behavior must not mutate central event history or envelope semantics. |
 
@@ -156,6 +160,7 @@ This atom does not own:
 - Do not use `shape_ref` as workflow state, authority marker, product surface, online/offline class, role label, tenant identity, or deployment identity.
 - Do not use `activity_ref` as immutable `authority_context`, pattern reference, deployment/tenant reference, assignment authority, or product queue identity.
 - Do not infer permission, role class, product persona, tenant, deployment, or sync entitlement from `actor_ref`.
+- Do not turn state, authority, workflow, identity-lineage, configured-domain, or reporting anomalies into structural envelope invalidity unless accepted baseline language or formal change control requires it.
 - Do not treat `device_id` as actor identity.
 - Do not treat reference fields as referent lifecycle ownership.
 - Do not add `tenant_id`, `deployment_id`, `user_id`, or `group_id` to the event envelope without formal change control.
@@ -197,6 +202,7 @@ This atom does not own:
 
 - Event creation code should validate the envelope contract before handing an event to storage.
 - Event processors should branch on `type` for platform processing and on `shape_ref` for payload schema interpretation.
+- Conflict, authorization, workflow, identity-lineage, and configured-domain anomaly handling should consume structurally valid events through their owning boundaries instead of widening this atom's validation contract.
 - Authorization, workflow, conflict, reporting, and local lifecycle code must consume envelope values without treating them as stored authority, stored workflow state, or referent lifecycle ownership.
 - Implementations may choose concrete serializers and validators later, but those choices cannot change field meanings or add fields outside change control.
 - Product and deployer vocabulary should map through shapes, activities, assignments, patterns, projections, and UI translation rather than through envelope extensions.

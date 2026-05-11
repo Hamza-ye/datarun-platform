@@ -79,6 +79,8 @@ atoms:
       - SPEC-005
       - SPEC-006
       - SPEC-007
+      - SPEC-009
+      - SPEC-010
     source_basis:
       - professional-baseline/04-architecture-baseline-v0.md
       - professional-baseline/07-system-boundary-map.md

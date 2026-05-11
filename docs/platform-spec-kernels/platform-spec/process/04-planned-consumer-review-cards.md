@@ -6,6 +6,11 @@ This file gives Integration Review a surface for planned downstream atoms that d
 
 These cards are not spec atoms, not implementation authority, and not accepted downstream contracts. When a planned atom is drafted, its atom file must reconcile or supersede the relevant card.
 
+The foundation acceptance pass uses two card groups:
+
+- Batch 2 immediate consumers: `SPEC-005`, `SPEC-006`, and `SPEC-007`.
+- Direct registry consumer with conflict/flag risk surface: `SPEC-010`, because conflict/flag behavior directly depends on the foundation split between structural validation, append-only fact preservation, and later anomaly surfacing.
+
 ## Use Rule
 
 Use a planned-consumer review card only when all of these are true:
@@ -143,5 +148,57 @@ Carried gaps:
 Integration Review question:
 
 - Can `SPEC-007` draft authority reconstruction and sync delivery later while consuming foundation atoms as event, envelope, reference, and storage contracts only, without needing foundation atoms to decide authority policy or sync mechanics?
+
+Outcome: Pending Integration Review.
+
+## SPEC-010 Planned Consumer Card
+
+Consumer: `SPEC-010` Conflict, Flag, And Resolution
+
+Foundation upstream atoms under review:
+
+- `SPEC-002` Glossary And Core Definitions
+- `SPEC-003` Event Log And Storage
+- `SPEC-004` Event Envelope And Schema
+
+Intermediate planned dependencies to reconcile later:
+
+- `SPEC-005` References And Identity Lineage
+- `SPEC-006` Configuration And Parameterization
+- `SPEC-007` Assignment, Authority, And Sync
+- `SPEC-009` Projections, Workflow, And Patterns
+
+Consumption needs:
+
+- stable distinction between structural validation and accept-and-flag anomaly handling
+- append-only event truth where flags and resolutions affect interpretation/projection, not historical event identity
+- envelope `type` as processing vocabulary, with identity/integrity/conflict facts routed through shapes, payload, references, projections, and later flag contracts
+- source-event and source-chain vocabulary that permits causal/source links where required by shape or owning boundary without adding a universal envelope source field
+- `actor_ref` and system actor convention available for later eligible auto-resolution attribution without deciding general resolution-event mapping
+
+Forbidden hidden assumptions:
+
+- `SPEC-004` already decides general flag lifecycle, flag identity, detector ownership, flag creation location, or resolution-event type mapping
+- conflict detected, conflict resolved, subjects merged, subject split, cycle violation, or transition state becomes an envelope `type`
+- state, authority, workflow, identity-lineage, configured-domain, or reporting anomalies become structural envelope invalidity
+- malformed envelopes or payloads are accepted under accept-and-flag
+- every detector runs before event persistence or every ordinary offline capture has complete global knowledge
+- source-chain traversal depth, source-only cascade beyond closed workflow cases, or server-created flag default is already accepted
+- flagged or unresolved events can create irreversible downstream work before relevant checks run
+
+Carried gaps:
+
+- general flag semantics beyond accepted workflow cases
+- final flag event identity and resolution-event type mapping
+- platform-bundled integrity/identity/conflict shape inventory
+- alias-cycle read-side behavior and resolution semantics
+- domain conflict automation outside workflow
+- source-chain traversal depth limits
+- auto-resolution authoring and monitoring
+- temporary authority, revocation, and offline grace policy where late authorization anomalies may surface as flags
+
+Integration Review question:
+
+- Can `SPEC-010` draft conflict, flag, and resolution behavior later while consuming `SPEC-002`, `SPEC-003`, and `SPEC-004` as vocabulary, append-only storage, and structural-envelope contracts only, without requiring foundation atoms to decide detector ownership, flag lifecycle, conflict shape inventory, or resolution mapping?
 
 Outcome: Pending Integration Review.
