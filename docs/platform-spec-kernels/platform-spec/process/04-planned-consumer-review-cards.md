@@ -74,6 +74,8 @@ Outcome: Carry explicit gap.
 
 Consumer: `SPEC-006` Configuration And Parameterization
 
+Supersession note: this planned-consumer card was used for Batch 1B foundation acceptance and is superseded by draft `atoms/06-configuration-and-parametrization.md`. It remains here as historical review evidence, not as current downstream authority.
+
 Foundation upstream atoms under review:
 
 - `SPEC-002` Glossary And Core Definitions
@@ -119,7 +121,7 @@ Foundation upstream atoms under review:
 - `SPEC-003` Event Log And Storage
 - `SPEC-004` Event Envelope And Schema
 
-Intermediate planned dependencies to reconcile later:
+Intermediate dependencies to reconcile later:
 
 - `SPEC-005` References And Identity Lineage
 - `SPEC-006` Configuration And Parameterization
@@ -166,7 +168,7 @@ Foundation upstream atoms under review:
 - `SPEC-003` Event Log And Storage
 - `SPEC-004` Event Envelope And Schema
 
-Intermediate planned dependencies to reconcile later:
+Intermediate dependencies to reconcile later:
 
 - `SPEC-005` References And Identity Lineage
 - `SPEC-006` Configuration And Parameterization
@@ -213,7 +215,7 @@ Foundation upstream atoms under review:
 - `SPEC-003` Event Log And Storage
 - `SPEC-004` Event Envelope And Schema
 
-Intermediate planned dependencies to reconcile later:
+Intermediate dependencies to reconcile later:
 
 - `SPEC-005` References And Identity Lineage
 - `SPEC-006` Configuration And Parameterization

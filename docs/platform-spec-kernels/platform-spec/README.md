@@ -67,4 +67,4 @@ If an atom path, status, owner role, boundary, batch, dependency, blocking relat
 
 ## Current Next Step
 
-Continue Batch 2 core-boundary atomization with `SPEC-006` and `SPEC-007`. `SPEC-005` is accepted as the narrow References And Identity Lineage contract; carry its explicit gaps forward when drafting configuration/parameterization and assignment/authority/sync.
+Continue Batch 2 core-boundary atomization with `SPEC-007`. `SPEC-006` is drafted and has Challenge Review plus Integration Review evidence recorded, but remains Draft until Architecture Steward recommendation and Decision Board / Project Owner approval. Carry the explicit `SPEC-005` and `SPEC-006` gaps forward when drafting assignment/authority/sync.

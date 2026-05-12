@@ -26,8 +26,8 @@ owner_roles:
 - Delivery Lead
 - Product Owner
 next_recommended:
-- SPEC-006
 - SPEC-007
+- SPEC-006
 atoms:
 - id: SPEC-001
   title: Spec Governance And Source Authority
