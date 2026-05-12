@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **How to sync:** Run `./scripts/sync.sh` (or `python3 scripts/generate-dashboard.py` for local-only) after any change to the registry or gap register.
-> Last regenerated: 2026-05-12 03:37:27
+> Last regenerated: 2026-05-12 03:44:53
 
 ## Execution Summary
 
@@ -10,8 +10,8 @@
 |---|---|
 | Total Atoms | 15 |
 | Accepted | 4 |
-| Draft | 4 |
-| Planned | 7 |
+| Draft | 5 |
+| Planned | 6 |
 | Open Gaps | 22 |
 
 ## Atom Registry
@@ -23,7 +23,7 @@
 | SPEC-003 | [Event Log And Storage](platform-spec-kernels/platform-spec/atoms/03-event-log-storage.md) | accepted | 1B | Event Log / Storage | SPEC-001, SPEC-002, SPEC-090, SPEC-091 | [#3](https://github.com/Hamza-ye/datarun-platform/issues/3) |
 | SPEC-004 | [Event Envelope And Schema](platform-spec-kernels/platform-spec/atoms/04-event-envelope-schema.md) | accepted | 1B | Event Envelope / Schema | SPEC-001, SPEC-002, SPEC-003, SPEC-090, SPEC-091 | [#4](https://github.com/Hamza-ye/datarun-platform/issues/4) |
 | SPEC-005 | [References And Identity Lineage](platform-spec-kernels/platform-spec/atoms/05-references-and-identity-lineage.md) | accepted | 2 | Identity / Lineage | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-090, SPEC-091 | [#5](https://github.com/Hamza-ye/datarun-platform/issues/5) |
-| SPEC-006 | [Configuration And Parameterization](platform-spec-kernels/platform-spec/atoms/06-configuration-and-parametrization.md) | planned | 2 | Configuration | SPEC-001, SPEC-002, SPEC-004, SPEC-090, SPEC-091 | [#6](https://github.com/Hamza-ye/datarun-platform/issues/6) |
+| SPEC-006 | [Configuration And Parameterization](platform-spec-kernels/platform-spec/atoms/06-configuration-and-parametrization.md) | draft | 2 | Configuration | SPEC-001, SPEC-002, SPEC-004, SPEC-005, SPEC-090, SPEC-091 | [#6](https://github.com/Hamza-ye/datarun-platform/issues/6) |
 | SPEC-007 | [Assignment, Authority, And Sync](platform-spec-kernels/platform-spec/atoms/07-assignment-authority-and-sync.md) | planned | 2 | Assignment / Authority / Sync | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-005, SPEC-006, SPEC-090, SPEC-091 | [#7](https://github.com/Hamza-ye/datarun-platform/issues/7) |
 | SPEC-008 | [Local Data Lifecycle](platform-spec-kernels/platform-spec/atoms/08-local-data-lifecycle.md) | planned | 4 | Local Data Lifecycle | SPEC-001, SPEC-003, SPEC-007, SPEC-090, SPEC-091 | [#8](https://github.com/Hamza-ye/datarun-platform/issues/8) |
 | SPEC-009 | [Projections, Workflow, And Patterns](platform-spec-kernels/platform-spec/atoms/09-projections-workflow-and-patterns.md) | planned | 3 | Projection / Workflow State | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-005, SPEC-006, SPEC-007, SPEC-090, SPEC-091 | [#9](https://github.com/Hamza-ye/datarun-platform/issues/9) |

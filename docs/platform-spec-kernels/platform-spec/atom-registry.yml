@@ -183,7 +183,7 @@ atoms:
 - id: SPEC-006
   title: Configuration And Parameterization
   file: atoms/06-configuration-and-parametrization.md
-  status: planned
+  status: draft
   batch: 2
   boundary: Configuration
   owner_role: Architecture Steward
@@ -191,6 +191,7 @@ atoms:
   - SPEC-001
   - SPEC-002
   - SPEC-004
+  - SPEC-005
   - SPEC-090
   - SPEC-091
   blocks:
@@ -200,9 +201,12 @@ atoms:
   - SPEC-011
   source_basis:
   - professional-baseline/04-architecture-baseline-v0.md
+  - professional-baseline/05-decision-gap-register.md
   - professional-baseline/07-system-boundary-map.md
   - professional-baseline/16-operational-constraints-boundary-control.md
+  - professional-baseline/17-authorization-visibility-boundary-control.md
   - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+  - professional-baseline/19-envelope-shape-parametrization-definitions.md
   github_issue: 6
 - id: SPEC-007
   title: Assignment, Authority, And Sync
