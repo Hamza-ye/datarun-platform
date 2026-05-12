@@ -211,7 +211,7 @@ atoms:
 - id: SPEC-007
   title: Assignment, Authority, And Sync
   file: atoms/07-assignment-authority-and-sync.md
-  status: planned
+  status: draft
   batch: 2
   boundary: Assignment / Authority / Sync
   owner_role: Architecture Steward
@@ -232,9 +232,14 @@ atoms:
   - SPEC-012
   source_basis:
   - professional-baseline/04-architecture-baseline-v0.md
+  - professional-baseline/05-decision-gap-register.md
   - professional-baseline/07-system-boundary-map.md
+  - professional-baseline/09-identity-boundary-control.md
   - professional-baseline/15-conflict-flag-offline-boundary-control.md
+  - professional-baseline/16-operational-constraints-boundary-control.md
   - professional-baseline/17-authorization-visibility-boundary-control.md
+  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+  - professional-baseline/19-envelope-shape-parametrization-definitions.md
   - pre-operations/04-accepted-pre-atomization-decisions.md
   github_issue: 7
 - id: SPEC-008
