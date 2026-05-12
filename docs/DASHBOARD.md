@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **How to sync:** Run `./scripts/sync.sh` (or `python3 scripts/generate-dashboard.py` for local-only) after any change to the registry or gap register.
-> Last regenerated: 2026-05-12 16:59:00
+> Last regenerated: 2026-05-12 20:21:26
 
 ## Execution Summary
 
@@ -13,14 +13,14 @@
 | Draft | 6 |
 | Planned | 5 |
 | Professional Baseline Gaps | 22 |
-| Atomization Open Decisions | 33 |
+| Atomization Open Decisions | 34 |
 
 ## Governance Flow
 
 | Layer | Source | Dashboard Role |
 |---|---|---|
 | Accepted baseline gap register | [05-decision-gap-register.md](platform-spec-kernels/professional-baseline/05-decision-gap-register.md) | Source-authority gap inventory (22 items). |
-| Atomization control register | [90-open-decisions.md](platform-spec-kernels/platform-spec/atoms/90-open-decisions.md) | Spec-facing hold-backs and open decisions (33 items). |
+| Atomization control register | [90-open-decisions.md](platform-spec-kernels/platform-spec/atoms/90-open-decisions.md) | Spec-facing hold-backs and open decisions (34 items). |
 | Draft atoms | `platform-spec-kernels/platform-spec/atoms/` | Carry relevant gaps without closing them. |
 | Review and acceptance | Challenge Review, Integration Review, steward recommendation, approval | Promote only after evidence and explicit status update. |
 
@@ -34,6 +34,7 @@ Next recommended boundaries: Assignment / Authority / Sync, Configuration.
 | Group-managed authorization | Hold-back | Assignment / Authority / Sync plus Configuration |
 | Referent registration, attributes, and catalogs | Hold-back / platform-spec design gap | Event Envelope / Schema for reference contracts; Identity / Lineage for subject-continuity lifecycle; Configuration for shape/catalog definitions; Projection / Workflow State and Assignment / Authority / Sync for process, actor, and assignment lifecycles |
 | Final reference serialization and active emission sites | Platform-spec detail gap | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior atoms |
+| Event correlation and grouping semantics | Hold-back / platform-spec detail gap | Event Envelope / Schema for `activity_ref` field meaning; Configuration for activity instances; Projection / Workflow State and owning behavior atoms for workflow, process, campaign, distribution, review, reporting, or cross-flow grouping semantics; Assignment / Authority / Sync where grouping affects visibility or authority |
 | Platform-bundled shape inventory | Platform-spec detail gap | Owning behavior atoms plus Event Envelope / Schema and Configuration |
 | Operational actor vocabulary and operation-class routing | Platform-spec detail gap | Cross-boundary definitions plus Assignment / Authority / Sync, Configuration, and Projection / Workflow State |
 | Shared-device multi-actor sessions | Architecture decision gap | Assignment / Authority / Sync |
@@ -113,6 +114,7 @@ Next recommended boundaries: Assignment / Authority / Sync, Configuration.
 | Group-managed authorization | Hold-back | Assignment / Authority / Sync plus Configuration |
 | Referent registration, attributes, and catalogs | Hold-back / platform-spec design gap | Event Envelope / Schema for reference contracts; Identity / Lineage for subject-continuity lifecycle; Configuration for shape/catalog definitions; Projection / Workflow State and Assignment / Authority / Sync for process, actor, and assignment lifecycles |
 | Final reference serialization and active emission sites | Platform-spec detail gap | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior atoms |
+| Event correlation and grouping semantics | Hold-back / platform-spec detail gap | Event Envelope / Schema for `activity_ref` field meaning; Configuration for activity instances; Projection / Workflow State and owning behavior atoms for workflow, process, campaign, distribution, review, reporting, or cross-flow grouping semantics; Assignment / Authority / Sync where grouping affects visibility or authority |
 | Platform-bundled shape inventory | Platform-spec detail gap | Owning behavior atoms plus Event Envelope / Schema and Configuration |
 | Operational actor vocabulary and operation-class routing | Platform-spec detail gap | Cross-boundary definitions plus Assignment / Authority / Sync, Configuration, and Projection / Workflow State |
 | Shared-device multi-actor sessions | Architecture decision gap | Assignment / Authority / Sync |
