@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **How to sync:** Run `./scripts/sync.sh` (or `python3 scripts/generate-dashboard.py` for local-only) after any change to the registry or gap register.
-> Last regenerated: 2026-05-12 04:12:18
+> Last regenerated: 2026-05-12 16:59:00
 
 ## Execution Summary
 
@@ -12,7 +12,43 @@
 | Accepted | 4 |
 | Draft | 6 |
 | Planned | 5 |
-| Open Gaps | 22 |
+| Professional Baseline Gaps | 22 |
+| Atomization Open Decisions | 33 |
+
+## Governance Flow
+
+| Layer | Source | Dashboard Role |
+|---|---|---|
+| Accepted baseline gap register | [05-decision-gap-register.md](platform-spec-kernels/professional-baseline/05-decision-gap-register.md) | Source-authority gap inventory (22 items). |
+| Atomization control register | [90-open-decisions.md](platform-spec-kernels/platform-spec/atoms/90-open-decisions.md) | Spec-facing hold-backs and open decisions (33 items). |
+| Draft atoms | `platform-spec-kernels/platform-spec/atoms/` | Carry relevant gaps without closing them. |
+| Review and acceptance | Challenge Review, Integration Review, steward recommendation, approval | Promote only after evidence and explicit status update. |
+
+## Active Atomization Risk Surface
+
+Next recommended boundaries: Assignment / Authority / Sync, Configuration.
+
+| Area | Status | Primary Route |
+|---|---|---|
+| External identity-provider authority | Hold-back | Assignment / Authority / Sync |
+| Group-managed authorization | Hold-back | Assignment / Authority / Sync plus Configuration |
+| Referent registration, attributes, and catalogs | Hold-back / platform-spec design gap | Event Envelope / Schema for reference contracts; Identity / Lineage for subject-continuity lifecycle; Configuration for shape/catalog definitions; Projection / Workflow State and Assignment / Authority / Sync for process, actor, and assignment lifecycles |
+| Final reference serialization and active emission sites | Platform-spec detail gap | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior atoms |
+| Platform-bundled shape inventory | Platform-spec detail gap | Owning behavior atoms plus Event Envelope / Schema and Configuration |
+| Operational actor vocabulary and operation-class routing | Platform-spec detail gap | Cross-boundary definitions plus Assignment / Authority / Sync, Configuration, and Projection / Workflow State |
+| Shared-device multi-actor sessions | Architecture decision gap | Assignment / Authority / Sync |
+| Auditor access and subject-based scope | Architecture decision gap | Assignment / Authority / Sync |
+| Assessment visibility | Platform-spec / operational policy gap | Assignment / Authority / Sync plus Reporting / Aggregation |
+| Cross-level distribution visibility | Architecture decision gap / operational policy | Assignment / Authority / Sync |
+| Permission table and activity/context authority details | Platform-spec / operational policy gap | Assignment / Authority / Sync plus Configuration |
+| Temporary authority, revocation, and offline grace policy | Operational policy gap with architecture trigger | Assignment / Authority / Sync plus Flag / Resolution |
+| Onboarding and role-transition details | Operational policy plus implementation/tooling gap | Assignment / Authority / Sync plus Configuration and Local Data Lifecycle |
+| Domain conflict automation outside workflow | Architecture decision gap | Configuration plus Flag / Resolution |
+| Formal Pattern Registry schema | Platform-spec detail gap | Projection / Workflow State plus Configuration |
+| Sync delivery mechanics | Implementation/tooling gap | Assignment / Authority / Sync |
+| Event schema/versioning tooling | Implementation/tooling gap | Event Envelope / Schema plus Event Log / Storage and Configuration |
+| Configuration versioning and stale-configuration reconciliation | Platform-spec / implementation tooling gap | Configuration plus Event Envelope / Schema and Assignment / Authority / Sync |
+| Configuration authoring and deploy-time validation UX | Implementation/tooling gap | Configuration |
 
 ## Atom Registry
 
@@ -35,6 +71,9 @@
 | SPEC-092 | [Change-Control Log](platform-spec-kernels/platform-spec/atoms/92-change-control-log.md) | draft | 1A | Cross-boundary process register | SPEC-001, SPEC-090, SPEC-091 | [#14](https://github.com/Hamza-ye/datarun-platform/issues/14) |
 
 ## Open Decisions / Gaps
+
+<details>
+<summary>Professional baseline gaps</summary>
 
 | Gap | Classification |
 |---|---|
@@ -60,3 +99,46 @@
 | Reporting And Aggregation | Operational policy gap |
 | ADR-006-R Through ADR-009 Assessment | Completed later-source assessment |
 | General Flag Semantics | Later-source assessment gap |
+
+</details>
+
+<details>
+<summary>Atomization open decisions and hold-backs</summary>
+
+| Area | Status | Primary Route |
+|---|---|---|
+| Cloud multi-tenancy and shared-runtime hosting | Hold-back | Deployment / Tenancy routing surface |
+| Deployment identity in event envelopes | Hold-back | Event Envelope / Schema plus Deployment / Tenancy |
+| External identity-provider authority | Hold-back | Assignment / Authority / Sync |
+| Group-managed authorization | Hold-back | Assignment / Authority / Sync plus Configuration |
+| Referent registration, attributes, and catalogs | Hold-back / platform-spec design gap | Event Envelope / Schema for reference contracts; Identity / Lineage for subject-continuity lifecycle; Configuration for shape/catalog definitions; Projection / Workflow State and Assignment / Authority / Sync for process, actor, and assignment lifecycles |
+| Final reference serialization and active emission sites | Platform-spec detail gap | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior atoms |
+| Platform-bundled shape inventory | Platform-spec detail gap | Owning behavior atoms plus Event Envelope / Schema and Configuration |
+| Operational actor vocabulary and operation-class routing | Platform-spec detail gap | Cross-boundary definitions plus Assignment / Authority / Sync, Configuration, and Projection / Workflow State |
+| Shared-device multi-actor sessions | Architecture decision gap | Assignment / Authority / Sync |
+| Auditor access and subject-based scope | Architecture decision gap | Assignment / Authority / Sync |
+| Assessment visibility | Platform-spec / operational policy gap | Assignment / Authority / Sync plus Reporting / Aggregation |
+| Cross-level distribution visibility | Architecture decision gap / operational policy | Assignment / Authority / Sync |
+| Permission table and activity/context authority details | Platform-spec / operational policy gap | Assignment / Authority / Sync plus Configuration |
+| Temporary authority, revocation, and offline grace policy | Operational policy gap with architecture trigger | Assignment / Authority / Sync plus Flag / Resolution |
+| Onboarding and role-transition details | Operational policy plus implementation/tooling gap | Assignment / Authority / Sync plus Configuration and Local Data Lifecycle |
+| General flag semantics beyond accepted workflow cases | Architecture decision gap | Flag / Resolution |
+| Flag event identity, creation location, and resolution-event mapping | Architecture / platform-spec decision gap | Flag / Resolution plus Event Envelope / Schema |
+| Alias-cycle read-side behavior and resolution semantics | Architecture decision gap | Identity / Lineage plus Flag / Resolution |
+| Domain conflict automation outside workflow | Architecture decision gap | Configuration plus Flag / Resolution |
+| Exact Pattern Registry inventory | Platform-spec detail gap | Projection / Workflow State |
+| Formal Pattern Registry schema | Platform-spec detail gap | Projection / Workflow State plus Configuration |
+| Source-chain traversal depth limits | Platform-spec detail gap | Flag / Resolution plus Projection / Workflow State |
+| Sync delivery mechanics | Implementation/tooling gap | Assignment / Authority / Sync |
+| Local purge/lifecycle rules for sensitive data | Platform-spec / operational policy gap | Local Data Lifecycle |
+| Reporting freshness semantics | Platform-spec detail gap | Reporting / Aggregation |
+| Retention and archival | Platform-spec / operational policy gap | Event Log / Storage plus Local Data Lifecycle |
+| Structured import/export contracts | Platform-spec detail gap | Event Envelope / Schema plus Reporting / Aggregation |
+| Projection optimization and caching | Implementation/tooling gap | Event Log / Storage plus Projection / Workflow State |
+| Event schema/versioning tooling | Implementation/tooling gap | Event Envelope / Schema plus Event Log / Storage and Configuration |
+| Projection compatibility across schema versions | Platform-spec / implementation tooling gap | Projection / Workflow State plus Event Envelope / Schema |
+| Configuration versioning and stale-configuration reconciliation | Platform-spec / implementation tooling gap | Configuration plus Event Envelope / Schema and Assignment / Authority / Sync |
+| Configuration authoring and deploy-time validation UX | Implementation/tooling gap | Configuration |
+| Auto-resolution authoring and monitoring | Implementation/tooling gap | Flag / Resolution plus Reporting / Aggregation |
+
+</details>

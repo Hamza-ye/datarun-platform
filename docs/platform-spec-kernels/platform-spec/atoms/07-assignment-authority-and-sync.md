@@ -178,9 +178,11 @@ This atom does not own:
 |---|---|---|
 | Shared-device multi-actor sessions | Assignment / Authority / Sync plus Identity / Lineage and implementation design | Shared devices become required for the first deployment or local sessions must support multiple actors. |
 | Auditor access and subject-based scope | Assignment / Authority / Sync with formal architecture decision if new scope semantics are required | Auditor or subject-based visibility is required by a deployment or product slice. |
+| Assessment visibility | Assignment / Authority / Sync plus Reporting / Aggregation and operational policy | Assessment views require visibility beyond current assignment/scope mechanisms or become part of a product slice. |
 | Cross-level distribution visibility | Assignment / Authority / Sync plus operational policy | A deployment needs cross-level access beyond existing scope mechanisms. |
 | Permission table and activity/context authority details | Assignment / Authority / Sync plus Configuration | Concrete permission matrices, role/action bindings, or normative activity/context authority semantics must be implemented. |
 | Temporary authority, revocation, and offline grace policy | Assignment / Authority / Sync plus Flag / Resolution and operational policy | Temporary grants, emergency cover, role handoff windows, late revocation, or grace periods are required. |
+| Onboarding and role-transition details | Assignment / Authority / Sync plus Configuration, Local Data Lifecycle, and operational policy | Onboarding, responsibility transfer, actor setup, or role transition behavior must become normative. |
 | Sync delivery mechanics | Assignment / Authority / Sync plus implementation tooling | Sync transport, pagination, priority, bandwidth handling, retries, or low-end-device delivery must be specified. |
 | Local purge/lifecycle rules for sensitive data | Local Data Lifecycle plus operational policy | Sensitive deployment or scope contraction behavior must be implemented. |
 | Configuration versioning and stale-configuration reconciliation | Configuration plus Event Envelope / Schema and Assignment / Authority / Sync | Stale local authority or configuration affects sync-time review, migration, or offline work created under older configuration. |
@@ -228,5 +230,5 @@ This atom does not own:
 
 Drafting Agent note, 2026-05-12:
 
-- This draft intentionally carries forward shared-device sessions, auditor and subject-based scope, cross-level visibility, permission/activity authority details, temporary authority and offline grace policy, sync delivery mechanics, sensitive local lifecycle, stale-configuration reconciliation, final reference serialization, and referent registration/catalog gaps.
+- This draft intentionally carries forward shared-device sessions, auditor and subject-based scope, assessment visibility, cross-level visibility, permission/activity authority details, temporary authority and offline grace policy, onboarding and role-transition details, sync delivery mechanics, sensitive local lifecycle, stale-configuration reconciliation, final reference serialization, and referent registration/catalog gaps.
 - `SPEC-006` remains Draft. This atom consumes `SPEC-006` only as draft/open-gap context and does not treat Configuration as accepted implementation authority.
