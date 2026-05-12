@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **How to sync:** Run `./scripts/sync.sh` (or `python3 scripts/generate-dashboard.py` for local-only) after any change to the registry or gap register.
-> Last regenerated: 2026-05-12 03:31:15
+> Last regenerated: 2026-05-12 03:37:27
 
 ## Execution Summary
 

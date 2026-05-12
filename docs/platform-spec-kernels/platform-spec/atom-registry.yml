@@ -26,7 +26,6 @@ owner_roles:
 - Delivery Lead
 - Product Owner
 next_recommended:
-- SPEC-005
 - SPEC-006
 - SPEC-007
 atoms:

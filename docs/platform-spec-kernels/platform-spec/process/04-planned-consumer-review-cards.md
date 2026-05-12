@@ -6,7 +6,7 @@ This file gives Integration Review a surface for planned downstream atoms that d
 
 These cards are not spec atoms, not implementation authority, and not accepted downstream contracts. When a planned atom is drafted, its atom file must reconcile or supersede the relevant card.
 
-The foundation acceptance pass uses three card groups:
+The Batch 1B foundation acceptance pass used three card groups:
 
 - Batch 2 immediate consumers: `SPEC-005`, `SPEC-006`, and `SPEC-007`.
 - Direct registry consumer with projection/workflow risk surface: `SPEC-009`, because workflow state and pattern behavior directly consume foundation vocabulary, event truth, and envelope/shape separation.
@@ -36,6 +36,8 @@ Each card must end with one of these outcomes:
 
 Consumer: `SPEC-005` References And Identity Lineage
 
+Supersession note: this planned-consumer card was used for Batch 1B foundation acceptance and is superseded by accepted `atoms/05-references-and-identity-lineage.md`. It remains here as review evidence, not as current downstream authority.
+
 Foundation upstream atoms under review:
 
 - `SPEC-002` Glossary And Core Definitions
@@ -62,7 +64,7 @@ Carried gaps:
 - referent registration, attributes, and catalogs
 - alias-cycle read-side behavior and resolution semantics
 
-Integration Review question:
+Historical Integration Review question:
 
 - Can `SPEC-005` draft identity-lineage behavior later while consuming foundation references as contracts only, without needing `SPEC-002`, `SPEC-003`, or `SPEC-004` to decide referent lifecycle ownership?
 
