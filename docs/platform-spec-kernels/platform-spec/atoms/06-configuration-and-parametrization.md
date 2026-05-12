@@ -193,3 +193,18 @@ This atom does not own:
 Drafting Agent note, 2026-05-12:
 
 - This draft intentionally carries forward unresolved configuration versioning, stale-configuration reconciliation, authoring and deploy-time validation UX, event schema/versioning tooling, platform-bundled shape inventory, Pattern Registry schema/inventory, permission/activity authority details, referent catalog gaps, and final reference serialization/emission-site gaps.
+
+Challenge Review, 2026-05-12:
+
+- Verdict: Pass With Notes. No rejected-path reintroduction or change-control trigger found.
+- Draft checklist remains unchecked by design; checklist completion is deferred to the future acceptance workflow.
+- Forbidden-path terms appear only as guardrails, rejected paths, or non-scope constraints.
+
+Integration Review, 2026-05-12:
+
+- Verdict: Carry Explicit Gap. `SPEC-006` is consumable by planned downstream atoms only with explicit gaps preserved.
+- `SPEC-007` can consume configuration inputs for authority work only if role labels, role/action mappings, activity context, scope parameters, schedules, sensitivity classifications, and policy values remain inputs to assignment-derived authority rather than grants.
+- `SPEC-009` can consume pattern selections, shape roles, and activity bindings while carrying Pattern Registry inventory/schema, projection compatibility, and platform-bundled shape gaps.
+- `SPEC-010` can consume configured severities, thresholds, uniqueness values, and bounded detector parameters only if detector logic, flag lifecycle, and resolution semantics remain outside Configuration.
+- `SPEC-011` can consume bounded schedules, thresholds, trigger declarations, and server-only constraints only if Trigger / Reactivity owns execution semantics, side effects, timing, and event-store write discipline.
+- No `SPEC-006` edits or change-control escalation are required before later acceptance workflow.
