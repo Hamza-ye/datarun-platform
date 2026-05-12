@@ -232,3 +232,25 @@ Drafting Agent note, 2026-05-12:
 
 - This draft intentionally carries forward shared-device sessions, auditor and subject-based scope, assessment visibility, cross-level visibility, permission/activity authority details, temporary authority and offline grace policy, onboarding and role-transition details, sync delivery mechanics, sensitive local lifecycle, stale-configuration reconciliation, final reference serialization, and referent registration/catalog gaps.
 - `SPEC-006` remains Draft. This atom consumes `SPEC-006` only as draft/open-gap context and does not treat Configuration as accepted implementation authority.
+
+Challenge Review reconciliation, 2026-05-12:
+
+- Verdict before reconciliation: Needs Rework.
+- Reconciled missing open-gap carry-forward by adding `Assessment visibility` and `Onboarding and role-transition details` to this atom and `90-open-decisions.md`.
+- No rejected path was reintroduced and no change-control trigger was found.
+
+Integration Review, 2026-05-12:
+
+- Verdict: Carry Explicit Gap.
+- Planned downstream atoms may consume SPEC-007 outputs as gates, source facts, and handoffs only.
+- `SPEC-008` may consume scope-contraction handoff without inheriting purge, retention, archive, or sensitive lifecycle rules.
+- `SPEC-009` may consume authority checks and detect-before-act gates without inheriting workflow state, Pattern Registry, queue, lifecycle, or final permission-table behavior.
+- `SPEC-010` may consume stale or invalid authority source facts without inheriting flag lifecycle, resolution mapping, or general authorization-flag semantics.
+- `SPEC-011` may consume authority gating without inheriting trigger timing, scheduling, or side-effect policy.
+- `SPEC-012` may consume access-scoped visibility constraints without closing reporting freshness, auditor access, assessment visibility, or cross-level exceptions.
+
+Architecture Steward recommendation, 2026-05-12:
+
+- Recommendation: proceed as Draft with explicit carried gaps preserved.
+- This recommendation does not promote SPEC-007 out of Draft.
+- Future promotion still requires the formal acceptance workflow and an explicit status update in this atom and `atom-registry.yml`.
