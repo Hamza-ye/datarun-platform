@@ -1,6 +1,6 @@
 # References And Identity Lineage
 
-Status: Draft
+Status: Accepted
 Owning boundary: Identity / Lineage
 Primary owner: Architecture Steward
 
@@ -190,16 +190,29 @@ This atom does not own:
 
 ## Review Checklist
 
-- [ ] Source basis is accepted and cited.
-- [ ] Owner and boundary are singular.
-- [ ] Scope and non-scope are explicit.
-- [ ] Contracts identify inputs, outputs, and boundary crossings.
-- [ ] Open gaps are not closed accidentally.
-- [ ] Forbidden couplings include the likely drift risks.
-- [ ] No envelope field, type value, authority shortcut, or canonical projection state was added without change control.
-- [ ] Product labels, role labels, and UI surfaces remain outside platform-core semantics.
+- [x] Source basis is accepted and cited.
+- [x] Owner and boundary are singular.
+- [x] Scope and non-scope are explicit.
+- [x] Contracts identify inputs, outputs, and boundary crossings.
+- [x] Open gaps are not closed accidentally.
+- [x] Forbidden couplings include the likely drift risks.
+- [x] No envelope field, type value, authority shortcut, or canonical projection state was added without change control.
+- [x] Product labels, role labels, and UI surfaces remain outside platform-core semantics.
 
-Drafting Agent note:
+Drafting Agent note, 2026-05-12:
 
-- This is a draft only. It has not completed Challenge Review, Integration Review, Architecture Steward recommendation, or Decision Board / Project Owner approval.
 - This draft intentionally carries forward unresolved reference serialization, referent registration/catalog, alias-cycle, and platform-bundled identity-shape gaps.
+
+Challenge Review, 2026-05-12:
+
+- Verdict: Pass. No findings, rejected-path matches, or change-control triggers.
+
+Integration Review, 2026-05-12:
+
+- Verdict: Carry Explicit Gap. No required edits; downstream consumers may consume the narrow Identity / Lineage contract only while carrying explicit gaps.
+
+Batch 2 acceptance, 2026-05-12:
+
+- Decision Board / Project Owner approval promoted `SPEC-005` to Accepted.
+- Accepted surface is limited to subject identity continuity for subject-lineage referents, raw subject-reference preservation in immutable events, read-side resolved subject references as projection-derived interpretation, alias lineage for merge behavior, corrective split behavior preserving historical references, lineage acyclicity for accepted subject-lineage operations, and forbidden couplings preventing Identity / Lineage from absorbing authority, workflow, process, catalogs, reporting, or configuration ownership.
+- Final reference serialization and active emission sites; referent registration, attributes, and catalogs; alias-cycle read-side behavior and resolution semantics; platform-bundled registration or identity shapes; domain duplicate-detection and matching policy; identity resolution UX; authority/sync policy gaps; Pattern Registry gaps; flag lifecycle gaps; and reporting freshness/aggregation gaps remain open.
