@@ -14,10 +14,10 @@ No ADR-006-R through ADR-009 content is used here.
 
 The ADR-001 through ADR-005 baseline is accepted as stable enough to build from for:
 
-- system boundary validation
+- architecture responsibility validation
 - prioritized gap routing
 - targeted ADR-006+ assessment
-- platform-spec skeleton drafting
+- platform-spec outline drafting
 
 This does not make the baseline a final platform specification. It accepts it as the current engineering comparison surface.
 
@@ -40,7 +40,7 @@ This does not make the baseline a final platform specification. It accepts it as
 
 These gaps are accepted as explicit, not accidental. They are not blockers to accepting the baseline itself.
 
-P1, before platform-spec skeleton or later-source use:
+P1, before platform-spec outline or later-source use:
 
 - ADR-006-R through ADR-009 assessment.
 - General flag semantics if the platform spec needs more than ADR-005 workflow flag behavior.
@@ -57,7 +57,7 @@ P2, before core implementation planning or affected spec sections:
 - Configuration authoring, deployment, validation, and migration UX.
 - Auto-resolution authoring and monitoring.
 - Sync delivery mechanics.
-- Reporting and aggregation if reporting is included in the initial spec skeleton.
+- Reporting and aggregation if reporting is included in the initial platform-spec outline.
 
 P3, policy/product-timed unless a first deployment needs them:
 
@@ -102,10 +102,10 @@ Items that need careful handling during the next passes:
 
 ## Completed Follow-Up
 
-This acceptance check led to the completed boundary-validation and later-source assessment sequence:
+This acceptance check led to the completed responsibility-validation and later-source assessment sequence:
 
-1. `07-system-boundary-map.md` was validated against the accepted baseline and accepted gaps.
-2. ADR-006-R through ADR-009 claims were routed through the validated boundary map in `10` through `13`.
-3. Additional control overlays were added for identity, conflict/flag/offline behavior, and operational constraints before platform-spec atomization.
+1. `07-system-boundary-map.md` was validated against the accepted baseline and accepted gaps, then reframed as an architecture responsibility map.
+2. ADR-006-R through ADR-009 claims were routed through the validated responsibility map in `10` through `13`.
+3. Additional control overlays were added for identity, conflict/flag/offline behavior, and operational constraints before platform-spec drafting.
 
-Current atomization input should use the full professional-baseline set through `17-authorization-visibility-boundary-control.md`.
+Current platform-spec drafting input should use the full professional-baseline set through `19-envelope-shape-parametrization-definitions.md`.

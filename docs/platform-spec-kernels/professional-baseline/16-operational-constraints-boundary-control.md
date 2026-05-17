@@ -1,6 +1,6 @@
 # Operational Constraints Boundary Control
 
-Status: Atomization-ready dependency-aware control overlay
+Status: Spec-drafting-ready dependency-aware control overlay
 
 This document preserves `../../constraints.md` as operational envelope authority without letting it become architecture or implementation authority. The constraints shaped the ADR path, but they do not decide mechanisms by themselves.
 
@@ -50,11 +50,11 @@ It is not authority for:
 - latency service levels
 - platform module boundaries
 
-If a constraint creates pressure not closed by ADR-001 through ADR-005, route it to the gap register or atomization hold-back list.
+If a constraint creates pressure not closed by ADR-001 through ADR-005, route it to the gap register or platform-spec hold-back list.
 
-## Constraint-To-Boundary Mapping
+## Constraint-To-Responsibility Mapping
 
-| Constraint Pressure | Accepted Baseline Mechanism | Primary Boundary | Open / Deferred Routing |
+| Constraint Pressure | Accepted Baseline Mechanism | Primary Responsibility Area | Open / Deferred Routing |
 |---|---|---|---|
 | field users are often offline | client-generated IDs, local event creation, immutable event sync | Event Log / Storage; Event Envelope / Schema; Assignment / Authority / Sync | sync delivery mechanics, local lifecycle, offline conflict reconciliation |
 | supervisors/coordinators see delayed field state | projection-derived views and sync-visible state | Reporting / Aggregation | freshness metadata and reporting consistency surface |
@@ -73,7 +73,7 @@ If a constraint creates pressure not closed by ADR-001 through ADR-005, route it
 
 ## Constraint Vocabulary
 
-Use these terms narrowly during atomization:
+Use these terms narrowly during platform-spec drafting:
 
 | Term | Control Definition | Not Allowed To Mean |
 |---|---|---|
@@ -86,7 +86,7 @@ Use these terms narrowly during atomization:
 | immediate capture | capture interaction should not wait for network or central validation | immediate central visibility or global conflict certainty |
 | config propagation | changed configuration reaches devices on next sync and old in-progress work can complete under old rules | instant config invalidation of offline work |
 
-Actor-tier labels in `../../constraints.md` are operational examples. During atomization, translate them into operation classes and environmental assumptions. Do not hard-code field worker, supervisor, coordinator, auditor, or regional lead as platform-core responsibility types merely because the constraints use those names.
+Actor-tier labels in `../../constraints.md` are operational examples. During platform-spec drafting, translate them into operation classes and environmental assumptions. Do not hard-code field worker, supervisor, coordinator, auditor, or regional lead as platform-core responsibility types merely because the constraints use those names.
 
 ## Overread Controls
 
@@ -189,9 +189,9 @@ Forbidden overread:
 - Do not force in-progress offline work under old configuration to retroactively follow new rules.
 - Do not use `device_time` as protocol ordering to simulate live behavior.
 
-## Atomization Readiness Checks
+## Spec Drafting Readiness Checks
 
-Before writing a spec atom affected by operational constraints, check:
+Before writing a spec section affected by operational constraints, check:
 
 1. Which constraint pressure is being preserved?
 2. Is it closed by ADR-001 through ADR-005, or is it only an operational requirement?
@@ -207,13 +207,13 @@ Before writing a spec atom affected by operational constraints, check:
 
 This overlay does not change ADR-001 through ADR-005 baseline behavior.
 
-It does require one visibility update to the professional baseline: structured import/export compatibility should be explicit in the gap register and boundary routing. The constraint already exists in extracted domain kernels, but without a professional-baseline route it can be forgotten during atomization.
+It does require one visibility update to the professional baseline: structured import/export compatibility should be explicit in the gap register and boundary routing. The constraint already exists in extracted domain kernels, but without a professional-baseline route it can be forgotten during platform-spec drafting.
 
 No new boundary is required. Structured exchange should route primarily through Event Envelope / Schema while consuming Event Log / Storage, Configuration, and Reporting / Aggregation outputs as needed.
 
 ## Recommended Next Step
 
-Use this overlay alongside `15-conflict-flag-offline-boundary-control.md` to draft the first atomization plan. The plan should explicitly hold back:
+Use this overlay alongside `15-conflict-flag-offline-boundary-control.md` to draft the first platform-spec plan. The plan should explicitly hold back:
 
 - structured import/export contracts
 - reporting freshness metadata

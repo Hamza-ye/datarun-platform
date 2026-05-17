@@ -2,7 +2,7 @@
 
 Status: Later-source assessment against accepted ADR-001 through ADR-005 baseline
 
-This document assesses `../../adrs/adr-006-flag-semantics-R.md` through the accepted baseline and validated boundary map. ADR-006-R is assessment material only. It may supersede `../../adrs/adr-006-flag-semantics.md` inside the ADR-006 revision lineage, but it does not supersede ADR-001 through ADR-005.
+This document assesses `../../adrs/adr-006-flag-semantics-R.md` through the accepted baseline and architecture responsibility map. ADR-006-R is assessment material only. It may supersede `../../adrs/adr-006-flag-semantics.md` inside the ADR-006 revision lineage, but it does not supersede ADR-001 through ADR-005.
 
 ## Source Basis
 
@@ -34,9 +34,9 @@ The carried claims mostly address the accepted `General flag semantics` later-so
 
 The S5 claim is narrower and riskier. It touches subject-lineage acyclicity, online-only merge/split validation, accept-and-flag, general flag category creation, conflict lifecycle, and read-side identity semantics over a flagged cycle.
 
-## Boundary Routing
+## Responsibility Routing
 
-| Claim Area | Primary Boundary | Secondary Boundaries | Reason |
+| Claim Area | Primary Responsibility Area | Affected Areas | Reason |
 |---|---|---|---|
 | accept-and-flag as invariant | Flag / Resolution | Event Log / Storage; Projection / Workflow State | Elaborates accepted accept-and-flag discipline without changing event-log source of truth. |
 | flag as canonical event-stream anomaly surface | Flag / Resolution | Event Envelope / Schema; Event Log / Storage | Attempts to close general event-stream representation for state anomalies. |
@@ -51,15 +51,15 @@ The S5 claim is narrower and riskier. It touches subject-lineage acyclicity, onl
 |---|---|---|
 | S1: validly structured events are not rejected for state-based reasons; anomalies are accepted and flagged | Consistent elaboration, with bounded open-gap closure value | Consistent with the accepted detect-before-act and accept-and-flag discipline. It must remain bounded to state-based anomalies and must not weaken structural envelope/payload validation. |
 | S2: flags are the canonical event-stream representation of state anomalies | Open-gap closure candidate | This addresses the `General flag semantics` gap. It is compatible with ADR-005 workflow-specific flags if it does not absorb ADR-005 source-only workflow lineage or auto-resolution semantics without classification. |
-| S3: conflict detection is algorithmic and can evolve | Consistent elaboration | Compatible with the boundary map: detector procedures may consume facts from identity, authorization, or workflow, but those source boundaries do not own flag lifecycle. |
+| S3: conflict detection is algorithmic and can evolve | Consistent elaboration | Compatible with the responsibility map: detector procedures may consume facts from identity, authorization, or workflow, but those source areas do not own flag lifecycle. |
 | S4: flags are server-created by default; device-side creation is additively evolvable | Open-gap closure candidate plus deferred implementation/spec detail | Current baseline does not close flag creation location. Server-side default is plausible under detect-before-act, but should not be promoted to an invariant without formal gap closure. Device-side flagging remains future implementation/spec detail unless a later decision requires it. |
 | S5: alias-cycle closure is surfaced as `cycle_violation` while the cycle-closing event is still accepted | Valid dispute requiring formal decision before adoption | This exposes a real tension with the accepted baseline statement that subject lineage remains acyclic and merge/split are online-only where validation is required. The need to detect alias cycles is consistent with the baseline; accepting a cycle-closing lineage event while read-side behavior is undefined is not safe to absorb silently. |
 | S5.1: cycle detection runs on the push path after structural validation and before persistence | Open-gap closure candidate if S5 dispute is resolved | The placement is compatible with structural validation versus state-anomaly separation, but exact push-path mechanics are not closed by ADR-001 through ADR-005. |
 | S5.2: batch-serial detection within one push request | Deferred implementation/spec detail | This is deterministic procedure detail. It may be a good implementation rule, but current baseline does not define push request array-order semantics. |
-| S5.3: `cycle_violation` is manual-only and cycle resolution is deferred | Open-gap closure candidate plus explicit unresolved gap | Manual-only fits the risk profile, but resolution semantics are explicitly undefined. Do not atomize cycle handling as settled until resolution/read behavior is decided or clearly deferred. |
+| S5.3: `cycle_violation` is manual-only and cycle resolution is deferred | Open-gap closure candidate plus explicit unresolved gap | Manual-only fits the risk profile, but resolution semantics are explicitly undefined. Do not treat cycle handling as settled until resolution/read behavior is decided or clearly deferred. |
 | S5.4: request-time anchor for alias-cycle detection | Open-gap closure candidate requiring decision | Compatible with `device_time` being advisory, but it introduces a detector temporal-anchor rule not present in ADR-001 through ADR-005. It should be decided as part of alias-cycle semantics, not generalized to other detectors. |
 | S5.5: add `cycle_violation` to flag catalog | Open-gap closure candidate | This is a proposed general flag category. It should not be added to the accepted baseline until general flag semantics and alias-cycle handling are closed. |
-| S5 deferred read-side and resolution semantics | Architecture decision gap | ADR-006-R itself says read-side semantics over cyclic graphs and cycle resolution are undecided. These block a safe identity/flag atomized spec if alias-cycle behavior is included. |
+| S5 deferred read-side and resolution semantics | Architecture decision gap | ADR-006-R itself says read-side semantics over cyclic graphs and cycle resolution are undecided. These block a safe identity/flag spec section if alias-cycle behavior is included. |
 | S5 fork-cycle case marked decided-unexercised | Deferred implementation/spec detail | Treat as unproven corollary, not as accepted baseline behavior. It depends on the eventual graph model and tests. |
 
 ## Accepted Carry-Forward Candidates
@@ -83,7 +83,7 @@ These candidates do not require changing the ADR-001 through ADR-005 baseline.
 - Read-side identity semantics over a flagged cycle.
 - Cycle resolution effects.
 
-These require either formal gap closure or explicit deferral in the first platform spec skeleton.
+These require either formal gap closure or explicit deferral in the first platform-spec outline.
 
 ## Baseline Impact
 
@@ -92,10 +92,10 @@ No ADR-001 through ADR-005 baseline item should be changed by this assessment al
 Required gap/routing updates:
 
 - Add an explicit architecture decision gap for alias-cycle enforcement, read-side behavior, and resolution semantics.
-- Route that gap primarily to Identity / Lineage, with Flag / Resolution, Projection / Workflow State, and Event Log / Storage as secondary boundaries.
+- Route that gap primarily to Identity / Lineage, with Flag / Resolution, Projection / Workflow State, and Event Log / Storage as affected areas.
 
 ## Completed Follow-Up
 
 The alias-cycle gap and routing were recorded, and ADR-007 through ADR-009 were assessed in `11` through `13`.
 
-During atomization, use this assessment only for the accepted carry-forward candidates and explicit hold-backs listed above.
+During platform-spec drafting, use this assessment only for the accepted carry-forward candidates and explicit hold-backs listed above.

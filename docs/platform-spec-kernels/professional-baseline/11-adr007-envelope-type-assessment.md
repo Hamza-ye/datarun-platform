@@ -2,7 +2,7 @@
 
 Status: Later-source assessment against accepted ADR-001 through ADR-005 baseline
 
-This document assesses `../../adrs/adr-007-envelope-type-closure.md` through the accepted baseline and validated boundary map. ADR-007 is assessment material only. It does not supersede ADR-001 through ADR-005 automatically.
+This document assesses `../../adrs/adr-007-envelope-type-closure.md` through the accepted baseline and architecture responsibility map. ADR-007 is assessment material only. It does not supersede ADR-001 through ADR-005 automatically.
 
 ## Source Basis
 
@@ -39,16 +39,16 @@ The six envelope type values are behavior/pipeline vocabulary, not a taxonomy of
 
 This is mostly consistent elaboration of the accepted ADR-001 through ADR-005 baseline.
 
-## Boundary Routing
+## Responsibility Routing
 
-| Claim Area | Primary Boundary | Secondary Boundaries | Reason |
+| Claim Area | Primary Responsibility Area | Affected Areas | Reason |
 |---|---|---|---|
 | closed six-value `type` vocabulary | Event Envelope / Schema | Configuration | Restates ADR-004 structural event type closure. |
 | `type` as processing pipeline, not domain fact | Event Envelope / Schema | Configuration; Flag / Resolution; Identity / Lineage | Prevents domain/integrity facts from expanding envelope structure. |
 | identity/integrity facts expressed by `shape_ref` | Event Envelope / Schema | Configuration; Identity / Lineage; Flag / Resolution | Routes fact discrimination through shape contract rather than structural type. |
 | consumer filtering by `shape_ref` for domain facts | Event Envelope / Schema | All consumers of event facts | Provides a safe consumer rule for avoiding type-vocabulary drift. |
 | deterministic flag identity includes `shape_ref` | Flag / Resolution | Event Envelope / Schema | Ties flag identity to the fact shape, but depends on general flag semantics still being assessed. |
-| platform-bundled integrity/identity shapes | Configuration | Event Envelope / Schema; Identity / Lineage; Flag / Resolution | Raises platform-owned shape obligations that should be reconciled with ADR-009 duality before final atomization. |
+| platform-bundled integrity/identity shapes | Configuration | Event Envelope / Schema; Identity / Lineage; Flag / Resolution | Raises platform-owned shape obligations that should be reconciled with ADR-009 duality before final platform-spec drafting. |
 
 ## Claim Classification
 
@@ -88,7 +88,7 @@ These candidates reinforce the accepted baseline rather than changing it.
 - A general rule for shapes spanning multiple envelope types.
 - Any claim that relies on ADR-008 or ADR-009 before those assessments are complete.
 
-These should be held as candidates for the Event Envelope / Schema, Configuration, Identity / Lineage, and Flag / Resolution atomization passes.
+These should be held as candidates for the Event Envelope / Schema, Configuration, Identity / Lineage, and Flag / Resolution spec sections.
 
 ## Baseline Impact
 
@@ -105,4 +105,4 @@ No new gap is required from ADR-007 by itself. Existing gaps already cover the d
 
 ADR-008 was assessed in `12-adr008-reference-fields-assessment.md`.
 
-During atomization, use this assessment to preserve the `type` versus `shape_ref` separation and the listed envelope guardrails.
+During platform-spec drafting, use this assessment to preserve the `type` versus `shape_ref` separation and the listed envelope guardrails.

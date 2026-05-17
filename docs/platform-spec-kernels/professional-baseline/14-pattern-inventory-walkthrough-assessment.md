@@ -2,7 +2,7 @@
 
 Status: Historical/pre-convergence assessment against accepted ADR-001 through ADR-005 baseline
 
-This document assesses `../../exploration/28-pattern-inventory-walkthrough.md` through the accepted baseline, validated boundary map, and later-source classification guardrails. The walkthrough is not authority for platform behavior. It is useful candidate material for the `Exact Pattern Registry Inventory` and `Formal Pattern Registry Schema Format` gaps.
+This document assesses `../../exploration/28-pattern-inventory-walkthrough.md` through the accepted baseline, architecture responsibility map, and later-source classification guardrails. The walkthrough is not authority for platform behavior. It is useful candidate material for the `Exact Pattern Registry Inventory` and `Formal Pattern Registry Schema Format` gaps.
 
 ## Source Basis
 
@@ -33,9 +33,9 @@ The walkthrough mostly proposes candidate inventory and schema detail. It should
 
 Participant-role language in this assessment means workflow capacity inside a pattern, such as capturer, reviewer, approver, sender, or receiver. It must not be read as a fixed product persona, actor subclass, permission shortcut, or service boundary. Concrete deployments bind those capacities to configured roles, assignments, scopes, and operation classes.
 
-## Boundary Routing
+## Responsibility Routing
 
-| Claim Area | Primary Boundary | Secondary Boundaries | Reason |
+| Claim Area | Primary Responsibility Area | Affected Areas | Reason |
 |---|---|---|---|
 | Pattern Registry inventory candidate | Projection / Workflow State | Configuration | Pattern mechanism and skeletons are platform-owned; deployers bind instances through configuration. |
 | pattern schema conventions | Projection / Workflow State | Configuration; Event Envelope / Schema | Transition tables consume event `type`, shape roles, and activity context without adding envelope fields. |
@@ -64,7 +64,7 @@ Participant-role language in this assessment means workflow capacity inside a pa
 | `entity_lifecycle` cannot be parameterized from `case_management` | Open-gap closure candidate | The reasoning is plausible: cyclical verification differs structurally from case closure. Treat `entity_lifecycle` as a candidate future pattern, not accepted inventory. |
 | `entity_lifecycle` may be added later with no data migration | Deferred platform evolution candidate | Compatible with Pattern Registry append-only evolution if no envelope fields or type values change. It still requires platform decision/spec work before shipping. |
 | "Patterns are config, not events" wording | Needs narrowing | Under ADR-009, pattern mechanism is platform-fixed; deployer pattern bindings are configuration. Do not carry forward wording that classifies the mechanism as config. |
-| Uses implementation contract IDs such as C15/C18/C20 | Not carry-forward | Those IDs come from pre-convergence contract extraction and should not be used as authority in atomized specs. |
+| Uses implementation contract IDs such as C15/C18/C20 | Not carry-forward | Those IDs come from pre-convergence contract extraction and should not be used as authority in platform-spec sections. |
 
 ## Candidate Inventory Result
 
@@ -81,7 +81,7 @@ The walkthrough supports the following candidate inventory classification:
 
 ## Safe Carry-Forward Candidates
 
-The following material is safe to carry forward into pattern atomization as candidate language:
+The following material is safe to carry forward into Pattern Registry specification as candidate language:
 
 - Pattern inventory should start from the four ADR-005 existence-proof patterns, not from arbitrary workflow invention.
 - Pattern definitions should use abstract shape roles mapped to concrete `shape_ref` values by deployer configuration.
@@ -120,7 +120,7 @@ It also provides supporting candidate detail for existing P2/P3 areas:
 
 ## Recommended Next Step
 
-Use this assessment to draft a Pattern Registry atomization plan, not the final pattern spec. The first atomization pass should split:
+Use this assessment to draft a Pattern Registry specification plan, not the final pattern spec. The first specification pass should split:
 
 - platform-fixed Pattern Registry mechanism
 - pattern definition schema

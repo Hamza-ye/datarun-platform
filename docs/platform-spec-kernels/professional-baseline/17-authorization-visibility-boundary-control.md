@@ -1,10 +1,10 @@
 # Authorization Visibility Boundary Control
 
-Status: Atomization-ready dependency-aware control overlay
+Status: Spec-drafting-ready dependency-aware control overlay
 
 This document preserves `../../access-control-scenario.md` as authorization and visibility pressure without letting it silently rewrite ADR-003 or turn into a deployer-authored access-control system.
 
-The core rule is: the access-control scenario states what must remain possible across roles, context, hierarchy, temporary authority, and offline operation. ADR-001 through ADR-005 define the accepted mechanisms currently allowed to satisfy that pressure. Anything not closed by those mechanisms must route through the gap register and change control before atomization freezes it into platform-spec language.
+The core rule is: the access-control scenario states what must remain possible across roles, context, hierarchy, temporary authority, and offline operation. ADR-001 through ADR-005 define the accepted mechanisms currently allowed to satisfy that pressure. Anything not closed by those mechanisms must route through the gap register and change control before platform-spec drafting freezes it into specification language.
 
 ## Source Basis
 
@@ -63,11 +63,11 @@ The accepted baseline already closes these mechanisms:
 - scope contraction uses selective retain as ADR-003's initial strategy
 - sensitive deployments require stronger local lifecycle handling than retain-and-hide
 
-The access-control scenario should therefore constrain atomization by naming pressure and gaps. It should not be used to reopen those closed rules unless a claim passes `02-change-control.md`.
+The access-control scenario should therefore constrain platform-spec drafting by naming pressure and gaps. It should not be used to reopen those closed rules unless a claim passes `02-change-control.md`.
 
-## Pressure-To-Boundary Mapping
+## Pressure-To-Responsibility Mapping
 
-| Scenario Pressure | Accepted Baseline Mechanism | Primary Boundary | Open / Deferred Routing |
+| Scenario Pressure | Accepted Baseline Mechanism | Primary Responsibility Area | Open / Deferred Routing |
 |---|---|---|---|
 | role and context determine visibility/action | assignment-derived access; bounded roles, scopes, activities, and policy choices | Assignment / Authority / Sync | permission table details; activity/context authority details |
 | same role has different authority in different activities or areas | authority projection from actor, assignment timeline, references, and event context | Assignment / Authority / Sync | subject-based scope; assessment visibility; cross-level visibility |
@@ -80,7 +80,7 @@ The access-control scenario should therefore constrain atomization by naming pre
 
 ## Classification Rules
 
-Use these classifications during atomization and later review:
+Use these classifications during platform-spec drafting and later review:
 
 | Claim Type | Classification | Allowed Handling |
 |---|---|---|
@@ -89,7 +89,7 @@ Use these classifications during atomization and later review:
 | concrete permission tables, role names, and deployer policy values | platform-spec detail or operational policy | Keep bounded by platform-owned mechanisms and configuration limits. |
 | product role labels used as UI lenses or scenario shorthand | product clarification plus platform-spec detail | Preserve as operating-context language; do not create fixed actor classes or direct authority shortcuts. |
 | auditor access, subject-based scope, or cross-level visibility exceptions | open-gap closure candidate | Close through the named gap if expressible with existing scope mechanisms; require formal decision for new scope semantics. |
-| temporary grants, revocation, and offline grace behavior | open-gap closure candidate | Route through the temporary authority/offline reconciliation gap before authorization/sync atomization if needed now. |
+| temporary grants, revocation, and offline grace behavior | open-gap closure candidate | Route through the temporary authority/offline reconciliation gap before authorization/sync specification if needed now. |
 | user group or identity-provider claim directly grants data access | conflict or new unauthorized claim | Reject unless formal change control changes the baseline. |
 | authority snapshot stored on each event | conflict with closed baseline | Reject unless formal reopen accepts stored `authority_context`. |
 | field-level sensitivity | conflict with closed baseline | Reject unless formal reopen changes ADR-004. |
@@ -102,7 +102,7 @@ Offline authorization creates two enforcement points that may temporarily disagr
 - local device enforcement over last-known assignments, configuration, scoped projections, and local session state
 - server/sync enforcement over later central knowledge, assignment changes, revocations, identity changes, and received events
 
-During atomization:
+During platform-spec drafting:
 
 - local enforcement must be described as last-known and scoped, not globally authoritative
 - sync-time authorization must preserve immutable event history and attribution
@@ -119,13 +119,13 @@ Scope and authority have both platform-owned and deployer-configured parts:
 - platform-owned mechanism: assignment-derived access, fixed scope containment semantics, sync scope as access scope, authority projection inputs, and original-reference authorization checks
 - deployer-configured instances: concrete roles, assigned actors, areas, teams, activities, schedules, thresholds, sensitivity classifications, and policy values within bounded configuration
 
-Atomized specs must not mix these into one "access-control config language." Deployer configuration supplies instances and policy values. The platform owns the authority mechanism and its limits.
+Platform-spec sections must not mix these into one "access-control config language." Deployer configuration supplies instances and policy values. The platform owns the authority mechanism and its limits.
 
-Operational actor labels sit on the instance/product side of this split. `Supervisor`, `Coordinator`, `Auditor`, `Reviewer`, and similar names may be deployer labels, scenario shorthand, or UI lenses; they are not platform-owned actor subclasses unless a later formal decision creates such a mechanism. Authorization atoms should name the authority inputs and operation class they require rather than relying on a persona label.
+Operational actor labels sit on the instance/product side of this split. `Supervisor`, `Coordinator`, `Auditor`, `Reviewer`, and similar names may be deployer labels, scenario shorthand, or UI lenses; they are not platform-owned actor subclasses unless a later formal decision creates such a mechanism. Authorization spec sections should name the authority inputs and operation class they require rather than relying on a persona label.
 
-## Atomization Readiness Checks
+## Spec Drafting Readiness Checks
 
-Before writing an authorization, sync, reporting, trigger, workflow, or local-lifecycle atom:
+Before writing an authorization, sync, reporting, trigger, workflow, or local-lifecycle spec section:
 
 1. Is the claim a closed ADR-001 through ADR-005 rule, a pre-operations guardrail, an access-control pressure, or an open gap?
 2. Does it preserve assignment-derived access and sync scope as access scope?
@@ -141,13 +141,13 @@ Before writing an authorization, sync, reporting, trigger, workflow, or local-li
 
 No ADR-001 through ADR-005 baseline item should be changed by this overlay.
 
-This overlay adds one gap-register clarification: temporary authority, revocation, and offline grace reconciliation should be explicit before authorization/sync atomization if the first platform spec needs to describe temporary grants or late revocation behavior.
+This overlay adds one gap-register clarification: temporary authority, revocation, and offline grace reconciliation should be explicit before authorization/sync specification if the first platform spec needs to describe temporary grants or late revocation behavior.
 
 ## Recommended Next Step
 
-Use this overlay with `15-conflict-flag-offline-boundary-control.md`, `16-operational-constraints-boundary-control.md`, and `../pre-operations/04-accepted-pre-atomization-decisions.md` as the final pre-atomization guardrail surface.
+Use this overlay with `15-conflict-flag-offline-boundary-control.md`, `16-operational-constraints-boundary-control.md`, and `../pre-operations/04-accepted-pre-atomization-decisions.md` as the final pre-spec-drafting guardrail surface.
 
-Hold back from first atomization unless explicitly needed:
+Hold back from first platform-spec drafting unless explicitly needed:
 
 - new scope types
 - auditor access semantics

@@ -85,9 +85,12 @@ Each gap should include:
 
 - short name
 - classification
-- current owner or likely decision path
+- primary responsibility area
+- affected areas
 - baseline item affected
 - why it is still open
+- closure path, priority, and platform-spec handling
+- hold-back reopen triggers where later-source material is valid but not safe to absorb yet
 - whether ADR-006-R through ADR-009 may contain relevant assessment material
 
 Allowed classifications:
@@ -96,41 +99,42 @@ Allowed classifications:
 - platform-spec detail gap
 - implementation/tooling gap
 - operational policy gap
+- product validation gap
 - later-source assessment gap
 
-## System Boundary Map
+## Architecture Responsibility Map
 
 Purpose:
 
-- route settled mechanisms, gaps, later claims, and future spec artifacts through explicit engineering boundaries
+- route settled mechanisms, gaps, later claims, and future spec artifacts through explicit architecture responsibility areas
 
 Current file:
 
 - `07-system-boundary-map.md`
 
-Each boundary should include:
+The map should include:
 
-- what it owns
-- what it does not own
-- inputs and outputs
-- how crossing the boundary is allowed
-- settled mechanisms
-- open/deferred items
-- forbidden coupling
+- the document altitude it occupies
+- classification of earlier boundary candidates
+- retained responsibility areas
+- demoted or routed areas
+- cross-boundary contracts
+- post-baseline assessment routing rules
+- disposition of the earlier boundary-map treatment
 
 Rules:
 
 - it is generated from the closure overlay, architecture baseline, and gap register
 - viability primitive groupings may be used only as lineage/context, not authority
-- every gap should have one primary owning boundary
-- ADR-006-R through ADR-009 claims must be classified against boundaries before they can affect the baseline
-- boundary names are routing surfaces, not implementation module names
+- every gap should have one primary responsibility owner in `05-decision-gap-register.md`
+- ADR-006-R through ADR-009 claims must be classified against responsibility areas before they can affect the baseline
+- responsibility names are routing surfaces, not implementation module names
 
-## Platform Spec Skeleton
+## Platform Specification Outline
 
 Purpose:
 
-- provide the outline for final platform specification documents
+- provide the top-level outline for final platform specification documents before detailed spec sections are accepted
 
 Expected sections:
 
@@ -147,7 +151,7 @@ Expected sections:
 Rules:
 
 - generated from the accepted architecture baseline and gap register
-- routed through the system boundary map
+- routed through the architecture responsibility map
 - not generated directly from ADRs or exploration files
 - should be stable enough for engineering review
 
@@ -205,7 +209,7 @@ Expected content:
 
 - accepted ADR-002 core
 - reference-category interpretation
-- responsibility split by owning boundary
+- responsibility split by owning area
 - identity-owned and identity-forbidden areas
 - dependency-aware ADR boundary checks
 - implementation guardrails
@@ -218,26 +222,28 @@ Rules:
 - it must separate reference protocol from lifecycle ownership
 - it must keep process, assignment, authority, conflict resolution, and reporting outside subject-lineage ownership
 
-## Final Atomic Kernel Files
+## Implementation-Facing Specification Sections
 
 Purpose:
 
-- split rest-state kernels into final categories after conflicts are resolved
+- turn the accepted baseline and gap register into buildable platform specification sections after the platform-spec outline is stable
+- keep implementation guidance out of baseline governance artifacts
 
 Target groups:
 
-- primitives
-- contracts
+- normative behavior
+- contracts and data shapes
 - invariants
-- algorithms
-- configuration
-- interactions
-- forbidden-patterns
-- open-questions
-- rejected-alternatives
+- algorithms and derivation rules
+- configuration surfaces
+- cross-boundary interactions
+- forbidden patterns
+- open decisions
+- rejected alternatives
 
 Rules:
 
-- do not create these until rest state is proven
-- do not split by ADR number
-- every settled kernel must retain source basis
+- do not create or accept detailed spec sections until the platform-spec outline is stable
+- do not split by ADR number or by a local process label
+- every settled statement must retain source basis
+- every open decision must cite `05-decision-gap-register.md`

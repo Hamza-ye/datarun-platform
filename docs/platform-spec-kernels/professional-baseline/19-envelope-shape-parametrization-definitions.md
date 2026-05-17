@@ -1,8 +1,8 @@
 # Envelope, Shape, And Parametrization Definitions
 
-Status: Atomization definition file
+Status: Platform-spec definition file
 
-This file provides compact definitions for atomization agents. It is derived from ADR-004 closure, ADR-005 reinforcement, and the boundary-control overlay in `18-envelope-shape-parametrization-boundary-control.md`.
+This file provides compact definitions for platform-spec writers. It is derived from ADR-004 closure, ADR-005 reinforcement, and the boundary-control overlay in `18-envelope-shape-parametrization-boundary-control.md`.
 
 It does not add platform behavior. It defines how to read already-accepted boundaries.
 
@@ -95,7 +95,7 @@ Shape addition and shape versioning are the normal way to add new fact vocabular
 
 A platform-bundled shape is a shape supplied by platform code for a platform-owned fact. It is still identified by `shape_ref`; it does not become a new envelope `type`.
 
-This definition does not accept a final platform-bundled shape inventory. Exact bundled shapes remain governed by the relevant identity, flag, event-envelope, and platform-spec atomization passes.
+This definition does not accept a final platform-bundled shape inventory. Exact bundled shapes remain governed by the relevant identity, flag, event-envelope, and platform-spec sections.
 
 ### Activity
 
@@ -250,7 +250,7 @@ Interpretation:
 - no fixed `Supervisor`, `Coordinator`, `Reviewer`, or `WorkItem` core class is implied
 - the minimal review loop may use a narrow `capture_with_review` pattern, but does not close full Pattern Registry inventory or schema
 
-## Atomization Rule
+## Spec Drafting Rule
 
 When in doubt, keep the axes separate:
 

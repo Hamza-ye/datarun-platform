@@ -1,6 +1,6 @@
 # Identity Boundary Control
 
-Status: Atomization-ready dependency-aware control overlay
+Status: Spec-drafting-ready dependency-aware control overlay
 
 This document prevents ADR-002's broad exploration shape from becoming broad implementation coupling. It does not re-decide ADR-002 and does not use ADR-006-R through ADR-009 as authority.
 
@@ -144,11 +144,11 @@ Do not break these later-ADR assumptions:
 - Reporting may pressure identity projections to become canonical current truth.
 - Pending match may become a generic identity mechanism too early instead of a workflow/process capability.
 
-## Atomization Use
+## Spec Drafting Use
 
-`07-system-boundary-map.md` has been validated against this overlay. During atomization, keep carrying these routing controls:
+`07-system-boundary-map.md` has been validated against this overlay. During platform-spec drafting, keep carrying these routing controls:
 
-1. Keep the first identity atomized spec limited to reference contract plus subject-lineage contract.
+1. Keep the first identity spec section limited to reference contract plus subject-lineage contract.
 2. Put actor/assignment authority in the authorization/sync spec.
 3. Put process identity and pending match in workflow/process-pattern spec work.
 4. Put conflict resolution lifecycle in flag/resolution spec work.

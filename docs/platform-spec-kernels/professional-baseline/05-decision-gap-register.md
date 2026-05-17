@@ -16,6 +16,7 @@ Primary references:
 - Platform-spec detail gap: needs specification detail, but the architecture boundary is already closed.
 - Implementation/tooling gap: needs implementation design, tooling, UX, or operational mechanics.
 - Operational policy gap: deployment or organization policy, not core architecture.
+- Product validation gap: needs scenario/product validation before it should drive platform evolution.
 - Later-source assessment gap: ADR-006-R through ADR-009 may contain relevant claims, but those claims must be assessed through change control.
 
 ## Closure Paths
@@ -24,8 +25,54 @@ Primary references:
 - Platform-spec detailing: write platform-spec language under the existing architecture boundary; no new ADR unless the detail changes the boundary.
 - Implementation/tooling design: write an engineering design, prototype, or tickets; preserve the baseline constraints.
 - Operational policy definition: define product/operations policy; escalate only if policy requires architecture change.
+- Product validation: validate with target scenarios or deployments; escalate only if validation shows the baseline primitives are insufficient.
 - Later-source assessment: classify later ADR claims through `02-change-control.md`; do not absorb them directly.
 - No action until product need appears: keep the gap visible but do not spend engineering time until a concrete need appears.
+
+## Register Control
+
+This file is the canonical register for open decision state. It owns gap classification, primary responsibility ownership, affected responsibility areas, closure path, priority, platform-spec handling, and hold-back reopen triggers.
+
+`07-system-boundary-map.md` defines responsibility routing and cross-boundary contracts. It must not maintain a second open-gap register. If ownership changes, update this register first and then update responsibility language only where the responsibility definition itself changes.
+
+ADR-006-R through ADR-009 remain assessed input, not baseline authority. Their useful material enters platform-spec work through one of three lanes:
+
+- consistent elaboration of a settled baseline rule, used as platform-spec guardrail language
+- open-gap closure candidate, kept under the owning gap below
+- hold-back or formal-reopen candidate, kept visible without becoming normal platform behavior
+
+## Open Gap Ownership Index
+
+This index is the only canonical gap-ownership index in the professional baseline. Detailed rationale remains in the individual gap entries.
+
+| Gap | Primary Responsibility Area | Affected Areas | Platform-Spec Handling |
+|---|---|---|---|
+| Domain conflict automation outside workflow | Flag / Resolution | Projection / Workflow State; Configuration | Open decision unless the platform spec only states ADR-005 workflow-specific behavior. |
+| Subject-based scope and auditor access | Assignment / Authority / Sync | Reporting / Aggregation; Local Data Lifecycle | Open decision if first target deployment needs these access paths. |
+| Shared device actor scope | Assignment / Authority / Sync | Identity / Lineage; Event Envelope / Schema | Open decision unless shared devices are explicitly out of initial scope. |
+| Temporary authority and offline revocation reconciliation | Assignment / Authority / Sync | Flag / Resolution; Projection / Workflow State; Local Data Lifecycle | Policy/spec detail under existing mechanisms unless new scope, envelope, or projection semantics are needed. |
+| Alias-cycle enforcement and resolution semantics | Identity / Lineage | Flag / Resolution; Projection / Workflow State; Event Log / Storage | Open decision before identity or flag sections claim cycle-closing behavior. |
+| Authorization visibility and role-action detail surfaces | Assignment / Authority / Sync | Configuration; Reporting / Aggregation; Local Data Lifecycle | Platform-spec or policy detail under existing assignment/scope mechanisms; formal decision for new scope or authority semantics. |
+| Operational actor vocabulary and operation-class routing | Assignment / Authority / Sync | Configuration; Projection / Workflow State; Reporting / Aggregation | Spec guardrail: product/deployer labels are not platform actor subclasses. |
+| Envelope type, shape ref, references, and parametrization boundary | Event Envelope / Schema | Configuration; Projection / Workflow State; Assignment / Authority / Sync | Spec guardrail: keep `type`, `shape_ref`, references, mechanisms, instances, and product labels separate. |
+| Process reference and process lifecycle semantics | Projection / Workflow State | Event Envelope / Schema; Identity / Lineage; Assignment / Authority / Sync | Platform-spec detail only if process identity, pending-match, or process lifecycle behavior is in scope. |
+| Exact Pattern Registry inventory | Projection / Workflow State | Configuration; Flag / Resolution | Platform-spec detail. Do not convert inventory choices into new event-envelope structure. |
+| Formal Pattern Registry schema format | Projection / Workflow State | Configuration | Platform-spec detail plus implementation/tooling design. |
+| Source-chain traversal limits | Flag / Resolution | Projection / Workflow State | Platform-spec detail under ADR-005 source-only flag lineage. |
+| Bounded context expression details | Projection / Workflow State | Configuration | Platform-spec detail under the closed ADR-005 `context.*` surface. |
+| Projection performance and caching | Event Log / Storage | Projection / Workflow State | Implementation/tooling design; no architecture decision unless source-of-truth rules change. |
+| Low-end device scale and offline performance | Event Log / Storage | Projection / Workflow State; Assignment / Authority / Sync; Local Data Lifecycle | Implementation/tooling design and reference-device validation; formal decision only if canonical event, projection, sync, or lifecycle semantics change. |
+| Event schema and versioning tooling | Event Envelope / Schema | Event Log / Storage; Configuration | Implementation/tooling design plus platform-spec versioning obligations. |
+| Structured import/export compatibility | Event Envelope / Schema | Event Log / Storage; Configuration; Reporting / Aggregation | Compatibility obligation only; formal decision if external schemas redefine platform records. |
+| Configuration authoring and deployment UX | Configuration | Trigger / Reactivity | Implementation/tooling design under bounded configuration rules. |
+| Auto-resolution authoring and monitoring | Flag / Resolution | Reporting / Aggregation | Implementation/tooling design; platform-spec detail only for required audit surfaces. |
+| Sync delivery mechanics | Assignment / Authority / Sync | Local Data Lifecycle | Implementation/tooling design under immutable, scope-filtered sync. |
+| Retention and archival | Local Data Lifecycle | Event Log / Storage; Reporting / Aggregation | Operational policy; formal decision if canonical event history changes. |
+| Sensitive data policy and local lifecycle | Local Data Lifecycle | Configuration; Assignment / Authority / Sync; Event Log / Storage | Operational policy and implementation detail under shape/activity sensitivity unless access, envelope, or canonical history changes. |
+| Setup experience and onboarding | Configuration | Assignment / Authority / Sync; Local Data Lifecycle | Product/operations and tooling unless onboarding changes authority or configuration semantics. |
+| Reporting and aggregation | Reporting / Aggregation | Assignment / Authority / Sync; Projection / Workflow State | Platform-spec detail plus implementation/tooling and policy decisions. |
+| Domain-agnostic proof gap | Configuration | Projection / Workflow State; Reporting / Aggregation | Product validation; formal architecture decision only if validation shows new primitives are required. |
+| General flag semantics | Flag / Resolution | Identity / Lineage; Assignment / Authority / Sync; Projection / Workflow State; Reporting / Aggregation | Open decision for non-workflow flag lifecycle, identity, category, and resolution behavior. |
 
 ## Architecture Decision Gaps
 
@@ -139,8 +186,8 @@ Closure path:
 
 Priority:
 
-- P1 before authorization/sync atomization if the first platform spec includes campaigns, emergency cover, temporary grants, or offline revocation behavior.
-- P3 if initial atomization can explicitly defer temporary-authority workflow and grace-period policy.
+- P1 before authorization/sync specification if the first platform spec includes campaigns, emergency cover, temporary grants, or offline revocation behavior.
+- P3 if the initial platform spec can explicitly defer temporary-authority workflow and grace-period policy.
 
 ### Alias-Cycle Enforcement And Resolution Semantics
 
@@ -168,7 +215,7 @@ Closure path:
 
 Priority:
 
-- P1 before atomizing identity lineage or general flag semantics if alias-cycle behavior is in scope.
+- P1 before drafting identity lineage or general flag semantics if alias-cycle behavior is in scope.
 - P2 if the first platform spec explicitly defers alias-cycle handling.
 
 ## Platform-Spec Detail Gaps
@@ -182,7 +229,7 @@ Affected baseline:
 - Authorization and sync
 - Configuration boundary
 - Projection and workflow
-- Product-alignment vocabulary and selected-slice atomization
+- Product-alignment vocabulary and selected-slice specification
 
 Why open:
 
@@ -194,14 +241,44 @@ Later claims may use operational labels as examples only if they preserve assign
 
 Closure path:
 
-- Platform-spec detailing for each atom to state its operation class: offline-capable, online/coordination-required, or offline-with-constraints.
+- Platform-spec detailing for each section to state its operation class: offline-capable, online/coordination-required, or offline-with-constraints.
 - Product/UX design can choose labels, default surfaces, and navigation treatments without changing core mechanisms.
 - Implementation design may use temporary role labels for seed data or tests, but core interfaces should be named for behaviors, capabilities, or boundary responsibilities rather than persona labels.
 - Formal architecture decision only if a future requirement needs fixed platform-owned actor subclasses.
 
 Priority:
 
-- P1 before selected-slice atomization so first-slice review, approval, oversight, setup, and resolution language does not harden into fixed platform classes.
+- P1 before first-slice specification so review, approval, oversight, setup, and resolution language does not harden into fixed platform classes.
+
+### Authorization Visibility And Role-Action Detail Surfaces
+
+Classification: Platform-spec detail gap with architecture decision triggers
+
+Affected baseline:
+
+- Authorization and sync
+- Configuration boundary
+- Reporting and aggregation
+- Local data lifecycle where visibility changes affect device retention
+
+Why open:
+
+ADR-003 closes assignment-derived access, sync scope as access scope, original-subject authorization, and authority as projection. It leaves role-action permission tables, assessment visibility, cross-level distribution visibility, and exact visibility exceptions as configuration, policy, or implementation/specification detail unless they require new scope or authority semantics.
+
+Later-source assessment:
+
+Later claims may elaborate authorization inputs, role-action table shape, and visibility policy only if they preserve assignment-derived access, bounded configuration, immutable event sync, and projection-derived authority. Claims that add fixed platform role classes, stored `authority_context`, group/identity-provider direct authority, field-level sensitivity, or arbitrary deployer access logic conflict with the baseline unless formal change control reopens it.
+
+Closure path:
+
+- Platform-spec detailing for role-action table shape, operation classes, and authorization inputs under existing assignment/scope mechanisms.
+- Operational policy definition for assessment visibility, cross-level visibility, or role-transition policy that does not require new platform semantics.
+- Formal architecture decision if a requirement needs new scope types, subject-based scope semantics, auditor paths, direct group authority, stored authority snapshots, or different sync-scope behavior.
+
+Priority:
+
+- P1 if the first platform specification includes assessment visibility, auditor visibility, cross-level distribution visibility, or detailed role-action tables.
+- P3 if initial implementation can defer those surfaces while preserving assignment-derived access.
 
 ### Envelope Type, Shape Ref, And Parametrization Boundary
 
@@ -212,13 +289,13 @@ Affected baseline:
 - Event envelope
 - Configuration boundary
 - Projection and workflow
-- Product-alignment vocabulary and selected-slice atomization
+- Product-alignment vocabulary and selected-slice specification
 
 Why open:
 
 ADR-004 correctly closes `shape_ref`, optional `activity_ref`, and the six-value structural event `type` vocabulary. ADR-005 reinforces that closure by adding no envelope fields or type values and by rejecting `status_changed`. Later assessments clarify related distinctions: `type` is not domain fact, reference is not referent, and platform-fixed mechanism is not deployer-configured instance.
 
-The risk is not an unresolved architecture decision. The risk is atomization drift: future specs or implementation decomposition may collapse the axes and turn domain facts, review labels, workflow states, role labels, product queues, or activity labels into new envelope types, platform classes, or service boundaries.
+The risk is not an unresolved architecture decision. The risk is spec-drafting drift: future specs or implementation decomposition may collapse the axes and turn domain facts, review labels, workflow states, role labels, product queues, or activity labels into new envelope types, platform classes, or service boundaries.
 
 Later-source assessment:
 
@@ -234,16 +311,48 @@ Later claims may elaborate this area only if they preserve the orthogonal model:
 
 Claims that add envelope type values for domain facts, role actions, workflow states, identity/integrity facts, product work items, or offline/sync states should be classified as unauthorized unless formal change control reopens the envelope.
 
+This entry is also the register home for ADR-007 and ADR-008 detail candidates that should not become a separate governance layer: final reference serialization, active emission sites for typed references, platform-bundled identity/integrity/conflict/resolution shape inventory, and shape/reference discrimination rules. New envelope fields or new typed-reference categories remain architecture-grade changes unless the existing envelope contract is sufficient.
+
 Closure path:
 
 - Use `18-envelope-shape-parametrization-boundary-control.md` as the lineage/control overlay.
-- Use `19-envelope-shape-parametrization-definitions.md` as the atomization definition file.
-- Platform-spec atoms involving events, review, patterns, roles, work queues, or selected-slice behavior must cite the relevant axis rather than relying on overloaded prose.
+- Use `19-envelope-shape-parametrization-definitions.md` as the platform-spec definition file.
+- Platform-spec sections involving events, review, patterns, roles, work queues, or selected-slice behavior must cite the relevant axis rather than relying on overloaded prose.
 - Formal architecture decision only if a future requirement truly needs a new envelope field, new type value, new fixed actor subclass, or new platform-owned mechanism.
 
 Priority:
 
-- P1 before event-envelope, review, Pattern Registry, selected-slice, authorization/sync, or implementation-decomposition atomization.
+- P1 before event-envelope, review, Pattern Registry, selected-slice, authorization/sync, or implementation-decomposition specification.
+
+### Process Reference And Process Lifecycle Semantics
+
+Classification: Platform-spec detail gap with architecture decision trigger
+
+Affected baseline:
+
+- Event envelope
+- Identity and references
+- Projection and workflow
+- Authorization and sync where process references affect authority or sync scope
+
+Why open:
+
+ADR-002 names `process` as one typed reference category, and later ADR-008 assessment preserves reference-versus-referent separation. The baseline does not close active emission sites for process references, process identity lifecycle, pending-match behavior, or whether any process lifecycle belongs in identity, workflow projection, or configuration.
+
+Later-source assessment:
+
+Later claims may use process references only as envelope/reference contracts unless a platform-spec section explicitly defines the lifecycle owner. Claims that store process lifecycle as subject-lineage identity state, add new envelope fields, or use process references as authority snapshots require formal change control.
+
+Closure path:
+
+- Platform-spec detailing if a workflow/process section needs process identity, pending-match behavior, or process lifecycle semantics under existing reference contracts.
+- Formal architecture decision if the existing typed-reference contract is insufficient or a new envelope field/reference category is required.
+- Implementation/tooling design after the lifecycle owner and emission sites are specified.
+
+Priority:
+
+- P1 only if the first platform specification includes process identity, pending-match, or process-scoped workflow behavior.
+- P3 if initial specifications can defer active process-reference emission.
 
 ### Exact Pattern Registry Inventory
 
@@ -268,7 +377,7 @@ Closure path:
 
 Priority:
 
-- P1 for platform specification skeleton.
+- P1 for the first platform specification.
 
 ### Formal Pattern Schema Format
 
@@ -294,7 +403,7 @@ Closure path:
 
 Priority:
 
-- P1 for platform specification skeleton.
+- P1 for the first platform specification.
 
 ### Source-Chain Traversal Limits
 
@@ -346,6 +455,37 @@ Priority:
 
 - P2 unless first implementation includes state-aware forms immediately.
 
+## Product Validation Gaps
+
+### Domain-Agnostic Proof Gap
+
+Classification: Product validation gap
+
+Affected baseline:
+
+- Configuration boundary
+- Projection and workflow
+- Reporting and aggregation
+
+Why open:
+
+Earlier viability work preserved a domain-agnostic proof concern: the accepted primitives should remain capable of supporting multiple deployment domains without turning configuration into an inner platform or forcing domain-specific platform code for ordinary operations. ADR-001 through ADR-005 give strong evidence for the core model, but they do not prove every future domain will fit the same bounded surfaces.
+
+Later-source assessment:
+
+Later claims may provide scenario evidence or identify pressure that the baseline cannot express. They must not silently add platform primitives, new event types, broad reporting models, or arbitrary deployer code. If validation shows the current primitives are insufficient, route the exact failed pressure through formal architecture change control.
+
+Closure path:
+
+- Product validation against representative target deployments and selected vertical slices.
+- Platform-spec detailing only for validated capabilities that fit existing architecture boundaries.
+- Formal architecture decision only if validation requires new primitives or changes to event, configuration, projection, authority, or flag semantics.
+
+Priority:
+
+- P2 before broad implementation planning across multiple domains.
+- P3 if the first implementation is intentionally narrow and the domain limits are documented.
+
 ## Implementation / Tooling Gaps
 
 ### Projection Performance And Caching
@@ -373,6 +513,35 @@ Closure path:
 Priority:
 
 - P2 for implementation planning.
+
+### Low-End Device Scale And Offline Performance
+
+Classification: Implementation/tooling gap with architecture decision trigger
+
+Affected baseline:
+
+- Event log source of truth
+- Projection and workflow
+- Authorization and sync
+- Local data lifecycle
+
+Why open:
+
+ADR-001 through ADR-005 accept low-end device and intermittent-connectivity pressure, but they do not close concrete performance budgets, storage thresholds, priority sync strategy, projection rebuild strategy, or local compaction/summarization mechanics.
+
+Later-source assessment:
+
+Later claims may propose implementation strategies only if they preserve immutable event history, append-only sync, projection rebuild discipline, scope-filtered delivery, and local lifecycle constraints. Claims that make projections canonical, mutate events, hide data instead of applying lifecycle policy where stronger handling is required, or require global state for ordinary offline capture need formal architecture reconsideration.
+
+Closure path:
+
+- Implementation/tooling design for projection, caching, sync prioritization, local storage pressure handling, and reference device tests.
+- Platform-spec detailing only for minimum performance obligations or compatibility constraints that affect contracts.
+- Formal architecture decision if performance strategy changes canonical event, projection, sync, or lifecycle semantics.
+
+Priority:
+
+- P2 before core mobile/offline implementation planning.
 
 ### Event Schema And Versioning Tooling
 
@@ -423,7 +592,7 @@ Claims must preserve immutable event history, envelope stability, deployer shape
 
 Closure path:
 
-- Platform-spec detailing for import/export compatibility obligations if included in the spec skeleton.
+- Platform-spec detailing for import/export compatibility obligations if included in the platform specification.
 - Implementation/tooling design for concrete import/export jobs, mapping, validation, and operational delivery.
 - Operational policy definition where external exchange is driven by compliance, reporting, or deployment-specific data-sharing obligations.
 - Formal architecture decision only if interoperability requirements alter canonical event, envelope, access, or lifecycle semantics.
@@ -537,6 +706,37 @@ Priority:
 
 - P3 unless legal/compliance requirements are known now.
 
+### Sensitive Data Policy And Local Lifecycle
+
+Classification: Operational policy gap with architecture decision trigger
+
+Affected baseline:
+
+- Authorization and sync
+- Configuration boundary
+- Event log source of truth
+- Local data lifecycle under scope changes
+
+Why open:
+
+ADR-004 closes shape/activity-level sensitivity classification and rejects field-level sensitivity. ADR-003 closes selective retain as the initial scope-contraction strategy, while also preserving that sensitive deployments need stronger local lifecycle handling than retain-and-hide. The baseline does not close sensitive-subject policy, local purge rules, encryption/key handling, retention windows, or compliance-driven device lifecycle behavior.
+
+Later-source assessment:
+
+Later claims may elaborate sensitive-data lifecycle only if they preserve immutable event history, shape/activity-level sensitivity classification, assignment-derived access, sync scope as access scope, and the rejection of field-level sensitivity. Claims that require canonical event deletion/redaction, field-level sensitivity, hidden-but-retained local data as sufficient handling, or new access semantics need formal change control.
+
+Closure path:
+
+- Operational policy definition for sensitive classifications, retention windows, purge policy, device loss, compliance handling, and role-transition obligations.
+- Implementation/tooling design for local storage, encryption, purge, audit, and migration behavior.
+- Platform-spec detailing only for lifecycle obligations that become normative platform contracts.
+- Formal architecture decision if the policy changes canonical event history, access/sync semantics, sensitivity granularity, or scope-contraction behavior.
+
+Priority:
+
+- P1 if the first deployment handles sensitive data that requires stronger local lifecycle treatment.
+- P3 if initial deployments can stay within non-sensitive or explicitly bounded sensitivity assumptions.
+
 ### Setup Experience And Onboarding
 
 Classification: Operational policy gap
@@ -589,7 +789,7 @@ Closure path:
 
 Priority:
 
-- P2 for platform spec skeleton if reporting capabilities are included.
+- P2 for the first platform specification if reporting capabilities are included.
 
 ## Completed Later-Source Assessment
 
@@ -607,7 +807,7 @@ Affected baseline:
 
 Why closed:
 
-ADR-006-R through ADR-009 were assessed against the accepted ADR-001 through ADR-005 baseline, validated boundary map, and gap register in `10` through `13`.
+ADR-006-R through ADR-009 were assessed against the accepted ADR-001 through ADR-005 baseline, architecture responsibility map, and gap register in `10` through `13`.
 
 Assessment rule preserved:
 
@@ -620,10 +820,27 @@ Closure output:
 - `12-adr008-reference-fields-assessment.md`
 - `13-adr009-duality-rule-assessment.md`
 
-Atomization use:
+Platform-spec use:
 
-- Use the classified carry-forward candidates and hold-backs from `10` through `13`.
+- Use classified carry-forward candidates from `10` through `13` as guardrails, not new decisions.
+- Carry forward the `type` / `shape_ref` / reference / mechanism-instance distinctions as specification guardrails because they clarify already-settled ADR-001 through ADR-005 boundaries.
+- Carry forward the flag guardrail that accept-and-flag applies to validly structured state anomalies, not malformed envelopes or invalid payloads.
+- Keep flag lifecycle separate from detector source facts, identity lineage, authorization, workflow projection, and reporting ownership.
+- Keep `actor_ref` as authorship, `activity_ref` as activity context, and product/deployer labels as configuration or product vocabulary, not platform actor subclasses.
+- Route general flag semantics, alias-cycle behavior, final reference emission, Pattern Registry inventory/schema, subject/auditor scope, resolution-event mapping, and bundled shape inventory through the owning gaps in this register.
+- Hold back unified flag catalogs, `cycle_violation` normalization, server-created flag invariants, request-time temporal anchors, and non-workflow resolution mapping until the owning gap states a closure path.
 - Do not treat ADR-006-R through ADR-009 as automatic authority over ADR-001 through ADR-005.
+
+Later-source hold-back reopen triggers:
+
+- Unified flag catalog: reopen when a flag specification needs a cross-category catalog with lifecycle, identity, and resolution semantics.
+- `cycle_violation`: reopen when an identity/flag decision chooses accept-and-flag, reject, or projection-exclusion behavior for cycle-closing lineage facts.
+- Server-created flags as a permanent invariant: reopen when a flag category needs normative detector placement and creation authority.
+- Request-time temporal anchor: reopen when a detector specification needs a temporal anchor and can preserve `device_time` as advisory only.
+- Non-workflow resolution-event mapping: reopen when a general flag/resolution specification defines category-specific manual or automated resolution events.
+- Platform-bundled shape inventory: reopen when an owning behavior section needs a normative bundled shape and payload contract.
+- Process reference active emission or process lifecycle: reopen when projection/workflow specification needs process identity, pending-match behavior, or process lifecycle semantics.
+- Subject-based scope, auditor access, or new scope types: reopen when a first deployment or authorization section requires those access paths.
 
 ## Later-Source Assessment Gaps
 
@@ -644,6 +861,8 @@ Assessment rule:
 
 Keep flag category creation, conflict detection timing, source-only cascade, unresolved-flag state derivation, flag resolution/auto-resolution, and general flag semantics separate.
 
+This gap also owns ADR-006-R and ADR-007 candidates for flag identity, flag creation location, detector placement, resolution-event mapping, and any non-workflow flag catalog. Those candidates must not be normalized through the envelope or workflow sections before this gap states a closure path.
+
 Closure path:
 
 - Use `10-adr006r-flag-semantics-assessment.md` as classified candidate material.
@@ -652,7 +871,7 @@ Closure path:
 
 Priority:
 
-- P1 if flag semantics are needed for the platform spec skeleton.
+- P1 if flag semantics are needed for the first platform specification.
 
 ## Non-Gaps
 

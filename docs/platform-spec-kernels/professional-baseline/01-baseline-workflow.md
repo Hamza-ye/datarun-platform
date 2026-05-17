@@ -77,11 +77,11 @@ Read later ADRs only through the gap register and change-control categories.
 
 Do not treat them as a fresh source sequence that automatically closes platform behavior.
 
-### 6. Produce Platform Spec Skeleton
+### 6. Produce Platform Specification Outline
 
-After the baseline and gaps are stable, create the first platform specification skeleton.
+After the baseline and gaps are stable, create the first platform specification outline.
 
-The skeleton should be generated from the accepted baseline and gap register, not directly from ADR prose.
+The outline should be generated from the accepted baseline and gap register, not directly from ADR prose.
 
 ## Stop Conditions
 

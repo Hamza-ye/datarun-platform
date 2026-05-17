@@ -2,7 +2,7 @@
 
 Status: Later-source assessment against accepted ADR-001 through ADR-005 baseline
 
-This document assesses `../../adrs/adr-009-platform-fixed-vs-deployer-configured.md` through the accepted baseline and validated boundary map. ADR-009 is assessment material only. It does not supersede ADR-001 through ADR-005 automatically.
+This document assesses `../../adrs/adr-009-platform-fixed-vs-deployer-configured.md` through the accepted baseline and architecture responsibility map. ADR-009 is assessment material only. It does not supersede ADR-001 through ADR-005 automatically.
 
 ## Source Basis
 
@@ -32,11 +32,11 @@ ADR-009 names a classification rule already latent in ADR-003, ADR-004, and ADR-
 - platform-fixed mechanism: closed vocabulary, grammar, protocol, containment test, or typed interface owned by the platform
 - deployer-configured instance: named, parameterized occurrence assembled and shipped by a deployer within bounded configuration
 
-The rule is useful because prior implementation work conflated mechanism and instance, causing broadness drift. The safe reading is that ADR-009 is a classification guardrail for atomization, not a new runtime subsystem.
+The rule is useful because prior implementation work conflated mechanism and instance, causing broadness drift. The safe reading is that ADR-009 is a classification guardrail for platform-spec drafting, not a new runtime subsystem.
 
-## Boundary Routing
+## Responsibility Routing
 
-| Claim Area | Primary Boundary | Secondary Boundaries | Reason |
+| Claim Area | Primary Responsibility Area | Affected Areas | Reason |
 |---|---|---|---|
 | mechanism/instance duality rule | Configuration | Event Envelope / Schema; Assignment / Authority / Sync; Projection / Workflow State | Configuration owns the platform/deployer boundary, while specific mechanisms live in their owning boundaries. |
 | scope mechanism | Assignment / Authority / Sync | Configuration | Scope containment and sync/access semantics are platform-owned; deployers configure instances within fixed scope types. |
@@ -51,16 +51,16 @@ Concrete role labels and pattern participant bindings sit on the instance side o
 
 | ADR-009 Claim | Classification | Assessment |
 |---|---|---|
-| S1: split platform-fixed mechanism from deployer-configured instance | Consistent elaboration | This formalizes the baseline's platform/deployer boundary and should govern atomization. It does not change ADR-001 through ADR-005; it prevents one concept row or spec section from mixing closure semantics with deployer configuration. |
+| S1: split platform-fixed mechanism from deployer-configured instance | Consistent elaboration | This formalizes the baseline's platform/deployer boundary and should govern platform-spec drafting. It does not change ADR-001 through ADR-005; it prevents one concept row or spec section from mixing closure semantics with deployer configuration. |
 | S1: mechanism is platform-owned and extension is architecture-grade | Consistent elaboration | Compatible with structural event type closure, fixed scope types, bounded configuration, and platform-owned Pattern Registry. |
 | S1: instance is deployer-authored configuration | Consistent elaboration | Compatible with ADR-004's four-layer gradient and deployer policy surfaces. Must stay bounded; instance authoring cannot become deployer-authored platform logic. |
 | S2: `scope` mechanism is platform-fixed | Consistent elaboration | ADR-003 and ADR-004 already close assignment-derived access, sync scope as access scope, and platform-fixed scope types. This clarifies classification only. |
 | S2: concrete scope instances remain configuration | Consistent elaboration plus platform-spec detail | Safe if treated as deployer-provided values under platform-owned containment semantics. Does not close subject-based scope or auditor access beyond existing gaps. |
 | S3: `pattern` mechanism is platform-fixed | Consistent elaboration | ADR-005 already closes Pattern Registry as platform-owned workflow primitive. ADR-009 clarifies why deployers select patterns rather than author new mechanisms. |
-| S3: pattern-related instance rows remain separate | Consistent elaboration plus platform-spec detail | Safe as atomization guidance. Exact Pattern Registry inventory and formal schema remain P1 gaps. |
+| S3: pattern-related instance rows remain separate | Consistent elaboration plus platform-spec detail | Safe as spec-drafting guidance. Exact Pattern Registry inventory and formal schema remain P1 gaps. |
 | S4: `activity` is deployer-configured instance | Consistent elaboration | ADR-004 places activities in bounded configuration; ADR-008 separates `activity_ref` field contract from the activity referent. This is safe and useful. |
 | S4: `activity_ref` remains contract while `activity` is config | Consistent elaboration | Reinforces ADR-008 assessment and prevents reference/referent conflation. |
-| F-C1: do not classify mechanism as config or instance as primitive | Consistent elaboration | Safe as a forbidden-pattern guardrail for future atomization and later claim assessment. |
+| F-C1: do not classify mechanism as config or instance as primitive | Consistent elaboration | Safe as a forbidden-pattern guardrail for future platform-spec drafting and later claim assessment. |
 | General future use of the duality rule | Consistent elaboration with change-control limit | Safe as a classification test. It must not be used to close a new mechanism without checking whether that mechanism is actually open, closed, or disputed under the baseline. |
 
 ## Accepted Carry-Forward Candidates
@@ -98,9 +98,9 @@ No new gap is required from ADR-009 by itself. Existing gaps already cover the d
 - `Formal Pattern Registry Schema Format`
 - `Configuration Authoring And Deployment UX`
 
-## Atomization Guardrail
+## Spec Drafting Guardrail
 
-When drafting platform-spec atoms, do not create a single atom that mixes:
+When drafting platform-spec sections, do not create a single section that mixes:
 
 - a platform-fixed mechanism and deployer-authored instances
 - a reference field and its referent
@@ -118,4 +118,4 @@ ADR-007, ADR-008, and ADR-009 together form a useful classification triad:
 
 The later-source assessment sequence is closed for ADR-006-R through ADR-009.
 
-During atomization, use the accepted carry-forward candidates and explicit hold-backs from `10`, `11`, `12`, and this assessment together with the later control overlays in `15` and `16`.
+During platform-spec drafting, use the accepted carry-forward candidates and explicit hold-backs from `10`, `11`, `12`, and this assessment together with the later control overlays in `15` and `16`.

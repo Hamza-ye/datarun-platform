@@ -1,6 +1,6 @@
 # Envelope, Shape, And Parametrization Boundary Control
 
-Status: Atomization-ready extraction and control overlay
+Status: Spec-drafting-ready extraction and control overlay
 
 This document records the focused ADR-004 lineage for `shape_ref`, envelope `type`, platform-fixed structure, and deployer parametrization. It is not a new architecture decision and does not supersede any ADR.
 
@@ -119,7 +119,7 @@ ADR-004 closed the core decision correctly. The weakness was not the decision it
 - ADR-005 S5/S6 for patterns
 - later assessments for `type` vs. `shape_ref`, reference vs. referent, and mechanism vs. instance
 
-That spread makes the line easy to misread during atomization. In particular, the word `review` appears at multiple layers:
+That spread makes the line easy to misread during platform-spec drafting. In particular, the word `review` appears at multiple layers:
 
 - `type=review`: envelope processing path for a human judgment event
 - `capture_with_review`: pattern skeleton for submit/review/return/accept flow
@@ -130,7 +130,7 @@ Only the first is an envelope type. Only the second is a platform-fixed pattern 
 
 ## Drift Risks Found
 
-The current baseline and product-alignment edits mostly preserve the line. The risk is not that the architecture has already hard-coded the wrong model. The risk is that atomization agents may collapse the axes unless the control is explicit.
+The current baseline and product-alignment edits mostly preserve the line. The risk is not that the architecture has already hard-coded the wrong model. The risk is that spec writers may collapse the axes unless the control is explicit.
 
 High-risk misreads:
 
@@ -144,7 +144,7 @@ High-risk misreads:
 
 ## Clean Model
 
-The atomization-safe model is four orthogonal axes:
+The spec-safe model is four orthogonal axes:
 
 | Axis | Owns | May vary by deployer? | Extension path |
 |---|---|---|---|
@@ -221,7 +221,7 @@ Do not turn the word `review` into a fixed actor class, service boundary, canoni
 
 ### C5: Platform-Fixed And Deployer-Configured Must Be Split
 
-Every atom that mentions a platform-fixed mechanism and deployer-authored instances must split them.
+Every spec section that mentions a platform-fixed mechanism and deployer-authored instances must split them.
 
 Examples:
 
@@ -284,11 +284,11 @@ The accepted baseline already contains the correct architecture line:
 - `11`, `12`, and `13` later-source assessments provide a useful triad: type is not domain fact; reference is not referent; mechanism is not instance.
 - `14-pattern-inventory-walkthrough-assessment.md` correctly keeps pattern inventory/schema candidate-only.
 
-No ADR wording needs deletion or rewrite. The needed correction is this explicit atomization-facing control surface plus the companion definition file.
+No ADR wording needs deletion or rewrite. The needed correction is this explicit spec-drafting control surface plus the companion definition file.
 
-## Atomization Acceptance Checks
+## Spec Acceptance Checks
 
-Before accepting an atom involving events, shapes, patterns, review, assignments, or operational roles, answer:
+Before accepting a spec section involving events, shapes, patterns, review, assignments, or operational roles, answer:
 
 1. Which axis is being used: `type`, `shape_ref`, reference field, projection, pattern, configuration, or product label?
 2. If `type`, what distinct platform processing behavior is required?
@@ -298,16 +298,16 @@ Before accepting an atom involving events, shapes, patterns, review, assignments
 6. If queue/status/work item, which projection derives it, and why is it not canonical storage?
 7. What operation class applies: offline-capable, online/coordination-required, offline-with-constraints, or configuration/control-plane?
 8. Which gap is touched but not closed?
-9. Would this atom add an envelope field, type value, actor subclass, or service boundary? If yes, change control is required.
+9. Would this section add an envelope field, type value, actor subclass, or service boundary? If yes, change control is required.
 
 ## Baseline Impact
 
 This overlay does not change ADR-001 through ADR-005 baseline behavior.
 
-It makes one platform-spec detail gap explicit: atomization needs a concise, citable definition of envelope type, `shape_ref`, references, pattern mechanism, deployer parameterization, and prohibited encodings. That definition is provided in `19-envelope-shape-parametrization-definitions.md`.
+It makes one platform-spec detail gap explicit: platform-spec drafting needs a concise, citable definition of envelope type, `shape_ref`, references, pattern mechanism, deployer parameterization, and prohibited encodings. That definition is provided in `19-envelope-shape-parametrization-definitions.md`.
 
 ## Recommended Next Step
 
-Use this overlay and `19-envelope-shape-parametrization-definitions.md` before drafting event-envelope, review, Pattern Registry, selected-slice, or authorization/sync atoms.
+Use this overlay and `19-envelope-shape-parametrization-definitions.md` before drafting event-envelope, review, Pattern Registry, selected-slice, or authorization/sync spec sections.
 
 The selected slice may proceed only if the review loop is framed as a narrow use of the existing type/shape/pattern/configuration axes, not as a new core model.

@@ -2,7 +2,7 @@
 
 Status: Accepted baseline from ADR-001 through ADR-005 closure
 
-This document is the current engineering-facing architecture baseline. It is generated from `../10-adr1-5-rest-state-closure-register.md`, not directly from ADR prose. It is not a final platform specification and does not process ADR-006-R through ADR-009.
+This document is the current engineering-facing architecture baseline. It is generated from `../10-adr1-5-rest-state-closure-register.md`, not directly from ADR prose. It is not a final platform specification and does not absorb ADR-006-R through ADR-009.
 
 ## Baseline Scope
 
@@ -60,7 +60,7 @@ Lineage must remain acyclic. Merge/split operations are online-only where the ba
 
 The baseline uses detect-before-act discipline: conflict and authorization checks run before downstream policy or workflow effects.
 
-Validly structured stale or invalid work is accepted as immutable factual history and surfaced with flags rather than rejected, except where the baseline explicitly defines an online-only resolution operation.
+Validly structured work that is stale or state-anomalous under current projections is accepted as immutable factual history and surfaced with flags rather than rejected, except where the baseline explicitly defines an online-only resolution operation. Structural validation still applies to malformed envelopes, unsupported event types, and payloads that do not match their declared shape.
 
 Last-write-wins and invisible automatic merge are rejected for operational conflicts requiring judgment.
 
@@ -79,7 +79,7 @@ Authority is projection-derived rather than stored as immutable `authority_conte
 
 Authorization for an event is checked against the original subject reference written into that event, not against post-merge alias projections.
 
-Operational role labels are configuration and product-surface vocabulary, not platform classes. Labels such as field worker, supervisor, coordinator, reviewer, auditor, or regional lead may appear in scenarios and UX artifacts, but hard platform boundaries should be drawn around operation behavior: offline-capable operations, online or coordination-required operations, and operations that can proceed offline only with constrained authority, warnings, or sync-time reconciliation.
+Operational role labels are configuration and product-surface vocabulary, not platform-owned actor classes. Labels such as field worker, supervisor, coordinator, reviewer, auditor, or regional lead may appear in scenarios and UX artifacts, but the baseline expresses authority through actors, assignments, roles, scopes, activities, projections, and sync scope.
 
 Scope expansion is additive. For scope contraction, the ADR-003 initial strategy is selective retain: an actor's own events remain on device, while other actors' events about out-of-scope subjects are candidates for device-side removal.
 
@@ -169,37 +169,35 @@ The following paths are rejected under the current baseline:
 
 ## Open And Deferred Items
 
-Open or deferred items are not architecture baseline decisions unless later change control makes them so.
+Open or deferred items are not architecture baseline decisions unless later change control makes them so. `05-decision-gap-register.md` is the canonical register for classification, ownership, closure path, and priority.
 
-Current open/deferred areas:
+Architecture or policy gaps still visible from the baseline:
 
-- retention and archival
-- setup experience
-- onboarding and role transition details
-- reporting aggregation
-- domain-agnostic proof gaps
-- subject-based scope and auditor access
-- shared device actor scope
-- assessment visibility
+- subject-based scope, auditor access, assessment visibility, and cross-level visibility exceptions
+- shared-device actor scope
 - sensitive-subject policy beyond shape/activity-level sensitivity classification
-- grace-period policy
-- temporary authority and offline revocation reconciliation
-- permission table details
-- cross-level distribution visibility
+- temporary authority, grace-period policy, and offline revocation reconciliation
 - domain conflict resolution automation outside closed ADR-005 workflow cases
-- workflow-aware reporting and aggregation
-- projection optimization and caching
-- event schema/versioning tooling
-- projection merge strategy across schema versions
-- configuration authoring format
-- deployment packaging UX
-- deploy-time validator UX
-- migration tooling for breaking changes
-- exact Pattern Registry inventory and schema
+- general flag semantics outside closed ADR-005 workflow interactions
+
+Platform-spec detail gaps:
+
+- exact Pattern Registry inventory, pattern skeletons, and formal pattern schema format
 - source-chain traversal depth limits
+- bounded `context.*` evaluation details beyond the closed seven-value form scope
+- workflow-aware reporting and aggregation
+- event schema/versioning obligations and projection compatibility across schema versions
+
+Implementation, tooling, product, or operations gaps:
+
+- retention and archival policy
+- setup experience, onboarding, and role transition process
+- reporting aggregation and decision-maker reporting requirements
+- domain-agnostic proof or product validation gaps
+- projection optimization, caching, rebuild strategy, and low-end device performance
+- configuration authoring format, deployment packaging UX, deploy-time validator UX, and migration tooling
 - auto-resolution authoring UX and monitoring/reporting surface
 - sync pagination, priority, bandwidth handling, transport details, and operational delivery mechanics
-- platform-spec atomization and final document structure
 
 ## Post-Baseline Assessment Rule
 

@@ -1,6 +1,6 @@
 # Conflict Flag Offline Boundary Control
 
-Status: Atomization-ready dependency-aware control overlay
+Status: Spec-drafting-ready dependency-aware control overlay
 
 This document prevents the accepted conflict, flag, and offline-default surfaces from collapsing into one broad implementation boundary. It does not re-decide ADR-001 through ADR-005, does not absorb ADR-006-R through ADR-009 as authority, and does not reuse pre-convergence primitive maps as final architecture.
 
@@ -46,7 +46,7 @@ Therefore:
 
 ## Principle-To-Control Mapping
 
-| Principle Pressure | Accepted Mechanism | Primary Boundary | Control Meaning |
+| Principle Pressure | Accepted Mechanism | Primary Responsibility Area | Control Meaning |
 |---|---|---|---|
 | P1: Offline is the default | client-generated IDs, local event creation, immutable sync, advisory command validation | Event Log / Storage; Event Envelope / Schema; Assignment / Authority / Sync | Offline capture cannot require complete global knowledge. Sync must reconcile later state knowledge without treating offline creation as exceptional. |
 | P2: Configuration has boundaries | platform-fixed structural event types, bounded deployer policy surfaces, Pattern Registry mechanism | Configuration; Projection / Workflow State | Deployer policy may configure thresholds/severities/shape bindings, but must not define platform detection engines, structural event vocabulary, or arbitrary authority logic. |
@@ -58,7 +58,7 @@ Therefore:
 
 ## Control Vocabulary
 
-Use these terms narrowly during atomization:
+Use these terms narrowly during platform-spec drafting:
 
 | Term | Control Definition | Not Allowed To Mean |
 |---|---|---|
@@ -72,7 +72,7 @@ Use these terms narrowly during atomization:
 
 ## Dependency Split
 
-| Responsibility | Owning Boundary | Cross-Boundary Contract | Forbidden Broadening |
+| Responsibility | Owning Area | Cross-Boundary Contract | Forbidden Broadening |
 |---|---|---|---|
 | event structural validity | Event Envelope / Schema | accepted event envelope and schema contract | Do not turn state anomalies into structural invalidity unless baseline says so. |
 | immutable acceptance | Event Log / Storage | append-only write contract | Do not mutate, delete, or rewrite accepted events to resolve conflicts. |
@@ -92,7 +92,7 @@ Accept-and-flag applies to validly structured events whose problem is state-base
 
 It does not apply to malformed events, invalid envelope vocabulary, invalid structural type values, impossible schema references, or payloads that fail the accepted schema contract.
 
-During atomization, every conflict rule must state which side it falls on:
+During platform-spec drafting, every conflict rule must state which side it falls on:
 
 - structural rejection before event acceptance
 - accepted event plus flag or surfaced issue
@@ -178,20 +178,20 @@ The pre-convergence mapping treated these as broad cross-cutting concerns:
 - flag catalog
 - aggregation interface
 
-The current path keeps the useful insight but rejects the broad conclusion. These are control surfaces that constrain atomized specs. They are not proof that a single `Conflict Detector`, `Flag Catalog`, `Sync Contract`, or `Aggregation Interface` is already closed as an implementation boundary.
+The current path keeps the useful insight but rejects the broad conclusion. These are control surfaces that constrain platform-spec sections. They are not proof that a single `Conflict Detector`, `Flag Catalog`, `Sync Contract`, or `Aggregation Interface` is already closed as an implementation boundary.
 
-For platform-spec atomization, each surface must be rewritten as:
+For platform-spec drafting, each surface must be rewritten as:
 
 - accepted invariant
-- owning boundary
+- owning responsibility area
 - source facts consumed
 - downstream effects blocked or allowed
 - open gaps
 - forbidden coupling
 
-## Atomization Readiness Checks
+## Spec Drafting Readiness Checks
 
-Before writing a conflict/flag/offline spec atom, check:
+Before writing a conflict/flag/offline spec section, check:
 
 1. Does the claim come from ADR-001 through ADR-005 closure, a classified later-source assessment, or only a principle?
 2. Is the anomaly structural invalidity, state anomaly, authorization anomaly, workflow transition anomaly, identity-lineage anomaly, configured-domain anomaly, or reporting visibility issue?
@@ -214,11 +214,11 @@ No patch is currently required to `07-system-boundary-map.md`. The existing map 
 - local retain/remove effects to Local Data Lifecycle
 - trigger effects to Trigger / Reactivity
 
-The overlay should be used before atomizing conflict, flag, sync, workflow, trigger, Pattern Registry, or reporting specs.
+The overlay should be used before drafting conflict, flag, sync, workflow, trigger, Pattern Registry, or reporting specs.
 
 ## Recommended Next Step
 
-Use this overlay to draft the first platform-spec atomization plan around the cross-cutting ingestion and anomaly pipeline:
+Use this overlay to draft the first platform-spec plan around the cross-cutting ingestion and anomaly pipeline:
 
 - structural event acceptance
 - offline/local creation assumptions

@@ -2,7 +2,7 @@
 
 Status: Completed operating plan
 
-This plan defines the order for stabilizing the ADR-001 through ADR-005 baseline and its gaps before any further ADR assessment or platform-spec atomization.
+This plan defines the order for stabilizing the ADR-001 through ADR-005 baseline and its gaps before any further ADR assessment or platform-spec drafting.
 
 ## Goal
 
@@ -13,7 +13,7 @@ The stabilized state should answer:
 - what is decided now
 - what is explicitly not decided
 - what work closes each gap
-- which system boundary owns each mechanism or gap
+- which responsibility area owns each mechanism or gap
 - what later ADR claims may be assessed
 - what must not be reopened without formal change control
 
@@ -62,7 +62,7 @@ Rank gaps by what they block.
 Priority levels:
 
 - P0: blocks architecture baseline acceptance
-- P1: blocks platform specification skeleton
+- P1: blocks platform specification outline
 - P2: blocks implementation planning for a core subsystem
 - P3: product/operations detail that can wait
 
@@ -71,14 +71,14 @@ Outcome:
 - a short ordered list of next gap work
 - no parallel reopening of unrelated decisions
 
-### Step 4: Boundary Map Validation
+### Step 4: Architecture Responsibility Map Validation
 
 Validate `07-system-boundary-map.md` against the accepted baseline and gap register.
 
 Outcome:
 
-- settled mechanisms have owning boundaries
-- every gap has one primary owning boundary
+- settled mechanisms have owning responsibility areas
+- every gap has one primary responsibility owner
 - later claims have a routing surface before classification
 
 ### Step 5: Targeted Later-Source Assessment
@@ -87,8 +87,8 @@ Assess ADR-006-R through ADR-009 only against gaps or explicit baseline disputes
 
 Allowed outcomes:
 
-- consistent elaboration of a settled boundary
-- open-gap closure candidate for a named boundary-owned gap
+- consistent elaboration of a settled responsibility area
+- open-gap closure candidate for a named owner gap
 - deferred implementation/spec detail
 - new unauthorized claim
 - conflict with closed baseline
@@ -99,9 +99,9 @@ Outcome:
 - later claims are classified, not absorbed
 - baseline remains unchanged unless a formal change is accepted
 
-### Step 6: Platform Spec Skeleton
+### Step 6: Platform Specification Outline
 
-After baseline acceptance and gap triage, draft the first platform spec skeleton.
+After baseline acceptance and gap triage, draft the first platform specification outline.
 
 Inputs:
 
@@ -110,14 +110,14 @@ Inputs:
 - validated `07-system-boundary-map.md`
 - `02-change-control.md`
 
-Do not generate the skeleton directly from ADRs or exploration files.
+Do not generate the outline directly from ADRs or exploration files.
 
 ## What Not To Do
 
 - Do not run another broad extraction pass over all staging files.
 - Do not treat every gap as needing exploration.
 - Do not read ADR-006-R through ADR-009 as automatic authority.
-- Do not split final atomic kernel files until the baseline and gaps are stable.
+- Do not split detailed platform-spec sections until the baseline and gaps are stable.
 - Do not patch large staging files unless a concrete extraction error is found.
 
 ## Professional Team Practice
@@ -126,7 +126,7 @@ A production team at this stage would stabilize the baseline first, then move th
 
 1. Confirm the accepted architecture baseline.
 2. Decide which open items actually block engineering.
-3. Route settled mechanisms and gaps through system boundaries.
+3. Route settled mechanisms and gaps through architecture responsibility areas.
 4. Turn platform-spec details into spec sections.
 5. Turn implementation/tooling items into design docs or tickets.
 6. Turn policy gaps into product/operations decisions.
@@ -137,9 +137,9 @@ A production team at this stage would stabilize the baseline first, then move th
 This stabilization sequence has been completed through the professional-baseline overlays:
 
 1. `08-baseline-acceptance-check.md` accepted the ADR-001 through ADR-005 baseline.
-2. `07-system-boundary-map.md` was validated and corrected where needed.
-3. ADR-006-R through ADR-009 were assessed against the stabilized gaps and boundaries in `10` through `13`.
+2. `07-system-boundary-map.md` was validated, corrected where needed, and reframed as an architecture responsibility map.
+3. ADR-006-R through ADR-009 were assessed against the stabilized gaps and responsibility areas in `10` through `13`.
 4. Historical pattern-inventory material was assessed in `14`.
-5. Control overlays in `15` and `16` were added before atomization.
+5. Control overlays in `15` through `19` were added before platform-spec drafting.
 
-Current atomization work should use the accepted baseline, gap register, validated boundary map, later-source assessments, and control overlays rather than restarting this stabilization sequence.
+Current platform-spec drafting should use the accepted baseline, gap register, architecture responsibility map, later-source assessments, and control overlays rather than restarting this stabilization sequence.
