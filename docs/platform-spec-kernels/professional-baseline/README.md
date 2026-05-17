@@ -31,6 +31,7 @@ This folder formalizes that operating model.
 - `17-authorization-visibility-boundary-control.md`: dependency-aware overlay that preserves `access-control-scenario.md` as authorization/visibility pressure without mutating ADR-003 or widening deployer access-control authority.
 - `18-envelope-shape-parametrization-boundary-control.md`: focused ADR-004 lineage and spec-drafting control overlay for envelope `type`, `shape_ref`, platform-fixed structure, and deployer parametrization.
 - `19-envelope-shape-parametrization-definitions.md`: compact definition file for separating envelope type, shape facts, references, patterns, projections, configuration, and product vocabulary during platform-spec drafting.
+- `20-platform-spec-outline.md`: draft top-level normative platform specification structure generated from the accepted baseline, gap register, responsibility map, and assessed guardrails.
 
 Related pre-operations material:
 
@@ -52,6 +53,7 @@ Related pre-operations material:
 - `17-authorization-visibility-boundary-control.md` routes contextual authority, hierarchy exceptions, temporary authority, role transitions, and offline authorization disagreement into accepted mechanisms or explicit gaps.
 - `18-envelope-shape-parametrization-boundary-control.md` confirms ADR-004 closed the core line correctly and makes the spec-drafting guardrails explicit: `type` is processing behavior, `shape_ref` is fact schema/version, `activity_ref` is context, review is layered, and deployer labels do not become platform classes.
 - `19-envelope-shape-parametrization-definitions.md` is the citable glossary for event-envelope, shape, pattern, reference, projection, and parametrization terms during platform-spec outline and section work.
+- `20-platform-spec-outline.md` is the current draft platform-spec outline. It routes future normative sections to responsibility owners and identifies which `05` gaps block or constrain first section drafting.
 - ADR-006-R through ADR-009 remain assessment material. Their claims are classified in `10` through `13`; carry-forward guardrails, open gaps, and hold-backs are governed by `05-decision-gap-register.md`. They are not automatic authority over ADR-001 through ADR-005.
 - Pre-operations readiness and decision-board material lives in `../pre-operations/` so assessment/process material and draft briefs do not mix with baseline artifacts.
 
@@ -66,7 +68,7 @@ Prepare the platform-spec outline from the accepted baseline and canonical decis
 Immediate order:
 
 1. Use `05-decision-gap-register.md` as the only canonical open-gap register: one primary responsibility area, affected areas, closure path, priority, platform-spec handling, and hold-back reopen triggers.
-2. Draft the platform-spec outline from `04`, `05`, `07`, and the assessed inputs in `10` through `19`.
+2. Review and stabilize `20-platform-spec-outline.md` as the platform-spec outline from `04`, `05`, `07`, and the assessed inputs in `10` through `19`.
 3. Treat existing `../platform-spec/atoms/` files as draft spec-section input to be reviewed against the outline, not as accepted governance.
 
 Product-alignment material was created later and should be assessed separately before it affects this baseline closeout path.

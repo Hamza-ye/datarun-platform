@@ -136,6 +136,10 @@ Purpose:
 
 - provide the top-level outline for final platform specification documents before detailed spec sections are accepted
 
+Current file:
+
+- `20-platform-spec-outline.md`
+
 Expected sections:
 
 - event model
