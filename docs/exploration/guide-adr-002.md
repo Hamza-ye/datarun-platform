@@ -1,7 +1,8 @@
 # ADR-002 Exploration Guide: Identity & Conflict Resolution
 
 > **For what was decided**: read [ADR-002](../adrs/adr-002-identity-conflict.md) — 14 sub-decisions (S1–S14).
-> **For structural implications**: read [architecture/primitives.md](../architecture/primitives.md) (Identity Resolver, Conflict Detector).
+> **For reach picture** (strategy, parts, thickness): [Architecture Reach Brief § ADR-002](architecture-reach/architecture-reach-brief.md#adr-002--identity--conflict-resolution).
+> **For structural implications**: [architecture/primitives.md](../architecture/primitives.md) (historical component catalog; prefer [system boundary map](../platform-spec-kernels/professional-baseline/07-system-boundary-map.md) for atomization).
 > **Below**: how we got there — section-by-section navigation into the raw explorations.
 
 ---

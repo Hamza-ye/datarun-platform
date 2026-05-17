@@ -1,7 +1,10 @@
-> **⚠️ SUPERSEDED** — This is a raw exploration document archived for reference. Decisions were finalized in **ADR-001**. For a navigated reading guide, see [guide-adr-001.md](../guide-adr-001.md).
+> **For what was decided**: read [../../adrs/*.md](../../adrs/).
+> **For reach picture** [Architecture Reach Brief]: [Architecture Reach Brief](../architecture-reach/architecture-reach-brief.md#adr-005--state-progression--workflow).
+> **For structural implications**: [architecture baseline](../../platform-spec-kernels/professional-baseline/).
+
 # Architecture Landscape Exploration
 
-> This document maps the viable architecture space for Datarun. It does not make decisions — it identifies the families of approach that survive the constraint filter, learns from prior art, reveals which decisions are coupled, and proposes a sequence for committing to them.
+> This document maps the viable architecture space for Datarun. It does not make decisions — it identifies the families of approach that survive the constraint filter, learns from prior art, reveals which decisions are coupled, and proposes a sequence for committing to them. architecture and
 
 ---
 

@@ -1,7 +1,8 @@
 # ADR-005 Exploration Guide: State Progression & Workflow
 
 > **For what was decided**: read [ADR-005](../adrs/adr-005-state-progression.md).
-> **For structural implications**: read [architecture/primitives.md](../architecture/primitives.md) (Trigger Engine, Pattern Registry, Command Validator), [architecture/patterns.md](../architecture/patterns.md) (4 patterns).
+> **For reach picture**: [Architecture Reach Brief § ADR-005](architecture-reach/architecture-reach-brief.md#adr-005--state-progression--workflow).
+> **For structural implications**: [architecture/patterns.md](../architecture/patterns.md) (4 patterns); [07-system-boundary-map.md](../platform-spec-kernels/professional-baseline/07-system-boundary-map.md).
 > **Below**: how we got there — section-by-section navigation into the raw explorations.
 
 ---

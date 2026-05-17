@@ -1,7 +1,8 @@
 # ADR-004 Exploration Guide: Configuration Boundary
 
 > **For what was decided**: read [ADR-004](../adrs/adr-004-configuration-boundary.md).
-> **For structural implications**: read [architecture/primitives.md](../architecture/primitives.md) (Shape Registry, Expression Evaluator, Deploy-time Validator, Config Packager, Pattern Registry), [architecture/contracts.md](../architecture/contracts.md) (C5, C11–C14, C19–C20).
+> **For reach picture**: [Architecture Reach Brief § ADR-004](architecture-reach/architecture-reach-brief.md#adr-004--configuration-boundary).
+> **For structural implications**: [07-system-boundary-map.md](../platform-spec-kernels/professional-baseline/07-system-boundary-map.md); inter-primitive contracts in [26-contract-extraction.md](26-contract-extraction.md).
 > **Below**: how we got there — section-by-section navigation into the raw explorations.
 
 ---

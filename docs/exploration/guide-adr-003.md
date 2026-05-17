@@ -1,7 +1,8 @@
 # ADR-003 Exploration Guide: Authorization & Selective Sync
 
-> **For what was decided**: read [ADR-003](../adrs/adr-003-authorization-sync.md) — 7 sub-decisions (S1–S7).
-> **For structural implications**: read [architecture/primitives.md](../architecture/primitives.md) (Scope Resolver), [architecture/cross-cutting.md](../architecture/cross-cutting.md) (accept-and-flag extensions).
+> **For what was decided**: read [ADR-003](../adrs/adr-003-authorization-sync.md) — 10 sub-decisions (S1–S10).
+> **For reach picture**: [Architecture Reach Brief § ADR-003](architecture-reach/architecture-reach-brief.md#adr-003--authorization--selective-sync).
+> **For structural implications**: [07-system-boundary-map.md](../platform-spec-kernels/professional-baseline/07-system-boundary-map.md) (Scope Resolver / authorization boundaries).
 > **Below**: how we got there — section-by-section navigation into the raw explorations.
 
 ---
