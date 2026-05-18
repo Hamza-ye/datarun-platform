@@ -40,7 +40,7 @@ This does not make the baseline a final platform specification. It accepts it as
 
 These gaps are accepted as explicit, not accidental. They are not blockers to accepting the baseline itself.
 
-P1, before platform-spec outline or later-source use:
+P1, before affected platform-spec sections or later-source use:
 
 - ADR-006-R through ADR-009 assessment.
 - General flag semantics if the platform spec needs more than ADR-005 workflow flag behavior.
@@ -106,6 +106,6 @@ This acceptance check led to the completed responsibility-validation and later-s
 
 1. `07-system-boundary-map.md` was validated against the accepted baseline and accepted gaps, then reframed as an architecture responsibility map.
 2. ADR-006-R through ADR-009 claims were routed through the validated responsibility map in `10` through `13`.
-3. Additional control overlays were added for identity, conflict/flag/offline behavior, and operational constraints before platform-spec drafting.
+3. Additional assessed input records were added for identity, conflict/flag/offline behavior, operational constraints, authorization/visibility, and envelope/shape/parametrization boundaries.
 
-Current platform-spec drafting input should use the full professional-baseline set through `19-envelope-shape-parametrization-definitions.md`.
+Current platform-spec drafting should follow `04`, `05`, `07`, and `20`. Use `09` through `19` as assessed supporting inputs, not as current authority sources.

@@ -4,7 +4,7 @@ Domain-agnostic operations platform for field-based organizations. Offline-first
 
 ## Documentation
 
-For platform-spec atomization, start at
+For platform-specification work, start at
 [`docs/README.md`](docs/README.md), then
 [`docs/platform-spec-kernels/professional-baseline/README.md`](docs/platform-spec-kernels/professional-baseline/README.md).
 

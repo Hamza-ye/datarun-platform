@@ -48,7 +48,7 @@ def run_gh(args):
 
 def main():
     # Load registry
-    registry_path = Path("docs/platform-spec-kernels/platform-spec/atom-registry.yml")
+    registry_path = Path("docs/platform-spec-kernels/platform-spec/section-registry.yml")
     if not registry_path.exists():
         print(f"Error: {registry_path} not found.")
         return
@@ -56,37 +56,37 @@ def main():
     with open(registry_path, 'r') as f:
         registry = yaml.safe_load(f)
     
-    atoms = registry.get('atoms', [])
+    sections = registry.get('sections', [])
     updated_registry = False
 
-    for atom in atoms:
-        atom_id = atom['id']
-        title = atom['title']
+    for section in sections:
+        section_id = section['id']
+        title = section['title']
         
         # 1. Create/Find Issue
-        issue_number = atom.get('github_issue')
+        issue_number = section.get('github_issue')
         if not issue_number:
-            print(f"Creating issue for {atom_id}...")
+            print(f"Creating issue for {section_id}...")
             body = f"## {title}\n\n"
-            body += f"**ID:** {atom_id}\n"
-            body += f"**Boundary:** {atom['boundary']}\n"
-            body += f"**Batch:** {atom['batch']}\n\n"
-            body += f"**Status:** {atom['status']}\n\n"
+            body += f"**ID:** {section_id}\n"
+            body += f"**Boundary:** {section['boundary']}\n"
+            body += f"**Batch:** {section['batch']}\n\n"
+            body += f"**Status:** {section['status']}\n\n"
             body += f"### Trace\n"
-            body += f"- **File:** [docs/platform-spec-kernels/platform-spec/{atom['file']}](https://github.com/{REPO}/blob/main/docs/platform-spec-kernels/platform-spec/{atom['file']})\n"
-            body += f"- **Basis:** {', '.join(atom.get('source_basis', []))}\n"
+            body += f"- **File:** [docs/platform-spec-kernels/platform-spec/{section['file']}](https://github.com/{REPO}/blob/main/docs/platform-spec-kernels/platform-spec/{section['file']})\n"
+            body += f"- **Basis:** {', '.join(section.get('source_basis', []))}\n"
             
-            issue_url = run_gh(["issue", "create", "--repo", REPO, "--title", f"{atom_id}: {title}", "--body", body])
+            issue_url = run_gh(["issue", "create", "--repo", REPO, "--title", f"{section_id}: {title}", "--body", body])
             if issue_url and issue_url.startswith("https://"):
                 issue_number = int(issue_url.split("/")[-1])
-                atom['github_issue'] = issue_number
+                section['github_issue'] = issue_number
                 updated_registry = True
                 print(f"Created issue #{issue_number}")
             else:
-                print(f"Failed to create issue for {atom_id}")
+                print(f"Failed to create issue for {section_id}")
                 continue
         else:
-            print(f"Using existing issue #{issue_number} for {atom_id}")
+            print(f"Using existing issue #{issue_number} for {section_id}")
 
         # 2. Add to Project
         # We use the URL to add the issue to the project
@@ -114,16 +114,16 @@ def main():
                 # Text fields
                 run_gh(["project", "item-edit", "--id", item_id, "--field-id", field_id, "--project-id", PROJECT_ID, "--text", str(value)])
 
-        print(f"Syncing fields for {atom_id}...")
-        update_field('spec_id', atom_id)
-        update_field('batch', str(atom['batch']))
-        update_field('boundary', atom['boundary'])
-        update_field('status', atom['status'])
-        update_field('owner_role', atom['owner_role'])
-        update_field('source_file', atom['file'])
-        update_field('depends_on', ", ".join(atom.get('depends_on', [])))
-        update_field('blocks', ", ".join(atom.get('blocks', [])))
-        update_field('source_basis', ", ".join(atom.get('source_basis', []))[:250])
+        print(f"Syncing fields for {section_id}...")
+        update_field('spec_id', section_id)
+        update_field('batch', str(section['batch']))
+        update_field('boundary', section['boundary'])
+        update_field('status', section['status'])
+        update_field('owner_role', section['owner_role'])
+        update_field('source_file', section['file'])
+        update_field('depends_on', ", ".join(section.get('depends_on', [])))
+        update_field('blocks', ", ".join(section.get('blocks', [])))
+        update_field('source_basis', ", ".join(section.get('source_basis', []))[:250])
         update_field('github_issue_field', str(issue_number))
 
     # Save registry if updated
@@ -131,7 +131,7 @@ def main():
         with open(registry_path, 'w') as f:
             # We want to preserve the structure as much as possible
             yaml.dump(registry, f, sort_keys=False, default_flow_style=False)
-        print("Updated atom-registry.yml with issue numbers.")
+        print("Updated section-registry.yml with issue numbers.")
 
 if __name__ == "__main__":
     main()

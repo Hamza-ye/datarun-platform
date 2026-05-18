@@ -1,14 +1,14 @@
 # Product Alignment Track
 
-Status: Closed pre-atomization product/UX alignment track
+Status: Closed pre-specification product/UX alignment track
 
-This folder reconnects the accepted platform architecture baseline to product behavior, operational workflows, and user expectations before selected-slice atomization and implementation progression.
+This folder reconnects the accepted platform architecture baseline to product behavior, operational workflows, and user expectations before selected-slice platform-spec section drafting and implementation progression.
 
 It does not redesign the architecture. It does not create platform behavior authority by itself. It translates the approved domain problem space into product-facing artifacts, then routes any pressure back through the professional baseline, gap register, and change-control rules.
 
 ## Why This Exists
 
-The project reached a strong architecture baseline before the product interaction layer was equally explicit. That creates a real risk: atomized platform specs could become internally correct but weakly grounded in how users actually experience field work, oversight, configuration, sync, review, conflicts, and reporting.
+The project reached a strong architecture baseline before the product interaction layer was equally explicit. That creates a real risk: platform-spec sections could become internally correct but weakly grounded in how users actually experience field work, oversight, configuration, sync, review, conflicts, and reporting.
 
 This track reduces that risk by stabilizing product-facing artifacts before implementation progression.
 
@@ -55,7 +55,7 @@ Architecture guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 ## Non-Authority Rule
 
@@ -65,7 +65,7 @@ Product-alignment artifacts may:
 - describe user-facing behavior
 - propose product vocabulary
 - identify UX gaps
-- recommend atomization sequencing
+- recommend platform-spec section drafting sequencing
 
 They may not:
 
@@ -86,9 +86,9 @@ Domain-specific examples may explain behavior, but the artifact language should 
 
 Role labels in this track are operational lenses, not platform-core responsibility types.
 
-Terms such as field-level worker, supervisor, coordinator, administrator, auditor, reviewer, regional lead, or cross-regional coordinator describe common operating contexts from the source scenarios. They must not be atomized into fixed platform classes, service boundaries, envelope fields, or permanent authority shortcuts.
+Terms such as field-level worker, supervisor, coordinator, administrator, auditor, reviewer, regional lead, or cross-regional coordinator describe common operating contexts from the source scenarios. They must not be turned into fixed platform classes, service boundaries, envelope fields, or permanent authority shortcuts.
 
-The harder boundary for later atomization is operation behavior:
+The harder boundary for later platform-spec section drafting is operation behavior:
 
 - operations that must work offline
 - operations that require coordination or connectivity
@@ -106,9 +106,9 @@ The same person may operate in different contexts across activities, areas, time
 6. `06-product-vocabulary-alignment.md`: product terms mapped to baseline terms and forbidden interpretations.
 7. `07-interaction-state-model.md`: user-visible states, offline/sync states, review states, flag/conflict states, and what remains UI-only.
 8. `08-ux-gap-routing.md`: product/UX gaps routed to the existing gap register or proposed as explicit additions.
-9. `09-first-vertical-slice.md`: first product-backed slice for atomization and implementation progression.
-10. `10-atomization-readiness-from-product.md`: readiness gate for selected-slice atomization.
-11. `11-alignment-closeout.md`: close the product-alignment track and state the stable atomization input surface.
+9. `09-first-vertical-slice.md`: first product-backed slice for platform-spec section drafting and implementation progression.
+10. `10-platform-spec-readiness-from-product.md`: readiness gate for selected-slice platform-spec section drafting.
+11. `11-alignment-closeout.md`: close the product-alignment track and state the stable platform-spec section drafting input surface.
 
 ## Stable Outputs
 
@@ -121,13 +121,13 @@ The same person may operate in different contexts across activities, areas, time
 - `07-interaction-state-model.md`: Session 7 operational-surface state model.
 - `08-ux-gap-routing.md`: Session 8 routing from product pressure to gaps, deferrals, and change-control triggers.
 - `09-first-vertical-slice.md`: Session 9 selected first product-backed vertical slice.
-- `10-atomization-readiness-from-product.md`: Session 10 atomization readiness gate for the selected slice.
-- `11-alignment-closeout.md`: Session 11 closeout and stable atomization input surface.
+- `10-platform-spec-readiness-from-product.md`: Session 10 platform-spec section drafting readiness gate for the selected slice.
+- `11-alignment-closeout.md`: Session 11 closeout and stable platform-spec section drafting input surface.
 
 ## Next Step
 
-Begin selected-slice atomization from `09-first-vertical-slice.md`, `10-atomization-readiness-from-product.md`, and `08-ux-gap-routing.md`.
+Begin selected-slice platform-spec section drafting from `09-first-vertical-slice.md`, `10-platform-spec-readiness-from-product.md`, and `08-ux-gap-routing.md`.
 
 ## Working Rule
 
-Do not atomize broad internal platform surfaces from this track. Atomize only after product behavior, scenario pressure, and baseline boundary ownership agree.
+Do not draft broad internal platform surfaces from this track. Draft platform-spec sections only after product behavior, scenario pressure, and baseline boundary ownership agree.

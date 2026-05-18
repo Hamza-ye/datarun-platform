@@ -1,6 +1,6 @@
 # References And Identity Lineage
 
-Status: Accepted
+Status: Candidate section input
 Owning boundary: Identity / Lineage
 Primary owner: Architecture Steward
 
@@ -19,12 +19,12 @@ Source basis:
 
 Depends on:
 
-- `01-spec-governance.md`
-- `02-glossary-and-core-definitions.md`
-- `03-event-log-storage.md`
-- `04-event-envelope-schema.md`
-- `90-open-decisions.md`
-- `91-rejected-paths.md`
+- `00-specification-source-authority.md`
+- `01-core-definitions-and-boundary-vocabulary.md`
+- `02-event-log-and-storage-model.md`
+- `03-event-envelope-schema-and-references.md`
+- `90-open-decisions-and-gap-register-citations.md`
+- `91-rejected-alternatives.md`
 
 Consumed by:
 
@@ -36,11 +36,11 @@ Consumed by:
 
 ## Purpose
 
-This atom defines the narrow Identity / Lineage contract for subject continuity, raw subject-reference preservation, alias projection, and corrective split behavior. It keeps reference contracts separate from referent lifecycle ownership so identity lineage does not absorb actor authority, assignment scope, process workflows, catalogs, descriptive attributes, reporting, or deployer configuration.
+This section defines the narrow Identity / Lineage contract for subject continuity, raw subject-reference preservation, alias projection, and corrective split behavior. It keeps reference contracts separate from referent lifecycle ownership so identity lineage does not absorb actor authority, assignment scope, process workflows, catalogs, descriptive attributes, reporting, or deployer configuration.
 
 ## Scope
 
-This atom owns:
+This section owns:
 
 - subject identity continuity for referents that have subject-lineage semantics
 - raw subject-reference preservation as accepted immutable event history
@@ -53,7 +53,7 @@ This atom owns:
 
 ## Non-Scope
 
-This atom does not own:
+This section does not own:
 
 - final reference serialization, field placement, cardinality, or required emission sites
 - new event-envelope fields, structural reference categories, or structural `type` values
@@ -70,7 +70,7 @@ This atom does not own:
 
 ## Definitions
 
-| Term | Meaning In This Atom | Must Not Mean |
+| Term | Meaning In This Section | Must Not Mean |
 |---|---|---|
 | Subject-lineage referent | A referent whose identity continuity is governed by Identity / Lineage | Every record, actor, assignment, process, activity, catalog item, or workflow instance |
 | Subject reference | A reference identifying what an event is about when the accepted reference contract or relevant shape requires subject aboutness | Ownership of every lifecycle, workflow, authority, catalog, or reporting behavior for that referent |
@@ -96,7 +96,7 @@ This atom does not own:
 - Accepted subject-lineage operations must preserve acyclicity. Alias-cycle read-side behavior and resolution semantics remain an open decision and must not be silently defined here.
 - Identity / Lineage may surface lineage facts or detector inputs, but Flag / Resolution owns flag lifecycle and accepted resolution effects.
 - Identity / Lineage may expose subject-lineage projections, but projections and reports do not become source truth for identity.
-- A device or server resolves references only over the event subset and lineage facts available to that context; this atom does not require complete global knowledge on every device.
+- A device or server resolves references only over the event subset and lineage facts available to that context; this section does not require complete global knowledge on every device.
 
 ## Contracts
 
@@ -107,7 +107,7 @@ This atom does not own:
 - event subsets delivered under Assignment / Authority / Sync constraints
 - subject-lineage operation requests or accepted lineage facts for merge, split, corrective split, archive, or stale-reference interpretation where later shape work defines them
 - original event references needed by authorization, conflict, audit, projection, and reporting consumers
-- configuration or policy values only where a later accepted atom defines bounded subject-duplicate detection or presentation behavior
+- configuration or policy values only where a later accepted section defines bounded subject-duplicate detection or presentation behavior
 
 ### Outputs
 
@@ -136,7 +136,7 @@ This atom does not own:
 
 - Implementations may choose storage, indexing, and graph-projection strategies for lineage if raw event references and append-only event truth are preserved.
 - Read models may display both raw and resolved subject references if they keep the distinction explicit.
-- Later atoms may define platform-bundled subject-lineage shapes only through the platform-bundled shape inventory gap and without adding envelope `type` values.
+- Later sections may define platform-bundled subject-lineage shapes only through the platform-bundled shape inventory gap and without adding envelope `type` values.
 - Later configuration work may define bounded duplicate-candidate policy values if it does not become deployer-authored lineage algorithms or arbitrary platform code.
 - Product surfaces may choose labels for identity review or subject display if they map back to raw/resolved lineage facts and do not become canonical identity truth.
 
@@ -159,10 +159,10 @@ This atom does not own:
 
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
-| Final reference serialization and active emission sites | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior atoms | A later atom or implementation needs canonical field names, placement, cardinality, or required emission sites for subject, causal, process, assignment, or other typed-reference values. |
+| Final reference serialization and active emission sites | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior sections | A later section or implementation needs canonical field names, placement, cardinality, or required emission sites for subject, causal, process, assignment, or other typed-reference values. |
 | Referent registration, attributes, and catalogs | Event Envelope / Schema for reference contracts; Identity / Lineage for subject-continuity lifecycle; Configuration for shape/catalog definitions; Projection / Workflow State and Assignment / Authority / Sync for process, actor, and assignment lifecycles | A spec needs subject registration events, descriptive attribute mutation/projection, deployer-defined catalogs, platform-bundled registration shapes, or lifecycle ownership for non-subject referents. |
 | Alias-cycle read-side behavior and resolution semantics | Identity / Lineage plus Flag / Resolution, with formal architecture decision if included | Identity or flag behavior needs to decide whether cycle-closing lineage facts are rejected, accepted-and-flagged, excluded from projection, or resolved through a specific event/process. |
-| Platform-bundled registration or identity shapes | Owning behavior atoms plus Event Envelope / Schema and Configuration | A platform-owned identity, registration, merge, split, or stale-reference fact needs normative `shape_ref` inventory or payload schema. |
+| Platform-bundled registration or identity shapes | Owning behavior sections plus Event Envelope / Schema and Configuration | A platform-owned identity, registration, merge, split, or stale-reference fact needs normative `shape_ref` inventory or payload schema. |
 | Domain duplicate-detection and matching policy | Configuration plus Flag / Resolution, with Identity / Lineage as source-fact provider | A deployment needs domain-specific matching, duplicate-candidate thresholds, or automated resolution beyond platform-fixed subject-lineage facts. |
 | User-facing identity resolution UX | Product/implementation design plus Identity / Lineage and Flag / Resolution | Implementation needs review screens, operator workflows, or display policy for raw/resolved subject references and identity anomalies. |
 

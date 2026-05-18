@@ -1,8 +1,8 @@
 # Ships — Scenario-Driven Delivery Index
 
-> **FORBIDDEN FOR PLATFORM-SPEC ATOMIZATION.**
+> **FORBIDDEN FOR CURRENT PLATFORM-SPECIFICATION WORK.**
 > This directory contains legacy Ship execution specs, retros, and status.
-> Do not use it as authority for the current platform-spec atomization path.
+> Do not use it as authority for the current platform-specification path.
 > Start at
 > [`../platform-spec-kernels/professional-baseline/README.md`](../platform-spec-kernels/professional-baseline/README.md).
 > The legacy instructions below are retained only for historical Ship/convergence

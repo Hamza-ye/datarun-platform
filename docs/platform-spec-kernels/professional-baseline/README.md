@@ -15,23 +15,23 @@ This folder formalizes that operating model.
 - `01-baseline-workflow.md`: the order of work from extracted evidence to usable architecture/spec baseline.
 - `02-change-control.md`: how post-baseline ADRs or new claims are allowed to affect the baseline.
 - `03-artifact-definitions.md`: the expected artifacts and what each one is allowed to contain.
-- `04-architecture-baseline-v0.md`: current engineering-facing baseline generated from the ADR-001 through ADR-005 closure overlay.
+- `04-architecture-baseline-v0.md`: current engineering-facing baseline generated from the ADR-001 through ADR-005 closure register.
 - `05-decision-gap-register.md`: unresolved post-baseline gaps classified before later ADR assessment or implementation planning.
 - `06-baseline-stabilization-plan.md`: ordered stabilization steps for accepting the baseline, assigning closure paths, triaging gaps, and only then assessing later ADRs.
 - `07-system-boundary-map.md`: architecture responsibility map for assigning settled mechanisms, gaps, and later claims to one primary responsibility area.
 - `08-baseline-acceptance-check.md`: accepted sign-off for ADR-001 through ADR-005 baseline, including priority tiers for accepted gaps.
-- `09-identity-boundary-control.md`: dependency-aware overlay that prevents ADR-002's broad identity/conflict document shape from becoming broad implementation coupling.
+- `09-identity-boundary-control.md`: assessed identity-routing input that has been routed into the gap register, responsibility map, and platform-spec outline.
 - `10-adr006r-flag-semantics-assessment.md`: later-source assessment of ADR-006-R flag-semantics and alias-cycle claims against the accepted baseline and responsibility routing.
 - `11-adr007-envelope-type-assessment.md`: later-source assessment of ADR-007 envelope-type closure and shape-based fact discrimination against the accepted baseline.
 - `12-adr008-reference-fields-assessment.md`: later-source assessment of ADR-008 reference-field contracts and reference-vs-referent classification against the accepted baseline.
 - `13-adr009-duality-rule-assessment.md`: later-source assessment of ADR-009 platform-fixed mechanism versus deployer-configured instance classification against the accepted baseline.
 - `14-pattern-inventory-walkthrough-assessment.md`: assessment of the historical pattern-inventory walkthrough as candidate material for Pattern Registry inventory and schema gaps.
-- `15-conflict-flag-offline-boundary-control.md`: dependency-aware overlay that keeps conflict detection, accept-and-flag, detect-before-act, flag lifecycle, and offline-default behavior from collapsing into one broad boundary during platform-spec drafting.
-- `16-operational-constraints-boundary-control.md`: dependency-aware overlay that preserves `constraints.md` as operational envelope authority without turning it into architecture or implementation authority.
-- `17-authorization-visibility-boundary-control.md`: dependency-aware overlay that preserves `access-control-scenario.md` as authorization/visibility pressure without mutating ADR-003 or widening deployer access-control authority.
-- `18-envelope-shape-parametrization-boundary-control.md`: focused ADR-004 lineage and spec-drafting control overlay for envelope `type`, `shape_ref`, platform-fixed structure, and deployer parametrization.
-- `19-envelope-shape-parametrization-definitions.md`: compact definition file for separating envelope type, shape facts, references, patterns, projections, configuration, and product vocabulary during platform-spec drafting.
-- `20-platform-spec-outline.md`: draft top-level normative platform specification structure generated from the accepted baseline, gap register, responsibility map, and assessed guardrails.
+- `15-conflict-flag-offline-boundary-control.md`: assessed routing input for conflict detection, accept-and-flag, detect-before-act, flag lifecycle, and offline-default behavior.
+- `16-operational-constraints-boundary-control.md`: assessed routing input for operational constraints that must not become architecture or implementation authority by themselves.
+- `17-authorization-visibility-boundary-control.md`: assessed routing input for authorization/visibility pressure that must preserve ADR-003 and bounded configuration.
+- `18-envelope-shape-parametrization-boundary-control.md`: focused ADR-004 lineage assessment for envelope `type`, `shape_ref`, platform-fixed structure, and deployer parametrization.
+- `19-envelope-shape-parametrization-definitions.md`: candidate definition source material for the future `01 Core Definitions And Boundary Vocabulary` platform-spec section.
+- `20-platform-spec-outline.md`: draft top-level normative platform specification structure generated from the accepted baseline, gap register, responsibility map, and assessed inputs.
 
 Related pre-operations material:
 
@@ -41,34 +41,35 @@ Related pre-operations material:
 ## Current Standing
 
 - ADR-001 through ADR-005 are the current extracted closure baseline.
-- `../10-adr1-5-rest-state-closure-register.md` is the compact closure overlay.
+- `../10-adr1-5-rest-state-closure-register.md` is the compact closure register.
 - `08-baseline-acceptance-check.md` accepts the baseline as stable enough for responsibility validation, targeted later-source assessment, and platform-spec outline work.
 - `10-adr006r-flag-semantics-assessment.md` classifies ADR-006-R S1 through S4 as mostly compatible general-flag-semantics candidates, while routing ADR-006-R S5 alias-cycle behavior as a formal decision gap before identity/flag specification if in scope.
 - `11-adr007-envelope-type-assessment.md` classifies ADR-007 as mostly consistent envelope-boundary elaboration: `type` remains the six-value processing axis, while domain/integrity facts are discriminated by `shape_ref`.
 - `12-adr008-reference-fields-assessment.md` classifies ADR-008 as mostly consistent reference-boundary elaboration: `*_ref` fields are envelope contracts, while referents keep separate lifecycle ownership and classification.
 - `13-adr009-duality-rule-assessment.md` classifies ADR-009 as mostly consistent platform/deployer-boundary elaboration: platform-fixed mechanisms and deployer-configured instances must be split during platform-spec drafting.
 - `14-pattern-inventory-walkthrough-assessment.md` treats `28-pattern-inventory-walkthrough.md` as candidate material for pattern inventory/schema, not as authority or final pattern specification.
-- `15-conflict-flag-offline-boundary-control.md` keeps the validated principles visible while routing accepted conflict, flag, and offline-default behavior through stabilized responsibility areas before platform-spec drafting.
-- `16-operational-constraints-boundary-control.md` routes operational constraints such as offline field work, low-end devices, compliance support, interoperability compatibility, responsiveness, and configuration propagation into accepted mechanisms or explicit gaps.
-- `17-authorization-visibility-boundary-control.md` routes contextual authority, hierarchy exceptions, temporary authority, role transitions, and offline authorization disagreement into accepted mechanisms or explicit gaps.
-- `18-envelope-shape-parametrization-boundary-control.md` confirms ADR-004 closed the core line correctly and makes the spec-drafting guardrails explicit: `type` is processing behavior, `shape_ref` is fact schema/version, `activity_ref` is context, review is layered, and deployer labels do not become platform classes.
-- `19-envelope-shape-parametrization-definitions.md` is the citable glossary for event-envelope, shape, pattern, reference, projection, and parametrization terms during platform-spec outline and section work.
+- `15-conflict-flag-offline-boundary-control.md` records routed findings for accepted conflict, flag, and offline-default behavior; durable gap and responsibility routing belongs in `05`, `07`, and `20`.
+- `16-operational-constraints-boundary-control.md` records routed findings for operational constraints such as offline field work, low-end devices, compliance support, interoperability compatibility, responsiveness, and configuration propagation.
+- `17-authorization-visibility-boundary-control.md` records routed findings for contextual authority, hierarchy exceptions, temporary authority, role transitions, and offline authorization disagreement.
+- `18-envelope-shape-parametrization-boundary-control.md` confirms ADR-004 closed the core line correctly and records the axis split: `type` is processing behavior, `shape_ref` is fact schema/version, `activity_ref` is context, review is layered, and deployer labels do not become platform classes.
+- `19-envelope-shape-parametrization-definitions.md` is candidate source material for event-envelope, shape, pattern, reference, projection, and parametrization terms during `01 Core Definitions And Boundary Vocabulary` drafting.
 - `20-platform-spec-outline.md` is the current draft platform-spec outline. It routes future normative sections to responsibility owners and identifies which `05` gaps block or constrain first section drafting.
-- ADR-006-R through ADR-009 remain assessment material. Their claims are classified in `10` through `13`; carry-forward guardrails, open gaps, and hold-backs are governed by `05-decision-gap-register.md`. They are not automatic authority over ADR-001 through ADR-005.
+- ADR-006-R through ADR-009 remain assessment material. Their claims are classified in `10` through `13`; carry-forward constraints, open gaps, and hold-backs are governed by `05-decision-gap-register.md`. They are not automatic authority over ADR-001 through ADR-005.
 - Pre-operations readiness and decision-board material lives in `../pre-operations/` so assessment/process material and draft briefs do not mix with baseline artifacts.
 
 ## Working Rule
 
-Do not continue broad extraction when the next problem is baseline clarity. Use the closure overlay to produce engineering-facing baseline artifacts, route them through architecture responsibility areas, then assess later ADRs only against explicit gaps or disputes.
+Do not continue broad extraction when the next problem is baseline clarity. Use the closure register to produce engineering-facing baseline artifacts, route them through architecture responsibility areas, then assess later ADRs only against explicit gaps or disputes.
 
 ## Current Next Step
 
-Prepare the platform-spec outline from the accepted baseline and canonical decision gap register before accepting more detailed platform-spec output.
+Draft and review the first platform-spec sections against the accepted baseline, canonical decision gap register, responsibility map, and platform-spec outline.
 
 Immediate order:
 
 1. Use `05-decision-gap-register.md` as the only canonical open-gap register: one primary responsibility area, affected areas, closure path, priority, platform-spec handling, and hold-back reopen triggers.
-2. Review and stabilize `20-platform-spec-outline.md` as the platform-spec outline from `04`, `05`, `07`, and the assessed inputs in `10` through `19`.
-3. Treat existing `../platform-spec/atoms/` files as draft spec-section input to be reviewed against the outline, not as accepted governance.
+2. Use `20-platform-spec-outline.md` as the platform-spec outline from `04`, `05`, `07`, and the assessed inputs in `10` through `19`.
+3. Treat existing `../platform-spec/sections/` files as candidate spec-section input to be reviewed against the outline, not as accepted platform specification.
+4. Start section drafting with `00`, `01`, `02`, `90`, and `91`; draft `03` only with its implementation-readiness blockers cited from `05`.
 
 Product-alignment material was created later and should be assessed separately before it affects this baseline closeout path.

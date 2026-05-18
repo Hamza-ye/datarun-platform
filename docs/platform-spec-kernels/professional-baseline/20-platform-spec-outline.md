@@ -2,7 +2,7 @@
 
 Status: Draft outline from accepted professional baseline
 
-This document defines the top-level structure for the normative platform specification. It is not the platform specification itself, not an implementation design, and not a new governance layer.
+This document defines the top-level structure for the normative platform specification. It is not the platform specification itself, not an implementation design, and not another process layer.
 
 The outline exists to route future platform-spec sections through accepted architecture responsibility areas before detailed spec text is accepted.
 
@@ -14,7 +14,7 @@ Primary inputs:
 - `05-decision-gap-register.md`
 - `07-system-boundary-map.md`
 
-Assessed inputs and guardrails:
+Assessed inputs already routed through `05`, `07`, and this outline:
 
 - `10-adr006r-flag-semantics-assessment.md`
 - `11-adr007-envelope-type-assessment.md`
@@ -30,7 +30,7 @@ Assessed inputs and guardrails:
 Not source authority for this outline:
 
 - ADR prose directly, except through the accepted baseline and classified assessments.
-- Existing `../platform-spec/atoms/` files. They are draft section input only.
+- Existing `../platform-spec/sections/` files. They are draft section input only.
 - Product-alignment material, until separately assessed into this baseline path.
 - Prior process labels or implementation-era contract IDs.
 
@@ -38,7 +38,7 @@ Not source authority for this outline:
 
 - Every normative behavior section must cite its accepted baseline source or a named gap in `05-decision-gap-register.md`.
 - Every normative behavior section must name one primary architecture responsibility owner from `07-system-boundary-map.md`.
-- Governance, source-control, open-decision, and rejected-path sections are non-behavioral control sections and must cite their governing professional-baseline source instead.
+- Source-authority, open-decision, and rejected-path sections are non-behavioral control sections and must cite their professional-baseline source instead.
 - Detailed platform-spec sections must not silently close architecture decision gaps.
 - Open decisions belong in a dedicated open-decisions section and must cite `05`.
 - Rejected alternatives belong in a dedicated rejected-paths section.
@@ -47,9 +47,9 @@ Not source authority for this outline:
 
 ## Top-Level Platform Specification Structure
 
-### 00. Specification Governance
+### 00. Specification Source Authority
 
-Primary owner: professional-baseline governance control
+Primary owner: professional-baseline source authority
 
 Purpose:
 
@@ -76,7 +76,7 @@ Blocking gaps:
 
 ### 01. Core Definitions And Boundary Vocabulary
 
-Primary owner: professional-baseline governance control
+Primary owner: professional-baseline source authority
 
 Purpose:
 
@@ -172,7 +172,7 @@ Must not include:
 
 Blocking or constraining gaps:
 
-- `Envelope type, shape ref, references, and parametrization boundary` is P1 guardrail material for this section.
+- `Envelope type, shape ref, references, and parametrization boundary` is P1 constraint material for this section.
 - `Event schema and versioning tooling` blocks final versioning obligations that affect compatibility and migration.
 - `Structured import/export compatibility` constrains compatibility language if external exchange is included.
 - `Process reference and process lifecycle semantics` blocks active process-reference lifecycle behavior if included.
@@ -474,7 +474,7 @@ Blocking or constraining gaps:
 
 ### 90. Open Decisions And Gap Register Citations
 
-Primary owner: professional-baseline governance control
+Primary owner: professional-baseline source authority
 
 Purpose:
 
@@ -500,7 +500,7 @@ Blocking gaps:
 
 ### 91. Rejected Alternatives
 
-Primary owner: professional-baseline governance control
+Primary owner: professional-baseline source authority
 
 Purpose:
 
@@ -523,7 +523,7 @@ Blocking gaps:
 
 ### 92. Source Basis And Change-Control Log
 
-Primary owner: professional-baseline governance control
+Primary owner: professional-baseline source authority
 
 Purpose:
 
@@ -552,7 +552,7 @@ This map identifies which `05` gaps block or constrain the first platform-spec s
 
 | Platform-Spec Section | Can Draft Stable Baseline Now? | Blocking Or Constraining Gaps |
 |---|---|---|
-| 00. Specification Governance | Yes | None. |
+| 00. Specification Source Authority | Yes | None. |
 | 01. Core Definitions And Boundary Vocabulary | Yes | None, if it stays definitional and uses `19`. |
 | 02. Event Log And Storage Model | Yes | Retention/archive and performance gaps constrain later implementation/policy text. |
 | 03. Event Envelope, Schema, And References | Partial | Versioning obligations, process-reference emission, structured import/export compatibility, and final reference serialization details remain constrained. |
@@ -569,11 +569,54 @@ This map identifies which `05` gaps block or constrain the first platform-spec s
 | 91. Rejected Alternatives | Yes | None. |
 | 92. Source Basis And Change-Control Log | Yes | None. |
 
+## Architecture Steward Review Of First Sections
+
+This review checks sections `00`, `01`, `02`, `03`, `90`, and `91` against `05-decision-gap-register.md`.
+
+Decision language:
+
+- `Can draft`: the section can be written as platform-spec text now.
+- `Implementation-ready`: engineering can depend on the section without inventing missing contracts.
+- `Blocker`: a `05` gap must be closed or explicitly held back before the section can claim the affected behavior.
+- `Constraint`: the section can proceed, but must state the limit and cite the owning `05` gap.
+
+| Section | Can Draft? | Implementation-Ready? | Architecture Steward Decision |
+|---|---|---|---|
+| `00. Specification Source Authority` | Yes | Yes for source hierarchy and status rules | No `05` gap blocks this section. It must establish that `05` remains the canonical open-gap register and that candidate section files are not normative until accepted under the platform-spec outline. |
+| `01. Core Definitions And Boundary Vocabulary` | Yes | Yes for vocabulary only | No `05` gap blocks definitional text. The section must not close final bundled shape inventory, Pattern Registry inventory, general flag catalog, role taxonomy, process lifecycle, or reference serialization. It should use `19` and cite `05` where a term names an open surface. |
+| `02. Event Log And Storage Model` | Yes | Yes for append-only storage invariants; no for retention, archival, performance, or local lifecycle mechanics | No architecture gap blocks event-log source-of-truth, append-only acceptance, or projection-derived state. `Projection performance and caching`, `Low-end device scale and offline performance`, and `Retention and archival` are constraints. The section must not define deletion, redaction, archive policy, compaction, cache strategy, or low-end-device budgets as settled behavior. |
+| `03. Event Envelope, Schema, And References` | Yes | Partial | The stable envelope axes can be drafted now: required baseline fields, six `type` values, `shape_ref`, `actor_ref`, optional `activity_ref`, device-time advisory semantics, `device_sequence`, and `sync_watermark`. Implementation-ready append still needs enough schema/reference detail to validate an event. Therefore `Event schema and versioning tooling` and final reference serialization/emission details are blockers for implementation-ready append semantics, unless explicitly held back from the first slice. `Process reference and process lifecycle semantics` is a blocker only if process lifecycle or active process-reference emission is included. `Structured import/export compatibility` is a constraint only if external exchange is included. |
+| `90. Open Decisions And Gap Register Citations` | Yes | Yes, if synchronized with `05` | No `05` gap blocks this section. It must not duplicate ownership or invent closure. Its job is to cite `05`, list affected platform-spec sections, and state whether each gap is a blocker, constraint, deferral, policy item, implementation/tooling item, or product-validation item. |
+| `91. Rejected Alternatives` | Yes | Yes for forbidden paths | No `05` gap blocks this section. It must preserve rejected paths from `04`, `08`, and assessed inputs without adding new rejections. If a rejected path appears necessary for implementation, the response is change control, not local exception text. |
+
+First-section blocker result:
+
+- `00`, `01`, `02`, `90`, and `91` can be drafted now without closing additional `05` gaps.
+- `03` can be drafted now as the envelope boundary section, but cannot be treated as sufficient for implementation-ready append until schema/versioning and reference serialization/emission obligations are settled or explicitly scoped out of the first append slice.
+- The first implementation-facing slice must not begin from `02` alone. Append-to-log needs at least stable text from `00`, `01`, `02`, `03`, `90`, and `91`.
+
+Immediate gap decisions for the first sections:
+
+| Gap From `05` | Decision For Sections `00`, `01`, `02`, `03`, `90`, `91` |
+|---|---|
+| `Envelope type, shape ref, references, and parametrization boundary` | Constraint for `01`, `03`, and `91`; not a blocker if the sections preserve the axis split and do not add envelope fields, type values, actor subclasses, or product classes. |
+| `Event schema and versioning tooling` | Blocker for implementation-ready `03`; constraint for conceptual `03`. The first append slice needs at least normative event schema/version obligations, even if tooling and migration design remain later. |
+| Final reference serialization and active emission details under the envelope/reference gap | Blocker for implementation-ready `03` if append validation requires canonical reference field names, placement, cardinality, or required emission sites. Can be held back only if the first slice limits references narrowly and states that limit. |
+| `Process reference and process lifecycle semantics` | Not a blocker for first sections if process lifecycle and active process-reference emission are out of scope. Blocker if `03` or `01` tries to define process lifecycle behavior. |
+| `Structured import/export compatibility` | Not a blocker for first sections unless `03` or `91` defines external exchange. Keep as explicit hold-back. |
+| `Projection performance and caching` | Constraint for `02`; not a blocker. Do not specify cache/rebuild strategy as architecture. |
+| `Low-end device scale and offline performance` | Constraint for `02`; not a blocker. Do not use performance pressure to weaken event-log source of truth. |
+| `Retention and archival` | Constraint for `02` and `91`; blocker only if the section defines deletion, redaction, archival, or canonical-history mutation. |
+| `Operational actor vocabulary and operation-class routing` | Constraint for `01` and `91`; not a blocker if role labels remain examples and operation classes remain behavioral. |
+| `Exact Pattern Registry inventory` and `Formal Pattern Registry schema format` | Not blockers for first sections. `01` may define `pattern` only as a term; it must not define inventory or schema. |
+| `General flag semantics`, `Domain conflict automation outside workflow`, `Alias-cycle enforcement and resolution semantics`, and `Source-chain traversal limits` | Not blockers for first sections unless `91` lists rejected/held-back paths. They remain blockers for later flag, workflow, and identity behavior sections. |
+| `Subject-based scope and auditor access`, `Shared device actor scope`, `Temporary authority and offline revocation reconciliation`, and `Authorization visibility and role-action detail surfaces` | Not blockers for first sections unless `03` over-defines actor/session/reference behavior. They remain blockers for affected authority/sync/reporting sections. |
+
 ## Recommended Drafting Order
 
 Draft in this order to keep the first pass professionally bounded:
 
-1. `00. Specification Governance`
+1. `00. Specification Source Authority`
 2. `01. Core Definitions And Boundary Vocabulary`
 3. `91. Rejected Alternatives`
 4. `90. Open Decisions And Gap Register Citations`
@@ -586,7 +629,7 @@ Draft in this order to keep the first pass professionally bounded:
 11. `08. Flags, Conflict Surfacing, And Resolution`
 12. `09` through `12` only where a selected platform-spec slice needs them
 
-This order establishes governance and vocabulary first, then stable event/configuration foundations, then authority and identity, then workflow and flags where the P1 gaps must be handled explicitly.
+This order establishes source authority and vocabulary first, then stable event/configuration foundations, then authority and identity, then workflow and flags where the P1 gaps must be handled explicitly.
 
 ## Immediate Decisions Before Detailed Sections
 
@@ -602,9 +645,28 @@ Before accepting detailed platform-spec sections, decide or explicitly defer the
 
 Items outside that list can usually remain as explicit section hold-backs until implementation planning or deployment policy requires them.
 
-## Existing Draft Section Inputs
+## Minimum Append-To-Log Gate
 
-Existing `../platform-spec/atoms/` files should be reviewed only after this outline is accepted. Review should classify each file as one of:
+The accepted architecture baseline is not enough by itself to implement even the first append-to-log slice. Before engineering design treats event append as buildable, the first platform-spec sections must settle or explicitly hold back the following:
+
+| Needed For First Append | Platform-Spec Section | Required Standing |
+|---|---|---|
+| Source authority and status rules | `00. Specification Source Authority` | Stable enough that implementation knows which documents are normative. |
+| Core vocabulary | `01. Core Definitions And Boundary Vocabulary` | Stable enough that `event`, `envelope`, `payload`, `shape_ref`, references, actor, device, projection, and configuration mean one thing. |
+| Append-only storage invariant | `02. Event Log And Storage Model` | Normative statement that accepted events are immutable operational facts and projections are derived. |
+| Event acceptance boundary | `02` and `03. Event Envelope, Schema, And References` | Clear split between structural rejection and accepted state anomaly. |
+| Minimal envelope contract | `03` | Required fields, six `type` values, `shape_ref`, `actor_ref`, `activity_ref`, subject/reference obligations where in scope, device metadata, and timestamp semantics. |
+| Shape/version obligation | `03` and `06. Configuration And Parameterization` | Enough shape naming/versioning and validation language to decide whether a payload matches its declared shape. |
+| Authorship and device distinction | `03` and `05. Assignment, Authority, And Sync` | `actor_ref` authorship and device identity cannot be collapsed; shared-device behavior can be explicitly held back if out of first slice. |
+| Offline ordering/concurrency metadata | `03` and `05` | `device_sequence`, `sync_watermark`, and advisory `device_time` semantics must be clear enough for append and later sync. |
+| Open-decision citation | `90. Open Decisions And Gap Register Citations` | Any missing reference serialization, schema tooling, sync delivery, or authorization detail must be visible as a `05` gap, not hidden in implementation. |
+| Rejected paths | `91. Rejected Alternatives` | Implementation must know not to add mutable canonical records, snapshot-primary truth, new envelope fields, stored authority snapshots, or structural ordering by device time. |
+
+If any first-slice implementation needs final reference serialization, process-reference emission, shared-device sessions, temporary authority, schema migration, or sync transport behavior, that need must be routed to the owning gap before code depends on it.
+
+## Existing Candidate Section Inputs
+
+Existing `../platform-spec/sections/` files should be reviewed only after this outline is accepted. Review should classify each file as one of:
 
 - compatible section input
 - needs rewrite to match outline section ownership
@@ -612,4 +674,4 @@ Existing `../platform-spec/atoms/` files should be reviewed only after this outl
 - contains rejected or unauthorized baseline drift
 - implementation/tooling material, not normative platform specification
 
-They should not be treated as accepted governance or as the source of this outline.
+They should not be treated as accepted platform specification or as the source of this outline.

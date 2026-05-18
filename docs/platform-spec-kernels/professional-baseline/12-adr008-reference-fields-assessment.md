@@ -2,7 +2,7 @@
 
 Status: Later-source assessment against accepted ADR-001 through ADR-005 baseline
 
-This document assesses `../../adrs/adr-008-envelope-reference-fields.md` through the accepted baseline, identity boundary-control overlay, and architecture responsibility map. ADR-008 is assessment material only. It does not supersede ADR-001 through ADR-005 automatically.
+This document assesses `../../adrs/adr-008-envelope-reference-fields.md` through the accepted baseline, identity boundary-routing input, and architecture responsibility map. ADR-008 is assessment material only. It does not supersede ADR-001 through ADR-005 automatically.
 
 ## Source Basis
 
@@ -64,9 +64,9 @@ This is mostly consistent with the accepted baseline and strongly reinforces `09
 | S2: human/system authorship discriminator is `system:` prefix | Open-gap closure candidate | Useful contract detail, but final acceptance should be coordinated with ADR-007 shape/type and ADR-009 mechanism/configuration classification. |
 | S3: `activity_ref` is optional, deployer-chosen, and auto-populated from activity context | Consistent elaboration plus implementation/spec detail | Compatible with ADR-004 optional `activity_ref`. Auto-population behavior is spec/implementation detail, not a new architecture baseline by itself. |
 | S3: activity instance is config while `activity_ref` is contract | Consistent elaboration | Strongly aligned with the reference-vs-referent rule and the platform/deployer boundary. |
-| S4: reference is not referent | Consistent elaboration | Safe and important carry-forward. It matches the current identity boundary-control overlay and should govern platform-spec drafting. |
-| F-B1: never classify a `*_ref` field and referent in the same row | Consistent elaboration | Safe as classification guardrail. |
-| F-B2: never extend `subject_ref.type` without an ADR | Consistent elaboration | Safe as envelope stability guardrail. |
+| S4: reference is not referent | Consistent elaboration | Safe and important carry-forward. It matches the current identity boundary-routing input and should constrain platform-spec drafting. |
+| F-B1: never classify a `*_ref` field and referent in the same row | Consistent elaboration | Safe as a classification constraint. |
+| F-B2: never extend `subject_ref.type` without an ADR | Consistent elaboration | Safe as an envelope stability constraint. |
 | F-B3: never treat `actor_ref.source_type` as closed enum | Consistent elaboration | Safe if scoped to source-type vocabulary only, not the envelope field shape. |
 | F-B4: do not use envelope `type` for authorship | Consistent elaboration | Reinforces ADR-007 assessment. Authorship belongs in `actor_ref`; processing belongs in `type`. |
 | Future dedicated `assignment_ref` question | Deferred architecture decision candidate | No current baseline change. If assignment references need a separate envelope field rather than the existing typed-reference channel, that is an Event Envelope / Schema decision with Assignment / Authority / Sync impact. |

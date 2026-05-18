@@ -2,7 +2,7 @@
 
 Status: Iteration 40 validated closure overlay
 
-This file is a compact closure overlay for ADR-001 through ADR-005. It does not replace the larger staging files and does not delete lineage. The staging files remain the evidence trail; this register records the current rest-state baseline that later platform-spec atomization and ADR-006+ assessment must preserve.
+This file is a compact closure overlay for ADR-001 through ADR-005. It does not replace the larger staging files and does not delete lineage. The staging files remain the evidence trail; this register records the current rest-state baseline that later platform-spec section drafting and ADR-006+ assessment must preserve.
 
 ## Use Rules
 
@@ -289,7 +289,7 @@ These are not unresolved architecture disputes unless a later valid source turns
 - Auto-resolution authoring UX and reporting/monitoring surface.
 - Sync pagination, priority, bandwidth handling, transport details, and operational delivery mechanics.
 - Accepted-risk revisit triggers from ADR-001 through ADR-005 remain monitoring inputs for platform specification and implementation work.
-- Platform-spec atomization and final document structure.
+- Platform-spec section drafting and final document structure.
 
 Source/covered-by anchors:
 

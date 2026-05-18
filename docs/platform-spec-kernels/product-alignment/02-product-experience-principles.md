@@ -2,7 +2,7 @@
 
 Status: Session 2 product-alignment artifact
 
-This document states product-facing principles for the platform experience before selected-slice atomization. These principles translate the domain ambition, constraints, behavioral patterns, and Session 1 boundary map into testable UX/product expectations.
+This document states product-facing principles for the platform experience before selected-slice platform-spec section drafting. These principles translate the domain ambition, constraints, behavioral patterns, and Session 1 boundary map into testable UX/product expectations.
 
 They are not architecture decisions. They do not rename baseline mechanisms or close gaps. They guide later role, journey, information architecture, vocabulary, interaction-state, and first-slice work.
 
@@ -28,7 +28,7 @@ Architecture guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 ## Principle Status
 
@@ -242,7 +242,7 @@ Configuration must remain bounded. Deployers configure shapes, activities, roles
 Later-session tests:
 
 - User-role artifact must define setup/coordination expectations separately from field and review/oversight work.
-- Journeys must include a setup/configuration journey before atomization readiness.
+- Journeys must include a setup/configuration journey before platform-spec section drafting readiness.
 - Information architecture must keep admin/configuration surfaces connected to operational concepts without exposing raw internals.
 - UX gap routing must preserve configuration authoring/deployment UX and Pattern Registry inventory/schema gaps.
 
@@ -270,7 +270,7 @@ Later-session tests:
 
 Product rule:
 
-Implementation progression should start with a thin but real operational slice that composes multiple product boundaries, instead of atomizing every internal platform surface first.
+Implementation progression should start with a thin but real operational slice that composes multiple product boundaries, instead of platform-spec drafting every internal platform surface first.
 
 Scenario pressure:
 
@@ -284,7 +284,7 @@ Later-session tests:
 
 - Core journeys should identify slice candidates.
 - UX gap routing should mark which gaps block or do not block the first slice.
-- First vertical slice should name its accepted scope, excluded concerns, and atomization dependencies.
+- First vertical slice should name its accepted scope, excluded concerns, and platform-spec section drafting dependencies.
 
 ## Principle-To-Session Trace
 

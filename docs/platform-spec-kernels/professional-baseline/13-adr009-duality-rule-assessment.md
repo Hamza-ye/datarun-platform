@@ -32,7 +32,7 @@ ADR-009 names a classification rule already latent in ADR-003, ADR-004, and ADR-
 - platform-fixed mechanism: closed vocabulary, grammar, protocol, containment test, or typed interface owned by the platform
 - deployer-configured instance: named, parameterized occurrence assembled and shipped by a deployer within bounded configuration
 
-The rule is useful because prior implementation work conflated mechanism and instance, causing broadness drift. The safe reading is that ADR-009 is a classification guardrail for platform-spec drafting, not a new runtime subsystem.
+The rule is useful because prior implementation work conflated mechanism and instance, causing broadness drift. The safe reading is that ADR-009 is a classification constraint for platform-spec drafting, not a new runtime subsystem.
 
 ## Responsibility Routing
 
@@ -60,7 +60,7 @@ Concrete role labels and pattern participant bindings sit on the instance side o
 | S3: pattern-related instance rows remain separate | Consistent elaboration plus platform-spec detail | Safe as spec-drafting guidance. Exact Pattern Registry inventory and formal schema remain P1 gaps. |
 | S4: `activity` is deployer-configured instance | Consistent elaboration | ADR-004 places activities in bounded configuration; ADR-008 separates `activity_ref` field contract from the activity referent. This is safe and useful. |
 | S4: `activity_ref` remains contract while `activity` is config | Consistent elaboration | Reinforces ADR-008 assessment and prevents reference/referent conflation. |
-| F-C1: do not classify mechanism as config or instance as primitive | Consistent elaboration | Safe as a forbidden-pattern guardrail for future platform-spec drafting and later claim assessment. |
+| F-C1: do not classify mechanism as config or instance as primitive | Consistent elaboration | Safe as a forbidden-pattern constraint for future platform-spec drafting and later claim assessment. |
 | General future use of the duality rule | Consistent elaboration with change-control limit | Safe as a classification test. It must not be used to close a new mechanism without checking whether that mechanism is actually open, closed, or disputed under the baseline. |
 
 ## Accepted Carry-Forward Candidates
@@ -98,7 +98,7 @@ No new gap is required from ADR-009 by itself. Existing gaps already cover the d
 - `Formal Pattern Registry Schema Format`
 - `Configuration Authoring And Deployment UX`
 
-## Spec Drafting Guardrail
+## Specification Drafting Classification Check
 
 When drafting platform-spec sections, do not create a single section that mixes:
 
@@ -118,4 +118,4 @@ ADR-007, ADR-008, and ADR-009 together form a useful classification triad:
 
 The later-source assessment sequence is closed for ADR-006-R through ADR-009.
 
-During platform-spec drafting, use the accepted carry-forward candidates and explicit hold-backs from `10`, `11`, `12`, and this assessment together with the later control overlays in `15` and `16`.
+During platform-spec drafting, use the accepted carry-forward candidates and explicit hold-backs from `10`, `11`, `12`, and this assessment together with the routed findings in `15` and `16`.

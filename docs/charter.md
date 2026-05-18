@@ -1,8 +1,8 @@
 # Datarun Charter — Currently Decided State
 
-> **FORBIDDEN FOR PLATFORM-SPEC ATOMIZATION.**
+> **FORBIDDEN FOR CURRENT PLATFORM-SPECIFICATION WORK.**
 > This file is a legacy convergence/Ship status surface. Do not use it as
-> authority for the current platform-spec atomization path. Start at
+> authority for the current platform-specification path. Start at
 > [`platform-spec-kernels/professional-baseline/README.md`](platform-spec-kernels/professional-baseline/README.md).
 > The legacy instructions below are retained only for historical Ship/convergence
 > context and must not override this warning.

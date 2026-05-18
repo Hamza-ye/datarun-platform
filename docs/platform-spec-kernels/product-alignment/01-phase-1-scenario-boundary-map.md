@@ -2,7 +2,7 @@
 
 Status: Session 1 product-alignment artifact
 
-This document groups Phase 1 scenarios by product experience boundary and operational tension. It is not an architecture rewrite and not a platform-spec atom. It prepares later product/UX artifacts by asking: what does the platform need to feel like to users across the Phase 1 problem space?
+This document groups Phase 1 scenarios by product experience boundary and operational tension. It is not an architecture rewrite and not a platform-platform-spec section. It prepares later product/UX artifacts by asking: what does the platform need to feel like to users across the Phase 1 problem space?
 
 ## Source Basis
 
@@ -27,7 +27,7 @@ Guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 Vocabulary decisions belong in `06-product-vocabulary-alignment.md`.
 

@@ -2,7 +2,7 @@
 
 Status: Session 9 product-alignment artifact
 
-This document selects the first product-backed vertical slice for atomization and implementation progression. It is a slice-selection gate, not a delivery plan, not a backlog, and not an architecture decision.
+This document selects the first product-backed vertical slice for platform-spec section drafting and implementation progression. It is a slice-selection gate, not a delivery plan, not a backlog, and not an architecture decision.
 
 The goal is to choose the smallest slice that proves product behavior, scenario pressure, and baseline boundary ownership compose under offline conditions without quietly closing unresolved gaps.
 
@@ -28,7 +28,7 @@ Architecture guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 ## Control Rule
 
@@ -236,7 +236,7 @@ Short form:
 Assigned offline capture -> sync visibility -> authorized review -> returned correction -> evidence/history -> minimal freshness-aware oversight
 ```
 
-Where source scenarios call this `supervisor review`, that phrase is product shorthand. The atomized reading is review by an actor whose current assignment, scope, activity context, and policy values authorize that judgment. It is not a fixed `Supervisor` platform class.
+Where source scenarios call this `supervisor review`, that phrase is product shorthand. The platform-spec reading is review by an actor whose current assignment, scope, activity context, and policy values authorize that judgment. It is not a fixed `Supervisor` platform class.
 
 This slice is selected because it proves the smallest meaningful operational loop where product behavior and accepted architecture boundaries have to cooperate:
 
@@ -458,19 +458,19 @@ The selected slice agrees with baseline boundary ownership only under these cons
 - no setup builder
 - no auditor/subject-based scope
 
-If any of these constraints are violated during atomization, the slice is no longer safe and must route back to `08-ux-gap-routing.md` or change control.
+If any of these constraints are violated during platform-spec section drafting, the slice is no longer safe and must route back to `08-ux-gap-routing.md` or change control.
 
-## First Atomization Direction
+## First Platform specification section drafting Direction
 
-The first atomization should be product-backed and boundary-aware:
+The first platform-spec section drafting should be product-backed and boundary-aware:
 
 1. Define the selected slice as a thin product spec.
-2. Split platform atoms only where the slice needs them.
-3. Keep each atom tied to one accepted boundary.
+2. Split platform sections only where the slice needs them.
+3. Keep each section tied to one accepted boundary.
 4. Route gaps explicitly instead of embedding assumptions.
 5. Preserve product vocabulary layering from `06-product-vocabulary-alignment.md`.
 
-Likely atomization surfaces after this slice:
+Likely platform-spec section drafting surfaces after this slice:
 
 - selected-slice product behavior
 - event/history obligations for capture, decision, correction
@@ -480,7 +480,7 @@ Likely atomization surfaces after this slice:
 - evidence/history projection for the slice
 - minimal freshness-aware oversight for the slice
 
-Do not atomize broad platform areas yet:
+Do not draft broad platform areas yet:
 
 - full authorization model
 - full sync engine
@@ -495,5 +495,5 @@ Do not atomize broad platform areas yet:
 
 Later product artifacts should use this selected slice as follows:
 
-- `10-atomization-readiness-from-product.md` should verify that this slice is sufficient to restart atomization narrowly and identify which atoms are safe now.
+- `10-platform-spec-readiness-from-product.md` should verify that this slice is sufficient to restart platform-spec section drafting narrowly and identify which sections are safe now.
 - `11-alignment-closeout.md` should record this slice as the product-backed input surface.

@@ -62,7 +62,7 @@ Rank gaps by what they block.
 Priority levels:
 
 - P0: blocks architecture baseline acceptance
-- P1: blocks platform specification outline
+- P1: blocks affected platform-spec sections
 - P2: blocks implementation planning for a core subsystem
 - P3: product/operations detail that can wait
 
@@ -134,12 +134,12 @@ A production team at this stage would stabilize the baseline first, then move th
 
 ## Completed Stabilization Outcome
 
-This stabilization sequence has been completed through the professional-baseline overlays:
+This stabilization sequence has been completed through the professional-baseline records:
 
 1. `08-baseline-acceptance-check.md` accepted the ADR-001 through ADR-005 baseline.
 2. `07-system-boundary-map.md` was validated, corrected where needed, and reframed as an architecture responsibility map.
 3. ADR-006-R through ADR-009 were assessed against the stabilized gaps and responsibility areas in `10` through `13`.
 4. Historical pattern-inventory material was assessed in `14`.
-5. Control overlays in `15` through `19` were added before platform-spec drafting.
+5. Assessment records in `15` through `19` captured cross-cutting risks and routed durable content into `05`, `07`, `20`, or future platform-spec sections.
 
-Current platform-spec drafting should use the accepted baseline, gap register, architecture responsibility map, later-source assessments, and control overlays rather than restarting this stabilization sequence.
+Current platform-spec drafting should use the accepted baseline, gap register, architecture responsibility map, and platform-spec outline. Use `10` through `19` only as traceable assessed inputs where a section needs their routed findings.

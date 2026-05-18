@@ -20,7 +20,7 @@ Primary baseline inputs:
 - `04-architecture-baseline-v0.md`
 - `05-decision-gap-register.md`
 
-Accepted validation overlays:
+Accepted validation inputs:
 
 - `08-baseline-acceptance-check.md`
 - `09-identity-boundary-control.md`
@@ -95,7 +95,7 @@ Use the documents at these altitudes:
 
 ## Cross-Boundary Contracts
 
-| Contract | Primary Owner | Crosses Into | Baseline Guardrail |
+| Contract | Primary Owner | Crosses Into | Baseline Constraint |
 |---|---|---|---|
 | Event envelope contract | Event Envelope / Schema | Event Log / Storage, Identity / Lineage, Assignment / Authority / Sync, Projection / Workflow State | No new envelope fields or structural type values without change control. |
 | Original-reference contract | Identity / Lineage | Assignment / Authority / Sync, Flag / Resolution | Authorization checks use original subject reference, not post-merge alias projection. |

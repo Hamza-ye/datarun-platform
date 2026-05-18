@@ -1,8 +1,8 @@
 # Operational Constraints Boundary Control
 
-Status: Spec-drafting-ready dependency-aware control overlay
+Status: Assessed boundary-routing input already routed into the baseline/spec path
 
-This document preserves `../../constraints.md` as operational envelope authority without letting it become architecture or implementation authority. The constraints shaped the ADR path, but they do not decide mechanisms by themselves.
+This document records how `../../constraints.md` creates operational pressure without becoming architecture or implementation authority. The constraints shaped the ADR path, but they do not decide mechanisms by themselves. Durable authority and routing belong in `05`, `07`, and `20`.
 
 The core rule is: constraints define what the platform must work within; ADR-001 through ADR-005 define the accepted mechanisms currently used to satisfy those constraints; unresolved constraint pressure must be routed as explicit gaps rather than silently widening existing boundaries.
 
@@ -205,7 +205,7 @@ Before writing a spec section affected by operational constraints, check:
 
 ## Baseline Impact
 
-This overlay does not change ADR-001 through ADR-005 baseline behavior.
+This assessment does not change ADR-001 through ADR-005 baseline behavior.
 
 It does require one visibility update to the professional baseline: structured import/export compatibility should be explicit in the gap register and boundary routing. The constraint already exists in extracted domain kernels, but without a professional-baseline route it can be forgotten during platform-spec drafting.
 
@@ -213,7 +213,7 @@ No new boundary is required. Structured exchange should route primarily through 
 
 ## Recommended Next Step
 
-Use this overlay alongside `15-conflict-flag-offline-boundary-control.md` to draft the first platform-spec plan. The plan should explicitly hold back:
+Use these routed findings through `05`, `07`, and `20` when drafting platform-spec sections. The affected sections should explicitly hold back:
 
 - structured import/export contracts
 - reporting freshness metadata

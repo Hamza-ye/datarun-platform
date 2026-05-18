@@ -1,20 +1,21 @@
 version: 1
-status: active
-canonical_root: docs/platform-spec-kernels/platform-spec
+status: candidate-input
+candidate_root: docs/platform-spec-kernels/platform-spec
 source_basis_root: docs/platform-spec-kernels
 agent_start:
   read_first:
-  - atom-registry.yml
+  - ../professional-baseline/20-platform-spec-outline.md
+  - section-registry.yml
   - README.md
-  - process/01-atomization-operating-plan.md
-  rule: Use this registry to find the next atom and relevant files; use the atom files
-    as authority.
-update_rule: If an atom path, status, owner_role, boundary, batch, dependencies, blocking
+  - process/01-platform-spec-section-operating-plan.md
+  rule: Use this registry to find candidate section material and relevant files; use
+    accepted professional-baseline documents and the platform-spec outline as authority.
+update_rule: If a section path, status, owner_role, boundary, batch, dependencies, blocking
   relationship, or source_basis changes, update this registry in the same commit.
 status_values:
 - planned
 - draft
-- accepted
+- candidate-input
 - deferred
 - hold-back
 - rejected
@@ -26,15 +27,16 @@ owner_roles:
 - Delivery Lead
 - Product Owner
 next_recommended:
-- SPEC-007
-- SPEC-006
-atoms:
+- Review first section drafts against 05 and 20
+- Prepare section acceptance review for 00, 01, 02, 90, and 91
+- Resolve or explicitly hold back 03 implementation-readiness blockers
+sections:
 - id: SPEC-001
-  title: Spec Governance And Source Authority
-  file: atoms/01-spec-governance.md
+  title: Specification Source Authority
+  file: sections/00-specification-source-authority.md
   status: draft
   batch: 1A
-  boundary: Cross-boundary process
+  boundary: professional-baseline source authority
   owner_role: Architecture Steward
   depends_on: []
   blocks:
@@ -53,22 +55,19 @@ atoms:
   - SPEC-091
   - SPEC-092
   source_basis:
-  - platform-spec/atom-registry.yml
   - professional-baseline/02-change-control.md
   - professional-baseline/03-artifact-definitions.md
   - professional-baseline/04-architecture-baseline-v0.md
   - professional-baseline/05-decision-gap-register.md
   - professional-baseline/07-system-boundary-map.md
-  - pre-operations/01-decision-board-operating-model.md
-  - pre-operations/04-accepted-pre-atomization-decisions.md
-  - platform-spec/process/01-atomization-operating-plan.md
+  - professional-baseline/20-platform-spec-outline.md
   github_issue: 1
 - id: SPEC-002
-  title: Glossary And Core Definitions
-  file: atoms/02-glossary-and-core-definitions.md
-  status: accepted
+  title: Core Definitions And Boundary Vocabulary
+  file: sections/01-core-definitions-and-boundary-vocabulary.md
+  status: draft
   batch: 1B
-  boundary: Cross-boundary definitions
+  boundary: professional-baseline source authority
   owner_role: Architecture Steward
   depends_on:
   - SPEC-001
@@ -84,18 +83,15 @@ atoms:
   - SPEC-010
   source_basis:
   - professional-baseline/04-architecture-baseline-v0.md
+  - professional-baseline/05-decision-gap-register.md
   - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
-  - pre-operations/04-accepted-pre-atomization-decisions.md
-  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
   - professional-baseline/19-envelope-shape-parametrization-definitions.md
+  - professional-baseline/20-platform-spec-outline.md
   github_issue: 2
 - id: SPEC-003
-  title: Event Log And Storage
-  file: atoms/03-event-log-storage.md
-  status: accepted
+  title: Event Log And Storage Model
+  file: sections/02-event-log-and-storage-model.md
+  status: draft
   batch: 1B
   boundary: Event Log / Storage
   owner_role: Architecture Steward
@@ -117,11 +113,12 @@ atoms:
   - professional-baseline/07-system-boundary-map.md
   - professional-baseline/15-conflict-flag-offline-boundary-control.md
   - professional-baseline/16-operational-constraints-boundary-control.md
+  - professional-baseline/20-platform-spec-outline.md
   github_issue: 3
 - id: SPEC-004
-  title: Event Envelope And Schema
-  file: atoms/04-event-envelope-schema.md
-  status: accepted
+  title: Event Envelope, Schema, And References
+  file: sections/03-event-envelope-schema-and-references.md
+  status: draft
   batch: 1B
   boundary: Event Envelope / Schema
   owner_role: Architecture Steward
@@ -141,18 +138,16 @@ atoms:
   - professional-baseline/04-architecture-baseline-v0.md
   - professional-baseline/05-decision-gap-register.md
   - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/09-identity-boundary-control.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
+  - professional-baseline/11-adr007-envelope-type-assessment.md
+  - professional-baseline/12-adr008-reference-fields-assessment.md
   - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
   - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  - pre-operations/04-accepted-pre-atomization-decisions.md
+  - professional-baseline/20-platform-spec-outline.md
   github_issue: 4
 - id: SPEC-005
   title: References And Identity Lineage
-  file: atoms/05-references-and-identity-lineage.md
-  status: accepted
+  file: sections/05-references-and-identity-lineage.md
+  status: candidate-input
   batch: 2
   boundary: Identity / Lineage
   owner_role: Architecture Steward
@@ -182,7 +177,7 @@ atoms:
   github_issue: 5
 - id: SPEC-006
   title: Configuration And Parameterization
-  file: atoms/06-configuration-and-parametrization.md
+  file: sections/06-configuration-and-parametrization.md
   status: draft
   batch: 2
   boundary: Configuration
@@ -210,7 +205,7 @@ atoms:
   github_issue: 6
 - id: SPEC-007
   title: Assignment, Authority, And Sync
-  file: atoms/07-assignment-authority-and-sync.md
+  file: sections/07-assignment-authority-and-sync.md
   status: draft
   batch: 2
   boundary: Assignment / Authority / Sync
@@ -240,11 +235,11 @@ atoms:
   - professional-baseline/17-authorization-visibility-boundary-control.md
   - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
   - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  - pre-operations/04-accepted-pre-atomization-decisions.md
+  - pre-operations/04-accepted-pre-specification-decisions.md
   github_issue: 7
 - id: SPEC-008
   title: Local Data Lifecycle
-  file: atoms/08-local-data-lifecycle.md
+  file: sections/08-local-data-lifecycle.md
   status: planned
   batch: 4
   boundary: Local Data Lifecycle
@@ -264,7 +259,7 @@ atoms:
   github_issue: 8
 - id: SPEC-009
   title: Projections, Workflow, And Patterns
-  file: atoms/09-projections-workflow-and-patterns.md
+  file: sections/09-projections-workflow-and-patterns.md
   status: planned
   batch: 3
   boundary: Projection / Workflow State
@@ -291,7 +286,7 @@ atoms:
   github_issue: 9
 - id: SPEC-010
   title: Conflict, Flag, And Resolution
-  file: atoms/10-conflict-flag-and-resolution.md
+  file: sections/10-conflict-flag-and-resolution.md
   status: planned
   batch: 3
   boundary: Flag / Resolution
@@ -318,7 +313,7 @@ atoms:
   github_issue: 10
 - id: SPEC-011
   title: Trigger And Reactivity
-  file: atoms/11-trigger-reactivity.md
+  file: sections/11-trigger-reactivity.md
   status: planned
   batch: 3
   boundary: Trigger / Reactivity
@@ -340,7 +335,7 @@ atoms:
   github_issue: 15
 - id: SPEC-012
   title: Reporting, Aggregation, And Freshness
-  file: atoms/12-reporting-aggregation-and-freshness.md
+  file: sections/12-reporting-aggregation-and-freshness.md
   status: planned
   batch: 4
   boundary: Reporting / Aggregation
@@ -362,11 +357,11 @@ atoms:
   - professional-baseline/17-authorization-visibility-boundary-control.md
   github_issue: 11
 - id: SPEC-090
-  title: Open Decisions And Hold-backs
-  file: atoms/90-open-decisions.md
+  title: Open Decisions And Gap Register Citations
+  file: sections/90-open-decisions-and-gap-register-citations.md
   status: draft
   batch: 1A
-  boundary: Cross-boundary control register
+  boundary: professional-baseline source authority
   owner_role: Architecture Steward
   depends_on:
   - SPEC-001
@@ -383,23 +378,16 @@ atoms:
   - SPEC-011
   - SPEC-012
   source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
   - professional-baseline/05-decision-gap-register.md
   - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/09-identity-boundary-control.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
-  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
-  - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  - pre-operations/04-accepted-pre-atomization-decisions.md
+  - professional-baseline/20-platform-spec-outline.md
   github_issue: 12
 - id: SPEC-091
-  title: Rejected Paths
-  file: atoms/91-rejected-paths.md
+  title: Rejected Alternatives
+  file: sections/91-rejected-alternatives.md
   status: draft
   batch: 1A
-  boundary: Cross-boundary control register
+  boundary: professional-baseline source authority
   owner_role: Challenge Reviewer
   depends_on:
   - SPEC-001
@@ -417,18 +405,13 @@ atoms:
   - SPEC-012
   source_basis:
   - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/09-identity-boundary-control.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
-  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
-  - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  - pre-operations/04-accepted-pre-atomization-decisions.md
+  - professional-baseline/05-decision-gap-register.md
+  - professional-baseline/08-baseline-acceptance-check.md
+  - professional-baseline/20-platform-spec-outline.md
   github_issue: 13
 - id: SPEC-092
   title: Change-Control Log
-  file: atoms/92-change-control-log.md
+  file: sections/92-change-control-log.md
   status: draft
   batch: 1A
   boundary: Cross-boundary process register
@@ -442,6 +425,6 @@ atoms:
   - professional-baseline/02-change-control.md
   - professional-baseline/04-architecture-baseline-v0.md
   - professional-baseline/05-decision-gap-register.md
-  - platform-spec/process/01-atomization-operating-plan.md
-  - platform-spec/atoms/01-spec-governance.md
+  - platform-spec/process/01-platform-spec-section-operating-plan.md
+  - platform-spec/sections/00-specification-source-authority.md
   github_issue: 14

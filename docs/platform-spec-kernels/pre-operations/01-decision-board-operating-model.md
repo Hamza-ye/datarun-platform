@@ -2,7 +2,7 @@
 
 Status: Working operating model; not platform behavior authority
 
-This document defines a small decision board for the solo-plus-AI project mode. It exists to separate authority, drafting, challenge, and delivery before platform-spec atomization.
+This document defines a small decision board for the solo-plus-AI project mode. It exists to separate authority, drafting, challenge, and delivery before platform-spec platform-spec section drafting.
 
 The board is not a committee and not a source of architecture by itself. It is a repeatable way to decide what becomes architecture, what remains a hold-back, and what can be safely deferred.
 
@@ -38,7 +38,7 @@ Bring a decision to this board when it:
 - affects more than one stakeholder group
 - would be expensive to reverse after implementation
 - could cause AI agents or implementation code to reinterpret the baseline
-- blocks atomization planning or first implementation sequencing
+- blocks platform-spec section drafting planning or first implementation sequencing
 
 Do not use the board for ordinary implementation details, naming, minor UI copy, small refactors, or low-risk local design.
 
@@ -107,7 +107,7 @@ Every reviewed item must end in one of these outcomes:
 | Accepted | The project may use this as the working decision. |
 | Rejected | Do not use this path without reopening. |
 | Deferred | Safe to postpone; record the trigger that would reopen it. |
-| Hold-back | Do not decide now, but prevent atomization from accidentally deciding it. |
+| Hold-back | Do not decide now, but prevent platform-spec section drafting from accidentally deciding it. |
 | Needs spike | Run a focused technical or product investigation. |
 | Needs stakeholder input | Decision depends on real-world usage, policy, or adoption tradeoffs. |
 | Requires formal ADR/change | The choice changes a baseline invariant or creates a new architecture-grade mechanism. |
@@ -118,9 +118,9 @@ Avoid vague outcomes such as "later" or "TBD" without a reopen trigger.
 
 | Priority | Decision | Current action |
 |---|---|---|
-| Now | Deployment / tenancy guardrail | Review `02-deployment-tenancy-decision-brief.md` before affected atomization. |
-| Now | Authentication / actor mapping guardrail | Review `03-authentication-actor-mapping-decision-brief.md` before authorization/sync atomization. |
-| Next | Notifications / escalation routing | Route through Trigger / Reactivity and Flag / Resolution after the first two guardrails. |
+| Now | Deployment / tenancy decision | Review `02-deployment-tenancy-decision-brief.md` before affected platform-spec section drafting. |
+| Now | Authentication / actor mapping decision | Review `03-authentication-actor-mapping-decision-brief.md` before authorization/sync platform-spec section drafting. |
+| Next | Notifications / escalation routing | Route through Trigger / Reactivity and Flag / Resolution after the first two decisions. |
 | Next | Admin / configuration surfaces | Route through Configuration and Assignment / Authority / Sync before implementation planning. |
 | Later | Reporting, audit/export, retention, local lifecycle | Keep visible as deferred unless first deployment requires them. |
 
@@ -139,23 +139,23 @@ AI agents must not:
 - silently accept a baseline change
 - decide stakeholder priority
 - turn a recommendation into accepted architecture
-- write final spec atoms from unaccepted briefs
+- write final platform-spec sections from unaccepted briefs
 - collapse product, architecture, and delivery judgment into one answer
 
 ## Operating Rhythm
 
-Use this rhythm while atomization is being planned:
+Use this rhythm while platform-spec section drafting is being planned:
 
 1. Maintain a small queue of board-worthy decisions.
 2. Draft one or two briefs at a time.
 3. Review each brief through the role views.
 4. Record one allowed outcome.
-5. Update the atomization plan, gap register, or hold-back list.
-6. Only then draft affected final spec atoms.
+5. Update the platform-spec section drafting plan, gap register, or hold-back list.
+6. Only then draft affected final platform-spec sections.
 
 ## Immediate Rule
 
-Before affected atomization, resolve or explicitly hold back:
+Before affected platform-spec section drafting, resolve or explicitly hold back:
 
 - deployment/tenant context and whether it stays outside the event envelope
 - authentication/account-to-actor mapping and whether groups are authority sources or provisioning/configuration helpers

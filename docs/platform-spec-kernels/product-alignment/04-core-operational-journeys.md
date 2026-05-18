@@ -4,7 +4,7 @@ Status: Session 4 product-alignment artifact
 
 This document describes the recurring operational journeys the product must support across Phase 1 scenarios. It is not a wireframe, not an information architecture, not a workflow schema, and not an implementation plan.
 
-The purpose is to make user-facing movement through the platform explicit before selected-slice atomization: how work appears, how users act on it, how review and oversight happen, how offline work remains understandable, and where unresolved pressure must route to gaps instead of becoming hidden architecture debt.
+The purpose is to make user-facing movement through the platform explicit before selected-slice platform-spec section drafting: how work appears, how users act on it, how review and oversight happen, how offline work remains understandable, and where unresolved pressure must route to gaps instead of becoming hidden architecture debt.
 
 ## Source Basis
 
@@ -27,7 +27,7 @@ Architecture guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 ## Control Rule
 
@@ -647,7 +647,7 @@ The product must provide these behaviors across the journey set:
 
 ## Product Debt Filter
 
-A journey detail is not stable enough for atomization if it:
+A journey detail is not stable enough for platform-spec section drafting if it:
 
 - creates a new platform object only because one scenario needs a convenient screen label
 - assumes a gap is closed without naming it

@@ -2,7 +2,7 @@
 
 Status: Session 5 product-alignment artifact
 
-This document defines the product's information architecture direction before selected-slice atomization. It describes how users should find work, records, review, oversight, setup, evidence, exceptions, and sync state as one coherent product.
+This document defines the product's information architecture direction before selected-slice platform-spec section drafting. It describes how users should find work, records, review, oversight, setup, evidence, exceptions, and sync state as one coherent product.
 
 It is not a final sitemap, wireframe set, route table, permission model, data model, or implementation plan.
 
@@ -28,7 +28,7 @@ Architecture guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 ## Control Rule
 
@@ -596,15 +596,15 @@ Avoid these IA shapes:
 | Evidence | auditor access; structured import/export; retention/archive; sensitive local data lifecycle |
 | Sync And Local Status | sync delivery mechanics; local data lifecycle; shared-device actor scope; temporary authority/offline revocation |
 
-## Atomization Implications
+## Platform specification section drafting Implications
 
-Session 5 does not authorize broad product-spec atomization yet. It does clarify what later atomization must preserve:
+Session 5 does not authorize broad product-spec platform-spec section drafting yet. It does clarify what later platform-spec section drafting must preserve:
 
 - product specs should describe reusable surfaces, not scenario-specific apps
 - work discovery, capture, review, oversight, setup, evidence, exception, and sync language must be vocabulary-aligned before implementation specs harden
 - first-slice planning should prove movement across surfaces, not just isolated capture
 - implementation tickets should not use IA labels as storage or service boundaries
-- unresolved IA pressure should route to `08-ux-gap-routing.md` before platform-spec atoms depend on it
+- unresolved IA pressure should route to `08-ux-gap-routing.md` before platform-platform-spec sections depend on it
 
 ## Session 5 Output
 

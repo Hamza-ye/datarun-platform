@@ -1,8 +1,8 @@
 # Authorization Visibility Boundary Control
 
-Status: Spec-drafting-ready dependency-aware control overlay
+Status: Assessed boundary-routing input already routed into the baseline/spec path
 
-This document preserves `../../access-control-scenario.md` as authorization and visibility pressure without letting it silently rewrite ADR-003 or turn into a deployer-authored access-control system.
+This document records how `../../access-control-scenario.md` creates authorization and visibility pressure without silently rewriting ADR-003 or becoming a deployer-authored access-control system. Durable authority and routing belong in `05`, `07`, and `20`.
 
 The core rule is: the access-control scenario states what must remain possible across roles, context, hierarchy, temporary authority, and offline operation. ADR-001 through ADR-005 define the accepted mechanisms currently allowed to satisfy that pressure. Anything not closed by those mechanisms must route through the gap register and change control before platform-spec drafting freezes it into specification language.
 
@@ -19,7 +19,7 @@ Primary inputs:
 - `09-identity-boundary-control.md`
 - `15-conflict-flag-offline-boundary-control.md`
 - `16-operational-constraints-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 - `../../access-control-scenario.md`
 
 Lineage context:
@@ -84,7 +84,7 @@ Use these classifications during platform-spec drafting and later review:
 
 | Claim Type | Classification | Allowed Handling |
 |---|---|---|
-| accounts authenticate, actors author, assignments authorize | consistent elaboration | Carry forward from `../pre-operations/04-accepted-pre-atomization-decisions.md`. |
+| accounts authenticate, actors author, assignments authorize | consistent elaboration | Carry forward from `../pre-operations/04-accepted-pre-specification-decisions.md`. |
 | role, scope, activity, time, and subject/context all influence authority | consistent elaboration plus platform-spec detail | Specify as inputs to the authority projection without adding envelope fields or stored authority snapshots. |
 | concrete permission tables, role names, and deployer policy values | platform-spec detail or operational policy | Keep bounded by platform-owned mechanisms and configuration limits. |
 | product role labels used as UI lenses or scenario shorthand | product clarification plus platform-spec detail | Preserve as operating-context language; do not create fixed actor classes or direct authority shortcuts. |
@@ -127,7 +127,7 @@ Operational actor labels sit on the instance/product side of this split. `Superv
 
 Before writing an authorization, sync, reporting, trigger, workflow, or local-lifecycle spec section:
 
-1. Is the claim a closed ADR-001 through ADR-005 rule, a pre-operations guardrail, an access-control pressure, or an open gap?
+1. Is the claim a closed ADR-001 through ADR-005 rule, a pre-operations accepted decision, an access-control pressure, or an open gap?
 2. Does it preserve assignment-derived access and sync scope as access scope?
 3. Does it keep authentication, actor authorship, assignment authority, and device identity separate?
 4. Does it require a new scope type, auditor path, subject-based scope, or cross-level visibility rule?
@@ -139,13 +139,13 @@ Before writing an authorization, sync, reporting, trigger, workflow, or local-li
 
 ## Baseline Impact
 
-No ADR-001 through ADR-005 baseline item should be changed by this overlay.
+No ADR-001 through ADR-005 baseline item should be changed by this assessment.
 
-This overlay adds one gap-register clarification: temporary authority, revocation, and offline grace reconciliation should be explicit before authorization/sync specification if the first platform spec needs to describe temporary grants or late revocation behavior.
+This assessment added one gap-register clarification: temporary authority, revocation, and offline grace reconciliation should be explicit before authorization/sync specification if the first platform spec needs to describe temporary grants or late revocation behavior.
 
 ## Recommended Next Step
 
-Use this overlay with `15-conflict-flag-offline-boundary-control.md`, `16-operational-constraints-boundary-control.md`, and `../pre-operations/04-accepted-pre-atomization-decisions.md` as the final pre-spec-drafting guardrail surface.
+Use the routed findings through `05`, `07`, and `20`, with `../pre-operations/04-accepted-pre-specification-decisions.md` as assessed source material where relevant.
 
 Hold back from first platform-spec drafting unless explicitly needed:
 

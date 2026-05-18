@@ -60,11 +60,11 @@ This is mostly consistent elaboration of the accepted ADR-001 through ADR-005 ba
 | S2: `conflict_detected/v1` rides `type=alert` | Open-gap closure candidate | Plausible under ADR-004 `alert` semantics and ADR-006-R candidate flag semantics, but depends on accepting general flag event-stream representation. Do not promote independently of the flag-semantics closure. |
 | S2: manual `conflict_resolved/v1` rides `type=review`; auto-resolution rides `type=capture` | Open-gap closure candidate | This is a precise mapping for resolution facts. It is compatible with ADR-005 auto-resolution actor attribution, but final acceptance depends on closing general flag resolution semantics. |
 | S2: `subjects_merged/v1` and `subject_split/v1` ride `type=capture` | Consistent elaboration plus identity-spec candidate | Compatible with identity lineage as append-only facts and with not adding envelope types. Exact shape contracts should be captured in identity/lineage spec only after alias-cycle handling is decided or explicitly deferred. |
-| S3: consumers identify identity/integrity facts by `shape_ref`, not `type` | Consistent elaboration | Safe and useful as a boundary guardrail. It preserves `type` as processing vocabulary and prevents implementation modules from reintroducing pre-convergence drift. |
+| S3: consumers identify identity/integrity facts by `shape_ref`, not `type` | Consistent elaboration | Safe and useful as a specification constraint. It preserves `type` as processing vocabulary and prevents implementation modules from reintroducing pre-convergence drift. |
 | S4: deterministic flag identity includes `shape_ref` | Open-gap closure candidate plus deferred spec detail | Compatible with shape-based fact discrimination, but belongs to Flag / Resolution and depends on general flag identity semantics. Do not absorb before ADR-006-R/ADR-007/ADR-008/ADR-009 are jointly classified for flags. |
 | S5: platform-bundled shape registry obligation for four integrity/identity shapes | Open-gap closure candidate | Directionally compatible with platform-owned mechanisms and deployer-configured shapes, but needs ADR-009 duality assessment before final classification. It must not be read as deployers authoring platform integrity shapes. |
-| Forbidden patterns F-A1 through F-A4 | Consistent elaboration | Safe as guardrails: do not add envelope `type` values, do not discriminate domain facts by `type`, do not encode authorship in `type`, and escalate type-vocabulary expansion. |
-| Forbidden pattern F-A5 | Open-gap closure candidate | Useful guardrail, but shape-across-type authorship rules should be accepted only alongside the final shape/reference classification from ADR-008/009. |
+| Forbidden patterns F-A1 through F-A4 | Consistent elaboration | Safe as constraints: do not add envelope `type` values, do not discriminate domain facts by `type`, do not encode authorship in `type`, and escalate type-vocabulary expansion. |
+| Forbidden pattern F-A5 | Open-gap closure candidate | Useful constraint, but shape-across-type authorship rules should be accepted only alongside the final shape/reference classification from ADR-008/009. |
 | Supersession of ADR-002 Addendum | Deferred source-management detail | The addendum is not part of the accepted ADR-001 through ADR-005 baseline authority for this pass. ADR-007 can be used as assessment material without accepting repository-wide supersession mechanics. |
 
 ## Accepted Carry-Forward Candidates
@@ -105,4 +105,4 @@ No new gap is required from ADR-007 by itself. Existing gaps already cover the d
 
 ADR-008 was assessed in `12-adr008-reference-fields-assessment.md`.
 
-During platform-spec drafting, use this assessment to preserve the `type` versus `shape_ref` separation and the listed envelope guardrails.
+During platform-spec drafting, use this assessment to preserve the `type` versus `shape_ref` separation and the listed envelope constraints.

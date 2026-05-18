@@ -9,24 +9,24 @@ Source basis:
 - `../../professional-baseline/02-change-control.md`
 - `../../professional-baseline/04-architecture-baseline-v0.md`
 - `../../professional-baseline/05-decision-gap-register.md`
-- `../process/01-atomization-operating-plan.md`
-- `01-spec-governance.md`
+- `../process/01-platform-spec-section-operating-plan.md`
+- `00-specification-source-authority.md`
 
 Depends on:
 
-- `01-spec-governance.md`
-- `90-open-decisions.md`
-- `91-rejected-paths.md`
+- `00-specification-source-authority.md`
+- `90-open-decisions-and-gap-register-citations.md`
+- `91-rejected-alternatives.md`
 
 Consumed by:
 
-- all future atom reviews
+- all future section reviews
 - decision board reviews
 - implementation planning
 
 ## Purpose
 
-This log records formal changes, disputes, accepted gap closures, and rejected baseline challenges that arise during platform-spec atomization.
+This log records formal changes, disputes, accepted gap closures, and rejected baseline challenges that arise during platform-spec platform-spec section drafting.
 
 ## Scope
 
@@ -49,11 +49,11 @@ This log does not own:
 
 - No accepted ADR-001 through ADR-005 baseline item is changed unless recorded here or in a later designated change-control artifact.
 - Every accepted baseline-affecting change must name the affected baseline item, source claim, classification, decision owner, result, and rationale.
-- This log starts empty because no platform-spec atomization change has yet modified the accepted baseline.
+- This log starts empty because no platform-spec platform-spec section drafting change has yet modified the accepted baseline.
 
 ## Change-Control Entries
 
-No accepted baseline changes have been recorded during platform-spec atomization yet.
+No accepted baseline changes have been recorded during platform-spec platform-spec section drafting yet.
 
 ## Entry Template
 
@@ -64,7 +64,7 @@ Status: Proposed | Accepted | Rejected | Deferred | Valid Dispute | Superseded
 Date:
 Decision owner:
 Affected baseline item:
-Affected atom:
+Affected section:
 Source claim:
 Classification:
 
@@ -93,14 +93,14 @@ Use the classifications from `../../professional-baseline/02-change-control.md`:
 ### Inputs
 
 - change-control proposals
-- atom review findings
+- section review findings
 - decision board outcomes
 - implementation pressure that challenges baseline behavior
 
 ### Outputs
 
 - accepted or rejected change-control records
-- affected atom updates
+- affected section updates
 - open-decision register updates
 - rejected-path register updates
 
@@ -110,7 +110,7 @@ Use the classifications from `../../professional-baseline/02-change-control.md`:
 |---|---|---|
 | Open Decisions | closure or deferral entries | Accepted closure may remove or revise hold-backs. |
 | Rejected Paths | rejected or reopened paths | Reopening requires explicit record. |
-| Behavior Atoms | affected atom updates | Atoms update only after change-control outcome is recorded. |
+| Behavior Sections | affected section updates | Sections update only after change-control outcome is recorded. |
 
 ## Allowed Extension Points
 
@@ -128,7 +128,7 @@ Use the classifications from `../../professional-baseline/02-change-control.md`:
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
 | Whether change-control entries should receive stable IDs tied to commits | Architecture Steward / Delivery Lead | Before the first accepted baseline-affecting change. |
-| Whether this log remains in platform-spec or moves to a broader decisions folder | Decision Board | If change-control volume grows beyond atomization work. |
+| Whether this log remains in platform-spec or moves to a broader decisions folder | Decision Board | If change-control volume grows beyond platform-spec section drafting work. |
 
 ## Review Checklist
 

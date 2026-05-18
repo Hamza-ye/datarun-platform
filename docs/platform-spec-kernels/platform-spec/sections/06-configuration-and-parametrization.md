@@ -16,12 +16,12 @@ Source basis:
 
 Depends on:
 
-- `01-spec-governance.md`
-- `02-glossary-and-core-definitions.md`
-- `04-event-envelope-schema.md`
+- `00-specification-source-authority.md`
+- `01-core-definitions-and-boundary-vocabulary.md`
+- `03-event-envelope-schema-and-references.md`
 - `05-references-and-identity-lineage.md`
-- `90-open-decisions.md`
-- `91-rejected-paths.md`
+- `90-open-decisions-and-gap-register-citations.md`
+- `91-rejected-alternatives.md`
 
 Consumed by:
 
@@ -33,11 +33,11 @@ Consumed by:
 
 ## Purpose
 
-This atom defines the narrow Configuration boundary for bounded deployer parameterization. It lets deployments vary shapes, activities, labels, bindings, schedules, thresholds, severities, sensitivity classifications, and policy values inside platform-owned mechanisms without letting configuration redefine the event envelope, authority model, workflow mechanisms, reference lineage, or platform code.
+This section defines the narrow Configuration boundary for bounded deployer parameterization. It lets deployments vary shapes, activities, labels, bindings, schedules, thresholds, severities, sensitivity classifications, and policy values inside platform-owned mechanisms without letting configuration redefine the event envelope, authority model, workflow mechanisms, reference lineage, or platform code.
 
 ## Scope
 
-This atom owns:
+This section owns:
 
 - deployer-defined shapes and shape versions as payload schemas identified by `shape_ref`
 - deployer-configured activity instances referenced by optional `activity_ref`
@@ -49,7 +49,7 @@ This atom owns:
 
 ## Non-Scope
 
-This atom does not own:
+This section does not own:
 
 - event-envelope fields, structural reference categories, structural `type` values, or envelope serialization
 - platform-owned structural event processing semantics
@@ -64,18 +64,18 @@ This atom does not own:
 
 ## Definitions
 
-| Term | Meaning In This Atom | Must Not Mean |
+| Term | Meaning In This Section | Must Not Mean |
 |---|---|---|
 | Configuration | Bounded deployer selection of values inside platform-owned mechanisms | General-purpose programming language, platform extension runtime, or architecture authority |
 | Deployer parameterization | Selection of names, bindings, scopes, thresholds, severities, schedules, sensitivity classifications, pattern bindings, role/action mappings, or policy values inside accepted limits | Permission to author envelope fields, event type values, access-control programs, state-machine mechanisms, detector algorithms, or platform code |
 | Configuration package | Atomic deployer configuration unit that groups bounded definitions and policy values for deployment validation and distribution | Final versioning model, migration UX, stale-work reconciliation policy, or mutable event truth |
-| Shape definition | Deployer-defined typed payload schema and version identified by `shape_ref` unless a later atom accepts a platform-bundled shape | Envelope `type`, workflow state, authority marker, platform-owned domain catalog, or referent lifecycle owner |
+| Shape definition | Deployer-defined typed payload schema and version identified by `shape_ref` unless a later section accepts a platform-bundled shape | Envelope `type`, workflow state, authority marker, platform-owned domain catalog, or referent lifecycle owner |
 | Activity definition | Deployer-configured operational instance that may bind shapes, pattern selections, role/action mappings, scope parameters, schedules, deadlines, thresholds, severities, sensitivity classifications, and policy values | Tenant/deployment identity, work-item identity, assignment authority, pattern identity, or immutable authority context |
 | Role label | Deployer or product vocabulary mapped through configuration and later consumed by assignment, pattern capacity, or product surfaces | Platform actor subclass, direct permission grant, envelope type, or authority source |
-| Role/action mapping | Bounded configuration declaration that maps deployer role labels or capacities to platform-owned action categories where a later authority atom consumes them | Final permission table, direct access-control program, or complete authority policy |
+| Role/action mapping | Bounded configuration declaration that maps deployer role labels or capacities to platform-owned action categories where a later authority section consumes them | Final permission table, direct access-control program, or complete authority policy |
 | Policy value | Deployer-selected value inside a platform-owned mechanism, such as severity, threshold, deadline, sensitivity classification, or uniqueness constraint | New platform mechanism, arbitrary rule program, or event-envelope field |
-| Sensitivity classification | Shape-level or activity-level policy value consumed by authority, local lifecycle, reporting, or operational policy where later atoms define effects | Field-level sensitivity mechanism, regulatory framework implementation, or automatic access bypass |
-| Platform-bundled shape | Narrow platform-supplied payload schema for an explicitly platform-owned fact, if later accepted by the owning atom | General platform-owned domain schema catalog or new structural event type |
+| Sensitivity classification | Shape-level or activity-level policy value consumed by authority, local lifecycle, reporting, or operational policy where later sections define effects | Field-level sensitivity mechanism, regulatory framework implementation, or automatic access bypass |
+| Platform-bundled shape | Narrow platform-supplied payload schema for an explicitly platform-owned fact, if later accepted by the owning section | General platform-owned domain schema catalog or new structural event type |
 
 ## Invariants
 
@@ -83,14 +83,14 @@ This atom does not own:
 - The platform owns structural event type vocabulary and processing semantics. Configuration must not add, remove, rename, or reinterpret the six accepted structural `type` values from `SPEC-004`.
 - Every event payload schema is addressed through `shape_ref` using the accepted `SPEC-004` meaning and format. Configuration must not use `shape_ref` as workflow state, authority marker, product surface, role label, tenant identity, deployment identity, or online/offline marker.
 - `activity_ref` remains optional event context for a configured activity instance. Configuration must not use `activity_ref` as immutable `authority_context`, pattern reference, tenant/deployment reference, assignment authority, or product queue identity.
-- Shapes are deployer-defined by default. Platform-bundled shapes remain narrow exceptions owned by the relevant behavior atom and are not accepted as a final inventory here.
+- Shapes are deployer-defined by default. Platform-bundled shapes remain narrow exceptions owned by the relevant behavior section and are not accepted as a final inventory here.
 - Activity definitions may bind platform-owned mechanisms and deployer values, but they do not create new platform mechanisms.
 - Role labels and role/action mappings are configuration inputs to later assignment, authority, pattern, and product-surface behavior. They are not platform actor subclasses or direct authority grants.
 - Sensitivity classification is configurable only at shape or activity level under the accepted baseline. Field-level sensitivity remains rejected unless formally reopened.
 - Configuration packages must be validated before they are treated as deployable configuration, but final authoring format, deployment UX, validator UX, package versioning, and stale-configuration reconciliation remain open.
 - Structurally valid offline work created under older configuration must not be retroactively invalidated solely because newer configuration has synced. Exact stale-configuration reconciliation remains open.
 - Configuration does not own referent lifecycle. Referent registration, attributes, catalogs, and final reference serialization remain routed through the open gaps and owning boundaries.
-- Configuration cannot close authority, sync, workflow, flag, reporting, or local lifecycle gaps by providing values those later atoms have not accepted.
+- Configuration cannot close authority, sync, workflow, flag, reporting, or local lifecycle gaps by providing values those later sections have not accepted.
 
 ## Contracts
 
@@ -99,7 +99,7 @@ This atom does not own:
 - accepted envelope meanings for structural `type`, `shape_ref`, optional `activity_ref`, payload, references, and system actor convention from Event Envelope / Schema
 - accepted glossary definitions for configuration, deployer parameterization, shape, activity, pattern, role label, and policy value
 - accepted Identity / Lineage constraints on raw references, subject-lineage ownership, and referent lifecycle non-ownership
-- platform-owned mechanism definitions from later accepted atoms, including assignment/scope mechanisms, pattern mechanisms, flag categories, trigger capabilities, reporting constraints, and local lifecycle effects where applicable
+- platform-owned mechanism definitions from later accepted sections, including assignment/scope mechanisms, pattern mechanisms, flag categories, trigger capabilities, reporting constraints, and local lifecycle effects where applicable
 - deployer-supplied shape definitions, activity definitions, labels, bindings, schedules, thresholds, severities, sensitivity classifications, and policy values
 - open-decision and rejected-path registers for validation against unresolved gaps and forbidden encodings
 
@@ -110,7 +110,7 @@ This atom does not own:
 - bounded role/action mapping declarations for later authority and workflow consumers
 - bounded schedule, threshold, deadline, severity, sensitivity-classification, and policy-value declarations
 - configuration package validation results that distinguish deployable bounded configuration from rejected configuration drift
-- handoff artifacts for downstream atoms that consume configuration without treating draft configuration behavior as accepted authority
+- handoff artifacts for downstream sections that consume configuration without treating draft configuration behavior as accepted authority
 
 ### Boundary Crossings
 
@@ -130,7 +130,7 @@ This atom does not own:
 - Deployers may add shape definitions and shape versions within accepted naming, validation, and package constraints.
 - Deployers may configure activity instances and bind them to shapes, pattern selections, role/action mappings, scope parameters, schedules, thresholds, deadlines, severities, sensitivity classifications, and policy values inside accepted limits.
 - Deployers may choose product-facing labels if they map back to platform-owned mechanisms and do not become platform actor classes, envelope types, or canonical storage primitives.
-- Later atoms may define additional platform-owned mechanisms that configuration can parameterize, provided they preserve the platform/deployer responsibility boundary.
+- Later sections may define additional platform-owned mechanisms that configuration can parameterize, provided they preserve the platform/deployer responsibility boundary.
 - Implementation tooling may choose authoring, packaging, validation, and migration UX later, provided it preserves atomic configuration packages, bounded validation, and older-configuration coexistence constraints.
 
 ## Forbidden Couplings
@@ -153,11 +153,11 @@ This atom does not own:
 | Configuration versioning and stale-configuration reconciliation | Configuration plus Event Envelope / Schema and Assignment / Authority / Sync | Configuration packages, shape/version coexistence, offline work under older configuration, or migration behavior must be specified. |
 | Configuration authoring and deploy-time validation UX | Configuration plus implementation tooling | Admin/configuration authoring, packaging, deploy-time validator UX, or breaking-change migration tooling is selected for implementation. |
 | Event schema/versioning tooling | Event Envelope / Schema plus Event Log / Storage and Configuration | Validation, schema registry, migration, or mixed-version event handling must be implemented. |
-| Platform-bundled shape inventory | Owning behavior atoms plus Event Envelope / Schema and Configuration | A platform-owned fact needs a normative bundled shape or payload schema. |
-| Formal Pattern Registry schema and exact inventory | Projection / Workflow State plus Configuration | Workflow atom or implementation needs serialized pattern definitions, validation tooling, or normative pattern skeletons. |
+| Platform-bundled shape inventory | Owning behavior sections plus Event Envelope / Schema and Configuration | A platform-owned fact needs a normative bundled shape or payload schema. |
+| Formal Pattern Registry schema and exact inventory | Projection / Workflow State plus Configuration | Workflow section or implementation needs serialized pattern definitions, validation tooling, or normative pattern skeletons. |
 | Permission/activity authority details | Assignment / Authority / Sync plus Configuration | Concrete permission matrices, role/action bindings, activity/context authority semantics, or policy values must become normative. |
 | Referent registration, attributes, and catalogs | Event Envelope / Schema, Identity / Lineage, Configuration, Projection / Workflow State, and Assignment / Authority / Sync | A spec needs subject registration events, descriptive attribute mutation/projection, deployer-defined catalogs, or lifecycle ownership for non-subject referents. |
-| Final reference serialization and active emission sites | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior atoms | A later atom or implementation needs canonical field names, placement, cardinality, or required emission sites for subject, causal, process, assignment, or other typed-reference values. |
+| Final reference serialization and active emission sites | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior sections | A later section or implementation needs canonical field names, placement, cardinality, or required emission sites for subject, causal, process, assignment, or other typed-reference values. |
 
 ## Rejected Paths
 
@@ -198,11 +198,11 @@ Challenge Review, 2026-05-12:
 
 - Verdict: Pass With Notes. No rejected-path reintroduction or change-control trigger found.
 - Draft checklist remains unchecked by design; checklist completion is deferred to the future acceptance workflow.
-- Forbidden-path terms appear only as guardrails, rejected paths, or non-scope constraints.
+- Forbidden-path terms appear only as constraints, rejected paths, or non-scope constraints.
 
 Integration Review, 2026-05-12:
 
-- Verdict: Carry Explicit Gap. `SPEC-006` is consumable by planned downstream atoms only with explicit gaps preserved.
+- Verdict: Carry Explicit Gap. `SPEC-006` is consumable by planned downstream sections only with explicit gaps preserved.
 - `SPEC-007` can consume configuration inputs for authority work only if role labels, role/action mappings, activity context, scope parameters, schedules, sensitivity classifications, and policy values remain inputs to assignment-derived authority rather than grants.
 - `SPEC-009` can consume pattern selections, shape roles, and activity bindings while carrying Pattern Registry inventory/schema, projection compatibility, and platform-bundled shape gaps.
 - `SPEC-010` can consume configured severities, thresholds, uniqueness values, and bounded detector parameters only if detector logic, flag lifecycle, and resolution semantics remain outside Configuration.

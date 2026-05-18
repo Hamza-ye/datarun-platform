@@ -1,8 +1,8 @@
 # Envelope, Shape, And Parametrization Boundary Control
 
-Status: Spec-drafting-ready extraction and control overlay
+Status: Assessed lineage and boundary-routing input already routed into the baseline/spec path
 
-This document records the focused ADR-004 lineage for `shape_ref`, envelope `type`, platform-fixed structure, and deployer parametrization. It is not a new architecture decision and does not supersede any ADR.
+This document records the focused ADR-004 lineage for `shape_ref`, envelope `type`, platform-fixed structure, and deployer parametrization. It is not a new architecture decision, does not supersede any ADR, and is not a current authority source. Durable authority and routing belong in `05`, `07`, and `20`.
 
 The purpose is to prevent a recurring drift pattern: treating operational facts, workflow labels, role labels, or product surfaces as new envelope types, platform classes, or core architectural boundaries when the accepted model routes them through shapes, references, patterns, configuration, projections, and assignments.
 
@@ -24,17 +24,17 @@ Accepted closure sources:
 - `05-decision-gap-register.md`
 - `07-system-boundary-map.md`
 
-Later assessment guardrails, used only as classified assessment material:
+Later assessments, used only as classified assessment material:
 
 - `11-adr007-envelope-type-assessment.md`
 - `12-adr008-reference-fields-assessment.md`
 - `13-adr009-duality-rule-assessment.md`
 - `14-pattern-inventory-walkthrough-assessment.md`
 
-Related product controls:
+Related product context, not baseline authority:
 
 - `../product-alignment/09-first-vertical-slice.md`
-- `../product-alignment/10-atomization-readiness-from-product.md`
+- `../product-alignment/10-platform-spec-readiness-from-product.md`
 - `../product-alignment/11-alignment-closeout.md`
 
 ## Extraction Pass Result
@@ -130,7 +130,7 @@ Only the first is an envelope type. Only the second is a platform-fixed pattern 
 
 ## Drift Risks Found
 
-The current baseline and product-alignment edits mostly preserve the line. The risk is not that the architecture has already hard-coded the wrong model. The risk is that spec writers may collapse the axes unless the control is explicit.
+The current baseline preserves the line. Product-alignment material may provide scenario pressure after separate assessment, but it must not act as baseline authority. The risk is that spec writers may collapse the axes unless the classification is explicit.
 
 High-risk misreads:
 
@@ -162,7 +162,7 @@ The boundary is behavioral, not persona-based:
 
 Operational role labels can describe who commonly performs an operation. They do not define the operation's architectural class.
 
-## Control Rules
+## Specification Classification Rules
 
 ### C1: Type Is Processing Behavior
 
@@ -284,7 +284,7 @@ The accepted baseline already contains the correct architecture line:
 - `11`, `12`, and `13` later-source assessments provide a useful triad: type is not domain fact; reference is not referent; mechanism is not instance.
 - `14-pattern-inventory-walkthrough-assessment.md` correctly keeps pattern inventory/schema candidate-only.
 
-No ADR wording needs deletion or rewrite. The needed correction is this explicit spec-drafting control surface plus the companion definition file.
+No ADR wording needs deletion or rewrite. The needed correction has been routed into the gap register, responsibility map, platform-spec outline, and companion definition material.
 
 ## Spec Acceptance Checks
 
@@ -302,12 +302,12 @@ Before accepting a spec section involving events, shapes, patterns, review, assi
 
 ## Baseline Impact
 
-This overlay does not change ADR-001 through ADR-005 baseline behavior.
+This assessment does not change ADR-001 through ADR-005 baseline behavior.
 
-It makes one platform-spec detail gap explicit: platform-spec drafting needs a concise, citable definition of envelope type, `shape_ref`, references, pattern mechanism, deployer parameterization, and prohibited encodings. That definition is provided in `19-envelope-shape-parametrization-definitions.md`.
+It makes one platform-spec detail gap explicit: platform-spec drafting needs a concise, citable definition of envelope type, `shape_ref`, references, pattern mechanism, deployer parameterization, and prohibited encodings. Candidate definition material is provided in `19-envelope-shape-parametrization-definitions.md`.
 
 ## Recommended Next Step
 
-Use this overlay and `19-envelope-shape-parametrization-definitions.md` before drafting event-envelope, review, Pattern Registry, selected-slice, or authorization/sync spec sections.
+Use the routed findings through `05`, `07`, and `20`, and use `19-envelope-shape-parametrization-definitions.md` as candidate source material before drafting event-envelope, review, Pattern Registry, selected-slice, or authorization/sync specification sections.
 
 The selected slice may proceed only if the review loop is framed as a narrow use of the existing type/shape/pattern/configuration axes, not as a new core model.

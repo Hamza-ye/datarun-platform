@@ -1,8 +1,8 @@
 # Conflict Flag Offline Boundary Control
 
-Status: Spec-drafting-ready dependency-aware control overlay
+Status: Assessed boundary-routing input already routed into the baseline/spec path
 
-This document prevents the accepted conflict, flag, and offline-default surfaces from collapsing into one broad implementation boundary. It does not re-decide ADR-001 through ADR-005, does not absorb ADR-006-R through ADR-009 as authority, and does not reuse pre-convergence primitive maps as final architecture.
+This document records the assessed routing needed to keep the accepted conflict, flag, and offline-default surfaces from collapsing into one broad implementation boundary. It does not re-decide ADR-001 through ADR-005, does not absorb ADR-006-R through ADR-009 as authority, does not reuse pre-convergence primitive maps as final architecture, and is not a current authority source. Durable authority and routing belong in `05`, `07`, and `20`.
 
 The key correction is that `accept-and-flag`, `detect-before-act`, conflict detection, flag lifecycle, workflow state exclusion, authorization checks, and offline operation are related controls, not one subsystem. They exist because the platform principles created durable pressure, and ADR-001 through ADR-005 then validated narrower mechanisms.
 
@@ -46,7 +46,7 @@ Therefore:
 
 ## Principle-To-Control Mapping
 
-| Principle Pressure | Accepted Mechanism | Primary Responsibility Area | Control Meaning |
+| Principle Pressure | Accepted Mechanism | Primary Responsibility Area | Routed Meaning |
 |---|---|---|---|
 | P1: Offline is the default | client-generated IDs, local event creation, immutable sync, advisory command validation | Event Log / Storage; Event Envelope / Schema; Assignment / Authority / Sync | Offline capture cannot require complete global knowledge. Sync must reconcile later state knowledge without treating offline creation as exceptional. |
 | P2: Configuration has boundaries | platform-fixed structural event types, bounded deployer policy surfaces, Pattern Registry mechanism | Configuration; Projection / Workflow State | Deployer policy may configure thresholds/severities/shape bindings, but must not define platform detection engines, structural event vocabulary, or arbitrary authority logic. |
@@ -56,7 +56,7 @@ Therefore:
 | P6: Authority is contextual and auditable | assignment-derived access, authority-as-projection, original-subject authorization | Assignment / Authority / Sync | Authorization conflicts are detected from assignment and sync knowledge, not from stored immutable authority snapshots or identity projection shortcuts. |
 | P7: Simplest scenario stays simple | S00 avoids workflow patterns, flags, triggers, and special resolution in the happy path | All boundaries | Conflict/flag/offline machinery must be opt-in by scenario pressure and must not burden basic structured capture. |
 
-## Control Vocabulary
+## Assessment Vocabulary
 
 Use these terms narrowly during platform-spec drafting:
 
@@ -165,7 +165,7 @@ Not safe to absorb yet:
 - source-only cascade as general flag semantics outside ADR-005 workflow cases
 - auto-resolution for non-workflow or security-relevant conflicts without formal classification
 
-## Iteration 27 Guardrail
+## Iteration 27 Assessment
 
 The pre-convergence mapping treated these as broad cross-cutting concerns:
 
@@ -178,7 +178,7 @@ The pre-convergence mapping treated these as broad cross-cutting concerns:
 - flag catalog
 - aggregation interface
 
-The current path keeps the useful insight but rejects the broad conclusion. These are control surfaces that constrain platform-spec sections. They are not proof that a single `Conflict Detector`, `Flag Catalog`, `Sync Contract`, or `Aggregation Interface` is already closed as an implementation boundary.
+The current path keeps the useful insight but rejects the broad conclusion. These are assessment surfaces that inform platform-spec section review. They are not proof that a single `Conflict Detector`, `Flag Catalog`, `Sync Contract`, or `Aggregation Interface` is already closed as an implementation boundary.
 
 For platform-spec drafting, each surface must be rewritten as:
 
@@ -204,7 +204,7 @@ Before writing a conflict/flag/offline spec section, check:
 
 ## Baseline Impact
 
-No ADR-001 through ADR-005 baseline item should be changed by this overlay.
+No ADR-001 through ADR-005 baseline item should be changed by this assessment.
 
 No patch is currently required to `07-system-boundary-map.md`. The existing map already routes:
 
@@ -214,11 +214,11 @@ No patch is currently required to `07-system-boundary-map.md`. The existing map 
 - local retain/remove effects to Local Data Lifecycle
 - trigger effects to Trigger / Reactivity
 
-The overlay should be used before drafting conflict, flag, sync, workflow, trigger, Pattern Registry, or reporting specs.
+The routed findings should be cited through `05`, `07`, and `20` before accepting conflict, flag, sync, workflow, trigger, Pattern Registry, or reporting specification sections.
 
 ## Recommended Next Step
 
-Use this overlay to draft the first platform-spec plan around the cross-cutting ingestion and anomaly pipeline:
+Use these routed findings when drafting platform-spec sections around the cross-cutting ingestion and anomaly pipeline:
 
 - structural event acceptance
 - offline/local creation assumptions

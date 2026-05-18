@@ -1,16 +1,16 @@
 # Authentication And Actor Mapping Decision Brief
 
-Status: Stakeholder brief; accepted outcome recorded in `04-accepted-pre-atomization-decisions.md`
+Status: Stakeholder brief; accepted outcome recorded in `04-accepted-pre-specification-decisions.md`
 
 Audience: stakeholders and decision reviewers. This brief explains the tradeoff; it is not the agent-facing instruction surface.
 
 ## Decision
 
-How should authentication accounts, users, and user groups map to the platform's actor, assignment, role, and scope model during initial platform-spec atomization?
+How should authentication accounts, users, and user groups map to the platform's actor, assignment, role, and scope model during initial platform-spec platform-spec section drafting?
 
 ## Why Now
 
-`00-baseline-validation-and-full-stack-readiness.md` classified authentication mapping as requiring a pre-atomization decision or hold-back. If this is left vague, implementation or atomization may accidentally make user accounts, user groups, or identity-provider claims into authority sources, contradicting ADR-003's assignment-derived access model.
+`00-baseline-validation-and-full-stack-readiness.md` classified authentication mapping as requiring a pre-specification decision or hold-back. If this is left vague, implementation or platform-spec section drafting may accidentally make user accounts, user groups, or identity-provider claims into authority sources, contradicting ADR-003's assignment-derived access model.
 
 ## Baseline Constraints
 
@@ -25,10 +25,10 @@ How should authentication accounts, users, and user groups map to the platform's
 
 | Option | Description | Assessment |
 |---|---|---|
-| A. Accounts authenticate, actors author, assignments authorize | Authenticated principals map to actor references. Assignments, roles, and scopes remain the effective authority model. Groups may later help provisioning but do not directly grant event/data access. | Recommended as initial guardrail. Preserves ADR-003 and keeps auth separate from authority. |
+| A. Accounts authenticate, actors author, assignments authorize | Authenticated principals map to actor references. Assignments, roles, and scopes remain the effective authority model. Groups may later help provisioning but do not directly grant event/data access. | Recommended initial decision. Preserves ADR-003 and keeps auth separate from authority. |
 | B. User groups directly grant access | Groups become the primary authorization model for sync, actions, and visibility. | Not acceptable under current baseline. It risks becoming arbitrary access-control logic and bypassing assignment-derived access. |
 | C. External IdP claims directly drive authority | OAuth/SAML/IdP claims become scopes, roles, or sync filters directly. | Too risky now. Useful for authentication and provisioning later, but not as direct authority without a formal decision. |
-| D. No real authentication initially | Use static actor tokens or seeded actors only, deferring account model. | Possible for prototypes, but unsafe as atomization language because it does not define the mapping guardrail. |
+| D. No real authentication initially | Use static actor tokens or seeded actors only, deferring account model. | Possible for prototypes, but unsafe as platform-spec section drafting language because it does not define the mapping decision. |
 
 ## Product Owner View
 
@@ -86,7 +86,7 @@ Implementation difficulty:
 
 Build order:
 
-1. Define account-to-actor mapping guardrail.
+1. Define account-to-actor mapping decision.
 2. Implement simple actor authentication or session model.
 3. Keep assignment management as the source of effective access.
 4. Add groups later as provisioning templates if needed.
@@ -135,7 +135,7 @@ Authentication proves that a principal may act as an actor. It does not define w
 
 Outcome:
 
-- Accepted as `PREOP-002` in `04-accepted-pre-atomization-decisions.md`, with groups framed as later operational teams or provisioning templates if needed.
+- Accepted as `PREOP-002` in `04-accepted-pre-specification-decisions.md`, with groups framed as later operational teams or provisioning templates if needed.
 
 ## Explicit Deferrals
 
@@ -151,11 +151,11 @@ Outcome:
 
 Reopen before implementation if the first deployment requires shared devices, external identity provider integration, or group-managed authorization.
 
-Reopen before atomizing authorization/sync if a proposed spec would let account, group, or IdP claims directly grant event access without assignment-derived authority.
+Reopen before platform-spec drafting authorization/sync if a proposed spec would let account, group, or IdP claims directly grant event access without assignment-derived authority.
 
 ## Required Follow-Up
 
-- Carry authentication/account-to-actor mapping as an explicit hold-back in the atomization plan.
+- Carry authentication/account-to-actor mapping as an explicit hold-back in the platform-spec section drafting plan.
 - Do not add `user_id` or `group_id` to the event envelope without formal change control.
-- Do not make user groups authority sources in final authorization/sync atoms.
+- Do not make user groups authority sources in final authorization/sync sections.
 - When implementation planning starts, define a small account/session-to-actor mechanism that feeds the existing Assignment / Authority / Sync boundary.

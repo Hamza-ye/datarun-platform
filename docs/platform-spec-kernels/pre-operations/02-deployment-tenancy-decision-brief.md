@@ -1,16 +1,16 @@
 # Deployment And Tenancy Decision Brief
 
-Status: Stakeholder brief; accepted outcome recorded in `04-accepted-pre-atomization-decisions.md`
+Status: Stakeholder brief; accepted outcome recorded in `04-accepted-pre-specification-decisions.md`
 
 Audience: stakeholders and decision reviewers. This brief explains the tradeoff; it is not the agent-facing instruction surface.
 
 ## Decision
 
-How should deployment and tenant context be handled during initial platform-spec atomization, especially for cloud and self-hosted futures?
+How should deployment and tenant context be handled during initial platform-spec platform-spec section drafting, especially for cloud and self-hosted futures?
 
 ## Why Now
 
-`00-baseline-validation-and-full-stack-readiness.md` classified the multi-tenant deployment model as requiring a pre-atomization decision or hold-back. If this is left vague, atomization may accidentally add deployment or tenant identity to the event envelope, sync contract, configuration model, or reporting model.
+`00-baseline-validation-and-full-stack-readiness.md` classified the multi-tenant deployment model as requiring a pre-specification decision or hold-back. If this is left vague, platform-spec section drafting may accidentally add deployment or tenant identity to the event envelope, sync contract, configuration model, or reporting model.
 
 ## Baseline Constraints
 
@@ -24,8 +24,8 @@ How should deployment and tenant context be handled during initial platform-spec
 
 | Option | Description | Assessment |
 |---|---|---|
-| A. Single-deployment runtime first | Initial atomization assumes one deployment context per runtime/database. Deployment context stays outside event envelopes. Cloud multi-tenancy is a later deployment architecture decision. | Recommended as initial guardrail. Smallest decision that protects envelope stability and keeps self-host simple. |
-| B. Shared cloud multi-tenant runtime now | Atomization defines tenant isolation, tenant-scoped storage, tenant-aware sync, tenant-aware admin, and shared-runtime operations now. | Too broad for current stage. Likely to create platform invariants before stakeholder and ops needs are understood. |
+| A. Single-deployment runtime first | Initial platform-spec section drafting assumes one deployment context per runtime/database. Deployment context stays outside event envelopes. Cloud multi-tenancy is a later deployment architecture decision. | Recommended initial decision. Smallest decision that protects envelope stability and keeps self-host simple. |
+| B. Shared cloud multi-tenant runtime now | Platform specification section drafting defines tenant isolation, tenant-scoped storage, tenant-aware sync, tenant-aware admin, and shared-runtime operations now. | Too broad for current stage. Likely to create platform invariants before stakeholder and ops needs are understood. |
 | C. Tenant identity in every event envelope | Add tenant/deployment identity to events so every record is globally partitionable inside a shared event log. | Not acceptable without formal change control. It changes the envelope and risks redefining event identity. |
 | D. Hybrid reserved field or optional metadata | Reserve tenant/deployment metadata in or near events but do not fully define behavior. | Risky. A reserved field tends to become implementation authority without a closed invariant. |
 
@@ -60,7 +60,7 @@ Baseline impact:
 
 New invariants:
 
-- Option A introduces only a guardrail: deployment context is outside the event envelope for initial atomization.
+- Option A introduces only a boundary rule: deployment context is outside the event envelope for initial platform-spec section drafting.
 - It does not decide final cloud tenancy, tenant migration, or cross-tenant admin.
 
 Coupling risk:
@@ -82,7 +82,7 @@ Implementation difficulty:
 
 Build order:
 
-1. Specify initial single-deployment runtime guardrail.
+1. Specify initial single-deployment runtime boundary rule.
 2. Keep deployment packaging and configuration package identity visible as implementation/ops work.
 3. Defer shared cloud multi-tenant runtime until self-host/single-deployment mechanics are proven.
 
@@ -123,11 +123,11 @@ What needs stakeholder or domain input:
 
 ## Proposed Decision
 
-Initial atomization assumes one deployment context per runtime/database/configuration namespace. Deployment or tenant context stays outside the event envelope. Cloud multi-tenancy, cross-tenant administration, tenant migration, and shared-runtime hosting require a later dedicated architecture decision before implementation.
+Initial platform-spec section drafting assumes one deployment context per runtime/database/configuration namespace. Deployment or tenant context stays outside the event envelope. Cloud multi-tenancy, cross-tenant administration, tenant migration, and shared-runtime hosting require a later dedicated architecture decision before implementation.
 
 Outcome:
 
-- Accepted as `PREOP-001` in `04-accepted-pre-atomization-decisions.md`.
+- Accepted as `PREOP-001` in `04-accepted-pre-specification-decisions.md`.
 
 ## Explicit Deferrals
 
@@ -142,10 +142,10 @@ Outcome:
 
 Reopen this before implementation if the first target product must support multiple independent organizations inside one shared runtime or database.
 
-Reopen this before atomizing deployment/ops specs if self-host packaging, data residency, or managed cloud operations require a stronger deployment identity contract.
+Reopen this before platform-spec drafting deployment/ops specs if self-host packaging, data residency, or managed cloud operations require a stronger deployment identity contract.
 
 ## Required Follow-Up
 
-- Carry deployment/tenancy as an explicit hold-back in the atomization plan.
-- Do not add `tenant_id` or `deployment_id` to final event-envelope atoms without formal change control.
+- Carry deployment/tenancy as an explicit hold-back in the platform-spec section drafting plan.
+- Do not add `tenant_id` or `deployment_id` to final event-envelope sections without formal change control.
 - If accepted, later implementation planning should define deployment partitioning outside event payloads.

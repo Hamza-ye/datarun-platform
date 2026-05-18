@@ -81,7 +81,7 @@ Specific rule:
 - ADR-006-R does not supersede ADR-001 through ADR-005.
 - ADR-007 through ADR-009 do not supersede ADR-001 through ADR-005.
 
-## Flag-Specific Guardrail
+## Flag-Specific Constraint
 
 Flag-related claims must keep these boundaries separate:
 

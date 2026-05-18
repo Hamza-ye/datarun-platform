@@ -2,7 +2,7 @@
 
 Status: Session 6 product-alignment artifact
 
-This document aligns product vocabulary with the accepted architecture baseline before selected-slice atomization. It is a vocabulary control artifact, not a glossary for marketing copy and not an architecture rewrite.
+This document aligns product vocabulary with the accepted architecture baseline before selected-slice platform-spec section drafting. It is a vocabulary control artifact, not a glossary for marketing copy and not an architecture rewrite.
 
 The purpose is to let the product use natural, domain-agnostic language without letting product words quietly become canonical storage, service boundaries, permission rules, workflow schemas, or identity ownership claims.
 
@@ -31,7 +31,7 @@ Architecture guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 ## Control Rule
 
@@ -76,7 +76,7 @@ This means:
 - `Evidence` may organize traceability, but it is not a second source of truth.
 - `Sync Status` may explain local/central visibility, but it does not define sync protocol.
 
-If later atomization needs a product term to become a core primitive, that is not vocabulary cleanup. It is architecture pressure and must route through gap review or change control.
+If later platform-spec section drafting needs a product term to become a core primitive, that is not vocabulary cleanup. It is architecture pressure and must route through gap review or change control.
 
 ## Term Classes
 
@@ -88,7 +88,7 @@ Use these classes consistently:
 | Narrow product term | Safe only with explicit constraints | Must include forbidden interpretations |
 | Deployer label | Name a deployment may customize | Must not become a platform primitive |
 | Architecture-only term | Engineering/baseline mechanism | Avoid in ordinary UX and product IA |
-| Gap-routed term | Useful but touches an open decision | May be discussed, but not atomized as closed behavior |
+| Gap-routed term | Useful but touches an open decision | May be discussed, but not treated as closed platform-spec behavior |
 | Rejected term | Too misleading or architecture-debt-prone | Do not use as product or platform vocabulary |
 
 ## Vocabulary Direction
@@ -1268,7 +1268,7 @@ Avoid these terms for ordinary field, supervisor, and coordinator workflows unle
 
 ## Vocabulary Rules For Later Artifacts
 
-Apply these rules in `07` through `11` and later platform-spec atomization:
+Apply these rules in `07` through `11` and later platform-spec platform-spec section drafting:
 
 - Every product term that appears in an interaction state must map to this artifact or be added through explicit review.
 - Do not introduce CamelCase product primitives unless they are already baseline terms or deliberately accepted product terms.
@@ -1284,5 +1284,5 @@ Later product artifacts should use this vocabulary as follows:
 - `07-interaction-state-model.md` should define user-visible states using accepted product terms and avoid turning state labels into canonical stored state.
 - `08-ux-gap-routing.md` should use the vocabulary-to-gap matrix to route unresolved terms and pressure points.
 - `09-first-vertical-slice.md` should choose wording from accepted product-wide and narrow product terms only.
-- `10-atomization-readiness-from-product.md` should verify that atomization candidates do not depend on rejected, restricted, or gap-routed terms as if they were closed.
+- `10-platform-spec-readiness-from-product.md` should verify that platform-spec section drafting candidates do not depend on rejected, restricted, or gap-routed terms as if they were closed.
 - `11-alignment-closeout.md` should confirm this artifact is the stable vocabulary input surface.

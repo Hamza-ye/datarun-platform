@@ -1,13 +1,13 @@
-# Spec Atom Template
+# Spec Section Template
 
 Status: Template
 
-Use this template for every platform specification atom created under this folder.
+Use this template for every platform specification section created under this folder.
 
 Do not delete sections because they feel empty. If a section does not apply, write `None` and explain why. Empty sections are where coupling usually hides.
 
 ```md
-# <Atom Name>
+# <Section Name>
 
 Status: Draft | Accepted | Deferred | Hold-back | Rejected
 Owning boundary: <one boundary from the system boundary map>
@@ -16,30 +16,30 @@ Source basis:
 - <accepted baseline or control document>
 
 Depends on:
-- <accepted atom or guardrail>
+- <accepted section or routed source>
 
 Consumed by:
-- <known downstream atoms or implementation areas>
+- <known downstream sections or implementation areas>
 
 ## Purpose
 
-<One short paragraph explaining why this atom exists.>
+<One short paragraph explaining why this section exists.>
 
 ## Scope
 
-This atom owns:
+This section owns:
 
 - <owned behavior or contract>
 
 ## Non-Scope
 
-This atom does not own:
+This section does not own:
 
 - <explicitly excluded lifecycle, behavior, or vocabulary>
 
 ## Definitions
 
-| Term | Meaning In This Atom | Must Not Mean |
+| Term | Meaning In This Section | Must Not Mean |
 |---|---|---|
 | <term> | <definition> | <forbidden overread> |
 
@@ -75,7 +75,7 @@ This atom does not own:
 
 | Gap | Owner / Route | Reopen Trigger |
 |---|---|---|
-| <gap> | <decision gap, atom, implementation design, or operational policy> | <trigger> |
+| <gap> | <decision gap, section, implementation design, or operational policy> | <trigger> |
 
 ## Rejected Paths
 
@@ -83,7 +83,7 @@ This atom does not own:
 
 ## Implementation Implications
 
-- <engineering consequences that follow from this atom without prescribing full implementation design>
+- <engineering consequences that follow from this section without prescribing full implementation design>
 
 ## Review Checklist
 
@@ -112,7 +112,7 @@ Use the boundary names from the accepted boundary map unless a formal decision a
 - Reporting / Aggregation
 - Local Data Lifecycle
 
-`Deployment / Tenancy` may be used only as a hold-back routing surface under accepted pre-atomization guardrails. It is not yet a settled implementation boundary.
+`Deployment / Tenancy` may be used only as a hold-back routing surface under accepted pre-specification decisions. It is not yet a settled implementation boundary.
 
 ## Required Status Meanings
 

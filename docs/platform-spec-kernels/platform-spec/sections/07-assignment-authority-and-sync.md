@@ -15,18 +15,18 @@ Source basis:
 - `../../professional-baseline/17-authorization-visibility-boundary-control.md`
 - `../../professional-baseline/18-envelope-shape-parametrization-boundary-control.md`
 - `../../professional-baseline/19-envelope-shape-parametrization-definitions.md`
-- `../../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../../pre-operations/04-accepted-pre-specification-decisions.md`
 
 Depends on:
 
-- `01-spec-governance.md`
-- `02-glossary-and-core-definitions.md`
-- `03-event-log-storage.md`
-- `04-event-envelope-schema.md`
+- `00-specification-source-authority.md`
+- `01-core-definitions-and-boundary-vocabulary.md`
+- `02-event-log-and-storage-model.md`
+- `03-event-envelope-schema-and-references.md`
 - `05-references-and-identity-lineage.md`
 - `06-configuration-and-parametrization.md`
-- `90-open-decisions.md`
-- `91-rejected-paths.md`
+- `90-open-decisions-and-gap-register-citations.md`
+- `91-rejected-alternatives.md`
 
 Consumed by:
 
@@ -39,11 +39,11 @@ Consumed by:
 
 ## Purpose
 
-This atom defines the narrow Assignment / Authority / Sync contract for assignment-derived access, access-scoped event sync, authority reconstruction, original-subject authorization, and scope-change handoff. It preserves immutable event history while preventing accounts, groups, external claims, role labels, activity context, tenant context, deployment context, or stored snapshots from becoming platform authority.
+This section defines the narrow Assignment / Authority / Sync contract for assignment-derived access, access-scoped event sync, authority reconstruction, original-subject authorization, and scope-change handoff. It preserves immutable event history while preventing accounts, groups, external claims, role labels, activity context, tenant context, deployment context, or stored snapshots from becoming platform authority.
 
 ## Scope
 
-This atom owns:
+This section owns:
 
 - assignment-derived access as the source of effective event visibility and action authority
 - sync scope as the same scope used for access filtering
@@ -57,7 +57,7 @@ This atom owns:
 
 ## Non-Scope
 
-This atom does not own:
+This section does not own:
 
 - event-envelope fields, structural reference categories, structural `type` values, or envelope serialization
 - immutable authority snapshots stored on events
@@ -73,7 +73,7 @@ This atom does not own:
 
 ## Definitions
 
-| Term | Meaning In This Atom | Must Not Mean |
+| Term | Meaning In This Section | Must Not Mean |
 |---|---|---|
 | Assignment | Platform-recognized relation that binds an actor to scope, role/capacity, activity/context, time, or responsibility inputs used to derive access | External identity-provider claim, account group, role label, product persona, or stored event authority snapshot |
 | Assignment timeline | Projection of assignment changes over time as available to the device or server doing authority reconstruction | Complete global knowledge on every device or mutable override of historical event facts |
@@ -86,7 +86,7 @@ This atom does not own:
 | Scope expansion | Later assignment-derived access to more events, subjects, processes, activities, or scopes | Rewrite of prior authorization results or bulk reclassification of old events |
 | Scope contraction | Later assignment-derived loss of access to events, subjects, processes, activities, or scopes | Deletion or mutation of central canonical event history |
 | Selective retain | Baseline scope-contraction strategy where an actor's own events can remain locally while other actors' events about out-of-scope subjects become local lifecycle candidates | Complete sensitive-data purge policy or proof that hide-only behavior is sufficient |
-| Local lifecycle handoff | Transfer from Assignment / Authority / Sync to Local Data Lifecycle for device-side retain, remove, purge, archive, or summarize decisions | Authority atom ownership of sensitive-data deletion or retention policy |
+| Local lifecycle handoff | Transfer from Assignment / Authority / Sync to Local Data Lifecycle for device-side retain, remove, purge, archive, or summarize decisions | Authority section ownership of sensitive-data deletion or retention policy |
 | Stale local authority | Local action taken under last-known assignments, configuration, or projections that later central knowledge may constrain or surface | Stored authorization guarantee or automatic rejection of the historical event |
 
 ## Invariants
@@ -106,7 +106,7 @@ This atom does not own:
 - Scope expansion is additive and may make more events available to the actor or device under the same immutable event-history rules.
 - Scope contraction must preserve central canonical events and route local retain/remove/purge decisions to Local Data Lifecycle.
 - Structurally valid events created under stale local authority remain immutable operational facts; late authority problems are surfaced for the owning review or flag path unless a later accepted operation class requires online-only rejection.
-- This atom consumes `SPEC-006` configuration inputs only as draft/open-gap context until Configuration is accepted; it does not close configuration versioning or stale-configuration reconciliation.
+- This section consumes `SPEC-006` configuration inputs only as draft/open-gap context until Configuration is accepted; it does not close configuration versioning or stale-configuration reconciliation.
 
 ## Contracts
 
@@ -134,12 +134,12 @@ This atom does not own:
 
 | Crosses To | Through | Notes |
 |---|---|---|
-| Event Log / Storage | immutable event subset and append-only sync contract | Storage owns canonical event truth; this atom filters delivery by access scope. |
+| Event Log / Storage | immutable event subset and append-only sync contract | Storage owns canonical event truth; this section filters delivery by access scope. |
 | Event Envelope / Schema | `actor_ref`, optional `activity_ref`, original subject or typed references, device metadata, and sync concurrency metadata | Envelope owns field meanings. Assignment / Authority / Sync consumes them without adding fields or authority snapshots. |
-| Identity / Lineage | original subject reference plus read-side lineage facts | Identity owns raw/resolved reference behavior. This atom uses the original subject reference for historical authorization. |
-| Configuration | role/action mappings, scope parameters, activity context, schedules, sensitivity classifications, and bounded policy values | Configuration supplies bounded inputs. This atom owns authority reconstruction and does not accept arbitrary access-control logic. |
+| Identity / Lineage | original subject reference plus read-side lineage facts | Identity owns raw/resolved reference behavior. This section uses the original subject reference for historical authorization. |
+| Configuration | role/action mappings, scope parameters, activity context, schedules, sensitivity classifications, and bounded policy values | Configuration supplies bounded inputs. This section owns authority reconstruction and does not accept arbitrary access-control logic. |
 | Projection / Workflow State | detect-before-act gate and authority projection inputs for workflow effects | Workflow state remains projection-derived and must not run irreversible effects before relevant authorization checks. |
-| Flag / Resolution | surfaced stale or invalid authority facts | Flag / Resolution owns lifecycle and resolution semantics; this atom only supplies authorization anomaly source facts. |
+| Flag / Resolution | surfaced stale or invalid authority facts | Flag / Resolution owns lifecycle and resolution semantics; this section only supplies authorization anomaly source facts. |
 | Trigger / Reactivity | detect-before-act gate for downstream triggers | Triggers must not fire irreversible effects before relevant access and authority checks run. |
 | Reporting / Aggregation | access-scoped projection and report visibility constraints | Reports and aggregates consume access constraints; they do not become authority sources. |
 | Local Data Lifecycle | scope-contraction retain/remove/purge handoff | Local lifecycle owns concrete device-side handling and sensitive-data rules. |
@@ -149,9 +149,9 @@ This atom does not own:
 - Implementations may choose projection storage, indexing, and recomputation strategies for authority if assignment-derived access, original-subject authorization, and immutable event history are preserved.
 - Sync implementations may choose transport, pagination, batching, retry, priority, compression, and bandwidth strategies later under the sync delivery mechanics gap.
 - Later accepted configuration work may define bounded role/action mappings, scope parameters, policy values, and activity/context authority details without becoming arbitrary access-control code.
-- Later accepted atoms may define platform-bundled assignment or authorization-review shapes if routed through the platform-bundled shape inventory and reference-serialization gaps.
+- Later accepted sections may define platform-bundled assignment or authorization-review shapes if routed through the platform-bundled shape inventory and reference-serialization gaps.
 - Product surfaces may label roles, review queues, assignments, and oversight views if those labels map back to assignments, scopes, capacities, configuration, or projections and do not become platform actor subclasses.
-- Local lifecycle atoms may define retain, remove, purge, archive, or summarize behavior after scope contraction without mutating central canonical events.
+- Local lifecycle sections may define retain, remove, purge, archive, or summarize behavior after scope contraction without mutating central canonical events.
 
 ## Forbidden Couplings
 
@@ -165,8 +165,8 @@ This atom does not own:
 - Do not use post-merge resolved subject references as the authorization target for historical events.
 - Do not make sync scope a permission model separate from assignment-derived access scope.
 - Do not make sync deliver mutable records, projection state, queue state, work items, or reporting rows as canonical truth.
-- Do not define sync transport, pagination, priority, bandwidth, retry, or operational delivery mechanics in this atom.
-- Do not define final permission tables, fixed role taxonomies, fixed product personas, or auditor visibility exceptions in this atom.
+- Do not define sync transport, pagination, priority, bandwidth, retry, or operational delivery mechanics in this section.
+- Do not define final permission tables, fixed role taxonomies, fixed product personas, or auditor visibility exceptions in this section.
 - Do not let deployers author access-control programs, scope-containment logic, platform code, envelope fields, structural type values, or field-level sensitivity mechanisms.
 - Do not make configuration package changes retroactively invalidate structurally valid offline work by implication.
 - Do not make local retain-and-hide sufficient for sensitive scope contraction.
@@ -186,7 +186,7 @@ This atom does not own:
 | Sync delivery mechanics | Assignment / Authority / Sync plus implementation tooling | Sync transport, pagination, priority, bandwidth handling, retries, or low-end-device delivery must be specified. |
 | Local purge/lifecycle rules for sensitive data | Local Data Lifecycle plus operational policy | Sensitive deployment or scope contraction behavior must be implemented. |
 | Configuration versioning and stale-configuration reconciliation | Configuration plus Event Envelope / Schema and Assignment / Authority / Sync | Stale local authority or configuration affects sync-time review, migration, or offline work created under older configuration. |
-| Final reference serialization and active emission sites | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior atoms | Canonical field names, placement, cardinality, or required emission sites are needed for accepted references. |
+| Final reference serialization and active emission sites | Event Envelope / Schema plus Identity / Lineage, Assignment / Authority / Sync, Configuration, Projection / Workflow State, and owning behavior sections | Canonical field names, placement, cardinality, or required emission sites are needed for accepted references. |
 | Referent registration, attributes, and catalogs where authority depends on referent interpretation | Event Envelope / Schema, Identity / Lineage, Configuration, Projection / Workflow State, and Assignment / Authority / Sync | Authority depends on subject registration events, descriptive attributes, deployer-defined catalogs, or lifecycle ownership for non-subject referents. |
 
 ## Rejected Paths
@@ -231,18 +231,18 @@ This atom does not own:
 Drafting Agent note, 2026-05-12:
 
 - This draft intentionally carries forward shared-device sessions, auditor and subject-based scope, assessment visibility, cross-level visibility, permission/activity authority details, temporary authority and offline grace policy, onboarding and role-transition details, sync delivery mechanics, sensitive local lifecycle, stale-configuration reconciliation, final reference serialization, and referent registration/catalog gaps.
-- `SPEC-006` remains Draft. This atom consumes `SPEC-006` only as draft/open-gap context and does not treat Configuration as accepted implementation authority.
+- `SPEC-006` remains Draft. This section consumes `SPEC-006` only as draft/open-gap context and does not treat Configuration as accepted implementation authority.
 
 Challenge Review reconciliation, 2026-05-12:
 
 - Verdict before reconciliation: Needs Rework.
-- Reconciled missing open-gap carry-forward by adding `Assessment visibility` and `Onboarding and role-transition details` to this atom and `90-open-decisions.md`.
+- Reconciled missing open-gap carry-forward by adding `Assessment visibility` and `Onboarding and role-transition details` to this section and `90-open-decisions-and-gap-register-citations.md`.
 - No rejected path was reintroduced and no change-control trigger was found.
 
 Integration Review, 2026-05-12:
 
 - Verdict: Carry Explicit Gap.
-- Planned downstream atoms may consume SPEC-007 outputs as gates, source facts, and handoffs only.
+- Planned downstream sections may consume SPEC-007 outputs as gates, source facts, and handoffs only.
 - `SPEC-008` may consume scope-contraction handoff without inheriting purge, retention, archive, or sensitive lifecycle rules.
 - `SPEC-009` may consume authority checks and detect-before-act gates without inheriting workflow state, Pattern Registry, queue, lifecycle, or final permission-table behavior.
 - `SPEC-010` may consume stale or invalid authority source facts without inheriting flag lifecycle, resolution mapping, or general authorization-flag semantics.
@@ -253,4 +253,4 @@ Architecture Steward recommendation, 2026-05-12:
 
 - Recommendation: proceed as Draft with explicit carried gaps preserved.
 - This recommendation does not promote SPEC-007 out of Draft.
-- Future promotion still requires the formal acceptance workflow and an explicit status update in this atom and `atom-registry.yml`.
+- Future promotion still requires the formal acceptance workflow and an explicit status update in this section and `section-registry.yml`.

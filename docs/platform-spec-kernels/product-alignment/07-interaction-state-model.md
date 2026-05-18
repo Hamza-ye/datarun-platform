@@ -2,7 +2,7 @@
 
 Status: Session 7 product-alignment artifact
 
-This document defines user-visible interaction states for the operational surface before selected-slice atomization. It describes how the product should label, explain, and route visible states across work, records, operational targets, review, oversight, exceptions, setup, evidence, and sync/local status.
+This document defines user-visible interaction states for the operational surface before selected-slice platform-spec section drafting. It describes how the product should label, explain, and route visible states across work, records, operational targets, review, oversight, exceptions, setup, evidence, and sync/local status.
 
 It is not a workflow schema, not a stored state model, not a projection schema, not a permission table, and not a sync protocol.
 
@@ -30,7 +30,7 @@ Architecture guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 ## Control Rule
 
@@ -476,7 +476,7 @@ Rules:
 
 ## Product Debt Filter
 
-An interaction state is not ready for atomization if it:
+An interaction state is not ready for platform-spec section drafting if it:
 
 - implies a stored canonical state that the baseline does not define
 - requires new event-envelope fields
@@ -496,5 +496,5 @@ Later product artifacts should use this state model as follows:
 
 - `08-ux-gap-routing.md` should route state families and high-risk states to existing gaps or proposed clarifications.
 - `09-first-vertical-slice.md` should choose a slice that exercises work attention, action availability, local/sync, freshness, review, evidence, and at least one exception state.
-- `10-atomization-readiness-from-product.md` should verify that atomization candidates do not depend on visible states as hidden storage/workflow/permission decisions.
+- `10-platform-spec-readiness-from-product.md` should verify that platform-spec section drafting candidates do not depend on visible states as hidden storage/workflow/permission decisions.
 - `11-alignment-closeout.md` should confirm this state model remains an operational-surface contract and not a platform-core state schema.

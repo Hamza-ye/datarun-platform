@@ -216,7 +216,7 @@ Expected content:
 - responsibility split by owning area
 - identity-owned and identity-forbidden areas
 - dependency-aware ADR boundary checks
-- implementation guardrails
+- implementation constraints
 - open coupling risks
 
 Rules:
@@ -231,7 +231,7 @@ Rules:
 Purpose:
 
 - turn the accepted baseline and gap register into buildable platform specification sections after the platform-spec outline is stable
-- keep implementation guidance out of baseline governance artifacts
+- keep implementation guidance out of baseline artifacts
 
 Target groups:
 

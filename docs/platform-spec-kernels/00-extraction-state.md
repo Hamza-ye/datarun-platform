@@ -2,7 +2,7 @@
 
 Status: Iteration 40 ADR-001 through ADR-005 closure register validated
 
-This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature atomization.
+This file is the durable state carrier for extracting platform-specification kernels from the approved source set. It exists so the work can survive context compaction without drifting into unapproved sources, stale memory, ADR-shaped organization, or premature platform-spec section drafting.
 
 ## Session Source Boundary
 

@@ -1,8 +1,8 @@
 # Identity Boundary Control
 
-Status: Spec-drafting-ready dependency-aware control overlay
+Status: Assessed boundary-routing input already routed into the baseline/spec path
 
-This document prevents ADR-002's broad exploration shape from becoming broad implementation coupling. It does not re-decide ADR-002 and does not use ADR-006-R through ADR-009 as authority.
+This document records the assessed routing needed to keep ADR-002's broad exploration shape from becoming broad implementation coupling. It does not re-decide ADR-002, does not use ADR-006-R through ADR-009 as authority, and is not a current authority source. Durable authority and routing belong in `05-decision-gap-register.md`, `07-system-boundary-map.md`, and `20-platform-spec-outline.md`.
 
 The key correction for implementation is that ADR-002's typed reference categories are not all the same kind of identity lifecycle. They emerged because platform events can be about, performed by, authorized through, or attached to different operational referents. A collected record may be about a person, a facility, a household, a resource movement, a campaign, a review, someone's work, or another operational process. That does not mean one "Subject" subsystem owns every referent.
 
@@ -25,11 +25,11 @@ Scenario context checked for referent pressure:
 - `../../scenarios/09-coordinated-campaign.md`
 - `../../scenarios/14-multi-level-distribution.md`
 
-## Control Rule
+## Routing Rule
 
 ADR-002 creates a shared reference protocol and closes subject-lineage invariants. It does not authorize implementing one broad identity subsystem that owns actor authority, assignment scope, process workflows, shipment matching, campaign state, conflict lifecycle, or reporting identity views.
 
-Implementation must split ADR-002 into responsibility slices that preserve later ADR dependencies.
+Platform-spec sections must split ADR-002 into responsibility slices that preserve later ADR dependencies.
 
 ## Accepted ADR-002 Core
 
@@ -123,13 +123,13 @@ Do not break these later-ADR assumptions:
 - ADR-005 assumes workflow state is projection-derived. Identity must not store process current state or workflow state in identity records.
 - ADR-005 assumes source-only flag lineage and detect-before-act composition. Identity must supply raw references and lifecycle facts without becoming the flag cascade owner.
 
-## Implementation Guardrails
+## Candidate Specification Constraints
 
-- Build a small reference contract first; do not build a universal identity service first.
-- Keep subject lineage as its own bounded component.
+- Specify a small reference contract before any universal identity-service language.
+- Keep subject lineage as its own bounded platform responsibility.
 - Treat actor, assignment, and process references as references whose lifecycle owners live elsewhere.
 - Expose identity facts through read-only query/projection interfaces: original reference, resolved subject ID, lineage state, archived/split/merged status.
-- Require conflict detection to receive both original references and current projected lineage state.
+- Require conflict detection language to consume both original references and current projected lineage state.
 - Keep alias resolution out of the event store and out of envelope mutation.
 - Keep process matching for shipments/campaigns/cases behind workflow or process-pattern boundaries.
 - Keep assignment validity behind authorization/sync boundaries.
@@ -144,9 +144,9 @@ Do not break these later-ADR assumptions:
 - Reporting may pressure identity projections to become canonical current truth.
 - Pending match may become a generic identity mechanism too early instead of a workflow/process capability.
 
-## Spec Drafting Use
+## Routed Standing
 
-`07-system-boundary-map.md` has been validated against this overlay. During platform-spec drafting, keep carrying these routing controls:
+The durable findings from this assessment have been routed into `05`, `07`, and `20`. During platform-spec drafting, carry them as section constraints and cite `05` whenever a section touches an open gap:
 
 1. Keep the first identity spec section limited to reference contract plus subject-lineage contract.
 2. Put actor/assignment authority in the authorization/sync spec.

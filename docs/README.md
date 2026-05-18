@@ -3,7 +3,7 @@
 > **Current platform-spec entrypoint**:
 > [`platform-spec-kernels/professional-baseline/README.md`](platform-spec-kernels/professional-baseline/README.md).
 >
-> For atomization work, do not start from `charter.md`, `flagged-positions.md`,
+> For platform-specification work, do not start from `charter.md`, `flagged-positions.md`,
 > `ships/`, convergence docs, architecture docs, implementation docs, or git
 > history. Those surfaces are legacy/status/implementation context and can leak
 > stale decisions into the current baseline.
@@ -48,13 +48,14 @@ Datarun's ambition is to **eliminate that rebuilding**. Instead of bespoke syste
 
 ### Reading Guide
 
-For platform-spec atomization, read in this order:
+For platform-specification work, read in this order:
 
 1. **Operating model**: [Professional Baseline README](platform-spec-kernels/professional-baseline/README.md)
 2. **Accepted baseline**: [Architecture Baseline v0](platform-spec-kernels/professional-baseline/04-architecture-baseline-v0.md)
 3. **Open gaps**: [Decision Gap Register](platform-spec-kernels/professional-baseline/05-decision-gap-register.md)
 4. **Boundary routing**: [System Boundary Map](platform-spec-kernels/professional-baseline/07-system-boundary-map.md)
-5. **Control overlays**:
+5. **Platform-spec outline**: [Platform Specification Outline](platform-spec-kernels/professional-baseline/20-platform-spec-outline.md)
+6. **Assessed inputs as needed**:
    [Identity](platform-spec-kernels/professional-baseline/09-identity-boundary-control.md),
    [Conflict/Flag/Offline](platform-spec-kernels/professional-baseline/15-conflict-flag-offline-boundary-control.md),
    [Operational Constraints](platform-spec-kernels/professional-baseline/16-operational-constraints-boundary-control.md),
@@ -73,14 +74,14 @@ For domain and lineage background only, read:
 
 | Area                                            | Contents                                                                                                                    |
 | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [Professional Baseline](platform-spec-kernels/professional-baseline/README.md) | Current entrypoint for platform-spec atomization. |
-| [Product Alignment](platform-spec-kernels/product-alignment/README.md) | Pre-atomization product/UX alignment track that reconnects Phase 1 scenarios, operational workflows, and user expectations to the accepted architecture baseline. |
-| [Platform Spec Kernels](platform-spec-kernels/) | Extraction state, staging kernels, ADR-001 through ADR-005 closure register, and professional-baseline controls. |
+| [Professional Baseline](platform-spec-kernels/professional-baseline/README.md) | Current entrypoint for platform-specification work. |
+| [Product Alignment](platform-spec-kernels/product-alignment/README.md) | Product/UX alignment track that reconnects Phase 1 scenarios, operational workflows, and user expectations to the accepted architecture baseline. It is not current baseline authority unless separately assessed. |
+| [Platform Spec Kernels](platform-spec-kernels/) | Extraction state, staging kernels, ADR-001 through ADR-005 closure register, and professional-baseline routing. |
 | [Scenarios](scenarios/README.md)                | 21 real-world operational situations the platform must support — domain perspective, no solution prescription              |
 | [Constraints](constraints.md)                   | Operational context and boundaries — target users, connectivity, scale, data sensitivity                                   |
 | [Access Control](access-control-scenario.md)    | Cross-cutting concern: who can see and do what, under what circumstances                                                    |
 | [Principles](principles.md)                     | 7 working principles — all confirmed through 5 ADRs                                                                        |
 | [Viability Assessment](viability-assessment.md) | Platform viability analysis — vision vs. use cases gap analysis, GO/NO-GO*(pre dates adrs, and implementation decisions)*  |
 | [Behavioral Patterns](behavioral_patterns.md)   | 12 behavioral patterns extracted from scenarios — the first narrowing step                                                 |
-| [ADRs](adrs/)                                   | Decision records. For atomization, use them through the professional-baseline closure and assessment docs.                 |
-| Legacy/status surfaces                          | `charter.md`, `flagged-positions.md`, `ships/`, convergence docs, architecture docs, implementation docs, experiments, and checkpoints are not atomization authority. |
+| [ADRs](adrs/)                                   | Decision records. For platform-specification work, use them through the professional-baseline closure and assessment docs.                 |
+| Legacy/status surfaces                          | `charter.md`, `flagged-positions.md`, `ships/`, convergence docs, architecture docs, implementation docs, experiments, and checkpoints are not platform-specification authority. |

@@ -28,7 +28,7 @@ Architecture guardrails:
 - `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
 - `../professional-baseline/16-operational-constraints-boundary-control.md`
 - `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 
 ## Control Rule
 
@@ -53,7 +53,7 @@ When routing role-related pressure, prefer operation classes over actor labels: 
 |---|---|---|
 | Existing gap | Already present in `05-decision-gap-register.md` | Reference the gap and preserve its closure path |
 | Product clarification | Product wording/UX rule can clarify without changing architecture | Add to product alignment or later product spec |
-| Platform-spec detail | Boundary is closed; spec detail is still needed | Atomize only under accepted baseline constraints |
+| Platform-spec detail | Boundary is closed; spec detail is still needed | Platform-spec draft only under accepted baseline constraints |
 | Implementation/tooling design | UX/tooling/engineering mechanics needed | Design/prototype later without changing baseline |
 | Operational policy | Deployment/product policy needed | Define policy; escalate only if it requires architecture change |
 | Defer/no first-slice dependency | Keep visible but do not block first slice | Avoid depending on it in `09-first-vertical-slice.md` |
@@ -235,7 +235,7 @@ Product clarification:
 
 - Role labels are operating-context examples and user-facing lenses.
 - They do not define event-envelope fields, actor subtypes, platform classes, module boundaries, or permanent permission shortcuts.
-- Later atoms should state the operation class they need: offline-capable, online/coordination-required, or offline-with-constraints.
+- Later sections should state the operation class they need: offline-capable, online/coordination-required, or offline-with-constraints.
 
 First-slice implication:
 
@@ -463,7 +463,7 @@ Product pressure:
 
 Existing guardrails/gaps:
 
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
+- `../pre-operations/04-accepted-pre-specification-decisions.md`
 - deployment packaging UX
 - account/schema/IdP integration as future product need
 - permission table details
@@ -476,7 +476,7 @@ Product clarification:
 First-slice implication:
 
 - First slice may assume an authenticated actor context is provided.
-- Do not atomize account schema, IdP integration, tenant model, or group-managed authorization as part of product surface unless explicitly selected.
+- Do not draft account schema, IdP integration, tenant model, or group-managed authorization as part of product surface unless explicitly selected.
 
 Change-control trigger:
 
@@ -534,7 +534,7 @@ These do not need immediate gap-register edits, but should be preserved in produ
 
 ## Change-Control Watchlist
 
-During first-slice and atomization planning, stop and route through change control if any artifact proposes:
+During first-slice and platform-spec section drafting planning, stop and route through change control if any artifact proposes:
 
 - new event-envelope fields
 - stored immutable authority context
@@ -556,5 +556,5 @@ During first-slice and atomization planning, stop and route through change contr
 Later product artifacts should use this routing as follows:
 
 - `09-first-vertical-slice.md` should choose a slice that avoids blockers unless the slice explicitly exists to resolve one.
-- `10-atomization-readiness-from-product.md` should verify that every atomization candidate is either safe under this routing or has an explicit gap/change-control path.
+- `10-platform-spec-readiness-from-product.md` should verify that every platform-spec section drafting candidate is either safe under this routing or has an explicit gap/change-control path.
 - `11-alignment-closeout.md` should confirm that product alignment did not quietly close professional-baseline gaps.

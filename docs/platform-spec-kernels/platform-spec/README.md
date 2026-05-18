@@ -1,36 +1,32 @@
-# Platform Specification Atomization Workspace
+# Platform Specification Section Workspace
 
-Status: Planning workspace
+Status: Candidate section input workspace
 
-This folder is the working area for turning the accepted architecture baseline into small, reviewable, implementation-facing platform specification atoms.
+This folder contains candidate platform-spec section material.
 
-It is not an evidence archive and it is not a replacement for the accepted baseline. Final spec atoms must be drafted from the accepted baseline, the decision gap register, the boundary map, and the boundary-control overlays named below.
+It is not an evidence archive, not a process authority, and not a replacement for the accepted baseline or the platform-spec outline. Existing section files must be reviewed against `../professional-baseline/20-platform-spec-outline.md` before any section is treated as normative.
 
 ## Goal
 
-Turn the accepted baseline into small, reviewable, implementation-facing specs where every atom has:
+Turn the accepted baseline into reviewable, implementation-facing platform-spec sections where every section has:
 
 - one owner
 - one primary boundary
 - explicit contracts
 - explicit forbidden couplings
 - known open gaps
-- a controlled writing and review order
+- a clear writing and review order
 
 ## Source Authority
 
-Primary guardrails:
+Primary source path:
 
 - `../professional-baseline/04-architecture-baseline-v0.md`
 - `../professional-baseline/05-decision-gap-register.md`
 - `../professional-baseline/07-system-boundary-map.md`
-- `../professional-baseline/09-identity-boundary-control.md`
-- `../professional-baseline/15-conflict-flag-offline-boundary-control.md`
-- `../professional-baseline/16-operational-constraints-boundary-control.md`
-- `../professional-baseline/17-authorization-visibility-boundary-control.md`
-- `../pre-operations/04-accepted-pre-atomization-decisions.md`
-- `../professional-baseline/18-envelope-shape-parametrization-boundary-control.md`
-- `../professional-baseline/19-envelope-shape-parametrization-definitions.md`
+- `../professional-baseline/20-platform-spec-outline.md`
+
+Assessed source material may be cited only where the outline or `05` routes it into an affected section. Existing `sections/` files remain draft/candidate material until reviewed against the primary source path.
 
 Supporting process references:
 
@@ -40,13 +36,13 @@ Supporting process references:
 
 ## Folder Contents
 
-- `atom-registry.yml`: compact machine-readable lookup for atom status, owner, boundary, batch, dependencies, and next work. Source-basis paths in the registry are rooted at `docs/platform-spec-kernels/`.
-- `process/01-atomization-operating-plan.md`: the multi-session professional process for decomposition, drafting, review, and change control.
-- `process/02-spec-atom-template.md`: the required template for every future platform spec atom.
-- `process/03-atom-inventory-and-writing-order.md`: the initial decomposition map and iterative writing order.
-- `process/04-planned-consumer-review-cards.md`: non-authoritative integration-review cards for checking whether planned downstream atoms can consume upstream drafts without hidden assumptions.
-- `process/05-batch-1b-acceptance-packet.md`: approval trace for promoted Batch 1B atoms `SPEC-002`, `SPEC-003`, and `SPEC-004`.
-- `atoms/`: draft and accepted platform specification atoms.
+- `section-registry.yml`: compact machine-readable lookup for section status, owner, boundary, batch, dependencies, and next work. Source-basis paths in the registry are rooted at `docs/platform-spec-kernels/`.
+- `process/01-platform-spec-section-operating-plan.md`: the multi-session professional process for decomposition, drafting, review, and change control.
+- `process/02-platform-spec-section-template.md`: the required template for every future platform-spec section.
+- `process/03-section-inventory-and-writing-order.md`: the initial decomposition map and iterative writing order.
+- `process/04-planned-consumer-review-cards.md`: non-authoritative integration-review cards for checking whether planned downstream sections can consume upstream drafts without hidden assumptions.
+- `process/05-batch-1b-acceptance-packet.md`: historical approval trace from the previous section workflow; it is review evidence, not current acceptance authority.
+- `sections/`: candidate and draft platform specification sections.
 
 ## Non-Goals
 
@@ -61,10 +57,12 @@ This workspace must not:
 
 ## Agent Start Rule
 
-At the start of each platform-spec session, agents must read `atom-registry.yml`, then `process/01-atomization-operating-plan.md`, then only the atom, dependency, and source-basis files needed for the selected work.
+At the start of each platform-spec section session, agents must read `../professional-baseline/20-platform-spec-outline.md`, then `section-registry.yml`, then only the candidate section, dependency, and source-basis files needed for the selected work.
 
-If an atom path, status, owner role, boundary, batch, dependency, blocking relationship, or source basis changes, update `atom-registry.yml` in the same commit.
+If a section path, status, owner role, boundary, batch, dependency, blocking relationship, or source basis changes, update `section-registry.yml` in the same commit.
 
 ## Current Next Step
 
-Continue Batch 2 core-boundary atomization with `SPEC-007`. `SPEC-006` is drafted and has Challenge Review plus Integration Review evidence recorded, but remains Draft until Architecture Steward recommendation and Decision Board / Project Owner approval. Carry the explicit `SPEC-005` and `SPEC-006` gaps forward when drafting assignment/authority/sync.
+Do not continue from the old Batch 2 sequence by default.
+
+First review `../professional-baseline/20-platform-spec-outline.md`, identify which `05-decision-gap-register.md` gaps block the first platform-spec sections, then classify the existing `sections/` files as candidate input, reusable text, stale process material, or material that must be rewritten.

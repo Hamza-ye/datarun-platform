@@ -2,7 +2,7 @@
 
 Status: Historical/pre-convergence assessment against accepted ADR-001 through ADR-005 baseline
 
-This document assesses `../../exploration/28-pattern-inventory-walkthrough.md` through the accepted baseline, architecture responsibility map, and later-source classification guardrails. The walkthrough is not authority for platform behavior. It is useful candidate material for the `Exact Pattern Registry Inventory` and `Formal Pattern Registry Schema Format` gaps.
+This document assesses `../../exploration/28-pattern-inventory-walkthrough.md` through the accepted baseline, architecture responsibility map, and later-source classification assessments. The walkthrough is not authority for platform behavior. It is useful candidate material for the `Exact Pattern Registry Inventory` and `Formal Pattern Registry Schema Format` gaps.
 
 ## Source Basis
 

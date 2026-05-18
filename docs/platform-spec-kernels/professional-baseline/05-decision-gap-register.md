@@ -37,7 +37,7 @@ This file is the canonical register for open decision state. It owns gap classif
 
 ADR-006-R through ADR-009 remain assessed input, not baseline authority. Their useful material enters platform-spec work through one of three lanes:
 
-- consistent elaboration of a settled baseline rule, used as platform-spec guardrail language
+- consistent elaboration of a settled baseline rule, used as platform-spec constraint language
 - open-gap closure candidate, kept under the owning gap below
 - hold-back or formal-reopen candidate, kept visible without becoming normal platform behavior
 
@@ -53,8 +53,8 @@ This index is the only canonical gap-ownership index in the professional baselin
 | Temporary authority and offline revocation reconciliation | Assignment / Authority / Sync | Flag / Resolution; Projection / Workflow State; Local Data Lifecycle | Policy/spec detail under existing mechanisms unless new scope, envelope, or projection semantics are needed. |
 | Alias-cycle enforcement and resolution semantics | Identity / Lineage | Flag / Resolution; Projection / Workflow State; Event Log / Storage | Open decision before identity or flag sections claim cycle-closing behavior. |
 | Authorization visibility and role-action detail surfaces | Assignment / Authority / Sync | Configuration; Reporting / Aggregation; Local Data Lifecycle | Platform-spec or policy detail under existing assignment/scope mechanisms; formal decision for new scope or authority semantics. |
-| Operational actor vocabulary and operation-class routing | Assignment / Authority / Sync | Configuration; Projection / Workflow State; Reporting / Aggregation | Spec guardrail: product/deployer labels are not platform actor subclasses. |
-| Envelope type, shape ref, references, and parametrization boundary | Event Envelope / Schema | Configuration; Projection / Workflow State; Assignment / Authority / Sync | Spec guardrail: keep `type`, `shape_ref`, references, mechanisms, instances, and product labels separate. |
+| Operational actor vocabulary and operation-class routing | Assignment / Authority / Sync | Configuration; Projection / Workflow State; Reporting / Aggregation | Spec constraint: product/deployer labels are not platform actor subclasses. |
+| Envelope type, shape ref, references, and parametrization boundary | Event Envelope / Schema | Configuration; Projection / Workflow State; Assignment / Authority / Sync | Spec constraint: keep `type`, `shape_ref`, references, mechanisms, instances, and product labels separate. |
 | Process reference and process lifecycle semantics | Projection / Workflow State | Event Envelope / Schema; Identity / Lineage; Assignment / Authority / Sync | Platform-spec detail only if process identity, pending-match, or process lifecycle behavior is in scope. |
 | Exact Pattern Registry inventory | Projection / Workflow State | Configuration; Flag / Resolution | Platform-spec detail. Do not convert inventory choices into new event-envelope structure. |
 | Formal Pattern Registry schema format | Projection / Workflow State | Configuration | Platform-spec detail plus implementation/tooling design. |
@@ -229,11 +229,11 @@ Affected baseline:
 - Authorization and sync
 - Configuration boundary
 - Projection and workflow
-- Product-alignment vocabulary and selected-slice specification
+- Operational/product vocabulary pressure, not platform-spec authority
 
 Why open:
 
-Ground-truth and product-alignment sources use operational labels such as field worker, supervisor, coordinator, administrator, regional lead, auditor, and reviewer. These labels are necessary for scenario pressure and UX design, but they can be overread as permanent platform actor classes or core responsibility types. The accepted baseline already routes authority through actors, assignments, roles, scopes, activities, time, projections, and sync scope. It does not decide a fixed responsibility taxonomy.
+Ground-truth and product-facing sources use operational labels such as field worker, supervisor, coordinator, administrator, regional lead, auditor, and reviewer. These labels are necessary for scenario pressure and UX design, but they can be overread as permanent platform actor classes or core responsibility types. The accepted baseline already routes authority through actors, assignments, roles, scopes, activities, time, projections, and sync scope. It does not decide a fixed responsibility taxonomy.
 
 Later-source assessment:
 
@@ -282,14 +282,14 @@ Priority:
 
 ### Envelope Type, Shape Ref, And Parametrization Boundary
 
-Classification: Platform-spec detail gap with control overlay now available
+Classification: Platform-spec detail gap with assessed source material available
 
 Affected baseline:
 
 - Event envelope
 - Configuration boundary
 - Projection and workflow
-- Product-alignment vocabulary and selected-slice specification
+- Operational/product vocabulary pressure, not platform-spec authority
 
 Why open:
 
@@ -311,12 +311,12 @@ Later claims may elaborate this area only if they preserve the orthogonal model:
 
 Claims that add envelope type values for domain facts, role actions, workflow states, identity/integrity facts, product work items, or offline/sync states should be classified as unauthorized unless formal change control reopens the envelope.
 
-This entry is also the register home for ADR-007 and ADR-008 detail candidates that should not become a separate governance layer: final reference serialization, active emission sites for typed references, platform-bundled identity/integrity/conflict/resolution shape inventory, and shape/reference discrimination rules. New envelope fields or new typed-reference categories remain architecture-grade changes unless the existing envelope contract is sufficient.
+This entry is also the register home for ADR-007 and ADR-008 detail candidates that should not become a separate platform-spec authority layer: final reference serialization, active emission sites for typed references, platform-bundled identity/integrity/conflict/resolution shape inventory, and shape/reference discrimination rules. New envelope fields or new typed-reference categories remain architecture-grade changes unless the existing envelope contract is sufficient.
 
 Closure path:
 
-- Use `18-envelope-shape-parametrization-boundary-control.md` as the lineage/control overlay.
-- Use `19-envelope-shape-parametrization-definitions.md` as the platform-spec definition file.
+- Use `18-envelope-shape-parametrization-boundary-control.md` as lineage assessment material.
+- Use `19-envelope-shape-parametrization-definitions.md` as candidate source material for the `01 Core Definitions And Boundary Vocabulary` platform-spec section.
 - Platform-spec sections involving events, review, patterns, roles, work queues, or selected-slice behavior must cite the relevant axis rather than relying on overloaded prose.
 - Formal architecture decision only if a future requirement truly needs a new envelope field, new type value, new fixed actor subclass, or new platform-owned mechanism.
 
@@ -822,9 +822,9 @@ Closure output:
 
 Platform-spec use:
 
-- Use classified carry-forward candidates from `10` through `13` as guardrails, not new decisions.
-- Carry forward the `type` / `shape_ref` / reference / mechanism-instance distinctions as specification guardrails because they clarify already-settled ADR-001 through ADR-005 boundaries.
-- Carry forward the flag guardrail that accept-and-flag applies to validly structured state anomalies, not malformed envelopes or invalid payloads.
+- Use classified carry-forward candidates from `10` through `13` as specification constraints, not new decisions.
+- Carry forward the `type` / `shape_ref` / reference / mechanism-instance distinctions as specification constraints because they clarify already-settled ADR-001 through ADR-005 boundaries.
+- Carry forward the flag constraint that accept-and-flag applies to validly structured state anomalies, not malformed envelopes or invalid payloads.
 - Keep flag lifecycle separate from detector source facts, identity lineage, authorization, workflow projection, and reporting ownership.
 - Keep `actor_ref` as authorship, `activity_ref` as activity context, and product/deployer labels as configuration or product vocabulary, not platform actor subclasses.
 - Route general flag semantics, alias-cycle behavior, final reference emission, Pattern Registry inventory/schema, subject/auditor scope, resolution-event mapping, and bundled shape inventory through the owning gaps in this register.

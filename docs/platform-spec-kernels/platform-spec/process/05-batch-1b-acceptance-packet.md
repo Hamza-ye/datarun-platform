@@ -1,10 +1,12 @@
-# Batch 1B Acceptance Packet
+# Historical Batch 1B Acceptance Packet
 
-Status: Approved; status update authorized and recorded on 2026-05-12.
+Status: Historical review evidence from the previous section workflow
+
+This file is retained because it contains useful review evidence and carried-gap notes. It is not current acceptance authority. Current section status is controlled by `../section-registry.yml`, and all existing section files must be reviewed against `../../professional-baseline/20-platform-spec-outline.md` before being treated as normative platform specification.
 
 ## Request
 
-Approved promotion of these Batch 1B foundation atoms from `Draft` to `Accepted`:
+Approved promotion of these Batch 1B foundation sections from `Draft` to `Accepted`:
 
 - `SPEC-002` Glossary And Core Definitions
 - `SPEC-003` Event Log And Storage
@@ -18,7 +20,7 @@ Architecture Steward recommendation: accept Batch 1B with explicit carried gaps.
 
 Decision Board / Project Owner decision: approved on 2026-05-12.
 
-No upstream atom edits are required before approval. No rejected path is reintroduced. No open decision in `SPEC-090` is silently closed.
+No upstream section edits are required before approval. No rejected path is reintroduced. No open decision in `SPEC-090` is silently closed.
 
 ## Accepted Surface
 
@@ -64,14 +66,14 @@ Decision Board / Project Owner approval:
 
 - approved Batch 1B promotion for `SPEC-002`, `SPEC-003`, and `SPEC-004`
 - keep all carried gaps open
-- authorized a status update commit changing the three atom headers and `atom-registry.yml` statuses from `draft` to `accepted`
+- authorized a status update commit changing the three section headers and `section-registry.yml` statuses from `draft` to `accepted`
 
 Approval source: Project Owner instruction in the 2026-05-12 architecture-steward session.
 
-Status update result:
+Historical status update result:
 
-- `SPEC-002`, `SPEC-003`, and `SPEC-004` are accepted implementation-facing spec authority only for the accepted surface in this packet.
-- All carried gaps remain open and must be routed through their owning atoms or change control.
+- At the time, `SPEC-002`, `SPEC-003`, and `SPEC-004` were recorded as accepted for the narrow surface in this packet. Under the current baseline closeout path, they are candidate section input until reviewed against `20-platform-spec-outline.md`.
+- All carried gaps remain open and must be routed through their owning sections or change control.
 
 Referent registration, attributes, and catalogs hold-back check:
 

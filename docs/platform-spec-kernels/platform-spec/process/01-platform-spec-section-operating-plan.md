@@ -1,20 +1,20 @@
-# Atomization Operating Plan
+# Platform specification section drafting Operating Plan
 
-Status: Active planning process
+Status: Candidate process input
 
-This document defines the multi-session process for turning the accepted platform baseline into implementation-facing specification atoms without creating mud, drift, premature coupling, or irreversible decisions.
+This document defines the multi-session process for turning the accepted platform baseline into implementation-facing specification sections without creating mud, drift, premature coupling, or irreversible decisions.
 
 ## North Star
 
 The platform spec must preserve append-only operational truth, offline-first capture, assignment-scoped authority, projection-derived state, bounded deployer parameterization, and visible conflict handling.
 
-Every spec atom must make the platform easier to implement without weakening those constraints.
+Every platform-spec section must make the platform easier to implement without weakening those constraints.
 
 ## Operating Rule
 
-Atomization is a governance process before it is a writing process.
+Platform specification section drafting is a source-authority discipline before it is a writing process.
 
-No atom is accepted until it has:
+No section is accepted until it has:
 
 - one primary owner
 - one primary boundary
@@ -22,7 +22,7 @@ No atom is accepted until it has:
 - explicit contracts
 - explicit forbidden couplings
 - known open gaps
-- source basis linked to accepted guardrails
+- source basis linked to accepted sources and routed constraints
 - review against change-control triggers
 - Challenge Review and Integration Review evidence
 
@@ -30,31 +30,32 @@ No atom is accepted until it has:
 
 Use sources in this order:
 
-1. accepted professional baseline and boundary-control overlays
-2. accepted pre-atomization decisions
-3. decision gap register
-4. change-control classifications for later claims
-5. evidence archive only for verification or disputes
+1. accepted architecture baseline: `04-architecture-baseline-v0.md`
+2. canonical decision gap register: `05-decision-gap-register.md`
+3. architecture responsibility map: `07-system-boundary-map.md`
+4. platform-spec outline: `20-platform-spec-outline.md`
+5. assessed inputs only where routed through the outline or an affected `05` gap
+6. evidence archive only for verification or disputes
 
-Do not draft final spec atoms directly from ADR narrative, exploration narrative, product-alignment prose, or implementation plans.
+Do not draft final platform-spec sections directly from ADR narrative, exploration narrative, product-alignment prose, or implementation plans.
 
 ## Agent Start Procedure
 
 At the start of every platform-spec session:
 
-1. Read `atom-registry.yml`.
-2. Identify the requested atom, next recommended atom, or affected hold-back.
-3. Read this operating plan whenever the session drafts, reviews, changes atom status, changes dependencies, touches an open gap, records a rejected path, or handles change control.
-4. Read only the selected atom, its registry-listed dependencies, and the cited source-basis files needed for the work.
-5. Update `atom-registry.yml` in the same commit if atom status, path, owner role, boundary, batch, dependencies, blocking relationships, or source basis change.
+1. Read `section-registry.yml`.
+2. Identify the requested section, next recommended section, or affected hold-back.
+3. Read this operating plan whenever the session drafts, reviews, changes section status, changes dependencies, touches an open gap, records a rejected path, or handles change control.
+4. Read only the selected section, its registry-listed dependencies, and the cited source-basis files needed for the work.
+5. Update `section-registry.yml` in the same commit if section status, path, owner role, boundary, batch, dependencies, blocking relationships, or source basis change.
 
-The registry is a fast lookup layer. It is not architecture authority. If the registry and atom file disagree, pause and reconcile them before continuing.
+The registry is a fast lookup layer. It is not architecture authority. If the registry and section file disagree, pause and reconcile them before continuing.
 
 Registry `source_basis` paths are rooted at `docs/platform-spec-kernels/`.
 
 ## Commit Role Convention
 
-Commit history is a traceability surface for this work. Atomization commits should keep the project's existing conventional subject style and add a role line in the commit body.
+Commit history is a traceability surface for this work. Platform specification section drafting commits should keep the project's existing conventional subject style and add a role line in the commit body.
 
 Subject format:
 
@@ -66,7 +67,7 @@ Commit body format:
 
 ```text
 Role: <Architecture Steward | Drafting Agent | Challenge Reviewer | Integration Reviewer | Delivery Lead | Product Owner>
-Trace: <baseline, atom, decision, or hold-back touched>
+Trace: <baseline, section, decision, or hold-back touched>
 ```
 
 Use the role that best describes the responsibility of the change:
@@ -74,9 +75,9 @@ Use the role that best describes the responsibility of the change:
 | Role | Use When The Commit Mainly |
 |---|---|
 | Architecture Steward | Preserves or clarifies architecture boundaries, invariants, or change-control routing. |
-| Drafting Agent | Drafts specs, templates, inventories, or process artifacts under accepted guardrails. |
+| Drafting Agent | Drafts specs, templates, inventories, or process artifacts under accepted sources and routed constraints. |
 | Challenge Reviewer | Records review findings, rejected paths, disputes, or coupling risks. |
-| Integration Reviewer | Checks whether upstream atoms can be consumed by immediate downstream atoms without circular ownership or hidden assumptions. |
+| Integration Reviewer | Checks whether upstream sections can be consumed by immediate downstream sections without circular ownership or hidden assumptions. |
 | Delivery Lead | Sequences implementation-facing work, delivery constraints, or build order. |
 | Product Owner | Records stakeholder priority, accepted deferral, or product-impact decision. |
 
@@ -88,11 +89,11 @@ Roles are operating constraints, not labels for tone. A person or agent may swit
 
 Use one active role per work unit:
 
-- Drafting Agent drafts scoped atom text from the selected source basis and does not accept atoms, close gaps, or decide change control.
+- Drafting Agent drafts scoped section text from the selected source basis and does not accept sections, close gaps, or decide change control.
 - Challenge Reviewer records findings, coupling risks, rejected-path matches, and pause triggers; it does not rewrite findings into approval.
-- Integration Reviewer checks boundary crossings, dependency direction, and downstream consumption; it does not draft downstream behavior to make an upstream atom look complete.
+- Integration Reviewer checks boundary crossings, dependency direction, and downstream consumption; it does not draft downstream behavior to make an upstream section look complete.
 - Architecture Steward routes findings, reconciles source authority, classifies decision pressure, and prepares status recommendations; it does not use stewardship as a shortcut for acceptance.
-- Delivery Lead sequences implementation-facing work and transition artifacts; it does not treat draft atoms as implementation authority.
+- Delivery Lead sequences implementation-facing work and transition artifacts; it does not treat draft sections as implementation authority.
 - Product Owner states priority, deployment pressure, and product impact; it does not convert product need into architecture closure.
 
 Commits should normally represent one dominant role. If a commit contains reconciliation after review, the trace must name the review or gap being reconciled.
@@ -113,19 +114,19 @@ The process must keep these axes separate:
 - deployer parameterization vs deployer-authored platform logic
 - deployment/account/group context vs event-envelope authority
 
-If an atom blurs one of these axes, stop and re-route the claim before drafting continues.
+If a section blurs one of these axes, stop and re-route the claim before drafting continues.
 
 ## Session Cadence
 
-Run atomization as repeated architecture sessions.
+Run platform-spec section drafting as repeated architecture sessions.
 
-### Session 0: Intake And Guardrail Check
+### Session 0: Intake And Source Check
 
 Inputs:
 
-- accepted guardrail list
+- accepted source list
 - current decision gap register
-- existing atom inventory
+- existing section inventory
 - any new implementation or product pressure
 
 Actions:
@@ -133,22 +134,22 @@ Actions:
 1. confirm no source authority changed
 2. classify new pressure through change control
 3. update hold-backs if needed
-4. select the next atom batch
+4. select the next section batch
 
 Exit criteria:
 
 - the batch has no unresolved owner or boundary ambiguity
-- all required pre-atomization decisions are accepted or explicitly held back
+- all required pre-specification decisions are accepted or explicitly held back
 
-### Session 1: Atom Scoping
+### Session 1: Section Scoping
 
 Actions:
 
-1. name the atom
+1. name the section
 2. assign one primary boundary
-3. list source guardrails
+3. list accepted source basis and routed constraints
 4. define scope and non-scope
-5. list adjacent atoms and boundary crossings
+5. list adjacent sections and boundary crossings
 6. identify open gaps that must remain open
 
 Exit criteria:
@@ -176,7 +177,7 @@ Exit criteria:
 
 Review against these questions:
 
-1. Did the atom add or reinterpret an event-envelope field?
+1. Did the section add or reinterpret an event-envelope field?
 2. Did it add a structural event type?
 3. Did it make a projection canonical?
 4. Did it turn a role label into a platform actor class?
@@ -189,7 +190,7 @@ Review against these questions:
 
 Exit criteria:
 
-- any "yes" answer is either removed, routed to another atom, or escalated through change control
+- any "yes" answer is either removed, routed to another section, or escalated through change control
 
 ### Session 4: Integration Review
 
@@ -197,22 +198,22 @@ Actions:
 
 1. check all boundary crossings
 2. remove circular ownership
-3. confirm all dependencies point backward to accepted atoms or accepted guardrails
-4. check immediate downstream consumers, including planned atoms, for hidden assumptions
-5. use `process/04-planned-consumer-review-cards.md` when a downstream consumer does not yet have an atom file
-6. update the atom inventory
+3. confirm all dependencies point backward to accepted platform-spec sections or accepted professional-baseline sources
+4. check immediate downstream consumers, including planned sections, for hidden assumptions
+5. use `process/04-planned-consumer-review-cards.md` when a downstream consumer does not yet have a section file
+6. update the section inventory
 7. update open decisions and rejected paths
 
 Exit criteria:
 
-- the atom can be accepted without forcing another atom to accept hidden behavior
-- planned downstream atoms have an explicit non-authoritative consumer review surface, or the upstream atom remains draft
+- the section can be accepted without forcing another section to accept hidden behavior
+- planned downstream sections have an explicit non-authoritative consumer review surface, or the upstream section remains draft
 
 ### Session 5: Acceptance Or Rework
 
 Allowed outcomes:
 
-- accepted as current spec atom
+- accepted as current platform-spec section
 - accepted as draft with named open gaps
 - deferred
 - hold-back
@@ -228,19 +229,19 @@ Acceptance requires:
 - completed Integration Review
 - Architecture Steward recommendation
 - Decision Board / Project Owner approval for the status change
-- atom status and registry status updated in the same commit
+- section status and registry status updated in the same commit
 
-Draft atoms may be read for planning context, but implementation designs cite accepted atoms only.
+Draft sections may be read for planning context, but implementation designs cite accepted sections only.
 
 ## Writing Batches
 
-Write atoms in small batches. A batch should contain enough context to be coherent, but not enough to hide coupling.
+Write sections in small batches. A batch should contain enough context to be coherent, but not enough to hide coupling.
 
 Recommended batch size:
 
-- 2 to 4 atoms for foundation work
-- 1 to 2 atoms for high-risk boundary work
-- 1 atom for anything touching envelope, authority, sync, tenancy, identity, or configuration semantics
+- 2 to 4 sections for foundation work
+- 1 to 2 sections for high-risk boundary work
+- 1 section for anything touching envelope, authority, sync, tenancy, identity, or configuration semantics
 
 ## Initial Milestones
 
@@ -248,16 +249,16 @@ Recommended batch size:
 
 Acceptance target:
 
-- atomization operating plan exists
-- atom template exists
-- atom inventory and writing order exists
+- platform-spec section drafting operating plan exists
+- section template exists
+- section inventory and writing order exists
 - no final platform behavior is introduced
 
-### Milestone B: Foundation Atoms
+### Milestone B: Foundation Sections
 
 Draft in order:
 
-1. spec governance
+1. specification control
 2. glossary and core definitions
 3. event log and storage
 4. event envelope and schema
@@ -268,7 +269,7 @@ Acceptance target:
 - stable language for event truth, envelope type, shape ref, activity ref, actor ref, subject ref, projections, and parameterization
 - foundation acceptance happens as a batch after planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007`, plus direct registry consumers `SPEC-009` for the projection/workflow risk surface and `SPEC-010` for the conflict/flag risk surface, are checked through Integration Review
 
-### Milestone C: Core Boundary Atoms
+### Milestone C: Core Boundary Sections
 
 Draft in order:
 
@@ -282,7 +283,7 @@ Acceptance target:
 - configuration does not become arbitrary deployer code
 - authority remains assignment-derived and projection-derived
 
-### Milestone D: Derived Behavior Atoms
+### Milestone D: Derived Behavior Sections
 
 Draft in order:
 
@@ -296,7 +297,7 @@ Acceptance target:
 - conflict detection and flag lifecycle remain separate
 - downstream effects respect detect-before-act
 
-### Milestone E: Operational Surface Atoms
+### Milestone E: Operational Surface Sections
 
 Draft conditionally:
 
@@ -312,7 +313,7 @@ Acceptance target:
 
 ## Change-Control Triggers
 
-Stop and require formal change control if a proposed atom:
+Stop and require formal change control if a proposed section:
 
 - adds event-envelope fields
 - changes event-envelope field meaning
@@ -329,7 +330,7 @@ Stop and require formal change control if a proposed atom:
 
 ## Acceptance Checklist
 
-Before an atom is accepted:
+Before a section is accepted:
 
 - source basis is named
 - owner and boundary are singular
@@ -338,11 +339,11 @@ Before an atom is accepted:
 - open gaps remain visible
 - forbidden couplings are concrete
 - rejected paths are not reintroduced
-- downstream atoms know how to consume it
-- immediate planned downstream atoms have been checked through atom files or planned-consumer review cards
+- downstream sections know how to consume it
+- immediate planned downstream sections have been checked through section files or planned-consumer review cards
 - accepted status has a Decision Board / Project Owner approval record
-- no product alignment language is needed to understand the atom
+- no product alignment language is needed to understand the section
 
 ## Working Principle
 
-Prefer narrow, boring atoms that compose through explicit contracts over broad atoms that feel complete but hide ownership.
+Prefer narrow, boring sections that compose through explicit contracts over broad sections that feel complete but hide ownership.

@@ -1,8 +1,8 @@
 # Flagged Positions — Living Register
 
-> **FORBIDDEN FOR PLATFORM-SPEC ATOMIZATION.**
+> **FORBIDDEN FOR CURRENT PLATFORM-SPECIFICATION WORK.**
 > This is a legacy Ship/convergence verification register. Do not use it as
-> authority or as an open-gap source for the current platform-spec atomization
+> authority or as an open-gap source for the current platform-specification
 > path. Use
 > [`platform-spec-kernels/professional-baseline/05-decision-gap-register.md`](platform-spec-kernels/professional-baseline/05-decision-gap-register.md)
 > instead.

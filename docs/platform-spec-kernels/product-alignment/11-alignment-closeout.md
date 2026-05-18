@@ -2,18 +2,18 @@
 
 Status: Session 11 product-alignment closeout
 
-This document closes the pre-atomization product-alignment track.
+This document closes the pre-specification product-alignment track.
 
-It does not redesign the architecture, add platform behavior, or authorize broad atomization. It states the stable product input surface for the next atomization pass.
+It does not redesign the architecture, add platform behavior, or authorize broad platform-spec section drafting. It states the stable product input surface for the next platform-spec section drafting pass.
 
 ## Closeout Verdict
 
-Product alignment is complete enough to proceed to selected-slice atomization.
+Product alignment is complete enough to proceed to selected-slice platform-spec section drafting.
 
 The approved next movement is:
 
 ```text
-Atomize the selected slice only.
+Platform-spec draft the selected slice only.
 ```
 
 The selected slice remains:
@@ -22,9 +22,9 @@ The selected slice remains:
 Assigned offline capture -> sync visibility -> authorized review -> returned correction -> evidence/history -> minimal freshness-aware oversight
 ```
 
-Where the scenario set says `supervisor review`, that phrase is product shorthand. The atomization-safe interpretation is review by an actor currently authorized for that review context. No role label in the selected slice may be promoted into a fixed platform class, event-envelope field, service boundary, or permanent authority shortcut.
+Where the scenario set says `supervisor review`, that phrase is product shorthand. The platform-spec section drafting-safe interpretation is review by an actor currently authorized for that review context. No role label in the selected slice may be promoted into a fixed platform class, event-envelope field, service boundary, or permanent authority shortcut.
 
-Broad platform atomization remains intentionally blocked until the selected slice produces concrete atomized obligations and pressure-tested follow-up gaps.
+Broad platform-spec section drafting remains intentionally blocked until the selected slice produces concrete section obligations and pressure-tested follow-up gaps.
 
 ## Stable Product-Alignment Surface
 
@@ -41,23 +41,23 @@ The stable product-alignment surface is:
 | `07-interaction-state-model.md` | User-visible states and their non-canonical interpretation rules |
 | `08-ux-gap-routing.md` | Product pressure routed to existing gaps, deferrals, product clarifications, or change control |
 | `09-first-vertical-slice.md` | Selected first slice and its scope controls |
-| `10-atomization-readiness-from-product.md` | GO/NO-GO gate for what may be atomized now |
+| `10-platform-spec-readiness-from-product.md` | GO/NO-GO gate for what may be drafted into platform-spec sections now |
 
-These files are now the product-alignment input package for atomization.
+These files are now the product-alignment input package for platform-spec section drafting.
 
-## Stable Atomization Entry Point
+## Stable Platform specification section drafting Entry Point
 
-The next atomization pass should start from these three artifacts in order:
+The next platform-spec section drafting pass should start from these three artifacts in order:
 
 1. `09-first-vertical-slice.md`
-2. `10-atomization-readiness-from-product.md`
+2. `10-platform-spec-readiness-from-product.md`
 3. `08-ux-gap-routing.md`
 
-Use the earlier product-alignment files for traceability, vocabulary, and experience rules. Do not atomize directly from archived exploration prose or broad domain scenarios without routing through the selected-slice and readiness gates.
+Use the earlier product-alignment files for traceability, vocabulary, and experience rules. Do not draft platform-spec sections directly from archived exploration prose or broad domain scenarios without routing through the selected-slice and readiness gates.
 
-## Required Atomization Shape
+## Required Platform specification section drafting Shape
 
-Each first-pass atom should include:
+Each first-pass section should include:
 
 - selected-slice behavior served
 - scenario pressure traced
@@ -70,7 +70,7 @@ Each first-pass atom should include:
 - gap register references touched but not closed
 - change-control triggers
 
-Atoms that cannot provide those fields are not ready. They should be narrowed or routed back to `08-ux-gap-routing.md`.
+Sections that cannot provide those fields are not ready. They should be narrowed or routed back to `08-ux-gap-routing.md`.
 
 ## What Is Explicitly Closed
 
@@ -78,8 +78,8 @@ This closeout closes only the product-alignment phase.
 
 It closes:
 
-- the question of whether the first atomization pass should start broadly or from one product-backed slice
-- the product-alignment input package for first atomization
+- the question of whether the first platform-spec section drafting pass should start broadly or from one product-backed slice
+- the product-alignment input package for first platform-spec section drafting
 - the rule that product-facing work must remain domain-agnostic while preserving baseline vocabulary boundaries
 
 It does not close:
@@ -100,25 +100,25 @@ It does not close:
 
 ## Forward Rule
 
-From this point forward, atomization should not ask:
+From this point forward, platform-spec section drafting should not ask:
 
 ```text
-What platform areas can we atomize?
+What platform areas can we draft?
 ```
 
 It should ask:
 
 ```text
-What obligations does the selected slice force us to atomize, under the accepted boundaries?
+What obligations does the selected slice force us to draft, under the accepted boundaries?
 ```
 
 That distinction is the guardrail against turning mature architecture into disconnected implementation documents.
 
 ## Immediate Next Step
 
-Begin selected-slice atomization with a thin product-backed atomization plan.
+Begin selected-slice platform-spec section drafting with a thin product-backed platform-spec section drafting plan.
 
-The plan should enumerate only the atoms allowed by `10-atomization-readiness-from-product.md`, then validate each one against:
+The plan should enumerate only the sections allowed by `10-platform-spec-readiness-from-product.md`, then validate each one against:
 
 - `../professional-baseline/04-architecture-baseline-v0.md`
 - `../professional-baseline/05-decision-gap-register.md`
@@ -129,4 +129,4 @@ The plan should enumerate only the atoms allowed by `10-atomization-readiness-fr
 - `../professional-baseline/18-envelope-shape-parametrization-boundary-control.md`
 - `../professional-baseline/19-envelope-shape-parametrization-definitions.md`
 
-If the selected slice cannot proceed without closing a deferred gap, stop and route that pressure through change control instead of hiding it inside atomization.
+If the selected slice cannot proceed without closing a deferred gap, stop and route that pressure through change control instead of hiding it inside platform-spec section drafting.
