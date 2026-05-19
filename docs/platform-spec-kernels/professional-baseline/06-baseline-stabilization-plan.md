@@ -2,7 +2,7 @@
 
 Status: Completed operating plan
 
-This plan defines the order for stabilizing the ADR-001 through ADR-005 baseline and its gaps before any further ADR assessment or platform-spec drafting.
+This plan defines the order for stabilizing the ADR-001 through ADR-005 baseline and its gaps before any later work changes the baseline.
 
 ## Goal
 
@@ -62,7 +62,7 @@ Rank gaps by what they block.
 Priority levels:
 
 - P0: blocks architecture baseline acceptance
-- P1: blocks affected platform-spec sections
+- P1: blocks affected future specification/detail work
 - P2: blocks implementation planning for a core subsystem
 - P3: product/operations detail that can wait
 
@@ -99,9 +99,11 @@ Outcome:
 - later claims are classified, not absorbed
 - baseline remains unchanged unless a formal change is accepted
 
-### Step 6: Platform Specification Outline
+### Step 6: Removed Outline Attempt
 
-After baseline acceptance and gap triage, draft the first platform specification outline.
+Historical plan step: after baseline acceptance and gap triage, draft the first platform specification outline.
+
+Current standing: the produced outline has been removed and the `../platform-spec/` workspace is frozen.
 
 Inputs:
 
@@ -117,7 +119,7 @@ Do not generate the outline directly from ADRs or exploration files.
 - Do not run another broad extraction pass over all staging files.
 - Do not treat every gap as needing exploration.
 - Do not read ADR-006-R through ADR-009 as automatic authority.
-- Do not split detailed platform-spec sections until the baseline and gaps are stable.
+- Do not split detailed specification sections until the baseline and gaps are stable.
 - Do not patch large staging files unless a concrete extraction error is found.
 
 ## Professional Team Practice
@@ -127,7 +129,7 @@ A production team at this stage would stabilize the baseline first, then move th
 1. Confirm the accepted architecture baseline.
 2. Decide which open items actually block engineering.
 3. Route settled mechanisms and gaps through architecture responsibility areas.
-4. Turn platform-spec details into spec sections.
+4. Route platform-spec details through the gap register or change control before any section work exists.
 5. Turn implementation/tooling items into design docs or tickets.
 6. Turn policy gaps into product/operations decisions.
 7. Use later ADRs only as assessed inputs, not as superseding truth.
@@ -140,6 +142,6 @@ This stabilization sequence has been completed through the professional-baseline
 2. `07-system-boundary-map.md` was validated, corrected where needed, and reframed as an architecture responsibility map.
 3. ADR-006-R through ADR-009 were assessed against the stabilized gaps and responsibility areas in `10` through `13`.
 4. Historical pattern-inventory material was assessed in `14`.
-5. Assessment records in `15` through `19` captured cross-cutting risks and routed durable content into `05`, `07`, `20`, or future platform-spec sections.
+5. Assessment records in `15` through `19` captured cross-cutting risks and routed durable content into `05` and `07`.
 
-Current platform-spec drafting should use the accepted baseline, gap register, architecture responsibility map, and platform-spec outline. Use `10` through `19` only as traceable assessed inputs where a section needs their routed findings.
+There is no active platform-spec drafting path from this plan. Use `10` through `19` only as traceable assessed inputs when `05` or change control needs their routed findings.

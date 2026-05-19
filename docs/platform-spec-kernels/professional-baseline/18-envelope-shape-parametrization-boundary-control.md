@@ -1,8 +1,8 @@
 # Envelope, Shape, And Parametrization Boundary Control
 
-Status: Assessed lineage and boundary-routing input already routed into the baseline/spec path
+Status: Assessed lineage and boundary-routing input already routed into the baseline/gap path
 
-This document records the focused ADR-004 lineage for `shape_ref`, envelope `type`, platform-fixed structure, and deployer parametrization. It is not a new architecture decision, does not supersede any ADR, and is not a current authority source. Durable authority and routing belong in `05`, `07`, and `20`.
+This document records the focused ADR-004 lineage for `shape_ref`, envelope `type`, platform-fixed structure, and deployer parametrization. It is not a new architecture decision, does not supersede any ADR, and is not a current authority source. Durable authority and routing belong in `05` and `07`.
 
 The purpose is to prevent a recurring drift pattern: treating operational facts, workflow labels, role labels, or product surfaces as new envelope types, platform classes, or core architectural boundaries when the accepted model routes them through shapes, references, patterns, configuration, projections, and assignments.
 
@@ -119,7 +119,7 @@ ADR-004 closed the core decision correctly. The weakness was not the decision it
 - ADR-005 S5/S6 for patterns
 - later assessments for `type` vs. `shape_ref`, reference vs. referent, and mechanism vs. instance
 
-That spread makes the line easy to misread during platform-spec drafting. In particular, the word `review` appears at multiple layers:
+That spread makes the line easy to misread during later specification work. In particular, the word `review` appears at multiple layers:
 
 - `type=review`: envelope processing path for a human judgment event
 - `capture_with_review`: pattern skeleton for submit/review/return/accept flow
@@ -284,11 +284,11 @@ The accepted baseline already contains the correct architecture line:
 - `11`, `12`, and `13` later-source assessments provide a useful triad: type is not domain fact; reference is not referent; mechanism is not instance.
 - `14-pattern-inventory-walkthrough-assessment.md` correctly keeps pattern inventory/schema candidate-only.
 
-No ADR wording needs deletion or rewrite. The needed correction has been routed into the gap register, responsibility map, platform-spec outline, and companion definition material.
+No ADR wording needs deletion or rewrite. The needed correction has been routed into the gap register, responsibility map, withdrawn outline context, and companion definition material.
 
 ## Spec Acceptance Checks
 
-Before accepting a spec section involving events, shapes, patterns, review, assignments, or operational roles, answer:
+Before accepting any future spec section involving events, shapes, patterns, review, assignments, or operational roles, answer:
 
 1. Which axis is being used: `type`, `shape_ref`, reference field, projection, pattern, configuration, or product label?
 2. If `type`, what distinct platform processing behavior is required?
@@ -304,10 +304,10 @@ Before accepting a spec section involving events, shapes, patterns, review, assi
 
 This assessment does not change ADR-001 through ADR-005 baseline behavior.
 
-It makes one platform-spec detail gap explicit: platform-spec drafting needs a concise, citable definition of envelope type, `shape_ref`, references, pattern mechanism, deployer parameterization, and prohibited encodings. Candidate definition material is provided in `19-envelope-shape-parametrization-definitions.md`.
+It makes one platform-spec detail gap explicit: future accepted behavior needs a concise, citable definition of envelope type, `shape_ref`, references, pattern mechanism, deployer parameterization, and prohibited encodings. Candidate definition material is provided in `19-envelope-shape-parametrization-definitions.md`.
 
-## Recommended Next Step
+## Historical Follow-Up Note
 
-Use the routed findings through `05`, `07`, and `20`, and use `19-envelope-shape-parametrization-definitions.md` as candidate source material before drafting event-envelope, review, Pattern Registry, selected-slice, or authorization/sync specification sections.
+Use the routed findings through `05` and `07`, and use `19-envelope-shape-parametrization-definitions.md` as candidate source material if future baseline assessment touches event-envelope, review, Pattern Registry, selected-slice, or authorization/sync behavior.
 
 The selected slice may proceed only if the review loop is framed as a narrow use of the existing type/shape/pattern/configuration axes, not as a new core model.

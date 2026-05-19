@@ -1,8 +1,8 @@
 # Conflict Flag Offline Boundary Control
 
-Status: Assessed boundary-routing input already routed into the baseline/spec path
+Status: Assessed boundary-routing input already routed into the baseline/gap path
 
-This document records the assessed routing needed to keep the accepted conflict, flag, and offline-default surfaces from collapsing into one broad implementation boundary. It does not re-decide ADR-001 through ADR-005, does not absorb ADR-006-R through ADR-009 as authority, does not reuse pre-convergence primitive maps as final architecture, and is not a current authority source. Durable authority and routing belong in `05`, `07`, and `20`.
+This document records the assessed routing needed to keep the accepted conflict, flag, and offline-default surfaces from collapsing into one broad implementation boundary. It does not re-decide ADR-001 through ADR-005, does not absorb ADR-006-R through ADR-009 as authority, does not reuse pre-convergence primitive maps as final architecture, and is not a current authority source. Durable authority and routing belong in `05` and `07`.
 
 The key correction is that `accept-and-flag`, `detect-before-act`, conflict detection, flag lifecycle, workflow state exclusion, authorization checks, and offline operation are related controls, not one subsystem. They exist because the platform principles created durable pressure, and ADR-001 through ADR-005 then validated narrower mechanisms.
 
@@ -58,7 +58,7 @@ Therefore:
 
 ## Assessment Vocabulary
 
-Use these terms narrowly during platform-spec drafting:
+Use these terms narrowly when this material is assessed for future controlled work:
 
 | Term | Control Definition | Not Allowed To Mean |
 |---|---|---|
@@ -92,7 +92,7 @@ Accept-and-flag applies to validly structured events whose problem is state-base
 
 It does not apply to malformed events, invalid envelope vocabulary, invalid structural type values, impossible schema references, or payloads that fail the accepted schema contract.
 
-During platform-spec drafting, every conflict rule must state which side it falls on:
+If this material is later reused, every conflict rule must state which side it falls on:
 
 - structural rejection before event acceptance
 - accepted event plus flag or surfaced issue
@@ -178,9 +178,9 @@ The pre-convergence mapping treated these as broad cross-cutting concerns:
 - flag catalog
 - aggregation interface
 
-The current path keeps the useful insight but rejects the broad conclusion. These are assessment surfaces that inform platform-spec section review. They are not proof that a single `Conflict Detector`, `Flag Catalog`, `Sync Contract`, or `Aggregation Interface` is already closed as an implementation boundary.
+The current path keeps the useful insight but rejects the broad conclusion. These are assessment surfaces for future review. They are not proof that a single `Conflict Detector`, `Flag Catalog`, `Sync Contract`, or `Aggregation Interface` is already closed as an implementation boundary.
 
-For platform-spec drafting, each surface must be rewritten as:
+If this material is later reused, each surface must be rewritten as:
 
 - accepted invariant
 - owning responsibility area
@@ -189,9 +189,9 @@ For platform-spec drafting, each surface must be rewritten as:
 - open gaps
 - forbidden coupling
 
-## Spec Drafting Readiness Checks
+## Future Readiness Checks
 
-Before writing a conflict/flag/offline spec section, check:
+Before accepting conflict/flag/offline behavior from this material, check:
 
 1. Does the claim come from ADR-001 through ADR-005 closure, a classified later-source assessment, or only a principle?
 2. Is the anomaly structural invalidity, state anomaly, authorization anomaly, workflow transition anomaly, identity-lineage anomaly, configured-domain anomaly, or reporting visibility issue?
@@ -214,11 +214,11 @@ No patch is currently required to `07-system-boundary-map.md`. The existing map 
 - local retain/remove effects to Local Data Lifecycle
 - trigger effects to Trigger / Reactivity
 
-The routed findings should be cited through `05`, `07`, and `20` before accepting conflict, flag, sync, workflow, trigger, Pattern Registry, or reporting specification sections.
+The routed findings should be cited through `05` and `07` before any future decision accepts conflict, flag, sync, workflow, trigger, Pattern Registry, or reporting specification behavior.
 
-## Recommended Next Step
+## Historical Follow-Up Note
 
-Use these routed findings when drafting platform-spec sections around the cross-cutting ingestion and anomaly pipeline:
+Retain these routed findings as context for any future controlled work around the cross-cutting ingestion and anomaly pipeline:
 
 - structural event acceptance
 - offline/local creation assumptions

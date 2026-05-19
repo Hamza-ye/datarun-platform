@@ -4,7 +4,7 @@ Status: Accepted responsibility routing aid from ADR-001 through ADR-005 baselin
 
 This file is kept at its original path for traceability. Its role has been narrowed from a broad system boundary map into an architecture responsibility map.
 
-This document is not a source of platform behavior, not a platform specification, not a second decision register, and not an implementation plan. It routes accepted baseline mechanisms, open gaps, and future platform-spec sections to the responsibility area that should own the language.
+This document is not a source of platform behavior, not a platform specification, not a second decision register, and not an implementation plan. It routes accepted baseline mechanisms, open gaps, and future controlled specification claims to the responsibility area that should own the language.
 
 Authoritative sources remain:
 
@@ -134,19 +134,19 @@ Assessment must not silently move ownership between responsibility areas. If a l
 
 This document is retained, shrunk, and reframed.
 
-- Retained because architecture responsibility routing is still useful before platform-spec drafting.
+- Retained because architecture responsibility routing is still useful for baseline and gap assessment.
 - Shrunk because `04` owns accepted baseline decisions and `05` owns gap state.
 - Reframed because several earlier "system boundaries" were actually platform-spec sections, implementation/design concerns, or policy surfaces.
-- Not retired because the platform still needs one place that says which responsibility area reviews each spec section.
+- Not retired because the platform still needs one place that says which responsibility area reviews future specification claims.
 - Not renamed on disk yet to avoid reference churn. A later documentation hygiene pass can rename the file to `07-architecture-responsibility-map.md` after updating inbound links.
 
 ## Closure Checklist
 
-This map is ready to guide platform-spec drafting when:
+This map is ready to guide responsibility routing when:
 
 - every accepted ADR-001 through ADR-005 mechanism has one responsibility owner
 - every known open gap is owned in `05-decision-gap-register.md`
-- platform-spec sections route through the responsibility tables above
+- future specification claims route through the responsibility tables above
 - flag behavior remains separated from identity conflict detection, authorization checking, workflow projection, and general flag semantics
 - configuration cannot become deployer-authored platform logic
 - reporting, triggers, and local lifecycle cannot redefine event-log source-of-truth, authority semantics, or canonical history

@@ -1,12 +1,12 @@
 # Authentication And Actor Mapping Decision Brief
 
-Status: Stakeholder brief; accepted outcome recorded in `04-accepted-pre-specification-decisions.md`
+Status: Stakeholder brief; accepted outcome recorded in `04-accepted-pre-specification-decisions.md`; context only for current baseline assessment
 
 Audience: stakeholders and decision reviewers. This brief explains the tradeoff; it is not the agent-facing instruction surface.
 
 ## Decision
 
-How should authentication accounts, users, and user groups map to the platform's actor, assignment, role, and scope model during initial platform-spec platform-spec section drafting?
+How should authentication accounts, users, and user groups map to the platform's actor, assignment, role, and scope model during initial controlled specification work?
 
 ## Why Now
 
@@ -16,7 +16,7 @@ How should authentication accounts, users, and user groups map to the platform's
 
 - ADR-002 separates `actor_ref` from `device_id`; device identity is not actor identity.
 - ADR-003 closes access as assignment-derived and sync scope as access scope.
-- ADR-003 rejects stored immutable `authority_context`.
+- ADR-003 keeps authority context projection-derived and adds no `authority_context` field in the current baseline.
 - ADR-004 rejects deployer-authored arbitrary access-control logic.
 - `../professional-baseline/09-identity-boundary-control.md` states Identity / Lineage does not own actor provisioning, authentication, assignment validity, role, scope, authority, or sync delivery scope.
 - `../professional-baseline/12-adr008-reference-fields-assessment.md` treats `actor_ref` as the authorship field, not as device identity or envelope type.

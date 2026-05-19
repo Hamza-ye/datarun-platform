@@ -40,7 +40,7 @@ Every event envelope must express:
 The baseline also includes later ADR-001 through ADR-005 envelope closure:
 
 - ADR-002 adds causal/device/typed-identity reference requirements.
-- ADR-003 rejects stored immutable `authority_context`.
+- ADR-003 keeps authority context projection-derived and adds no `authority_context` field in the current baseline.
 - ADR-004 settles `shape_ref`, optional `activity_ref`, structural type vocabulary, and system actor convention.
 - ADR-005 adds no envelope fields and no structural event type.
 
@@ -158,7 +158,7 @@ The following paths are rejected under the current baseline:
 - last-write-wins for operational conflicts requiring judgment
 - invisible automatic merge where judgment is required
 - structural ordering by `device_time`
-- stored immutable `authority_context`
+- an `authority_context` field in the current envelope without formal change control
 - deployer-authored arbitrary access-control logic
 - field-level sensitivity
 - retain-and-hide as sufficient handling for sensitive local data after scope contraction

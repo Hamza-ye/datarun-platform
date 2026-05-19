@@ -56,7 +56,7 @@ This is mostly consistent with the accepted baseline and strongly reinforces `09
 | ADR-008 Claim | Classification | Assessment |
 |---|---|---|
 | S1: `subject_ref` is a contract envelope field with typed `{type, id}` shape | Consistent elaboration, with bounded spec-detail value | ADR-002 already closes typed identity references. This is safe if read as envelope/reference contract, not as Identity / Lineage ownership over every referent. |
-| S1: `subject_ref.type` enum contains `subject`, `actor`, `process`, and `assignment` | Consistent elaboration plus active-emission detail pending platform-spec drafting | ADR-002 names these four typed reference categories. The exact field serialization and active emission set should be handled in the event-envelope/reference spec, preserving `09`'s rule that categories are not ownership categories. |
+| S1: `subject_ref.type` enum contains `subject`, `actor`, `process`, and `assignment` | Consistent elaboration plus active-emission detail pending future controlled work | ADR-002 names these four typed reference categories. The exact field serialization and active emission set should be handled under the event-envelope/reference responsibility, preserving `09`'s rule that categories are not ownership categories. |
 | S1: `process` is reserved with no current emission site | Deferred implementation/spec detail | Compatible with the current responsibility routing of process identity to Projection / Workflow State. Do not treat this as a settled process lifecycle decision. |
 | S1: extending the typed-reference enum is architecture-grade | Consistent elaboration | Compatible with the accepted envelope stability rule. New reference categories would affect stored event interpretation and need formal decision. |
 | S2: `actor_ref` supports human UUID and `system:{source_type}/{source_id}` forms | Consistent elaboration | Compatible with ADR-004 system actor convention and ADR-005 auto-resolution attribution. It must not collapse actor identity into device identity. |
@@ -64,7 +64,7 @@ This is mostly consistent with the accepted baseline and strongly reinforces `09
 | S2: human/system authorship discriminator is `system:` prefix | Open-gap closure candidate | Useful contract detail, but final acceptance should be coordinated with ADR-007 shape/type and ADR-009 mechanism/configuration classification. |
 | S3: `activity_ref` is optional, deployer-chosen, and auto-populated from activity context | Consistent elaboration plus implementation/spec detail | Compatible with ADR-004 optional `activity_ref`. Auto-population behavior is spec/implementation detail, not a new architecture baseline by itself. |
 | S3: activity instance is config while `activity_ref` is contract | Consistent elaboration | Strongly aligned with the reference-vs-referent rule and the platform/deployer boundary. |
-| S4: reference is not referent | Consistent elaboration | Safe and important carry-forward. It matches the current identity boundary-routing input and should constrain platform-spec drafting. |
+| S4: reference is not referent | Consistent elaboration | Safe and important carry-forward. It matches the current identity boundary-routing input and should constrain any future controlled specification work. |
 | F-B1: never classify a `*_ref` field and referent in the same row | Consistent elaboration | Safe as a classification constraint. |
 | F-B2: never extend `subject_ref.type` without an ADR | Consistent elaboration | Safe as an envelope stability constraint. |
 | F-B3: never treat `actor_ref.source_type` as closed enum | Consistent elaboration | Safe if scoped to source-type vocabulary only, not the envelope field shape. |
@@ -73,7 +73,7 @@ This is mostly consistent with the accepted baseline and strongly reinforces `09
 
 ## Accepted Carry-Forward Candidates
 
-The following ADR-008 material is safe to carry forward as candidate platform-spec language:
+The following ADR-008 material is safe to carry forward as candidate future specification language:
 
 - Reference fields are envelope contracts.
 - Referents have separate lifecycle owners and classifications.
@@ -93,7 +93,7 @@ These candidates narrow broadness and reinforce the accepted baseline.
 - A dedicated `assignment_ref` field.
 - Final human/system authorship discriminator behavior if ADR-009 changes mechanism/configuration classification.
 
-These should remain candidates for Event Envelope / Schema, Identity / Lineage, Assignment / Authority / Sync, Configuration, and Projection / Workflow State spec sections.
+These should remain candidates under Event Envelope / Schema, Identity / Lineage, Assignment / Authority / Sync, Configuration, and Projection / Workflow State ownership.
 
 ## Baseline Impact
 
@@ -111,4 +111,4 @@ No new gap is required from ADR-008 by itself. Existing gaps and open/deferred i
 
 ADR-009 was assessed in `13-adr009-duality-rule-assessment.md`.
 
-During platform-spec drafting, use this assessment to preserve the reference-versus-referent distinction without turning reference fields into broad lifecycle ownership.
+If this assessment is later reused, preserve the reference-versus-referent distinction without turning reference fields into broad lifecycle ownership.

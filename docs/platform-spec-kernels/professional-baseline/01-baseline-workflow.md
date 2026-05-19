@@ -77,11 +77,11 @@ Read later ADRs only through the gap register and change-control categories.
 
 Do not treat them as a fresh source sequence that automatically closes platform behavior.
 
-### 6. Produce Platform Specification Outline
+### 6. Do Not Persist A Separate Outline Artifact
 
-After the baseline and gaps are stable, create the first platform specification outline.
+Do not retain a standalone platform specification outline artifact.
 
-The outline should be generated from the accepted baseline and gap register, not directly from ADR prose.
+Any future outline-like synthesis should be generated from the accepted baseline, gap register, and responsibility map for the specific review task, not kept as a parallel source.
 
 ## Stop Conditions
 

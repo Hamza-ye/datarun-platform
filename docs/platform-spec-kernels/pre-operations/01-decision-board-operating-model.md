@@ -1,8 +1,8 @@
 # Decision Board Operating Model
 
-Status: Working operating model; not platform behavior authority
+Status: Working operating model; not platform behavior authority; context only for current baseline assessment
 
-This document defines a small decision board for the solo-plus-AI project mode. It exists to separate authority, drafting, challenge, and delivery before platform-spec platform-spec section drafting.
+This document defines a small decision board for the solo-plus-AI project mode. It exists to separate authority, drafting, challenge, and delivery when a controlled decision is needed.
 
 The board is not a committee and not a source of architecture by itself. It is a repeatable way to decide what becomes architecture, what remains a hold-back, and what can be safely deferred.
 

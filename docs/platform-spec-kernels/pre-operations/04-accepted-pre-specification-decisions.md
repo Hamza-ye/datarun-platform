@@ -1,21 +1,21 @@
-# Accepted Pre-Platform specification section drafting Decisions
+# Accepted Pre-Specification Decisions
 
-Status: Accepted decision record
+Status: Accepted decision record; context only for current baseline assessment
 
-Audience: platform-spec section drafting planning and implementation agents.
+Audience: baseline assessment and implementation agents.
 
-Use this file as the current pre-specification decision record. The briefs are stakeholder rationale and do not override this record.
+Use this file as the current pre-specification decision record when a baseline gap or implementation question needs it. The briefs are stakeholder rationale and do not override this record.
 
 ## Active Decisions
 
 | ID | Topic | Decision | Hold Back |
 |---|---|---|---|
-| PREOP-001 | Deployment and tenancy | Initial platform-spec section drafting assumes one deployment context per runtime/database/configuration namespace. Deployment or tenant context stays outside the event envelope. | Cloud multi-tenancy, cross-tenant administration, tenant migration, shared-runtime hosting, deployment packaging UX, data residency mechanics |
+| PREOP-001 | Deployment and tenancy | Initial controlled specification work assumes one deployment context per runtime/database/configuration namespace. Deployment or tenant context stays outside the event envelope. | Cloud multi-tenancy, cross-tenant administration, tenant migration, shared-runtime hosting, deployment packaging UX, data residency mechanics |
 | PREOP-002 | Authentication and actor mapping | Authentication proves that a principal may act as an actor. Assignments, roles, scopes, activity/context, and platform-fixed containment semantics remain the source of effective authority. | Full account schema, external IdP integration, IdP group sync, operational-team/provisioning-template schema, shared-device sessions, account recovery, advanced credential lifecycle |
 
 ## Agent Instructions
 
-- Carry PREOP-001 and PREOP-002 into platform-spec section drafting planning.
+- Carry PREOP-001 and PREOP-002 only when a baseline gap, controlled specification task, or implementation question explicitly needs them.
 - Do not add `tenant_id`, `deployment_id`, `user_id`, or `group_id` to the event envelope without formal change control.
 - Do not make account, group, identity-provider claim, or tenant fields direct authority sources.
 - Treat user groups, if introduced later, as operational teams or provisioning templates only.

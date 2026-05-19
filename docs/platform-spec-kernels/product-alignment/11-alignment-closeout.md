@@ -1,16 +1,16 @@
 # Alignment Closeout
 
-Status: Session 11 product-alignment closeout
+Status: Session 11 product-alignment closeout; context only for current baseline assessment
 
 This document closes the pre-specification product-alignment track.
 
-It does not redesign the architecture, add platform behavior, or authorize broad platform-spec section drafting. It states the stable product input surface for the next platform-spec section drafting pass.
+It does not redesign the architecture, add platform behavior, or currently authorize platform-spec section drafting. It records the product input surface identified at the time it was written.
 
 ## Closeout Verdict
 
-Product alignment is complete enough to proceed to selected-slice platform-spec section drafting.
+At the time of this session, product alignment was treated as complete enough to proceed to selected-slice platform-spec section drafting.
 
-The approved next movement is:
+The historical next movement was:
 
 ```text
 Platform-spec draft the selected slice only.
@@ -43,11 +43,11 @@ The stable product-alignment surface is:
 | `09-first-vertical-slice.md` | Selected first slice and its scope controls |
 | `10-platform-spec-readiness-from-product.md` | GO/NO-GO gate for what may be drafted into platform-spec sections now |
 
-These files are now the product-alignment input package for platform-spec section drafting.
+These files were the product-alignment input package for platform-spec section drafting.
 
-## Stable Platform specification section drafting Entry Point
+## Historical Drafting Entry Point
 
-The next platform-spec section drafting pass should start from these three artifacts in order:
+A later platform-spec section drafting pass was expected to start from these three artifacts in order:
 
 1. `09-first-vertical-slice.md`
 2. `10-platform-spec-readiness-from-product.md`
@@ -55,9 +55,9 @@ The next platform-spec section drafting pass should start from these three artif
 
 Use the earlier product-alignment files for traceability, vocabulary, and experience rules. Do not draft platform-spec sections directly from archived exploration prose or broad domain scenarios without routing through the selected-slice and readiness gates.
 
-## Required Platform specification section drafting Shape
+## Historical Required Drafting Shape
 
-Each first-pass section should include:
+Each first-pass section was expected to include:
 
 - selected-slice behavior served
 - scenario pressure traced
@@ -114,9 +114,9 @@ What obligations does the selected slice force us to draft, under the accepted b
 
 That distinction is the guardrail against turning mature architecture into disconnected implementation documents.
 
-## Immediate Next Step
+## Historical Next Step
 
-Begin selected-slice platform-spec section drafting with a thin product-backed platform-spec section drafting plan.
+The historical recommendation was a thin product-backed platform-spec section drafting plan for the selected slice. This is no longer a current instruction.
 
 The plan should enumerate only the sections allowed by `10-platform-spec-readiness-from-product.md`, then validate each one against:
 

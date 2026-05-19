@@ -1,8 +1,8 @@
 # Identity Boundary Control
 
-Status: Assessed boundary-routing input already routed into the baseline/spec path
+Status: Assessed boundary-routing input already routed into the baseline/gap path
 
-This document records the assessed routing needed to keep ADR-002's broad exploration shape from becoming broad implementation coupling. It does not re-decide ADR-002, does not use ADR-006-R through ADR-009 as authority, and is not a current authority source. Durable authority and routing belong in `05-decision-gap-register.md`, `07-system-boundary-map.md`, and `20-platform-spec-outline.md`.
+This document records the assessed routing needed to keep ADR-002's broad exploration shape from becoming broad implementation coupling. It does not re-decide ADR-002, does not use ADR-006-R through ADR-009 as authority, and is not a current authority source. Durable authority and routing belong in `05-decision-gap-register.md` and `07-system-boundary-map.md`.
 
 The key correction for implementation is that ADR-002's typed reference categories are not all the same kind of identity lifecycle. They emerged because platform events can be about, performed by, authorized through, or attached to different operational referents. A collected record may be about a person, a facility, a household, a resource movement, a campaign, a review, someone's work, or another operational process. That does not mean one "Subject" subsystem owns every referent.
 
@@ -123,7 +123,7 @@ Do not break these later-ADR assumptions:
 - ADR-005 assumes workflow state is projection-derived. Identity must not store process current state or workflow state in identity records.
 - ADR-005 assumes source-only flag lineage and detect-before-act composition. Identity must supply raw references and lifecycle facts without becoming the flag cascade owner.
 
-## Candidate Specification Constraints
+## Candidate Constraint Material
 
 - Specify a small reference contract before any universal identity-service language.
 - Keep subject lineage as its own bounded platform responsibility.
@@ -146,9 +146,9 @@ Do not break these later-ADR assumptions:
 
 ## Routed Standing
 
-The durable findings from this assessment have been routed into `05`, `07`, and `20`. During platform-spec drafting, carry them as section constraints and cite `05` whenever a section touches an open gap:
+The durable findings from this assessment have been routed into `05` and `07`. The following points are retained as context material and must not start section work unless `05` or formal change control reopens a controlled task:
 
-1. Keep the first identity spec section limited to reference contract plus subject-lineage contract.
-2. Put actor/assignment authority in the authorization/sync spec.
-3. Put process identity and pending match in workflow/process-pattern spec work.
-4. Put conflict resolution lifecycle in flag/resolution spec work.
+1. Keep identity material limited to reference contract plus subject-lineage contract.
+2. Keep actor/assignment authority in the authorization/sync responsibility area.
+3. Keep process identity and pending match in workflow/process-pattern responsibility areas.
+4. Keep conflict resolution lifecycle in flag/resolution responsibility areas.

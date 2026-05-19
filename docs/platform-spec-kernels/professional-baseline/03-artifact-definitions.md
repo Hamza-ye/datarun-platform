@@ -130,35 +130,6 @@ Rules:
 - ADR-006-R through ADR-009 claims must be classified against responsibility areas before they can affect the baseline
 - responsibility names are routing surfaces, not implementation module names
 
-## Platform Specification Outline
-
-Purpose:
-
-- provide the top-level outline for final platform specification documents before detailed spec sections are accepted
-
-Current file:
-
-- `20-platform-spec-outline.md`
-
-Expected sections:
-
-- event model
-- event envelope
-- identity and references
-- sync and authorization
-- configuration model
-- projection and workflow
-- flags and conflict surfacing
-- open decisions
-- rejected alternatives
-
-Rules:
-
-- generated from the accepted architecture baseline and gap register
-- routed through the architecture responsibility map
-- not generated directly from ADRs or exploration files
-- should be stable enough for engineering review
-
 ## Baseline Stabilization Plan
 
 Purpose:
@@ -230,8 +201,8 @@ Rules:
 
 Purpose:
 
-- turn the accepted baseline and gap register into buildable platform specification sections after the platform-spec outline is stable
-- keep implementation guidance out of baseline artifacts
+- reserved artifact type for future buildable platform specification sections
+- keep implementation guidance out of baseline artifacts if this artifact type is reintroduced
 
 Target groups:
 
@@ -247,7 +218,7 @@ Target groups:
 
 Rules:
 
-- do not create or accept detailed spec sections until the platform-spec outline is stable
+- inactive until a baseline change-control decision reintroduces section work
 - do not split by ADR number or by a local process label
 - every settled statement must retain source basis
 - every open decision must cite `05-decision-gap-register.md`

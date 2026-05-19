@@ -48,7 +48,7 @@ This is mostly consistent elaboration of the accepted ADR-001 through ADR-005 ba
 | identity/integrity facts expressed by `shape_ref` | Event Envelope / Schema | Configuration; Identity / Lineage; Flag / Resolution | Routes fact discrimination through shape contract rather than structural type. |
 | consumer filtering by `shape_ref` for domain facts | Event Envelope / Schema | All consumers of event facts | Provides a safe consumer rule for avoiding type-vocabulary drift. |
 | deterministic flag identity includes `shape_ref` | Flag / Resolution | Event Envelope / Schema | Ties flag identity to the fact shape, but depends on general flag semantics still being assessed. |
-| platform-bundled integrity/identity shapes | Configuration | Event Envelope / Schema; Identity / Lineage; Flag / Resolution | Raises platform-owned shape obligations that should be reconciled with ADR-009 duality before final platform-spec drafting. |
+| platform-bundled integrity/identity shapes | Configuration | Event Envelope / Schema; Identity / Lineage; Flag / Resolution | Raises platform-owned shape obligations that should be reconciled with ADR-009 duality before final acceptance. |
 
 ## Claim Classification
 
@@ -69,7 +69,7 @@ This is mostly consistent elaboration of the accepted ADR-001 through ADR-005 ba
 
 ## Accepted Carry-Forward Candidates
 
-The following ADR-007 material is safe to carry forward as candidate platform-spec language:
+The following ADR-007 material is safe to carry forward as candidate future specification language:
 
 - The envelope `type` vocabulary remains the six ADR-004 structural processing values.
 - `type` answers processing pipeline, not domain fact, authorship, lifecycle ownership, or conflict category.
@@ -88,7 +88,7 @@ These candidates reinforce the accepted baseline rather than changing it.
 - A general rule for shapes spanning multiple envelope types.
 - Any claim that relies on ADR-008 or ADR-009 before those assessments are complete.
 
-These should be held as candidates for the Event Envelope / Schema, Configuration, Identity / Lineage, and Flag / Resolution spec sections.
+These should be held as candidates under Event Envelope / Schema, Configuration, Identity / Lineage, and Flag / Resolution ownership.
 
 ## Baseline Impact
 
@@ -105,4 +105,4 @@ No new gap is required from ADR-007 by itself. Existing gaps already cover the d
 
 ADR-008 was assessed in `12-adr008-reference-fields-assessment.md`.
 
-During platform-spec drafting, use this assessment to preserve the `type` versus `shape_ref` separation and the listed envelope constraints.
+If this assessment is later reused, preserve the `type` versus `shape_ref` separation and the listed envelope constraints.

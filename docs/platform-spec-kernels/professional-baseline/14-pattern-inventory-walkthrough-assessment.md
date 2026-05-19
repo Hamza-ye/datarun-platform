@@ -118,9 +118,9 @@ It also provides supporting candidate detail for existing P2/P3 areas:
 - Projection performance and caching
 - Reporting and aggregation, if pattern-specific projections feed reporting later
 
-## Recommended Next Step
+## Historical Follow-Up Note
 
-Use this assessment to draft a Pattern Registry specification plan, not the final pattern spec. The first specification pass should split:
+This assessment previously recommended a Pattern Registry specification plan rather than a final pattern spec. Any future assessment of this area should split:
 
 - platform-fixed Pattern Registry mechanism
 - pattern definition schema

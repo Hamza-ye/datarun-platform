@@ -111,7 +111,7 @@ First-slice implication:
 Change-control trigger:
 
 - new envelope fields for authority
-- stored immutable `authority_context`
+- `authority_context` as a current baseline envelope field
 - group, IdP claim, tenant, deployment, or device as direct authority source
 - sync scope diverging from access scope
 

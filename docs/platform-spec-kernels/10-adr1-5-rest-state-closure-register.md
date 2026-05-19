@@ -2,7 +2,7 @@
 
 Status: Iteration 40 validated closure overlay
 
-This file is a compact closure overlay for ADR-001 through ADR-005. It does not replace the larger staging files and does not delete lineage. The staging files remain the evidence trail; this register records the current rest-state baseline that later platform-spec section drafting and ADR-006+ assessment must preserve.
+This file is a compact closure overlay for ADR-001 through ADR-005. It does not replace the larger staging files and does not delete lineage. The staging files remain the evidence trail; this register records the current rest-state baseline that later controlled specification work and ADR-006+ assessment must preserve.
 
 ## Use Rules
 
@@ -32,7 +32,7 @@ Covered by:
 
 ### Event Envelope Baseline And Stability
 
-Every event envelope must express identity, type, payload, and timestamp. Later ADRs extend/shape the envelope within their owned boundaries: ADR-002 adds causal/device/typed-identity reference requirements; ADR-003 rejects stored authority context as an envelope field; ADR-004 settles `shape_ref`, optional `activity_ref`, structural type vocabulary, and system actor convention; ADR-005 adds no envelope fields and no structural event type.
+Every event envelope must express identity, type, payload, and timestamp. Later ADRs extend/shape the envelope within their owned boundaries: ADR-002 adds causal/device/typed-identity reference requirements; ADR-003 keeps authority context projection-derived and adds no `authority_context` field in the current baseline; ADR-004 settles `shape_ref`, optional `activity_ref`, structural type vocabulary, and system actor convention; ADR-005 adds no envelope fields and no structural event type.
 
 Source basis:
 
@@ -235,7 +235,7 @@ Covered by:
 
 Open items here remain open only where not already closed by ADR-001 through ADR-005.
 
-- Retention, archival, setup experience, onboarding/role transition, reporting aggregation, and domain-agnostic proof gaps remain open from ground-truth/viability extraction unless later platform-spec work closes them.
+- Retention, archival, setup experience, onboarding/role transition, reporting aggregation, and domain-agnostic proof gaps remain open from ground-truth/viability extraction unless later controlled work closes them.
 - Subject-based scope, auditor access, shared device actor scope, assessment visibility, sensitive-subject classification, grace-period policy, permission table details, and cross-level distribution visibility remain open or policy/implementation-owned after ADR-003/ADR-004 closure.
 - Domain conflict resolution automation remains open after ADR-004/ADR-005 except where ADR-005 closes workflow `transition_violation`, resolvability class, and L3b auto-resolution.
 - Workflow-aware reporting and aggregation remains open after ADR-005.
@@ -258,10 +258,10 @@ Source/covered-by anchors:
 - Snapshot-primary and action-log-primary storage are rejected as foundational storage primitives; snapshots/materialized views remain valid only as derived read models, summaries, exports, or repair artifacts.
 - Server-allocated identifiers for offline event/subject/record creation are rejected.
 - Last-write-wins and invisible automatic merge are rejected for operational conflicts requiring judgment.
-- Stored immutable `authority_context` in the event envelope is rejected by ADR-003.
+- An `authority_context` field in the current envelope is not part of the ADR-003 baseline; adding it later requires formal change control under ADR-001 envelope extensibility and ADR-003.
 - Structural ordering by `device_time` is rejected; device time is advisory for display and audit only.
 - Deployer-authored arbitrary access-control logic and field-level sensitivity are rejected by ADR-004.
-- Retain-but-hide is not recommended for sensitive data under ADR-003 scope-contraction strategy.
+- Retain-but-hide is not sufficient by itself for sensitive data under ADR-003 scope-contraction strategy.
 - `status_changed`, `current_state`, and `pattern_ref` are rejected as ADR-005 structural additions.
 - Workflow invalid-transition rejection is rejected; invalid transitions are accepted and flagged under the ADR-005 workflow contract.
 
@@ -289,7 +289,7 @@ These are not unresolved architecture disputes unless a later valid source turns
 - Auto-resolution authoring UX and reporting/monitoring surface.
 - Sync pagination, priority, bandwidth handling, transport details, and operational delivery mechanics.
 - Accepted-risk revisit triggers from ADR-001 through ADR-005 remain monitoring inputs for platform specification and implementation work.
-- Platform-spec section drafting and final document structure.
+- Final specification structure.
 
 Source/covered-by anchors:
 

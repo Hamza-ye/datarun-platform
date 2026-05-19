@@ -1,12 +1,12 @@
 # Deployment And Tenancy Decision Brief
 
-Status: Stakeholder brief; accepted outcome recorded in `04-accepted-pre-specification-decisions.md`
+Status: Stakeholder brief; accepted outcome recorded in `04-accepted-pre-specification-decisions.md`; context only for current baseline assessment
 
 Audience: stakeholders and decision reviewers. This brief explains the tradeoff; it is not the agent-facing instruction surface.
 
 ## Decision
 
-How should deployment and tenant context be handled during initial platform-spec platform-spec section drafting, especially for cloud and self-hosted futures?
+How should deployment and tenant context be handled during initial controlled specification work, especially for cloud and self-hosted futures?
 
 ## Why Now
 

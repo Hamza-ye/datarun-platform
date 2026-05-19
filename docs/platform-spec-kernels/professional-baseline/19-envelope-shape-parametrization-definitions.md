@@ -1,10 +1,10 @@
 # Envelope, Shape, And Parametrization Definitions
 
-Status: Candidate definition input for `01 Core Definitions And Boundary Vocabulary`
+Status: Candidate definition input for future baseline or gap assessment
 
-This file provides compact definitions for platform-spec writers. It is derived from ADR-004 closure, ADR-005 reinforcement, and the lineage assessment in `18-envelope-shape-parametrization-boundary-control.md`.
+This file provides compact definitions for future controlled assessment. It is derived from ADR-004 closure, ADR-005 reinforcement, and the lineage assessment in `18-envelope-shape-parametrization-boundary-control.md`.
 
-It does not add platform behavior, does not supersede `05`, `07`, or `20`, and is not an accepted platform-spec section. It defines how to read already-accepted boundaries until the future `01` section accepts or rewrites the vocabulary.
+It does not add platform behavior, does not supersede `05` or `07`, and is not an accepted platform specification section. It defines how to read already-accepted boundaries until a future controlled baseline or gap assessment accepts or rewrites the vocabulary.
 
 ## Core Definitions
 
@@ -95,7 +95,7 @@ Shape addition and shape versioning are the normal way to add new fact vocabular
 
 A platform-bundled shape is a shape supplied by platform code for a platform-owned fact. It is still identified by `shape_ref`; it does not become a new envelope `type`.
 
-This definition does not accept a final platform-bundled shape inventory. Exact bundled shapes remain governed by the relevant identity, flag, event-envelope, and platform-spec sections.
+This definition does not accept a final platform-bundled shape inventory. Exact bundled shapes remain governed by the relevant identity, flag, and event-envelope responsibility areas.
 
 ### Activity
 

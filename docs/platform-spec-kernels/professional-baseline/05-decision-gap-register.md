@@ -35,9 +35,9 @@ This file is the canonical register for open decision state. It owns gap classif
 
 `07-system-boundary-map.md` defines responsibility routing and cross-boundary contracts. It must not maintain a second open-gap register. If ownership changes, update this register first and then update responsibility language only where the responsibility definition itself changes.
 
-ADR-006-R through ADR-009 remain assessed input, not baseline authority. Their useful material enters platform-spec work through one of three lanes:
+ADR-006-R through ADR-009 remain assessed input, not baseline authority. Their useful material can affect future controlled work only through one of three lanes:
 
-- consistent elaboration of a settled baseline rule, used as platform-spec constraint language
+- consistent elaboration of a settled baseline rule, retained as future constraint material
 - open-gap closure candidate, kept under the owning gap below
 - hold-back or formal-reopen candidate, kept visible without becoming normal platform behavior
 
@@ -209,8 +209,8 @@ ADR-006-R is a valid dispute against silently treating subject-lineage acyclicit
 
 Closure path:
 
-- Formal architecture decision if alias-cycle behavior is included in the first identity or flag platform-spec sections.
-- Platform-spec detailing only after the decision states whether cycle-closing alias events are accepted-and-flagged, rejected as structural invalidity, or excluded from lineage projection until resolution.
+- Formal architecture decision if alias-cycle behavior is included in future identity or flag specification work.
+- Specification detailing only after the decision states whether cycle-closing alias events are accepted-and-flagged, rejected as structural invalidity, or excluded from lineage projection until resolution.
 - Implementation/tooling design for graph traversal, batch handling, and tests after the architecture decision.
 
 Priority:
@@ -883,7 +883,7 @@ These are closed under the current baseline and must not be reopened without for
 - device time as advisory display/audit data only
 - structural ordering by `device_sequence` and concurrency detection by `sync_watermark`
 - immutable event sync
-- no stored immutable `authority_context`
+- no `authority_context` field in the current baseline; any future field requires formal change control
 - assignment-derived access
 - sync scope as access scope
 - scope expansion as additive and scope contraction as selective retain under the ADR-003 initial strategy

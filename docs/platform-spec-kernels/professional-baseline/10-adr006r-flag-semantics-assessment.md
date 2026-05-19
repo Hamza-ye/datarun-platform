@@ -83,7 +83,7 @@ These candidates do not require changing the ADR-001 through ADR-005 baseline.
 - Read-side identity semantics over a flagged cycle.
 - Cycle resolution effects.
 
-These require either formal gap closure or explicit deferral in the first platform-spec outline.
+These require either formal gap closure or explicit deferral before future controlled specification work uses them.
 
 ## Baseline Impact
 
@@ -98,4 +98,4 @@ Required gap/routing updates:
 
 The alias-cycle gap and routing were recorded, and ADR-007 through ADR-009 were assessed in `11` through `13`.
 
-During platform-spec drafting, use this assessment only for the accepted carry-forward candidates and explicit hold-backs listed above.
+If this assessment is later reused, use only the accepted carry-forward candidates and explicit hold-backs listed above.

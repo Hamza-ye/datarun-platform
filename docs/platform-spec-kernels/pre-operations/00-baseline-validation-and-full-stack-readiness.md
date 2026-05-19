@@ -1,8 +1,8 @@
 # Baseline Validation And Full-Stack Readiness
 
-Status: Assessment artifact; no baseline mutation; no final platform-spec sections
+Status: Assessment artifact; no baseline mutation; context only for current baseline assessment
 
-This document records the validation pass over the professional baseline and classifies full-stack readiness gaps before platform-spec platform-spec section drafting. It does not change the accepted ADR-001 through ADR-005 baseline.
+This document records the validation pass over the professional baseline and classifies full-stack readiness gaps that existed before the now-frozen platform-spec section drafting track. It does not change the accepted ADR-001 through ADR-005 baseline.
 
 ## Source Basis
 
@@ -36,7 +36,7 @@ The professional baseline is internally consistent enough to proceed to full-sta
 
 - ADR-001 storage closure is preserved: immutable append-only event log, event-store write path, projection-derived views, client-generated identifiers, immutable event sync.
 - ADR-002 identity/conflict closure is preserved: typed references, `device_id` / `device_sequence` / `sync_watermark`, advisory `device_time`, alias-in-projection, raw-reference conflict detection, stale-event acceptance, online-only merge/split where required.
-- ADR-003 authorization/sync closure is preserved: assignment-derived access, sync scope as access scope, no stored immutable `authority_context`, original-subject authorization, additive scope expansion, selective-retain contraction.
+- ADR-003 authorization/sync closure is preserved: assignment-derived access, sync scope as access scope, no `authority_context` field in the current baseline, original-subject authorization, additive scope expansion, selective-retain contraction.
 - ADR-004 configuration closure is preserved: `shape_ref`, optional `activity_ref`, six structural event types, server-only triggers where required, atomic configuration packages, no deployer-authored access-control logic, no field-level sensitivity.
 - ADR-005 workflow closure is preserved: no new envelope fields, no `status_changed`, no `current_state`, no `pattern_ref`, projection-derived workflow state, source-only workflow flag lineage, bounded form-only `context.*`, L3b auto-resolution boundary.
 

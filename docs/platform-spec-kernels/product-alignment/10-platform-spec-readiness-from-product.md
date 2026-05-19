@@ -1,8 +1,8 @@
 # Platform specification section drafting Readiness From Product
 
-Status: Session 10 product-alignment artifact
+Status: Session 10 product-alignment artifact; context only for current baseline assessment
 
-This document assesses whether the product-alignment track is ready to feed platform-spec section drafting.
+This document assessed whether the product-alignment track was ready to feed platform-spec section drafting at the time it was written. It is not a current instruction to resume drafting.
 
 It is a readiness gate, not a backlog, not an implementation plan, and not an architecture decision. It does not reopen the first-slice selection from `09-first-vertical-slice.md`.
 
@@ -33,10 +33,10 @@ Architecture guardrails:
 
 ## Verdict
 
-Conditional GO:
+Historical conditional GO:
 
 ```text
-Proceed with narrow selected-slice platform-spec section drafting.
+Narrow selected-slice platform-spec section drafting only.
 ```
 
 NO-GO:
@@ -45,7 +45,7 @@ NO-GO:
 Do not resume broad platform-spec section drafting yet.
 ```
 
-The product track is ready to feed platform-spec section drafting only for the selected slice:
+At the time of this session, the product track was treated as ready to feed platform-spec section drafting only for the selected slice:
 
 ```text
 Assigned offline capture -> sync visibility -> authorized review -> returned correction -> evidence/history -> minimal freshness-aware oversight
@@ -53,13 +53,13 @@ Assigned offline capture -> sync visibility -> authorized review -> returned cor
 
 Where source scenarios call this `supervisor review`, the platform-spec section drafting-safe reading is an authorized review/oversight context. Platform specification section drafting must not turn field actor, supervisor, coordinator, auditor, reviewer, or administrator labels into fixed platform classes. It should name the operation class and boundary: offline-capable capture, sync-visible review, online/coordination-required setup or resolution, or offline-with-constraints authority.
 
-This is enough to start drafting product-backed platform-spec surfaces where product behavior, scenario pressure, and baseline boundary ownership agree.
+This was judged enough for product-backed platform-spec surfaces where product behavior, scenario pressure, and baseline boundary ownership agree. It is now retained as context only.
 
 It is not enough to draft full authorization, full sync delivery, full identity/lineage, full Pattern Registry, full reporting, full setup, full exception handling, transfer/custody, auditor access, or retention/export.
 
 ## Control Rule
 
-Platform specification section drafting may proceed only when each proposed section has all of the following:
+Any future controlled work based on this material would need all of the following:
 
 | Requirement | Meaning |
 |---|---|
@@ -70,9 +70,9 @@ Platform specification section drafting may proceed only when each proposed sect
 | Vocabulary layer | The section keeps core, product translation, and operational-surface terms separate |
 | Offline walkthrough | The section still behaves under saved-local, pending-sync, synced, and narrow sync-problem states |
 
-If any requirement is missing, the item is not ready for platform-spec section drafting. It should be routed back to product clarification, gap register, change control, or later implementation design.
+If any requirement is missing, the item is not ready for acceptance. It should be routed back to product clarification, gap register, change control, or later implementation design.
 
-## Ready To Platform-spec draft Now
+## Historical Ready-To-Draft Classification
 
 These surfaces are ready only inside the selected slice.
 
@@ -89,9 +89,9 @@ These surfaces are ready only inside the selected slice.
 | Evidence/history view | Event Log/Storage + product translation | Show original, correction, and decision trail | Does not define export, audit retention, or source-chain traversal closure |
 | Minimal freshness-aware oversight | Projection-derived view + Reporting/Aggregation pressure | Narrow counts for assigned, submitted, returned, approved, and stale/pending visibility | Does not close reporting/aggregation |
 
-## Conditional Platform specification section drafting
+## Historical Conditional Drafting Classification
 
-These surfaces may be drafted into platform-spec sections only if their constraint is kept explicit in the section itself.
+These surfaces were classified as draftable only if their constraint stayed explicit in the section itself.
 
 | Surface | Constraint | If Constraint Fails |
 |---|---|---|
@@ -101,11 +101,11 @@ These surfaces may be drafted into platform-spec sections only if their constrai
 | Minimal oversight | Present freshness-aware counts as read-model interpretation | Route broader needs to Reporting/Aggregation |
 | Returned work as attention | Treat return as review decision routing, not general flag semantics | Route broader exception behavior to conflict/flag gaps |
 
-Conditional platform-spec section drafting should be labeled as conditional in the platform-spec section drafting output. It should not be promoted to stable platform behavior without a later acceptance pass.
+Conditional material must not be promoted to stable platform behavior without a later acceptance pass.
 
-## Not Ready For Platform specification section drafting
+## Historical Not-Ready Classification
 
-These surfaces remain outside the first platform-spec section drafting pass.
+These surfaces were outside the first platform-spec section drafting pass.
 
 | Surface | Reason |
 |---|---|
@@ -155,7 +155,7 @@ Each first-pass section should answer these questions before it is accepted:
 A section should be rejected or narrowed if it introduces:
 
 - new event envelope fields
-- stored immutable `authority_context`
+- `authority_context` as a current baseline envelope field
 - tenant, deployment, group, IdP, device, or account authority shortcuts
 - a canonical `WorkItem` primitive
 - mutable canonical records competing with immutable events

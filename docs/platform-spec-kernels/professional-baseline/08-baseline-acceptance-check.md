@@ -17,7 +17,6 @@ The ADR-001 through ADR-005 baseline is accepted as stable enough to build from 
 - architecture responsibility validation
 - prioritized gap routing
 - targeted ADR-006+ assessment
-- platform-spec outline drafting
 
 This does not make the baseline a final platform specification. It accepts it as the current engineering comparison surface.
 
@@ -27,7 +26,7 @@ This does not make the baseline a final platform specification. It accepts it as
 - Stable event envelope baseline, including device-time advisory semantics.
 - Client-generated identity and lineage preservation.
 - Immutable event sync and access-scoped delivery.
-- Authority as projection, with no stored immutable `authority_context`.
+- Authority as projection, with no `authority_context` field in the current baseline.
 - Detect-before-act and accept-and-flag discipline.
 - Platform-fixed structural event types and deployer-configured shapes.
 - Bounded configuration evaluation and deployer policy surfaces.
@@ -40,7 +39,7 @@ This does not make the baseline a final platform specification. It accepts it as
 
 These gaps are accepted as explicit, not accidental. They are not blockers to accepting the baseline itself.
 
-P1, before affected platform-spec sections or later-source use:
+P1, before affected baseline change-control decisions or later-source use:
 
 - ADR-006-R through ADR-009 assessment.
 - General flag semantics if the platform spec needs more than ADR-005 workflow flag behavior.
@@ -57,7 +56,7 @@ P2, before core implementation planning or affected spec sections:
 - Configuration authoring, deployment, validation, and migration UX.
 - Auto-resolution authoring and monitoring.
 - Sync delivery mechanics.
-- Reporting and aggregation if reporting is included in the initial platform-spec outline.
+- Reporting and aggregation if reporting capability boundaries are being accepted.
 
 P3, policy/product-timed unless a first deployment needs them:
 
@@ -81,10 +80,10 @@ P3, policy/product-timed unless a first deployment needs them:
 - Server-allocated identifiers for offline event/subject/record creation.
 - Last-write-wins and invisible automatic merge where judgment is required.
 - Structural ordering by `device_time`.
-- Stored immutable `authority_context`.
+- An `authority_context` field in the current envelope without formal change control.
 - Deployer-authored arbitrary access-control logic.
 - Field-level sensitivity.
-- Retain-and-hide as sufficient sensitive-data handling after scope contraction.
+- Retain-and-hide as sufficient by itself for sensitive-data handling after scope contraction.
 - `status_changed`, `current_state`, and `pattern_ref` as ADR-005 structural additions.
 - Rejecting invalid workflow transitions instead of accepting and flagging.
 
@@ -108,4 +107,4 @@ This acceptance check led to the completed responsibility-validation and later-s
 2. ADR-006-R through ADR-009 claims were routed through the validated responsibility map in `10` through `13`.
 3. Additional assessed input records were added for identity, conflict/flag/offline behavior, operational constraints, authorization/visibility, and envelope/shape/parametrization boundaries.
 
-Current platform-spec drafting should follow `04`, `05`, `07`, and `20`. Use `09` through `19` as assessed supporting inputs, not as current authority sources.
+There is no active platform-spec drafting path from this acceptance check. Current assessment should follow `04`, `05`, and `07`. Use `09` through `19` as assessed supporting inputs, not as current authority sources.

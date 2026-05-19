@@ -1,10 +1,10 @@
 # Authorization Visibility Boundary Control
 
-Status: Assessed boundary-routing input already routed into the baseline/spec path
+Status: Assessed boundary-routing input already routed into the baseline/gap path
 
-This document records how `../../access-control-scenario.md` creates authorization and visibility pressure without silently rewriting ADR-003 or becoming a deployer-authored access-control system. Durable authority and routing belong in `05`, `07`, and `20`.
+This document records how `../../access-control-scenario.md` creates authorization and visibility pressure without silently rewriting ADR-003 or becoming a deployer-authored access-control system. Durable authority and routing belong in `05` and `07`.
 
-The core rule is: the access-control scenario states what must remain possible across roles, context, hierarchy, temporary authority, and offline operation. ADR-001 through ADR-005 define the accepted mechanisms currently allowed to satisfy that pressure. Anything not closed by those mechanisms must route through the gap register and change control before platform-spec drafting freezes it into specification language.
+The core rule is: the access-control scenario states what must remain possible across roles, context, hierarchy, temporary authority, and offline operation. ADR-001 through ADR-005 define the accepted mechanisms currently allowed to satisfy that pressure. Anything not closed by those mechanisms must route through the gap register and change control before it affects specification language.
 
 ## Source Basis
 
@@ -63,7 +63,7 @@ The accepted baseline already closes these mechanisms:
 - scope contraction uses selective retain as ADR-003's initial strategy
 - sensitive deployments require stronger local lifecycle handling than retain-and-hide
 
-The access-control scenario should therefore constrain platform-spec drafting by naming pressure and gaps. It should not be used to reopen those closed rules unless a claim passes `02-change-control.md`.
+The access-control scenario should therefore constrain future controlled work by naming pressure and gaps. It should not be used to reopen those closed rules unless a claim passes `02-change-control.md`.
 
 ## Pressure-To-Responsibility Mapping
 
@@ -80,14 +80,14 @@ The access-control scenario should therefore constrain platform-spec drafting by
 
 ## Classification Rules
 
-Use these classifications during platform-spec drafting and later review:
+Use these classifications during later review:
 
 | Claim Type | Classification | Allowed Handling |
 |---|---|---|
 | accounts authenticate, actors author, assignments authorize | consistent elaboration | Carry forward from `../pre-operations/04-accepted-pre-specification-decisions.md`. |
-| role, scope, activity, time, and subject/context all influence authority | consistent elaboration plus platform-spec detail | Specify as inputs to the authority projection without adding envelope fields or stored authority snapshots. |
-| concrete permission tables, role names, and deployer policy values | platform-spec detail or operational policy | Keep bounded by platform-owned mechanisms and configuration limits. |
-| product role labels used as UI lenses or scenario shorthand | product clarification plus platform-spec detail | Preserve as operating-context language; do not create fixed actor classes or direct authority shortcuts. |
+| role, scope, activity, time, and subject/context all influence authority | consistent elaboration plus future specification detail | Specify as inputs to the authority projection without adding envelope fields or stored authority snapshots. |
+| concrete permission tables, role names, and deployer policy values | future specification detail or operational policy | Keep bounded by platform-owned mechanisms and configuration limits. |
+| product role labels used as UI lenses or scenario shorthand | product clarification plus future specification detail | Preserve as operating-context language; do not create fixed actor classes or direct authority shortcuts. |
 | auditor access, subject-based scope, or cross-level visibility exceptions | open-gap closure candidate | Close through the named gap if expressible with existing scope mechanisms; require formal decision for new scope semantics. |
 | temporary grants, revocation, and offline grace behavior | open-gap closure candidate | Route through the temporary authority/offline reconciliation gap before authorization/sync specification if needed now. |
 | user group or identity-provider claim directly grants data access | conflict or new unauthorized claim | Reject unless formal change control changes the baseline. |
@@ -102,7 +102,7 @@ Offline authorization creates two enforcement points that may temporarily disagr
 - local device enforcement over last-known assignments, configuration, scoped projections, and local session state
 - server/sync enforcement over later central knowledge, assignment changes, revocations, identity changes, and received events
 
-During platform-spec drafting:
+If this material is later reused:
 
 - local enforcement must be described as last-known and scoped, not globally authoritative
 - sync-time authorization must preserve immutable event history and attribution
@@ -119,13 +119,13 @@ Scope and authority have both platform-owned and deployer-configured parts:
 - platform-owned mechanism: assignment-derived access, fixed scope containment semantics, sync scope as access scope, authority projection inputs, and original-reference authorization checks
 - deployer-configured instances: concrete roles, assigned actors, areas, teams, activities, schedules, thresholds, sensitivity classifications, and policy values within bounded configuration
 
-Platform-spec sections must not mix these into one "access-control config language." Deployer configuration supplies instances and policy values. The platform owns the authority mechanism and its limits.
+Future controlled specification work must not mix these into one "access-control config language." Deployer configuration supplies instances and policy values. The platform owns the authority mechanism and its limits.
 
-Operational actor labels sit on the instance/product side of this split. `Supervisor`, `Coordinator`, `Auditor`, `Reviewer`, and similar names may be deployer labels, scenario shorthand, or UI lenses; they are not platform-owned actor subclasses unless a later formal decision creates such a mechanism. Authorization spec sections should name the authority inputs and operation class they require rather than relying on a persona label.
+Operational actor labels sit on the instance/product side of this split. `Supervisor`, `Coordinator`, `Auditor`, `Reviewer`, and similar names may be deployer labels, scenario shorthand, or UI lenses; they are not platform-owned actor subclasses unless a later formal decision creates such a mechanism. Future authorization material should name the authority inputs and operation class it requires rather than relying on a persona label.
 
-## Spec Drafting Readiness Checks
+## Future Readiness Checks
 
-Before writing an authorization, sync, reporting, trigger, workflow, or local-lifecycle spec section:
+Before accepting authorization, sync, reporting, trigger, workflow, or local-lifecycle behavior from this material:
 
 1. Is the claim a closed ADR-001 through ADR-005 rule, a pre-operations accepted decision, an access-control pressure, or an open gap?
 2. Does it preserve assignment-derived access and sync scope as access scope?
@@ -141,13 +141,13 @@ Before writing an authorization, sync, reporting, trigger, workflow, or local-li
 
 No ADR-001 through ADR-005 baseline item should be changed by this assessment.
 
-This assessment added one gap-register clarification: temporary authority, revocation, and offline grace reconciliation should be explicit before authorization/sync specification if the first platform spec needs to describe temporary grants or late revocation behavior.
+This assessment added one gap-register clarification: temporary authority, revocation, and offline grace reconciliation should be explicit before authorization/sync behavior is accepted if the work needs to describe temporary grants or late revocation behavior.
 
-## Recommended Next Step
+## Historical Follow-Up Note
 
-Use the routed findings through `05`, `07`, and `20`, with `../pre-operations/04-accepted-pre-specification-decisions.md` as assessed source material where relevant.
+Use the routed findings through `05` and `07`, with `../pre-operations/04-accepted-pre-specification-decisions.md` as assessed source material where relevant.
 
-Hold back from first platform-spec drafting unless explicitly needed:
+Hold back unless explicitly needed:
 
 - new scope types
 - auditor access semantics

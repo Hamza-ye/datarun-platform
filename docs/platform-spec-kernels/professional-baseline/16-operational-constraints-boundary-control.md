@@ -1,8 +1,8 @@
 # Operational Constraints Boundary Control
 
-Status: Assessed boundary-routing input already routed into the baseline/spec path
+Status: Assessed boundary-routing input already routed into the baseline/gap path
 
-This document records how `../../constraints.md` creates operational pressure without becoming architecture or implementation authority. The constraints shaped the ADR path, but they do not decide mechanisms by themselves. Durable authority and routing belong in `05`, `07`, and `20`.
+This document records how `../../constraints.md` creates operational pressure without becoming architecture or implementation authority. The constraints shaped the ADR path, but they do not decide mechanisms by themselves. Durable authority and routing belong in `05` and `07`.
 
 The core rule is: constraints define what the platform must work within; ADR-001 through ADR-005 define the accepted mechanisms currently used to satisfy those constraints; unresolved constraint pressure must be routed as explicit gaps rather than silently widening existing boundaries.
 
@@ -73,7 +73,7 @@ If a constraint creates pressure not closed by ADR-001 through ADR-005, route it
 
 ## Constraint Vocabulary
 
-Use these terms narrowly during platform-spec drafting:
+Use these terms narrowly when this material is assessed for future controlled work:
 
 | Term | Control Definition | Not Allowed To Mean |
 |---|---|---|
@@ -86,7 +86,7 @@ Use these terms narrowly during platform-spec drafting:
 | immediate capture | capture interaction should not wait for network or central validation | immediate central visibility or global conflict certainty |
 | config propagation | changed configuration reaches devices on next sync and old in-progress work can complete under old rules | instant config invalidation of offline work |
 
-Actor-tier labels in `../../constraints.md` are operational examples. During platform-spec drafting, translate them into operation classes and environmental assumptions. Do not hard-code field worker, supervisor, coordinator, auditor, or regional lead as platform-core responsibility types merely because the constraints use those names.
+Actor-tier labels in `../../constraints.md` are operational examples. If this material is later reused, translate those labels into operation classes and environmental assumptions. Do not hard-code field worker, supervisor, coordinator, auditor, or regional lead as platform-core responsibility types merely because the constraints use those names.
 
 ## Overread Controls
 
@@ -147,7 +147,7 @@ Accepted baseline reading:
 Forbidden overread:
 
 - Do not hard-code one regulatory framework into the core platform.
-- Do not infer field-level sensitivity, arbitrary access-control logic, or stored immutable `authority_context`.
+- Do not infer field-level sensitivity, arbitrary access-control logic, or an `authority_context` field in the current baseline.
 - Do not let compliance reporting bypass assignment/sync-scope constraints.
 
 ### Interoperability
@@ -207,13 +207,13 @@ Before writing a spec section affected by operational constraints, check:
 
 This assessment does not change ADR-001 through ADR-005 baseline behavior.
 
-It does require one visibility update to the professional baseline: structured import/export compatibility should be explicit in the gap register and boundary routing. The constraint already exists in extracted domain kernels, but without a professional-baseline route it can be forgotten during platform-spec drafting.
+It does require one visibility update to the professional baseline: structured import/export compatibility should be explicit in the gap register and boundary routing. The constraint already exists in extracted domain kernels, but without a professional-baseline route it can be forgotten.
 
 No new boundary is required. Structured exchange should route primarily through Event Envelope / Schema while consuming Event Log / Storage, Configuration, and Reporting / Aggregation outputs as needed.
 
-## Recommended Next Step
+## Historical Follow-Up Note
 
-Use these routed findings through `05`, `07`, and `20` when drafting platform-spec sections. The affected sections should explicitly hold back:
+Use these routed findings through `05` and `07` if future baseline assessment touches this area. The affected work should explicitly hold back:
 
 - structured import/export contracts
 - reporting freshness metadata
