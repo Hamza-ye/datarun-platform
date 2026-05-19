@@ -26,13 +26,11 @@ Depends on:
 - `90-open-decisions-and-gap-register-citations.md`
 - `91-rejected-alternatives.md`
 
-Consumed by:
+Candidate input for:
 
-- `07-assignment-authority-and-sync.md`
-- `09-projections-workflow-and-patterns.md`
-- `10-conflict-flag-and-resolution.md`
-- `12-reporting-aggregation-and-freshness.md`
-- implementation designs for subject-lineage storage, lineage projections, conflict inputs, and read-side identity resolution
+- outline section `04. Identity And Lineage`
+- future review of identity-lineage source material against `05` and `20`
+- later engineering design only after an outline-aligned section is accepted
 
 ## Purpose
 

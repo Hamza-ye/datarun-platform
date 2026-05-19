@@ -43,13 +43,13 @@ Do not draft final platform-spec sections directly from ADR narrative, explorati
 
 At the start of every platform-spec session:
 
-1. Read `section-registry.yml`.
-2. Identify the requested section, next recommended section, or affected hold-back.
+1. Read `../../professional-baseline/20-platform-spec-outline.md`.
+2. Use `section-registry.yml` only to locate the requested section, candidate input, or source-basis files.
 3. Read this operating plan whenever the session drafts, reviews, changes section status, changes dependencies, touches an open gap, records a rejected path, or handles change control.
-4. Read only the selected section, its registry-listed dependencies, and the cited source-basis files needed for the work.
-5. Update `section-registry.yml` in the same commit if section status, path, owner role, boundary, batch, dependencies, blocking relationships, or source basis change.
+4. Read only the selected section, candidate inputs, and cited source-basis files needed for the work.
+5. Update `section-registry.yml` in the same commit if manifest path, status label, owner, batch, candidate input, or source basis changes.
 
-The registry is a fast lookup layer. It is not architecture authority. If the registry and section file disagree, pause and reconcile them before continuing.
+The registry is a manifest. It is not architecture authority, acceptance authority, gap authority, or implementation-readiness authority. If the registry and accepted source path disagree, the registry is stale.
 
 Registry `source_basis` paths are rooted at `docs/platform-spec-kernels/`.
 
@@ -229,7 +229,7 @@ Acceptance requires:
 - completed Integration Review
 - Architecture Steward recommendation
 - Decision Board / Project Owner approval for the status change
-- section status and registry status updated in the same commit
+- section status and manifest status updated in the same commit after approval
 
 Draft sections may be read for planning context, but implementation designs cite accepted sections only.
 
@@ -258,24 +258,24 @@ Acceptance target:
 
 Draft in order:
 
-1. specification control
-2. glossary and core definitions
-3. event log and storage
-4. event envelope and schema
+1. specification source authority
+2. core definitions and boundary vocabulary
+3. event log and storage model
+4. event envelope, schema, and references
 
 Acceptance target:
 
 - stable source hierarchy
 - stable language for event truth, envelope type, shape ref, activity ref, actor ref, subject ref, projections, and parameterization
-- foundation acceptance happens as a batch after planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007`, plus direct registry consumers `SPEC-009` for the projection/workflow risk surface and `SPEC-010` for the conflict/flag risk surface, are checked through Integration Review
+- foundation acceptance happens only after planned consumers `04`, `05`, `06`, `07`, and `08` are checked for hidden assumptions through Integration Review or planned-consumer review cards
 
 ### Milestone C: Core Boundary Sections
 
 Draft in order:
 
-1. references and identity lineage
-2. configuration and parameterization
-3. assignment, authority, and sync
+1. identity and lineage
+2. assignment, authority, and sync
+3. configuration and parameterization
 
 Acceptance target:
 
@@ -287,8 +287,8 @@ Acceptance target:
 
 Draft in order:
 
-1. projections, workflow, and patterns
-2. conflict, flag, and resolution
+1. projection, workflow, and pattern registry
+2. flags, conflict surfacing, and resolution
 3. trigger and reactivity
 
 Acceptance target:
@@ -301,9 +301,9 @@ Acceptance target:
 
 Draft conditionally:
 
-1. local data lifecycle
+1. local data lifecycle and operational constraints
 2. reporting, aggregation, and freshness
-3. audit export and interoperability
+3. import, export, and external compatibility
 4. retention and archival
 5. deployment and operations hold-backs
 

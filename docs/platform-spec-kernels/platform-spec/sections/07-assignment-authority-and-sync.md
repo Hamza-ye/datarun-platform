@@ -1,6 +1,6 @@
 # Assignment, Authority, And Sync
 
-Status: Draft
+Status: Candidate section input
 Owning boundary: Assignment / Authority / Sync
 Primary owner: Architecture Steward
 
@@ -28,14 +28,11 @@ Depends on:
 - `90-open-decisions-and-gap-register-citations.md`
 - `91-rejected-alternatives.md`
 
-Consumed by:
+Candidate input for:
 
-- `08-local-data-lifecycle.md`
-- `09-projections-workflow-and-patterns.md`
-- `10-conflict-flag-and-resolution.md`
-- `11-trigger-reactivity.md`
-- `12-reporting-aggregation-and-freshness.md`
-- implementation designs for assignment projection, access filtering, authorization checks, sync filtering, stale-authority surfacing, and scope-change handoff
+- outline section `05. Assignment, Authority, And Sync`
+- future review of authority/sync source material against `05` and `20`
+- later engineering design only after an outline-aligned section is accepted
 
 ## Purpose
 
@@ -253,4 +250,4 @@ Architecture Steward recommendation, 2026-05-12:
 
 - Recommendation: proceed as Draft with explicit carried gaps preserved.
 - This recommendation does not promote SPEC-007 out of Draft.
-- Future promotion still requires the formal acceptance workflow and an explicit status update in this section and `section-registry.yml`.
+- Future reuse or promotion still requires review against the current outline and an explicit status update in this section and the manifest.

@@ -17,7 +17,7 @@ The Batch 1B cards below are historical evidence for foundation acceptance. They
 Use a planned-consumer review card only when all of these are true:
 
 - an upstream section is being considered for acceptance
-- an immediate downstream consumer is listed in `section-registry.yml`
+- an immediate downstream consumer is listed in the outline and mirrored in `section-registry.yml`
 - the downstream consumer is still `planned` and has no section file
 - Integration Review needs to check whether the upstream section is safe to accept
 
@@ -70,10 +70,10 @@ The Batch 1B foundation acceptance pass used planned-consumer cards to check whe
 
 | Consumer | Current superseding surface | Upstream foundation reviewed | Historical outcome | Carried gap surface |
 |---|---|---|---|---|
-| `SPEC-005` References And Identity Lineage | Accepted `sections/05-references-and-identity-lineage.md` | `SPEC-002`, `SPEC-003`, `SPEC-004` | Carry explicit gap | Reference serialization/emission sites; referent registration, attributes, and catalogs; alias-cycle read-side behavior. |
-| `SPEC-006` Configuration And Parameterization | Draft `sections/06-configuration-and-parametrization.md` | `SPEC-002`, `SPEC-004` | Carry explicit gap | Schema/versioning tooling; formal envelope serialization; platform-bundled shape inventory; Pattern Registry schema; configuration versioning and stale-configuration reconciliation; configuration authoring and deploy-time validation UX. |
-| `SPEC-007` Assignment, Authority, And Sync | Draft `sections/07-assignment-authority-and-sync.md` | `SPEC-002`, `SPEC-003`, `SPEC-004` | Carry explicit gap | Shared-device sessions; auditor/subject scope; assessment visibility; cross-level visibility; permission/activity authority details; temporary authority, revocation, and offline grace; onboarding and role-transition details; sync delivery mechanics; sensitive local lifecycle. |
-| `SPEC-009` Projections, Workflow, And Patterns | Planned section; historical Batch 1B card only | `SPEC-002`, `SPEC-003`, `SPEC-004` | Carry explicit gap | Pattern Registry inventory/schema; projection compatibility across schema versions; source-chain traversal limits; platform-bundled shape inventory; configuration versioning and stale-configuration reconciliation. |
-| `SPEC-010` Conflict, Flag, And Resolution | Planned section; historical Batch 1B card only | `SPEC-002`, `SPEC-003`, `SPEC-004` | Carry explicit gap | General flag semantics; flag identity/creation/resolution mapping; platform-bundled integrity/identity/conflict shapes; alias-cycle behavior; domain conflict automation; source-chain traversal limits; auto-resolution authoring and monitoring; late authorization anomaly policy. |
+| `04` Identity And Lineage | Candidate input `sections/05-references-and-identity-lineage.md` | `01`, `02`, `03` | Carry explicit gap | Reference serialization/emission sites; referent registration, attributes, and catalogs; alias-cycle read-side behavior. |
+| `06` Configuration And Parameterization | Candidate input `sections/06-configuration-and-parametrization.md` | `01`, `03` | Carry explicit gap | Schema/versioning tooling; formal envelope serialization; platform-bundled shape inventory; Pattern Registry schema; configuration versioning and stale-configuration reconciliation; configuration authoring and deploy-time validation UX. |
+| `05` Assignment, Authority, And Sync | Candidate input `sections/07-assignment-authority-and-sync.md` | `01`, `02`, `03` | Carry explicit gap | Shared-device sessions; auditor/subject scope; assessment visibility; cross-level visibility; permission/activity authority details; temporary authority, revocation, and offline grace; onboarding and role-transition details; sync delivery mechanics; sensitive local lifecycle. |
+| `07` Projection, Workflow, And Pattern Registry | Planned section; historical Batch 1B card only | `01`, `02`, `03` | Carry explicit gap | Pattern Registry inventory/schema; projection compatibility across schema versions; source-chain traversal limits; platform-bundled shape inventory; configuration versioning and stale-configuration reconciliation. |
+| `08` Flags, Conflict Surfacing, And Resolution | Planned section; historical Batch 1B card only | `01`, `02`, `03` | Carry explicit gap | General flag semantics; flag identity/creation/resolution mapping; platform-bundled integrity/identity/conflict shapes; alias-cycle behavior; domain conflict automation; source-chain traversal limits; auto-resolution authoring and monitoring; late authorization anomaly policy. |
 
 Historical Batch 1B acceptance is recorded in `05-batch-1b-acceptance-packet.md`. Current platform-spec section drafting gaps are maintained in `../sections/90-open-decisions-and-gap-register-citations.md`.

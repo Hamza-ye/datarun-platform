@@ -1,6 +1,6 @@
 # Configuration And Parameterization
 
-Status: Draft
+Status: Candidate section input
 Owning boundary: Configuration
 Primary owner: Architecture Steward
 
@@ -23,13 +23,11 @@ Depends on:
 - `90-open-decisions-and-gap-register-citations.md`
 - `91-rejected-alternatives.md`
 
-Consumed by:
+Candidate input for:
 
-- `07-assignment-authority-and-sync.md`
-- `09-projections-workflow-and-patterns.md`
-- `10-conflict-flag-and-resolution.md`
-- `11-trigger-reactivity.md`
-- implementation designs for configuration packaging, validation, shape registries, activity setup, policy-value management, and deployer administration
+- outline section `06. Configuration And Parameterization`
+- future review of configuration source material against `05` and `20`
+- later engineering design only after an outline-aligned section is accepted
 
 ## Purpose
 

@@ -14,4 +14,4 @@ Current state:
 - planning and source-authority material lives under `../process/`
 - source authority remains under `../../professional-baseline/` and `../../pre-operations/`
 
-Historical acceptance notes inside individual section files are review history from the previous workflow. Current acceptance status is controlled by `../section-registry.yml` and by review against `../../professional-baseline/20-platform-spec-outline.md`.
+Historical acceptance notes inside individual section files are review history from the previous workflow. Current acceptance requires review against `../../professional-baseline/20-platform-spec-outline.md` and the accepted source path; `../section-registry.yml` is only a manifest snapshot.

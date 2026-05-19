@@ -1,53 +1,101 @@
-# Platform Spec Dashboard
+# Platform Specification Snapshot
 
-> [!IMPORTANT]
-> **How to sync:** Run `./scripts/sync.sh` (or `python3 scripts/generate-dashboard.py` for local-only) after any change to the registry or gap register.
-> Last regenerated: 2026-05-19 02:17:26
+> [!NOTE]
+> This dashboard owns no architecture, gap, acceptance, implementation, or remote-tracking state. It is a generated local snapshot from accepted baseline inputs plus the non-authoritative section manifest.
+> Regenerate with `python3 scripts/generate-dashboard.py` after changing the baseline, gap register, outline, first-section citations, or manifest.
+> Last regenerated: 2026-05-19 03:00:57
 
-## Execution Summary
+## Source Inputs
+
+| Input | Standing In This Snapshot |
+|---|---|
+| [04 Architecture Baseline v0](platform-spec-kernels/professional-baseline/04-architecture-baseline-v0.md) | Accepted architecture baseline. |
+| [05 Decision Gap Register](platform-spec-kernels/professional-baseline/05-decision-gap-register.md) | Canonical open-gap and open-decision register. |
+| [07 Architecture Responsibility Map](platform-spec-kernels/professional-baseline/07-system-boundary-map.md) | Responsibility routing only. |
+| [20 Platform-Spec Outline](platform-spec-kernels/professional-baseline/20-platform-spec-outline.md) | Draft outline from accepted baseline; source for section structure and blocker assessment. |
+| [section-registry.yml](platform-spec-kernels/platform-spec/section-registry.yml) | Non-authoritative local manifest for paths, status labels, and candidate inputs. |
+| [90 Gap Citations](platform-spec-kernels/platform-spec/sections/90-open-decisions-and-gap-register-citations.md) | Draft citation surface for first-section blockers and hold-backs; does not replace 05. |
+
+## Snapshot Counts
 
 | Metric | Value |
-|---|---|
-| Total Sections | 15 |
-| Accepted | 0 |
-| Draft | 9 |
-| Planned | 5 |
-| Professional Baseline Gaps | 27 |
-| Platform-Spec Open Decisions | 13 |
+|---|---:|
+| Outline sections | 16 |
+| Manifest sections | 16 |
+| Manifest status: planned | 8 |
+| Manifest status: candidate-input | 1 |
+| Manifest status: draft | 7 |
+| Manifest status: accepted | 0 |
+| Manifest status: deferred | 0 |
+| Manifest status: hold-back | 0 |
+| Manifest status: rejected | 0 |
+| Target section files present | 8 of 16 |
+| Candidate input files present | 2 of 2 |
+| Canonical gap entries visible in 05 | 27 |
+| First-section gap citations visible in 90 | 13 |
 
-## Governance Flow
+## Manifest Alignment
 
-| Layer | Source | Dashboard Role |
-|---|---|---|
-| Accepted baseline gap register | [05-decision-gap-register.md](platform-spec-kernels/professional-baseline/05-decision-gap-register.md) | Source-authority gap inventory (27 items). |
-| Open-decision citations | [90-open-decisions-and-gap-register-citations.md](platform-spec-kernels/platform-spec/sections/90-open-decisions-and-gap-register-citations.md) | Spec-facing hold-backs and open decisions (13 items). |
-| Draft sections | `platform-spec-kernels/platform-spec/sections/` | Carry relevant gaps without closing them. |
-| Review and acceptance | Challenge Review, Integration Review, steward recommendation, approval | Promote only after evidence and explicit status update. |
+The manifest section numbers and titles match the current outline headings in `20-platform-spec-outline.md`.
 
-## Section Registry
+## Section Manifest
 
-| ID | Title | Status | Batch | Boundary | Dependencies | Issue |
+| Section | Title | Status | Owner | Target File | Candidate Input | First Slice |
 |---|---|---|---|---|---|---|
-| SPEC-001 | [Specification Source Authority](platform-spec-kernels/platform-spec/sections/00-specification-source-authority.md) | draft | 1A | professional-baseline source authority | - | [#1](https://github.com/Hamza-ye/datarun-platform/issues/1) |
-| SPEC-002 | [Core Definitions And Boundary Vocabulary](platform-spec-kernels/platform-spec/sections/01-core-definitions-and-boundary-vocabulary.md) | draft | 1B | professional-baseline source authority | SPEC-001, SPEC-090, SPEC-091 | [#2](https://github.com/Hamza-ye/datarun-platform/issues/2) |
-| SPEC-003 | [Event Log And Storage Model](platform-spec-kernels/platform-spec/sections/02-event-log-and-storage-model.md) | draft | 1B | Event Log / Storage | SPEC-001, SPEC-002, SPEC-090, SPEC-091 | [#3](https://github.com/Hamza-ye/datarun-platform/issues/3) |
-| SPEC-004 | [Event Envelope, Schema, And References](platform-spec-kernels/platform-spec/sections/03-event-envelope-schema-and-references.md) | draft | 1B | Event Envelope / Schema | SPEC-001, SPEC-002, SPEC-003, SPEC-090, SPEC-091 | [#4](https://github.com/Hamza-ye/datarun-platform/issues/4) |
-| SPEC-005 | [References And Identity Lineage](platform-spec-kernels/platform-spec/sections/05-references-and-identity-lineage.md) | candidate-input | 2 | Identity / Lineage | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-090, SPEC-091 | [#5](https://github.com/Hamza-ye/datarun-platform/issues/5) |
-| SPEC-006 | [Configuration And Parameterization](platform-spec-kernels/platform-spec/sections/06-configuration-and-parametrization.md) | draft | 2 | Configuration | SPEC-001, SPEC-002, SPEC-004, SPEC-005, SPEC-090, SPEC-091 | [#6](https://github.com/Hamza-ye/datarun-platform/issues/6) |
-| SPEC-007 | [Assignment, Authority, And Sync](platform-spec-kernels/platform-spec/sections/07-assignment-authority-and-sync.md) | draft | 2 | Assignment / Authority / Sync | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-005, SPEC-006, SPEC-090, SPEC-091 | [#7](https://github.com/Hamza-ye/datarun-platform/issues/7) |
-| SPEC-008 | [Local Data Lifecycle](platform-spec-kernels/platform-spec/sections/08-local-data-lifecycle.md) | planned | 4 | Local Data Lifecycle | SPEC-001, SPEC-003, SPEC-007, SPEC-090, SPEC-091 | [#8](https://github.com/Hamza-ye/datarun-platform/issues/8) |
-| SPEC-009 | [Projections, Workflow, And Patterns](platform-spec-kernels/platform-spec/sections/09-projections-workflow-and-patterns.md) | planned | 3 | Projection / Workflow State | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-005, SPEC-006, SPEC-007, SPEC-090, SPEC-091 | [#9](https://github.com/Hamza-ye/datarun-platform/issues/9) |
-| SPEC-010 | [Conflict, Flag, And Resolution](platform-spec-kernels/platform-spec/sections/10-conflict-flag-and-resolution.md) | planned | 3 | Flag / Resolution | SPEC-001, SPEC-002, SPEC-003, SPEC-004, SPEC-005, SPEC-006, SPEC-007, SPEC-009, SPEC-090, SPEC-091 | [#10](https://github.com/Hamza-ye/datarun-platform/issues/10) |
-| SPEC-011 | [Trigger And Reactivity](platform-spec-kernels/platform-spec/sections/11-trigger-reactivity.md) | planned | 3 | Trigger / Reactivity | SPEC-001, SPEC-003, SPEC-006, SPEC-007, SPEC-009, SPEC-010, SPEC-090, SPEC-091 | [#15](https://github.com/Hamza-ye/datarun-platform/issues/15) |
-| SPEC-012 | [Reporting, Aggregation, And Freshness](platform-spec-kernels/platform-spec/sections/12-reporting-aggregation-and-freshness.md) | planned | 4 | Reporting / Aggregation | SPEC-001, SPEC-003, SPEC-005, SPEC-007, SPEC-009, SPEC-010, SPEC-090, SPEC-091 | [#11](https://github.com/Hamza-ye/datarun-platform/issues/11) |
-| SPEC-090 | [Open Decisions And Gap Register Citations](platform-spec-kernels/platform-spec/sections/90-open-decisions-and-gap-register-citations.md) | draft | 1A | professional-baseline source authority | SPEC-001 | [#12](https://github.com/Hamza-ye/datarun-platform/issues/12) |
-| SPEC-091 | [Rejected Alternatives](platform-spec-kernels/platform-spec/sections/91-rejected-alternatives.md) | draft | 1A | professional-baseline source authority | SPEC-001 | [#13](https://github.com/Hamza-ye/datarun-platform/issues/13) |
-| SPEC-092 | [Change-Control Log](platform-spec-kernels/platform-spec/sections/92-change-control-log.md) | draft | 1A | Cross-boundary process register | SPEC-001, SPEC-090, SPEC-091 | [#14](https://github.com/Hamza-ye/datarun-platform/issues/14) |
+| 00 | Specification Source Authority | draft | professional-baseline source authority | [sections/00-specification-source-authority.md](platform-spec-kernels/platform-spec/sections/00-specification-source-authority.md) | - | yes |
+| 01 | Core Definitions And Boundary Vocabulary | draft | professional-baseline source authority | [sections/01-core-definitions-and-boundary-vocabulary.md](platform-spec-kernels/platform-spec/sections/01-core-definitions-and-boundary-vocabulary.md) | - | yes |
+| 02 | Event Log And Storage Model | draft | Event Log / Storage | [sections/02-event-log-and-storage-model.md](platform-spec-kernels/platform-spec/sections/02-event-log-and-storage-model.md) | - | yes |
+| 03 | Event Envelope, Schema, And References | draft | Event Envelope / Schema | [sections/03-event-envelope-schema-and-references.md](platform-spec-kernels/platform-spec/sections/03-event-envelope-schema-and-references.md) | - | yes |
+| 04 | Identity And Lineage | planned | Identity / Lineage | `sections/04-identity-and-lineage.md` (not created) | [sections/05-references-and-identity-lineage.md](platform-spec-kernels/platform-spec/sections/05-references-and-identity-lineage.md) | no |
+| 05 | Assignment, Authority, And Sync | planned | Assignment / Authority / Sync | `sections/05-assignment-authority-and-sync.md` (not created) | [sections/07-assignment-authority-and-sync.md](platform-spec-kernels/platform-spec/sections/07-assignment-authority-and-sync.md) | no |
+| 06 | Configuration And Parameterization | candidate-input | Configuration | [sections/06-configuration-and-parametrization.md](platform-spec-kernels/platform-spec/sections/06-configuration-and-parametrization.md) | - | no |
+| 07 | Projection, Workflow, And Pattern Registry | planned | Projection / Workflow State | `sections/07-projection-workflow-and-pattern-registry.md` (not created) | - | no |
+| 08 | Flags, Conflict Surfacing, And Resolution | planned | Flag / Resolution | `sections/08-flags-conflict-surfacing-and-resolution.md` (not created) | - | no |
+| 09 | Local Data Lifecycle And Operational Constraints | planned | Local Data Lifecycle | `sections/09-local-data-lifecycle-and-operational-constraints.md` (not created) | - | no |
+| 10 | Reporting, Aggregation, And Freshness | planned | Projection / Workflow State | `sections/10-reporting-aggregation-and-freshness.md` (not created) | - | no |
+| 11 | Trigger And Reactivity | planned | Configuration | `sections/11-trigger-and-reactivity.md` (not created) | - | no |
+| 12 | Import, Export, And External Compatibility | planned | Event Envelope / Schema | `sections/12-import-export-and-external-compatibility.md` (not created) | - | no |
+| 90 | Open Decisions And Gap Register Citations | draft | professional-baseline source authority | [sections/90-open-decisions-and-gap-register-citations.md](platform-spec-kernels/platform-spec/sections/90-open-decisions-and-gap-register-citations.md) | - | yes |
+| 91 | Rejected Alternatives | draft | professional-baseline source authority | [sections/91-rejected-alternatives.md](platform-spec-kernels/platform-spec/sections/91-rejected-alternatives.md) | - | yes |
+| 92 | Source Basis And Change-Control Log | draft | professional-baseline source authority | [sections/92-change-control-log.md](platform-spec-kernels/platform-spec/sections/92-change-control-log.md) | - | no |
 
-## Open Decisions / Gaps
+## First-Slice Focus
+
+This is a snapshot of what the outline says can be drafted first. It is not acceptance or implementation approval.
+
+| Section | Status | Snapshot Note |
+|---|---|---|
+| 00 | draft | Drafted, not accepted; no behavior authority until reviewed and accepted. |
+| 01 | draft | Drafted for vocabulary only; must not close pattern inventory, process lifecycle, role taxonomy, or reference-serialization gaps. |
+| 02 | draft | Drafted for append-only storage invariants; retention, archival, compaction, caching, and performance remain constrained or deferred. |
+| 03 | draft | Drafted but only partially implementation-ready; schema/version/reference serialization and emission details remain blockers unless scoped out. |
+| 90 | draft | Drafted as citation/routing surface only; 05 remains the canonical gap register. |
+| 91 | draft | Drafted to expose forbidden paths; new rejections still require source or change-control record. |
+
+## First-Section Gap Citations
+
+These rows are read from the draft `90` section. `05` remains canonical.
+
+| Gap From 05 | Applies To | Required Handling |
+|---|---|---|
+| Envelope type, shape ref, references, and parametrization boundary | `01`, `03`, `91` | Constraint. Preserve axis separation and do not add fields, type values, actor subclasses, or product classes. |
+| Event schema and versioning tooling | `03` | Blocker for implementation-ready append; constraint for conceptual envelope drafting. |
+| Final reference serialization and active emission sites | `03` | Blocker for implementation-ready append if canonical reference names, placement, cardinality, or emission sites are needed. |
+| Process reference and process lifecycle semantics | `01`, `03` | Explicit deferral unless process lifecycle or active process-reference emission is included. |
+| Structured import/export compatibility | `02`, `03`, `91` | Explicit deferral unless external exchange is included. |
+| Projection performance and caching | `02` | Constraint. Do not specify cache/rebuild strategy as architecture. |
+| Low-end device scale and offline performance | `02` | Constraint. Do not weaken event-log truth for performance pressure. |
+| Retention and archival | `02`, `91` | Constraint; blocker only if deletion, redaction, archive policy, or canonical-history mutation is specified. |
+| Operational actor vocabulary and operation-class routing | `01`, `91` | Constraint. Role labels remain product/deployer vocabulary unless formally changed. |
+| Exact Pattern Registry inventory and formal schema | `01` | Explicit deferral. `01` may define `pattern` only as a term. |
+| General flag semantics and domain conflict automation outside workflow | `91` | Hold back for later flag/conflict sections. |
+| Alias-cycle enforcement and resolution semantics | `91` | Hold back for later identity/flag sections. |
+| Subject-based scope, auditor access, shared-device actor scope, temporary authority, and authorization visibility details | `03`, `91` | Hold back unless actor/session/reference behavior is over-defined. |
+
+## Canonical Gap Register Snapshot
 
 <details>
-<summary>Professional baseline gaps</summary>
+<summary>Gap headings and classifications from 05</summary>
 
 | Gap | Classification |
 |---|---|
@@ -78,26 +126,5 @@
 | Reporting And Aggregation | Operational policy gap |
 | ADR-006-R Through ADR-009 Assessment | Completed later-source assessment |
 | General Flag Semantics | Later-source assessment gap |
-
-</details>
-
-<details>
-<summary>Platform-spec open decisions and hold-backs</summary>
-
-| Area | Status | Primary Route |
-|---|---|---|
-| Envelope type, shape ref, references, and parametrization boundary | Constraint. Preserve axis separation and do not add fields, type values, actor subclasses, or product classes. | `01`, `03`, `91` |
-| Event schema and versioning tooling | Blocker for implementation-ready append; constraint for conceptual envelope drafting. | `03` |
-| Final reference serialization and active emission sites | Blocker for implementation-ready append if canonical reference names, placement, cardinality, or emission sites are needed. | `03` |
-| Process reference and process lifecycle semantics | Explicit deferral unless process lifecycle or active process-reference emission is included. | `01`, `03` |
-| Structured import/export compatibility | Explicit deferral unless external exchange is included. | `02`, `03`, `91` |
-| Projection performance and caching | Constraint. Do not specify cache/rebuild strategy as architecture. | `02` |
-| Low-end device scale and offline performance | Constraint. Do not weaken event-log truth for performance pressure. | `02` |
-| Retention and archival | Constraint; blocker only if deletion, redaction, archive policy, or canonical-history mutation is specified. | `02`, `91` |
-| Operational actor vocabulary and operation-class routing | Constraint. Role labels remain product/deployer vocabulary unless formally changed. | `01`, `91` |
-| Exact Pattern Registry inventory and formal schema | Explicit deferral. `01` may define `pattern` only as a term. | `01` |
-| General flag semantics and domain conflict automation outside workflow | Hold back for later flag/conflict sections. | `91` |
-| Alias-cycle enforcement and resolution semantics | Hold back for later identity/flag sections. | `91` |
-| Subject-based scope, auditor access, shared-device actor scope, temporary authority, and authorization visibility details | Hold back unless actor/session/reference behavior is over-defined. | `03`, `91` |
 
 </details>

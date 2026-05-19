@@ -1,430 +1,279 @@
-version: 1
-status: candidate-input
-candidate_root: docs/platform-spec-kernels/platform-spec
-source_basis_root: docs/platform-spec-kernels
-agent_start:
-  read_first:
-  - ../professional-baseline/20-platform-spec-outline.md
-  - section-registry.yml
-  - README.md
-  - process/01-platform-spec-section-operating-plan.md
-  rule: Use this registry to find candidate section material and relevant files; use
-    accepted professional-baseline documents and the platform-spec outline as authority.
-update_rule: If a section path, status, owner_role, boundary, batch, dependencies, blocking
-  relationship, or source_basis changes, update this registry in the same commit.
+version: 2
+standing: non-authoritative manifest
+purpose:
+  - List the platform-spec outline sections and the local files or candidate inputs attached to them.
+  - Feed local snapshot tooling without creating architecture, gap, acceptance, implementation, or remote-tracking authority.
+  - Help a drafting or review session find the right files after reading the accepted baseline, gap register, responsibility map, and outline.
+does_not_own:
+  - architecture baseline
+  - open-gap ownership or closure
+  - section acceptance
+  - implementation readiness
+  - engineering tickets or tests
+  - remote issues, projects, or sync state
+authority_path:
+  accepted_baseline: ../professional-baseline/04-architecture-baseline-v0.md
+  canonical_gap_register: ../professional-baseline/05-decision-gap-register.md
+  responsibility_map: ../professional-baseline/07-system-boundary-map.md
+  platform_spec_outline: ../professional-baseline/20-platform-spec-outline.md
+rule: If this manifest disagrees with the accepted baseline, gap register, responsibility map, outline, or an accepted section, treat this manifest as stale and update it after the source-authority decision.
 status_values:
-- planned
-- draft
-- candidate-input
-- deferred
-- hold-back
-- rejected
-owner_roles:
-- Architecture Steward
-- Drafting Agent
-- Challenge Reviewer
-- Integration Reviewer
-- Delivery Lead
-- Product Owner
-next_recommended:
-- Review first section drafts against 05 and 20
-- Prepare section acceptance review for 00, 01, 02, 90, and 91
-- Resolve or explicitly hold back 03 implementation-readiness blockers
+  - planned
+  - candidate-input
+  - draft
+  - accepted
+  - deferred
+  - hold-back
+  - rejected
+current_focus:
+  - Review draft sections 00, 01, 02, 03, 90, and 91 against 05 and 20.
+  - Do not treat 03 as implementation-ready until schema/version/reference blockers are closed or explicitly held back.
+  - Classify old candidate section files before reusing them in outline-aligned sections 04 through 12.
 sections:
-- id: SPEC-001
-  title: Specification Source Authority
-  file: sections/00-specification-source-authority.md
-  status: draft
-  batch: 1A
-  boundary: professional-baseline source authority
-  owner_role: Architecture Steward
-  depends_on: []
-  blocks:
-  - SPEC-002
-  - SPEC-003
-  - SPEC-004
-  - SPEC-005
-  - SPEC-006
-  - SPEC-007
-  - SPEC-008
-  - SPEC-009
-  - SPEC-010
-  - SPEC-011
-  - SPEC-012
-  - SPEC-090
-  - SPEC-091
-  - SPEC-092
-  source_basis:
-  - professional-baseline/02-change-control.md
-  - professional-baseline/03-artifact-definitions.md
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/20-platform-spec-outline.md
-  github_issue: 1
-- id: SPEC-002
-  title: Core Definitions And Boundary Vocabulary
-  file: sections/01-core-definitions-and-boundary-vocabulary.md
-  status: draft
-  batch: 1B
-  boundary: professional-baseline source authority
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-090
-  - SPEC-091
-  blocks:
-  - SPEC-003
-  - SPEC-004
-  - SPEC-005
-  - SPEC-006
-  - SPEC-007
-  - SPEC-009
-  - SPEC-010
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  - professional-baseline/20-platform-spec-outline.md
-  github_issue: 2
-- id: SPEC-003
-  title: Event Log And Storage Model
-  file: sections/02-event-log-and-storage-model.md
-  status: draft
-  batch: 1B
-  boundary: Event Log / Storage
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-002
-  - SPEC-090
-  - SPEC-091
-  blocks:
-  - SPEC-004
-  - SPEC-005
-  - SPEC-007
-  - SPEC-009
-  - SPEC-010
-  - SPEC-012
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/20-platform-spec-outline.md
-  github_issue: 3
-- id: SPEC-004
-  title: Event Envelope, Schema, And References
-  file: sections/03-event-envelope-schema-and-references.md
-  status: draft
-  batch: 1B
-  boundary: Event Envelope / Schema
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-002
-  - SPEC-003
-  - SPEC-090
-  - SPEC-091
-  blocks:
-  - SPEC-005
-  - SPEC-006
-  - SPEC-007
-  - SPEC-009
-  - SPEC-010
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/11-adr007-envelope-type-assessment.md
-  - professional-baseline/12-adr008-reference-fields-assessment.md
-  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
-  - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  - professional-baseline/20-platform-spec-outline.md
-  github_issue: 4
-- id: SPEC-005
-  title: References And Identity Lineage
-  file: sections/05-references-and-identity-lineage.md
-  status: candidate-input
-  batch: 2
-  boundary: Identity / Lineage
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-002
-  - SPEC-003
-  - SPEC-004
-  - SPEC-090
-  - SPEC-091
-  blocks:
-  - SPEC-007
-  - SPEC-009
-  - SPEC-010
-  - SPEC-012
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/08-baseline-acceptance-check.md
-  - professional-baseline/09-identity-boundary-control.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
-  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
-  - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  github_issue: 5
-- id: SPEC-006
-  title: Configuration And Parameterization
-  file: sections/06-configuration-and-parametrization.md
-  status: draft
-  batch: 2
-  boundary: Configuration
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-002
-  - SPEC-004
-  - SPEC-005
-  - SPEC-090
-  - SPEC-091
-  blocks:
-  - SPEC-007
-  - SPEC-009
-  - SPEC-010
-  - SPEC-011
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
-  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
-  - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  github_issue: 6
-- id: SPEC-007
-  title: Assignment, Authority, And Sync
-  file: sections/07-assignment-authority-and-sync.md
-  status: draft
-  batch: 2
-  boundary: Assignment / Authority / Sync
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-002
-  - SPEC-003
-  - SPEC-004
-  - SPEC-005
-  - SPEC-006
-  - SPEC-090
-  - SPEC-091
-  blocks:
-  - SPEC-008
-  - SPEC-009
-  - SPEC-010
-  - SPEC-011
-  - SPEC-012
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/09-identity-boundary-control.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
-  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
-  - professional-baseline/19-envelope-shape-parametrization-definitions.md
-  - pre-operations/04-accepted-pre-specification-decisions.md
-  github_issue: 7
-- id: SPEC-008
-  title: Local Data Lifecycle
-  file: sections/08-local-data-lifecycle.md
-  status: planned
-  batch: 4
-  boundary: Local Data Lifecycle
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-003
-  - SPEC-007
-  - SPEC-090
-  - SPEC-091
-  blocks: []
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
-  github_issue: 8
-- id: SPEC-009
-  title: Projections, Workflow, And Patterns
-  file: sections/09-projections-workflow-and-patterns.md
-  status: planned
-  batch: 3
-  boundary: Projection / Workflow State
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-002
-  - SPEC-003
-  - SPEC-004
-  - SPEC-005
-  - SPEC-006
-  - SPEC-007
-  - SPEC-090
-  - SPEC-091
-  blocks:
-  - SPEC-010
-  - SPEC-011
-  - SPEC-012
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
-  github_issue: 9
-- id: SPEC-010
-  title: Conflict, Flag, And Resolution
-  file: sections/10-conflict-flag-and-resolution.md
-  status: planned
-  batch: 3
-  boundary: Flag / Resolution
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-002
-  - SPEC-003
-  - SPEC-004
-  - SPEC-005
-  - SPEC-006
-  - SPEC-007
-  - SPEC-009
-  - SPEC-090
-  - SPEC-091
-  blocks:
-  - SPEC-011
-  - SPEC-012
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  github_issue: 10
-- id: SPEC-011
-  title: Trigger And Reactivity
-  file: sections/11-trigger-reactivity.md
-  status: planned
-  batch: 3
-  boundary: Trigger / Reactivity
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-003
-  - SPEC-006
-  - SPEC-007
-  - SPEC-009
-  - SPEC-010
-  - SPEC-090
-  - SPEC-091
-  blocks: []
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/15-conflict-flag-offline-boundary-control.md
-  github_issue: 15
-- id: SPEC-012
-  title: Reporting, Aggregation, And Freshness
-  file: sections/12-reporting-aggregation-and-freshness.md
-  status: planned
-  batch: 4
-  boundary: Reporting / Aggregation
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-003
-  - SPEC-005
-  - SPEC-007
-  - SPEC-009
-  - SPEC-010
-  - SPEC-090
-  - SPEC-091
-  blocks: []
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/16-operational-constraints-boundary-control.md
-  - professional-baseline/17-authorization-visibility-boundary-control.md
-  github_issue: 11
-- id: SPEC-090
-  title: Open Decisions And Gap Register Citations
-  file: sections/90-open-decisions-and-gap-register-citations.md
-  status: draft
-  batch: 1A
-  boundary: professional-baseline source authority
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  blocks:
-  - SPEC-002
-  - SPEC-003
-  - SPEC-004
-  - SPEC-005
-  - SPEC-006
-  - SPEC-007
-  - SPEC-008
-  - SPEC-009
-  - SPEC-010
-  - SPEC-011
-  - SPEC-012
-  source_basis:
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/07-system-boundary-map.md
-  - professional-baseline/20-platform-spec-outline.md
-  github_issue: 12
-- id: SPEC-091
-  title: Rejected Alternatives
-  file: sections/91-rejected-alternatives.md
-  status: draft
-  batch: 1A
-  boundary: professional-baseline source authority
-  owner_role: Challenge Reviewer
-  depends_on:
-  - SPEC-001
-  blocks:
-  - SPEC-002
-  - SPEC-003
-  - SPEC-004
-  - SPEC-005
-  - SPEC-006
-  - SPEC-007
-  - SPEC-008
-  - SPEC-009
-  - SPEC-010
-  - SPEC-011
-  - SPEC-012
-  source_basis:
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - professional-baseline/08-baseline-acceptance-check.md
-  - professional-baseline/20-platform-spec-outline.md
-  github_issue: 13
-- id: SPEC-092
-  title: Change-Control Log
-  file: sections/92-change-control-log.md
-  status: draft
-  batch: 1A
-  boundary: Cross-boundary process register
-  owner_role: Architecture Steward
-  depends_on:
-  - SPEC-001
-  - SPEC-090
-  - SPEC-091
-  blocks: []
-  source_basis:
-  - professional-baseline/02-change-control.md
-  - professional-baseline/04-architecture-baseline-v0.md
-  - professional-baseline/05-decision-gap-register.md
-  - platform-spec/process/01-platform-spec-section-operating-plan.md
-  - platform-spec/sections/00-specification-source-authority.md
-  github_issue: 14
+  - section: "00"
+    title: Specification Source Authority
+    file: sections/00-specification-source-authority.md
+    status: draft
+    batch: first-section-control
+    first_slice_focus: true
+    primary_owner: professional-baseline source authority
+    source_basis:
+      - professional-baseline/02-change-control.md
+      - professional-baseline/03-artifact-definitions.md
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Drafted, not accepted; no behavior authority until reviewed and accepted.
+  - section: "01"
+    title: Core Definitions And Boundary Vocabulary
+    file: sections/01-core-definitions-and-boundary-vocabulary.md
+    status: draft
+    batch: first-section-foundation
+    first_slice_focus: true
+    primary_owner: professional-baseline source authority
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/19-envelope-shape-parametrization-definitions.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Drafted for vocabulary only; must not close pattern inventory, process lifecycle, role taxonomy, or reference-serialization gaps.
+  - section: "02"
+    title: Event Log And Storage Model
+    file: sections/02-event-log-and-storage-model.md
+    status: draft
+    batch: first-section-foundation
+    first_slice_focus: true
+    primary_owner: Event Log / Storage
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Drafted for append-only storage invariants; retention, archival, compaction, caching, and performance remain constrained or deferred.
+  - section: "03"
+    title: Event Envelope, Schema, And References
+    file: sections/03-event-envelope-schema-and-references.md
+    status: draft
+    batch: first-section-foundation
+    first_slice_focus: true
+    primary_owner: Event Envelope / Schema
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/11-adr007-envelope-type-assessment.md
+      - professional-baseline/12-adr008-reference-fields-assessment.md
+      - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+      - professional-baseline/19-envelope-shape-parametrization-definitions.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Drafted but only partially implementation-ready; schema/version/reference serialization and emission details remain blockers unless scoped out.
+  - section: "04"
+    title: Identity And Lineage
+    file: sections/04-identity-and-lineage.md
+    status: planned
+    batch: core-boundary
+    first_slice_focus: false
+    primary_owner: Identity / Lineage
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/09-identity-boundary-control.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs:
+      - sections/05-references-and-identity-lineage.md
+    note: Planned under the outline; existing references/identity material is candidate input only.
+  - section: "05"
+    title: Assignment, Authority, And Sync
+    file: sections/05-assignment-authority-and-sync.md
+    status: planned
+    batch: core-boundary
+    first_slice_focus: false
+    primary_owner: Assignment / Authority / Sync
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs:
+      - sections/07-assignment-authority-and-sync.md
+    note: Planned under the outline; existing assignment/sync material is candidate input only.
+  - section: "06"
+    title: Configuration And Parameterization
+    file: sections/06-configuration-and-parametrization.md
+    status: candidate-input
+    batch: core-boundary
+    first_slice_focus: false
+    primary_owner: Configuration
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/18-envelope-shape-parametrization-boundary-control.md
+      - professional-baseline/19-envelope-shape-parametrization-definitions.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Existing file may be reusable but is not accepted and must be reviewed against the cleaned outline.
+  - section: "07"
+    title: Projection, Workflow, And Pattern Registry
+    file: sections/07-projection-workflow-and-pattern-registry.md
+    status: planned
+    batch: derived-behavior
+    first_slice_focus: false
+    primary_owner: Projection / Workflow State
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/14-pattern-inventory-walkthrough-assessment.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Planned; Pattern Registry inventory/schema, source-chain traversal, and bounded context details remain open or constrained.
+  - section: "08"
+    title: Flags, Conflict Surfacing, And Resolution
+    file: sections/08-flags-conflict-surfacing-and-resolution.md
+    status: planned
+    batch: derived-behavior
+    first_slice_focus: false
+    primary_owner: Flag / Resolution
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/10-adr006r-flag-semantics-assessment.md
+      - professional-baseline/13-adr009-duality-rule-assessment.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Planned; ADR-005 workflow flag behavior can draft, but general flag semantics and non-workflow automation remain open.
+  - section: "09"
+    title: Local Data Lifecycle And Operational Constraints
+    file: sections/09-local-data-lifecycle-and-operational-constraints.md
+    status: planned
+    batch: operational-surface
+    first_slice_focus: false
+    primary_owner: Local Data Lifecycle
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Planned; sensitive data lifecycle, retention, low-end performance, and sync delivery mechanics remain constrained or deferred.
+  - section: "10"
+    title: Reporting, Aggregation, And Freshness
+    file: sections/10-reporting-aggregation-and-freshness.md
+    status: planned
+    batch: operational-surface
+    first_slice_focus: false
+    primary_owner: Projection / Workflow State
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/16-operational-constraints-boundary-control.md
+      - professional-baseline/17-authorization-visibility-boundary-control.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Planned; reporting remains derived and access-constrained, with auditor/cross-level visibility unresolved unless closed.
+  - section: "11"
+    title: Trigger And Reactivity
+    file: sections/11-trigger-and-reactivity.md
+    status: planned
+    batch: derived-behavior
+    first_slice_focus: false
+    primary_owner: Configuration
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/15-conflict-flag-offline-boundary-control.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Planned; trigger details must route through configuration and detect-before-act constraints.
+  - section: "12"
+    title: Import, Export, And External Compatibility
+    file: sections/12-import-export-and-external-compatibility.md
+    status: planned
+    batch: operational-surface
+    first_slice_focus: false
+    primary_owner: Event Envelope / Schema
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Planned; external compatibility must not redefine canonical event, envelope, access, or lifecycle semantics.
+  - section: "90"
+    title: Open Decisions And Gap Register Citations
+    file: sections/90-open-decisions-and-gap-register-citations.md
+    status: draft
+    batch: first-section-control
+    first_slice_focus: true
+    primary_owner: professional-baseline source authority
+    source_basis:
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/07-system-boundary-map.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Drafted as citation/routing surface only; 05 remains the canonical gap register.
+  - section: "91"
+    title: Rejected Alternatives
+    file: sections/91-rejected-alternatives.md
+    status: draft
+    batch: first-section-control
+    first_slice_focus: true
+    primary_owner: professional-baseline source authority
+    source_basis:
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/08-baseline-acceptance-check.md
+      - professional-baseline/20-platform-spec-outline.md
+    candidate_inputs: []
+    note: Drafted to expose forbidden paths; new rejections still require source or change-control record.
+  - section: "92"
+    title: Source Basis And Change-Control Log
+    file: sections/92-change-control-log.md
+    status: draft
+    batch: first-section-control
+    first_slice_focus: false
+    primary_owner: professional-baseline source authority
+    source_basis:
+      - professional-baseline/02-change-control.md
+      - professional-baseline/04-architecture-baseline-v0.md
+      - professional-baseline/05-decision-gap-register.md
+      - professional-baseline/20-platform-spec-outline.md
+      - platform-spec/sections/00-specification-source-authority.md
+    candidate_inputs: []
+    note: Drafted as a trace log; it records accepted changes only after change-control outcome exists.

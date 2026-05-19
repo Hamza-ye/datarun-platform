@@ -36,7 +36,7 @@ Supporting process references:
 
 ## Folder Contents
 
-- `section-registry.yml`: compact machine-readable lookup for section status, owner, boundary, batch, dependencies, and next work. Source-basis paths in the registry are rooted at `docs/platform-spec-kernels/`.
+- `section-registry.yml`: non-authoritative manifest for outline-aligned section paths, draft/planned labels, and candidate inputs. It owns no architecture, gap closure, section acceptance, implementation readiness, or remote tracking state. Source-basis paths in the registry are rooted at `docs/platform-spec-kernels/`.
 - `process/01-platform-spec-section-operating-plan.md`: the multi-session professional process for decomposition, drafting, review, and change control.
 - `process/02-platform-spec-section-template.md`: the required template for every future platform-spec section.
 - `process/03-section-inventory-and-writing-order.md`: the initial decomposition map and iterative writing order.
@@ -57,9 +57,9 @@ This workspace must not:
 
 ## Agent Start Rule
 
-At the start of each platform-spec section session, agents must read `../professional-baseline/20-platform-spec-outline.md`, then `section-registry.yml`, then only the candidate section, dependency, and source-basis files needed for the selected work.
+At the start of each platform-spec section session, agents must read `../professional-baseline/20-platform-spec-outline.md`, then use `section-registry.yml` only as a manifest for locating candidate files and source-basis pointers.
 
-If a section path, status, owner role, boundary, batch, dependency, blocking relationship, or source basis changes, update `section-registry.yml` in the same commit.
+If a section path, manifest status label, owner, batch, candidate input, or source-basis pointer changes, update `section-registry.yml` in the same commit. If the manifest disagrees with `04`, `05`, `07`, `20`, or an accepted section, treat the manifest as stale.
 
 ## Current Next Step
 

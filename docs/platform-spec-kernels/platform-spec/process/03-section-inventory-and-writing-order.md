@@ -6,7 +6,7 @@ This document defines the initial platform-spec decomposition and the profession
 
 Paths in this document are relative to `docs/platform-spec-kernels/platform-spec/`.
 
-For fast lookup, agents should read `section-registry.yml` before this inventory. This inventory explains the writing order; the registry gives the current machine-readable status map.
+This inventory is candidate process input. The current section structure comes from `../../professional-baseline/20-platform-spec-outline.md`; `section-registry.yml` is only a manifest for local paths and candidate inputs.
 
 ## Decomposition Principles
 
@@ -24,14 +24,15 @@ For fast lookup, agents should read `section-registry.yml` before this inventory
 | 2 | `sections/01-core-definitions-and-boundary-vocabulary.md` | Core Definitions And Boundary Vocabulary | professional-baseline source authority | Stabilizes vocabulary before behavior is drafted. |
 | 3 | `sections/02-event-log-and-storage-model.md` | Event Log And Storage Model | Event Log / Storage | Establishes canonical truth and write-path discipline. |
 | 4 | `sections/03-event-envelope-schema-and-references.md` | Event Envelope, Schema, And References | Event Envelope / Schema | Freezes the stable envelope contract before references or workflow depend on it. |
-| 5 | `sections/05-references-and-identity-lineage.md` | References And Identity Lineage | Identity / Lineage | Keeps subject lineage narrow and prevents identity from absorbing authority or workflow. |
-| 6 | `sections/06-configuration-and-parametrization.md` | Configuration And Parameterization | Configuration | Defines deployer variation without surrendering platform semantics. |
-| 7 | `sections/07-assignment-authority-and-sync.md` | Assignment, Authority, And Sync | Assignment / Authority / Sync | Establishes access, authority reconstruction, and sync scope before derived behavior. |
-| 8 | `sections/08-local-data-lifecycle.md` | Local Data Lifecycle | Local Data Lifecycle | Needed before sensitive local lifecycle or scope contraction details become implementation work. |
-| 9 | `sections/09-projections-workflow-and-patterns.md` | Projections, Workflow, And Patterns | Projection / Workflow State | Builds on events, envelope, configuration, and authority. |
-| 10 | `sections/10-conflict-flag-and-resolution.md` | Conflict, Flag, And Resolution | Flag / Resolution | Keeps detection source facts separate from flag lifecycle and resolution. |
-| 11 | `sections/11-trigger-reactivity.md` | Trigger And Reactivity | Trigger / Reactivity | Must respect detect-before-act and event-store write path. |
-| 12 | `sections/12-reporting-aggregation-and-freshness.md` | Reporting, Aggregation, And Freshness | Reporting / Aggregation | Must remain projection-derived and access-scoped. |
+| 5 | `sections/04-identity-and-lineage.md` | Identity And Lineage | Identity / Lineage | Keeps subject lineage narrow and prevents identity from absorbing authority or workflow. |
+| 6 | `sections/05-assignment-authority-and-sync.md` | Assignment, Authority, And Sync | Assignment / Authority / Sync | Establishes access, authority reconstruction, and sync scope before derived behavior. |
+| 7 | `sections/06-configuration-and-parametrization.md` | Configuration And Parameterization | Configuration | Defines deployer variation without surrendering platform semantics. |
+| 8 | `sections/07-projection-workflow-and-pattern-registry.md` | Projection, Workflow, And Pattern Registry | Projection / Workflow State | Builds on events, envelope, configuration, and authority. |
+| 9 | `sections/08-flags-conflict-surfacing-and-resolution.md` | Flags, Conflict Surfacing, And Resolution | Flag / Resolution | Keeps detection source facts separate from flag lifecycle and resolution. |
+| 10 | `sections/09-local-data-lifecycle-and-operational-constraints.md` | Local Data Lifecycle And Operational Constraints | Local Data Lifecycle | Needed before sensitive local lifecycle or scope contraction details become implementation work. |
+| 11 | `sections/10-reporting-aggregation-and-freshness.md` | Reporting, Aggregation, And Freshness | Reporting / Aggregation | Must remain projection-derived and access-scoped. |
+| 12 | `sections/11-trigger-and-reactivity.md` | Trigger And Reactivity | Configuration | Must respect bounded configuration, detect-before-act, and event-store write path. |
+| 13 | `sections/12-import-export-and-external-compatibility.md` | Import, Export, And External Compatibility | Event Envelope / Schema | Preserves external compatibility without making external schemas canonical. |
 | 90 | `sections/90-open-decisions-and-gap-register-citations.md` | Open Decisions And Gap Register Citations | professional-baseline source authority | Keeps gaps visible and prevents accidental closure. |
 | 91 | `sections/91-rejected-alternatives.md` | Rejected Alternatives | professional-baseline source authority | Makes rejected paths easy to enforce. |
 | 92 | `sections/92-change-control-log.md` | Change-Control Log | Cross-boundary process | Records accepted baseline changes, disputes, and formal reopens. |
@@ -52,7 +53,7 @@ Files:
 Acceptance rule:
 
 - These files define process only. They must not create platform behavior.
-- The registry is a lookup layer only; section files remain canonical.
+- The registry is a manifest only; accepted source documents and accepted section files remain authoritative.
 
 ### Batch 1A: Control Foundation
 
@@ -94,7 +95,7 @@ Acceptance rule:
 - Later sections can reference these without re-reading ADR prose.
 - Foundation behavior sections are accepted as a batch, not promoted one by one.
 - Before acceptance, Challenge Review must check rejected paths and change-control triggers.
-- Before acceptance, Integration Review must check planned consumers `SPEC-005`, `SPEC-006`, and `SPEC-007`, plus direct registry consumers `SPEC-009` for the projection/workflow risk surface and `SPEC-010` for the conflict/flag risk surface.
+- Before acceptance, Integration Review must check planned consumers `04`, `05`, `06`, `07`, and `08` for identity, authority, configuration, projection/workflow, and flag/conflict risk surfaces.
 - Because these consumers are still planned, use `process/04-planned-consumer-review-cards.md` as the review surface instead of creating skeleton section files.
 - Planned-consumer review cards are superseded when their sections are drafted; they are not downstream contracts.
 

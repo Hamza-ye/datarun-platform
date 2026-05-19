@@ -2,7 +2,7 @@
 
 Status: Historical review evidence from the previous section workflow
 
-This file is retained because it contains useful review evidence and carried-gap notes. It is not current acceptance authority. Current section status is controlled by `../section-registry.yml`, and all existing section files must be reviewed against `../../professional-baseline/20-platform-spec-outline.md` before being treated as normative platform specification.
+This file is retained because it contains useful review evidence and carried-gap notes. It is not current acceptance authority. All existing section files must be reviewed against `../../professional-baseline/20-platform-spec-outline.md` before being treated as normative platform specification; `../section-registry.yml` is only a manifest snapshot.
 
 ## Request
 
