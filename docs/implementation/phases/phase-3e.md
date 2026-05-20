@@ -1,12 +1,12 @@
 # Phase 3e: Envelope Type Vocabulary Retrofit
 
-> Retrofit code, tests, fixtures, and prose to match [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md). Four string literals (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) were persisted as envelope `type` values during Phases 1–2, contradicting ADR-4 S3's closed 6-type vocabulary. They are **shape names**, not envelope types. Phase 3e is the narrowest migration that brings the code into conformance.
+> Retrofit code, tests, fixtures, and prose to match [ADR-007](../../adrs/adr-007-envelope-type-closure.md), which absorbed the former ADR-002 Addendum. Four string literals (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) were persisted as envelope `type` values during Phases 1–2, contradicting ADR-4 S3's closed 6-type vocabulary. They are **shape names**, not envelope types. Phase 3e is the narrowest migration that brings the code into conformance.
 
-**Exercises**: ADR-4 S3 (envelope type closure), ADR-2 S6/S8 (identity events), IDR-017 (shape storage), IDR-019 (config package bundled shapes), [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md) (authorship-based type mapping for `conflict_resolved/v1`).
+**Exercises**: ADR-4 S3 (envelope type closure), ADR-2 S6/S8 (identity events), IDR-017 (shape storage), IDR-019 (config package bundled shapes), [ADR-007](../../adrs/adr-007-envelope-type-closure.md) (authorship-based type mapping for `conflict_resolved/v1`).
 
 **Primitives touched**: Event Envelope (vocabulary tightening, no field change), Shape Registry (four platform-bundled internal shapes added), Conflict Detector (emission rewrite), Identity Resolver (emission rewrite), Projection Engine (filter predicate rewrite, mobile), Config Packager (bundled-shape registration), Sync pipeline (scoped-pull system-event predicate).
 
-**Not introducing new primitives. Not introducing new wire fields. Not changing ADR decisions.** Phase 3e is execution of the addendum, not a decision surface.
+**Not introducing new primitives. Not introducing new wire fields. Not changing ADR decisions.** Phase 3e is execution of the envelope-type correction now canonicalized by ADR-007, not a decision surface.
 
 ---
 
@@ -22,21 +22,21 @@ The Phase 3d close-out audit (2026-04-21) walked every code site that referenced
 
 The drift was caught in a safe stage (no production data exists, test count stable at 153 server + 67 mobile). Phase 3e lands before Phase 4 begins so the drift never compounds with role-action enforcement, pattern state machines, or trigger events.
 
-The architectural reconciliation is already recorded in the [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md) — Phase 3e implements it.
+The architectural reconciliation is now canonicalized in [ADR-007](../../adrs/adr-007-envelope-type-closure.md). Phase 3e implemented that correction.
 
 ---
 
 ## 2. What's In Scope
 
-Five narrow deliverables, grouped into three commits. Each deliverable closes against a specific addendum rule.
+Five narrow deliverables, grouped into three commits. Each deliverable closes against a specific envelope-type correction rule.
 
 | # | Item | Closes | Kind |
 |---|------|--------|------|
 | 3e.1 | Envelope schema tighten — remove `conflict_detected` / `conflict_resolved` / `subjects_merged` / `subject_split` from the `type` enum on both `server/src/main/resources/envelope.schema.json` and `contracts/envelope.schema.json`. The enum becomes exactly 6 values. | ADR-4 S3 | Wire-format tightening |
-| 3e.2 | Register four platform-bundled internal shapes in `contracts/shapes/` and via `Shape Registry` at server boot: `conflict_detected.schema.json`, `conflict_resolved.schema.json`, `subjects_merged.schema.json`, `subject_split.schema.json`. Payload schemas match what Phase 1/2 already emit — this is formalization, not new payload design. | Addendum §"Shape Registry Obligation" | Registry completion |
-| 3e.3 | Server emission + filter rewrite — `ConflictDetector`, `ConflictResolutionService`, `IdentityService`, `SyncController` emit the correct `type` per the addendum mapping table, and all `isSystemEventType(String type)` helpers rewrite to `isSystemEvent(Event e)` predicates keyed on `shape_ref` prefix. | Addendum §"Consumer Filtering Rule" | Code migration |
-| 3e.4 | Mobile emission + filter rewrite — `EventStore` SQL NOT IN predicate rewrites to `shape_ref NOT LIKE '...'`, `ProjectionEngine` `_isSystemEvent` rewrites to `shape_ref` prefix, `SyncService` alias update keys on `shape_ref.startsWith('subjects_merged/')`. | Addendum §"Consumer Filtering Rule" | Code migration |
-| 3e.5 | Prose corrections — IDR-009, IDR-015 (SQL snippet), phase-1/2/3/4 specs, ADR-001 pointer paragraph, `contracts/flag-catalog.md` all reference the addendum and use the correct vocabulary. CLAUDE.md codebase map reflects the updated shape registry. | Addendum §"Retrofit Scope (Pointer)" | Docs |
+| 3e.2 | Register four platform-bundled internal shapes in `contracts/shapes/` and via `Shape Registry` at server boot: `conflict_detected.schema.json`, `conflict_resolved.schema.json`, `subjects_merged.schema.json`, `subject_split.schema.json`. Payload schemas match what Phase 1/2 already emit — this is formalization, not new payload design. | ADR-007 §S5 | Registry completion |
+| 3e.3 | Server emission + filter rewrite — `ConflictDetector`, `ConflictResolutionService`, `IdentityService`, `SyncController` emit the correct `type` per the ADR-007 mapping table, and all `isSystemEventType(String type)` helpers rewrite to `isSystemEvent(Event e)` predicates keyed on `shape_ref` prefix. | ADR-007 §S3 | Code migration |
+| 3e.4 | Mobile emission + filter rewrite — `EventStore` SQL NOT IN predicate rewrites to `shape_ref NOT LIKE '...'`, `ProjectionEngine` `_isSystemEvent` rewrites to `shape_ref` prefix, `SyncService` alias update keys on `shape_ref.startsWith('subjects_merged/')`. | ADR-007 §S3 | Code migration |
+| 3e.5 | Prose corrections — IDR-009, IDR-015 (SQL snippet), phase-1/2/3/4 specs, ADR-001 pointer paragraph, `contracts/flag-catalog.md` all reference ADR-007 and use the correct vocabulary. CLAUDE.md codebase map reflects the updated shape registry. | ADR-007 §S1-S5 | Docs |
 
 ---
 
@@ -54,11 +54,11 @@ Five narrow deliverables, grouped into three commits. Each deliverable closes ag
 
 ## 4. Design Decisions
 
-Phase 3e's architecture is already decided in the addendum. Only two thin Lean decisions remain.
+Phase 3e's architecture is already decided in ADR-007. Only two thin Lean decisions remain.
 
 ### DD-1 (Lean): Where are the four internal shape schemas stored and loaded?
 
-**Context**: The addendum requires the four internal shapes to be platform-bundled, matching the precedent set by `assignment_created/v1` and `assignment_ended/v1` (IDR-013). Those live under `contracts/shapes/` and are loaded by the server at boot.
+**Context**: ADR-007 requires the four internal shapes to be platform-bundled, matching the precedent set by `assignment_created/v1` and `assignment_ended/v1` (IDR-013). Those live under `contracts/shapes/` and are loaded by the server at boot.
 
 **Resolved**: Four new schema files under `contracts/shapes/`:
 
@@ -98,7 +98,7 @@ Each call-site picks the combination it needs. The old `_isSystemEvent` helper i
 
 ### DD-3 (Lean): Deterministic flag ID derivation change
 
-**Context**: Phase 1 derives the `conflict_detected` flag UUID from `(source_event_id + flag_category)`. The addendum clarifies this should be `(source_event_id + shape_ref + flag_category)` so future integrity shapes can't collide.
+**Context**: Phase 1 derives the `conflict_detected` flag UUID from `(source_event_id + flag_category)`. ADR-007 clarifies this should be `(source_event_id + shape_ref + flag_category)` so future integrity shapes can't collide.
 
 **Resolved**: Update the derivation in `ConflictDetector` to include `shape_ref` as the second hash input. Existing Phase 1/2 flags all carry `shape_ref = conflict_detected/v1` — re-deriving against those produces a **different** UUID than before (because the input changed).
 
@@ -128,7 +128,7 @@ Each call-site picks the combination it needs. The old `_isSystemEvent` helper i
   - Line 72 + 166: guard on `flagEvent.shapeRef().startsWith("conflict_detected/")` (not `type`).
   - Line 237: manual resolution emission — `type = "review"`, `shape_ref = "conflict_resolved/v1"`.
   - Line 272: manual-identity-conflict emission — `type = "alert"`, `shape_ref = "conflict_detected/v1"`, payload `flag_category = "identity_conflict"`.
-  - (Auto-resolution is Phase 4 territory; no 3e emission site for `type = capture, shape = conflict_resolved/v1`. The addendum documents the mapping so Phase 4 lands it correctly.)
+  - (Auto-resolution is Phase 4 territory; no 3e emission site for `type = capture, shape = conflict_resolved/v1`. ADR-007 documents the mapping so Phase 4 lands it correctly.)
 - `server/src/main/java/dev/datarun/server/identity/IdentityService.java`:
   - Line 201: merge emission — `type = "capture"`, `shape_ref = "subjects_merged/v1"`.
   - Line 232: split emission — `type = "capture"`, `shape_ref = "subject_split/v1"`.
@@ -145,7 +145,7 @@ Each call-site picks the combination it needs. The old `_isSystemEvent` helper i
 
 - **Envelope schema test**: assert that an event with `type = "conflict_detected"` is **rejected** by the envelope validator post-3e (it's no longer in the enum).
 - **Shape registry test**: assert that `ShapeService.findAll()` returns the 4 platform-bundled shapes after boot without any admin action.
-- **Emission mapping test** (one per mapping row in the addendum table): detector flag → `type=alert, shape_ref=conflict_detected/v1`; manual resolution → `type=review, shape_ref=conflict_resolved/v1`; merge → `type=capture, shape_ref=subjects_merged/v1`; split → `type=capture, shape_ref=subject_split/v1`.
+- **Emission mapping test** (one per mapping row in ADR-007 §S2): detector flag → `type=alert, shape_ref=conflict_detected/v1`; manual resolution → `type=review, shape_ref=conflict_resolved/v1`; merge → `type=capture, shape_ref=subjects_merged/v1`; split → `type=capture, shape_ref=subject_split/v1`.
 
 ### Commit 2: `feat(mobile): envelope type vocabulary migration`
 
@@ -177,9 +177,9 @@ Each call-site picks the combination it needs. The old `_isSystemEvent` helper i
 - `docs/decisions/idr-015-scope-filtered-sync-query.md` — line 65 SQL snippet: rewrite to `shape_ref LIKE 'conflict_detected/%' OR ...`. Add a note on the index consideration (see §5 Risks).
 - `docs/implementation/phases/phase-1.md` — lines 137, 161, 214, 231, 234, 248, 253, 286: prose corrections. Line 161 (deterministic flag ID) updated per DD-3.
 - `docs/implementation/phases/phase-2.md` — line 520 prose correction.
-- `docs/implementation/phases/phase-3.md` — line 39 table: remove "Total platform vocabulary = 10 types" and replace with "Envelope vocabulary = 6 types. Four identity/integrity shapes are platform-bundled (see ADR-002 Addendum)."
+- `docs/implementation/phases/phase-3.md` — line 39 table: remove "Total platform vocabulary = 10 types" and replace with "Envelope vocabulary = 6 types. Four identity/integrity shapes are platform-bundled (see ADR-007)."
 - `docs/implementation/phases/phase-4.md` — line 275 prose correction; confirms auto-resolution emits `type=capture, shape_ref=conflict_resolved/v1`.
-- `docs/adrs/adr-001-offline-data-model.md` — line 92 prose: keep the conceptual reference (*"a `subjects_merged` event"* is OK as shorthand) but add an ADR-002 Addendum footnote pointer.
+- `docs/adrs/adr-001-offline-data-model.md` — line 92 prose: keep the conceptual reference (*"a `subjects_merged` event"* is OK as shorthand) but add an ADR-007 footnote pointer.
 - `contracts/flag-catalog.md` — line 3 prose: *"Each flag is persisted as an event with `type=alert` and `shape_ref=conflict_detected/v1`; `flag_category` lives in the payload."* Line 26 similar.
 - `CLAUDE.md` — Codebase Map additions:
   - `contracts/shapes/` entries for the 4 new internal shape schemas.
@@ -209,11 +209,11 @@ Five cleanups caught during the phase-3e review pass (audit of Phase 0/1/2/3 dri
 
 - **B1 — `subject_ref.type` enum `process` is aspirational**: Both envelope schema files list `process` in the enum, but no code emits or consumes it. Add description text to `subject_ref` in both schemas:
 
-  > Note: `process` is reserved for future workflow-instance refs (see ADR-2 S2). No current emission site. Pattern instances in Phase 4 use `(subject_ref, activity_ref)` or `source_event_id` per `patterns.md`, NOT `process` refs — do not claim this identity category without a new IDR.
+  > Note: `process` is reserved for future workflow-instance refs (see ADR-2 S2 and ADR-008 S1). No current emission site. Pattern instances in Phase 4 use `(subject_ref, activity_ref)` or `source_event_id` per `patterns.md`, NOT `process` refs — do not claim this active identity category without a new ADR.
 
 - **B2 — `actor_ref` system-actor convention under-documented**: Add description text to `actor_ref` in both schemas:
 
-  > System actors use `id` prefixed with `system:{component}/{identifier}` (e.g., `system:auto_resolution/late_entry_accept`). The `type` enum stays `['actor']` — authorship discrimination is by `id` prefix, never by adding a new type value. See ADR-002 Addendum F-A3.
+  > System actors use `id` prefixed with `system:{source_type}/{source_id}` (e.g., `system:auto_resolution/late_entry_accept`). The `type` enum stays `['actor']` — authorship discrimination is by `id` prefix, never by adding a new type value. See ADR-008 S2 and ADR-007 F-A3.
 
 - **B4 — Two envelope schemas can diverge silently**: `contracts/envelope.schema.json` and `server/src/main/resources/envelope.schema.json` are maintained as separate files. Add a server-side contract test (`EnvelopeSchemaParityTest`) that reads both files and asserts byte-for-byte equality (modulo trailing newline). The test fails the build if they diverge. IG — no IDR needed. Cheap insurance against a repeat of the type-vocabulary drift.
 
@@ -225,9 +225,9 @@ All must pass. Phase 3e is not complete until every item is green.
 
 - [ ] **3e.1**: `envelope.schema.json` (both copies) contains exactly the 6 ADR-4 S3 values in `type.enum`. A contract test asserts an event with any of the 4 drift strings as `type` is **rejected** by the validator.
 - [ ] **3e.2**: Server boot loads four platform-bundled shape definitions; `ShapeService.findAll()` returns them without admin action; Shape Registry contract test passes.
-- [ ] **3e.3**: All server emission sites produce events whose `(type, shape_ref)` pair matches the addendum mapping table. Contract test per mapping row.
+- [ ] **3e.3**: All server emission sites produce events whose `(type, shape_ref)` pair matches the ADR-007 mapping table. Contract test per mapping row.
 - [ ] **3e.4**: All mobile filter sites discriminate on `shape_ref` (for integrity events) or `type` (for assignment events) appropriately. `ProjectionEngine` parity test against the updated shared fixture passes.
-- [ ] **3e.5**: Prose audit — `grep -rn "conflict_detected\|conflict_resolved\|subjects_merged\|subject_split" docs/ contracts/` returns only (a) the addendum itself, (b) `flag-catalog.md` in the corrected form, (c) shape-schema file paths, (d) historical journal entries that are explicitly marked as pre-3e. No active specs or IDRs assert the drift mapping.
+- [ ] **3e.5**: Prose audit — `grep -rn "conflict_detected\|conflict_resolved\|subjects_merged\|subject_split" docs/ contracts/` returns only (a) the superseded addendum itself, (b) `flag-catalog.md` in the corrected form, (c) shape-schema file paths, (d) historical journal entries that are explicitly marked as pre-3e. No active specs or IDRs assert the drift mapping.
 - [ ] **CD idempotency preserved**: Sweep-then-sweep produces no duplicate flags under the new derivation (DD-3). Existing `ConflictDetectorIntegrationTest` asserts this — update fixtures, not semantics.
 - [ ] **Projection equivalence preserved**: Updated shared fixture + existing parity test prove server and mobile projections produce identical subject lists and event timelines.
 - [ ] **No regression**: all Phase 0/1/2/3a/3b/3c/3d tests still pass. Test count expectation: 153 server + 67 mobile *minimum* (plus new contract tests from §5; realistic landing point ≈ 160 server + 69 mobile).
@@ -242,7 +242,7 @@ All must pass. Phase 3e is not complete until every item is green.
 | DD-1 envelope enum tighten | **Execution of ADR-4 S3** | Already a Lock decision at the ADR level. Phase 3e does not re-decide; it aligns code. |
 | DD-2 named predicates (mobile + server) | **Lean** | Internal refactor. Same behavior, more readable key. |
 | DD-3 flag ID derivation | **Lean** | Internal to detector. No external consumers; deterministic re-derivable. |
-| 3e.1–3e.5 code + docs migration | **Lean** | Execution of the addendum. |
+| 3e.1–3e.5 code + docs migration | **Lean** | Execution of ADR-007. |
 
 No Locks introduced by Phase 3e. By design — this is retrofit, not new architecture.
 
@@ -256,18 +256,18 @@ No Locks introduced by Phase 3e. By design — this is retrofit, not new archite
 | A non-obvious code site keys on the drift strings and is missed by the grep. | Low | The initial grep (CLAUDE.md 2026-04-21 audit) found 12 files; Phase 3e verifies by running the same grep at the end of Commit 3 and asserting zero remaining matches outside documented exceptions. |
 | `ProjectionEngine` mobile rewrite introduces a subtle projection divergence from server. | Medium | The shared parity fixture test is the safety net. Update the fixture once, run both sides, any divergence fails both tests symmetrically. |
 | Fresh dev DB required per DD-3 surprises a developer mid-PR. | Low | Add a one-line note to the PR/commit message and to CLAUDE.md's "Build & Test" section: *"Phase 3e requires `docker compose down -v` before first test run."* |
-| Auto-resolution emission sites come in Phase 4 and accidentally use `type=review`. | Low | Addendum F-A5 is explicit; the mapping table will be directly cited in Phase 4 spec when auto-resolution lands. No preemptive 3e code needed — Phase 3e leaves no auto-resolution emission site in the codebase. |
+| Auto-resolution emission sites come in Phase 4 and accidentally use `type=review`. | Low | ADR-007 F-A5 is explicit; the mapping table will be directly cited in Phase 4 spec when auto-resolution lands. No preemptive 3e code needed — Phase 3e leaves no auto-resolution emission site in the codebase. |
 
 ---
 
 ## 9. Open Questions Before Implementation
 
-None. The addendum locks every judgment call (authorship → type mapping, shape naming, consumer filter rule). Phase 3e is execution.
+None. ADR-007 locks every judgment call (authorship → type mapping, shape naming, consumer filter rule). Phase 3e is execution.
 
 If an implementing agent believes it has found an open question, that agent must:
 
-1. Re-read the [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md) end-to-end.
-2. Re-read §F-A1 through §F-A5 in that addendum (forbidden patterns).
+1. Re-read [ADR-007](../../adrs/adr-007-envelope-type-closure.md) end-to-end.
+2. Re-read §F-A1 through §F-A5 in ADR-007 (forbidden patterns).
 3. If the question genuinely remains, escalate — do not choose. This is exactly the failure mode that produced the Phase 1/2 drift.
 
 ---
@@ -290,6 +290,6 @@ The 3e review pass surfaced two items that are **verification** work, not retrof
 Entries recorded here as 3e progresses. Empty at spec authoring time.
 
 - **2026-04-21**: Phase 3e specced and reviewed. ADR-002 Addendum committed as `d2b4cbb`. Review pass applied corrections R1–R5 and folded audit findings A1/A2/B1/B2/B4 into 3e.5 scope. Two verification-only items (FP-001 `role_stale`, FP-002 `subject_lifecycle`) recorded in `docs/flagged-positions.md` as gating IDR-021 / Phase 4.
-- **2026-04-21**: Commit 1 landed as `e35263e` — server envelope type migration. Envelope enum reduced 10→6 in both schema files. Four platform-bundled shape schemas added under `contracts/shapes/`. `PlatformShapeBootstrap` registers them on `ApplicationReadyEvent` (idempotent). All server emission sites (`ConflictDetector`, `ConflictResolutionService`, `IdentityService`) now emit the architecturally correct `(type, shape_ref)` tuples. F-A3 system-actor convention enforced (`system:{component}/{identifier}`). DD-3 deterministic flag ID derivation updated to include `shape_ref`. All filter/discrimination sites (`SyncController`, `EventRepository`, `SubjectProjection`) rewritten to key on `shape_ref`. Test assertions conform to architecture (not legacy behavior): `IdentityResolverIntegrationTest` counts domain captures by `shape_ref = 'basic_capture/v1'`, not by envelope type; `ConfigIntegrationTest` `@BeforeEach` preserves the four platform-bundled shape names (they are platform contract, not deployer-managed). New contract tests: `EnvelopeVocabularyTest` (parameterized rejection/acceptance), `PlatformShapeBootstrapTest`, system-actor convention assertion in `ConflictDetectorIntegrationTest`. Server test count 153 → 163 (all green).
+- **2026-04-21**: Commit 1 landed as `e35263e` — server envelope type migration. Envelope enum reduced 10→6 in both schema files. Four platform-bundled shape schemas added under `contracts/shapes/`. `PlatformShapeBootstrap` registers them on `ApplicationReadyEvent` (idempotent). All server emission sites (`ConflictDetector`, `ConflictResolutionService`, `IdentityService`) now emit the architecturally correct `(type, shape_ref)` tuples. F-A3 system-actor convention enforced (`system:{source_type}/{source_id}`). DD-3 deterministic flag ID derivation updated to include `shape_ref`. All filter/discrimination sites (`SyncController`, `EventRepository`, `SubjectProjection`) rewritten to key on `shape_ref`. Test assertions conform to architecture (not legacy behavior): `IdentityResolverIntegrationTest` counts domain captures by `shape_ref = 'basic_capture/v1'`, not by envelope type; `ConfigIntegrationTest` `@BeforeEach` preserves the four platform-bundled shape names (they are platform contract, not deployer-managed). New contract tests: `EnvelopeVocabularyTest` (parameterized rejection/acceptance), `PlatformShapeBootstrapTest`, system-actor convention assertion in `ConflictDetectorIntegrationTest`. Server test count 153 → 163 (all green).
 - **2026-04-21**: Commit 2 landed as `6a774be` — mobile envelope type migration. `ProjectionEngine` `_isSystemEventType` string switch replaced with four top-level named predicates per DD-2 (`isIntegrityFlag`, `isIntegrityResolution`, `isIdentityLifecycle`, `isAssignmentEvent`). `event_store.dart` `purgeOutOfScopeEvents` SQL migrated from `type NOT IN (...)` to four `shape_ref NOT LIKE` clauses plus a single `type != 'assignment_changed'` check — hybrid predicate is correct (type is the pipeline question, `shape_ref` is the payload question). `sync_service.dart` alias-merge processing keys on `shapeRef.startsWith('subjects_merged/')`. Test fixtures (`projection_engine_test.dart`, `selective_retain_test.dart`) rewritten with architecturally correct (type, shape_ref, F-A3 actor_ref) tuples. New DD-2 contract test `event_classifiers_test.dart` (5 tests): positive/negative coverage per predicate, version independence (vN), mutual exclusivity on canonical events. Mobile test count 67 → 72 (all green).
-- **2026-04-21**: Commit 3 landed — docs + folded audit fixes. A1: `contracts/flag-catalog.md` resolution prose corrected (`reclassified` is subject-reclassification, only valid for `identity_conflict` flags). A2: catalog extended from 6 to 9 categories matching SG-2 / cross-cutting.md §7 (categories 7/8 deferred to Phase 4; category 9 reserved as growth slot). B1: `process` marked reserved in `subject_ref.description` in both envelope schemas. B2: `system:{component}/{identifier}` convention documented in `actor_ref.description`. B4: `EnvelopeSchemaParityTest` lands in `server/src/test/java/.../contracts/`, asserting byte-parity between `contracts/envelope.schema.json` and the server-bundled copy — closes FP-003. Prose corrections landed in `phase-1.md` (line 161 DD-3 update; line 317 addendum pointer), `phase-3.md` (line 39: 10 types → 6 envelope types + 4 shapes), `phase-4.md` (line 275: auto-resolution discrimination by actor prefix), `idr-009.md` (merge step), `idr-015.md` (SQL rewrite). CLAUDE.md codebase map updated: `PlatformShapeBootstrap` under `config/`, four new shape schemas under `contracts/shapes/`, server test table extended to 16 classes / 164 rows, mobile test table extended to 10 files / 72 tests. `docs/status.md` marks Phase 3e COMPLETE. `docs/flagged-positions.md` FP-003 → RESOLVED. Final test counts: **164 server / 72 mobile, all green**. Phase 3e close-out complete.
+- **2026-04-21**: Commit 3 landed — docs + folded audit fixes. A1: `contracts/flag-catalog.md` resolution prose corrected (`reclassified` is subject-reclassification, only valid for `identity_conflict` flags). A2: catalog extended from 6 to 9 categories matching SG-2 / cross-cutting.md §7 (categories 7/8 deferred to Phase 4; category 9 reserved as growth slot). B1: `process` marked reserved in `subject_ref.description` in both envelope schemas. B2: `system:{source_type}/{source_id}` convention documented in `actor_ref.description`. B4: `EnvelopeSchemaParityTest` lands in `server/src/test/java/.../contracts/`, asserting byte-parity between `contracts/envelope.schema.json` and the server-bundled copy — closes FP-003. Prose corrections landed in `phase-1.md` (line 161 DD-3 update; line 317 ADR-007 pointer), `phase-3.md` (line 39: 10 types → 6 envelope types + 4 shapes), `phase-4.md` (line 275: auto-resolution discrimination by actor prefix), `idr-009.md` (merge step), `idr-015.md` (SQL rewrite). CLAUDE.md codebase map updated: `PlatformShapeBootstrap` under `config/`, four new shape schemas under `contracts/shapes/`, server test table extended to 16 classes / 164 rows, mobile test table extended to 10 files / 72 tests. `docs/status.md` marks Phase 3e COMPLETE. `docs/flagged-positions.md` FP-003 → RESOLVED. Final test counts: **164 server / 72 mobile, all green**. Phase 3e close-out complete.

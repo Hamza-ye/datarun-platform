@@ -129,7 +129,7 @@ The type set is a **Lock** — persisted in shape definitions, parsed by both ev
 }
 ```
 
-No expressions. No trigger logic. Pure declarative constraint. DD-1's shape JSON must include this field (nullable for Phase 3, populated Phase 4). Server-side evaluation at sync time reuses ADR-2's conflict detection infrastructure — violations produce `ConflictDetected` events with `domain_uniqueness_violation` flag type.
+No expressions. No trigger logic. Pure declarative constraint. DD-1's shape JSON must include this field (nullable for Phase 3, populated Phase 4). Server-side evaluation at sync time reuses ADR-2's conflict detection infrastructure — violations produce flag events with `type = alert`, `shape_ref = conflict_detected/v1`, and `flag_category = domain_uniqueness_violation`.
 
 ### Field-Level Metadata Extensibility
 

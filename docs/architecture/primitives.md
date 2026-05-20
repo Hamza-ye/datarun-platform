@@ -50,7 +50,7 @@ The foundational read primitive. Computes current state from event streams. Ever
 | [5-S4] | State machines are projection patterns. State derived from events + pattern definitions, never stored in events. | Initial strategy |
 | [5-S8] | `context.*` scope: 7 platform-fixed properties pre-resolved on-device from local projection at form-open time. | Initial strategy |
 
-**Capabilities** (accumulated across 5 ADRs):
+**Capabilities** (accumulated across ADR-001 through ADR-005, clarified by ADR-006 through ADR-009 where applicable):
 
 | Capability | Source |
 |-----------|--------|
@@ -106,18 +106,18 @@ Manages subject identity lifecycle: creation, merge, split, alias resolution, li
 
 ## 4. Conflict Detector
 
-The anomaly detection pipeline. Evaluates incoming events against projected state and raises flags. Never rejects events.
+The anomaly detection pipeline. Evaluates structurally valid incoming events against projected state and raises flags for state anomalies. It does not reject events for state staleness.
 
-**Invariant**: Accept-and-flag — events are never rejected for state staleness. Detect-before-act — flagged events do not trigger policies or advance state machines. Single-writer — each flag has exactly one designated resolver.
+**Invariant**: Accept-and-flag — structurally valid events are never rejected for state staleness. Detect-before-act — flagged events do not trigger policies or advance state machines. Single-writer — each flag has exactly one designated resolver.
 
 **Constraints**:
 
 | ID | Constraint | Classification |
 |----|-----------|----------------|
-| [2-S11] | Single-writer conflict resolution. Every `ConflictDetected` event designates exactly one resolver. | Strategy-protecting |
+| [2-S11] | Single-writer conflict resolution. Every `conflict_detected/v1` flag designates exactly one resolver. | Strategy-protecting |
 | [2-S12] | Conflict detection before policy execution. Flagged events do not trigger policies until resolved. | Strategy-protecting |
 | [2-S13] | Conflict detection uses raw references (original `subject_id`). Alias resolution occurs only in projection, after detection. | Structural |
-| [2-S14] | Events are never rejected for state staleness. Anomalies surfaced as `ConflictDetected` events. | Structural |
+| [2-S14] | Structurally valid events are never rejected for state staleness. Anomalies are surfaced as `type = alert`, `shape_ref = conflict_detected/v1` flag events. | Structural |
 | [3-S7] | Detect-before-act extends to ALL flag types including authorization flags. Blocking vs. informational is deployment-configurable. | Strategy-protecting |
 | [5-S1] | `transition_violation` flag category: incoming events evaluated against pattern-defined state machine rules. | Strategy-protecting |
 | [5-S2] | Flagged events excluded from state machine evaluation. Extends detect-before-act to state derivation. | Strategy-protecting |

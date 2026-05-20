@@ -6,7 +6,7 @@
 
 **Primitives built**: Identity Resolver (alias resolution, merge/split), Conflict Detector (accept-and-flag, 3 flag types), Projection Engine (extended: alias resolution, flagged-event exclusion).
 
-**Contracts exercised**: C3 (ES accepts all events), C4 (PE → CD: projected state), C7 (IR → PE: alias resolution), C8 (CD → PE: flag events).
+**Contracts exercised**: C3 (ES accepts all structurally valid events), C4 (PE → CD: projected state), C7 (IR → PE: alias resolution), C8 (CD → PE: flag events).
 
 ---
 
@@ -15,7 +15,7 @@
 Phase 1 proves the platform can handle reality — concurrent work from multiple devices, conflicting observations, and identity confusion — without losing data or silently hiding problems.
 
 It validates:
-- Events are never rejected for state staleness (accept-and-flag)
+- Structurally valid events are never rejected for state staleness (accept-and-flag)
 - Concurrent modifications to the same subject are detected and flagged
 - Flagged events remain in the timeline but are excluded from state derivation
 - Subject identity can be corrected after the fact (merge/split) without rewriting history
@@ -314,7 +314,7 @@ Classified after Phase 1 completion. See [execution-plan.md §6.1](../execution-
 
 **contracts/**
 
-- `envelope.schema.json` — **(historical)** Phase 1 extended the `type` enum with `subjects_merged`, `subject_split`, `conflict_detected`, `conflict_resolved`. [ADR-002 Addendum](../../adrs/adr-002-addendum-type-vocabulary.md) (2026-04-21) reclassifies these as shape names; Phase 3e removed them from the type enum. The canonical mapping is documented in the Addendum.
+- `envelope.schema.json` — **(historical)** Phase 1 extended the `type` enum with `subjects_merged`, `subject_split`, `conflict_detected`, `conflict_resolved`. ADR-007 reclassifies these as shape names; Phase 3e removed them from the type enum. The canonical mapping is documented in [ADR-007](../../adrs/adr-007-envelope-type-closure.md).
 - `sync-protocol.md` — push request body extended: `{events: [...], device_id: "...", last_pull_watermark: N}`
 - `flag-catalog.md` — 3 flag categories documented: `concurrent_state_change`, `stale_reference`, `identity_conflict`
 
@@ -333,15 +333,15 @@ Classified after Phase 1 completion. See [execution-plan.md §6.1](../execution-
   - `concurrent_state_change`: knowledge-horizon comparison (push's `last_pull_watermark` vs. subject's latest events from other devices)
   - `stale_reference`: incoming `subject_ref.id` found in alias table as retired ID
   - `identity_conflict`: manual creation via admin endpoint (no auto-detection in Phase 1)
-- Flag creation: `conflict_detected` events with source_event_id, flag_category, designated_resolver
+- Flag creation: flag events with `type = alert`, `shape_ref = conflict_detected/v1`, source_event_id, flag_category, designated_resolver
 - Designated resolver assignment: for Phase 1, hardcoded coordinator actor (Phase 2 adds assignment-based resolution)
 
 **server/core/** (extended)
 
-- Event Store: unchanged (new event types are just events with different `type` values)
+- Event Store: unchanged (identity/integrity facts are events distinguished by `shape_ref`, not new envelope `type` values)
 - Projection Engine extended:
   - Alias resolution: retirement lookup before subject grouping
-  - Flag exclusion: identify flagged source events from `conflict_detected` events, exclude from state derivation
+  - Flag exclusion: identify flagged source events from `shape_ref = conflict_detected/v1` events, exclude from state derivation
   - Source-chain traversal: on-demand (IG-5), not precomputed
 
 **server/sync/** (extended)
@@ -358,9 +358,9 @@ Classified after Phase 1 completion. See [execution-plan.md §6.1](../execution-
 
 **mobile/data/** (extended)
 
-- Projection Engine: alias resolution from `subject_aliases` SQLite table. Flag exclusion from `conflict_detected` events in local store.
+- Projection Engine: alias resolution from `subject_aliases` SQLite table. Flag exclusion from `shape_ref = conflict_detected/v1` events in local store.
 - Event Store: SQLite migration v2 — `subject_aliases` table
-- Sync Service: sends `last_pull_watermark` in push request. Processes `subjects_merged` events during pull to update local alias table. Processes `conflict_detected` events during pull to mark flagged events.
+- Sync Service: sends `last_pull_watermark` in push request. Processes `shapeRef.startsWith('subjects_merged/')` events during pull to update local alias table. Processes `shapeRef.startsWith('conflict_detected/')` events during pull to mark flagged events.
 
 **mobile/presentation/** (extended)
 
@@ -371,18 +371,18 @@ Classified after Phase 1 completion. See [execution-plan.md §6.1](../execution-
 
 ## 6. Technical Specifications
 
-### Event Type Vocabulary Extension
+### Event Type Vocabulary Extension (historical, superseded by ADR-007)
 
-Phase 1 appends 4 types to the platform vocabulary. F2 governs ad-hoc type creation by implementers; these are architecture-mandated types from ADR-2.
+Phase 1 originally treated four identity/integrity facts as new envelope `type` values. That reading is superseded by [ADR-007](../../adrs/adr-007-envelope-type-closure.md). The current envelope `type` vocabulary remains closed at six values; identity/integrity facts are platform-bundled shapes.
 
-| Type | Processing behavior | Producer | Online-only? |
-|------|-------------------|----------|:------------:|
-| `subjects_merged` | Alias creation in projection | Server (Identity Resolver) | Yes |
-| `subject_split` | Archive source, create successor | Server (Identity Resolver) | Yes |
-| `conflict_detected` | Flag source event, exclude from state | Server (Conflict Detector) | Yes |
-| `conflict_resolved` | Un-flag source event, re-derive state | Server (admin action) | Yes |
+| Domain fact | Envelope `type` | `shape_ref` | Producer | Online-only? |
+|------|-------------------|-------------|----------|:------------:|
+| Subjects merged | `capture` | `subjects_merged/v1` | Server (Identity Resolver) | Yes |
+| Subject split | `capture` | `subject_split/v1` | Server (Identity Resolver) | Yes |
+| Conflict detected | `alert` | `conflict_detected/v1` | Server (Conflict Detector) | Yes |
+| Conflict resolved manually | `review` | `conflict_resolved/v1` | Server (admin action) | Yes |
 
-All 4 are server-generated, online-only. They use the standard 11-field envelope. `shape_ref` for system events: `system/identity/v1` (merge/split) and `system/integrity/v1` (flags).
+All four use the standard 11-field envelope. Consumers identify these facts by `shape_ref`, not by `type`.
 
 ### Envelope for Phase 1 System Events
 
@@ -391,11 +391,11 @@ System events use the same 11-field envelope. Phase 1 specific values:
 | Field | `subjects_merged` | `subject_split` | `conflict_detected` | `conflict_resolved` |
 |-------|-------------------|-----------------|---------------------|---------------------|
 | `id` | Server-generated UUID | Server-generated UUID | Server-generated UUID | Server-generated UUID |
-| `type` | `subjects_merged` | `subject_split` | `conflict_detected` | `conflict_resolved` |
-| `shape_ref` | `system/identity/v1` | `system/identity/v1` | `system/integrity/v1` | `system/integrity/v1` |
+| `type` | `capture` | `capture` | `alert` | `review` |
+| `shape_ref` | `subjects_merged/v1` | `subject_split/v1` | `conflict_detected/v1` | `conflict_resolved/v1` |
 | `activity_ref` | `null` | `null` | `null` | `null` |
 | `subject_ref` | `{type: "subject", id: <surviving_id>}` | `{type: "subject", id: <source_id>}` | `{type: "subject", id: <flagged_event_subject>}` | `{type: "subject", id: <flagged_event_subject>}` |
-| `actor_ref` | `{type: "actor", id: <coordinator>}` | `{type: "actor", id: <coordinator>}` | `{type: "actor", id: "system"}` | `{type: "actor", id: <resolver>}` |
+| `actor_ref` | `{type: "actor", id: <coordinator>}` | `{type: "actor", id: <coordinator>}` | `{type: "actor", id: "system:conflict_detector/<flag_category>"}` | `{type: "actor", id: <resolver>}` |
 | `device_id` | Server `device_id` | Server `device_id` | Server `device_id` | Server `device_id` |
 | `device_seq` | Server's next seq | Server's next seq | Server's next seq | Server's next seq |
 | `sync_watermark` | Assigned on insert | Assigned on insert | Assigned on insert | Assigned on insert |
@@ -595,9 +595,9 @@ Implementation decisions and discoveries are in [`docs/decisions/`](../../decisi
 **Deliverables shipped:**
 - Migration V3: `subject_aliases` table (retired_id UUID PK, surviving_id UUID NOT NULL, merged_at TIMESTAMPTZ, CHECK retired_id != surviving_id), `idx_aliases_surviving` index, `subject_lifecycle` table (subject_id UUID PK, state VARCHAR(20) DEFAULT 'active', archived_at TIMESTAMPTZ, successor_id UUID)
 - `server/identity/AliasCache` — `ConcurrentHashMap<UUID, UUID>` loaded at `@PostConstruct`, refreshed after each merge via `refresh()`. Single-hop resolve + isRetired check.
-- `server/identity/IdentityService` — full DD-3 merge procedure: eager-insert lifecycle rows → SELECT FOR UPDATE (ordered by subject_id to prevent deadlocks) → check both active → cascade existing aliases (transitive closure) → insert new alias (ON CONFLICT DO NOTHING) → archive retired → insert `subjects_merged` event → commit → refresh alias cache. Split procedure: precondition check → archive source with successor_id → insert `subject_split` event.
+- `server/identity/IdentityService` — full DD-3 merge procedure: eager-insert lifecycle rows → SELECT FOR UPDATE (ordered by subject_id to prevent deadlocks) → check both active → cascade existing aliases (transitive closure) → insert new alias (ON CONFLICT DO NOTHING) → archive retired → insert event with `type = capture`, `shape_ref = subjects_merged/v1` → commit → refresh alias cache. Split procedure: precondition check → archive source with successor_id → insert event with `type = capture`, `shape_ref = subject_split/v1`.
 - `server/identity/IdentityController` — `POST /api/identity/merge` and `POST /api/identity/split` REST endpoints with precondition validation.
-- `server/integrity/ConflictDetector` extended — `stale_reference` detection: checks `AliasCache.isRetired()` for incoming event's `subject_ref.id` before concurrent_state_change check. Produces `conflict_detected` events with `flag_category=stale_reference`. `buildFlagEvent()` parameterized by flag category and reason.
+- `server/integrity/ConflictDetector` extended — `stale_reference` detection: checks `AliasCache.isRetired()` for incoming event's `subject_ref.id` before concurrent_state_change check. Produces flag events with `type = alert`, `shape_ref = conflict_detected/v1`, and `flag_category=stale_reference`. `buildFlagEvent()` parameterized by flag category and reason.
 - `server/subject/SubjectProjection` extended — alias resolution via LEFT JOIN `subject_aliases` in CTE. `COALESCE(sa.surviving_id, e.subject_ref->>'id')` as `canonical_subject_id`. Merged subjects appear as one unified entry.
 - `server/subject/SubjectController` extended — `GET /api/subjects/{id}/events` resolves through alias cache, includes events from all retired IDs in the alias chain, sorted by sync_watermark.
 
@@ -620,7 +620,7 @@ Implementation decisions and discoveries are in [`docs/decisions/`](../../decisi
 36/36 integration tests green (27 Phase 0+1a+1b preserved + 9 Phase 1c conflict resolution tests).
 
 **Deliverables shipped (server-side resolution slice):**
-- `server/integrity/ConflictResolutionService` — Resolves conflict flags with three outcomes: `accepted` (event re-included in state), `rejected` (event permanently excluded), `reclassified` (event re-attributed to different subject). Manual `identity_conflict` flag creation (DD-5). Precondition checks: flag must exist, must be `conflict_detected` type, must not already be resolved. Lists unresolved flags.
+- `server/integrity/ConflictResolutionService` — Resolves conflict flags with three outcomes: `accepted` (event re-included in state), `rejected` (event permanently excluded), `reclassified` (event re-attributed to different subject). Manual `identity_conflict` flag creation (DD-5). Precondition checks: flag must exist, must have `shape_ref = conflict_detected/v1`, must not already be resolved. Lists unresolved flags.
 - `server/integrity/ConflictController` — `POST /api/conflicts/{flag_id}/resolve` (resolution endpoint), `GET /api/conflicts` (list unresolved flags), `POST /api/conflicts/identity` (manual identity_conflict creation).
 - `server/event/EventRepository` — added `findById(UUID)` method.
 - `server/subject/SubjectProjection` — CTE refined: `flagged_event_ids` now only un-flags events resolved with `accepted` or `reclassified` (not `rejected`). This ensures rejected events stay permanently excluded from state derivation.
@@ -673,12 +673,12 @@ Implementation decisions and discoveries are in [`docs/decisions/`](../../decisi
 
 **Deliverables shipped (mobile PE extensions):**
 - `mobile/data/event_store.dart` — DB migration v2: `subject_aliases` table (retired_id PK, surviving_id, merged_at). `_onCreate` builds both tables for fresh installs. `_onUpgrade` adds alias table for v1→v2 upgrades. New methods: `upsertAlias()` (with eager transitive closure — updates existing aliases pointing to retired ID), `getAllAliases()`, `close()`. Constructor accepts optional `dbPath` for test injection.
-- `mobile/data/sync_service.dart` — Now takes `DeviceIdentity`. Push sends `last_pull_watermark` + `device_id` (DD-1 compliance). Pull processes `subjects_merged` events to update local alias table via `upsertAlias()`.
+- `mobile/data/sync_service.dart` — Now takes `DeviceIdentity`. Push sends `last_pull_watermark` + `device_id` (DD-1 compliance). Pull processes `shapeRef.startsWith('subjects_merged/')` events to update local alias table via `upsertAlias()`.
 - `mobile/data/projection_engine.dart` — Full rewrite for Phase 1:
-  - `getSubjectList()`: loads aliases, builds flagged event set from `conflict_detected` events, un-flags events resolved with `accepted`/`reclassified`, resolves subject IDs through alias table, filters system event types from grouping, excludes flagged events from state derivation (captureCount, name), counts unresolved flags per subject.
+  - `getSubjectList()`: loads aliases, builds flagged event set from `shapeRef.startsWith('conflict_detected/')` events, un-flags events resolved with `accepted`/`reclassified`, resolves subject IDs through alias table, filters system events from grouping by `shape_ref`, excludes flagged events from state derivation (captureCount, name), counts unresolved flags per subject.
   - `getSubjectDetail()`: fetches events for surviving ID + all retired aliases, deduplicates, sorts DESC.
   - `getFlaggedEventIds()`: returns set of source_event_ids for unresolved flags (used by UI for indicators).
-  - `_isSystemEventType()`: filters `conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`.
+  - `_isSystemEvent()`: filters `conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split` by `shape_ref` prefix.
 - `mobile/domain/subject_summary.dart` — Added `flagCount` field (default 0, backward-compatible).
 - `mobile/presentation/screens/work_list_screen.dart` — Flag badge (red pill) on subjects with `flagCount > 0`.
 - `mobile/presentation/screens/subject_detail_screen.dart` — Loads `flaggedEventIds`, passes `isFlagged` to `_EventTile`. Flagged events show red icon tint + "FLAGGED" badge.

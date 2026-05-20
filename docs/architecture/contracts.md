@@ -16,7 +16,7 @@
 |---|----------|-----------|--------|-----|
 | C1 | ALL | Every persisted event is immutable, carries a complete 11-field envelope, and is self-describing via `type` and `shape_ref`. Events are never modified or deleted. | [1-S1], [1-S5], [4-S1], [4-S3], [E1] | D |
 | C2 | PE | The complete event stream for any subject is available for projection derivation. Projections are always rebuildable from the event stream. | [1-S2], [1-ST3] | D |
-| C3 | CD | Every incoming event is persisted regardless of state staleness or anomaly. No event is rejected before entering the store. | [2-S14], [1-S1] | D |
+| C3 | CD | Every structurally valid incoming event is persisted regardless of state staleness or anomaly. Structural envelope/payload invalidity is rejected by validation; state anomalies are not rejected before entering the store. | [2-S14], [1-S1], [6-S1] | D |
 
 ### Projection Engine → consumers
 
@@ -36,7 +36,7 @@
 
 | # | Consumer | Guarantee | Source | Cl. |
 |---|----------|-----------|--------|-----|
-| C8 | PE | Every detected anomaly produces a `ConflictDetected` event identifying the source event, its flag category (from the 9-category unified catalog), and exactly one designated resolver. Flagged events are deterministically identifiable for state exclusion. | [2-S11], [2-S14], [5-S2], [E3], [E5] | D |
+| C8 | PE | Every detected state anomaly produces a flag event with `type = alert` and `shape_ref = conflict_detected/v1`, identifying the source event, its flag category (from the 9-category unified catalog), and exactly one designated resolver. Flagged events are deterministically identifiable for state exclusion. | [2-S11], [2-S14], [5-S2], [6-S2], [7-S2], [E3], [E5] | D |
 | C9 | TE | No event carrying an unresolved flag triggers policy execution. Each flag carries a resolvability classification (`auto_eligible` or `manual_only`), available for auto-resolution policy evaluation. | [2-S12], [3-S7], [5-S3], [5-S9] | D |
 
 ### Scope Resolver → consumers

@@ -11,18 +11,18 @@ The 11-field envelope is the universal contract between every primitive. Every c
 | Field | Type | Presence | Source | Primary consumers |
 |-------|------|----------|--------|-------------------|
 | `id` | UUID | Mandatory | [1-S3], [1-S5] | All (global unique reference) |
-| `type` | enum(6) | Mandatory | [4-S3] | Trigger Engine (processing behavior), Conflict Detector |
+| `type` | enum(6) | Mandatory | [4-S3], [7-S1] | Trigger Engine (processing behavior), Conflict Detector |
 | `shape_ref` | `{name}/v{N}` | Mandatory | [4-S1] | Shape Registry (validation), Projection Engine (multi-version routing) |
-| `activity_ref` | `[a-z][a-z0-9_]*` | Optional | [4-S2] | Scope Resolver (activity filtering), Pattern Registry (pattern binding) |
-| `subject_ref` | `{type, id}` | Mandatory | [2-S2] | Projection Engine (subject grouping), Identity Resolver (alias), Scope Resolver (authorization) |
-| `actor_ref` | `{type, id}` | Mandatory | [2-S2] | Scope Resolver (authorization), audit trail |
+| `activity_ref` | `[a-z][a-z0-9_]*` | Optional | [4-S2], [8-S3] | Scope Resolver (activity filtering), Pattern Registry (pattern binding) |
+| `subject_ref` | `{type, id}` | Mandatory | [2-S2], [8-S1] | Projection Engine (subject grouping), Identity Resolver (alias), Scope Resolver (authorization) |
+| `actor_ref` | `{type, id}` | Mandatory | [2-S2], [8-S2] | Scope Resolver (authorization), audit trail |
 | `device_id` | UUID | Mandatory | [2-S5] | Identity Resolver (device provenance), sync protocol |
 | `device_seq` | integer | Mandatory | [2-S1] | Causal ordering (intra-device), conflict detection |
 | `sync_watermark` | version | Mandatory | [2-S1] | Causal ordering (cross-device concurrency), auto-resolution |
 | `timestamp` | datetime | Mandatory | [2-S3] | Advisory only — display and audit. No ordering or correctness depends on it. |
 | `payload` | object | Mandatory | [1-S5] | Shape-specific data (validated against `shape_ref`) |
 
-**Type vocabulary** [4-S3], [E2]: Platform-fixed, closed, append-only. 6 initial types:
+**Type vocabulary** [4-S3], [7-S1], [E2]: Platform-fixed, closed, append-only. 6 initial types:
 
 | Type | Processing behavior |
 |------|-------------------|
@@ -33,27 +33,27 @@ The 11-field envelope is the universal contract between every primitive. Every c
 | `task_completed` | Work item resolution |
 | `assignment_changed` | Scope/role modification |
 
-Types represent processing behavior, not domain meaning. Domain meaning lives in shapes [4-S3].
+Types represent processing behavior, not domain meaning. Domain meaning lives in shapes [4-S3], [7-S2].
 
-**Envelope finalization** [E1]: Five ADRs added fields (ADR-1: 4 fields, ADR-2: +5 fields, ADR-3: +0, ADR-4: +2, ADR-5: +0) reaching 11 total. The extensibility clause [1-S5] was never invoked. The envelope is architecturally stable.
+**Envelope finalization** [E1]: ADR-001 through ADR-005 added fields (ADR-1: 4 fields, ADR-2: +5 fields, ADR-3: +0, ADR-4: +2, ADR-5: +0) reaching 11 total. ADR-006 through ADR-009 clarify semantics and references without adding fields. The extensibility clause [1-S5] was never invoked. The envelope is architecturally stable.
 
 ---
 
 ## 2. Accept-and-Flag Lifecycle
 
-The universal anomaly handling mechanism [E3]. All deviations from expected state — identity, authorization, state transitions, domain rules — are surfaced as flags on events, never cause rejection.
+The universal state-anomaly handling mechanism [E3]. All deviations from expected state — identity, authorization, state transitions, domain rules — are surfaced as flags on structurally valid events, never cause state-based rejection. Structurally invalid envelopes or payloads are rejected by validation.
 
 **Pipeline** (each stage is a contract guarantee):
 
 | Stage | What happens | Contract |
 |-------|-------------|----------|
-| Event persisted | Event written regardless of anomaly | [C3]: ES accepts all events |
+| Event persisted | Structurally valid event written regardless of state anomaly | [C3]: ES accepts all structurally valid events |
 | State available | Projected state ready for evaluation | [C4]: PE → CD |
 | Detection | Anomaly identified, flag created with designated resolver | [C8]: CD → PE |
 | Exclusion | Flagged event visible in timeline but excluded from state derivation | [C8]: CD → PE, [5-S2] |
 | Policy gating | Flagged event does not trigger policies | [C9]: CD → TE, [2-S12] |
 | Auto-resolution | `auto_eligible` flags watched for enabling events within time window | [C9]: CD → TE, [5-S9] |
-| Resolution persisted | `ConflictResolved` event created (online-only) | [C21]: TE → ES (auto), [3-S6] (manual) |
+| Resolution persisted | `conflict_resolved/v1` event created (online-only) | [C21]: TE → ES (auto), [3-S6] (manual) |
 | State re-derived | Post-resolution: state re-derived including the previously-excluded event | [C2]: ES → PE |
 
 The pipeline forms a closed loop: ES → CD (detect) → PE (exclude) → TE (auto-resolve) → ES (persist) → PE (re-derive).

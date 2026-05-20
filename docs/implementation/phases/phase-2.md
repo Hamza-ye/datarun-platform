@@ -597,7 +597,7 @@ Mobile:
 - `mobile/data/device_identity.dart` — `actorToken` getter + `setActorToken()` for token storage via SharedPreferences.
 - `mobile/data/sync_service.dart` — pull sends `Authorization: Bearer <token>` header. 401 handled. Processes `assignment_changed` events during pull via `EventStore.processAssignmentEvent()`.
 - `mobile/data/event_store.dart` — DB version 3: `local_assignments` table. `processAssignmentEvent()` (created/ended). `getActiveAssignments()`.
-- `mobile/data/projection_engine.dart` — `assignment_changed` added to `_isSystemEventType()` exclusion.
+- `mobile/data/projection_engine.dart` — `assignment_changed` added to the then-existing system-event exclusion. Phase 3e later split classifiers so assignment events remain keyed by `type`, while identity/integrity events are keyed by `shape_ref`.
 - `mobile/presentation/app_state.dart` — exposes `activeAssignments` list.
 - `mobile/presentation/screens/work_list_screen.dart` — app bar shows current role(s).
 - `mobile/test/projection_engine_test.dart` — 2 new tests: assignment exclusion + processAssignmentEvent lifecycle.
