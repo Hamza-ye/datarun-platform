@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://datarun.dev/schemas/envelope.schema.json",
   "title": "Event Envelope",
-  "description": "The 11-field event envelope. Every event in Datarun carries this structure. Fields are finalized across 5 ADRs — no additions without ADR-level decision.",
+  "description": "The 11-field event envelope. Every event in Datarun carries this structure. Field set is finalized by ADR-001 through ADR-005; ADR-006 through ADR-009 clarify flag semantics, type closure, reference fields, and config boundaries. No additions without ADR-level decision.",
   "type": "object",
   "properties": {
     "id": {
@@ -20,7 +20,7 @@
         "task_completed",
         "assignment_changed"
       ],
-      "description": "Platform-fixed, closed, append-only vocabulary of 6 values (ADR-4 S3). Domain meaning lives in shapes, not types. Identity and integrity events (conflict_detected, conflict_resolved, subjects_merged, subject_split) are shape names, not types; see ADR-002 Addendum for mapping."
+      "description": "Platform-fixed, closed, append-only vocabulary of 6 values (ADR-4 S3, ADR-007 S1). Domain meaning lives in shapes, not types. Identity and integrity events (conflict_detected, conflict_resolved, subjects_merged, subject_split) are shape names, not types; see ADR-007 S2 for mapping."
     },
     "shape_ref": {
       "type": "string",
@@ -47,7 +47,7 @@
       },
       "required": ["type", "id"],
       "additionalProperties": false,
-      "description": "The entity this event is about. Typed identity reference. Note: 'process' is reserved for future workflow-instance refs (see ADR-2 S2). No current emission site. Pattern instances in Phase 4 use (subject_ref, activity_ref) or source_event_id per docs/architecture/patterns.md, NOT 'process' refs — do not claim this identity category without a new IDR."
+      "description": "The entity this event is about. Typed identity reference. Note: 'process' is reserved for future workflow-instance refs (see ADR-2 S2 and ADR-008 S1). No current emission site. Pattern instances in Phase 4 use (subject_ref, activity_ref) or source_event_id per docs/architecture/patterns.md, NOT 'process' refs — do not claim this active identity category without a new ADR."
     },
     "actor_ref": {
       "type": "object",
@@ -64,7 +64,7 @@
       },
       "required": ["type", "id"],
       "additionalProperties": false,
-      "description": "Who created this event. System actors use 'id' prefixed with 'system:{component}/{identifier}' (e.g., 'system:auto_resolution/late_entry_accept'). The 'type' enum stays ['actor'] — authorship discrimination is by 'id' prefix, never by adding a new type value. See ADR-002 Addendum F-A3."
+      "description": "Who created this event. System actors use 'id' prefixed with 'system:{source_type}/{source_id}' (e.g., 'system:auto_resolution/late_entry_accept'). The 'type' enum stays ['actor'] — authorship discrimination is by 'id' prefix, never by adding a new type value. See ADR-008 S2 and ADR-007 F-A3."
     },
     "device_id": {
       "type": "string",

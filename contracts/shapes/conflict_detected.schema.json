@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://datarun.dev/schemas/shapes/conflict_detected.schema.json",
   "title": "conflict_detected/v1 payload",
-  "description": "Payload for integrity flag events. Emitted with envelope type=alert. Describes a single detected integrity anomaly; one flag per (source_event_id, flag_category). flag_category is one of the 9 values in docs/contracts/flag-catalog.md.",
+  "description": "Payload for integrity flag events. Emitted with envelope type=alert and shape_ref=conflict_detected/v1. Describes a single detected integrity anomaly; one flag per (source_event_id, flag_category). flag_category is one of the 9 values in contracts/flag-catalog.md.",
   "type": "object",
   "properties": {
     "source_event_id": {
@@ -28,7 +28,7 @@
       },
       "required": ["type", "id"],
       "additionalProperties": false,
-      "description": "Actor who should review this flag. System actors use the 'system:{component}/{id}' id convention."
+      "description": "Actor who should review this flag. System actors use the 'system:{source_type}/{source_id}' id convention."
     },
     "reason": {
       "type": "string",
