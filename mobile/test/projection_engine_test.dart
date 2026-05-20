@@ -54,7 +54,7 @@ void main() {
       type: 'alert',
       shapeRef: 'conflict_detected/v1',
       subjectRef: {'type': 'subject', 'id': subjectId},
-      // F-A3 system actor convention.
+      // ADR-008 S2 system actor convention.
       actorRef: {'type': 'actor', 'id': 'system:conflict_detector/$category'},
       deviceId: 'server',
       deviceSeq: serverSeq++,

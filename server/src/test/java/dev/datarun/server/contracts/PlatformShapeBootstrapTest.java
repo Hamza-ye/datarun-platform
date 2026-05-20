@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Phase 3e contract test: the four platform-bundled shapes
  * ({@code conflict_detected/v1}, {@code conflict_resolved/v1},
  * {@code subjects_merged/v1}, {@code subject_split/v1}) are registered by
- * the server at application-ready time (ADR-002 Addendum DD-1).
+ * the server at application-ready time (ADR-007 S5).
  *
  * <p>Without these shapes registered, the server cannot emit architecturally
  * valid integrity or identity events. Their presence is a contract, not a

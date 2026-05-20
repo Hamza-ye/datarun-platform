@@ -333,8 +333,8 @@ public class ConflictDetector {
         subjectRef.put("type", "subject");
         subjectRef.put("id", subjectId.toString());
 
-        // System actor convention (ADR-002 Addendum F-A3): system:{component}/{identifier}.
-        // Component = detector module; identifier = the specific flag category this invocation raised.
+        // System actor convention (ADR-008 S2): system:{source_type}/{source_id}.
+        // source_type = detector module; source_id = the specific flag category this invocation raised.
         ObjectNode actorRef = objectMapper.createObjectNode();
         actorRef.put("type", "actor");
         actorRef.put("id", "system:conflict_detector/" + flagCategory);
@@ -477,7 +477,7 @@ public class ConflictDetector {
     /**
      * Deterministic UUID from (source_event_id + shape_ref + flag_category).
      * Enables idempotent sweep — same input always produces same flag ID.
-     * shape_ref is included (per ADR-002 Addendum) so future integrity shapes
+     * shape_ref is included per ADR-007 S4 so future integrity shapes
      * cannot collide against historical flag IDs.
      */
     static UUID deterministicUuid(UUID sourceEventId, String flagCategory) {

@@ -150,7 +150,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         }
         assertThat(resolvedEvent).isNotNull();
 
-        // Verify envelope per ADR-002 Addendum: manual resolution is type=review.
+        // Verify envelope per ADR-007 S2: manual resolution is type=review.
         assertThat(resolvedEvent.get("type").asText()).isEqualTo("review");
         assertThat(resolvedEvent.get("shape_ref").asText()).isEqualTo("conflict_resolved/v1");
         assertThat(resolvedEvent.get("subject_ref").get("type").asText()).isEqualTo("subject");

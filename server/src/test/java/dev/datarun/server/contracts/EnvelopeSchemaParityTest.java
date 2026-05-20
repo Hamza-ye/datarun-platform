@@ -41,7 +41,7 @@ class EnvelopeSchemaParityTest {
         assertEquals(a, b,
                 "Envelope schema copies must stay identical. "
                         + "Edit both in a single change, or fold one into the other. "
-                        + "See docs/flagged-positions.md FP-003 and ADR-002 Addendum.");
+                        + "See docs/flagged-positions.md FP-003, ADR-007, and ADR-008.");
     }
 
     private static String normalize(String s) {

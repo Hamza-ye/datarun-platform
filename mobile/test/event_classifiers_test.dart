@@ -2,7 +2,7 @@ import 'package:datarun_mobile/data/projection_engine.dart';
 import 'package:datarun_mobile/domain/event.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Phase 3e (DD-2) contract: integrity and identity events are discriminated
+/// ADR-007 S3 contract: integrity and identity events are discriminated
 /// by `shape_ref`, never by envelope `type`. The four named predicates below
 /// encode that rule. A change to envelope type vocabulary must never break
 /// discrimination, and an unrelated shape must never be mistaken for a flag.
@@ -22,7 +22,7 @@ void main() {
     );
   }
 
-  group('event_classifiers (ADR-002 Addendum DD-2)', () {
+  group('event_classifiers (ADR-007 S3)', () {
     test('isIntegrityFlag matches conflict_detected/v* and nothing else', () {
       expect(isIntegrityFlag(make(type: 'alert', shapeRef: 'conflict_detected/v1')), isTrue);
       expect(isIntegrityFlag(make(type: 'alert', shapeRef: 'conflict_detected/v2')), isTrue);

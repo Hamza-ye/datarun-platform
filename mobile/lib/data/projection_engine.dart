@@ -2,9 +2,9 @@ import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/domain/event.dart';
 import 'package:datarun_mobile/domain/subject_summary.dart';
 
-/// ADR-002 Addendum (Phase 3e, DD-2): integrity and identity events are
-/// discriminated by `shape_ref`, never by envelope `type`. The four named
-/// predicates below replace the former `_isSystemEventType` string switch.
+/// ADR-007 S3: integrity and identity events are discriminated by `shape_ref`,
+/// never by envelope `type`. The four named predicates below replace the
+/// former `_isSystemEventType` string switch.
 /// Each predicate answers a single architectural question.
 bool isIntegrityFlag(Event e) => e.shapeRef.startsWith('conflict_detected/');
 

@@ -172,7 +172,7 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         assertThat(flagEvent.get("subject_ref").get("id").asText()).isEqualTo(SUBJECT_X.toString());
         assertThat(flagEvent.has("actor_ref")).isTrue();
         assertThat(flagEvent.get("actor_ref").get("type").asText()).isEqualTo("actor");
-        // System actor convention: system:{component}/{identifier} (ADR-002 Addendum F-A3)
+        // System actor convention: system:{source_type}/{source_id} (ADR-008 S2)
         assertThat(flagEvent.get("actor_ref").get("id").asText())
                 .startsWith("system:conflict_detector/");
         assertThat(flagEvent.has("device_id")).isTrue();
@@ -189,7 +189,7 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         assertThat(payload.get("flag_category").asText()).isEqualTo("concurrent_state_change");
         assertThat(payload.has("resolvability")).isTrue();
         assertThat(payload.has("reason")).isTrue();
-        // designated_resolver is optional — absent when no specific resolver is known (ADR-002 Addendum).
+        // designated_resolver is optional when no specific resolver is known.
     }
 
     /**
@@ -266,9 +266,9 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
     }
 
     /**
-     * ADR-002 Addendum F-A3: system-emitted flags carry actor_ref.id using the
-     * convention {@code system:{component}/{identifier}}. The component is
-     * {@code conflict_detector}; the identifier is the flag category.
+     * ADR-008 S2: system-emitted flags carry actor_ref.id using the
+     * convention {@code system:{source_type}/{source_id}}. The source type is
+     * {@code conflict_detector}; the source id is the flag category.
      */
     @Test
     void conflictDetected_actorRefFollowsSystemConvention() {
@@ -289,7 +289,7 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         assertThat(actorRef.get("type").asText()).isEqualTo("actor");
         String id = actorRef.get("id").asText();
         assertThat(id)
-                .as("System actor id must follow 'system:{component}/{identifier}' (F-A3)")
+                .as("System actor id must follow 'system:{source_type}/{source_id}'")
                 .startsWith("system:conflict_detector/");
         // The identifier segment must match the flag category from the payload.
         String flagCategory = flagEvent.get("payload").get("flag_category").asText();

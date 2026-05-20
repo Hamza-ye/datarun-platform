@@ -122,7 +122,7 @@ void main() {
       await store.processAssignmentEvent(assignment);
 
       // System-authored integrity event from other device for out-of-scope subject.
-      // Under ADR-002 Addendum: type=alert, shape_ref=conflict_detected/v1,
+      // Under ADR-007 S2: type=alert, shape_ref=conflict_detected/v1,
       // actor_ref.id follows the system:{component}/{identifier} convention.
       final systemEvent = Event(
         id: 'sys-1',

@@ -300,7 +300,7 @@ class EventStore {
 
     // Find events from other devices whose subject is not in any active assignment's subject_list
     // and are not system-authored (integrity/identity via shape_ref, assignment via type).
-    // ADR-002 Addendum: integrity/identity events are discriminated by shape_ref, not type.
+    // ADR-007 S3: integrity/identity events are discriminated by shape_ref, not type.
     final candidates = await db.rawQuery('''
       SELECT id, subject_ref FROM $_table
       WHERE device_id != ?

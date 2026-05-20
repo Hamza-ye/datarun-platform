@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Phase 3e contract test: the envelope type vocabulary is closed.
  *
- * ADR-002 Addendum (2026-04-21) collapses identity and integrity events from
- * rogue envelope types into the 6 canonical process types, emitted under
- * dedicated shape names. This test guards that collapse: any attempt to
+ * ADR-007 absorbs the Phase 3e correction that moved identity and integrity
+ * events from rogue envelope types into the 6 canonical process types, emitted
+ * under dedicated shape names. This test guards that collapse: any attempt to
  * reintroduce the old type strings at the envelope level must be rejected.
  */
 @SpringBootTest

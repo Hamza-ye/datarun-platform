@@ -271,8 +271,8 @@ public class SyncController {
         for (Event e : events) {
             if (e.actorRef() != null && e.actorRef().has("id")) {
                 String id = e.actorRef().get("id").asText(null);
-                // System actors use the 'system:{component}/{identifier}' convention
-                // (ADR-002 Addendum F-A3) and never carry a human UUID.
+                // System actors use the 'system:{source_type}/{source_id}' convention
+                // (ADR-008 S2) and never carry a human UUID.
                 if (id != null && !id.startsWith("system:")) {
                     try {
                         return UUID.fromString(id);

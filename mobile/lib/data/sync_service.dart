@@ -98,7 +98,7 @@ class SyncService {
         for (final event in events) {
           await _eventStore.insertFromServer(event);
           // Process subjects_merged events to update local alias table.
-          // ADR-002 Addendum: discriminate identity lifecycle by shape_ref.
+          // ADR-007 S3: discriminate identity lifecycle by shape_ref.
           if (event.shapeRef.startsWith('subjects_merged/')) {
             final retiredId = event.payload['retired_id'] as String?;
             final survivingId = event.payload['surviving_id'] as String?;
