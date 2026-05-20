@@ -27,6 +27,9 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private IdentityService identityService;
+
     private static final UUID DEVICE_A = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID DEVICE_B = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static final UUID ACTOR_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
@@ -150,6 +153,34 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         // Successor has no events yet (it's a new subject)
         var successorEvents = rest.getForEntity("/api/subjects/" + successorId + "/events", JsonNode.class);
         assertThat(successorEvents.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void subjectLifecycleProjection_rebuildsFromIdentityLifecycleEvents() {
+        UUID subjectA = UUID.randomUUID();
+        UUID subjectB = UUID.randomUUID();
+        UUID subjectC = UUID.randomUUID();
+        UUID subjectD = UUID.randomUUID();
+
+        pushEvents(List.of(
+                buildEvent(subjectA, DEVICE_A, 1),
+                buildEvent(subjectB, DEVICE_A, 2),
+                buildEvent(subjectC, DEVICE_A, 3),
+                buildEvent(subjectD, DEVICE_A, 4)), DEVICE_A);
+
+        assertThat(merge(subjectA, subjectB).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(merge(subjectB, subjectD).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(split(subjectC).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        List<Map<String, Object>> originalRows = lifecycleRows();
+        assertThat(originalRows).hasSize(4);
+
+        jdbc.execute("DELETE FROM subject_lifecycle");
+        assertThat(lifecycleRows()).isEmpty();
+
+        identityService.rebuildSubjectLifecycleFromEvents();
+
+        assertThat(lifecycleRows()).isEqualTo(originalRows);
     }
 
     // --- QG4: Archived subject cannot be merge target ---
@@ -370,5 +401,16 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
         return rest.exchange("/api/identity/split", HttpMethod.POST, entity, JsonNode.class);
+    }
+
+    private List<Map<String, Object>> lifecycleRows() {
+        return jdbc.queryForList("""
+                SELECT subject_id::text AS subject_id,
+                       state,
+                       COALESCE(archived_at::text, '') AS archived_at,
+                       COALESCE(successor_id::text, '') AS successor_id
+                FROM subject_lifecycle
+                ORDER BY subject_id::text
+                """);
     }
 }

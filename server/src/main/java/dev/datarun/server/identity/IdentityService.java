@@ -18,6 +18,8 @@ import java.util.UUID;
  * Identity Resolver: merge/split operations on subjects.
  * Online-only, server-validated (F9).
  * Merge uses the full DD-3 procedure with row-level locking.
+ * subject_lifecycle is a rebuildable projection cache of identity lifecycle events,
+ * used only to serialize merge/split precondition checks.
  */
 @Service
 public class IdentityService {
@@ -111,14 +113,15 @@ public class IdentityService {
                 ON CONFLICT (retired_id) DO NOTHING
                 """, retiredId.toString(), survivingId.toString());
 
-            // Step 3: Archive retired subject
+            Event event = buildMergeEvent(retiredId, survivingId, actorId, reason);
+
+            // Step 3: Archive retired subject in the cache using event time so the row is rebuildable.
             jdbc.update("""
-                UPDATE subject_lifecycle SET state = 'archived', archived_at = NOW()
+                UPDATE subject_lifecycle SET state = 'archived', archived_at = ?::timestamptz
                 WHERE subject_id = ?::uuid
-                """, retiredId.toString());
+                """, event.timestamp().toString(), retiredId.toString());
 
             // Step 4: Insert subjects_merged event
-            Event event = buildMergeEvent(retiredId, survivingId, actorId, reason);
             eventRepository.insert(event);
 
             return event;
@@ -162,14 +165,15 @@ public class IdentityService {
                         "Subject " + sourceId + " is not active (state: " + state + ")");
             }
 
-            // Archive source with successor reference
+            Event event = buildSplitEvent(sourceId, successorId, actorId, reason);
+
+            // Archive source with successor reference using event time so the row is rebuildable.
             jdbc.update("""
-                UPDATE subject_lifecycle SET state = 'archived', archived_at = NOW(), successor_id = ?::uuid
+                UPDATE subject_lifecycle SET state = 'archived', archived_at = ?::timestamptz, successor_id = ?::uuid
                 WHERE subject_id = ?::uuid
-                """, successorId.toString(), sourceId.toString());
+                """, event.timestamp().toString(), successorId.toString(), sourceId.toString());
 
             // Insert subject_split event
-            Event event = buildSplitEvent(sourceId, successorId, actorId, reason);
             eventRepository.insert(event);
 
             return event;
@@ -178,6 +182,66 @@ public class IdentityService {
         log.info("Split subject {} → successor {} (event: {})", sourceId, successorId,
                 splitEvent != null ? splitEvent.id() : "null");
         return splitEvent;
+    }
+
+    /**
+     * Rebuild the subject_lifecycle projection from identity lifecycle events.
+     * The event stream is the source of truth; this cache may be discarded and
+     * recomputed for repair, migration, or drift checks.
+     */
+    public void rebuildSubjectLifecycleFromEvents() {
+        transactionTemplate.executeWithoutResult(status -> {
+            jdbc.update("DELETE FROM subject_lifecycle");
+            jdbc.update("""
+                WITH touched_subjects AS (
+                    SELECT DISTINCT subject_id
+                    FROM (
+                        SELECT payload->>'retired_id' AS subject_id
+                        FROM events
+                        WHERE shape_ref LIKE 'subjects_merged/%'
+                        UNION ALL
+                        SELECT payload->>'surviving_id' AS subject_id
+                        FROM events
+                        WHERE shape_ref LIKE 'subjects_merged/%'
+                        UNION ALL
+                        SELECT payload->>'source_id' AS subject_id
+                        FROM events
+                        WHERE shape_ref LIKE 'subject_split/%'
+                    ) touched
+                    WHERE subject_id IS NOT NULL
+                ),
+                archived_subjects AS (
+                    SELECT DISTINCT ON (subject_id)
+                           subject_id,
+                           archived_at,
+                           successor_id
+                    FROM (
+                        SELECT payload->>'retired_id' AS subject_id,
+                               timestamp AS archived_at,
+                               NULL::text AS successor_id,
+                               sync_watermark
+                        FROM events
+                        WHERE shape_ref LIKE 'subjects_merged/%'
+                        UNION ALL
+                        SELECT payload->>'source_id' AS subject_id,
+                               timestamp AS archived_at,
+                               payload->>'successor_id' AS successor_id,
+                               sync_watermark
+                        FROM events
+                        WHERE shape_ref LIKE 'subject_split/%'
+                    ) archived
+                    WHERE subject_id IS NOT NULL
+                    ORDER BY subject_id, sync_watermark DESC
+                )
+                INSERT INTO subject_lifecycle (subject_id, state, archived_at, successor_id)
+                SELECT touched.subject_id::uuid,
+                       CASE WHEN archived.subject_id IS NULL THEN 'active' ELSE 'archived' END,
+                       archived.archived_at,
+                       archived.successor_id::uuid
+                FROM touched_subjects touched
+                LEFT JOIN archived_subjects archived ON archived.subject_id = touched.subject_id
+                """);
+        });
     }
 
     private Event buildMergeEvent(UUID retiredId, UUID survivingId, UUID actorId, String reason) {

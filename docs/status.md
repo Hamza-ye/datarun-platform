@@ -33,7 +33,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 | FP# | Item | Blocks | Severity | Status |
 |-----|------|--------|:--------:|--------|
 | FP-001 | `role_stale` projection-derived role verification | IDR-021 | A | **OPEN** |
-| FP-002 | `subject_lifecycle` table read-discipline audit | Phase 4 | B | **OPEN** |
+| FP-002 | `subject_lifecycle` table read-discipline audit | Phase 4 | B | **RESOLVED** |
 | FP-003 | Envelope schema parity test | — | C | **RESOLVED** (EnvelopeSchemaParityTest) |
 
 **Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.

@@ -12,7 +12,10 @@ CREATE TABLE subject_aliases (
 );
 CREATE INDEX idx_aliases_surviving ON subject_aliases (surviving_id);
 
--- Subject lifecycle state (for merge/split preconditions).
+-- Subject lifecycle projection cache (for merge/split precondition locking).
+-- Projection cache. Rebuildable from events. Never the state of record.
+-- Source of truth is the event stream: subjects_merged/v1 and subject_split/v1.
+-- The cache can be discarded and rebuilt from those identity lifecycle events.
 -- Population: starts empty. Subjects with no row are treated as 'active' (default).
 -- Merge/split operations insert or update rows. The table grows as identity operations occur.
 CREATE TABLE subject_lifecycle (

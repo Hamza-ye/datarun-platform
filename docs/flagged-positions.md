@@ -81,8 +81,9 @@ All three must be true:
 
 ## FP-002 — `subject_lifecycle` table read-discipline audit
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding B3)
+**Resolved**: 2026-05-21 by subject lifecycle rebuild test and migration comment
 **Blocks**: Phase 4 (not a specific IDR — pattern state machines will interact with identity lifecycle)
 **Severity**: B — projection discipline
 
@@ -107,6 +108,7 @@ All three must be true:
 ### Resolution log
 
 - **2026-04-21**: Opened.
+- **2026-05-21**: Resolved. `subject_lifecycle` is classified as a projection cache used for merge/split precondition locking; `IdentityService.rebuildSubjectLifecycleFromEvents()` rebuilds it from `subjects_merged/v1` and `subject_split/v1` events; `IdentityResolverIntegrationTest.subjectLifecycleProjection_rebuildsFromIdentityLifecycleEvents` proves the cache can be discarded and reconstructed with identical rows; V3 migration now carries the projection-cache warning.
 
 ---
 
