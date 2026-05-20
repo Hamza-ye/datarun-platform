@@ -3,7 +3,7 @@
 > Status: **Decided**
 > Date: 2026-04-12
 > Exploration: [Reading Guide](../exploration/guide-adr-004.md) · Raw: [13](../exploration/archive/13-adr4-session1-scoping.md) (Session 1), [14](../exploration/archive/14-adr4-session2-scenario-walkthrough.md) (Session 2), [15–18](../exploration/archive/) (Session 3 Parts 1–4)
-> **Related addendum (2026-04-21)**: [ADR-002 Addendum — Envelope Type Mapping](adr-002-addendum-type-vocabulary.md) clarifies how identity/integrity events map onto the 6-type envelope vocabulary established by S3. Binding for all code.
+> **Related canonicalization (2026-04-23)**: [ADR-007](adr-007-envelope-type-closure.md) absorbs the former [ADR-002 Addendum](adr-002-addendum-type-vocabulary.md) and clarifies how identity/integrity events map onto the 6-type envelope vocabulary established by S3. ADR-007 is the binding current reference for code.
 
 ---
 

@@ -72,7 +72,7 @@ Merge and split are data-recording lifecycle events: they record what happened t
 
 ---
 
-## Consumer Filtering Rule (Binding)
+## Consumer Filtering Rule (Absorbed Into ADR-007)
 
 **Any code that needs to identify identity/integrity events MUST filter on `shape_ref`, not on `type`.**
 
@@ -134,7 +134,7 @@ This matches the treatment of `assignment_created/v1` and `assignment_ended/v1` 
 
 ---
 
-## FORBIDDEN PATTERNS — For Future Agents
+## FORBIDDEN PATTERNS — Historical Copy; Canonical Form in ADR-007
 
 The drift happened because agents treated the envelope `type` field as an extensible tag. It is not. These rules are binding and must be quoted in any future PR that wants to add a new event kind:
 
@@ -154,7 +154,7 @@ If a test asserts `e.type == "conflict_detected"` the test is wrong — it must 
 
 `type` is not a proxy for "who wrote this." Authorship is carried by `actor_ref`. The same shape (e.g., `conflict_resolved/v1`) can be written under different envelope types depending on the authoring actor (human → `review`, system → `capture`). Do not invent a new type to distinguish authorship — discriminate on `actor_ref` (specifically, the `system:*` prefix convention for system actors).
 
-### F-A4: Before writing code that keys on a system event, read this addendum
+### F-A4: Before writing code that keys on a system event, read ADR-007
 
 If you are about to write any of:
 
@@ -162,11 +162,11 @@ If you are about to write any of:
 - `WHERE type IN ('conflict_detected', ...)`
 - `type.startsWith("conflict")` (or any envelope-type-based integrity classification)
 
-**Stop.** Re-read the Consumer Filtering Rule above. Use `shape_ref` instead. If you think you have a case that genuinely needs to key on `type`, that is an architecture-grade question — escalate to a new IDR, do not just write the code.
+**Stop.** Re-read ADR-007 §S3. Use `shape_ref` instead. If you think you have a case that genuinely needs to key on `type`, that is an architecture-grade question — escalate to a new ADR, do not just write the code.
 
 ### F-A5: Never split a shape across envelope types without recording the authorship rule
 
-`conflict_resolved/v1` legitimately spans `type=review` and `type=capture` because the authorship rule is written above (manual vs auto). If you introduce another shape that spans types, you MUST record the authorship discriminator in the same table form as the mapping table above, in a new addendum or IDR. Leaving authorship implicit is how the Phase 1/2 drift started.
+`conflict_resolved/v1` legitimately spans `type=review` and `type=capture` because the authorship rule is written above (manual vs auto). If you introduce another shape that spans types, you MUST record the authorship discriminator in the same table form as the mapping table above, through an ADR-level decision. Leaving authorship implicit is how the Phase 1/2 drift started.
 
 ---
 
@@ -225,6 +225,6 @@ The retrofit is **data-destructive for dev/test DBs** (existing events carry soo
 
 ---
 
-## Next Step
+## Current Status
 
-Phase 3e is specced and executed. After 3e passes, this addendum is closed; Phase 4 proceeds on a clean vocabulary.
+Phase 3e is specced and executed. ADR-007 absorbed this addendum and is the current canonical reference.
