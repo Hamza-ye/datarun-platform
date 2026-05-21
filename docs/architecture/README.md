@@ -35,7 +35,7 @@ The architecture serves five commitments from the platform vision:
 | V1 | Works without connectivity | Events created offline with full envelope. No operation requires a server roundtrip. Sync is for exchange, not operation. |
 | V2 | Set up, not built | Four-layer configuration gradient (L0–L3). The simplest scenario requires 2 artifacts and zero code. |
 | V3 | Trustworthy records | Append-only events. Full provenance in every envelope. Structurally valid events are accepted; state anomalies are flagged, never silently discarded. |
-| V4 | One system, not many | 11 primitives compose for all 21 scenarios. Same contracts, same patterns, same integrity guarantees. |
+| V4 | One system, not many | Shared primitives and contracts compose across the scenario set. Pattern inventory is platform-fixed and evolves when a scenario needs a new pattern. Same integrity guarantees. |
 | V5 | Grows without breaking | Additive schema evolution. Platform-fixed patterns compose without modification. Complexity budgets prevent accretion. |
 
 ---

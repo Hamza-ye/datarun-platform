@@ -18,7 +18,7 @@ The 11-field envelope is the universal contract between every primitive. Every c
 | `actor_ref` | `{type, id}` | Mandatory | [2-S2], [8-S2] | Scope Resolver (authorization), audit trail |
 | `device_id` | UUID | Mandatory | [2-S5] | Identity Resolver (device provenance), sync protocol |
 | `device_seq` | integer | Mandatory | [2-S1] | Causal ordering (intra-device), conflict detection |
-| `sync_watermark` | version | Mandatory | [2-S1] | Causal ordering (cross-device concurrency), auto-resolution |
+| `sync_watermark` | version/null | Nullable until server receipt | [2-S1] | Causal ordering once assigned, pull pagination, auto-resolution |
 | `timestamp` | datetime | Mandatory | [2-S3] | Advisory only — display and audit. No ordering or correctness depends on it. |
 | `payload` | object | Mandatory | [1-S5] | Shape-specific data (validated against `shape_ref`) |
 
@@ -105,7 +105,7 @@ End-to-end flow from deployer authoring to device operation. Involves 3 primitiv
 
 | Step | What happens | Primitive | Contract |
 |------|-------------|-----------|----------|
-| Author | Deployer creates shapes, activities, triggers, patterns, rules | — (external input) | — |
+| Author | Deployer creates shapes, activities, triggers, pattern bindings, and rules from platform-provided mechanisms | — (external input) | — |
 | Validate | All budgets and composition rules checked | Deploy-time Validator | [C13], [C18] |
 | Package | Validated config assembled into atomic payload with all shape versions | Config Packager | [C14], [C19] |
 | Deliver | Device receives package at next sync | Config Packager | [C20] |
@@ -148,7 +148,7 @@ The sync contract is fully decomposable into guarantees from Event Store, Scope 
 | 6 | `temporal_authority_expired` | ADR-3 | `auto_eligible` | Assignment ended, worker didn't know — timing overlap |
 | 7 | `domain_uniqueness_violation` | ADR-4 | `manual_only` | Business rule violation |
 | 8 | `transition_violation` | ADR-5 | `auto_eligible` | Invalid state transition — usually offline timing overlap |
-| 9 | *(reserved)* | — | — | Catalog is append-only per the accept-and-flag pattern |
+| 9 | *(reserved)* | — | — | Growth slot; claiming it requires ADR-level amendment |
 
 **Naming note**: ADR-003's original names (`ScopeStaleFlag`, `RoleStaleFlag`, `TemporalAuthorityExpiredFlag`) normalized to `snake_case`. `scope_stale` renamed to `scope_violation` because ADR-003 [3-S7] treats scope changes as a security concern (blocking by default), aligning with "violation" over "stale."
 

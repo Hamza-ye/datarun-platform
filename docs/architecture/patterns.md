@@ -27,8 +27,8 @@ Each pattern specification follows a fixed structure:
 
 | Type | PE state key | Rule |
 |------|-------------|------|
-| `subject-level` | `(subject_ref, activity_ref)` | Rule 1: at most one per activity |
-| `event-level` | `(source_event_id)` | Rule 2: compose freely |
+| `subject-level` | `(subject_ref, activity_ref, pattern_ref)` | Rule 1: at most one subject-level binding per activity |
+| `event-level` | `(source_event_id, pattern_ref)` | Rule 2: compose freely |
 
 **Shape binding modes**: Shapes relate to patterns as **transition-bound** (mapped to a state transition; Rule 5 applies) or **activation-bound** (triggers instance creation without competing for transitions; Rule 5 does not apply).
 
@@ -241,8 +241,8 @@ Level validation: the review must be for exactly `current_level`; otherwise `tra
 
 | Mode | PE state key | Declaration | Rule 1 |
 |------|-------------|------------|--------|
-| Primary | `(subject_ref, activity_ref)` | Assigned as activity's subject-level pattern | Consumes slot |
-| Embedded | `(submission_event_id)` | Listed alongside a subject-level pattern | Does not consume slot |
+| Primary | `(subject_ref, activity_ref, pattern_ref)` | Assigned as activity's subject-level pattern | Consumes slot |
+| Embedded | `(submission_event_id, pattern_ref)` | Listed alongside a subject-level pattern | Does not consume slot |
 
 Transition table is identical in both modes; only the PE state key changes.
 

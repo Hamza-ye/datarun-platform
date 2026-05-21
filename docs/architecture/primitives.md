@@ -47,7 +47,7 @@ The foundational read primitive. Computes current state from event streams. Ever
 | [3-S3] | Authority context is a projection, not an envelope field. Derived from assignment event timeline. | Structural |
 | [5-S2] | Flagged events are visible in timeline but excluded from state derivation. | Strategy-protecting |
 | [4-S11] | Projection rules are pure value-to-value lookup tables. | Initial strategy |
-| [5-S4] | State machines are projection patterns. State derived from events + pattern definitions, never stored in events. | Initial strategy |
+| [5-S4] | State machines are projection patterns. State derived from events plus pattern bindings and platform-bundled definitions, never stored in events. | Initial strategy |
 | [5-S8] | `context.*` scope: 7 platform-fixed properties pre-resolved on-device from local projection at form-open time. | Initial strategy |
 
 **Capabilities** (accumulated across ADR-001 through ADR-005, clarified by ADR-006 through ADR-009 where applicable):
@@ -73,16 +73,16 @@ The foundational read primitive. Computes current state from event streams. Ever
 
 ## 3. Identity Resolver
 
-Manages subject identity lifecycle: creation, merge, split, alias resolution, lineage tracking.
+Manages subject identity lifecycle: creation, merge, split, alias resolution, lineage tracking. It also preserves the typed reference contract inherited from ADR-002 and ADR-008.
 
-**Invariant**: 4 typed identity categories (subject, actor, assignment, process). Merge = alias in projection, never rewrite. Lineage graph is a DAG by construction.
+**Invariant**: Subject merge/split lineage is a DAG by construction. Merge = alias in projection, never rewrite. The typed reference contract has four enum values, but `process` is reserved and has no active emission site.
 
 **Constraints**:
 
 | ID | Constraint | Classification |
 |----|-----------|----------------|
 | [2-S1] | Causal ordering via `device_seq` + `sync_watermark`. `(device_id, device_seq)` is globally unique and never reused. | Structural |
-| [2-S2] | All identity references carry a type discriminator and UUID: `{type, id}`. Types: subject, actor, process, assignment. | Structural |
+| [2-S2] | All identity references carry a type discriminator and UUID: `{type, id}`. Enum values: `subject`, `actor`, `assignment`, `process`; `process` is reserved by ADR-008 and not active without ADR-level activation. | Structural |
 | [2-S3] | `device_time` (mapped to `timestamp`) is advisory only. No ordering or correctness depends on it. | Structural |
 | [2-S5] | `device_id` identifies a physical device, not a user. New device = new `device_id`. | Structural |
 | [2-S6] | Merge = alias in projection. `SubjectsMerged` creates alias mapping: `retired_id → surviving_id`. Eager transitive closure. Single-hop lookup. | Structural |
@@ -93,12 +93,12 @@ Manages subject identity lifecycle: creation, merge, split, alias resolution, li
 
 **Identity type taxonomy**:
 
-| Type | Lifecycle | Mergeable | Example |
-|------|-----------|-----------|---------|
-| Subject | Persistent | Yes | Person, facility, location |
-| Actor | Persistent | No | Field worker, supervisor |
-| Assignment | Temporal | No | "CHV covering Village X from Jan–Jun" |
-| Process | Transient | No | Shipment, review cycle, campaign instance |
+| Type | Current status | Lifecycle | Mergeable | Example |
+|------|----------------|-----------|-----------|---------|
+| Subject | Active | Persistent or operational event-stream subject | Yes when governed by subject identity lifecycle | Person, facility, location, shipment-as-subject in current transfer pattern |
+| Actor | Active | Persistent | No | Field worker, supervisor |
+| Assignment | Active | Temporal | No | "CHV covering Village X from Jan-Jun" |
+| Process | Reserved | Transient workflow-instance identity | No active emission site | Shipment, review cycle, campaign instance (S07 provenance) |
 
 **Configuration surface**: None. The identity model is platform-fixed.
 
@@ -282,7 +282,7 @@ The configuration acceptance gate. Enforces hard complexity budgets before any c
 
 The configuration delivery pipeline endpoint. Gets validated configuration from server to device atomically.
 
-**Invariant**: Atomic delivery. At most 2 configuration versions coexist on device (current + previous for in-progress work). A device never operates with a shape from version N and a trigger from version N+1.
+**Invariant**: Atomic delivery. At most 2 configuration package slots coexist on device (`current` + `pending`). A form in progress continues under the config it opened with; the device never mixes artifacts from different package versions.
 
 **Constraints**:
 
@@ -294,7 +294,7 @@ The configuration delivery pipeline endpoint. Gets validated configuration from 
 - Shape definitions (all versions, for multi-version projection support)
 - Activity definitions (role-action mappings, pattern selections, scope compositions)
 - Trigger definitions (L3a, L3b, auto-resolution)
-- Pattern definitions (state machine skeletons + parameterization)
+- Pattern bindings (selected platform-bundled pattern refs + deployer parameterization)
 - Expression rules (L2 show/hide, computed defaults)
 - Flag severity overrides (blocking vs. informational per flag type)
 - Sensitivity classifications (per shape/activity)
