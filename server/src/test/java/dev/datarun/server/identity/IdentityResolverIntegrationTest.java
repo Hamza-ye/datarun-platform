@@ -30,6 +30,12 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private IdentityLifecycleProjection lifecycleProjection;
 
+    @Autowired
+    private SubjectAliasProjection subjectAliasProjection;
+
+    @Autowired
+    private AliasCache aliasCache;
+
     private static final UUID DEVICE_A = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID DEVICE_B = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static final UUID ACTOR_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
@@ -111,6 +117,40 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(bTarget).isEqualTo(subjectC.toString()); // Direct: B→C
 
         // Unified subject list shows only C with all 3 events
+        var subjectsResponse = rest.getForEntity("/api/subjects", JsonNode.class);
+        JsonNode subjects = subjectsResponse.getBody().get("subjects");
+        assertThat(subjects.size()).isEqualTo(1);
+        assertThat(subjects.get(0).get("id").asText()).isEqualTo(subjectC.toString());
+        assertThat(subjects.get(0).get("event_count").asInt()).isEqualTo(3);
+    }
+
+    @Test
+    void subjectAliasProjection_rebuildsSingleHopClosureFromMergeEvents() {
+        UUID subjectA = UUID.randomUUID();
+        UUID subjectB = UUID.randomUUID();
+        UUID subjectC = UUID.randomUUID();
+
+        pushEvents(List.of(
+                buildEvent(subjectA, DEVICE_A, 1),
+                buildEvent(subjectB, DEVICE_A, 2),
+                buildEvent(subjectC, DEVICE_A, 3)), DEVICE_A);
+
+        assertThat(merge(subjectA, subjectB).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(merge(subjectB, subjectC).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        List<Map<String, Object>> originalRows = aliasRows();
+        assertThat(originalRows).containsExactlyInAnyOrder(
+                Map.of("retired_id", subjectA.toString(), "surviving_id", subjectC.toString()),
+                Map.of("retired_id", subjectB.toString(), "surviving_id", subjectC.toString()));
+
+        jdbc.execute("DELETE FROM subject_aliases");
+        assertThat(aliasRows()).isEmpty();
+
+        subjectAliasProjection.rebuildFromEvents();
+        aliasCache.refresh();
+
+        assertThat(aliasRows()).isEqualTo(originalRows);
+
         var subjectsResponse = rest.getForEntity("/api/subjects", JsonNode.class);
         JsonNode subjects = subjectsResponse.getBody().get("subjects");
         assertThat(subjects.size()).isEqualTo(1);
@@ -287,6 +327,32 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(staleFlags).isGreaterThan(0);
     }
 
+    @Test
+    void aliasRowWithoutMergeEvent_doesNotCreateStaleReferenceFlag() {
+        UUID retiredId = UUID.randomUUID();
+        UUID survivingId = UUID.randomUUID();
+
+        jdbc.update("""
+                INSERT INTO subject_aliases (retired_id, surviving_id, merged_at)
+                VALUES (?::uuid, ?::uuid, NOW())
+                """, retiredId.toString(), survivingId.toString());
+        aliasCache.refresh();
+
+        var response = pushEvents(List.of(buildEvent(retiredId, DEVICE_B, 1)), DEVICE_B);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().get("accepted").asInt()).isEqualTo(1);
+        assertThat(response.getBody().get("flags_raised").asInt()).isEqualTo(0);
+
+        Integer staleFlags = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM events
+                WHERE shape_ref LIKE 'conflict_detected/%'
+                  AND payload->>'flag_category' = 'stale_reference'
+                  AND subject_ref->>'id' = ?
+                """,
+                Integer.class, retiredId.toString());
+        assertThat(staleFlags).isZero();
+    }
+
     // --- QG7: Contract C7 — merge creates alias → transitive closure → PE re-attributes ---
 
     @Test
@@ -429,6 +495,15 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
         return rest.exchange("/api/identity/split", HttpMethod.POST, entity, JsonNode.class);
+    }
+
+    private List<Map<String, Object>> aliasRows() {
+        return jdbc.queryForList("""
+                SELECT retired_id::text AS retired_id,
+                       surviving_id::text AS surviving_id
+                FROM subject_aliases
+                ORDER BY retired_id::text
+                """);
     }
 
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * In-memory alias cache: retired_id → surviving_id.
- * Full table loaded at startup. Refreshed after each merge event.
+ * Full projection table loaded at startup. Refreshed after each merge event.
  * At hundreds-to-thousands of entries (<100KB), zero DB round-trips per event resolution.
  * Single-hop lookup guaranteed by eager transitive closure in the alias table.
  */

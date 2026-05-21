@@ -31,6 +31,7 @@ public class IdentityService {
     private final EventRepository eventRepository;
     private final ServerIdentity serverIdentity;
     private final AliasCache aliasCache;
+    private final SubjectAliasProjection subjectAliasProjection;
     private final IdentityLifecycleProjection lifecycleProjection;
     private final ObjectMapper objectMapper;
 
@@ -39,6 +40,7 @@ public class IdentityService {
                            EventRepository eventRepository,
                            ServerIdentity serverIdentity,
                            AliasCache aliasCache,
+                           SubjectAliasProjection subjectAliasProjection,
                            IdentityLifecycleProjection lifecycleProjection,
                            ObjectMapper objectMapper) {
         this.jdbc = jdbc;
@@ -46,6 +48,7 @@ public class IdentityService {
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
         this.aliasCache = aliasCache;
+        this.subjectAliasProjection = subjectAliasProjection;
         this.lifecycleProjection = lifecycleProjection;
         this.objectMapper = objectMapper;
     }
@@ -82,20 +85,10 @@ public class IdentityService {
                         "Subject " + survivingId + " is not active (state: " + survivingState + ")");
             }
 
-            // Step 1: Cascade existing aliases pointing to retired → surviving
-            jdbc.update("""
-                UPDATE subject_aliases SET surviving_id = ?::uuid
-                WHERE surviving_id = ?::uuid
-                """, survivingId.toString(), retiredId.toString());
-
-            // Step 2: Record new alias (idempotent for replay safety)
-            jdbc.update("""
-                INSERT INTO subject_aliases (retired_id, surviving_id, merged_at)
-                VALUES (?::uuid, ?::uuid, NOW())
-                ON CONFLICT (retired_id) DO NOTHING
-                """, retiredId.toString(), survivingId.toString());
-
             Event event = buildMergeEvent(retiredId, survivingId, actorId, reason);
+
+            // Step 1: Update the rebuildable alias projection with eager transitive closure.
+            subjectAliasProjection.upsertAlias(retiredId, survivingId, event.timestamp());
 
             // Step 3: Insert subjects_merged event. Lifecycle is derived from this event.
             eventRepository.insert(event);

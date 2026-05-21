@@ -17,21 +17,27 @@ void main() {
 
   setUp(() async {
     serverSeq = 100;
-    dbPath = '${Directory.systemTemp.path}/datarun_test_${DateTime.now().microsecondsSinceEpoch}.db';
+    dbPath =
+        '${Directory.systemTemp.path}/datarun_test_${DateTime.now().microsecondsSinceEpoch}.db';
     store = EventStore(dbPath: dbPath);
     pe = ProjectionEngine(store);
   });
 
   tearDown(() async {
     await store.close();
-    try { File(dbPath).deleteSync(); } catch (_) {}
+    try {
+      File(dbPath).deleteSync();
+    } catch (_) {}
   });
 
-  Event makeCapture(String id, String subjectId,
-      {String deviceId = 'dev-1',
-      int seq = 1,
-      String name = 'Alice',
-      String timestamp = '2026-04-18T10:00:00Z'}) {
+  Event makeCapture(
+    String id,
+    String subjectId, {
+    String deviceId = 'dev-1',
+    int seq = 1,
+    String name = 'Alice',
+    String timestamp = '2026-04-18T10:00:00Z',
+  }) {
     return Event(
       id: id,
       type: 'capture',
@@ -46,9 +52,13 @@ void main() {
     );
   }
 
-  Event makeFlag(String flagId, String sourceEventId, String subjectId,
-      {String category = 'concurrent_state_change',
-      String timestamp = '2026-04-18T11:00:00Z'}) {
+  Event makeFlag(
+    String flagId,
+    String sourceEventId,
+    String subjectId, {
+    String category = 'concurrent_state_change',
+    String timestamp = '2026-04-18T11:00:00Z',
+  }) {
     return Event(
       id: flagId,
       type: 'alert',
@@ -68,9 +78,14 @@ void main() {
     );
   }
 
-  Event makeResolution(String id, String flagEventId, String sourceEventId,
-      String subjectId, String resolution,
-      {String timestamp = '2026-04-18T12:00:00Z'}) {
+  Event makeResolution(
+    String id,
+    String flagEventId,
+    String sourceEventId,
+    String subjectId,
+    String resolution, {
+    String timestamp = '2026-04-18T12:00:00Z',
+  }) {
     return Event(
       id: id,
       type: 'review',
@@ -90,8 +105,12 @@ void main() {
     );
   }
 
-  Event makeMerge(String id, String retiredId, String survivingId,
-      {String timestamp = '2026-04-18T11:00:00Z'}) {
+  Event makeMerge(
+    String id,
+    String retiredId,
+    String survivingId, {
+    String timestamp = '2026-04-18T11:00:00Z',
+  }) {
     return Event(
       id: id,
       type: 'capture',
@@ -102,18 +121,22 @@ void main() {
       deviceSeq: serverSeq++,
       syncWatermark: 70,
       timestamp: timestamp,
-      payload: {
-        'surviving_id': survivingId,
-        'retired_id': retiredId,
-      },
+      payload: {'surviving_id': survivingId, 'retired_id': retiredId},
     );
   }
 
   group('ProjectionEngine', () {
     test('basic subject list from captures', () async {
       await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
-      await store.insert(makeCapture('e2', 'subj-2', name: 'Bob',
-          seq: 2, timestamp: '2026-04-18T10:05:00Z'));
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-2',
+          name: 'Bob',
+          seq: 2,
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
 
       final subjects = await pe.getSubjectList();
 
@@ -127,11 +150,16 @@ void main() {
 
     test('flag exclusion: flagged event excluded from state', () async {
       await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
-      await store.insert(makeCapture('e2', 'subj-1',
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-1',
           name: 'Alice Updated',
           deviceId: 'dev-2',
           seq: 2,
-          timestamp: '2026-04-18T10:05:00Z'));
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
       // Flag e2
       await store.insertFromServer(makeFlag('f1', 'e2', 'subj-1'));
 
@@ -145,15 +173,21 @@ void main() {
 
     test('flag resolution (accepted): event re-included in state', () async {
       await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
-      await store.insert(makeCapture('e2', 'subj-1',
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-1',
           name: 'Alice Updated',
           deviceId: 'dev-2',
           seq: 2,
-          timestamp: '2026-04-18T10:05:00Z'));
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
       await store.insertFromServer(makeFlag('f1', 'e2', 'subj-1'));
       // Resolve: accepted → e2 back in state
       await store.insertFromServer(
-          makeResolution('r1', 'f1', 'e2', 'subj-1', 'accepted'));
+        makeResolution('r1', 'f1', 'e2', 'subj-1', 'accepted'),
+      );
 
       final subjects = await pe.getSubjectList();
 
@@ -164,15 +198,21 @@ void main() {
 
     test('flag resolution (rejected): event stays excluded', () async {
       await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
-      await store.insert(makeCapture('e2', 'subj-1',
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-1',
           name: 'Alice Updated',
           deviceId: 'dev-2',
           seq: 2,
-          timestamp: '2026-04-18T10:05:00Z'));
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
       await store.insertFromServer(makeFlag('f1', 'e2', 'subj-1'));
       // Resolve: rejected → e2 stays excluded
       await store.insertFromServer(
-          makeResolution('r1', 'f1', 'e2', 'subj-1', 'rejected'));
+        makeResolution('r1', 'f1', 'e2', 'subj-1', 'rejected'),
+      );
 
       final subjects = await pe.getSubjectList();
 
@@ -183,8 +223,15 @@ void main() {
 
     test('alias resolution: merged subjects shown as one', () async {
       await store.insert(makeCapture('e1', 'subj-A', name: 'Alice'));
-      await store.insert(makeCapture('e2', 'subj-B',
-          name: 'Alice Copy', seq: 2, timestamp: '2026-04-18T10:05:00Z'));
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-B',
+          name: 'Alice Copy',
+          seq: 2,
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
       // Merge B into A
       await store.insertFromServer(makeMerge('m1', 'subj-B', 'subj-A'));
       await store.upsertAlias('subj-B', 'subj-A', '2026-04-18T11:00:00Z');
@@ -198,10 +245,24 @@ void main() {
 
     test('alias transitive closure: A→B→C resolves to C', () async {
       await store.insert(makeCapture('e1', 'subj-A', name: 'Alice'));
-      await store.insert(makeCapture('e2', 'subj-B',
-          name: 'Alice B', seq: 2, timestamp: '2026-04-18T10:05:00Z'));
-      await store.insert(makeCapture('e3', 'subj-C',
-          name: 'Alice C', seq: 3, timestamp: '2026-04-18T10:10:00Z'));
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-B',
+          name: 'Alice B',
+          seq: 2,
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
+      await store.insert(
+        makeCapture(
+          'e3',
+          'subj-C',
+          name: 'Alice C',
+          seq: 3,
+          timestamp: '2026-04-18T10:10:00Z',
+        ),
+      );
 
       // Merge A → B, then B → C (with transitive closure update)
       await store.upsertAlias('subj-A', 'subj-B', '2026-04-18T11:00:00Z');
@@ -217,10 +278,57 @@ void main() {
       expect(subjects[0].captureCount, 3);
     });
 
+    test('alias table rebuilds from merge events', () async {
+      await store.insert(makeCapture('e1', 'subj-A', name: 'Alice'));
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-B',
+          name: 'Alice B',
+          seq: 2,
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
+      await store.insert(
+        makeCapture(
+          'e3',
+          'subj-C',
+          name: 'Alice C',
+          seq: 3,
+          timestamp: '2026-04-18T10:10:00Z',
+        ),
+      );
+
+      await store.insertFromServer(
+        makeMerge('m1', 'subj-A', 'subj-B', timestamp: '2026-04-18T11:00:00Z'),
+      );
+      await store.insertFromServer(
+        makeMerge('m2', 'subj-B', 'subj-C', timestamp: '2026-04-18T11:05:00Z'),
+      );
+
+      await store.rebuildAliasesFromEvents();
+
+      final aliases = await store.getAllAliases();
+      expect(aliases['subj-A'], 'subj-C');
+      expect(aliases['subj-B'], 'subj-C');
+
+      final subjects = await pe.getSubjectList();
+      expect(subjects, hasLength(1));
+      expect(subjects[0].subjectId, 'subj-C');
+      expect(subjects[0].captureCount, 3);
+    });
+
     test('subject detail includes events from retired aliases', () async {
       await store.insert(makeCapture('e1', 'subj-A', name: 'Alice'));
-      await store.insert(makeCapture('e2', 'subj-B',
-          name: 'Alice Copy', seq: 2, timestamp: '2026-04-18T10:05:00Z'));
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-B',
+          name: 'Alice Copy',
+          seq: 2,
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
       await store.upsertAlias('subj-B', 'subj-A', '2026-04-18T11:00:00Z');
 
       // Detail for surviving subject should include events from retired alias
@@ -228,20 +336,53 @@ void main() {
       expect(events, hasLength(2));
     });
 
+    test('subject detail resolves retired id to surviving subject', () async {
+      await store.insert(makeCapture('e1', 'subj-A', name: 'Alice'));
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-B',
+          name: 'Alice Copy',
+          seq: 2,
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
+      await store.upsertAlias('subj-B', 'subj-A', '2026-04-18T11:00:00Z');
+
+      final events = await pe.getSubjectDetail('subj-B');
+      expect(events, hasLength(2));
+    });
+
     test('getFlaggedEventIds returns only unresolved flags', () async {
       await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
-      await store.insert(makeCapture('e2', 'subj-1',
-          name: 'Updated', seq: 2, timestamp: '2026-04-18T10:05:00Z'));
-      await store.insert(makeCapture('e3', 'subj-1',
-          name: 'Updated2', seq: 3, timestamp: '2026-04-18T10:10:00Z'));
+      await store.insert(
+        makeCapture(
+          'e2',
+          'subj-1',
+          name: 'Updated',
+          seq: 2,
+          timestamp: '2026-04-18T10:05:00Z',
+        ),
+      );
+      await store.insert(
+        makeCapture(
+          'e3',
+          'subj-1',
+          name: 'Updated2',
+          seq: 3,
+          timestamp: '2026-04-18T10:10:00Z',
+        ),
+      );
 
       // Flag e2 and e3
       await store.insertFromServer(makeFlag('f1', 'e2', 'subj-1'));
-      await store.insertFromServer(makeFlag('f2', 'e3', 'subj-1',
-          timestamp: '2026-04-18T11:05:00Z'));
+      await store.insertFromServer(
+        makeFlag('f2', 'e3', 'subj-1', timestamp: '2026-04-18T11:05:00Z'),
+      );
       // Resolve e2 as accepted
       await store.insertFromServer(
-          makeResolution('r1', 'f1', 'e2', 'subj-1', 'accepted'));
+        makeResolution('r1', 'f1', 'e2', 'subj-1', 'accepted'),
+      );
 
       final flagged = await pe.getFlaggedEventIds();
       expect(flagged, contains('e3')); // Still flagged
@@ -273,7 +414,11 @@ void main() {
         payload: {
           'target_actor': {'type': 'actor', 'id': 'actor-1'},
           'role': 'field_worker',
-          'scope': {'geographic': 'loc-1', 'subject_list': null, 'activity': null},
+          'scope': {
+            'geographic': 'loc-1',
+            'subject_list': null,
+            'activity': null,
+          },
           'valid_from': '2026-04-19T00:00:00Z',
           'valid_to': null,
         },

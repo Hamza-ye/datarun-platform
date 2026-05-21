@@ -110,12 +110,6 @@
       }
     }
   ],
-  "aliases": [
-    {
-      "retired_id": "bbbbbbbb-0003-0000-0000-000000000003",
-      "surviving_id": "bbbbbbbb-0002-0000-0000-000000000002"
-    }
-  ],
   "expected_output": {
     "subjects": [
       {

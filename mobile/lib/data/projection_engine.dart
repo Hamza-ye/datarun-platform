@@ -87,8 +87,9 @@ class ProjectionEngine {
       final latest = subjectEvents.first;
 
       // For state derivation, exclude flagged events
-      final stateEvents =
-          subjectEvents.where((e) => !flaggedEventIds.contains(e.id)).toList();
+      final stateEvents = subjectEvents
+          .where((e) => !flaggedEventIds.contains(e.id))
+          .toList();
 
       // Try to extract name from earliest capture payload (state events only).
       // subjectEvents already excludes non-domain events, so type == 'capture'
@@ -103,23 +104,22 @@ class ProjectionEngine {
         subjectType: latest.subjectRef['type']!,
         name: name,
         latestTimestamp: latest.timestamp,
-        captureCount:
-            stateEvents.where((e) => e.type == 'capture').length,
+        captureCount: stateEvents.where((e) => e.type == 'capture').length,
         flagCount: flagCountBySubject[entry.key] ?? 0,
       );
-    }).toList()
-      ..sort((a, b) => b.latestTimestamp.compareTo(a.latestTimestamp));
+    }).toList()..sort((a, b) => b.latestTimestamp.compareTo(a.latestTimestamp));
   }
 
   /// Full event timeline for one subject.
   /// Returns all events including flagged (UI marks them), with alias resolution.
   Future<List<Event>> getSubjectDetail(String subjectId) async {
-    final events = await _eventStore.getBySubject(subjectId);
-
-    // Also fetch events for any retired IDs that alias to this subject
     final aliases = await _eventStore.getAllAliases();
+    final canonicalId = _resolveSubjectId(subjectId, aliases);
+    final events = await _eventStore.getBySubject(canonicalId);
+
+    // Also fetch events for any retired IDs that alias to this canonical subject.
     final retiredIds = aliases.entries
-        .where((e) => e.value == subjectId)
+        .where((e) => e.value == canonicalId)
         .map((e) => e.key)
         .toList();
 

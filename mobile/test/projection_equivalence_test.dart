@@ -34,10 +34,17 @@ void main() {
 
   test('E7: projection equivalence — Dart PE matches shared fixture', () async {
     // Load the shared fixture
-    final fixtureFile = File('${Directory.current.path}/../contracts/fixtures/projection-equivalence.json');
-    expect(fixtureFile.existsSync(), isTrue,
-        reason: 'Fixture file must exist at contracts/fixtures/projection-equivalence.json');
-    final fixture = jsonDecode(fixtureFile.readAsStringSync()) as Map<String, dynamic>;
+    final fixtureFile = File(
+      '${Directory.current.path}/../contracts/fixtures/projection-equivalence.json',
+    );
+    expect(
+      fixtureFile.existsSync(),
+      isTrue,
+      reason:
+          'Fixture file must exist at contracts/fixtures/projection-equivalence.json',
+    );
+    final fixture =
+        jsonDecode(fixtureFile.readAsStringSync()) as Map<String, dynamic>;
 
     // Insert events
     final events = fixture['events'] as List<dynamic>;
@@ -59,16 +66,8 @@ void main() {
       await store.insert(event);
     }
 
-    // Insert aliases
-    final aliases = fixture['aliases'] as List<dynamic>;
-    for (final alias in aliases) {
-      final a = alias as Map<String, dynamic>;
-      await store.upsertAlias(
-        a['retired_id'] as String,
-        a['surviving_id'] as String,
-        DateTime.now().toUtc().toIso8601String(),
-      );
-    }
+    // Rebuild the alias projection from subjects_merged/v1 events.
+    await store.rebuildAliasesFromEvents();
 
     // Run Dart PE
     final subjects = await pe.getSubjectList();
@@ -78,26 +77,40 @@ void main() {
         (fixture['expected_output']['subjects'] as List<dynamic>)
             .cast<Map<String, dynamic>>();
 
-    expect(subjects.length, equals(expectedSubjects.length),
-        reason: 'Subject count mismatch');
+    expect(
+      subjects.length,
+      equals(expectedSubjects.length),
+      reason: 'Subject count mismatch',
+    );
 
     for (var i = 0; i < expectedSubjects.length; i++) {
       final expected = expectedSubjects[i];
       final actual = subjects[i];
 
-      expect(actual.subjectId, equals(expected['subject_id']),
-          reason: 'subject[$i].subject_id');
-      expect(actual.captureCount, equals(expected['event_count']),
-          reason: 'subject[$i].event_count');
-      expect(actual.flagCount, equals(expected['flag_count']),
-          reason: 'subject[$i].flag_count');
+      expect(
+        actual.subjectId,
+        equals(expected['subject_id']),
+        reason: 'subject[$i].subject_id',
+      );
+      expect(
+        actual.captureCount,
+        equals(expected['event_count']),
+        reason: 'subject[$i].event_count',
+      );
+      expect(
+        actual.flagCount,
+        equals(expected['flag_count']),
+        reason: 'subject[$i].flag_count',
+      );
 
       // Compare timestamps as instants
-      final expectedTs =
-          DateTime.parse(expected['latest_timestamp'] as String);
+      final expectedTs = DateTime.parse(expected['latest_timestamp'] as String);
       final actualTs = DateTime.parse(actual.latestTimestamp);
-      expect(actualTs.toUtc(), equals(expectedTs.toUtc()),
-          reason: 'subject[$i].latest_timestamp');
+      expect(
+        actualTs.toUtc(),
+        equals(expectedTs.toUtc()),
+        reason: 'subject[$i].latest_timestamp',
+      );
     }
   });
 }

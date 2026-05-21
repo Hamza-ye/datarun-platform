@@ -132,8 +132,11 @@ class EventStore {
   /// Insert a locally-created event. pushed = 0.
   Future<void> insert(Event event) async {
     final db = await database;
-    await db.insert(_table, event.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.ignore);
+    await db.insert(
+      _table,
+      event.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
   }
 
   /// Insert an event received from the server (already has sync_watermark).
@@ -143,15 +146,18 @@ class EventStore {
     final map = event.toMap();
     map['pushed'] = 1; // Server events don't need pushing
     map['sync_watermark'] = event.syncWatermark;
-    await db.insert(_table, map,
-        conflictAlgorithm: ConflictAlgorithm.ignore);
+    await db.insert(_table, map, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
   /// All events not yet pushed to server.
   Future<List<Event>> getUnpushed() async {
     final db = await database;
-    final rows = await db.query(_table,
-        where: 'pushed = ?', whereArgs: [0], orderBy: 'device_seq ASC');
+    final rows = await db.query(
+      _table,
+      where: 'pushed = ?',
+      whereArgs: [0],
+      orderBy: 'device_seq ASC',
+    );
     return rows.map(Event.fromMap).toList();
   }
 
@@ -161,7 +167,9 @@ class EventStore {
     final db = await database;
     final placeholders = ids.map((_) => '?').join(',');
     await db.rawUpdate(
-        'UPDATE $_table SET pushed = 1 WHERE id IN ($placeholders)', ids);
+      'UPDATE $_table SET pushed = 1 WHERE id IN ($placeholders)',
+      ids,
+    );
   }
 
   /// All events for a given subject, ordered by device_seq.
@@ -169,10 +177,12 @@ class EventStore {
     final db = await database;
     // subject_ref is stored as JSON string like {"type":"subject","id":"..."}
     // We search using LIKE for the id within the JSON.
-    final rows = await db.query(_table,
-        where: 'subject_ref LIKE ?',
-        whereArgs: ['%"id":"$subjectId"%'],
-        orderBy: 'timestamp DESC');
+    final rows = await db.query(
+      _table,
+      where: 'subject_ref LIKE ?',
+      whereArgs: ['%"id":"$subjectId"%'],
+      orderBy: 'timestamp DESC',
+    );
     return rows.map(Event.fromMap).toList();
   }
 
@@ -186,8 +196,9 @@ class EventStore {
   /// Count of unpushed events.
   Future<int> unpushedCount() async {
     final db = await database;
-    final result =
-        await db.rawQuery('SELECT COUNT(*) as c FROM $_table WHERE pushed = 0');
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as c FROM $_table WHERE pushed = 0',
+    );
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
@@ -195,18 +206,37 @@ class EventStore {
 
   /// Upsert an alias with eager transitive closure.
   /// If existing aliases point to retiredId, they are updated to point to survivingId.
-  Future<void> upsertAlias(String retiredId, String survivingId, String mergedAt) async {
+  Future<void> upsertAlias(
+    String retiredId,
+    String survivingId,
+    String mergedAt,
+  ) async {
     final db = await database;
     await db.transaction((txn) async {
-      // Eager transitive closure: update any alias that pointed to the retired subject
-      await txn.rawUpdate(
-          'UPDATE $_aliasTable SET surviving_id = ? WHERE surviving_id = ?',
-          [survivingId, retiredId]);
-      // Insert or replace the new alias
-      await txn.rawInsert(
-          'INSERT OR REPLACE INTO $_aliasTable (retired_id, surviving_id, merged_at) '
-          'VALUES (?, ?, ?)',
-          [retiredId, survivingId, mergedAt]);
+      await _upsertAlias(txn, retiredId, survivingId, mergedAt);
+    });
+  }
+
+  /// Rebuild aliases from local subjects_merged/v1 events.
+  /// subject_aliases is a projection table; merge events are the source of truth.
+  Future<void> rebuildAliasesFromEvents() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete(_aliasTable);
+      final rows = await txn.query(
+        _table,
+        where: 'shape_ref LIKE ?',
+        whereArgs: ['subjects_merged/%'],
+        orderBy: 'sync_watermark ASC, timestamp ASC',
+      );
+      for (final row in rows) {
+        final event = Event.fromMap(row);
+        final retiredId = event.payload['retired_id'] as String?;
+        final survivingId = event.payload['surviving_id'] as String?;
+        if (retiredId != null && survivingId != null) {
+          await _upsertAlias(txn, retiredId, survivingId, event.timestamp);
+        }
+      }
     });
   }
 
@@ -214,7 +244,28 @@ class EventStore {
   Future<Map<String, String>> getAllAliases() async {
     final db = await database;
     final rows = await db.query(_aliasTable);
-    return {for (final r in rows) r['retired_id'] as String: r['surviving_id'] as String};
+    return {
+      for (final r in rows)
+        r['retired_id'] as String: r['surviving_id'] as String,
+    };
+  }
+
+  Future<void> _upsertAlias(
+    Transaction txn,
+    String retiredId,
+    String survivingId,
+    String mergedAt,
+  ) async {
+    // Eager transitive closure: update any alias that pointed to the retired subject.
+    await txn.rawUpdate(
+      'UPDATE $_aliasTable SET surviving_id = ? WHERE surviving_id = ?',
+      [survivingId, retiredId],
+    );
+    await txn.rawInsert(
+      'INSERT OR REPLACE INTO $_aliasTable (retired_id, surviving_id, merged_at) '
+      'VALUES (?, ?, ?)',
+      [retiredId, survivingId, mergedAt],
+    );
   }
 
   /// Close the database (for testing).
@@ -266,10 +317,7 @@ class EventStore {
   /// Get active assignments for the local actor.
   Future<List<Map<String, dynamic>>> getActiveAssignments() async {
     final db = await database;
-    return db.query(
-      _assignmentTable,
-      where: 'ended = 0',
-    );
+    return db.query(_assignmentTable, where: 'ended = 0');
   }
 
   /// Selective-retain: purge out-of-scope events from other actors.
@@ -278,7 +326,8 @@ class EventStore {
   Future<int> purgeOutOfScopeEvents(String ownDeviceId) async {
     final db = await database;
     final assignments = await getActiveAssignments();
-    if (assignments.isEmpty) return 0; // No assignments → no scope info → keep all
+    if (assignments.isEmpty)
+      return 0; // No assignments → no scope info → keep all
 
     // Build list of in-scope subject IDs from assignments' subject_list + geo
     // For selective-retain, we only purge events from OTHER devices whose subjects
@@ -296,12 +345,14 @@ class EventStore {
       }
     }
 
-    if (!hasSubjectListScope) return 0; // No subject_list scope → can't determine out-of-scope
+    if (!hasSubjectListScope)
+      return 0; // No subject_list scope → can't determine out-of-scope
 
     // Find events from other devices whose subject is not in any active assignment's subject_list
     // and are not system-authored (integrity/identity via shape_ref, assignment via type).
     // ADR-007 S3: integrity/identity events are discriminated by shape_ref, not type.
-    final candidates = await db.rawQuery('''
+    final candidates = await db.rawQuery(
+      '''
       SELECT id, subject_ref FROM $_table
       WHERE device_id != ?
         AND shape_ref NOT LIKE 'conflict_detected/%'
@@ -309,7 +360,9 @@ class EventStore {
         AND shape_ref NOT LIKE 'subjects_merged/%'
         AND shape_ref NOT LIKE 'subject_split/%'
         AND type != 'assignment_changed'
-    ''', [ownDeviceId]);
+    ''',
+      [ownDeviceId],
+    );
 
     final toPurge = <String>[];
     for (final row in candidates) {

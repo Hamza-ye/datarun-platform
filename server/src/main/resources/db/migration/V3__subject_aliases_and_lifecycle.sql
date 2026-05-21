@@ -2,8 +2,8 @@
 -- Phase 1b: Identity Resolver — alias table.
 
 -- Alias table for identity resolution (merge).
--- Materialized with eager transitive closure — contract C7 demands single-hop lookup.
--- retired_id → surviving_id mapping. All lookups are O(1).
+-- Rebuildable projection derived from subjects_merged/v1 events.
+-- Eager transitive closure keeps retired_id → surviving_id lookup single-hop (ADR-002 S6).
 CREATE TABLE subject_aliases (
     retired_id    UUID PRIMARY KEY,
     surviving_id  UUID NOT NULL,

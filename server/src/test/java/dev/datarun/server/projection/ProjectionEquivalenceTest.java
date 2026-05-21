@@ -3,7 +3,7 @@ package dev.datarun.server.projection;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.datarun.server.AbstractIntegrationTest;
-import dev.datarun.server.identity.AliasCache;
+import dev.datarun.server.identity.SubjectAliasProjection;
 import dev.datarun.server.subject.SubjectProjection;
 import dev.datarun.server.subject.SubjectSummary;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ class ProjectionEquivalenceTest extends AbstractIntegrationTest {
     private SubjectProjection subjectProjection;
 
     @Autowired
-    private AliasCache aliasCache;
+    private SubjectAliasProjection subjectAliasProjection;
 
     @BeforeEach
     void cleanDb() {
@@ -66,14 +66,8 @@ class ProjectionEquivalenceTest extends AbstractIntegrationTest {
             insertEvent(event);
         }
 
-        // Insert aliases
-        JsonNode aliases = fixture.get("aliases");
-        for (JsonNode alias : aliases) {
-            insertAlias(alias);
-        }
-
-        // Refresh alias cache so PE picks them up
-        aliasCache.refresh();
+        // Rebuild the alias projection from subjects_merged/v1 events.
+        subjectAliasProjection.rebuildFromEvents();
 
         // Run server PE
         List<SubjectSummary> subjects = subjectProjection.listSubjects();
@@ -137,13 +131,4 @@ class ProjectionEquivalenceTest extends AbstractIntegrationTest {
                 timestamp.toString(), payload.toString());
     }
 
-    private void insertAlias(JsonNode alias) {
-        String retiredId = alias.get("retired_id").asText();
-        String survivingId = alias.get("surviving_id").asText();
-        jdbc.update("""
-                INSERT INTO subject_aliases (retired_id, surviving_id, merged_at)
-                VALUES (?::uuid, ?::uuid, NOW())
-                ON CONFLICT (retired_id) DO NOTHING
-                """, retiredId, survivingId);
-    }
 }
