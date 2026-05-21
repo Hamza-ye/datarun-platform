@@ -130,8 +130,9 @@ public class ConflictDetector {
      *
      * @param acceptedEvents events that were just persisted
      * @param actorId the pushing actor
+     * @param lastPullWatermark the pushing device's reported last pull watermark
      */
-    public List<Event> evaluateAuth(List<Event> acceptedEvents, UUID actorId) {
+    public List<Event> evaluateAuth(List<Event> acceptedEvents, UUID actorId, long lastPullWatermark) {
         List<Event> flagEvents = new ArrayList<>();
         if (actorId == null) return flagEvents;
 
@@ -227,9 +228,9 @@ public class ConflictDetector {
             }
 
             // --- 3. role_stale ---
-            // Check if actor's role at event creation differs from current role.
+            // Check if actor's role at the device's knowledge horizon differs from current role.
             // Phase 2: flag ALL role changes (Phase 3 refines to capability-restricted only).
-            String roleAtCreation = findRoleAtWatermark(actorId, event);
+            String roleAtCreation = findRoleAtWatermark(actorId, event, lastPullWatermark);
             if (roleAtCreation != null && !currentRoles.isEmpty()
                     && !currentRoles.contains(roleAtCreation)) {
                 Event flag = buildFlagEvent(
@@ -389,14 +390,17 @@ public class ConflictDetector {
     }
 
     /**
-     * Find the role the actor had at the time of event creation.
-     * Looks at the assignment timeline relative to the event's sync_watermark.
+     * Find the role the actor had at the event's effective knowledge watermark.
+     * Replays assignment_created events from the event timeline up to
+     * min(server-assigned event watermark, push.last_pull_watermark), matching
+     * the causal horizon used by concurrency detection.
      */
-    private String findRoleAtWatermark(UUID actorId, Event event) {
+    private String findRoleAtWatermark(UUID actorId, Event event, long lastPullWatermark) {
         Long eventWatermark = eventRepository.getSyncWatermark(event.id());
         if (eventWatermark == null) return null;
+        long effectiveWatermark = Math.min(eventWatermark, lastPullWatermark);
 
-        // Find the most recent assignment_created for this actor before or at the event's watermark
+        // Find the most recent assignment_created for this actor before or at the effective watermark.
         List<String> roles = eventRepository.getJdbcTemplate().queryForList("""
                 SELECT e.payload->>'role'
                 FROM events e
@@ -406,7 +410,7 @@ public class ConflictDetector {
                   AND e.sync_watermark <= ?
                 ORDER BY e.sync_watermark DESC
                 LIMIT 1
-                """, String.class, actorId.toString(), eventWatermark);
+                """, String.class, actorId.toString(), effectiveWatermark);
         return roles.isEmpty() ? null : roles.get(0);
     }
 

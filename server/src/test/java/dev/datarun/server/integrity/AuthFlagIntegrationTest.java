@@ -250,6 +250,51 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         assertThat(roleAtOldWindow.get(0)).isNotEqualTo(currentRole.get(0));
     }
 
+    /**
+     * FP-001 gate: role_stale must use the actor's projected assignment timeline
+     * at the device knowledge watermark, not the server push watermark.
+     *
+     * Event A is pushed before the role change and is clean. Event B is pushed
+     * after the role change with a last_pull_watermark from before the change,
+     * so only B can be flagged as role_stale.
+     */
+    @Test
+    void roleStale_usesDeviceKnowledgeWatermark_notPushWatermark() {
+        Event oldAssignment = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, null,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(3), null);
+        UUID oldAssignmentId = UUID.fromString(oldAssignment.subjectRef().get("id").asText());
+        long knowledgeBeforeRoleChange = jdbc.queryForObject(
+                "SELECT sync_watermark FROM events WHERE id = ?::uuid",
+                Long.class, oldAssignment.id().toString());
+
+        UUID subjectA = UUID.randomUUID();
+        registerSubjectLocation(subjectA, villageX1);
+        UUID eventA = pushCaptureEvent(subjectA, WORKER, DEVICE_W,
+                "Created and pushed before role change", knowledgeBeforeRoleChange);
+
+        assignmentService.endAssignment(oldAssignmentId, ADMIN, "role change");
+        assignmentService.createAssignment(ADMIN, WORKER, "supervisor",
+                villageX1, null, null,
+                OffsetDateTime.now(ZoneOffset.UTC), null);
+
+        UUID subjectB = UUID.randomUUID();
+        registerSubjectLocation(subjectB, villageX1);
+        UUID eventB = pushCaptureEvent(subjectB, WORKER, DEVICE_W,
+                "Created before role change, pushed after", knowledgeBeforeRoleChange);
+
+        List<String> roleStaleSources = jdbc.queryForList("""
+                SELECT payload->>'source_event_id'
+                FROM events
+                WHERE shape_ref = 'conflict_detected/v1'
+                  AND payload->>'flag_category' = 'role_stale'
+                ORDER BY sync_watermark ASC
+                """, String.class);
+
+        assertThat(roleStaleSources).containsExactly(eventB.toString());
+        assertThat(roleStaleSources).doesNotContain(eventA.toString());
+    }
+
     // --- Helpers ---
 
     private void registerSubjectLocation(UUID subjectId, UUID locationId) {
@@ -261,8 +306,14 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
     }
 
     private void pushCaptureEvent(UUID subjectId, UUID actorId, UUID deviceId, String notes) {
+        pushCaptureEvent(subjectId, actorId, deviceId, notes, null);
+    }
+
+    private UUID pushCaptureEvent(UUID subjectId, UUID actorId, UUID deviceId, String notes,
+                                  Long lastPullWatermark) {
+        UUID eventId = UUID.randomUUID();
         Map<String, Object> event = new LinkedHashMap<>();
-        event.put("id", UUID.randomUUID().toString());
+        event.put("id", eventId.toString());
         event.put("type", "capture");
         event.put("shape_ref", "basic_capture/v1");
         event.put("activity_ref", "vaccination");
@@ -274,11 +325,16 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         event.put("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
         event.put("payload", Map.of("name", "Subject", "category", "test", "notes", notes));
 
-        Map<String, Object> request = Map.of("events", List.of(event));
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("events", List.of(event));
+        if (lastPullWatermark != null) {
+            request.put("last_pull_watermark", lastPullWatermark);
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         ResponseEntity<JsonNode> response = rest.exchange("/api/sync/push",
                 HttpMethod.POST, new HttpEntity<>(request, headers), JsonNode.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return eventId;
     }
 }

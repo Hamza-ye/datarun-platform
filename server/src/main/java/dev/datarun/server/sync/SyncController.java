@@ -141,7 +141,8 @@ public class SyncController {
             UUID actorId = extractActorId(acceptedEvents);
             if (actorId != null) {
                 try {
-                    List<Event> authFlags = conflictDetector.evaluateAuth(acceptedEvents, actorId);
+                    List<Event> authFlags = conflictDetector.evaluateAuth(
+                            acceptedEvents, actorId, lastPullWatermark);
                     if (!authFlags.isEmpty()) {
                         flagsRaised += persistFlagEvents(authFlags);
                     }

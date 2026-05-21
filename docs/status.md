@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-22 (post-FP-005 scope-pull register update)
+**Last updated**: 2026-05-22 (FP-001 resolved; FP-005 live contraction verified)
 
 ---
 
@@ -32,11 +32,11 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 | FP# | Item | Blocks | Severity | Status |
 |-----|------|--------|:--------:|--------|
-| FP-001 | `role_stale` projection-derived role verification | IDR-021 | A | **OPEN** |
+| FP-001 | `role_stale` projection-derived role verification | IDR-021 | A | **RESOLVED** |
 | FP-002 | `subject_lifecycle` table read-discipline audit | Phase 4 | B | **RESOLVED** |
 | FP-003 | Envelope schema parity test | — | C | **RESOLVED** (EnvelopeSchemaParityTest) |
 | FP-004 | `assignment_ref` as potential future envelope field | future assignment-targeting ADR/work | B | **OPEN** |
-| FP-005 | Scoped pull temporal anchor and subject-history backfill | IDR-021, Phase 4 `ongoing_resolution` | A | **OPEN** |
+| FP-005 | Scoped pull temporal anchor and subject-history backfill | IDR-021, Phase 4 `ongoing_resolution` | A | **IN_PROGRESS** |
 
 **Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
 
@@ -84,7 +84,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 **Phase 4: Workflow & Policies** — next phase. IDR-020 is rewritten; remaining prep is IDR-021, IDR-022, and the Phase 4 spec.
 
-- IDR-021 (Role-Action Enforcement Model) must close FP-001 and either resolve or explicitly route FP-005 before role-action code begins.
+- IDR-021 (Role-Action Enforcement Model) may now build on FP-001's resolved role timeline check, but must still either resolve or explicitly route FP-005 before role-action code begins.
 - IDR-022 (Flag Severity + Domain Uniqueness) must define severity authoring and `domain_uniqueness_violation`.
 - Phase spec: `docs/implementation/phases/phase-4.md` (once written)
 
@@ -106,5 +106,5 @@ _(None)_
 | Decision | Status | Reference |
 |----------|--------|-----------|
 | IDR-020: Pattern State Machine Representation | **ACTIVE** | [idr-020-pattern-state-machine-representation.md](decisions/idr-020-pattern-state-machine-representation.md) |
-| IDR-021: Role-Action Enforcement Model | **NEEDED** | Must close FP-001 before Phase 4 role-action code |
+| IDR-021: Role-Action Enforcement Model | **NEEDED** | FP-001 closed; must resolve or explicitly route FP-005 before Phase 4 role-action code |
 | IDR-022: Flag Severity + Domain Uniqueness | **NEEDED** | Must cover severity authoring and `domain_uniqueness_violation` |

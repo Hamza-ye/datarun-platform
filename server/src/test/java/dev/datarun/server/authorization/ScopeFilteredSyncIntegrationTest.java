@@ -237,6 +237,46 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
     }
 
     /**
+     * FP-005 gate: normal live sync contracts at request time.
+     * After reassignment away from District X, a later pull from the actor's
+     * prior watermark must not deliver new events from the old scope.
+     */
+    @Test
+    void liveSyncContraction_reassignedAway_doesNotDeliverNewOldScopeEvents() {
+        var created = assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                districtX, null, null,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        UUID assignmentId = UUID.fromString(created.subjectRef().get("id").asText());
+
+        UUID initialX = UUID.randomUUID();
+        registerSubjectLocation(initialX, districtX);
+        pushCaptureEvent(initialX, "Initial District X capture");
+
+        ResponseEntity<JsonNode> initialPull = pullEvents(tokenA, 0, 100);
+        long lastSeenBeforeReassignment = initialPull.getBody().get("latest_watermark").asLong();
+
+        assignmentService.endAssignment(assignmentId, ADMIN, "reassignment");
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                districtZ, null, null,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        UUID oldScopeAfterReassignment = UUID.randomUUID();
+        UUID newScopeAfterReassignment = UUID.randomUUID();
+        registerSubjectLocation(oldScopeAfterReassignment, districtX);
+        registerSubjectLocation(newScopeAfterReassignment, districtZ);
+        pushCaptureEvent(oldScopeAfterReassignment, "New District X capture after reassignment");
+        pushCaptureEvent(newScopeAfterReassignment, "New District Z capture after reassignment");
+
+        ResponseEntity<JsonNode> pullAfterReassignment =
+                pullEvents(tokenA, lastSeenBeforeReassignment, 100);
+        List<String> visibleSubjects =
+                extractCaptureSubjectIds(pullAfterReassignment.getBody().get("events"));
+
+        assertThat(visibleSubjects).contains(newScopeAfterReassignment.toString());
+        assertThat(visibleSubjects).doesNotContain(oldScopeAfterReassignment.toString());
+    }
+
+    /**
      * QG: Assignment events have valid 11-field envelope, type = assignment_changed.
      */
     @Test

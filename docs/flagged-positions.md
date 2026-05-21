@@ -50,8 +50,9 @@ Dated entries as work progresses. When RESOLVED, the final entry cites the commi
 
 ## FP-001 — `role_stale` projection-derived role verification
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding A3)
+**Resolved**: 2026-05-22 by projection-derived knowledge-watermark role check
 **Blocks**: IDR-021 (Role-Action Enforcement)
 **Severity**: A — touches ADR-3 S3 structural constraint
 
@@ -76,6 +77,7 @@ All three must be true:
 ### Resolution log
 
 - **2026-04-21**: Opened.
+- **2026-05-22**: RESOLVED. `ConflictDetector.evaluateAuth(...)` now receives push `last_pull_watermark` and derives `role_stale` by replaying `assignment_created/v1` events up to `min(event.sync_watermark, push.last_pull_watermark)`, matching the assignment event timeline/knowledge-horizon semantics rather than reading current cache/snapshot state. `AuthFlagIntegrationTest.roleStale_usesDeviceKnowledgeWatermark_notPushWatermark` proves the cache/push-watermark shortcut fails the gate: event A before the role change stays clean, while event B pushed after the role change with a pre-change knowledge watermark receives `role_stale`.
 
 ---
 
@@ -178,7 +180,7 @@ A successor ADR must exist, and either:
 
 ## FP-005 — Scoped pull temporal anchor and subject-history backfill
 
-**Status**: OPEN
+**Status**: IN_PROGRESS
 **Opened**: 2026-05-22 by ADR-003 / Phase 4 readiness review
 **Blocks**: IDR-021 (Role-Action Enforcement), Phase 4 `ongoing_resolution` implementation
 **Severity**: A — touches ADR-003 S2 ("sync scope = access scope") and ADR-003 S3 authority-as-projection
@@ -211,6 +213,7 @@ All four must be true:
 ### Resolution log
 
 - **2026-05-22**: Opened. Current repo read found live pull uses active assignments at request time and watermark pagination; no current subject-history backfill or audit pull class is specified.
+- **2026-05-22**: Live contraction portion verified. `ScopeFilteredSyncIntegrationTest.liveSyncContraction_reassignedAway_doesNotDeliverNewOldScopeEvents` proves normal `/api/sync/pull` is request-time scoped: after reassignment away from a geographic scope, a later pull from the actor's prior watermark does not deliver new events from the old scope. Remaining before role-action code begins: decide/test subject-history backfill for already-active `ongoing_resolution` subjects, and classify audit/historical pull as out of Phase 4 or as a separate pull class/API. Neither may be folded silently into live sync.
 
 ---
 
