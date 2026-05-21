@@ -1,10 +1,12 @@
 # Concept Ledger
 
-> **Lifespan**: temporary scaffolding. Archived at Phase 4 freeze.
+> **Historical status**: temporary convergence scaffolding. This ledger is no
+> longer an authority source after ADR-006 through ADR-009. Use it as an index
+> into the ADRs only; if a row disagrees with an ADR, the ADR wins.
 >
-> The ledger is the single inventory of every named concept in the platform.
-> The charter is mechanically derivable from it: each STABLE row produces one
-> charter claim.
+> The original convergence intent was for this ledger to be the single inventory
+> of named platform concepts and to generate `docs/charter.md`. That mechanism
+> is archived for stabilization work.
 
 ## Schema
 
@@ -378,4 +380,3 @@ The 18 DISPUTED rows are the natural input to Phase 1 (topological sort) and Pha
 | watermark | DERIVED | — | PROPOSED | phases/phase-0.md | round 0: DERIVED (inventory) | pagination key |
 | workflow-pattern | CONFIG | — | PROPOSED | ADR-005 Session 1 | round 0: CONFIG (inventory) | synonym of pattern |
 | write-path-discipline | INVARIANT | — | PROPOSED | ADR-001 | round 0: INVARIANT (inventory) | events sole write path |
-

@@ -20,7 +20,7 @@ Merge, split, conflict detection, and resolution events are server-generated. Th
 
 - Persistent `device_id` UUID: env var `SERVER_DEVICE_ID` primary, DB-stored fallback (`server_identity` single-row table, auto-generated on first boot)
 - Monotonic `device_seq`: PostgreSQL SEQUENCE (`nextval('server_device_seq')`). Gaps from rollback are harmless — [2-S1] requires monotonic, not gapless
-- `actor_ref`: `{type: "actor", id: "system"}` for auto-generated events, coordinator UUID for human-triggered
+- `actor_ref`: `system:{source_type}/{source_id}` for system-authored events, coordinator UUID for human-triggered events
 - `ServerIdentity` bean initialized at startup before push processing
 
 ## Consequences

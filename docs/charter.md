@@ -1,13 +1,14 @@
-# Datarun Charter — Currently Decided State
+# Datarun Charter — Convergence Artifact
 
-> **This is the single source of truth for "what is settled."** Generated from
-> `docs/convergence/concept-ledger.md`. Every claim cites the ADR that decided
-> it. The drift gate (`scripts/check-convergence.sh`) fails any claim missing
-> a cite or pointing to a superseded ADR.
+> **Historical status**: this is a convergence artifact, not the current source
+> of architectural authority. After ADR-006 through ADR-009, the ADRs are the
+> authority for settled positions. Use this file as an index only; if it
+> disagrees with an ADR, the ADR wins.
 >
-> **Lifespan**: permanent. During convergence (Phase 0–3) this file is
-> incrementally populated as ADRs land. At Phase 4 freeze, it becomes
-> immutable except via new ADR + same-commit regeneration.
+> The original convergence intent was to generate this file from
+> `docs/convergence/concept-ledger.md` and protect it with
+> `scripts/check-convergence.sh`. That mechanism is no longer the governance
+> path for stabilization work.
 
 ## Status
 

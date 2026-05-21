@@ -79,36 +79,39 @@ All three must be true:
 
 ---
 
-## FP-002 — `subject_lifecycle` table read-discipline audit
+## FP-002 — `subject_lifecycle` table removal
 
-**Status**: RESOLVED
+**Status**: OPEN
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding B3)
 **Resolved**: 2026-05-21 by subject lifecycle rebuild test and migration comment
+**Reopened**: 2026-05-21 by ADR-002 lifecycle parity review
 **Blocks**: Phase 4 (not a specific IDR — pattern state machines will interact with identity lifecycle)
 **Severity**: B — projection discipline
 
 ### Context
 
-The V3 Flyway migration introduced a `subject_lifecycle` table, populated during merge/split operations. Per ADR-1 S2 and ADR-5 S4, **state is always a projection of events, never an independent source of truth**. The escape hatch B→C explicitly permits projection caches — but only if every read is defensive (the cache can be rebuilt from events) and there is no read path that treats the cache as authoritative.
+The V3 Flyway migration introduced a `subject_lifecycle` table, populated during merge/split operations. Per ADR-1 S2 and ADR-5 S4, **state is always a projection of events, never an independent source of truth**. The escape hatch B→C permits projection caches only after a read-cost pressure justifies them.
 
-It is currently unverified whether `subject_lifecycle` is used as a write-only cache or whether any read path treats it as the state of record. If a read path treats it as authoritative, that is a silent stored-state drift — the same failure class as Phase 1/2 type-vocabulary, different layer.
+The 2026-05-21 read-discipline audit found the table was implemented as a disciplined cache, but the stricter ADR-001/002 posture is simpler: no `subject_lifecycle` cache by default. Subject identity lifecycle should be projected from `subjects_merged/v1` and `subject_split/v1` events on demand, following the `ScopeResolver` precedent. B→C remains available only if a future fixture proves lifecycle projection cost is real.
 
 ### Trigger
 
-Before Phase 4 implementation begins. Phase 4 adds pattern state machines that interact with subject identity — any existing sloppiness around identity state discipline will be load-bearing by the time patterns land, and will be much harder to unwind then.
+Before Phase 4 implementation begins. Phase 4 adds pattern state machines that interact with subject identity; keeping identity lifecycle event-derived prevents ADR-005 workflow state from accidentally growing around an identity cache.
 
 ### Gate
 
-All three must be true:
+All four must be true:
 
-1. Every read of `subject_lifecycle` is classified as (a) defensive/cacheable or (b) authoritative. If any read is authoritative, it is rewritten to read from events + alias projection instead.
-2. A rebuild procedure exists (even if only documented) that regenerates `subject_lifecycle` contents from the event store, and a test proves the rebuild produces identical rows.
-3. V3 migration file carries a comment: *"Projection cache. Rebuildable from events. Never the state of record."*
+1. `subject_lifecycle` is removed from the schema and server code.
+2. Merge/split precondition checks project active/archived lifecycle from identity events inside the write transaction, with transaction-scoped locking around the involved subject IDs.
+3. Split-archived sources are excluded from active subject projections while their historical event stream remains accessible.
+4. Post-split events referencing the archived source are accepted and flagged, not rejected or silently projected into a successor.
 
 ### Resolution log
 
 - **2026-04-21**: Opened.
 - **2026-05-21**: Resolved. `subject_lifecycle` is classified as a projection cache used for merge/split precondition locking; `IdentityService.rebuildSubjectLifecycleFromEvents()` rebuilds it from `subjects_merged/v1` and `subject_split/v1` events; `IdentityResolverIntegrationTest.subjectLifecycleProjection_rebuildsFromIdentityLifecycleEvents` proves the cache can be discarded and reconstructed with identical rows; V3 migration now carries the projection-cache warning.
+- **2026-05-21**: Reopened. The cache is disciplined, but not necessary yet. Preferred direction is no `subject_lifecycle` table: project identity lifecycle from events on demand and keep ADR-001 B→C as a future performance escape hatch.
 
 ---
 

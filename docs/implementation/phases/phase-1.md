@@ -70,7 +70,7 @@ The per-event `sync_watermark` (from the envelope, [2-S1]) captures the device's
 - Server gets a persistent `device_id` UUID: env var `SERVER_DEVICE_ID` primary, DB-stored fallback (auto-generated on first boot, stored in `server_identity` single-row table)
 - Server maintains a monotonic `device_seq` counter: PostgreSQL SEQUENCE (`nextval('server_device_seq')`). Gaps from rollback are expected and harmless — S1 requires monotonically increasing, not gapless.
 - Server-generated events receive `sync_watermark` immediately on insert (they're already on the server)
-- `actor_ref` for system-generated events: `{type: "actor", id: "system"}` for auto-detection events, `{type: "actor", id: <coordinator_uuid>}` for human-triggered merge/split/resolution
+- `actor_ref` for system-authored events uses `system:{source_type}/{source_id}`; human-triggered merge/split/resolution events use `{type: "actor", id: <coordinator_uuid>}`
 - `ServerIdentity` bean must be initialized at startup (constructor injection) before any push processing
 
 **Mobile impact**: Device receives server-generated events via normal pull. `device_id = server_uuid` is just another device ID — no special handling needed. The event is processed like any other.
