@@ -17,7 +17,7 @@ tags: [workflow, pattern-registry, projection, conflict, phase-4]
 
 ## Context
 
-Phase 4.0 was rolled back because its first draft mixed role-action enforcement with pattern state machines and drifted from the already-decided ADR-005 model. ADR-005 requires state to be projection-derived, pattern definitions to be platform-fixed, transitions to be flagged rather than rejected, and deployers to parameterize rather than author state machines. Scenario 06 adds one important guardrail: `entity_lifecycle` cannot be silently approximated with `case_management`, because updates after verification are normal registry behavior, not violations.
+Phase 4.0 was rolled back because its first draft mixed role-action enforcement with pattern state machines and drifted from the already-decided ADR-005 model. ADR-005 requires state to be projection-derived, pattern definitions to be platform-fixed, transitions to be flagged rather than rejected, and deployers to parameterize rather than author state machines. Scenario 06 adds one important guardrail: `entity_lifecycle` cannot be silently approximated with `ongoing_resolution`, because updates after verification are normal registry behavior, not violations.
 
 ## Decision
 
@@ -28,12 +28,12 @@ The config package keeps the existing `activities[name].pattern` slot from IDR-0
 ```json
 {
   "subject": {
-    "ref": "case_management/v1",
+    "ref": "ongoing_resolution/v1",
     "composition": "subject",
     "shape_roles": {
-      "opening": ["malaria_case_opening/v1"],
+      "opening": ["malaria_episode_opening/v1"],
       "interaction": ["malaria_follow_up/v1", "malaria_follow_up/v2"],
-      "resolution": ["malaria_case_outcome/v1"],
+      "resolution": ["malaria_episode_outcome/v1"],
       "closure_review": ["malaria_closure_review/v1"]
     },
     "participant_roles": {
@@ -68,13 +68,15 @@ The config package keeps the existing `activities[name].pattern` slot from IDR-0
 
 `shape_roles` values are arrays, not single strings. A role can include multiple shape versions so old offline work under `facility/v1` and new work under `facility/v2` can both remain projectable under the same role. New capture can be restricted by the activity's current `shapes` list; projection must still recognize deprecated shape versions that remain in the role binding.
 
-`composition` is copied from the pattern definition and validated for consistency. Subject-level state keys are `(subject_ref, activity_ref, pattern_ref)`. Event-level state keys are `(source_event_id, pattern_ref)`. Phase 4 must not use `subject_ref.type = "process"` for pattern instances; `process` remains reserved under ADR-008.
+`composition` is copied from the pattern definition and validated for consistency. Subject-level state identity is derived from `(subject_ref, activity_ref, binding.ref)`. Event-level state identity is derived from `(source_event_id, binding.ref)`. The `binding.ref` value is the platform pattern definition reference inside the activity config; it is not an event envelope field, payload field, or stored event authority. For a concrete event, the applicable binding is resolved from `activity_ref`, `shape_ref`, and the activity's pattern binding set. Phase 4 must not use `subject_ref.type = "process"` for pattern instances; `process` remains reserved under ADR-008.
 
 Runtime state is derived from events plus the pattern binding. Events never store `current_state`, and no envelope field is added. The first Phase 4 implementation should derive state on demand or through rebuildable in-process structures. A durable workflow-state projection table remains an ADR-001 B->C optimization escape hatch only after measured read cost justifies it.
 
 Transition evaluation is accept-and-flag. A structurally valid event is stored even when no transition matches the current derived state. The conflict detector emits a `transition_violation` as `type = alert`, `shape_ref = conflict_detected/v1`, with `flag_category = transition_violation`. Events with unresolved flags are excluded from state derivation and remain visible in the timeline, matching ADR-005 S2 and the existing projection discipline.
 
-`entity_lifecycle` remains a separate pattern candidate. Any Phase 4 scope that claims Scenario 06 support must implement it or explicitly defer S06. It must not map S06 to `case_management`.
+`ongoing_resolution` is the active platform name for the behavior called `case_management` in ADR-005 exploration examples: following a subject over multiple interactions until resolution, with optional referral, transfer, closure review, and reopening. The platform name is deliberately domain-neutral; deployer shape names can still use domain terms such as `malaria_episode_opening/v1`.
+
+`entity_lifecycle` remains a separate pattern candidate. Any Phase 4 scope that claims Scenario 06 support must implement it or explicitly defer S06. It must not map S06 to `ongoing_resolution`.
 
 ## Alternatives Rejected
 
@@ -82,25 +84,25 @@ Transition evaluation is accept-and-flag. A structurally valid event is stored e
 - **Let deployers author transition tables** - turns L0 assembly into an inner platform and violates ADR-005 S5. Deployers bind shapes, roles, and parameters only.
 - **Represent pattern bindings as a string only** - cannot express shape-role mapping, role mapping, event-level overlays, feature gates, or multi-version shape support.
 - **Use `process` identities for workflow instances now** - ADR-008 reserves `process`; Phase 4 pattern instances already have sufficient keys without activating a new identity class.
-- **Treat `entity_lifecycle` as `case_management`** - would create false-positive `transition_violation` flags for normal S06 updates after verification.
+- **Treat `entity_lifecycle` as `ongoing_resolution`** - would create false-positive `transition_violation` flags for normal S06 updates after verification.
 - **Create a durable workflow-state table first** - premature storage authority. The B->C escape hatch stays available if benchmarks prove replay cost is material.
 
 ## Phase 4 Quality Gates
 
 - S06 registry gate: with `entity_lifecycle`, `verified` + `update` projects to `active` and produces no `transition_violation`.
-- Case-management contrast gate: with `case_management`, `closed` or `resolved` + ordinary `interaction` is accepted, flagged with `transition_violation`, and excluded from state until resolution.
+- Ongoing-resolution contrast gate: with `ongoing_resolution`, `closed` or `resolved` + ordinary `interaction` is accepted, flagged with `transition_violation`, and excluded from state until resolution.
 - Shape-evolution gate: a deprecated-but-known shape version bound to the same `shape_role` remains valid for projection when offline work arrives after a newer shape version is active.
 - Composition gate: deploy-time validation rejects two subject-level patterns in one activity, duplicate transition-bound shape ownership, missing required shape roles, and missing required participant roles.
 - Flag exclusion gate: unresolved flagged events do not advance `current_state`; resolving the flag as accepted re-derives state including the event.
 - Vocabulary gate: Phase 4 introduces no new envelope `type`; transition flags use `type=alert`, `shape_ref=conflict_detected/v1`.
-- Identity gate: pattern state keys use `(subject_ref, activity_ref, pattern_ref)` or `(source_event_id, pattern_ref)`, never `subject_ref.type = "process"`.
+- Identity gate: pattern state identity uses `(subject_ref, activity_ref, binding.ref)` or `(source_event_id, binding.ref)`, never an event-carried `pattern_ref` and never `subject_ref.type = "process"`.
 
 ## Consequences
 
 - IDR-020 no longer blocks Phase 4 planning; IDR-021 and IDR-022 remain separate blockers for role-action enforcement and flag severity/domain uniqueness.
 - The Pattern Registry implementation can start as a small platform-bundled registry plus a generic transition matcher.
-- The mobile and server projection engines must share fixtures for at least the S06 and case-management contrast gates before Phase 4 is declared complete.
-- If an early deployment needs registry lifecycle behavior, Phase 4 must promote `entity_lifecycle` into the implemented inventory instead of relying on `case_management`.
+- The mobile and server projection engines must share fixtures for at least the S06 and ongoing-resolution contrast gates before Phase 4 is declared complete.
+- If an early deployment needs registry lifecycle behavior, Phase 4 must promote `entity_lifecycle` into the implemented inventory instead of relying on `ongoing_resolution`.
 
 ## Traces
 

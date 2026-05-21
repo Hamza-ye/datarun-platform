@@ -27,8 +27,8 @@ Each pattern specification follows a fixed structure:
 
 | Type | PE state key | Rule |
 |------|-------------|------|
-| `subject-level` | `(subject_ref, activity_ref, pattern_ref)` | Rule 1: at most one subject-level binding per activity |
-| `event-level` | `(source_event_id, pattern_ref)` | Rule 2: compose freely |
+| `subject-level` | `(subject_ref, activity_ref, binding.ref)` | Rule 1: at most one subject-level binding per activity |
+| `event-level` | `(source_event_id, binding.ref)` | Rule 2: compose freely |
 
 **Shape binding modes**: Shapes relate to patterns as **transition-bound** (mapped to a state transition; Rule 5 applies) or **activation-bound** (triggers instance creation without competing for transitions; Rule 5 does not apply).
 
@@ -111,9 +111,11 @@ Per subject (aggregated across event-level instances):
 
 ---
 
-## 4. case_management
+## 4. ongoing_resolution
 
 Long-running subject lifecycle with multiple interactions, referrals, transfers, and a review-gated closure.
+
+ADR-005 exploration used the scenario-derived name `case_management` for this behavior. The active platform pattern name is `ongoing_resolution` so the core vocabulary stays domain-neutral.
 
 **Composition type**: `subject-level`
 
@@ -121,7 +123,7 @@ Long-running subject lifecycle with multiple interactions, referrals, transfers,
 
 | State | Marker | Description |
 |-------|--------|-------------|
-| `opened` | [I] | Case created |
+| `opened` | [I] | Tracked subject opened |
 | `active` | | Receiving interactions |
 | `referred` | | Referred for specialist input |
 | `resolved` | | Outcome recorded, awaiting closure review |
@@ -143,9 +145,9 @@ Long-running subject lifecycle with multiple interactions, referrals, transfers,
 | T8 | `resolved`, `closed` | `capture` | `reopening` | `reopened` | SC |
 | T9 | `reopened` | `capture` | `interaction` | `active` | SC |
 | T10 | any | `assignment_changed` | `transfer` | (same) | SP |
-| T11 | any† | `review` | `case_review` | (same) | SP |
+| T11 | any† | `review` | `general_review` | (same) | SP |
 
-† T11: case must exist (no from = `—`).
+† T11: tracked subject must exist (no from = `—`).
 
 ### Roles
 
@@ -171,7 +173,7 @@ Long-running subject lifecycle with multiple interactions, referrals, transfers,
 | `shapes.closure_review` | Shape mapping | Yes |
 | `shapes.reopening` | Shape mapping | No |
 | `shapes.transfer` | Shape mapping | No |
-| `shapes.case_review` | Shape mapping | No |
+| `shapes.general_review` | Shape mapping | No |
 | `roles.assigned_worker` | Role mapping | Yes |
 | `roles.supervisor` | Role mapping | Yes |
 | `deadlines.follow_up_interval` | Duration | No |
@@ -241,8 +243,8 @@ Level validation: the review must be for exactly `current_level`; otherwise `tra
 
 | Mode | PE state key | Declaration | Rule 1 |
 |------|-------------|------------|--------|
-| Primary | `(subject_ref, activity_ref, pattern_ref)` | Assigned as activity's subject-level pattern | Consumes slot |
-| Embedded | `(submission_event_id, pattern_ref)` | Listed alongside a subject-level pattern | Does not consume slot |
+| Primary | `(subject_ref, activity_ref, binding.ref)` | Assigned as activity's subject-level pattern | Consumes slot |
+| Embedded | `(submission_event_id, binding.ref)` | Listed alongside a subject-level pattern | Does not consume slot |
 
 Transition table is identical in both modes; only the PE state key changes.
 
@@ -321,7 +323,7 @@ Child subjects reference parents via `parent_shipment_ref` in the dispatch paylo
 
 Entity registry lifecycle with cyclical verification. **Not in the initial inventory** — deferred to platform evolution per [exploration/28 §8](../exploration/28-pattern-inventory-walkthrough.md#8-s06-disposition-entity_lifecycle).
 
-**Why separate from case_management**: Updates after verification are normal transitions (→ `active`), not violations. Verification is cyclical (repeated every period), not a linear progression toward closure. Mapping to case_management would produce false-positive `transition_violation` flags on every post-verification update.
+**Why separate from ongoing_resolution**: Updates after verification are normal transitions (→ `active`), not violations. Verification is cyclical (repeated every period), not a linear progression toward closure. Mapping to ongoing_resolution would produce false-positive `transition_violation` flags on every post-verification update.
 
 **States**: `registered` [I], `active`, `verified`, `deprecated` [Q]
 
@@ -338,7 +340,7 @@ Full specification: [exploration/28 §8](../exploration/28-pattern-inventory-wal
 | Pattern | Comp. | States | Trans. | Shape roles | Participant roles | Event types used |
 |---------|-------|--------|--------|-------------|-------------------|-----------------|
 | `capture_with_review` | event | 3 | 3 | 2 | 2 | capture, review |
-| `case_management` | subject | 6 | 11 | 8 (3 opt.) | 2 | capture, review, assignment_changed |
+| `ongoing_resolution` | subject | 6 | 11 | 8 (3 opt.) | 2 | capture, review, assignment_changed |
 | `multi_step_approval` | subj/event | 4 + level | 6 | 2 | 1+N | capture, review |
 | `transfer_with_acknowledgment` | subject | 5 | 5 | 4 (2 opt.) | 3 | capture, review |
 

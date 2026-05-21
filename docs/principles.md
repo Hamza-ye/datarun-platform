@@ -64,7 +64,7 @@ New behaviors emerge from combining existing primitives. New primitives can be a
 
 **Derived from**: V4 (One system), V5 (Grows without breaking), Viability assessment Section 2 (primitives compose across scenarios)
 
-**Confirmed by**: ADR-003 introduced no new structural mechanisms — authorization reuses the accept-and-flag model from ADR-002 (S9), extends detect-before-act to all flag types (S7), and derives authority from the existing assignment timeline rather than adding a parallel authority structure. The pattern held: composition of existing primitives (events, projections, flags) rather than new mechanisms. ADR-005 formalized five composition rules governing how workflow patterns interact (subject-level vs. event-level, cross-activity linking via `activity_ref`, shape-to-pattern uniqueness). Validated against three multi-pattern scenarios: case management + approval, campaign + distribution, entity lifecycle + review.
+**Confirmed by**: ADR-003 introduced no new structural mechanisms — authorization reuses the accept-and-flag model from ADR-002 (S9), extends detect-before-act to all flag types (S7), and derives authority from the existing assignment timeline rather than adding a parallel authority structure. The pattern held: composition of existing primitives (events, projections, flags) rather than new mechanisms. ADR-005 formalized five composition rules governing how workflow patterns interact (subject-level vs. event-level, cross-activity linking via `activity_ref`, shape-to-pattern uniqueness). Validated against three multi-pattern scenarios: ongoing resolution + approval, campaign + distribution, entity lifecycle + review.
 
 ---
 

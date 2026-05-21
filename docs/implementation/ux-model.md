@@ -31,8 +31,8 @@
 
 | Flow | Field worker (S00) | Field worker (S08) | Supervisor (S04) |
 |------|--------------------|--------------------|--------------------|
-| Work List shows | Subjects in area, sorted by last visit | Active cases, grouped by state | Subjects with pending reviews, grouped by worker |
-| Subject Detail shows | Event timeline, "Capture" action | Case timeline, state badge, state-appropriate actions | Latest capture + review decision action |
+| Work List shows | Subjects in area, sorted by last visit | Ongoing subjects, grouped by state | Subjects with pending reviews, grouped by worker |
+| Subject Detail shows | Event timeline, "Capture" action | Ongoing subject timeline, state badge, state-appropriate actions | Latest capture + review decision action |
 | Form produces | `capture` event | `capture` event (interaction/referral/resolution shape) | `review` event with decision payload |
 
 Same 3 screen types. Different content, driven by activity configuration and pattern state. **STRUCTURAL** — this follows from type vocabulary being processing behavior (6 fixed types), with domain meaning in shapes [4-S3].
@@ -126,17 +126,17 @@ S1 → tap "Add New" → S3 (basic_capture/v1 form, new subject)
   → fill fields → save → S1 (new subject appears)
 ```
 
-**S08: Case management (stateful, multi-step)**
+**S08: Ongoing resolution (stateful, multi-step)**
 ```
 S1 (grouped: opened=2, active=5, referred=1)
-  → tap "Case #412 - Maria" → S2 (state: active, timeline: opening + 3 interactions)
+  → tap "Subject #412 - Maria" → S2 (state: active, timeline: opening + 3 interactions)
     → actions shown: [Follow-up, Refer, Record Resolution]
     → tap "Follow-up" → S3 (interaction shape)
     → fill fields → save → S2 (state: still active, timeline: +1 interaction)
     → back → S1
 
-S1 → tap "Add New Case" → S3 (opening shape, new subject)
-  → fill fields → save → S1 (new case appears under "opened" group)
+S1 → tap "Add New Subject" → S3 (opening shape, new subject)
+  → fill fields → save → S1 (new subject appears under "opened" group)
 ```
 
 **S04: Supervisor review**
@@ -440,7 +440,7 @@ subject_projections ──→ GroupingStrategy ──→ grouped_list ──→ 
 | **CardRenderer** | Renders a single subject card. | Subject name + last capture timestamp | + state badge + flag count + pending action indicator |
 | **SummaryExtractor** | Picks which projection fields to show on the card. | `{name, latest_timestamp}` | `{name, current_state, pending_count, flag_count, last_interaction}` |
 
-**STRUCTURAL**: GroupingStrategy must be driven by activity/pattern config, not hardcoded. In Phase 0, the "no pattern" activity produces a flat sort. In Phase 4, `case_management` produces state-based groups. The List Adapter receives a strategy, it does not decide one.
+**STRUCTURAL**: GroupingStrategy must be driven by activity/pattern config, not hardcoded. In Phase 0, the "no pattern" activity produces a flat sort. In Phase 4, `ongoing_resolution` produces state-based groups. The List Adapter receives a strategy, it does not decide one.
 
 **RECOMMENDED**: Use a single `ListView.builder` with section headers inserted as list items. No nested scrolling. Performant on low-end devices.
 

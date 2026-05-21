@@ -189,7 +189,7 @@ The 11 primitives from the [Architecture Description](../architecture/primitives
 **Exercises**: ADR-5 fully. SY-6.
 
 **Primitives built**:
-- Pattern Registry (4 patterns: capture_with_review, case_management, multi_step_approval, transfer_with_acknowledgment)
+- Pattern Registry (4 patterns: capture_with_review, ongoing_resolution, multi_step_approval, transfer_with_acknowledgment)
 - Trigger Engine (L3a event-reaction, L3b deadline-check, auto-resolution)
 - Command Validator (advisory on-device)
 
