@@ -12,14 +12,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
  * Identity Resolver: merge/split operations on subjects.
  * Online-only, server-validated (F9).
- * Merge uses the full DD-3 procedure with row-level locking.
- * subject_lifecycle is a rebuildable projection cache of identity lifecycle events,
- * used only to serialize merge/split precondition checks.
+ * Merge/split preconditions project identity lifecycle from events and serialize
+ * irreversible lineage writes with transaction-scoped advisory locks.
  */
 @Service
 public class IdentityService {
@@ -31,6 +31,7 @@ public class IdentityService {
     private final EventRepository eventRepository;
     private final ServerIdentity serverIdentity;
     private final AliasCache aliasCache;
+    private final IdentityLifecycleProjection lifecycleProjection;
     private final ObjectMapper objectMapper;
 
     public IdentityService(JdbcTemplate jdbc,
@@ -38,12 +39,14 @@ public class IdentityService {
                            EventRepository eventRepository,
                            ServerIdentity serverIdentity,
                            AliasCache aliasCache,
+                           IdentityLifecycleProjection lifecycleProjection,
                            ObjectMapper objectMapper) {
         this.jdbc = jdbc;
         this.transactionTemplate = transactionTemplate;
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
         this.aliasCache = aliasCache;
+        this.lifecycleProjection = lifecycleProjection;
         this.objectMapper = objectMapper;
     }
 
@@ -64,32 +67,11 @@ public class IdentityService {
         }
 
         Event mergeEvent = transactionTemplate.execute(status -> {
-            // Step 0: Acquire locks — prevents concurrent merge race condition.
-            // Eager-insert lifecycle rows (active is the default, changes no semantics)
-            // then lock in consistent order to prevent deadlocks.
-            jdbc.update("""
-                INSERT INTO subject_lifecycle (subject_id, state)
-                VALUES (?::uuid, 'active') ON CONFLICT (subject_id) DO NOTHING
-                """, retiredId.toString());
-            jdbc.update("""
-                INSERT INTO subject_lifecycle (subject_id, state)
-                VALUES (?::uuid, 'active') ON CONFLICT (subject_id) DO NOTHING
-                """, survivingId.toString());
+            // Step 0: Serialize irreversible lineage writes for both subject IDs.
+            lockSubjects(retiredId, survivingId);
 
-            // Lock in consistent order (by subject_id) to prevent deadlocks
-            UUID first = retiredId.compareTo(survivingId) < 0 ? retiredId : survivingId;
-            UUID second = retiredId.compareTo(survivingId) < 0 ? survivingId : retiredId;
-
-            String firstState = jdbc.queryForObject(
-                    "SELECT state FROM subject_lifecycle WHERE subject_id = ?::uuid FOR UPDATE",
-                    String.class, first.toString());
-            String secondState = jdbc.queryForObject(
-                    "SELECT state FROM subject_lifecycle WHERE subject_id = ?::uuid FOR UPDATE",
-                    String.class, second.toString());
-
-            // Application checks: both must be 'active'. If not → rollback.
-            String retiredState = retiredId.equals(first) ? firstState : secondState;
-            String survivingState = survivingId.equals(first) ? firstState : secondState;
+            String retiredState = lifecycleProjection.stateOf(retiredId);
+            String survivingState = lifecycleProjection.stateOf(survivingId);
 
             if (!"active".equals(retiredState)) {
                 throw new IllegalArgumentException(
@@ -115,13 +97,7 @@ public class IdentityService {
 
             Event event = buildMergeEvent(retiredId, survivingId, actorId, reason);
 
-            // Step 3: Archive retired subject in the cache using event time so the row is rebuildable.
-            jdbc.update("""
-                UPDATE subject_lifecycle SET state = 'archived', archived_at = ?::timestamptz
-                WHERE subject_id = ?::uuid
-                """, event.timestamp().toString(), retiredId.toString());
-
-            // Step 4: Insert subjects_merged event
+            // Step 3: Insert subjects_merged event. Lifecycle is derived from this event.
             eventRepository.insert(event);
 
             return event;
@@ -149,16 +125,9 @@ public class IdentityService {
         UUID successorId = UUID.randomUUID();
 
         Event splitEvent = transactionTemplate.execute(status -> {
-            // Ensure lifecycle row exists
-            jdbc.update("""
-                INSERT INTO subject_lifecycle (subject_id, state)
-                VALUES (?::uuid, 'active') ON CONFLICT (subject_id) DO NOTHING
-                """, sourceId.toString());
+            lockSubjects(sourceId);
 
-            // Lock and check precondition
-            String state = jdbc.queryForObject(
-                    "SELECT state FROM subject_lifecycle WHERE subject_id = ?::uuid FOR UPDATE",
-                    String.class, sourceId.toString());
+            String state = lifecycleProjection.stateOf(sourceId);
 
             if (!"active".equals(state)) {
                 throw new IllegalArgumentException(
@@ -167,13 +136,7 @@ public class IdentityService {
 
             Event event = buildSplitEvent(sourceId, successorId, actorId, reason);
 
-            // Archive source with successor reference using event time so the row is rebuildable.
-            jdbc.update("""
-                UPDATE subject_lifecycle SET state = 'archived', archived_at = ?::timestamptz, successor_id = ?::uuid
-                WHERE subject_id = ?::uuid
-                """, event.timestamp().toString(), successorId.toString(), sourceId.toString());
-
-            // Insert subject_split event
+            // Insert subject_split event. Lifecycle is derived from this event.
             eventRepository.insert(event);
 
             return event;
@@ -182,66 +145,6 @@ public class IdentityService {
         log.info("Split subject {} → successor {} (event: {})", sourceId, successorId,
                 splitEvent != null ? splitEvent.id() : "null");
         return splitEvent;
-    }
-
-    /**
-     * Rebuild the subject_lifecycle projection from identity lifecycle events.
-     * The event stream is the source of truth; this cache may be discarded and
-     * recomputed for repair, migration, or drift checks.
-     */
-    public void rebuildSubjectLifecycleFromEvents() {
-        transactionTemplate.executeWithoutResult(status -> {
-            jdbc.update("DELETE FROM subject_lifecycle");
-            jdbc.update("""
-                WITH touched_subjects AS (
-                    SELECT DISTINCT subject_id
-                    FROM (
-                        SELECT payload->>'retired_id' AS subject_id
-                        FROM events
-                        WHERE shape_ref LIKE 'subjects_merged/%'
-                        UNION ALL
-                        SELECT payload->>'surviving_id' AS subject_id
-                        FROM events
-                        WHERE shape_ref LIKE 'subjects_merged/%'
-                        UNION ALL
-                        SELECT payload->>'source_id' AS subject_id
-                        FROM events
-                        WHERE shape_ref LIKE 'subject_split/%'
-                    ) touched
-                    WHERE subject_id IS NOT NULL
-                ),
-                archived_subjects AS (
-                    SELECT DISTINCT ON (subject_id)
-                           subject_id,
-                           archived_at,
-                           successor_id
-                    FROM (
-                        SELECT payload->>'retired_id' AS subject_id,
-                               timestamp AS archived_at,
-                               NULL::text AS successor_id,
-                               sync_watermark
-                        FROM events
-                        WHERE shape_ref LIKE 'subjects_merged/%'
-                        UNION ALL
-                        SELECT payload->>'source_id' AS subject_id,
-                               timestamp AS archived_at,
-                               payload->>'successor_id' AS successor_id,
-                               sync_watermark
-                        FROM events
-                        WHERE shape_ref LIKE 'subject_split/%'
-                    ) archived
-                    WHERE subject_id IS NOT NULL
-                    ORDER BY subject_id, sync_watermark DESC
-                )
-                INSERT INTO subject_lifecycle (subject_id, state, archived_at, successor_id)
-                SELECT touched.subject_id::uuid,
-                       CASE WHEN archived.subject_id IS NULL THEN 'active' ELSE 'archived' END,
-                       archived.archived_at,
-                       archived.successor_id::uuid
-                FROM touched_subjects touched
-                LEFT JOIN archived_subjects archived ON archived.subject_id = touched.subject_id
-                """);
-        });
     }
 
     private Event buildMergeEvent(UUID retiredId, UUID survivingId, UUID actorId, String reason) {
@@ -304,5 +207,19 @@ public class IdentityService {
                 OffsetDateTime.now(ZoneOffset.UTC),
                 payload
         );
+    }
+
+    private void lockSubjects(UUID... subjectIds) {
+        Arrays.stream(subjectIds)
+                .distinct()
+                .sorted()
+                .forEach(subjectId -> jdbc.query(
+                        "SELECT pg_advisory_xact_lock(?)",
+                        rs -> { },
+                        advisoryLockKey(subjectId)));
+    }
+
+    private long advisoryLockKey(UUID subjectId) {
+        return subjectId.getMostSignificantBits() ^ subjectId.getLeastSignificantBits();
     }
 }

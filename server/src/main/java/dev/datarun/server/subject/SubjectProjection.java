@@ -29,7 +29,7 @@ public class SubjectProjection {
      * Integrity/identity events (conflict_detected/*, conflict_resolved/*, subjects_merged/*,
      * subject_split/*) are also excluded from the subject summary — they're metadata, not domain
      * state. Assignment events (type=assignment_changed) are likewise excluded.
-     * Archived subjects (those that appear only as retired_id in alias table) are excluded from the list.
+     * Archived identity sources are excluded from the active list.
      */
     public List<SubjectSummary> listSubjects() {
         return jdbc.query("""
@@ -43,6 +43,15 @@ public class SubjectProjection {
                             AND cr.payload->>'flag_event_id' = events.id::text
                             AND cr.payload->>'resolution' IN ('accepted', 'reclassified')
                       )
+                ),
+                archived_subjects AS (
+                    SELECT payload->>'retired_id' AS subject_id
+                    FROM events
+                    WHERE shape_ref LIKE 'subjects_merged/%'
+                    UNION
+                    SELECT payload->>'source_id' AS subject_id
+                    FROM events
+                    WHERE shape_ref LIKE 'subject_split/%'
                 ),
                 domain_events AS (
                     SELECT e.*,
@@ -86,6 +95,10 @@ public class SubjectProjection {
                     (SELECT COUNT(*) FROM unresolved_flags uf
                      WHERE uf.canonical_subject_id = ss.subject_id) AS flag_count
                 FROM subject_summary ss
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM archived_subjects archived
+                    WHERE archived.subject_id = ss.subject_id
+                )
                 ORDER BY ss.latest_timestamp DESC
                 """,
                 (rs, rowNum) -> new SubjectSummary(

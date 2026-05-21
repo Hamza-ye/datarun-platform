@@ -9,6 +9,7 @@ import dev.datarun.server.authorization.SubjectLocationRepository;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.identity.AliasCache;
+import dev.datarun.server.identity.IdentityLifecycleProjection;
 import dev.datarun.server.identity.ServerIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -49,6 +51,7 @@ public class ConflictDetector {
     private final EventRepository eventRepository;
     private final ServerIdentity serverIdentity;
     private final AliasCache aliasCache;
+    private final IdentityLifecycleProjection lifecycleProjection;
     private final ObjectMapper objectMapper;
     private final ScopeResolver scopeResolver;
     private final SubjectLocationRepository subjectLocationRepository;
@@ -56,12 +59,14 @@ public class ConflictDetector {
     public ConflictDetector(EventRepository eventRepository,
                             ServerIdentity serverIdentity,
                             AliasCache aliasCache,
+                            IdentityLifecycleProjection lifecycleProjection,
                             ObjectMapper objectMapper,
                             ScopeResolver scopeResolver,
                             SubjectLocationRepository subjectLocationRepository) {
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
         this.aliasCache = aliasCache;
+        this.lifecycleProjection = lifecycleProjection;
         this.objectMapper = objectMapper;
         this.scopeResolver = scopeResolver;
         this.subjectLocationRepository = subjectLocationRepository;
@@ -88,12 +93,14 @@ public class ConflictDetector {
                 continue;
             }
 
-            // stale_reference check: event references a retired subject ID
-            if (aliasCache.isRetired(subjectId)) {
-                Event staleFlag = createStaleReferenceFlag(event, subjectId);
+            // stale_reference check: event references a retired/archived subject ID.
+            Optional<IdentityLifecycleProjection.ArchivedSubject> archived =
+                    lifecycleProjection.findArchived(subjectId);
+            if (archived.isPresent() || aliasCache.isRetired(subjectId)) {
+                Event staleFlag = createStaleReferenceFlag(event, subjectId, archived);
                 flagEvents.add(staleFlag);
-                log.info("Stale reference detected for subject {} (event {}), canonical: {}",
-                        subjectId, event.id(), aliasCache.resolve(subjectId));
+                log.info("Stale reference detected for subject {} (event {})",
+                        subjectId, event.id());
             }
 
             // Retrieve the server-assigned watermark for this event
@@ -318,12 +325,20 @@ public class ConflictDetector {
                 "Event created with knowledge horizon before concurrent events from another device");
     }
 
-    private Event createStaleReferenceFlag(Event sourceEvent, UUID subjectId) {
+    private Event createStaleReferenceFlag(Event sourceEvent, UUID subjectId,
+                                           Optional<IdentityLifecycleProjection.ArchivedSubject> archived) {
         UUID flagId = deterministicUuid(sourceEvent.id(), STALE_REFERENCE_CATEGORY);
-        UUID canonicalId = aliasCache.resolve(subjectId);
+        String reason = archived
+                .map(a -> switch (a.type()) {
+                    case MERGED -> "Event references retired subject " + subjectId
+                            + ", canonical ID: " + a.targetId();
+                    case SPLIT -> "Event references archived split source " + subjectId
+                            + ", successor ID: " + a.targetId();
+                })
+                .orElseGet(() -> "Event references retired subject " + subjectId
+                        + ", canonical ID: " + aliasCache.resolve(subjectId));
         return buildFlagEvent(flagId, sourceEvent.id(), subjectId, STALE_REFERENCE_CATEGORY,
-                "auto_eligible", null,
-                "Event references retired subject " + subjectId + ", canonical ID: " + canonicalId);
+                "auto_eligible", null, reason);
     }
 
     private Event buildFlagEvent(UUID flagId, UUID sourceEventId, UUID subjectId,

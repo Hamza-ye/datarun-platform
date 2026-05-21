@@ -81,9 +81,9 @@ All three must be true:
 
 ## FP-002 — `subject_lifecycle` table removal
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding B3)
-**Resolved**: 2026-05-21 by subject lifecycle rebuild test and migration comment
+**Resolved**: 2026-05-21 by event-derived lifecycle projection
 **Reopened**: 2026-05-21 by ADR-002 lifecycle parity review
 **Blocks**: Phase 4 (not a specific IDR — pattern state machines will interact with identity lifecycle)
 **Severity**: B — projection discipline
@@ -112,6 +112,7 @@ All four must be true:
 - **2026-04-21**: Opened.
 - **2026-05-21**: Resolved. `subject_lifecycle` is classified as a projection cache used for merge/split precondition locking; `IdentityService.rebuildSubjectLifecycleFromEvents()` rebuilds it from `subjects_merged/v1` and `subject_split/v1` events; `IdentityResolverIntegrationTest.subjectLifecycleProjection_rebuildsFromIdentityLifecycleEvents` proves the cache can be discarded and reconstructed with identical rows; V3 migration now carries the projection-cache warning.
 - **2026-05-21**: Reopened. The cache is disciplined, but not necessary yet. Preferred direction is no `subject_lifecycle` table: project identity lifecycle from events on demand and keep ADR-001 B→C as a future performance escape hatch.
+- **2026-05-21**: Resolved. `subject_lifecycle` was removed from V3, server code, and tests. Merge/split preconditions now project lifecycle from identity events inside the write transaction under subject-scoped advisory locks; active subject projection excludes merged/split sources while historical event streams remain readable; post-split source events are accepted and flagged as `stale_reference`.
 
 ---
 

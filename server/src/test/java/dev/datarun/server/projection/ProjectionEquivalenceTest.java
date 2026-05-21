@@ -47,7 +47,6 @@ class ProjectionEquivalenceTest extends AbstractIntegrationTest {
         jdbc.execute("DELETE FROM subject_locations");
         jdbc.execute("DELETE FROM events");
         jdbc.execute("DELETE FROM subject_aliases");
-        jdbc.execute("DELETE FROM subject_lifecycle");
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         provisionTestToken();
     }

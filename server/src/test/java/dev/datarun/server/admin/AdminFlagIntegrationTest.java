@@ -41,7 +41,6 @@ class AdminFlagIntegrationTest extends AbstractIntegrationTest {
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         jdbc.execute("DELETE FROM device_sync_state");
         jdbc.execute("DELETE FROM subject_aliases");
-        jdbc.execute("DELETE FROM subject_lifecycle");
         provisionTestToken();
     }
 

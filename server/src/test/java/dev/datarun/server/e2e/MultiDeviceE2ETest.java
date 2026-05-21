@@ -41,7 +41,6 @@ class MultiDeviceE2ETest extends AbstractIntegrationTest {
         jdbc.execute("DELETE FROM subject_locations");
         jdbc.execute("DELETE FROM events");
         jdbc.execute("DELETE FROM subject_aliases");
-        jdbc.execute("DELETE FROM subject_lifecycle");
         jdbc.execute("DELETE FROM device_sync_state");
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         provisionTestToken();
