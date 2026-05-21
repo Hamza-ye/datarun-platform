@@ -254,7 +254,7 @@ The package structure accommodates Phase 4 additions without schema migration:
 | Phase 4 artifact | How it fits |
 |------------------|-------------|
 | Triggers (L3a, L3b) | New top-level key `"triggers": {}` — devices already parse unknown keys as ignored in Phase 3. Or: add to package schema when Phase 4 ships (the package JSON schema itself is Lean — only the structural keys are Lock). |
-| Pattern Registry | `activities[name].pattern` goes from `null` to a pattern reference string. |
+| Pattern Registry | `activities[name].pattern` goes from `null` to the pattern-binding set object defined by [IDR-020](idr-020-pattern-state-machine-representation.md). |
 | Uniqueness constraints | `shapes[ref].uniqueness` goes from `null` to `{scope, period, action}`. |
 | Flag severity overrides | `flag_severity_overrides` goes from `{}` to populated. |
 | Projection rules | New top-level key `"projection_rules": {}`. |

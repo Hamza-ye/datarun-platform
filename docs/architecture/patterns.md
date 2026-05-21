@@ -327,7 +327,7 @@ Entity registry lifecycle with cyclical verification. **Not in the initial inven
 
 **Transitions**: 8 (T1–T8). Key structural feature: T5 (`verified` → `active` on update) is a normal transition — the cyclical `active → verified → active → ...` loop.
 
-**Inventory recommendation**: Include when S06-like scenarios (entity registries) appear in early deployments. Zero architectural cost to add later — the Pattern Registry is append-only [5-S5].
+**Inventory recommendation**: Include when S06-like scenarios (entity registries) appear in early deployments. Adding it later is platform evolution under [5-S5]; it does not require stored-event changes, but it does require implementation and tests.
 
 Full specification: [exploration/28 §8](../exploration/28-pattern-inventory-walkthrough.md#8-s06-disposition-entity_lifecycle).
 

@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-21 (post-ADR-006 through ADR-009 stabilization)
+**Last updated**: 2026-05-21 (post-IDR-020 rewrite)
 
 ---
 
@@ -20,7 +20,7 @@
 
 **Phase 4: Workflow & Policies** — **NOT STARTED**
 
-Phase 4.0 (role-action enforcement) was drafted and rolled back — IDR-020 violated architecture rules (`docs/architecture/patterns.md`, `docs/exploration/28-pattern-inventory-walkthrough.md`). IDR-020 needs a rewrite before any Phase 4 implementation begins. See `docs/implementation/phases/phase-3d.md` §7 (Carried Debt) for the IDR-020 → IDR-021 → IDR-022 sequence.
+Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. Phase 4 implementation still needs IDR-021, IDR-022, and a Phase 4 spec before code begins.
 
 ### Carried architectural debt — ADR-007 + Phase 3e retrofit
 
@@ -61,7 +61,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 - `server/identity/` — ServerIdentity (env var + DB fallback, SEQUENCE-backed device_seq), IdentityLifecycleProjection (event-derived lifecycle), SubjectAliasProjection (rebuildable `subject_aliases` projection), IdentityService (merge/split with subject-scoped advisory locking), IdentityController (REST endpoints)
 - `server/integrity/` — ConflictDetector (per-event W_effective detection + stale_reference detection + auth CD: scope_violation, temporal_authority_expired, role_stale), ConflictSweepJob (5-min stateless sweep), ConflictResolutionService (resolve: accepted/rejected/reclassified + manual identity_conflict flags), ConflictController (REST: resolve, list flags, create identity_conflict)
 - `server/sync/` — Two-Tx pipeline (TransactionTemplate: Tx1 persist, Tx2 identity CD + auth CD + flags). Pull: scope-filtered with post-query activity + subject_list filtering (AND within assignment, OR across assignments)
-- `contracts/flag-catalog.md` — 6 flag categories (3 identity + 3 authorization) with detection ordering and resolvability
+- `contracts/flag-catalog.md` — 9 flag-category slots: implemented identity/authorization categories, Phase 4 `domain_uniqueness_violation` and `transition_violation`, plus one reserved slot
 - `server/subject/` — SubjectProjection with flag exclusion + alias resolution + assignment_changed exclusion (CTE-based, LEFT JOIN subject_aliases)
 - `server/subject/` — SubjectController with alias-aware event retrieval (includes events from all alias chains)
 - `server/event/` — EventRepository extended: location_path denormalization on insert, findSinceScoped (3-category OR: geo subjects, own assignments, system events), findByType
@@ -80,9 +80,10 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## What's Next
 
-**Phase 4: Workflow & Policies** — next phase. Requires IDR-020 rewrite first.
+**Phase 4: Workflow & Policies** — next phase. IDR-020 is rewritten; remaining prep is IDR-021, IDR-022, and the Phase 4 spec.
 
-- IDR-020 (Pattern State Machine Representation) must be rewritten grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md` before any Phase 4 code begins.
+- IDR-021 (Role-Action Enforcement Model) must close FP-001 before role-action code begins.
+- IDR-022 (Flag Severity + Domain Uniqueness) must define severity authoring and `domain_uniqueness_violation`.
 - Phase spec: `docs/implementation/phases/phase-4.md` (once written)
 
 ### Test Debt (carried from Phase 3)
@@ -102,5 +103,6 @@ _(None)_
 
 | Decision | Status | Reference |
 |----------|--------|-----------|
-| IDR-020: Pattern State Machine Representation | **NEEDS REWRITE** | `docs/decisions/idr-020-*.md` — does not exist yet, previous version violated architecture |
-| DD-2: Lock — needs IDR-020 first | OPEN | Phase 4 spec |
+| IDR-020: Pattern State Machine Representation | **ACTIVE** | [idr-020-pattern-state-machine-representation.md](decisions/idr-020-pattern-state-machine-representation.md) |
+| IDR-021: Role-Action Enforcement Model | **NEEDED** | Must close FP-001 before Phase 4 role-action code |
+| IDR-022: Flag Severity + Domain Uniqueness | **NEEDED** | Must cover severity authoring and `domain_uniqueness_violation` |

@@ -25,6 +25,7 @@
 | [idr-017](idr-017-shape-storage.md) | Shape storage — versioned snapshots with L1/L2 separation (DD-1) | active | 3a | decision | configuration, shape, dd, storage, versioning |
 | [idr-018](idr-018-expression-grammar.md) | Expression grammar — JSON AST with prefix-operator nodes (DD-2) | active | 3b | decision | configuration, expression, dd, grammar, cross-platform |
 | [idr-019](idr-019-config-package.md) | Config package — atomic JSON delivery via dedicated endpoint (DD-3) | active | 3c | decision | configuration, package, dd, sync, delivery |
+| [idr-020](idr-020-pattern-state-machine-representation.md) | Pattern state machine representation | active | 4-prep | decision | workflow, pattern-registry, projection, conflict, phase-4 |
 
 ## By Component
 
@@ -40,6 +41,7 @@
 - [idr-007](idr-007-concurrency-detection.md) — Concurrency detection
 - [idr-010](idr-010-conflict-detection-intercept.md) — CD intercept point
 - [idr-011](idr-011-identity-conflict-scope.md) — Identity conflict scope
+- [idr-020](idr-020-pattern-state-machine-representation.md) — Transition violation evaluation
 
 ### server/authorization
 - [idr-013](idr-013-assignment-payload.md) — Assignment payload design
@@ -55,6 +57,7 @@
 - [idr-017](idr-017-shape-storage.md) — Shape storage & versioning
 - [idr-018](idr-018-expression-grammar.md) — Expression grammar
 - [idr-019](idr-019-config-package.md) — Config package & delivery
+- [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding in config package
 
 ### server/admin
 - [idr-006](idr-006-thymeleaf-admin.md) — Thymeleaf admin
@@ -62,10 +65,12 @@
 ### mobile/data
 - [idr-003](idr-003-snake-case-json.md) — snake_case JSON
 - [idr-019](idr-019-config-package.md) — Config package (device-side management)
+- [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding parsing
 
 ### mobile/domain
 - [idr-018](idr-018-expression-grammar.md) — Expression evaluator
 - [idr-009](idr-009-alias-table.md) — Alias table (device schema)
+- [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern state projection
 
 ### mobile/test
 - [idr-012](idr-012-sqflite-memory-path.md) — sqflite memory path
@@ -74,6 +79,7 @@
 - [idr-003](idr-003-snake-case-json.md) — snake_case JSON
 - [idr-007](idr-007-concurrency-detection.md) — Concurrency detection
 - [idr-013](idr-013-assignment-payload.md) — Assignment payload design
+- [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding contract
 
 ### ci
 - [idr-001](idr-001-test-infrastructure.md) — Test infrastructure

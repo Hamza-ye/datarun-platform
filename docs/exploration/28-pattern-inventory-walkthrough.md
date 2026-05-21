@@ -740,7 +740,7 @@ Key structural features:
 - **Include if**: S06-like scenarios (entity registries) appear in early deployments.
 - **Defer if**: early deployments focus on case management and reporting (S04/S08). entity_lifecycle can be added as a platform evolution with zero data migration.
 
-The pattern inventory is append-only [5-S5]. Adding entity_lifecycle later carries no architectural cost.
+Adding `entity_lifecycle` later is platform evolution under [5-S5]. It carries no stored-event migration, but it does require implementation and tests.
 
 ---
 
@@ -832,4 +832,4 @@ No-pattern activities are valid. Pattern selection at L0 is opt-in. S00 requires
 | PE evaluation algorithm | How PE applies transition tables efficiently (hash lookup on (state, type, shape_role)) | Implementation scope |
 | Projection extraction rules | How pattern-specific projections (items_dispatched, approval_chain) extract values from payloads | L1 projection rules or pattern-specific extractors |
 | entity_lifecycle timing | When/whether to add as 5th pattern | Platform evolution decision |
-| Additional patterns | Future scenarios may require patterns not yet defined (e.g., scheduled_collection, periodic_assessment) | Pattern Registry is append-only [5-S5] |
+| Additional patterns | Future scenarios may require patterns not yet defined (e.g., scheduled_collection, periodic_assessment) | Platform evolution under [5-S5]; no deployer-authored state machines |
