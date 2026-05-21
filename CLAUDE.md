@@ -24,7 +24,7 @@ before any Phase 4 work; see §"Audit — End of Phase 3c (2026-04-21)" below.
 - Phase 3b (Expressions + DtV): COMPLETE
 - Phase 3c (Config Packager + Full Pipeline): COMPLETE
 - **Phase 3d (close-out)**: COMPLETE — 3d.1 activity_ref plumbing, 3d.2 sensitivity surface on device, 3d.3 ContextResolver.
-- **Phase 3e (envelope type vocabulary retrofit)**: COMPLETE — executes [ADR-002 Addendum](docs/adrs/adr-002-addendum-type-vocabulary.md). Envelope `type` closed at 6 values (ADR-4 S3); the four identity/integrity primitives (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) are platform-bundled **shape** names, registered at boot by `PlatformShapeBootstrap`. Server: 164 tests (16 classes). Mobile: 72 tests (10 files).
+- **Phase 3e (envelope type vocabulary retrofit)**: COMPLETE — executes [ADR-007](docs/adrs/adr-007-envelope-type-closure.md). Envelope `type` closed at 6 values (ADR-4 S3 / ADR-007); the four identity/integrity facts (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) are platform-bundled **shape** names, registered at boot by `PlatformShapeBootstrap`. Server: 164 tests (16 classes). Mobile: 72 tests (10 files).
 - **Phase 4**: NOT STARTED — blocked on IDR-020 rewrite + IDR-021 (role-action) + IDR-022 (severity/uniqueness)
 
 **Test counts (actual, post-Phase 3e 2026-04-21)**: 16 server test classes, 108 `@Test` methods
@@ -185,13 +185,13 @@ contracts/                         # Language-neutral shared definitions
   shapes/                          # Shape schemas: assignment_{created,ended}/v1 (IDR-013),
                                    # conflict_detected/v1, conflict_resolved/v1,
                                    # subjects_merged/v1, subject_split/v1 (platform-bundled
-                                   # internal shapes per ADR-002 Addendum, Phase 3e)
+                                   # internal shapes per ADR-007, Phase 3e)
 
 server/src/main/java/dev/datarun/server/
   event/                           # Event store + envelope validation
   sync/                            # Push/pull pipeline (2-Tx)
   subject/                         # Subject projection + REST
-  identity/                        # Server identity, alias cache, merge/split
+  identity/                        # Server identity, alias projection, lifecycle projection, merge/split
   integrity/                       # Conflict detection + resolution + sweep job
   authorization/                   # Token auth, assignments, scope resolution, locations
   config/                          # Phase 3: shapes, activities, config packaging
@@ -245,8 +245,9 @@ design/                            # formerly a git submodule — now inlined he
 | File | Purpose | Key API |
 |------|---------|---------|
 | `ServerIdentity.java` | Stable server device_id + SEQUENCE device_seq | `getDeviceId()`, `nextDeviceSeq()` |
-| `AliasCache.java` | In-memory ConcurrentHashMap retired→surviving | `resolve(UUID)→UUID`, `isRetired(UUID)`, `refresh()` |
-| `IdentityService.java` | Merge/split with DD-3 row-level locking | `merge(retiredId, survivingId, actorId, reason)→Event`, `split(sourceId, actorId, reason)→Event` |
+| `IdentityLifecycleProjection.java` | Event-derived active/archived lifecycle from identity shapes | `stateOf(UUID)`, `findArchived(UUID)` |
+| `SubjectAliasProjection.java` | Rebuildable `subject_aliases` projection from `subjects_merged/v1` | `upsertAlias(...)`, `resolve(UUID)`, `rebuildFromEvents()` |
+| `IdentityService.java` | Merge/split with subject-scoped advisory locking | `merge(retiredId, survivingId, actorId, reason)→Event`, `split(sourceId, actorId, reason)→Event` |
 | `IdentityController.java` | REST | `POST /api/identity/merge`, `POST /api/identity/split` |
 
 ### integrity/ — Conflict Detection & Resolution
@@ -286,7 +287,7 @@ design/                            # formerly a git submodule — now inlined he
 | `ExpressionRule.java` | Expression rule record | `record(id, activityRef, shapeRef, fieldName, ruleType, expression, message, createdAt)` |
 | `ExpressionRepository.java` | Expression rule persistence (JSONB expression column) | `insert(ExpressionRule)`, `findAll()`, `findByActivityAndShape(activity, shape)`, `delete(UUID)` |
 | `DeployTimeValidator.java` | DtV L2: field refs exist, operator-type compat, predicate budget ≤3, no nesting, default type match | `validate(ExpressionRule, Shape)→List<String>` |
-| `PlatformShapeBootstrap.java` | Phase 3e: `@EventListener(ApplicationReadyEvent)` registers the four platform-bundled internal shapes (`conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, `subject_split/v1`) via `ShapeService.createShape`. Idempotent — skips insertion if the shape already exists at version 1. Formalizes the Phase 1/2 payloads per [ADR-002 Addendum](docs/adrs/adr-002-addendum-type-vocabulary.md). | Spring component, no public API — runs once per boot |
+| `PlatformShapeBootstrap.java` | Phase 3e: `@EventListener(ApplicationReadyEvent)` registers the four platform-bundled internal shapes (`conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, `subject_split/v1`) via `ShapeService.createShape`. Idempotent — skips insertion if the shape already exists at version 1. Formalizes the Phase 1/2 payloads per [ADR-007](docs/adrs/adr-007-envelope-type-closure.md). | Spring component, no public API — runs once per boot |
 
 ### admin/ — Admin UI
 | File | Purpose |
@@ -413,8 +414,8 @@ Canonical docs in `docs/`:
 | # | Forbidden | Why |
 | --- | --- | --- |
 | F1 | Add or modify envelope fields | Envelope finalized at 11 fields. ADR-level decision. |
-| F2 | Create new envelope `type` values | Envelope type vocabulary is locked at **6 values** by ADR-4 S3: `capture`, `review`, `alert`, `task_created`, `task_completed`, `assignment_changed`. If you think you need a 7th, you need a new **shape**, not a new type. See [ADR-002 Addendum](docs/adrs/adr-002-addendum-type-vocabulary.md). |
-| F2a | Filter code on `type == "conflict_detected"` / `conflict_resolved` / `subjects_merged` / `subject_split` | These are **shape names**, not envelope types (per ADR-002 Addendum, 2026-04-21). Filter on `shape_ref` prefix instead. Any code or test that keys integrity-event discrimination off `type` is wrong. |
+| F2 | Create new envelope `type` values | Envelope type vocabulary is locked at **6 values** by ADR-4 S3 / ADR-007: `capture`, `review`, `alert`, `task_created`, `task_completed`, `assignment_changed`. If you think you need a 7th, you need a new **shape**, not a new type. See [ADR-007](docs/adrs/adr-007-envelope-type-closure.md). |
+| F2a | Filter code on `type == "conflict_detected"` / `conflict_resolved` / `subjects_merged` / `subject_split` | These are **shape names**, not envelope types (per ADR-007). Filter on `shape_ref` prefix instead. Any code or test that keys integrity-event discrimination off `type` is wrong. |
 | F2b | Encode authorship in envelope `type` | `type` answers "what pipeline"; `actor_ref` answers "who authored". `conflict_resolved/v1` spans `type=review` (human) and `type=capture` (`system:auto_resolution/*`) — discriminate on actor, never add a new type. |
 | F3 | Write to events table outside Event Store module | Write-path discipline. |
 | F4 | Modify or delete persisted events | Append-only is the foundational invariant. |

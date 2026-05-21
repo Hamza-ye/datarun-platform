@@ -20,9 +20,9 @@ Subject merge needs an alias table for identity resolution. ADR-002 S6 demands s
 
 Materialized `subject_aliases` projection table with eager transitive closure updated atomically within the merge transaction. The table is derived from `subjects_merged/v1` events; it is not an independent source of truth. It can be rebuilt by replaying merge events in `sync_watermark` order.
 
-In-memory `ConcurrentHashMap` cache (<100KB at scale) is loaded from the projection table and refreshed after each merge — zero DB round-trips on the hot read path.
+No in-memory alias cache is kept by default. Reads resolve through the rebuildable alias projection; ADR-001 B→C remains available if a future fixture proves alias lookup cost is real.
 
-Merge procedure (within single transaction): acquire transaction-scoped advisory locks for both subject IDs → project lifecycle from identity events and require both operands active → build `subjects_merged/v1` event → update the alias projection with eager transitive closure → insert event with `type = capture` and `shape_ref = subjects_merged/v1` → commit → refresh cache. (`subjects_merged` is a shape name, not an envelope type — see [ADR-007](../adrs/adr-007-envelope-type-closure.md).)
+Merge procedure (within single transaction): acquire transaction-scoped advisory locks for both subject IDs → project lifecycle from identity events and require both operands active → build `subjects_merged/v1` event → update the alias projection with eager transitive closure → insert event with `type = capture` and `shape_ref = subjects_merged/v1` → commit. (`subjects_merged` is a shape name, not an envelope type — see [ADR-007](../adrs/adr-007-envelope-type-closure.md).)
 
 Three fixes from Database Optimizer agent review:
 1. **Concurrent merge race**: transaction-scoped advisory locks on the involved subject IDs serialize irreversible lineage writes.
@@ -45,4 +45,4 @@ Three fixes from Database Optimizer agent review:
 - ADR: adr-002
 - Constraint: C7, [2-S9]
 - Exploration: doc 07 §B3–B5
-- Files: subject_aliases table, AliasCache, IdentityService
+- Files: subject_aliases table, SubjectAliasProjection, IdentityLifecycleProjection, IdentityService

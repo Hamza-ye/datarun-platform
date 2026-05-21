@@ -30,7 +30,6 @@ public class IdentityService {
     private final TransactionTemplate transactionTemplate;
     private final EventRepository eventRepository;
     private final ServerIdentity serverIdentity;
-    private final AliasCache aliasCache;
     private final SubjectAliasProjection subjectAliasProjection;
     private final IdentityLifecycleProjection lifecycleProjection;
     private final ObjectMapper objectMapper;
@@ -39,7 +38,6 @@ public class IdentityService {
                            TransactionTemplate transactionTemplate,
                            EventRepository eventRepository,
                            ServerIdentity serverIdentity,
-                           AliasCache aliasCache,
                            SubjectAliasProjection subjectAliasProjection,
                            IdentityLifecycleProjection lifecycleProjection,
                            ObjectMapper objectMapper) {
@@ -47,7 +45,6 @@ public class IdentityService {
         this.transactionTemplate = transactionTemplate;
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
-        this.aliasCache = aliasCache;
         this.subjectAliasProjection = subjectAliasProjection;
         this.lifecycleProjection = lifecycleProjection;
         this.objectMapper = objectMapper;
@@ -55,7 +52,7 @@ public class IdentityService {
 
     /**
      * Merge two subjects: retired_id is absorbed into surviving_id.
-     * Full DD-3 procedure with row-level locking (Database Optimizer validated).
+     * Current DD-3 procedure with subject-scoped advisory locking.
      *
      * @param retiredId  subject to retire (absorbed)
      * @param survivingId subject that survives (absorbs)
@@ -95,9 +92,6 @@ public class IdentityService {
 
             return event;
         });
-
-        // Step 5 (application): refresh alias cache
-        aliasCache.refresh();
 
         log.info("Merged subject {} into {} (event: {})", retiredId, survivingId,
                 mergeEvent != null ? mergeEvent.id() : "null");

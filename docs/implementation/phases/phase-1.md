@@ -81,7 +81,7 @@ The per-event `sync_watermark` (from the envelope, [2-S1]) captures the device's
 
 ### DD-3: Alias Table Storage
 
-**Approach** (recommended): Materialized table with eager transitive closure — contract C7 demands single-hop lookup.
+**Approach** (current after ADR-001/002 parity cleanup): Keep `subject_aliases` as a rebuildable projection with eager transitive closure — contract C7 demands single-hop lookup. Do not keep a `subject_lifecycle` table or alias cache by default. Lifecycle is projected from `subjects_merged/v1` and `subject_split/v1` events on demand; ADR-001 B→C remains available only if a future fixture proves read cost.
 
 **Server schema**:
 ```sql
@@ -93,22 +93,13 @@ CREATE TABLE subject_aliases (
 CREATE INDEX idx_aliases_surviving ON subject_aliases (surviving_id);
 ```
 
-**Merge procedure** (full, within a single transaction):
+**Merge procedure** (current, within a single transaction):
 ```sql
 BEGIN;
 
--- Step 0: Acquire locks — prevents concurrent merge race condition.
--- Eager-insert lifecycle rows (active is the default, changes no semantics)
--- then lock in consistent order to prevent deadlocks.
-INSERT INTO subject_lifecycle (subject_id, state)
-  VALUES ($retired_id, 'active') ON CONFLICT (subject_id) DO NOTHING;
-INSERT INTO subject_lifecycle (subject_id, state)
-  VALUES ($surviving_id, 'active') ON CONFLICT (subject_id) DO NOTHING;
-
-SELECT state FROM subject_lifecycle
-  WHERE subject_id IN ($retired_id, $surviving_id)
-  ORDER BY subject_id FOR UPDATE;
--- Application checks: both must be 'active'. If not → ROLLBACK.
+-- Step 0: Acquire subject-scoped advisory locks for all involved IDs.
+-- Application projects lifecycle from identity events in the same transaction.
+-- Preconditions: operands must be active. If not → ROLLBACK.
 
 -- Step 1: Cascade existing aliases pointing to retired → surviving
 UPDATE subject_aliases SET surviving_id = $surviving_id
@@ -119,26 +110,21 @@ INSERT INTO subject_aliases (retired_id, surviving_id, merged_at)
   VALUES ($retired_id, $surviving_id, NOW())
   ON CONFLICT (retired_id) DO NOTHING;
 
--- Step 3: Archive retired subject
-UPDATE subject_lifecycle SET state = 'archived', archived_at = NOW()
-  WHERE subject_id = $retired_id;
-
--- Step 4: Insert SubjectsMerged event
+-- Step 3: Insert SubjectsMerged event (type=capture, shape_ref=subjects_merged/v1)
 INSERT INTO events (...) VALUES (...);
 
 COMMIT;
--- Step 5 (application): refresh alias cache
 ```
 
-**Why row-level locking** (Agent review: Database Optimizer identified): Under READ COMMITTED, two concurrent merges involving a shared subject can produce a broken alias table — T1 inserts A→B while T2 cascades B→C, but T2 doesn't see T1's uncommitted insert. Result: A→B and B→C exist but no A→C. Single-hop violated. `SELECT ... FOR UPDATE` on lifecycle rows serializes merges that share operands.
+**Why locking** (Agent review: Database Optimizer identified): Under READ COMMITTED, two concurrent merges involving a shared subject can produce a broken alias table — T1 inserts A→B while T2 cascades B→C, but T2 doesn't see T1's uncommitted insert. Result: A→B and B→C exist but no A→C. Single-hop violated. Subject-scoped advisory locks serialize merges that share operands without introducing lifecycle rows as state.
 
-**Alias cache**: Full alias table loaded into `ConcurrentHashMap<UUID, UUID>` at startup. Refreshed after each merge event. At hundreds-to-thousands of entries (<100KB), this is the optimal hot-path strategy — zero DB round-trips per event resolution.
+**Alias projection**: `subject_aliases` is a rebuildable projection from `subjects_merged/v1` events. It exists for single-hop lookup and query ergonomics, not as an independent authority source.
 
-**Device schema**: Same structure in SQLite. Updated when `subjects_merged` events are received during pull.
+**Device schema**: Same alias structure in SQLite. Updated from `subjects_merged/v1` events during pull and rebuildable by replaying local events.
 
-**Terminology note**: The alias table uses `retired_id` (ADR-002 merge terminology). Both merged-retired and split-archived subjects enter `archived` state in `subject_lifecycle`. The alias table's `retired_id` is merge-specific; the lifecycle table normalizes all non-active subjects to `archived`.
+**Terminology note**: The alias table uses `retired_id` (ADR-002 merge terminology). The alias table's `retired_id` is merge-specific. Split-archived sources are lifecycle facts projected from `subject_split/v1`; they do not create alias rows.
 
-**Agent review outcome**: Database Optimizer validated with 3 required fixes applied above (row-level locking, idempotent INSERT, S9 precondition check). Schema and indexes confirmed correct. In-memory cache recommended for hot path.
+**Stabilization outcome**: The original lifecycle-row and alias-cache design was removed by FP-002. Current code projects lifecycle from events under advisory locks and keeps only the alias projection as rebuildable downstream state.
 
 ---
 
@@ -206,7 +192,7 @@ Classified after Phase 1 completion. See [execution-plan.md §6.1](../execution-
 **Prerequisites**: DD-1, DD-2, DD-4 resolved.
 
 **Deliverables**:
-1. `contracts/envelope.schema.json` updated — type enum extended with 4 new types
+1. `contracts/envelope.schema.json` validates the closed 6-type vocabulary; integrity facts use platform-bundled shapes such as `conflict_detected/v1` (corrected by ADR-007 / Phase 3e)
 2. `contracts/sync-protocol.md` updated — push request includes `last_pull_watermark`
 3. Server `conflict/` module:
    - `ConflictDetector` — evaluates incoming events against projected state
@@ -244,14 +230,13 @@ Classified after Phase 1 completion. See [execution-plan.md §6.1](../execution-
 **Deliverables**:
 1. Server `identity/` module:
    - Merge endpoint: `POST /api/identity/merge` (online-only, server-validated)
-     - Preconditions: both subjects active, not archived (checked against `subject_lifecycle`)
-     - Creates `subjects_merged` event
-     - Updates `subject_lifecycle`: sets `retired_id` state to `archived`
-     - Updates `subject_aliases` table with transitive closure
+     - Preconditions: both subjects active, not archived (projected from identity events)
+     - Creates event with `type = capture`, `shape_ref = subjects_merged/v1`
+     - Updates rebuildable `subject_aliases` projection with transitive closure
    - Split endpoint: `POST /api/identity/split` (online-only, server-validated)
      - Preconditions: source subject active (not already archived)
-     - Creates `subject_split` event
-     - Archives source, creates successor
+     - Creates event with `type = capture`, `shape_ref = subject_split/v1`
+     - Archives source as an event-derived lifecycle fact, creates successor
      - Historical events remain attributed to archived source
 2. Server Projection Engine extended:
    - Alias resolution: queries against retired IDs resolve to surviving IDs
@@ -259,8 +244,8 @@ Classified after Phase 1 completion. See [execution-plan.md §6.1](../execution-
    - `GET /api/subjects/{id}/events` includes events from all alias chains
 3. Conflict Detector extended:
    - `stale_reference` detection: event references retired subject ID → flag raised
-   - Detection uses raw references (2-S13) — checks alias table for the `subject_ref.id` in incoming events
-4. Database migration V3: `subject_aliases` table, archive state tracking
+   - Detection uses raw references (2-S13) and event-derived lifecycle, not alias table authority
+4. Database migration V3: `subject_aliases` table; archive state is event-derived
 5. Admin view: merge/split actions, alias chain visualization
 
 **Quality gates**:
@@ -494,15 +479,8 @@ CREATE TABLE subject_aliases (
 );
 CREATE INDEX idx_aliases_surviving ON subject_aliases (surviving_id);
 
--- Subject lifecycle state (for merge/split preconditions)
--- Population: starts empty. Subjects with no row are treated as 'active' (default).
--- Merge/split operations insert or update rows. The table grows as identity operations occur.
-CREATE TABLE subject_lifecycle (
-    subject_id  UUID PRIMARY KEY,
-    state       VARCHAR(20) NOT NULL DEFAULT 'active',  -- active | archived
-    archived_at TIMESTAMPTZ,
-    successor_id UUID  -- only set on split (points to new subject)
-);
+-- No subject_lifecycle table: lifecycle is projected from
+-- subjects_merged/v1 and subject_split/v1 events on demand.
 ```
 
 ### Mobile SQLite Schema Addition
@@ -560,7 +538,7 @@ Implementation decisions and discoveries are in [`docs/decisions/`](../../decisi
 19/19 integration tests green (8 Phase 0 preserved + 3 subject + 8 Phase 1a quality gates).
 
 **Deliverables shipped:**
-- `contracts/envelope.schema.json` — type enum extended with 4 new types
+- `contracts/envelope.schema.json` — closed 6-type enum; identity/integrity facts represented as platform-bundled shapes per ADR-007
 - `contracts/sync-protocol.md` — push request extended (`device_id`, `last_pull_watermark`), response extended (`flags_raised`)
 - Migration V2: `server_identity` table, `server_device_seq` SEQUENCE, `device_sync_state` table
 - `server/identity/ServerIdentity` — env var primary, DB fallback, SEQUENCE-backed `device_seq`
@@ -593,13 +571,14 @@ Implementation decisions and discoveries are in [`docs/decisions/`](../../decisi
 27/27 integration tests green (19 Phase 0+1a preserved + 8 Phase 1b quality gates).
 
 **Deliverables shipped:**
-- Migration V3: `subject_aliases` table (retired_id UUID PK, surviving_id UUID NOT NULL, merged_at TIMESTAMPTZ, CHECK retired_id != surviving_id), `idx_aliases_surviving` index, `subject_lifecycle` table (subject_id UUID PK, state VARCHAR(20) DEFAULT 'active', archived_at TIMESTAMPTZ, successor_id UUID)
-- `server/identity/AliasCache` — `ConcurrentHashMap<UUID, UUID>` loaded at `@PostConstruct`, refreshed after each merge via `refresh()`. Single-hop resolve + isRetired check.
-- `server/identity/IdentityService` — full DD-3 merge procedure: eager-insert lifecycle rows → SELECT FOR UPDATE (ordered by subject_id to prevent deadlocks) → check both active → cascade existing aliases (transitive closure) → insert new alias (ON CONFLICT DO NOTHING) → archive retired → insert event with `type = capture`, `shape_ref = subjects_merged/v1` → commit → refresh alias cache. Split procedure: precondition check → archive source with successor_id → insert event with `type = capture`, `shape_ref = subject_split/v1`.
+- Migration V3: `subject_aliases` table (retired_id UUID PK, surviving_id UUID NOT NULL, merged_at TIMESTAMPTZ, CHECK retired_id != surviving_id), `idx_aliases_surviving` index. No `subject_lifecycle` table.
+- `server/identity/IdentityLifecycleProjection` — projects active/archived lifecycle from `subjects_merged/v1` and `subject_split/v1` events on demand.
+- `server/identity/SubjectAliasProjection` — maintains rebuildable `subject_aliases` projection from `subjects_merged/v1` events with eager transitive closure.
+- `server/identity/IdentityService` — merge/split preconditions project lifecycle from events under subject-scoped advisory locks. Merge appends `type = capture`, `shape_ref = subjects_merged/v1` and updates alias projection in the same transaction. Split appends `type = capture`, `shape_ref = subject_split/v1`; no lifecycle row is written.
 - `server/identity/IdentityController` — `POST /api/identity/merge` and `POST /api/identity/split` REST endpoints with precondition validation.
-- `server/integrity/ConflictDetector` extended — `stale_reference` detection: checks `AliasCache.isRetired()` for incoming event's `subject_ref.id` before concurrent_state_change check. Produces flag events with `type = alert`, `shape_ref = conflict_detected/v1`, and `flag_category=stale_reference`. `buildFlagEvent()` parameterized by flag category and reason.
+- `server/integrity/ConflictDetector` extended — `stale_reference` detection uses event-derived lifecycle for incoming event's `subject_ref.id` before concurrent_state_change check. Produces flag events with `type = alert`, `shape_ref = conflict_detected/v1`, and `flag_category=stale_reference`. `buildFlagEvent()` parameterized by flag category and reason.
 - `server/subject/SubjectProjection` extended — alias resolution via LEFT JOIN `subject_aliases` in CTE. `COALESCE(sa.surviving_id, e.subject_ref->>'id')` as `canonical_subject_id`. Merged subjects appear as one unified entry.
-- `server/subject/SubjectController` extended — `GET /api/subjects/{id}/events` resolves through alias cache, includes events from all retired IDs in the alias chain, sorted by sync_watermark.
+- `server/subject/SubjectController` extended — `GET /api/subjects/{id}/events` resolves through the alias projection, includes events from all retired IDs in the alias chain, sorted by sync_watermark.
 
 **Quality gates verified:**
 - [x] QG1: Merge A and B → alias created → `GET /api/subjects` shows one unified subject with events from both (event_count=3)
@@ -678,7 +657,7 @@ Implementation decisions and discoveries are in [`docs/decisions/`](../../decisi
   - `getSubjectList()`: loads aliases, builds flagged event set from `shapeRef.startsWith('conflict_detected/')` events, un-flags events resolved with `accepted`/`reclassified`, resolves subject IDs through alias table, filters system events from grouping by `shape_ref`, excludes flagged events from state derivation (captureCount, name), counts unresolved flags per subject.
   - `getSubjectDetail()`: fetches events for surviving ID + all retired aliases, deduplicates, sorts DESC.
   - `getFlaggedEventIds()`: returns set of source_event_ids for unresolved flags (used by UI for indicators).
-  - `_isSystemEvent()`: filters `conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split` by `shape_ref` prefix.
+  - Named predicates filter `conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split` by `shape_ref` prefix.
 - `mobile/domain/subject_summary.dart` — Added `flagCount` field (default 0, backward-compatible).
 - `mobile/presentation/screens/work_list_screen.dart` — Flag badge (red pill) on subjects with `flagCount > 0`.
 - `mobile/presentation/screens/subject_detail_screen.dart` — Loads `flaggedEventIds`, passes `isFlagged` to `_EventTile`. Flagged events show red icon tint + "FLAGGED" badge.
@@ -705,11 +684,11 @@ Implementation decisions and discoveries are in [`docs/decisions/`](../../decisi
 64 total tests green (44 server + 20 mobile).
 
 **Deliverables shipped:**
-- `contracts/fixtures/projection-equivalence.json` — Shared fixture exercising: basic capture, flag exclusion, flag resolution (accepted → re-included), alias merge, system event filtering. 7 events + 1 alias → 2 expected subjects in canonical format `{subject_id, event_count, flag_count, latest_timestamp}`.
+- `contracts/fixtures/projection-equivalence.json` — Shared fixture exercising: basic capture, flag exclusion, flag resolution (accepted → re-included), alias merge, system event filtering. Alias state is rebuilt from events; expected subjects use canonical format `{subject_id, event_count, flag_count, latest_timestamp}`.
 - `server/subject/SubjectSummary` — Added `flag_count` field (was missing from server PE output).
 - `server/subject/SubjectProjection` — CTE extended with `unresolved_flags` sub-CTE to compute `flag_count` per subject. Both PEs now produce equivalent canonical shape.
-- `server/projection/ProjectionEquivalenceTest` — Loads shared fixture, inserts events + aliases into DB, runs server PE, compares to expected output field-by-field (including timestamp instant comparison).
-- `mobile/test/projection_equivalence_test.dart` — Loads same shared fixture from contracts/, inserts events + aliases into sqflite, runs Dart PE, compares to expected output.
+- `server/projection/ProjectionEquivalenceTest` — Loads shared fixture, inserts events, rebuilds alias projection from events, runs server PE, compares to expected output field-by-field (including timestamp instant comparison).
+- `mobile/test/projection_equivalence_test.dart` — Loads same shared fixture from contracts/, inserts events, rebuilds aliases from events in sqflite, runs Dart PE, compares to expected output.
 - `server/e2e/MultiDeviceE2ETest` — Full lifecycle test: Device A pushes 2 captures → Device B pushes 1 capture (concurrent, `last_pull_watermark=0`) → conflict auto-detected → PE shows 1 flag, 2 events → admin resolves as accepted → PE shows 0 flags, 3 events → pull returns all 5 events (3 domain + 2 system).
 
 **Quality gates verified:**

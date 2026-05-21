@@ -15,7 +15,7 @@ The envelope `type` vocabulary is **closed at 6 values** by ADR-4 S3. Four strin
 - If a spec says "add a new event type", translate to "add a new shape" before writing code.
 - Never filter integrity-event code on `type == "..."`. Always filter on `shape_ref` prefix.
 - Authorship (human vs system actor) is carried by `actor_ref`, never by envelope `type`. The same shape can legitimately span multiple envelope types based on who authored it.
-- When in doubt, read [ADR-002 Addendum](../adrs/adr-002-addendum-type-vocabulary.md) before writing code.
+- When in doubt, read [ADR-007](../adrs/adr-007-envelope-type-closure.md) before writing code.
 
 **How this drift got in**: Phase 1 and Phase 2 were implemented before ADR-4 S3 was ratified. ADR-4 did not audit Phase 1/2 code for type-vocabulary conformance. Lesson: when an ADR closes a vocabulary, run a grep audit across already-merged code the same day and file a retrofit phase if drift is found. Do not assume "future phases will notice."
 

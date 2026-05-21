@@ -33,9 +33,6 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private SubjectAliasProjection subjectAliasProjection;
 
-    @Autowired
-    private AliasCache aliasCache;
-
     private static final UUID DEVICE_A = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID DEVICE_B = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static final UUID ACTOR_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
@@ -147,7 +144,6 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(aliasRows()).isEmpty();
 
         subjectAliasProjection.rebuildFromEvents();
-        aliasCache.refresh();
 
         assertThat(aliasRows()).isEqualTo(originalRows);
 
@@ -336,7 +332,6 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
                 INSERT INTO subject_aliases (retired_id, surviving_id, merged_at)
                 VALUES (?::uuid, ?::uuid, NOW())
                 """, retiredId.toString(), survivingId.toString());
-        aliasCache.refresh();
 
         var response = pushEvents(List.of(buildEvent(retiredId, DEVICE_B, 1)), DEVICE_B);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

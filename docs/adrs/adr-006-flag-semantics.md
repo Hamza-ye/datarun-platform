@@ -3,8 +3,8 @@
 > Status: **Decided**
 > Date: 2026-04-22
 > Convergence round: 1 (Phase 2 ADR #1)
-> Upstream: ADR-001, ADR-002, ADR-002 Addendum
-> Downstream: ADR-007 (will cite this for the integrity-shape invariant)
+> Upstream: ADR-001, ADR-002, ADR-007
+> Downstream: ADR-007 cites this for the integrity-shape invariant
 > Exploration: [Phase 0.5 harvest — Group 1](../convergence/inventory/disputes-harvest.md) · Raw: archive/05, archive/07, archive/09
 
 ---
@@ -19,7 +19,7 @@ Phase 0 inventory found three DISPUTED classifications on flag-related concepts:
 
 The Phase 0.5 archive harvest (see [disputes-harvest.md §Group-1](../convergence/inventory/disputes-harvest.md)) found the dispute is not about what the platform does — it is about which facet of one underlying thing each classification captures. The platform never rejects events for state anomalies. That is a property; it does not change. The machinery that inspects events and raises flags is a procedure; it can evolve without changing the property. The disputes collapse once the two are separated.
 
-ADR-002 S14 committed the property. ADR-002 Addendum §DD-3 made the flag identity deterministic. Platform-bundled integrity shapes (the four canonical integrity/identity shapes) wire into the detection pipeline as fixed contracts — canonicalized in ADR-007. What remained undocumented was the canonical split: **property vs. procedure**, and where each sits in the concept vocabulary. This ADR makes that split explicit.
+ADR-002 S14 committed the property. ADR-007 canonicalizes the deterministic flag identity and platform-bundled integrity shapes (the four canonical integrity/identity shapes) that wire into the detection pipeline as fixed contracts. What remained undocumented was the canonical split: **property vs. procedure**, and where each sits in the concept vocabulary. This ADR makes that split explicit.
 
 ---
 

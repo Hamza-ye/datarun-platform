@@ -22,7 +22,7 @@ The 11-field envelope is the universal contract between every primitive. Every c
 | `timestamp` | datetime | Mandatory | [2-S3] | Advisory only — display and audit. No ordering or correctness depends on it. |
 | `payload` | object | Mandatory | [1-S5] | Shape-specific data (validated against `shape_ref`) |
 
-**Type vocabulary** [4-S3], [7-S1], [E2]: Platform-fixed, closed, append-only. 6 initial types:
+**Type vocabulary** [4-S3], [7-S1], [E2]: Platform-fixed and closed at exactly 6 values. It is not append-only; extension requires an ADR-level decision.
 
 | Type | Processing behavior |
 |------|-------------------|

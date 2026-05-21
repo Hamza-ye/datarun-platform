@@ -9,7 +9,7 @@
 
 ## Why This File Exists
 
-Platform work is executed by multiple AI agents across sessions. Agents do not automatically carry context between sessions. When an item is "deferred," the decision to defer it is the easy part — **remembering to pick it up later** is the hard part. The Phase 1/2 envelope-type-vocabulary drift (resolved by [ADR-002 Addendum](adrs/adr-002-addendum-type-vocabulary.md) on 2026-04-21) is a concrete example of what happens when deferrals slip through:
+Platform work is executed by multiple AI agents across sessions. Agents do not automatically carry context between sessions. When an item is "deferred," the decision to defer it is the easy part — **remembering to pick it up later** is the hard part. The Phase 1/2 envelope-type-vocabulary drift (resolved by [ADR-007](adrs/adr-007-envelope-type-closure.md) on 2026-04-23) is a concrete example of what happens when deferrals slip through:
 
 - A decision is made at time T.
 - Code is written at time T+N that silently contradicts the decision.

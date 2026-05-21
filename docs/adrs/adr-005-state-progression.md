@@ -93,7 +93,7 @@ State is always computable from events. In all four event-stormed scenarios (S04
 
 **The on-device Command Validator is advisory, not blocking.** On-device, the validator can warn: "this case is resolved — are you sure you want to add an interaction?" The user can override the warning. The event is written regardless. On-server, the same transition rules are evaluated and `transition_violation` flags are created for invalid transitions (S1). The validator improves user experience (fewer unnecessary flags) without compromising the append-only contract.
 
-**Evaluated and rejected: `status_changed` as 7th structural event type.** A state-transition event requires no different platform processing from `capture`. The distinction between state-changing events (a `case_resolution` shape) and state-preserving events (a `case_interaction` shape) is expressed through the shape + the pattern definition, not through the event type. The type tells the platform HOW to process the event structurally; the shape + pattern tells it WHAT the event means in the domain. Adding `status_changed` was evaluated and found to add zero processing-behavior value that existing types do not already provide. The type vocabulary remains at 6. The escape hatch remains: the vocabulary is append-only (ADR-4 S3), so `status_changed` can be added later if a future scenario reveals genuinely different processing behavior.
+**Evaluated and rejected: `status_changed` as 7th structural event type.** A state-transition event requires no different platform processing from `capture`. The distinction between state-changing events (a `case_resolution` shape) and state-preserving events (a `case_interaction` shape) is expressed through the shape + the pattern definition, not through the event type. The type tells the platform HOW to process the event structurally; the shape + pattern tells it WHAT the event means in the domain. Adding `status_changed` was evaluated and found to add zero processing-behavior value that existing types do not already provide. The type vocabulary remains at 6. ADR-007 later closes that vocabulary: `status_changed` would require a new ADR-level platform decision if a future scenario reveals genuinely different processing behavior.
 
 #### S5: Pattern Registry
 
@@ -168,7 +168,7 @@ Why not flag propagation (creating derived flags on downstream events):
 
 All properties are **pre-resolvable on-device from data already present** — local projection data and assignment resolver state. No new data needs to sync. The device resolves these values once at form-open time; they are static during form fill. From the expression evaluator's perspective, `context.subject_state` is syntactically identical to `entity.facility_name` — a named value in its namespace.
 
-The property vocabulary is **platform-fixed, closed, append-only** — same governance as event types. A deployer cannot define `context.my_field`. Adding a property is a platform code change. This prevents AP-1 (inner platform effect — deployer-extensible expression scopes would be a step toward a query language).
+The property vocabulary is **platform-fixed and closed** — same governance posture as event types. A deployer cannot define `context.my_field`. Adding a property is a platform code change that needs an explicit platform decision. This prevents AP-1 (inner platform effect — deployer-extensible expression scopes would be a step toward a query language).
 
 The expression language grammar is unchanged. The evaluator gains one more data scope in the form context, not a new evaluation mode. ADR-4 S11's language specification stands: operators + field references, zero functions.
 
@@ -232,7 +232,7 @@ No new infrastructure. The trigger engine handles auto-resolution using the same
 
 - **Event envelope**: Unchanged. 11 fields across five ADRs. The envelope's extensibility clause (ADR-1 S5) remains available but five ADRs have required zero use of it — the original 4-field minimum plus 7 additions across ADRs 2 and 4 have proven sufficient for the platform's full behavioral range, from basic capture through multi-step, multi-actor workflows.
 
-- **Type vocabulary**: Unchanged at 6 types. `status_changed` was evaluated and rejected; the escape hatch (append-only vocabulary, ADR-4 S3) is preserved.
+- **Type vocabulary**: Unchanged at 6 types. `status_changed` was evaluated and rejected; ADR-007 makes any future type addition an ADR-level platform decision.
 
 - **Conflict detection pipeline**: Gains one evaluation step (transition violation). The pipeline structure is unchanged — same input (incoming event + projection state), same output (flag on event), same timing (at sync processing, before policy execution).
 

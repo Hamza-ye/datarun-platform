@@ -2,7 +2,7 @@ package dev.datarun.server.subject;
 
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
-import dev.datarun.server.identity.AliasCache;
+import dev.datarun.server.identity.SubjectAliasProjection;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,14 +17,14 @@ public class SubjectController {
 
     private final EventRepository eventRepository;
     private final SubjectProjection subjectProjection;
-    private final AliasCache aliasCache;
+    private final SubjectAliasProjection subjectAliasProjection;
 
     public SubjectController(EventRepository eventRepository,
                              SubjectProjection subjectProjection,
-                             AliasCache aliasCache) {
+                             SubjectAliasProjection subjectAliasProjection) {
         this.eventRepository = eventRepository;
         this.subjectProjection = subjectProjection;
-        this.aliasCache = aliasCache;
+        this.subjectAliasProjection = subjectAliasProjection;
     }
 
     @GetMapping
@@ -40,14 +40,14 @@ public class SubjectController {
      */
     @GetMapping("/{id}/events")
     public ResponseEntity<?> getSubjectEvents(@PathVariable UUID id) {
-        // Resolve through alias: if id is retired, get the canonical surviving id
-        UUID canonicalId = aliasCache.resolve(id);
+        // Resolve through alias projection: if id is retired, get the canonical surviving id
+        UUID canonicalId = subjectAliasProjection.resolve(id);
 
         // Collect events from the canonical ID plus all retired aliases that point to it
         List<Event> events = new ArrayList<>(eventRepository.findBySubjectId(canonicalId));
 
         // Also find events from retired IDs that alias to this canonical ID
-        List<UUID> retiredIds = findRetiredAliases(canonicalId);
+        List<UUID> retiredIds = subjectAliasProjection.findRetiredAliases(canonicalId);
         for (UUID retiredId : retiredIds) {
             events.addAll(eventRepository.findBySubjectId(retiredId));
         }
@@ -68,15 +68,5 @@ public class SubjectController {
                 "subject_id", canonicalId.toString(),
                 "events", events
         ));
-    }
-
-    /**
-     * Find all retired IDs that alias to the given canonical (surviving) ID.
-     */
-    private List<UUID> findRetiredAliases(UUID canonicalId) {
-        return eventRepository.getJdbcTemplate().query(
-                "SELECT retired_id FROM subject_aliases WHERE surviving_id = ?::uuid",
-                (rs, rowNum) -> UUID.fromString(rs.getString("retired_id")),
-                canonicalId.toString());
     }
 }

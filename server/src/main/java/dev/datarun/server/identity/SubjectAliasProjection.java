@@ -39,6 +39,27 @@ public class SubjectAliasProjection {
                 """, retiredId.toString(), survivingId.toString(), mergedAt.toString());
     }
 
+    public UUID resolve(UUID subjectId) {
+        List<UUID> survivingIds = jdbc.query("""
+                SELECT surviving_id
+                FROM subject_aliases
+                WHERE retired_id = ?::uuid
+                """,
+                (rs, rowNum) -> UUID.fromString(rs.getString("surviving_id")),
+                subjectId.toString());
+        return survivingIds.isEmpty() ? subjectId : survivingIds.get(0);
+    }
+
+    public List<UUID> findRetiredAliases(UUID survivingId) {
+        return jdbc.query("""
+                SELECT retired_id
+                FROM subject_aliases
+                WHERE surviving_id = ?::uuid
+                """,
+                (rs, rowNum) -> UUID.fromString(rs.getString("retired_id")),
+                survivingId.toString());
+    }
+
     public void rebuildFromEvents() {
         transactionTemplate.executeWithoutResult(status -> {
             List<MergeAlias> mergeEvents = jdbc.query("""

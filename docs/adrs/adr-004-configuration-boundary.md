@@ -43,7 +43,7 @@ Resolves Q11 (activity model and correlation metadata).
 
 #### S3: Structural Event Type Vocabulary
 
-**The `type` field uses a platform-fixed, closed, append-only vocabulary of structural event types.** Types represent platform processing behavior, not domain meaning. Domain meaning lives in shapes.
+**The `type` field uses a platform-fixed vocabulary of exactly six structural event types.** Types represent platform processing behavior, not domain meaning. Domain meaning lives in shapes. ADR-007 later canonicalized this as a closed vocabulary; it is not an append-only extension surface.
 
 Initial vocabulary (6 types):
 
@@ -56,7 +56,7 @@ Initial vocabulary (6 types):
 | `task_completed` | Task response → source linking → deadline cancellation |
 | `assignment_changed` | Scope/role modification → sync scope recomputation (ADR-3) |
 
-A new type is justified only when it requires different platform processing behavior. If the only difference is domain meaning, it is `capture` with a domain-specific shape. New types may be added (code change, no data migration). No type may be removed or renamed once events carry it.
+A new type is justified only when it requires different platform processing behavior. If the only difference is domain meaning, it is `capture` with a domain-specific shape. Adding a type requires an ADR-level platform decision. No type may be removed or renamed once events carry it.
 
 Resolves Q1 (event type vocabulary ownership).
 
@@ -256,7 +256,7 @@ Resolves Q7 (partially — Q7a resolved, Q7b deferred), Q8 (role-action tables a
 
 - **Deprecation-only schema evolution accumulates cruft.** Shapes grow but never shrink. The 60-field budget bounds the accumulation. When a shape approaches its budget with mostly-deprecated fields, the deployer creates a new shape. Revisit trigger: >3 deployments hit the field budget due to deprecated-field accumulation rather than genuine field count.
 
-- **Six event types may prove insufficient.** The append-only vocabulary commitment makes addition cheap. However, premature addition creates permanent parsing obligations across all components. Revisit trigger: ADR-5 analysis identifies a processing behavior that cannot be cleanly expressed by any existing type.
+- **Six event types may prove insufficient.** ADR-007 closes the vocabulary at six; any addition requires a new ADR-level platform decision because it creates permanent parsing obligations across all components. Revisit trigger: a later ADR identifies a processing behavior that cannot be cleanly expressed by any existing type.
 
 ### Principles confirmed
 
