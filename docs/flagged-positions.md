@@ -176,6 +176,44 @@ A successor ADR must exist, and either:
 
 ---
 
+## FP-005 — Scoped pull temporal anchor and subject-history backfill
+
+**Status**: OPEN
+**Opened**: 2026-05-22 by ADR-003 / Phase 4 readiness review
+**Blocks**: IDR-021 (Role-Action Enforcement), Phase 4 `ongoing_resolution` implementation
+**Severity**: A — touches ADR-003 S2 ("sync scope = access scope") and ADR-003 S3 authority-as-projection
+
+### Context
+
+A rolled-back Ship-era FP raised a real ambiguity that still has a current-repo analogue: scope evaluation has different correct anchors depending on the pull class. The old text must not be imported verbatim because its repository, code paths, and "ships" strategy no longer apply, but the underlying question remains load-bearing for IDR-021 and Phase 4.
+
+Current code has only one live sync pull path. `server/src/main/java/dev/datarun/server/sync/SyncController.java` computes scope with `scopeResolver.getActiveAssignments(actorId)` during pull, and `ActiveAssignment.isActive()` evaluates current assignment activity. That is correct for **live-sync contraction**: after reassignment away from a scope, a normal pull should not deliver new events from the old scope.
+
+The unresolved risk is **subject-history backfill** for long-running subjects. Normal pull is watermark-based: it returns events with `sync_watermark > since_watermark`. If an actor already synced to watermark 500 and is then assigned a long-running `ongoing_resolution` subject whose history lives at watermarks 100-200, normal live pull will not return the prior timeline. Phase 4 pattern state derivation needs the full subject history to compute `current_state`, so subject-bound assignment may require a distinct backfill behavior rather than relying on the live-sync watermark path.
+
+Historical/audit pull is also not implemented. ADR-003 explicitly deferred auditor access, so it should not be silently folded into live sync. If audit reconstruction is needed, it needs an explicit pull class/API or an explicit out-of-Phase-4 deferral.
+
+### Trigger
+
+Before drafting IDR-021, and again before the first Phase 4 implementation commit for `ongoing_resolution`.
+
+### Gate
+
+All four must be true:
+
+1. **Live contraction stays request-time scoped**: an integration test proves that after an actor is reassigned away from a scope, a later normal pull does not deliver new events from the old scope.
+2. **Subject-history backfill is decided and tested**: either:
+   - a subject-bound backfill path exists and is tested: actor already synced past a subject's historical watermarks -> actor receives a new `subject_list` assignment for that subject -> next appropriate sync/backfill returns the subject's prior timeline needed for `ongoing_resolution` projection; or
+   - Phase 4 explicitly does not support assigning an already-active long-running subject to an actor with a high watermark, and the limitation is documented in the Phase 4 spec.
+3. **Audit/historical pull is classified**: a decision artifact states whether audit reconstruction is out of Phase 4 or requires a separate pull class/API. It must not be implied by live sync.
+4. **Push-path authority semantics are not assumed from the old FP**: IDR-021 either resolves this through FP-001 or adds tests that prove role/action checks reconstruct authority from the assignment event timeline at the intended event causal position, not from a cache, envelope field, or unexamined request-time shortcut.
+
+### Resolution log
+
+- **2026-05-22**: Opened. Current repo read found live pull uses active assignments at request time and watermark pagination; no current subject-history backfill or audit pull class is specified.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
