@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-22 (Phase 4 challenge review)
+**Last updated**: 2026-05-22 (FP-006 resolved)
 
 ---
 
@@ -37,7 +37,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 | FP-003 | Envelope schema parity test | — | C | **RESOLVED** (EnvelopeSchemaParityTest) |
 | FP-004 | `assignment_ref` as potential future envelope field | future assignment-targeting ADR/work | B | **OPEN** |
 | FP-005 | Scoped pull temporal anchor and subject-history backfill | Phase 4 `ongoing_resolution` | A | **IN_PROGRESS** (routed; IDR-021 drafting unblocked) |
-| FP-006 | `temporal_authority_expired` superseded-assignment false positive | Phase 4 role-action / detection ordering | A | **OPEN** |
+| FP-006 | `temporal_authority_expired` superseded-assignment false positive | Phase 4 role-action / detection ordering | A | **RESOLVED** |
 
 **Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
 
@@ -98,7 +98,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## Blockers
 
-FP-006 must be resolved before Phase 4 role-action enforcement or later detection-order passes begin.
+No unresolved blocker remains for Phase 4 role-action enforcement or detection-order implementation. FP-005 remains `IN_PROGRESS` and still blocks Phase 4 `ongoing_resolution` implementation until subject-history backfill is specified and tested.
 
 ---
 

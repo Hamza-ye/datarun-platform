@@ -160,25 +160,24 @@ public class ConflictDetector {
             UUID subjectId = extractSubjectId(event);
             if (subjectId == null) continue;
 
+            Long eventWatermark = eventRepository.getSyncWatermark(event.id());
+            if (eventWatermark == null) continue;
+            long effectiveWatermark = Math.min(eventWatermark, lastPullWatermark);
+            String subjectPath = subjectLocationRepository.findPathBySubjectId(subjectId);
+
             // --- 1. temporal_authority_expired ---
-            // Check if any assignment covering this subject ended AFTER the event was created
-            // (actor didn't know about the assignment ending)
+            // Check if any covering assignment ended after the device's knowledge horizon.
+            // If the actor has synced past the end (and any replacement assignment), later
+            // scope/role checks handle authority without inheriting a stale temporal flag.
             boolean temporalFlagged = false;
             for (ActiveAssignment ended : allAssignments) {
                 if (!ended.ended()) continue;
                 // Get the ended assignment's watermark
                 Long endedWatermark = getAssignmentEndedWatermark(ended.assignmentId());
                 if (endedWatermark == null) continue;
-
-                // Event's sync_watermark represents when the server saw it;
-                // we need to check if the assignment ended between event creation and push.
-                // If the ended watermark is > the event's envelope sync_watermark
-                // (from the pushing device's perspective), actor didn't know.
-                Long eventWatermark = eventRepository.getSyncWatermark(event.id());
-                if (eventWatermark == null) continue;
+                if (endedWatermark <= effectiveWatermark) continue;
 
                 // Assignment ended, and the subject was in that assignment's scope
-                String subjectPath = subjectLocationRepository.findPathBySubjectId(subjectId);
                 if (ended.containsGeographically(subjectPath)
                         && ended.containsSubject(subjectId)
                         && ended.containsActivity(event.activityRef())) {
@@ -199,7 +198,6 @@ public class ConflictDetector {
 
             // --- 2. scope_violation (skip if temporal_authority_expired already flagged) ---
             if (!temporalFlagged && !activeAssignments.isEmpty()) {
-                String subjectPath = subjectLocationRepository.findPathBySubjectId(subjectId);
                 boolean inScope = scopeResolver.isInScope(
                         activeAssignments, subjectPath, subjectId, event.activityRef());
                 if (!inScope) {

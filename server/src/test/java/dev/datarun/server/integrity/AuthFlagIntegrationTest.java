@@ -120,6 +120,66 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
     }
 
     /**
+     * FP-006 gate: an ended assignment must not create a temporal flag after the
+     * actor has synced a replacement covering assignment.
+     */
+    @Test
+    void replacementAssignmentSynced_noTemporalAuthorityExpiredFromEndedAssignment() {
+        Event assignmentA = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(2), null);
+        UUID assignmentAId = UUID.fromString(assignmentA.subjectRef().get("id").asText());
+
+        ResponseEntity<JsonNode> firstPull = pullEvents(workerToken, 0, 100);
+        long syncedUnderA = firstPull.getBody().get("latest_watermark").asLong();
+        assertThat(syncedUnderA).isGreaterThanOrEqualTo(syncWatermark(assignmentA.id()));
+
+        assignmentService.endAssignment(assignmentAId, ADMIN, "replacement");
+        Event assignmentB = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        ResponseEntity<JsonNode> replacementPull = pullEvents(workerToken, syncedUnderA, 100);
+        long syncedPastB = replacementPull.getBody().get("latest_watermark").asLong();
+        assertThat(syncedPastB).isGreaterThanOrEqualTo(syncWatermark(assignmentB.id()));
+
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, villageX1);
+        UUID pushedEvent = pushCaptureEvent(subject, WORKER, DEVICE_W,
+                "Captured after replacement sync", syncedPastB);
+
+        List<String> temporalSources = flagSources("temporal_authority_expired");
+        assertThat(temporalSources).doesNotContain(pushedEvent.toString());
+        assertThat(temporalSources).isEmpty();
+    }
+
+    /**
+     * FP-006 gate: the real stale temporal case remains flagged when the actor
+     * synced under A, A ended, and the actor did not sync the ending authority.
+     */
+    @Test
+    void assignmentEndsAfterActorSync_withoutResync_temporalAuthorityExpiredFlagged() {
+        Event assignmentA = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(2), null);
+        UUID assignmentAId = UUID.fromString(assignmentA.subjectRef().get("id").asText());
+
+        ResponseEntity<JsonNode> firstPull = pullEvents(workerToken, 0, 100);
+        long syncedUnderA = firstPull.getBody().get("latest_watermark").asLong();
+        assertThat(syncedUnderA).isGreaterThanOrEqualTo(syncWatermark(assignmentA.id()));
+
+        assignmentService.endAssignment(assignmentAId, ADMIN, "ended while worker offline");
+
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, villageX1);
+        UUID pushedEvent = pushCaptureEvent(subject, WORKER, DEVICE_W,
+                "Captured before syncing assignment end", syncedUnderA);
+
+        assertThat(flagSources("temporal_authority_expired"))
+                .containsExactly(pushedEvent.toString());
+    }
+
+    /**
      * QG: temporal_authority_expired flag carries auto_eligible resolvability.
      */
     @Test
@@ -336,5 +396,29 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
                 HttpMethod.POST, new HttpEntity<>(request, headers), JsonNode.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         return eventId;
+    }
+
+    private ResponseEntity<JsonNode> pullEvents(String token, long sinceWatermark, int limit) {
+        Map<String, Object> request = Map.of("since_watermark", sinceWatermark, "limit", limit);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return rest.exchange("/api/sync/pull", HttpMethod.POST,
+                new HttpEntity<>(request, headers), JsonNode.class);
+    }
+
+    private List<String> flagSources(String category) {
+        return jdbc.queryForList("""
+                SELECT payload->>'source_event_id'
+                FROM events
+                WHERE shape_ref = 'conflict_detected/v1'
+                  AND payload->>'flag_category' = ?
+                ORDER BY sync_watermark ASC
+                """, String.class, category);
+    }
+
+    private long syncWatermark(UUID eventId) {
+        return jdbc.queryForObject("SELECT sync_watermark FROM events WHERE id = ?::uuid",
+                Long.class, eventId.toString());
     }
 }

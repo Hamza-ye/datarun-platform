@@ -230,8 +230,9 @@ This FP is explicitly routed, not fully resolved:
 
 ## FP-006 — `temporal_authority_expired` superseded-assignment false positive
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-05-22 by Phase 4 challenge/code-readiness review
+**Resolved**: 2026-05-22 by temporal authority knowledge-horizon gate
 **Blocks**: Phase 4 role-action implementation and Phase 4 detection-order work
 **Severity**: A — false auth flags exclude otherwise valid events from Phase 4 projections
 
@@ -265,6 +266,7 @@ All three must be true:
 ### Resolution log
 
 - **2026-05-22**: Opened during Phase 4 challenge review. Code read found `ConflictDetector.evaluateAuth(...)` computes `endedWatermark` but does not use it to distinguish stale authority from a superseded assignment that the actor has already synced past.
+- **2026-05-22**: RESOLVED. `ConflictDetector.evaluateAuth(...)` now emits `temporal_authority_expired` for an ended covering assignment only when `assignment_ended.sync_watermark > min(event.sync_watermark, push.last_pull_watermark)`, so actors who synced past an assignment end and replacement do not inherit false temporal flags. `AuthFlagIntegrationTest.replacementAssignmentSynced_noTemporalAuthorityExpiredFromEndedAssignment` proves the replacement visibility case, and `AuthFlagIntegrationTest.assignmentEndsAfterActorSync_withoutResync_temporalAuthorityExpiredFlagged` preserves the real stale temporal case.
 
 ---
 
