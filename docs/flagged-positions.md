@@ -270,6 +270,44 @@ All three must be true:
 
 ---
 
+## FP-007 — Multi-axis assignment containment and null-activity semantics
+
+**Status**: OPEN
+**Opened**: 2026-05-22 by assignment administration scope-containment review
+**Blocks**: Phase 4 assignment-administration hardening; any implementation pass that claims ADR-003 S5 containment complete
+**Severity**: A — touches ADR-003 S5 and ADR-004/ADR-009 platform-fixed scope semantics
+
+### Context
+
+ADR-003 S5 requires `new_assignment.scope <= creating_actor.assignment.scope`. ADR-004 S7 and ADR-009 S2 define the platform-fixed scope axes as `geographic`, `subject_list`, and `activity`, with AND composition across non-null axes and `null` meaning unrestricted only on that axis. IDR-013 already carries all three axes in `assignment_created/v1`.
+
+Current code does not enforce that full shape. `AssignmentService.createAssignment(...)` accepts `geographicId`, `subjectList`, and `activityList`, but `validateScopeContainment(...)` validates only geography. This can allow a creator restricted by subject list or activity to create broader assignments on the ignored axes. A subject-list-only assignment with `geographic = null` can also be misread as root/admin-like if containment looks only at geography.
+
+`ActiveAssignment.containsActivity(...)` currently treats `activity_ref = null` as passing even when the assignment has a non-null activity restriction. That conflicts with the ADR-004 S7 reading that an activity scope axis means "event.activity_ref in actor's permitted activities" for ordinary activity work. IDR-023 correctly excludes `assignment_changed` from `activities[*].roles`; this FP must not be resolved by moving assignment administration into activity role-action config.
+
+### Trigger
+
+Before implementing assignment-administration hardening, before claiming Phase 4 assignment authority gates complete, and before any future IDR or code path changes assignment create/end authorization.
+
+### Gate
+
+All of the following must be true:
+
+1. A decision artifact states multi-axis containment semantics for assignment creation across `geographic`, `subject_list`, and `activity`.
+2. Assignment creation rejects broader geography, subject-list, or activity scopes unless the creator has a single covering assignment that contains the requested scope on every axis, or explicit bootstrap/root authority.
+3. `geographic = null`, `subject_list = null`, and `activity = null` in a new assignment each require unrestricted authority on that same axis or explicit bootstrap/root authority.
+4. Subject-list-only assignments are proven not to imply root/admin authority merely because their geographic axis is null.
+5. Bootstrap/root authority is explicit enough that "creator has no active assignments" is not silently treated as general production authority.
+6. Ordinary work events with `activity_ref = null` are not authorized by activity-restricted assignments; platform/system/identity/assignment events remain separately classified.
+7. Assignment ending requires target-assignment authority or explicit bootstrap/root authority, not merely a request actor ID.
+8. Tests cover the above behavior and prove `assignment_changed` remains outside `activities[*].roles`.
+
+### Resolution log
+
+- **2026-05-22**: Opened. Code read confirmed geography-only assignment creation containment in `AssignmentService`, null-activity wildcard behavior in `ActiveAssignment`, and the need for explicit bootstrap/root semantics before implementation. Routed to [IDR-024](decisions/idr-024-multi-axis-assignment-containment.md) for the decision/doc stop.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
