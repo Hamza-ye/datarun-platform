@@ -252,6 +252,64 @@ class DeployTimeValidatorTest {
         assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
     }
 
+    @Test
+    void activityRoles_validClosedEnvelopeActions_passes() {
+        JsonNode roles = parse("""
+                {
+                  "field_worker": ["capture"],
+                  "supervisor": ["capture", "review", "alert", "task_created", "task_completed", "assignment_changed"]
+                }
+                """);
+
+        List<String> violations = DeployTimeValidator.validateActivityRoles(roles);
+
+        assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
+    }
+
+    @Test
+    void activityRoles_unknownAction_rejected() {
+        JsonNode roles = parse("""
+                {"field_worker": ["capture", "approve"]}
+                """);
+
+        List<String> violations = DeployTimeValidator.validateActivityRoles(roles);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Unknown action 'approve'")));
+    }
+
+    @Test
+    void activityRoles_emptyActionList_rejected() {
+        JsonNode roles = parse("""
+                {"field_worker": []}
+                """);
+
+        List<String> violations = DeployTimeValidator.validateActivityRoles(roles);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("non-empty action list")));
+    }
+
+    @Test
+    void activityRoles_emptyRoleName_rejected() {
+        JsonNode roles = parse("""
+                {"": ["capture"]}
+                """);
+
+        List<String> violations = DeployTimeValidator.validateActivityRoles(roles);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("role name must be non-empty")));
+    }
+
+    @Test
+    void activityRoles_missingObject_rejected() {
+        List<String> violations = DeployTimeValidator.validateActivityRoles(null);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("'roles' object")));
+    }
+
     // --- Helpers ---
 
     private void addField(ArrayNode fields, String name, String type, boolean required) {

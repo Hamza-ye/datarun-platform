@@ -59,11 +59,8 @@ public class ActivityService {
             }
         }
 
-        // Roles must be an object with string arrays
-        JsonNode rolesNode = configJson.get("roles");
-        if (rolesNode == null || !rolesNode.isObject()) {
-            violations.add("Activity must have a 'roles' object");
-        }
+        // Roles must be an object keyed by role with closed envelope action arrays.
+        violations.addAll(DeployTimeValidator.validateActivityRoles(configJson.get("roles")));
 
         return violations;
     }

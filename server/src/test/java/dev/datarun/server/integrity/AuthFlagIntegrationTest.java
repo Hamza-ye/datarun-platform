@@ -1,6 +1,9 @@
 package dev.datarun.server.integrity;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
 import dev.datarun.server.authorization.AssignmentService;
 import dev.datarun.server.authorization.ActorTokenRepository;
@@ -32,6 +35,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
     @Autowired private AssignmentService assignmentService;
     @Autowired private LocationRepository locationRepository;
     @Autowired private ActorTokenRepository actorTokenRepository;
+    @Autowired private ObjectMapper objectMapper;
 
     private static final UUID ADMIN = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
     private static final UUID WORKER = UUID.fromString("aaaa0000-0000-0000-0000-000000003001");
@@ -52,6 +56,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         jdbc.execute("DELETE FROM events");
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         jdbc.execute("DELETE FROM device_sync_state");
+        jdbc.execute("DELETE FROM activities");
         jdbc.execute("DELETE FROM locations");
         provisionTestToken();
 
@@ -259,100 +264,161 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
     }
 
     /**
-     * QG: role_stale detection — events with watermarks in old-role window are
-     * detected as stale when compared against current active role.
-     *
-     * findRoleAtWatermark uses sync_watermark to determine what role the actor had
-     * when an event was persisted. This test verifies the detection query correctly
-     * identifies a role mismatch between the event-time role and current role.
+     * Phase 4: field workers with capture permission can push capture cleanly.
      */
     @Test
-    void roleChanges_eventFromOldRoleWindow_roleStaleDetected() {
-        // Create assignment with role "field_worker"
-        Event created1 = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
-                villageX1, null, null,
-                OffsetDateTime.now(ZoneOffset.UTC).minusDays(3), null);
-        UUID assignment1Id = UUID.fromString(created1.subjectRef().get("id").asText());
+    void roleAction_fieldWorkerCapturePermitted_noRoleStale() {
+        configureVaccinationRoles(Map.of(
+                "field_worker", List.of("capture"),
+                "supervisor", List.of("review")));
+        Event assignment = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        long knowledge = syncWatermark(assignment.id());
 
-        Long fieldWorkerWatermark = jdbc.queryForObject(
-                "SELECT sync_watermark FROM events WHERE subject_ref->>'id' = ?",
-                Long.class, assignment1Id.toString());
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, villageX1);
+        UUID event = pushCaptureEvent(subject, WORKER, DEVICE_W, "Allowed capture", knowledge);
 
-        // End old assignment, create new with "supervisor" role
-        assignmentService.endAssignment(assignment1Id, ADMIN, "role change");
-        assignmentService.createAssignment(ADMIN, WORKER, "supervisor",
-                villageX1, null, null,
-                OffsetDateTime.now(ZoneOffset.UTC), null);
-
-        // Verify: role at old-window watermark is "field_worker"
-        List<String> roleAtOldWindow = jdbc.queryForList("""
-                SELECT e.payload->>'role' FROM events e
-                WHERE e.type = 'assignment_changed' AND e.shape_ref = 'assignment_created/v1'
-                  AND e.payload->'target_actor'->>'id' = ? AND e.sync_watermark <= ?
-                ORDER BY e.sync_watermark DESC LIMIT 1
-                """, String.class, WORKER.toString(), fieldWorkerWatermark + 1);
-        assertThat(roleAtOldWindow).containsExactly("field_worker");
-
-        // Verify: current active role is "supervisor"
-        List<String> currentRole = jdbc.queryForList("""
-                SELECT e.payload->>'role' FROM events e
-                WHERE e.type = 'assignment_changed' AND e.shape_ref = 'assignment_created/v1'
-                  AND e.payload->'target_actor'->>'id' = ?
-                  AND NOT EXISTS (
-                      SELECT 1 FROM events e2 WHERE e2.type = 'assignment_changed'
-                        AND e2.shape_ref = 'assignment_ended/v1'
-                        AND e2.subject_ref->>'id' = e.subject_ref->>'id'
-                  )
-                """, String.class, WORKER.toString());
-        assertThat(currentRole).containsExactly("supervisor");
-
-        // Mismatch confirms role_stale detection query works correctly
-        assertThat(roleAtOldWindow.get(0)).isNotEqualTo(currentRole.get(0));
+        assertThat(flagSources("role_stale")).doesNotContain(event.toString());
+        assertThat(flagSources("role_stale")).isEmpty();
+        Integer flagCount = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM events WHERE shape_ref = 'conflict_detected/v1'",
+                Integer.class);
+        assertThat(flagCount).isZero();
     }
 
     /**
-     * FP-001 gate: role_stale must use the actor's projected assignment timeline
-     * at the device knowledge watermark, not the server push watermark.
-     *
-     * Event A is pushed before the role change and is clean. Event B is pushed
-     * after the role change with a last_pull_watermark from before the change,
-     * so only B can be flagged as role_stale.
+     * Phase 4: field workers lacking review can still push review, but it is
+     * accepted and flagged as role_stale.
      */
     @Test
-    void roleStale_usesDeviceKnowledgeWatermark_notPushWatermark() {
+    void roleAction_fieldWorkerReviewAcceptedAndRoleStale() {
+        configureVaccinationRoles(Map.of(
+                "field_worker", List.of("capture"),
+                "supervisor", List.of("review")));
+        Event assignment = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        long knowledge = syncWatermark(assignment.id());
+
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, villageX1);
+        UUID event = pushReviewEvent(subject, WORKER, DEVICE_W, "Unauthorized review", knowledge);
+
+        assertThat(flagSources("role_stale")).containsExactly(event.toString());
+    }
+
+    /**
+     * Phase 4: role label changes are not role_stale when both horizon and
+     * current authority permit the attempted action.
+     */
+    @Test
+    void roleAction_roleLabelChangeBothPermitAction_noRoleStale() {
+        configureVaccinationRoles(Map.of(
+                "field_worker", List.of("capture"),
+                "supervisor", List.of("capture", "review")));
         Event oldAssignment = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
-                villageX1, null, null,
+                villageX1, null, List.of("vaccination"),
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(3), null);
         UUID oldAssignmentId = UUID.fromString(oldAssignment.subjectRef().get("id").asText());
-        long knowledgeBeforeRoleChange = jdbc.queryForObject(
-                "SELECT sync_watermark FROM events WHERE id = ?::uuid",
-                Long.class, oldAssignment.id().toString());
-
-        UUID subjectA = UUID.randomUUID();
-        registerSubjectLocation(subjectA, villageX1);
-        UUID eventA = pushCaptureEvent(subjectA, WORKER, DEVICE_W,
-                "Created and pushed before role change", knowledgeBeforeRoleChange);
+        long knowledgeBeforeRoleChange = syncWatermark(oldAssignment.id());
 
         assignmentService.endAssignment(oldAssignmentId, ADMIN, "role change");
         assignmentService.createAssignment(ADMIN, WORKER, "supervisor",
-                villageX1, null, null,
+                villageX1, null, List.of("vaccination"),
                 OffsetDateTime.now(ZoneOffset.UTC), null);
 
-        UUID subjectB = UUID.randomUUID();
-        registerSubjectLocation(subjectB, villageX1);
-        UUID eventB = pushCaptureEvent(subjectB, WORKER, DEVICE_W,
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, villageX1);
+        UUID event = pushCaptureEvent(subject, WORKER, DEVICE_W,
                 "Created before role change, pushed after", knowledgeBeforeRoleChange);
 
-        List<String> roleStaleSources = jdbc.queryForList("""
-                SELECT payload->>'source_event_id'
-                FROM events
-                WHERE shape_ref = 'conflict_detected/v1'
-                  AND payload->>'flag_category' = 'role_stale'
-                ORDER BY sync_watermark ASC
-                """, String.class);
+        assertThat(flagSources("role_stale")).doesNotContain(event.toString());
+    }
 
-        assertThat(roleStaleSources).containsExactly(eventB.toString());
-        assertThat(roleStaleSources).doesNotContain(eventA.toString());
+    /**
+     * Phase 4: current role/action authority must still permit the event.
+     */
+    @Test
+    void roleAction_currentRoleWithoutAction_roleStale() {
+        configureVaccinationRoles(Map.of(
+                "field_worker", List.of("capture"),
+                "supervisor", List.of("review")));
+        Event oldAssignment = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(3), null);
+        UUID oldAssignmentId = UUID.fromString(oldAssignment.subjectRef().get("id").asText());
+        long knowledgeBeforeRoleChange = syncWatermark(oldAssignment.id());
+
+        assignmentService.endAssignment(oldAssignmentId, ADMIN, "role change");
+        assignmentService.createAssignment(ADMIN, WORKER, "supervisor",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC), null);
+
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, villageX1);
+        UUID event = pushCaptureEvent(subject, WORKER, DEVICE_W,
+                "Current role lacks capture", knowledgeBeforeRoleChange);
+
+        assertThat(flagSources("role_stale")).contains(event.toString());
+    }
+
+    /**
+     * FP-001 / IDR-021 gate: horizon authority uses the device knowledge
+     * watermark, so a later promotion cannot authorize an older review event.
+     */
+    @Test
+    void roleAction_horizonRoleWithoutAction_roleStaleEvenIfCurrentAllows() {
+        configureVaccinationRoles(Map.of(
+                "field_worker", List.of("capture"),
+                "supervisor", List.of("review")));
+        Event fieldWorkerAssignment = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(3), null);
+        long knowledgeBeforePromotion = syncWatermark(fieldWorkerAssignment.id());
+
+        assignmentService.createAssignment(ADMIN, WORKER, "supervisor",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC), null);
+
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, villageX1);
+        UUID event = pushReviewEvent(subject, WORKER, DEVICE_W,
+                "Review created before promotion", knowledgeBeforePromotion);
+
+        assertThat(flagSources("role_stale")).containsExactly(event.toString());
+    }
+
+    /**
+     * Phase 4: permissions OR across covering assignments, but do not leak
+     * outside an assignment's own scope.
+     */
+    @Test
+    void roleAction_multipleAssignmentsOrOnlyInsideCoveringScopes() {
+        configureVaccinationRoles(Map.of(
+                "field_worker", List.of("capture"),
+                "reviewer", List.of("review")));
+        Event captureAssignment = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        Event reviewAssignment = assignmentService.createAssignment(ADMIN, WORKER, "reviewer",
+                villageY1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        long knowledge = Math.max(syncWatermark(captureAssignment.id()), syncWatermark(reviewAssignment.id()));
+
+        UUID subjectX = UUID.randomUUID();
+        registerSubjectLocation(subjectX, villageX1);
+        UUID reviewInCaptureScope = pushReviewEvent(subjectX, WORKER, DEVICE_W,
+                "Review in capture-only scope", knowledge);
+
+        UUID subjectY = UUID.randomUUID();
+        registerSubjectLocation(subjectY, villageY1);
+        UUID reviewInReviewScope = pushReviewEvent(subjectY, WORKER, DEVICE_W,
+                "Review in review scope", knowledge);
+
+        assertThat(flagSources("role_stale")).containsExactly(reviewInCaptureScope.toString());
+        assertThat(flagSources("role_stale")).doesNotContain(reviewInReviewScope.toString());
     }
 
     // --- Helpers ---
@@ -371,11 +437,21 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
 
     private UUID pushCaptureEvent(UUID subjectId, UUID actorId, UUID deviceId, String notes,
                                   Long lastPullWatermark) {
+        return pushEvent(subjectId, actorId, deviceId, "capture", "basic_capture/v1", notes, lastPullWatermark);
+    }
+
+    private UUID pushReviewEvent(UUID subjectId, UUID actorId, UUID deviceId, String notes,
+                                 Long lastPullWatermark) {
+        return pushEvent(subjectId, actorId, deviceId, "review", "basic_review/v1", notes, lastPullWatermark);
+    }
+
+    private UUID pushEvent(UUID subjectId, UUID actorId, UUID deviceId, String type, String shapeRef,
+                           String notes, Long lastPullWatermark) {
         UUID eventId = UUID.randomUUID();
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("id", eventId.toString());
-        event.put("type", "capture");
-        event.put("shape_ref", "basic_capture/v1");
+        event.put("type", type);
+        event.put("shape_ref", shapeRef);
         event.put("activity_ref", "vaccination");
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
         event.put("actor_ref", Map.of("type", "actor", "id", actorId.toString()));
@@ -395,7 +471,24 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         ResponseEntity<JsonNode> response = rest.exchange("/api/sync/push",
                 HttpMethod.POST, new HttpEntity<>(request, headers), JsonNode.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().get("accepted").asInt()).isEqualTo(1);
         return eventId;
+    }
+
+    private void configureVaccinationRoles(Map<String, List<String>> roles) {
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("basic_capture/v1").add("basic_review/v1");
+        ObjectNode rolesNode = config.putObject("roles");
+        roles.forEach((role, actions) -> {
+            ArrayNode actionArray = rolesNode.putArray(role);
+            actions.forEach(actionArray::add);
+        });
+        jdbc.update("""
+                INSERT INTO activities (name, config_json, status, sensitivity)
+                VALUES ('vaccination', ?::jsonb, 'active', 'standard')
+                ON CONFLICT (name) DO UPDATE
+                SET config_json = EXCLUDED.config_json, status = EXCLUDED.status, sensitivity = EXCLUDED.sensitivity
+                """, config.toString());
     }
 
     private ResponseEntity<JsonNode> pullEvents(String token, long sinceWatermark, int limit) {

@@ -13,6 +13,9 @@ import java.util.*;
 @Service
 public class DeployTimeValidator {
 
+    public static final Set<String> CLOSED_ENVELOPE_ACTION_TYPES = Set.of(
+            "capture", "review", "alert", "task_created", "task_completed", "assignment_changed");
+
     private static final Set<String> COMPARISON_OPS = Set.of(
             "eq", "neq", "gt", "gte", "lt", "lte", "in", "not_null");
     private static final Set<String> ORDERING_OPS = Set.of("gt", "gte", "lt", "lte");
@@ -102,6 +105,41 @@ public class DeployTimeValidator {
                 violations.add("Rule " + rule.id() + " (" + rule.fieldName() + "/" + rule.ruleType() + "): " + v);
             }
         }
+        return violations;
+    }
+
+    public static List<String> validateActivityRoles(JsonNode rolesNode) {
+        List<String> violations = new ArrayList<>();
+        if (rolesNode == null || !rolesNode.isObject()) {
+            violations.add("Activity must have a 'roles' object");
+            return violations;
+        }
+
+        rolesNode.fields().forEachRemaining(entry -> {
+            String role = entry.getKey();
+            JsonNode actions = entry.getValue();
+            if (role == null || role.isBlank()) {
+                violations.add("Activity role name must be non-empty");
+            }
+            if (actions == null || !actions.isArray()) {
+                violations.add("Activity role '" + role + "' must map to an action array");
+                return;
+            }
+            if (actions.isEmpty()) {
+                violations.add("Activity role '" + role + "' must have a non-empty action list");
+            }
+            for (JsonNode actionNode : actions) {
+                if (!actionNode.isTextual()) {
+                    violations.add("Activity role '" + role + "' action must be a string");
+                    continue;
+                }
+                String action = actionNode.asText();
+                if (!CLOSED_ENVELOPE_ACTION_TYPES.contains(action)) {
+                    violations.add("Unknown action '" + action + "' for activity role '" + role + "'");
+                }
+            }
+        });
+
         return violations;
     }
 

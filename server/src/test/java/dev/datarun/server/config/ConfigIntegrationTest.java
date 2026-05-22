@@ -184,6 +184,40 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         assertTrue(violations.stream().anyMatch(v -> v.contains("does not exist")));
     }
 
+    @Test
+    void createActivity_unknownRoleAction_rejected() {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ss.createShape("household_visit", "standard", buildSchema(3, "household_visit"));
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("household_visit/v1");
+        config.putObject("roles").putArray("field_worker").add("approve");
+
+        List<String> violations = as.createActivity("bad_role_action", "standard", config);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Unknown action 'approve'")));
+        assertFalse(activityRepository.exists("bad_role_action"));
+    }
+
+    @Test
+    void createActivity_emptyRoleActionList_rejected() {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ss.createShape("household_visit", "standard", buildSchema(3, "household_visit"));
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("household_visit/v1");
+        config.putObject("roles").putArray("field_worker");
+
+        List<String> violations = as.createActivity("empty_role_actions", "standard", config);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("non-empty action list")));
+        assertFalse(activityRepository.exists("empty_role_actions"));
+    }
+
     // --- Config Endpoint (IDR-019) ---
 
     @Test
@@ -226,6 +260,8 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
 
         // Activity is present
         assertTrue(body.get("activities").has("monitoring"));
+        JsonNode packagedRoles = body.get("activities").get("monitoring").get("roles");
+        assertEquals(config.get("roles"), packagedRoles);
     }
 
     @Test
@@ -710,6 +746,7 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         ObjectNode actConfig = objectMapper.createObjectNode();
         actConfig.putArray("shapes").add("malaria_followup/v1");
         ObjectNode roles = actConfig.putObject("roles");
+        roles.putArray("admin").add("capture");
         roles.putArray("field_worker").add("capture");
         roles.putArray("supervisor").add("capture").add("review");
         List<String> actViolations = as.createActivity("malaria_program", "elevated", actConfig);

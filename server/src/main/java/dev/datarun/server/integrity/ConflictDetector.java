@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.authorization.ActiveAssignment;
 import dev.datarun.server.authorization.ScopeResolver;
 import dev.datarun.server.authorization.SubjectLocationRepository;
+import dev.datarun.server.config.Activity;
+import dev.datarun.server.config.ActivityRepository;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.identity.IdentityLifecycleProjection;
@@ -32,7 +34,7 @@ import java.util.UUID;
  * Authorization detection (Phase 2c):
  *   - temporal_authority_expired: assignment ended before event pushed (auto_eligible)
  *   - scope_violation: subject outside actor's active scope (manual_only)
- *   - role_stale: actor's role changed between event creation and push (manual_only)
+ *   - role_stale: action authority mismatch between horizon/current role permissions (manual_only)
  * 
  * Detection ordering: temporal_authority_expired → scope_violation → role_stale
  * (prevents mis-classifying expired actors as scope violators)
@@ -53,19 +55,22 @@ public class ConflictDetector {
     private final ObjectMapper objectMapper;
     private final ScopeResolver scopeResolver;
     private final SubjectLocationRepository subjectLocationRepository;
+    private final ActivityRepository activityRepository;
 
     public ConflictDetector(EventRepository eventRepository,
                             ServerIdentity serverIdentity,
                             IdentityLifecycleProjection lifecycleProjection,
                             ObjectMapper objectMapper,
                             ScopeResolver scopeResolver,
-                            SubjectLocationRepository subjectLocationRepository) {
+                            SubjectLocationRepository subjectLocationRepository,
+                            ActivityRepository activityRepository) {
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
         this.lifecycleProjection = lifecycleProjection;
         this.objectMapper = objectMapper;
         this.scopeResolver = scopeResolver;
         this.subjectLocationRepository = subjectLocationRepository;
+        this.activityRepository = activityRepository;
     }
 
     /**
@@ -146,12 +151,6 @@ public class ConflictDetector {
         // Reconstruct actor's active assignments at push time
         List<ActiveAssignment> activeAssignments = scopeResolver.getActiveAssignments(actorId);
 
-        // Determine actor's current role(s) from active assignments
-        List<String> currentRoles = activeAssignments.stream()
-                .map(ActiveAssignment::role)
-                .distinct()
-                .toList();
-
         for (Event event : acceptedEvents) {
             if (isIntegrityOrIdentityEvent(event) || isAssignmentEvent(event)) {
                 continue;
@@ -226,20 +225,29 @@ public class ConflictDetector {
             }
 
             // --- 3. role_stale ---
-            // Check if actor's role at the device's knowledge horizon differs from current role.
-            // Phase 2: flag ALL role changes (Phase 3 refines to capability-restricted only).
-            String roleAtCreation = findRoleAtWatermark(actorId, event, lastPullWatermark);
-            if (roleAtCreation != null && !currentRoles.isEmpty()
-                    && !currentRoles.contains(roleAtCreation)) {
+            // Phase 4: role_stale means action authority mismatch, not role-label drift.
+            Optional<JsonNode> activityRoles = findActivityRoles(event.activityRef());
+            if (activityRoles.isEmpty()) {
+                continue;
+            }
+            List<ActiveAssignment> horizonAssignments =
+                    assignmentsAtWatermark(allAssignments, effectiveWatermark);
+            boolean horizonPermits = hasCoveringActionAuthority(
+                    horizonAssignments, activityRoles.get(), subjectPath, subjectId,
+                    event.activityRef(), event.type());
+            boolean currentPermits = hasCoveringActionAuthority(
+                    activeAssignments, activityRoles.get(), subjectPath, subjectId,
+                    event.activityRef(), event.type());
+            if (!horizonPermits || !currentPermits) {
                 Event flag = buildFlagEvent(
                         deterministicUuid(event.id(), ROLE_STALE),
                         event.id(), subjectId, ROLE_STALE,
                         "manual_only",
                         findSupervisorActor(actorId),
-                        "Actor role was '" + roleAtCreation + "' at creation, now: " + currentRoles);
+                        roleActionMismatchReason(event.type(), horizonPermits, currentPermits));
                 flagEvents.add(flag);
-                log.info("Role stale detected for subject {} (event {}): was={}, now={}",
-                        subjectId, event.id(), roleAtCreation, currentRoles);
+                log.info("Role action authority mismatch for subject {} (event {}): action={}, horizon={}, current={}",
+                        subjectId, event.id(), event.type(), horizonPermits, currentPermits);
             }
         }
 
@@ -382,34 +390,85 @@ public class ConflictDetector {
     private Long getAssignmentEndedWatermark(UUID assignmentId) {
         List<Long> watermarks = eventRepository.getJdbcTemplate().queryForList(
                 "SELECT sync_watermark FROM events WHERE type = 'assignment_changed' " +
-                "AND shape_ref = 'assignment_ended/v1' AND subject_ref->>'id' = ?",
+                "AND shape_ref = 'assignment_ended/v1' AND subject_ref->>'id' = ? " +
+                "ORDER BY sync_watermark ASC LIMIT 1",
                 Long.class, assignmentId.toString());
         return watermarks.isEmpty() ? null : watermarks.get(0);
     }
 
     /**
-     * Find the role the actor had at the event's effective knowledge watermark.
-     * Replays assignment_created events from the event timeline up to
-     * min(server-assigned event watermark, push.last_pull_watermark), matching
-     * the causal horizon used by concurrency detection.
+     * Find the watermark of the assignment_created event for a given assignment.
      */
-    private String findRoleAtWatermark(UUID actorId, Event event, long lastPullWatermark) {
-        Long eventWatermark = eventRepository.getSyncWatermark(event.id());
-        if (eventWatermark == null) return null;
-        long effectiveWatermark = Math.min(eventWatermark, lastPullWatermark);
+    private Long getAssignmentCreatedWatermark(UUID assignmentId) {
+        List<Long> watermarks = eventRepository.getJdbcTemplate().queryForList(
+                "SELECT sync_watermark FROM events WHERE type = 'assignment_changed' " +
+                "AND shape_ref = 'assignment_created/v1' AND subject_ref->>'id' = ? " +
+                "ORDER BY sync_watermark ASC LIMIT 1",
+                Long.class, assignmentId.toString());
+        return watermarks.isEmpty() ? null : watermarks.get(0);
+    }
 
-        // Find the most recent assignment_created for this actor before or at the effective watermark.
-        List<String> roles = eventRepository.getJdbcTemplate().queryForList("""
-                SELECT e.payload->>'role'
-                FROM events e
-                WHERE e.type = 'assignment_changed'
-                  AND e.shape_ref = 'assignment_created/v1'
-                  AND e.payload->'target_actor'->>'id' = ?
-                  AND e.sync_watermark <= ?
-                ORDER BY e.sync_watermark DESC
-                LIMIT 1
-                """, String.class, actorId.toString(), effectiveWatermark);
-        return roles.isEmpty() ? null : roles.get(0);
+    private Optional<JsonNode> findActivityRoles(String activityRef) {
+        if (activityRef == null || activityRef.isBlank()) {
+            return Optional.empty();
+        }
+        return activityRepository.findByName(activityRef)
+                .map(Activity::configJson)
+                .map(config -> config.get("roles"))
+                .filter(JsonNode::isObject);
+    }
+
+    private List<ActiveAssignment> assignmentsAtWatermark(List<ActiveAssignment> assignments,
+                                                          long watermark) {
+        return assignments.stream()
+                .filter(assignment -> {
+                    Long createdWatermark = getAssignmentCreatedWatermark(assignment.assignmentId());
+                    if (createdWatermark == null || createdWatermark > watermark) {
+                        return false;
+                    }
+                    Long endedWatermark = getAssignmentEndedWatermark(assignment.assignmentId());
+                    return endedWatermark == null || endedWatermark > watermark;
+                })
+                .toList();
+    }
+
+    private boolean hasCoveringActionAuthority(List<ActiveAssignment> assignments,
+                                               JsonNode activityRoles,
+                                               String subjectPath,
+                                               UUID subjectId,
+                                               String activityRef,
+                                               String action) {
+        return assignments.stream()
+                .filter(assignment -> assignment.containsGeographically(subjectPath)
+                        && assignment.containsSubject(subjectId)
+                        && assignment.containsActivity(activityRef))
+                .anyMatch(assignment -> rolePermitsAction(activityRoles, assignment.role(), action));
+    }
+
+    private boolean rolePermitsAction(JsonNode activityRoles, String role, String action) {
+        if (role == null || action == null) {
+            return false;
+        }
+        JsonNode actions = activityRoles.get(role);
+        if (actions == null || !actions.isArray()) {
+            return false;
+        }
+        for (JsonNode actionNode : actions) {
+            if (actionNode.isTextual() && action.equals(actionNode.asText())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String roleActionMismatchReason(String action, boolean horizonPermits, boolean currentPermits) {
+        if (!horizonPermits && !currentPermits) {
+            return "Action '" + action + "' was not permitted at the device knowledge horizon or at push time";
+        }
+        if (!horizonPermits) {
+            return "Action '" + action + "' was not permitted at the device knowledge horizon";
+        }
+        return "Action '" + action + "' is no longer permitted at push time";
     }
 
     /**
