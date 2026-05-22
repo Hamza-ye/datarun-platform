@@ -8,7 +8,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.UUID;
 
 /**
- * Resolves Bearer token to actor_id for sync endpoints.
+ * Resolves Bearer token to actor_id for actor-scoped API endpoints.
  * Sets resolved actor_id as request attribute "actorId".
  * Returns 401 if token missing, malformed, or invalid.
  */

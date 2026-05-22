@@ -177,9 +177,9 @@ IDR-023 resolves the earlier assignment lifecycle command gate ambiguity by excl
 
 Assignment lifecycle commands are authority administration. They remain online commands that append immutable `assignment_changed` events, and Phase 4 role-action does not reinterpret them as offline work actions or emit `role_stale` for them. Existing ADR-003 S5 scope-containment and provisioning/bootstrap behavior are hardened by IDR-024 for the create/end command path.
 
-Assignment-administration hardening must now follow IDR-024 before this path is considered complete: creation containment across geography, subject list, and activity; explicit bootstrap/root authority; ordinary null-activity work not authorized by activity-restricted assignments; and end-assignment target authority. It must not make optional activity the universal authorization anchor.
+Assignment-administration hardening follows IDR-024: creation containment across geography, subject list, and activity; explicit bootstrap/root authority; ordinary null-activity work not authorized by activity-restricted assignments; and end-assignment target authority. It must not make optional activity the universal authorization anchor.
 
-The remaining command-boundary requirement is FP-008: ordinary assignment create/end requests must bind the acting actor from authenticated request context, not request-body actor IDs. Bootstrap/root provisioning remains a separate explicit path. The unauthenticated HTML admin assignment console is development-only until a production admin/root actor binding exists.
+FP-008 is resolved: ordinary assignment create/end requests bind the acting actor from authenticated request context, not request-body actor IDs. Bootstrap/root provisioning remains a separate explicit path. The unauthenticated HTML admin assignment console is development-only until a production admin/root actor binding exists.
 
 ### 4.2 Flag Severity
 
@@ -469,15 +469,19 @@ Phase 4 is not complete until every applicable gate is green.
 
 ### Assignment Administration Gates
 
-- [ ] Assignment creation evaluates containment across `geographic`, `subject_list`, and `activity`.
-- [ ] Requested unrestricted axes require matching unrestricted creator authority or explicit bootstrap/root authority.
-- [ ] Requested subject-list and activity values must be subsets of the covering creator assignment when the creator is restricted on that axis.
-- [ ] Containment uses one covering creator assignment, not an implicit union across separate assignments.
-- [ ] Subject-list-only assignments do not imply root/admin authority.
-- [ ] Bootstrap/root authority is explicit and bounded; an arbitrary actor with no active assignments cannot create broad production authority.
-- [ ] Ordinary null-activity work events are not authorized by activity-restricted assignments.
-- [ ] Assignment ending requires target-assignment authority or explicit bootstrap/root authority.
-- [ ] `assignment_changed` remains excluded from `activities[*].roles`.
+- [x] Assignment creation evaluates containment across `geographic`, `subject_list`, and `activity`.
+- [x] Requested unrestricted axes require matching unrestricted creator authority or explicit bootstrap/root authority.
+- [x] Requested subject-list and activity values must be subsets of the covering creator assignment when the creator is restricted on that axis.
+- [x] Containment uses one covering creator assignment, not an implicit union across separate assignments.
+- [x] Subject-list-only assignments do not imply root/admin authority.
+- [x] Bootstrap/root authority is explicit and bounded; an arbitrary actor with no active assignments cannot create broad production authority.
+- [x] Ordinary null-activity work events are not authorized by activity-restricted assignments.
+- [x] Assignment ending requires target-assignment authority or explicit bootstrap/root authority.
+- [x] `assignment_changed` remains excluded from `activities[*].roles`.
+- [x] Ordinary `/api/assignments` create/end commands use authenticated request actor context, not request-body actor IDs.
+- [x] Spoofed `creator_actor_id` / `actor_id` fields do not grant assignment authority.
+- [x] Ordinary assignment commands cannot reach the explicit initial bootstrap path by spoofing request-body actor fields.
+- [x] HTML admin assignment commands are documented as development-only until production admin/root actor binding exists.
 
 ### Severity Gates
 
