@@ -6,7 +6,7 @@
 
 **Primitives touched**: Config Package, Deploy-Time Validator, Shape Registry, Pattern Registry, Projection Engine, Conflict Detector, Conflict Resolution, Assignment Authority Projection, Sync Pull, Mobile Config Store, Mobile Projection Engine, Mobile Advisory Validators.
 
-**Not introducing new envelope fields. Not introducing new envelope types. Not introducing deployer-authored state machines. Not changing normal live sync into historical pull. Not making activity mandatory. Not authorizing `assignment_changed` through `activities[*].roles`.**
+**Not introducing new envelope fields. Not introducing new envelope types. Not introducing deployer-authored state machines. Not changing normal live sync into historical pull. Not making activity mandatory. Not authorizing `assignment_changed` through `activities[*].roles`. Not trusting assignment command actor IDs from request bodies.**
 
 ---
 
@@ -78,6 +78,13 @@ FP-006 is resolved. Authorization CD now gates `temporal_authority_expired` on t
 - Activity-restricted assignments do not authorize ordinary null-activity work events. Activity remains optional, but null-activity work needs unrestricted activity authority or a separately decided import/baseline/system rule.
 - Assignment ending needs target-assignment authority or explicit bootstrap/root authority, not merely a request actor ID.
 - This boundary must not reintroduce `assignment_changed` into `activities[*].roles` and must not fold assignment administration into role-action enforcement.
+
+### FP-008 Boundary
+
+- Ordinary `/api/assignments` create/end command authority must be bound to authenticated token/session/request actor context.
+- `creator_actor_id` and `actor_id` request-body fields are not authority inputs for ordinary assignment commands; request bodies identify the target actor, target assignment, target scope, validity window, and reason only.
+- The explicit initial bootstrap path remains separate from ordinary assignment commands and must not be reachable by spoofing request-body actor fields.
+- Until production admin auth exists, HTML admin assignment forms are development-only and must not be treated as production assignment-administration semantics.
 
 ### IDR-022 Boundary
 
@@ -171,6 +178,8 @@ IDR-023 resolves the earlier assignment lifecycle command gate ambiguity by excl
 Assignment lifecycle commands are authority administration. They remain online commands that append immutable `assignment_changed` events, and Phase 4 role-action does not reinterpret them as offline work actions or emit `role_stale` for them. Existing ADR-003 S5 scope-containment and provisioning/bootstrap behavior are hardened by IDR-024 for the create/end command path.
 
 Assignment-administration hardening must now follow IDR-024 before this path is considered complete: creation containment across geography, subject list, and activity; explicit bootstrap/root authority; ordinary null-activity work not authorized by activity-restricted assignments; and end-assignment target authority. It must not make optional activity the universal authorization anchor.
+
+The remaining command-boundary requirement is FP-008: ordinary assignment create/end requests must bind the acting actor from authenticated request context, not request-body actor IDs. Bootstrap/root provisioning remains a separate explicit path. The unauthenticated HTML admin assignment console is development-only until a production admin/root actor binding exists.
 
 ### 4.2 Flag Severity
 

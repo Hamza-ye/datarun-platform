@@ -309,6 +309,40 @@ All of the following must be true:
 
 ---
 
+## FP-008 — Assignment command actor identity binding
+
+**Status**: RESOLVED
+**Opened**: 2026-05-22 by assignment command boundary review after FP-007
+**Resolved**: 2026-05-22 by authenticated assignment command actor binding
+**Blocks**: Phase 4.3 domain uniqueness entry; any production exposure of assignment command endpoints
+**Severity**: A — otherwise ADR-003 S5/IDR-024 containment can be evaluated for a spoofed actor
+
+### Context
+
+FP-007 closed multi-axis containment inside `AssignmentService`, but the ordinary command boundary still let callers supply the authority actor. `AssignmentController` accepted `creator_actor_id` on create and `actor_id` on end, while `WebConfig` only token-bound sync pull/config endpoints. If `/api/assignments` was exposed, a caller could ask the service to evaluate containment for a different actor than the authenticated caller.
+
+The HTML `AdminController` assignment forms had the same shape: they accepted creator/actor IDs as request parameters even though this repo has no production admin authentication yet. That must not be mistaken for production assignment-administration semantics.
+
+### Trigger
+
+Before starting Phase 4.3 domain uniqueness, and before any deployment exposes ordinary assignment command endpoints beyond a trusted development environment.
+
+### Gate
+
+All five must be true:
+
+1. Ordinary `/api/assignments` create/end requests require authenticated actor context from token/session/request state.
+2. Create/end authority is evaluated for the authenticated actor, not `creator_actor_id` or `actor_id` request-body values.
+3. The ordinary assignment API cannot reach the explicit initial bootstrap path by spoofing command actor fields.
+4. Tests cover unauthenticated rejection, spoofed actor rejection, insufficient authenticated scope rejection, and successful covering multi-axis authenticated scope.
+5. The HTML admin assignment surface either binds to authenticated admin/root actor context or is explicitly documented as non-production/dev-only while no admin auth exists.
+
+### Resolution log
+
+- **2026-05-22**: RESOLVED. `WebConfig` now token-binds `/api/assignments` and `/api/assignments/**`. `AssignmentController` reads the acting actor from `ActorTokenInterceptor.ACTOR_ID_ATTR`, ignores legacy `creator_actor_id`/`actor_id` request fields, and calls only the ordinary `AssignmentService.createAssignment(...)`/`endAssignment(...)` flow. `AssignmentContainmentIntegrationTest` covers unauthenticated create/end rejection, spoofed create/end actor rejection, insufficient authenticated scope rejection, covering multi-axis authenticated success, and ordinary API inability to reach initial bootstrap by spoofing. `AdminController` assignment commands are marked development-only and bind to a fixed dev admin actor until real admin auth exists; assignment forms no longer accept creator/ending actor IDs.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.

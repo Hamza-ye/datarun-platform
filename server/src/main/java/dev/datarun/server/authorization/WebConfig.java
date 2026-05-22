@@ -5,8 +5,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Registers the actor token interceptor for sync endpoints.
- * Admin and other endpoints remain unauthenticated for Phase 2a.
+ * Registers the actor token interceptor for actor-scoped API endpoints.
+ * The HTML admin console is development-only until production admin auth lands.
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -20,6 +20,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(actorTokenInterceptor)
-                .addPathPatterns("/api/sync/pull", "/api/sync/config");
+                .addPathPatterns(
+                        "/api/sync/pull",
+                        "/api/sync/config",
+                        "/api/assignments",
+                        "/api/assignments/**");
     }
 }

@@ -20,9 +20,20 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Development HTML admin console.
+ *
+ * Production admin authentication is not wired in this repo yet. Assignment
+ * commands from this console are therefore explicitly dev-only and bind to a
+ * fixed development admin actor instead of accepting command-authority actor
+ * IDs from form fields.
+ */
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
+
+    private static final UUID DEV_ADMIN_ACTOR_ID =
+            UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
 
     private final SubjectProjection subjectProjection;
     private final EventRepository eventRepository;
@@ -124,22 +135,21 @@ public class AdminController {
     public String assignmentCreateForm(Model model) {
         List<Location> locations = locationRepository.findAll();
         model.addAttribute("locations", locations);
+        model.addAttribute("devAdminActorId", DEV_ADMIN_ACTOR_ID);
         return "assignment-create";
     }
 
     @PostMapping("/assignments/create")
-    public String createAssignment(@RequestParam String creatorActorId,
-                                   @RequestParam String targetActorId,
+    public String createAssignment(@RequestParam String targetActorId,
                                    @RequestParam String role,
                                    @RequestParam(required = false) String geographicScope,
                                    RedirectAttributes redirectAttributes) {
         try {
-            UUID creatorId = UUID.fromString(creatorActorId);
             UUID targetId = UUID.fromString(targetActorId);
             UUID geoId = (geographicScope != null && !geographicScope.isBlank())
                     ? UUID.fromString(geographicScope) : null;
 
-            assignmentService.createAssignment(creatorId, targetId, role, geoId,
+            assignmentService.createAssignment(DEV_ADMIN_ACTOR_ID, targetId, role, geoId,
                     null, null, OffsetDateTime.now(), null);
             redirectAttributes.addFlashAttribute("success", "Assignment created");
         } catch (Exception e) {
@@ -151,11 +161,10 @@ public class AdminController {
 
     @PostMapping("/assignments/{id}/end")
     public String endAssignment(@PathVariable UUID id,
-                                @RequestParam String actorId,
                                 @RequestParam(required = false) String reason,
                                 RedirectAttributes redirectAttributes) {
         try {
-            assignmentService.endAssignment(id, UUID.fromString(actorId), reason);
+            assignmentService.endAssignment(id, DEV_ADMIN_ACTOR_ID, reason);
             redirectAttributes.addFlashAttribute("success", "Assignment ended");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
