@@ -58,14 +58,14 @@ IDRs: IDR-001..IDR-019 in `docs/decisions/`. IDR-020, IDR-021, IDR-022 pending (
 # Start test database (host networking — works with VPN)
 docker compose -f docker-compose.test.yml up -d
 
-# Run all server tests (153 tests, ~30s)
-cd server && ./mvnw test
+# Run all server tests from repo root. There is no root-level Maven project.
+(cd server && ./mvnw test)
 
-# Run single test class
-./mvnw test -Dtest=ConfigIntegrationTest
+# Run a single server test class from repo root
+(cd server && ./mvnw test -Dtest=ConfigIntegrationTest)
 
-# Run mobile tests
-cd mobile && flutter test
+# Run mobile tests from repo root
+(cd mobile && flutter test)
 
 # Stop test database
 docker compose -f docker-compose.test.yml down
