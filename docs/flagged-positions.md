@@ -228,6 +228,46 @@ This FP is explicitly routed, not fully resolved:
 
 ---
 
+## FP-006 — `temporal_authority_expired` superseded-assignment false positive
+
+**Status**: OPEN
+**Opened**: 2026-05-22 by Phase 4 challenge/code-readiness review
+**Blocks**: Phase 4 role-action implementation and Phase 4 detection-order work
+**Severity**: A — false auth flags exclude otherwise valid events from Phase 4 projections
+
+### Context
+
+Current `ConflictDetector.evaluateAuth(...)` iterates all ended assignments for the pushing actor and emits `temporal_authority_expired` when an ended assignment covered the event's subject/activity. The code obtains the ended assignment watermark but does not compare it against the event's effective knowledge horizon or check whether a replacement covering assignment was visible to the actor before capture.
+
+That means a common reassignment/role-change path can over-flag:
+
+1. Actor has assignment A covering subject/activity.
+2. Server ends assignment A.
+3. Server creates assignment B for the same actor covering the same subject/activity.
+4. Actor syncs after B exists.
+5. Actor captures and pushes work under B.
+6. Auth CD can still flag the event as `temporal_authority_expired` because assignment A is ended and once covered the event.
+
+Phase 4 makes this more dangerous because unresolved flags are excluded from pattern-state and uniqueness-derived authoritative projections. A false temporal flag on otherwise valid work would suppress valid Phase 4 state transitions and could mask role-action behavior.
+
+### Trigger
+
+Before implementing IDR-021 role-action enforcement or adding Phase 4 domain uniqueness / pattern transition passes after authorization CD.
+
+### Gate
+
+All three must be true:
+
+1. An integration test proves replacement assignment visibility: assignment A covers actor/scope/activity -> actor syncs -> A ends -> assignment B covers the same actor/scope/activity -> actor syncs past B -> actor pushes an event in that scope -> no `temporal_authority_expired` is emitted from ended A.
+2. An integration test preserves the real stale-temporal case: actor syncs under assignment A -> A ends -> actor does not sync the ending/replacement authority -> actor pushes an event created under stale authority -> `temporal_authority_expired` is emitted.
+3. Auth CD uses assignment timeline knowledge explicitly enough that Phase 4 role-action evaluation can run after temporal/scope checks without inheriting false temporal flags from superseded assignments.
+
+### Resolution log
+
+- **2026-05-22**: Opened during Phase 4 challenge review. Code read found `ConflictDetector.evaluateAuth(...)` computes `endedWatermark` but does not use it to distinguish stale authority from a superseded assignment that the actor has already synced past.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.

@@ -20,11 +20,15 @@ This catalog matches the 9 categories defined in [`docs/architecture/boundary.md
 
 ## Detection Ordering
 
-Auth CD runs AFTER identity CD in the push pipeline. Within auth CD:
+Phase 4 push processing order is:
 
-1. **`temporal_authority_expired`** — checked first. If the actor's assignment ended before the event was created, flag as expired (not scope violation).
-2. **`scope_violation`** — checked against active assignments only. Event's subject location must be contained by at least one active assignment's geographic scope.
-3. **`role_stale`** — checked last. Compares the actor's role at event creation time against current role. Flagged if role changed.
+1. **Structural envelope and shape validation** — runs before persistence. Invalid structure is rejected; state anomalies are not.
+2. **Identity/lifecycle CD** — raises `concurrent_state_change` and `stale_reference`.
+3. **Authorization CD** — raises `temporal_authority_expired`, `scope_violation`, and `role_stale`.
+4. **Domain uniqueness CD** — raises `domain_uniqueness_violation`.
+5. **Pattern transition CD** — raises `transition_violation`.
+
+Within authorization CD, `temporal_authority_expired` remains before `scope_violation` so expired actors are not misclassified as scope violators. Phase 4 revises `role_stale`: it is an action-authority mismatch under IDR-021 role-action tables, not a flag for every role-label change. A role change is clean when both the horizon role and current role permit the attempted action.
 
 ## State Exclusion
 

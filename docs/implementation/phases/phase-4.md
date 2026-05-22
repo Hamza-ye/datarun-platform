@@ -20,7 +20,7 @@ Phase 3 completed configuration delivery, shape validation, expressions, device 
 - deployment-wide flag severity config through `flag_severity_overrides`;
 - shape-declared domain uniqueness detection through `shapes[*].uniqueness`;
 - device advisory UX for role-action, uniqueness, and pattern-state warnings;
-- subject-history backfill required before long-running `ongoing_resolution` subjects can be safely assigned to actors who have already advanced their normal sync watermark past the subject's historical events.
+- subject-history backfill required before `ongoing_resolution` is implemented or enabled.
 
 Phase 4 is not a general policy engine. It activates already-decided Phase 4 surfaces while preserving the invariants from ADR-001 through ADR-006: append-only events, accept-and-flag for state anomalies, authority as projection, sync scope equals access scope, closed envelope type vocabulary, and state as projection.
 
@@ -35,14 +35,19 @@ The following constraints are load-bearing. Phase 4 implementation must fail rev
 FP-005 remains `IN_PROGRESS` and routed, not resolved. Phase 4 must implement its route exactly:
 
 1. Normal `/api/sync/pull` remains request-time scoped against current active assignments. It must not become historical reconstruction, subject-history replay, or audit pull.
-2. `ongoing_resolution` cannot be implemented for already-active long-running subjects until subject-history backfill is specified and tested.
+2. `ongoing_resolution` cannot be implemented or enabled until subject-history backfill is specified and tested.
 3. Subject-history backfill is separate from role-action enforcement, flag severity, domain uniqueness, and pattern transition logic.
 4. Audit/historical pull is out of Phase 4 live sync. If audit reconstruction is needed later, it requires a successor decision and a separate pull class/API.
 5. The backfill design must define idempotence/cursor behavior without lowering the normal sync watermark, request-time authorization on every page, alias handling after merge/split, activity filtering for pattern state keys, and visibility of assignment/transfer events needed by subject-level projections.
 
+### FP-006 Boundary
+
+FP-006 is open and blocks Phase 4 role-action/detection-order implementation. Authorization CD must not over-emit `temporal_authority_expired` from an ended assignment after the actor has synced a replacement covering assignment. Phase 4 role-action, domain uniqueness, and pattern transition passes all depend on authorization flags being precise because unresolved flags exclude otherwise valid events from authoritative projections.
+
 ### IDR-020 Boundary
 
 - Pattern definitions are platform-bundled; deployers bind shapes, participant roles, and parameters only.
+- Event-level reviewability is orthogonal to subject-level patterns. `ongoing_resolution` events can be reviewed through event-level overlays such as `capture_with_review`, the same as events from any other activity, once `ongoing_resolution` itself is allowed past FP-005.
 - No event stores `current_state`, `pattern_ref`, or any workflow-state field.
 - Pattern state identity is `(subject_ref, activity_ref, binding.ref)` for subject-level patterns and `(source_event_id, binding.ref)` for event-level patterns.
 - Phase 4 must not use `subject_ref.type = "process"` for pattern instances.
@@ -84,7 +89,7 @@ FP-005 remains `IN_PROGRESS` and routed, not resolved. Phase 4 must implement it
 | 4.4 | Platform Pattern Registry and activity pattern binding validation | IDR-020 | Workflow registry |
 | 4.5 | Server and mobile pattern-state projection, including unresolved-flag exclusion and state re-derivation after resolution | IDR-020 / ADR-005 | Projection |
 | 4.6 | Server `transition_violation` detector in the push pipeline | IDR-020 / ADR-005 | Conflict detection |
-| 4.7 | Subject-history backfill decision and implementation before `ongoing_resolution` support | FP-005 / IDR-020 | Sync support |
+| 4.7 | Subject-history backfill decision and implementation before any `ongoing_resolution` support | FP-005 / IDR-020 | Sync support |
 | 4.8 | Phase 4 shared fixtures and quality gates spanning server/mobile equivalence | IDR-020/021/022 | Test infrastructure |
 
 ---
@@ -215,11 +220,12 @@ Registry work:
 
 - Implement a small platform-bundled registry for the initial pattern definitions from `docs/architecture/patterns.md`:
   - `capture_with_review/v1`;
-  - `ongoing_resolution/v1`, gated behind the FP-005 backfill prerequisite;
+  - `ongoing_resolution/v1`, not implemented or enabled until the FP-005 backfill prerequisite is closed;
   - `multi_step_approval/v1`;
   - `transfer_with_acknowledgment/v1`.
 - Keep `entity_lifecycle` deferred unless explicitly promoted. Do not claim S06 support without it.
 - Store pattern definitions in platform code or bundled resources. Deployer config references definitions by `ref`; it does not define states or transitions.
+- Preserve reviewability as composition: event-level review patterns may overlay subject-level patterns, including `ongoing_resolution`, without consuming the subject-level slot.
 
 Binding validation work:
 
@@ -240,6 +246,7 @@ Tests:
 - Missing required shape roles and participant roles are rejected.
 - Deprecated shape versions bound to a shape role project correctly.
 - Participant roles mapped to transitions must have the structural actions needed by those transitions.
+- `capture_with_review` can overlay events owned by a subject-level pattern without making the subject-level pattern own review state.
 
 ### 4.5 Pattern-State Projection
 
@@ -267,7 +274,7 @@ Tests:
 - Server/mobile projection equivalence for at least:
   - no-pattern activity;
   - `capture_with_review`;
-  - `ongoing_resolution` after backfill support exists;
+  - `ongoing_resolution` only after backfill support exists;
   - `multi_step_approval`;
   - `transfer_with_acknowledgment`.
 - Unresolved flagged events do not advance `current_state`.
@@ -292,17 +299,18 @@ Tests:
 - Ongoing-resolution contrast: `closed` or `resolved` plus ordinary `interaction` is accepted, flagged, and excluded from state until resolution.
 - Shape-evolution: old and new shape versions bound to one role both project.
 - Event-level review states derive independently from subject-level state.
+- Events inside `ongoing_resolution` remain reviewable through event-level overlays once `ongoing_resolution` is enabled; review state must not be collapsed into the subject-level lifecycle state.
 - No new envelope `type` appears.
 - Pattern identity never uses event-carried `pattern_ref` or `subject_ref.type = "process"`.
 - S06 registry gate remains deferred unless `entity_lifecycle` is promoted; if promoted, `verified` plus update projects to `active` with no `transition_violation`.
 
 ### 4.7 Subject-History Backfill for `ongoing_resolution`
 
-This slice must happen before `ongoing_resolution` is enabled for already-active long-running subjects.
+This slice must happen before `ongoing_resolution` is implemented or enabled.
 
 Decision required before code:
 
-- Either specify and implement a subject-bound backfill path, or explicitly document that Phase 4 does not support assigning already-active long-running subjects to actors whose normal sync watermark has passed the subject's historical events.
+- Either specify and implement a subject-bound backfill path, or explicitly document that Phase 4 does not support `ongoing_resolution`.
 - The preferred Phase 4 direction is a distinct subject-history backfill behavior, not a mutation of normal live pull.
 
 Minimum backfill requirements if implemented:
@@ -387,6 +395,7 @@ Phase 4 is not complete until every applicable gate is green.
 - [ ] Multiple assignments OR only across covering scopes.
 - [ ] `assignment_changed` requires role-action permission plus scope containment.
 - [ ] `/api/sync/pull` remains normal live sync, not backfill or audit pull.
+- [ ] FP-006 is resolved: superseded ended assignments do not produce false `temporal_authority_expired` after the actor has synced replacement authority.
 
 ### Severity Gates
 
@@ -420,7 +429,7 @@ Phase 4 is not complete until every applicable gate is green.
 ### FP-005 Gates
 
 - [ ] Live contraction stays request-time scoped.
-- [ ] Subject-history backfill is decided and tested before `ongoing_resolution` is enabled for already-active subjects.
+- [ ] Subject-history backfill is decided and tested before `ongoing_resolution` is implemented or enabled.
 - [ ] Backfill cursor behavior is idempotent and independent of the normal sync watermark.
 - [ ] Backfill authorization is evaluated at request time for every page.
 - [ ] Alias handling and activity filtering are covered by tests.
@@ -444,7 +453,7 @@ Recommended implementation order:
 3. Flag severity interpretation and tests.
 4. Domain uniqueness detector and mobile advisory uniqueness.
 5. Pattern Registry and binding validation.
-6. Pattern-state projection without `ongoing_resolution` enabled for already-active subject assignment.
+6. Pattern-state projection without `ongoing_resolution` enabled.
 7. FP-005 subject-history backfill decision and implementation.
 8. Enable `ongoing_resolution` projection and transition detection.
 9. Add remaining pattern detectors and mobile advisory transition warnings.
@@ -472,7 +481,7 @@ This order keeps the security-sensitive role-action work independent of FP-005, 
 
 | Risk | Likelihood | Mitigation |
 |------|:---:|------------|
-| `ongoing_resolution` lands without history backfill and produces wrong state for newly assigned long-running subjects. | High if unchecked | Gate `ongoing_resolution` behind FP-005 backfill decision/tests. |
+| `ongoing_resolution` lands without history backfill and produces wrong state for newly assigned long-running subjects. | High if unchecked | Gate all `ongoing_resolution` implementation and enablement behind FP-005 backfill decision/tests. |
 | Role-action enforcement accidentally uses current role only. | Medium | Timeline tests must prove horizon authority uses `min(event.sync_watermark, push.last_pull_watermark)`. |
 | Severity gets conflated with resolvability. | Medium | Dedicated tests prove severity changes do not alter `manual_only` / `auto_eligible`. |
 | `device_action` for uniqueness becomes server policy. | Medium | Server detector tests assert accept-and-flag regardless of device hint. |

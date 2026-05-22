@@ -16,4 +16,6 @@ Each walk-through references the scenario(s) it exercises and notes any architec
 
 | Walk-Through | Domain | Scenarios Exercised |
 |---|---|---|
+| [S01 Facility Observation Config Pipeline](s01-facility-observation-config-pipeline.md) | Public Health | S01, S04, S05 |
 | [ITN Distribution Campaign](itn-distribution-campaign.md) | Public Health | S00, S01, S03, S06, S07, S09, S14, S22 |
+| [S04 Supervisor Review through Phase 4](s04-supervisor-review-phase4.md) | Public Health / Operational Review | S00, S01, S03, S04, S19 |
