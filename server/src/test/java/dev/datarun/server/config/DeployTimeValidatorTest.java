@@ -253,17 +253,29 @@ class DeployTimeValidatorTest {
     }
 
     @Test
-    void activityRoles_validClosedEnvelopeActions_passes() {
+    void activityRoles_validActivityWorkActions_passes() {
         JsonNode roles = parse("""
                 {
                   "field_worker": ["capture"],
-                  "supervisor": ["capture", "review", "alert", "task_created", "task_completed", "assignment_changed"]
+                  "supervisor": ["capture", "review", "alert", "task_created", "task_completed"]
                 }
                 """);
 
         List<String> violations = DeployTimeValidator.validateActivityRoles(roles);
 
         assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
+    }
+
+    @Test
+    void activityRoles_assignmentChangedRejected() {
+        JsonNode roles = parse("""
+                {"supervisor": ["assignment_changed"]}
+                """);
+
+        List<String> violations = DeployTimeValidator.validateActivityRoles(roles);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Unknown action 'assignment_changed'")));
     }
 
     @Test

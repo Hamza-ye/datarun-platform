@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-22 (Phase 4 role-action server slice started)
+**Last updated**: 2026-05-22 (IDR-023 role-action domain boundary)
 
 ---
 
@@ -20,7 +20,7 @@
 
 **Phase 4: Workflow & Policies** — **IN PROGRESS** (first server role-action slice)
 
-Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. IDR-021 has been drafted as [Role-Action Enforcement Model](decisions/idr-021-role-action-enforcement-model.md), explicitly excluding FP-005 backfill/audit scope. IDR-022 has been drafted as [Flag Severity + Domain Uniqueness](decisions/idr-022-flag-severity-and-domain-uniqueness.md). The Phase 4 implementation spec is drafted at [phase-4.md](implementation/phases/phase-4.md); the first code slice has started with server-side role-action config validation/package preservation and authorization `role_stale` action-authority semantics.
+Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. IDR-021 has been drafted as [Role-Action Enforcement Model](decisions/idr-021-role-action-enforcement-model.md), explicitly excluding FP-005 backfill/audit scope. IDR-022 has been drafted as [Flag Severity + Domain Uniqueness](decisions/idr-022-flag-severity-and-domain-uniqueness.md). IDR-023 has been drafted as [Role-Action Domain Boundary and Assignment Administration](decisions/idr-023-role-action-domain-boundary-and-assignment-administration.md), narrowing activity role-action to activity work actions and keeping assignment lifecycle authority out of `activities[*].roles`. The Phase 4 implementation spec is drafted at [phase-4.md](implementation/phases/phase-4.md); the first code slice has started with server-side role-action config validation/package preservation and authorization `role_stale` action-authority semantics.
 
 ### Carried architectural debt — ADR-007 + Phase 3e retrofit
 
@@ -83,10 +83,11 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## What's Next
 
-**Phase 4: Workflow & Policies** — active implementation. IDR-020, IDR-021, and IDR-022 are drafted/active; the Phase 4 implementation spec is drafted, and the first server role-action slice is underway.
+**Phase 4: Workflow & Policies** — active implementation. IDR-020, IDR-021, IDR-022, and IDR-023 are drafted/active; the Phase 4 implementation spec is drafted, and the first server role-action slice is underway.
 
 - IDR-021 (Role-Action Enforcement Model) is drafted. It builds on FP-001's role timeline check and keeps FP-005 out of role-action scope: live sync stays request-time scoped, subject-history backfill is separate Phase 4 `ongoing_resolution` work, and audit/historical pull is out of Phase 4 live sync unless a successor decision introduces a separate pull class/API.
 - IDR-022 (Flag Severity + Domain Uniqueness) is drafted. It defines deployment-wide L0 severity overrides through `flag_severity_overrides`, keeps resolvability platform-owned, defines shape-declared `domain_uniqueness_violation`, and keeps FP-005 backfill/audit behavior out of scope.
+- IDR-023 (Role-Action Domain Boundary and Assignment Administration) is drafted. It excludes `assignment_changed` from `activities[*].roles`; assignment create/end remains an online authority path, not an activity role-action work event.
 - Phase spec: [docs/implementation/phases/phase-4.md](implementation/phases/phase-4.md) (drafted; implementation has started with the first role-action server slice)
 - First implementation slice: Phase 4.1 server role-action enforcement from IDR-021. This does not implement pattern registry, transition violations, flag severity, domain uniqueness, or `ongoing_resolution`.
 
@@ -110,3 +111,4 @@ No unresolved blocker remains for Phase 4 role-action enforcement or detection-o
 | IDR-020: Pattern State Machine Representation | **ACTIVE** | [idr-020-pattern-state-machine-representation.md](decisions/idr-020-pattern-state-machine-representation.md) |
 | IDR-021: Role-Action Enforcement Model | **ACTIVE** | [idr-021-role-action-enforcement-model.md](decisions/idr-021-role-action-enforcement-model.md) |
 | IDR-022: Flag Severity + Domain Uniqueness | **ACTIVE** | [idr-022-flag-severity-and-domain-uniqueness.md](decisions/idr-022-flag-severity-and-domain-uniqueness.md) |
+| IDR-023: Role-Action Domain Boundary and Assignment Administration | **ACTIVE** | [idr-023-role-action-domain-boundary-and-assignment-administration.md](decisions/idr-023-role-action-domain-boundary-and-assignment-administration.md) |

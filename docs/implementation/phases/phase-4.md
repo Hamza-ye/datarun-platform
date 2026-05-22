@@ -2,7 +2,7 @@
 
 > Implementation-grade plan for Phase 4 after the Phase 4.0 rollback and the IDR-020/021/022 prep pass. This spec authorizes Phase 4 implementation sequencing, but it does not itself start code work.
 
-**Exercises**: [IDR-020](../../decisions/idr-020-pattern-state-machine-representation.md) (Pattern State Machine Representation), [IDR-021](../../decisions/idr-021-role-action-enforcement-model.md) (Role-Action Enforcement Model), [IDR-022](../../decisions/idr-022-flag-severity-and-domain-uniqueness.md) (Flag Severity + Domain Uniqueness), [ADR-003](../../adrs/adr-003-authorization-sync.md) S1/S3/S5/S7, [ADR-004](../../adrs/adr-004-configuration-boundary.md) S6/S7/S9/S14, [ADR-005](../../adrs/adr-005-state-progression.md) S1-S9, and [ADR-006](../../adrs/adr-006-flag-semantics.md) S1-S4.
+**Exercises**: [IDR-020](../../decisions/idr-020-pattern-state-machine-representation.md) (Pattern State Machine Representation), [IDR-021](../../decisions/idr-021-role-action-enforcement-model.md) (Role-Action Enforcement Model), [IDR-022](../../decisions/idr-022-flag-severity-and-domain-uniqueness.md) (Flag Severity + Domain Uniqueness), [IDR-023](../../decisions/idr-023-role-action-domain-boundary-and-assignment-administration.md) (Role-Action Domain Boundary and Assignment Administration), [ADR-003](../../adrs/adr-003-authorization-sync.md) S1/S3/S5/S7, [ADR-004](../../adrs/adr-004-configuration-boundary.md) S6/S7/S9/S14, [ADR-005](../../adrs/adr-005-state-progression.md) S1-S9, and [ADR-006](../../adrs/adr-006-flag-semantics.md) S1-S4.
 
 **Primitives touched**: Config Package, Deploy-Time Validator, Shape Registry, Pattern Registry, Projection Engine, Conflict Detector, Conflict Resolution, Assignment Authority Projection, Sync Pull, Mobile Config Store, Mobile Projection Engine, Mobile Advisory Validators.
 
@@ -58,11 +58,13 @@ FP-006 is resolved. Authorization CD now gates `temporal_authority_expired` on t
 ### IDR-021 Boundary
 
 - Role-action permissions are activity-scoped L0 config in `activities[*].roles`.
-- The action vocabulary for Phase 4 is the closed six envelope `type` values: `capture`, `review`, `alert`, `task_created`, `task_completed`, `assignment_changed`.
+- The action vocabulary for activity role-action is the five activity work envelope `type` values: `capture`, `review`, `alert`, `task_created`, and `task_completed`.
+- `assignment_changed` is not valid in `activities[*].roles`; assignment lifecycle commands are authority administration, not activity-scoped work.
 - Server-side role-action checks are authoritative; mobile checks are advisory UX only.
 - Offline-pushed work is accepted and flagged as `role_stale` when horizon authority or current authority does not permit the attempted action.
 - `role_stale` means action-authority mismatch, not any role-label change.
 - Role-action enforcement must not alter `/api/sync/pull`, subject-history backfill, or audit pull behavior.
+- Activity remains optional at the envelope/model level. Phase 4 must not turn activity into the root of all authorization.
 
 ### IDR-022 Boundary
 
@@ -83,14 +85,14 @@ FP-006 is resolved. Authorization CD now gates `temporal_authority_expired` on t
 
 | # | Item | Source | Kind |
 |---|------|--------|------|
-| 4.1 | Role-action config validation, packaging, mobile parsing, advisory device gating, and authoritative server `role_stale` semantics | IDR-021 | Policy enforcement |
+| 4.1 | Role-action config validation, packaging, mobile parsing, advisory device gating, and authoritative server `role_stale` semantics | IDR-021 / IDR-023 | Policy enforcement |
 | 4.2 | Flag severity defaults and deployment-wide `flag_severity_overrides` validation, packaging, server/mobile interpretation | IDR-022 | Config + workflow gating |
 | 4.3 | Shape uniqueness schema, DtV validation, advisory device duplicate warnings, server-side `domain_uniqueness_violation` detector | IDR-022 | Shape policy |
 | 4.4 | Platform Pattern Registry and activity pattern binding validation | IDR-020 | Workflow registry |
 | 4.5 | Server and mobile pattern-state projection, including unresolved-flag exclusion and state re-derivation after resolution | IDR-020 / ADR-005 | Projection |
 | 4.6 | Server `transition_violation` detector in the push pipeline | IDR-020 / ADR-005 | Conflict detection |
 | 4.7 | Subject-history backfill decision and implementation before any `ongoing_resolution` support | FP-005 / IDR-020 | Sync support |
-| 4.8 | Phase 4 shared fixtures and quality gates spanning server/mobile equivalence | IDR-020/021/022 | Test infrastructure |
+| 4.8 | Phase 4 shared fixtures and quality gates spanning server/mobile equivalence | IDR-020/021/022/023 | Test infrastructure |
 
 ---
 
@@ -116,14 +118,15 @@ FP-006 is resolved. Authorization CD now gates `temporal_authority_expired` on t
 
 Server work:
 
-- Validate `activities[*].roles` as `{role: [action...]}` where each role is non-empty and each action is one of the six closed envelope `type` values.
+- Validate `activities[*].roles` as `{role: [action...]}` where each role is non-empty and each action is one of the five activity work envelope `type` values.
 - Reject empty action lists and unknown action names at deploy time.
+- Reject `assignment_changed` in activity role-action config.
 - Preserve `activities[*].roles` unchanged in the config package.
 - Revise `ConflictDetector` role-action logic so `role_stale` is emitted when either:
   - no covering assignment at `min(event.sync_watermark, push.last_pull_watermark)` granted a role permitting `event.type`; or
   - no current covering assignment grants a role permitting `event.type`.
 - Keep role-action evaluation scoped to covering assignments. Multiple covering assignments compose by OR; roles do not grant authority outside their own assignment scope.
-- Keep assignment mutation online: `assignment_changed` requires role-action permission and ADR-003 S5 scope containment.
+- Keep assignment lifecycle commands out of the activity role-action slice. Create/end assignment commands still append immutable `assignment_changed` events through the online authority path; this Phase 4 slice does not change their authorization behavior.
 
 Mobile work:
 
@@ -140,19 +143,17 @@ Tests:
 - Role-label changes do not flag if both horizon and current roles permit the action.
 - Timeline authority uses `min(event.sync_watermark, push.last_pull_watermark)`.
 - Two assignments OR permissions only inside their own scopes.
-- Assignment creation checks both role-action permission and scope containment.
+- Activity role-action config rejects `assignment_changed`.
+- Assignment lifecycle create/end behavior is unchanged by the activity role-action slice.
 - Boundary test proves role-action work does not change `/api/sync/pull` into backfill or audit pull.
 
-#### Assignment Mutation Gate: Required Amendment Before Code
+#### Assignment Administration Boundary
 
-The offline `role_stale` portion of IDR-021 is implementation-ready, but the online assignment mutation gate is not yet precise enough to code without inventing policy. Before implementing `createAssignment` / `endAssignment` role-action checks, amend IDR-021 or this spec with the following rules:
+IDR-023 resolves the earlier assignment lifecycle command gate ambiguity by excluding `assignment_changed` from `activities[*].roles`.
 
-1. **Permission target activities**: for `createAssignment`, an explicit `activityList` requires `assignment_changed` permission for every listed activity. `activityList == null` or empty is an unrestricted activity assignment, so the creator must have `assignment_changed` permission for every active activity in Layer 0 config at command time.
-2. **Scope-contained authority**: permission may compose by OR across the creator's active assignments, but only inside each assignment's own geographic, subject, and activity scope. A role attached to one activity-scoped assignment must not authorize assignment changes for another activity.
-3. **Ending assignments**: `endAssignment` must use the assignment being ended as the target scope. The actor ending it needs `assignment_changed` authority over that assignment's geographic, subject, and activity scope, using the same explicit/null activity rule.
-4. **Bootstrap/system behavior**: online actor-authored assignment mutation has no implicit "creator has no assignments" bypass. Initial root/admin provisioning must use an explicit system/provisioning path outside actor-authorized assignment mutation. If no active activities exist, actor-authorized assignment mutation fails closed because there is no activity-scoped role-action table to evaluate.
+Assignment lifecycle commands are authority administration. They remain online commands that append immutable `assignment_changed` events, and Phase 4 role-action does not reinterpret them as offline work actions or emit `role_stale` for them. Existing ADR-003 S5 scope-containment and provisioning/bootstrap behavior remain the implementation boundary until a later assignment-administration authority decision replaces or hardens that path.
 
-Until this amendment is adopted, do not implement the assignment mutation gate; the code would otherwise have to guess how `assignment_changed` maps onto activity-scoped role permissions when the assignment event itself has `activity_ref = null`.
+Future assignment-administration work must be explicit about provisioning/bootstrap, null activity scope, end-assignment target authority, and configuration shape. It must not make optional activity the universal authorization anchor.
 
 ### 4.2 Flag Severity
 
@@ -245,7 +246,7 @@ Binding validation work:
 - Reject duplicate transition-bound shape ownership within an activity.
 - Allow event-level overlay patterns through activation-bound shape lists.
 - Validate each binding's `composition` matches the platform definition.
-- Validate required shape roles, participant roles, parameters, and role-action prerequisites.
+- Validate required shape roles, participant roles, parameters, and activity work role-action prerequisites.
 - Allow `shape_roles` arrays so old shape versions remain projectable after shape evolution.
 - Ensure deprecated-but-known shape versions in `shape_roles` remain valid for projection even when not available for new capture.
 
@@ -256,7 +257,8 @@ Tests:
 - Duplicate transition-bound shape ownership is rejected.
 - Missing required shape roles and participant roles are rejected.
 - Deprecated shape versions bound to a shape role project correctly.
-- Participant roles mapped to transitions must have the structural actions needed by those transitions.
+- Participant roles mapped to activity work transitions must have the structural actions needed by those transitions.
+- Assignment lifecycle transitions consume `assignment_changed` projection facts but are not authorized through `activities[*].roles`.
 - `capture_with_review` can overlay events owned by a subject-level pattern without making the subject-level pattern own review state.
 
 ### 4.5 Pattern-State Projection
@@ -404,7 +406,8 @@ Phase 4 is not complete until every applicable gate is green.
 - [ ] Role label changes do not flag when both horizon and current roles permit the action.
 - [ ] Role-action timeline uses `min(event.sync_watermark, push.last_pull_watermark)`.
 - [ ] Multiple assignments OR only across covering scopes.
-- [ ] `assignment_changed` requires role-action permission plus scope containment.
+- [ ] `activities[*].roles` rejects `assignment_changed`.
+- [ ] Assignment lifecycle create/end behavior is not silently changed by the activity role-action slice.
 - [ ] `/api/sync/pull` remains normal live sync, not backfill or audit pull.
 - [x] FP-006 is resolved: superseded ended assignments do not produce false `temporal_authority_expired` after the actor has synced replacement authority.
 

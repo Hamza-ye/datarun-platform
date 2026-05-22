@@ -13,8 +13,8 @@ import java.util.*;
 @Service
 public class DeployTimeValidator {
 
-    public static final Set<String> CLOSED_ENVELOPE_ACTION_TYPES = Set.of(
-            "capture", "review", "alert", "task_created", "task_completed", "assignment_changed");
+    public static final Set<String> ACTIVITY_WORK_ACTION_TYPES = Set.of(
+            "capture", "review", "alert", "task_created", "task_completed");
 
     private static final Set<String> COMPARISON_OPS = Set.of(
             "eq", "neq", "gt", "gte", "lt", "lte", "in", "not_null");
@@ -134,7 +134,7 @@ public class DeployTimeValidator {
                     continue;
                 }
                 String action = actionNode.asText();
-                if (!CLOSED_ENVELOPE_ACTION_TYPES.contains(action)) {
+                if (!ACTIVITY_WORK_ACTION_TYPES.contains(action)) {
                     violations.add("Unknown action '" + action + "' for activity role '" + role + "'");
                 }
             }

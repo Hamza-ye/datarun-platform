@@ -28,6 +28,7 @@
 | [idr-020](idr-020-pattern-state-machine-representation.md) | Pattern state machine representation | active | 4-prep | decision | workflow, pattern-registry, projection, conflict, phase-4 |
 | [idr-021](idr-021-role-action-enforcement-model.md) | Role-action enforcement model | active | 4-prep | decision | authorization, role-action, configuration, conflict, phase-4 |
 | [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) | Flag Severity + Domain Uniqueness | active | 4-prep | decision | configuration, flags, conflict, uniqueness, phase-4 |
+| [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) | Role-action domain boundary and assignment administration | active | 4-prep | decision | authorization, role-action, assignment, configuration, phase-4 |
 
 ## By Component
 
@@ -46,6 +47,7 @@
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Transition violation evaluation
 - [idr-021](idr-021-role-action-enforcement-model.md) — Role-action violation evaluation
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity and domain uniqueness evaluation
+- [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Role-action domain boundary
 
 ### server/authorization
 - [idr-013](idr-013-assignment-payload.md) — Assignment payload design
@@ -53,6 +55,7 @@
 - [idr-015](idr-015-scope-filtered-sync-query.md) — Scope-filtered sync query
 - [idr-016](idr-016-actor-token-table.md) — Actor token table
 - [idr-021](idr-021-role-action-enforcement-model.md) — Role-action permission semantics
+- [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Assignment administration boundary
 
 ### server/identity
 - [idr-008](idr-008-server-event-producer.md) — Server event producer
@@ -65,6 +68,7 @@
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding in config package
 - [idr-021](idr-021-role-action-enforcement-model.md) — Activity role-action mappings
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity overrides and shape uniqueness constraints
+- [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Activity role-action vocabulary boundary
 
 ### server/admin
 - [idr-006](idr-006-thymeleaf-admin.md) — Thymeleaf admin
@@ -75,6 +79,7 @@
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding parsing
 - [idr-021](idr-021-role-action-enforcement-model.md) — Role-action config parsing
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Severity and uniqueness config parsing
+- [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Role-action config boundary
 
 ### mobile/domain
 - [idr-018](idr-018-expression-grammar.md) — Expression evaluator
@@ -82,6 +87,7 @@
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern state projection
 - [idr-021](idr-021-role-action-enforcement-model.md) — Advisory role-action gating
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Advisory uniqueness checks and flag severity behavior
+- [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Advisory role-action vocabulary boundary
 
 ### mobile/test
 - [idr-012](idr-012-sqflite-memory-path.md) — sqflite memory path
@@ -93,6 +99,7 @@
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding contract
 - [idr-021](idr-021-role-action-enforcement-model.md) — Activity role-action contract
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity and uniqueness contract
+- [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Activity role-action vocabulary boundary
 
 ### ci
 - [idr-001](idr-001-test-infrastructure.md) — Test infrastructure
