@@ -4,6 +4,7 @@ import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/presentation/screens/subject_detail_screen.dart';
 import 'package:datarun_mobile/presentation/screens/form_screen.dart';
 import 'package:datarun_mobile/presentation/widgets/sync_panel.dart';
+import 'package:datarun_mobile/domain/activity_role_actions.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 
 /// S1: Work List — subject-centric entry point.
@@ -26,7 +27,10 @@ class WorkListScreen extends StatelessWidget {
                         .map((a) => a['role'] as String)
                         .toSet()
                         .join(', '),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
               ],
             ),
@@ -51,7 +55,9 @@ class WorkListScreen extends StatelessWidget {
                         const SizedBox(width: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.orange,
                             borderRadius: BorderRadius.circular(10),
@@ -59,7 +65,9 @@ class WorkListScreen extends StatelessWidget {
                           child: Text(
                             '${state.pendingCount}',
                             style: const TextStyle(
-                                fontSize: 12, color: Colors.white),
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -71,8 +79,11 @@ class WorkListScreen extends StatelessWidget {
           ),
           body: state.subjects.isEmpty
               ? const Center(
-                  child: Text('No subjects yet.\nTap + to create one.',
-                      textAlign: TextAlign.center))
+                  child: Text(
+                    'No subjects yet.\nTap + to create one.',
+                    textAlign: TextAlign.center,
+                  ),
+                )
               : ListView.builder(
                   itemCount: state.subjects.length,
                   itemBuilder: (context, index) {
@@ -84,7 +95,9 @@ class WorkListScreen extends StatelessWidget {
                           if (s.flagCount > 0)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.red,
                                 borderRadius: BorderRadius.circular(10),
@@ -92,13 +105,16 @@ class WorkListScreen extends StatelessWidget {
                               child: Text(
                                 '${s.flagCount} flag${s.flagCount == 1 ? '' : 's'}',
                                 style: const TextStyle(
-                                    fontSize: 11, color: Colors.white),
+                                  fontSize: 11,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                         ],
                       ),
                       subtitle: Text(
-                          '${s.captureCount} capture${s.captureCount == 1 ? '' : 's'} · ${_formatTimestamp(s.latestTimestamp)}'),
+                        '${s.captureCount} capture${s.captureCount == 1 ? '' : 's'} · ${_formatTimestamp(s.latestTimestamp)}',
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         Navigator.push(
@@ -127,16 +143,27 @@ class WorkListScreen extends StatelessWidget {
     final activeActivities = configStore.getActiveActivities();
 
     if (activeActivities.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No activities configured')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No activities configured')));
       return;
     }
 
-    // Collect all shapes across active activities, tracking the activity for each shape
+    // Collect capture-available shapes across active activities, tracking the
+    // activity for each shape.
     final allShapes = <ShapeDefinition>[];
     final shapeToActivity = <String, String>{};
+    String? firstBlockedWarning;
     for (final actName in activeActivities) {
+      final decision = configStore.evaluateActivityAction(
+        activityRef: actName,
+        action: ActivityAction.capture,
+        activeAssignments: state.activeAssignments,
+      );
+      if (!decision.allowed) {
+        firstBlockedWarning ??= decision.warning;
+        continue;
+      }
       for (final shape in configStore.getShapesForActivity(actName)) {
         allShapes.add(shape);
         shapeToActivity[shape.shapeRef] = actName;
@@ -145,7 +172,7 @@ class WorkListScreen extends StatelessWidget {
 
     if (allShapes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No shapes available')),
+        SnackBar(content: Text(firstBlockedWarning ?? 'No shapes available')),
       );
       return;
     }
@@ -198,10 +225,7 @@ class WorkListScreen extends StatelessWidget {
   }
 
   void _showSyncPanel(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => const SyncPanel(),
-    );
+    showModalBottomSheet(context: context, builder: (_) => const SyncPanel());
   }
 
   String _formatTimestamp(String iso) {

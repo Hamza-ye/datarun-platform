@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:datarun_mobile/data/event_store.dart';
+import 'package:datarun_mobile/domain/activity_role_actions.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 
 /// Stores and caches the config package (IDR-019).
@@ -12,6 +13,7 @@ class ConfigStore {
   int _configVersion = 0;
   Map<String, ShapeDefinition> _shapes = {};
   Map<String, Map<String, dynamic>> _activities = {};
+  Map<String, ActivityRoleActions> _activityRoleActions = {};
   // Key: "{activity_ref}.{shape_ref}" → List of rule maps
   Map<String, List<Map<String, dynamic>>> _expressions = {};
   // Sensitivity classifications (IDR-019 §sensitivity_classifications)
@@ -30,14 +32,16 @@ class ConfigStore {
     final stored = await _eventStore.getConfigPackage();
     if (stored != null) {
       final version = stored['version'] as int;
-      final json = jsonDecode(stored['package_json'] as String) as Map<String, dynamic>;
+      final json =
+          jsonDecode(stored['package_json'] as String) as Map<String, dynamic>;
       _applyToCache(version, json);
     }
     // Check for pending config in SQLite
     final pending = await _eventStore.getPendingConfigPackage();
     if (pending != null) {
       _pendingVersion = pending['version'] as int;
-      _pendingJson = jsonDecode(pending['package_json'] as String) as Map<String, dynamic>;
+      _pendingJson =
+          jsonDecode(pending['package_json'] as String) as Map<String, dynamic>;
     }
   }
 
@@ -81,19 +85,33 @@ class ConfigStore {
     final activitiesRaw = packageJson['activities'];
     final expressionsRaw = packageJson['expressions'];
 
-    final shapesMap = shapesRaw is Map ? Map<String, dynamic>.from(shapesRaw) : <String, dynamic>{};
-    final activitiesMap = activitiesRaw is Map ? Map<String, dynamic>.from(activitiesRaw) : <String, dynamic>{};
-    final expressionsMap = expressionsRaw is Map ? Map<String, dynamic>.from(expressionsRaw) : <String, dynamic>{};
+    final shapesMap = shapesRaw is Map
+        ? Map<String, dynamic>.from(shapesRaw)
+        : <String, dynamic>{};
+    final activitiesMap = activitiesRaw is Map
+        ? Map<String, dynamic>.from(activitiesRaw)
+        : <String, dynamic>{};
+    final expressionsMap = expressionsRaw is Map
+        ? Map<String, dynamic>.from(expressionsRaw)
+        : <String, dynamic>{};
 
     final parsedShapes = <String, ShapeDefinition>{};
     for (final entry in shapesMap.entries) {
-      parsedShapes[entry.key] =
-          ShapeDefinition.fromConfigJson(entry.key, Map<String, dynamic>.from(entry.value as Map));
+      parsedShapes[entry.key] = ShapeDefinition.fromConfigJson(
+        entry.key,
+        Map<String, dynamic>.from(entry.value as Map),
+      );
     }
 
     final parsedActivities = <String, Map<String, dynamic>>{};
+    final parsedActivityRoleActions = <String, ActivityRoleActions>{};
     for (final entry in activitiesMap.entries) {
-      parsedActivities[entry.key] = Map<String, dynamic>.from(entry.value as Map);
+      final activityConfig = Map<String, dynamic>.from(entry.value as Map);
+      parsedActivities[entry.key] = activityConfig;
+      parsedActivityRoleActions[entry.key] = ActivityRoleActions.fromRoles(
+        entry.key,
+        activityConfig['roles'],
+      );
     }
 
     final parsedExpressions = <String, List<Map<String, dynamic>>>{};
@@ -108,6 +126,7 @@ class ConfigStore {
     _configVersion = version;
     _shapes = parsedShapes;
     _activities = parsedActivities;
+    _activityRoleActions = parsedActivityRoleActions;
     _expressions = parsedExpressions;
 
     // Sensitivity classifications (IDR-019). Defaults: shape='standard', activity='routine'.
@@ -141,6 +160,24 @@ class ConfigStore {
   /// Get an activity config by name. Returns null if not found.
   Map<String, dynamic>? getActivity(String name) => _activities[name];
 
+  /// Parsed role-action map for an activity.
+  ActivityRoleActions getActivityRoleActions(String activityName) =>
+      _activityRoleActions[activityName] ??
+      ActivityRoleActions.empty(activityName);
+
+  /// Advisory local decision for whether current assignments allow an activity
+  /// work action. Server-side conflict detection remains authoritative.
+  ActivityActionDecision evaluateActivityAction({
+    required String activityRef,
+    required ActivityAction action,
+    required Iterable<Map<String, dynamic>> activeAssignments,
+  }) => ActivityActionAdvisory.evaluate(
+    roleActions: getActivityRoleActions(activityRef),
+    activeAssignments: activeAssignments,
+    activityRef: activityRef,
+    action: action,
+  );
+
   /// Names of all active activities.
   List<String> getActiveActivities() => _activities.entries
       .where((e) => (e.value['status'] as String?) == 'active')
@@ -163,7 +200,10 @@ class ConfigStore {
 
   /// Get all expression rules for a field within an activity+shape combination.
   List<Map<String, dynamic>> getExpressionsForField(
-      String activityRef, String shapeRef, String fieldName) {
+    String activityRef,
+    String shapeRef,
+    String fieldName,
+  ) {
     final key = '$activityRef.$shapeRef';
     final rules = _expressions[key];
     if (rules == null) return [];
@@ -172,7 +212,10 @@ class ConfigStore {
 
   /// Get the show_condition expression for a field. Returns the expression node or null.
   Map<String, dynamic>? getShowCondition(
-      String activityRef, String shapeRef, String fieldName) {
+    String activityRef,
+    String shapeRef,
+    String fieldName,
+  ) {
     final rules = getExpressionsForField(activityRef, shapeRef, fieldName);
     for (final rule in rules) {
       if (rule['rule_type'] == 'show_condition') {
@@ -184,7 +227,10 @@ class ConfigStore {
 
   /// Get the default expression for a field. Returns the expression node or null.
   Map<String, dynamic>? getDefaultExpression(
-      String activityRef, String shapeRef, String fieldName) {
+    String activityRef,
+    String shapeRef,
+    String fieldName,
+  ) {
     final rules = getExpressionsForField(activityRef, shapeRef, fieldName);
     for (final rule in rules) {
       if (rule['rule_type'] == 'default') {
@@ -196,7 +242,10 @@ class ConfigStore {
 
   /// Get the warning expression for a field. Returns the expression node or null.
   Map<String, dynamic>? getWarningExpression(
-      String activityRef, String shapeRef, String fieldName) {
+    String activityRef,
+    String shapeRef,
+    String fieldName,
+  ) {
     final rules = getExpressionsForField(activityRef, shapeRef, fieldName);
     for (final rule in rules) {
       if (rule['rule_type'] == 'warning') {
@@ -208,7 +257,10 @@ class ConfigStore {
 
   /// Get the warning message for a field (from the rule, not the expression).
   String? getWarningMessage(
-      String activityRef, String shapeRef, String fieldName) {
+    String activityRef,
+    String shapeRef,
+    String fieldName,
+  ) {
     final rules = getExpressionsForField(activityRef, shapeRef, fieldName);
     for (final rule in rules) {
       if (rule['rule_type'] == 'warning') {

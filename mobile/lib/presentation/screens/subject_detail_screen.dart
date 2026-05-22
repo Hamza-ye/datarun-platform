@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/presentation/screens/form_screen.dart';
+import 'package:datarun_mobile/domain/activity_role_actions.dart';
 import 'package:datarun_mobile/domain/event.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 
@@ -28,8 +29,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
 
   Future<void> _loadEvents() async {
     final state = context.read<AppState>();
-    final events =
-        await state.projectionEngine.getSubjectDetail(widget.subjectId);
+    final events = await state.projectionEngine.getSubjectDetail(
+      widget.subjectId,
+    );
     final flaggedIds = await state.projectionEngine.getFlaggedEventIds();
     setState(() {
       _events = events;
@@ -49,15 +51,17 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _events.isEmpty
-              ? const Center(child: Text('No events'))
-              : ListView.builder(
-                  itemCount: _events.length,
-                  itemBuilder: (context, index) {
-                    final e = _events[index];
-                    return _EventTile(
-                        event: e, isFlagged: _flaggedIds.contains(e.id));
-                  },
-                ),
+          ? const Center(child: Text('No events'))
+          : ListView.builder(
+              itemCount: _events.length,
+              itemBuilder: (context, index) {
+                final e = _events[index];
+                return _EventTile(
+                  event: e,
+                  isFlagged: _flaggedIds.contains(e.id),
+                );
+              },
+            ),
       // Action bar — Phase 0: single "Capture" action
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
@@ -75,10 +79,21 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     final configStore = state.configStore;
     final activeActivities = configStore.getActiveActivities();
 
-    // Collect all shapes across active activities, tracking the activity for each shape
+    // Collect capture-available shapes across active activities, tracking the
+    // activity for each shape.
     final allShapes = <ShapeDefinition>[];
     final shapeToActivity = <String, String>{};
+    String? firstBlockedWarning;
     for (final actName in activeActivities) {
+      final decision = configStore.evaluateActivityAction(
+        activityRef: actName,
+        action: ActivityAction.capture,
+        activeAssignments: state.activeAssignments,
+      );
+      if (!decision.allowed) {
+        firstBlockedWarning ??= decision.warning;
+        continue;
+      }
       for (final shape in configStore.getShapesForActivity(actName)) {
         allShapes.add(shape);
         shapeToActivity[shape.shapeRef] = actName;
@@ -87,7 +102,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
 
     if (allShapes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No activities configured')),
+        SnackBar(
+          content: Text(firstBlockedWarning ?? 'No activities configured'),
+        ),
       );
       return;
     }
@@ -156,8 +173,7 @@ class _EventTile extends StatelessWidget {
           Expanded(child: Text('${event.type} · ${event.shapeRef}')),
           if (isFlagged)
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: Colors.red.shade100,
                 borderRadius: BorderRadius.circular(4),
@@ -165,9 +181,10 @@ class _EventTile extends StatelessWidget {
               child: Text(
                 'FLAGGED',
                 style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.red.shade900,
-                    fontWeight: FontWeight.bold),
+                  fontSize: 10,
+                  color: Colors.red.shade900,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
         ],
@@ -181,8 +198,10 @@ class _EventTile extends StatelessWidget {
             children: event.payload.entries.map((e) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Text('${e.key}: ${e.value ?? '—'}',
-                    style: Theme.of(context).textTheme.bodyMedium),
+                child: Text(
+                  '${e.key}: ${e.value ?? '—'}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               );
             }).toList(),
           ),

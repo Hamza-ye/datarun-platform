@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:datarun_mobile/presentation/app_state.dart';
+import 'package:datarun_mobile/domain/activity_role_actions.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 import 'package:datarun_mobile/domain/expression_evaluator.dart';
 import 'package:datarun_mobile/presentation/widgets/widget_mapper.dart';
@@ -29,9 +30,11 @@ class _FormScreenState extends State<FormScreen> {
   final Map<String, dynamic> _context = {};
   final Set<String> _hiddenFields = {};
   final Map<String, String> _warnings = {};
+  String? _actionWarning;
   bool _loading = true;
   bool _dirty = false;
   bool _saving = false;
+  bool _captureAllowed = true;
 
   @override
   void initState() {
@@ -49,11 +52,15 @@ class _FormScreenState extends State<FormScreen> {
       subjectId: widget.subjectId,
       activityRef: widget.activityRef,
     );
+    final decision = await _currentCaptureDecision(state);
     _context
       ..clear()
       ..addAll(ctx);
+    if (!mounted) return;
     setState(() {
       _shape = shape;
+      _captureAllowed = decision.allowed;
+      _actionWarning = decision.warning;
       _loading = false;
     });
     if (shape != null) {
@@ -82,7 +89,10 @@ class _FormScreenState extends State<FormScreen> {
     for (final field in _shape!.activeFields) {
       if (_values[field.name] != null) continue;
       final expr = state.configStore.getDefaultExpression(
-          widget.activityRef!, widget.shapeRef, field.name);
+        widget.activityRef!,
+        widget.shapeRef,
+        field.name,
+      );
       if (expr == null) continue;
       final value = ExpressionEvaluator.evaluateValue(expr, valuesMap);
       if (value != null) {
@@ -102,9 +112,15 @@ class _FormScreenState extends State<FormScreen> {
     for (final field in _shape!.activeFields) {
       // Show condition
       final showExpr = state.configStore.getShowCondition(
-          widget.activityRef!, widget.shapeRef, field.name);
+        widget.activityRef!,
+        widget.shapeRef,
+        field.name,
+      );
       if (showExpr != null) {
-        final visible = ExpressionEvaluator.evaluateCondition(showExpr, valuesMap);
+        final visible = ExpressionEvaluator.evaluateCondition(
+          showExpr,
+          valuesMap,
+        );
         if (!visible) {
           hidden.add(field.name);
         }
@@ -112,12 +128,21 @@ class _FormScreenState extends State<FormScreen> {
 
       // Warning
       final warnExpr = state.configStore.getWarningExpression(
-          widget.activityRef!, widget.shapeRef, field.name);
+        widget.activityRef!,
+        widget.shapeRef,
+        field.name,
+      );
       if (warnExpr != null) {
-        final triggered = ExpressionEvaluator.evaluateCondition(warnExpr, valuesMap);
+        final triggered = ExpressionEvaluator.evaluateCondition(
+          warnExpr,
+          valuesMap,
+        );
         if (triggered) {
           final msg = state.configStore.getWarningMessage(
-              widget.activityRef!, widget.shapeRef, field.name);
+            widget.activityRef!,
+            widget.shapeRef,
+            field.name,
+          );
           if (msg != null) {
             warnings[field.name] = msg;
           }
@@ -147,12 +172,13 @@ class _FormScreenState extends State<FormScreen> {
           title: Text(_shape?.name ?? 'Loading...'),
           actions: [
             TextButton(
-              onPressed: _saving ? null : _save,
+              onPressed: _saving || !_captureAllowed ? null : _save,
               child: _saving
                   ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2))
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Text('Save'),
             ),
           ],
@@ -160,28 +186,52 @@ class _FormScreenState extends State<FormScreen> {
         body: _loading
             ? const Center(child: CircularProgressIndicator())
             : _shape == null
-                ? const Center(child: Text('Shape not found in config'))
-                : Form(
-                    key: _formKey,
-                    child: ListView(
-                      children: _shape!.activeFields
-                          .where((field) => !_hiddenFields.contains(field.name))
-                          .map((field) {
-                        return WidgetMapper.build(
-                          field,
-                          _values[field.name],
-                          (value) {
-                            setState(() {
-                              _values[field.name] = value;
-                              _dirty = true;
-                              _evaluateExpressions();
-                            });
-                          },
-                          warningMessage: _warnings[field.name],
-                        );
-                      }).toList(),
-                    ),
-                  ),
+            ? const Center(child: Text('Shape not found in config'))
+            : Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    if (_actionWarning != null)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.warning_amber,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _actionWarning!,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ..._shape!.activeFields
+                        .where((field) => !_hiddenFields.contains(field.name))
+                        .map((field) {
+                          return WidgetMapper.build(
+                            field,
+                            _values[field.name],
+                            (value) {
+                              setState(() {
+                                _values[field.name] = value;
+                                _dirty = true;
+                                _evaluateExpressions();
+                              });
+                            },
+                            warningMessage: _warnings[field.name],
+                          );
+                        }),
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -192,6 +242,20 @@ class _FormScreenState extends State<FormScreen> {
     setState(() => _saving = true);
 
     final state = context.read<AppState>();
+    final decision = await _currentCaptureDecision(state);
+    if (!decision.allowed) {
+      if (!mounted) return;
+      setState(() {
+        _saving = false;
+        _captureAllowed = false;
+        _actionWarning = decision.warning;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(decision.warning ?? 'Capture unavailable')),
+      );
+      return;
+    }
+
     // Clean nulls from payload
     final payload = Map<String, dynamic>.from(_values)
       ..removeWhere((_, v) => v == null);
@@ -213,6 +277,19 @@ class _FormScreenState extends State<FormScreen> {
       );
       Navigator.pop(context);
     }
+  }
+
+  Future<ActivityActionDecision> _currentCaptureDecision(AppState state) async {
+    final activityRef = widget.activityRef;
+    if (activityRef == null) {
+      return const ActivityActionDecision.allowed();
+    }
+    final assignments = await state.eventStore.getActiveAssignments();
+    return state.configStore.evaluateActivityAction(
+      activityRef: activityRef,
+      action: ActivityAction.capture,
+      activeAssignments: assignments,
+    );
   }
 
   void _showDiscardDialog(BuildContext context) {

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/config_store.dart';
+import 'package:datarun_mobile/domain/activity_role_actions.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -83,13 +84,17 @@ void main() {
       'monitoring': {
         'name': 'monitoring',
         'shapes': ['household_visit/v1'],
-        'roles': {'field_worker': ['capture']},
+        'roles': {
+          'field_worker': ['capture'],
+        },
         'status': 'active',
       },
       'child_health': {
         'name': 'child_health',
         'shapes': ['child_check/v1', 'household_visit/v1'],
-        'roles': {'nurse': ['capture']},
+        'roles': {
+          'nurse': ['capture'],
+        },
         'status': 'active',
       },
       'archived_program': {
@@ -188,6 +193,82 @@ void main() {
     expect(active, isNot(contains('archived_program')));
   });
 
+  group('activity role actions', () {
+    test('parses and exposes configured work actions by role', () async {
+      await configStore.applyConfig(sampleConfig);
+
+      final actions = configStore.getActivityRoleActions('monitoring');
+
+      expect(actions.rolePermits('field_worker', ActivityAction.capture), true);
+      expect(actions.rolePermits('field_worker', ActivityAction.review), false);
+      expect(actions.permittedActionTypesForRole('field_worker'), {'capture'});
+    });
+
+    test(
+      'exposes all five activity work actions without assignment_changed',
+      () async {
+        final config = <String, dynamic>{
+          ...sampleConfig,
+          'activities': {
+            'monitoring': {
+              'name': 'monitoring',
+              'shapes': ['household_visit/v1'],
+              'roles': {
+                'supervisor': [
+                  'capture',
+                  'review',
+                  'alert',
+                  'task_created',
+                  'task_completed',
+                ],
+              },
+              'status': 'active',
+            },
+          },
+        };
+
+        await configStore.applyConfig(config);
+
+        final actions = configStore.getActivityRoleActions('monitoring');
+        expect(actions.permittedActionTypesForRole('supervisor'), {
+          'capture',
+          'review',
+          'alert',
+          'task_created',
+          'task_completed',
+        });
+        expect(ActivityAction.fromType('assignment_changed'), isNull);
+      },
+    );
+
+    test(
+      'evaluates advisory decisions from current local assignments',
+      () async {
+        await configStore.applyConfig(sampleConfig);
+
+        final assignments = [
+          {'role': 'field_worker', 'activity_list': 'monitoring'},
+        ];
+
+        final capture = configStore.evaluateActivityAction(
+          activityRef: 'monitoring',
+          action: ActivityAction.capture,
+          activeAssignments: assignments,
+        );
+        final review = configStore.evaluateActivityAction(
+          activityRef: 'monitoring',
+          action: ActivityAction.review,
+          activeAssignments: assignments,
+        );
+
+        expect(capture.allowed, true);
+        expect(capture.warning, isNull);
+        expect(review.allowed, false);
+        expect(review.warning, contains('does not allow review'));
+      },
+    );
+  });
+
   test('init loads persisted config from SQLite', () async {
     // First: apply and persist
     await configStore.applyConfig(sampleConfig);
@@ -210,13 +291,17 @@ void main() {
           {
             'field_name': 'followup_notes',
             'rule_type': 'show_condition',
-            'expression': {'eq': ['payload.needs_followup', true]},
+            'expression': {
+              'eq': ['payload.needs_followup', true],
+            },
             'message': null,
           },
           {
             'field_name': 'members_count',
             'rule_type': 'warning',
-            'expression': {'gt': ['payload.members_count', 20]},
+            'expression': {
+              'gt': ['payload.members_count', 20],
+            },
             'message': 'Unusually large household — please verify',
           },
           {
@@ -229,53 +314,80 @@ void main() {
       },
     };
 
-    test('expressions parsed and accessible via getExpressionsForField', () async {
-      await configStore.applyConfig(configWithExpressions);
+    test(
+      'expressions parsed and accessible via getExpressionsForField',
+      () async {
+        await configStore.applyConfig(configWithExpressions);
 
-      final rules = configStore.getExpressionsForField(
-          'monitoring', 'household_visit/v1', 'followup_notes');
-      expect(rules.length, 1);
-      expect(rules.first['rule_type'], 'show_condition');
-    });
+        final rules = configStore.getExpressionsForField(
+          'monitoring',
+          'household_visit/v1',
+          'followup_notes',
+        );
+        expect(rules.length, 1);
+        expect(rules.first['rule_type'], 'show_condition');
+      },
+    );
 
     test('getShowCondition returns correct expression', () async {
       await configStore.applyConfig(configWithExpressions);
 
       final expr = configStore.getShowCondition(
-          'monitoring', 'household_visit/v1', 'followup_notes');
+        'monitoring',
+        'household_visit/v1',
+        'followup_notes',
+      );
       expect(expr, isNotNull);
       expect(expr!['eq'], equals(['payload.needs_followup', true]));
     });
 
-    test('getWarningExpression returns correct expression and message', () async {
-      await configStore.applyConfig(configWithExpressions);
+    test(
+      'getWarningExpression returns correct expression and message',
+      () async {
+        await configStore.applyConfig(configWithExpressions);
 
-      final expr = configStore.getWarningExpression(
-          'monitoring', 'household_visit/v1', 'members_count');
-      expect(expr, isNotNull);
-      expect(expr!['gt'], equals(['payload.members_count', 20]));
+        final expr = configStore.getWarningExpression(
+          'monitoring',
+          'household_visit/v1',
+          'members_count',
+        );
+        expect(expr, isNotNull);
+        expect(expr!['gt'], equals(['payload.members_count', 20]));
 
-      final msg = configStore.getWarningMessage(
-          'monitoring', 'household_visit/v1', 'members_count');
-      expect(msg, 'Unusually large household — please verify');
-    });
+        final msg = configStore.getWarningMessage(
+          'monitoring',
+          'household_visit/v1',
+          'members_count',
+        );
+        expect(msg, 'Unusually large household — please verify');
+      },
+    );
 
     test('getDefaultExpression returns correct expression', () async {
       await configStore.applyConfig(configWithExpressions);
 
       final expr = configStore.getDefaultExpression(
-          'monitoring', 'household_visit/v1', 'visit_type');
+        'monitoring',
+        'household_visit/v1',
+        'visit_type',
+      );
       expect(expr, isNotNull);
       expect(expr!['ref'], 'context.default_visit_type');
     });
 
-    test('getShowCondition returns null for field without expressions', () async {
-      await configStore.applyConfig(configWithExpressions);
+    test(
+      'getShowCondition returns null for field without expressions',
+      () async {
+        await configStore.applyConfig(configWithExpressions);
 
-      final expr = configStore.getShowCondition(
-          'monitoring', 'household_visit/v1', 'head_of_household');
-      expect(expr, isNull);
-    });
+        final expr = configStore.getShowCondition(
+          'monitoring',
+          'household_visit/v1',
+          'head_of_household',
+        );
+        expect(expr, isNull);
+      },
+    );
   });
 
   // --- Phase 3d: Sensitivity classifications (IDR-019) ---
@@ -321,13 +433,17 @@ void main() {
         'monitoring': {
           'name': 'monitoring',
           'shapes': ['household_visit/v1'],
-          'roles': {'field_worker': ['capture']},
+          'roles': {
+            'field_worker': ['capture'],
+          },
           'status': 'active',
         },
         'outbreak_response': {
           'name': 'outbreak_response',
           'shapes': ['malaria_followup/v1'],
-          'roles': {'field_worker': ['capture']},
+          'roles': {
+            'field_worker': ['capture'],
+          },
           'status': 'active',
         },
       },
@@ -350,7 +466,10 @@ void main() {
       await configStore.applyConfig(configWithSensitivity);
 
       expect(configStore.getShapeSensitivity('household_visit/v1'), 'standard');
-      expect(configStore.getShapeSensitivity('malaria_followup/v1'), 'elevated');
+      expect(
+        configStore.getShapeSensitivity('malaria_followup/v1'),
+        'elevated',
+      );
     });
 
     test('getActivitySensitivity returns classification from config', () async {
@@ -358,7 +477,9 @@ void main() {
 
       expect(configStore.getActivitySensitivity('monitoring'), 'routine');
       expect(
-          configStore.getActivitySensitivity('outbreak_response'), 'restricted');
+        configStore.getActivitySensitivity('outbreak_response'),
+        'restricted',
+      );
     });
 
     test('defaults apply when classification is missing', () async {
@@ -420,7 +541,9 @@ void main() {
         'malaria_program': {
           'name': 'malaria_program',
           'shapes': ['malaria_followup/v1'],
-          'roles': {'field_worker': ['capture']},
+          'roles': {
+            'field_worker': ['capture'],
+          },
           'status': 'active',
         },
       },
