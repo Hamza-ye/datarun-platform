@@ -77,7 +77,7 @@ All three must be true:
 ### Resolution log
 
 - **2026-04-21**: Opened.
-- **2026-05-22**: RESOLVED. `ConflictDetector.evaluateAuth(...)` now receives push `last_pull_watermark` and derives `role_stale` by replaying `assignment_created/v1` events up to `min(event.sync_watermark, push.last_pull_watermark)`, matching the assignment event timeline/knowledge-horizon semantics rather than reading current cache/snapshot state. `AuthFlagIntegrationTest.roleStale_usesDeviceKnowledgeWatermark_notPushWatermark` proves the cache/push-watermark shortcut fails the gate: event A before the role change stays clean, while event B pushed after the role change with a pre-change knowledge watermark receives `role_stale`.
+- **2026-05-22**: RESOLVED. `ConflictDetector.evaluateAuth(...)` now receives push `last_pull_watermark` and derives `role_stale` by replaying `assignment_created/v1` events up to `min(event.sync_watermark, push.last_pull_watermark)`, matching the assignment event timeline/knowledge-horizon semantics rather than reading current cache/snapshot state. Current role-action tests cover the projection-derived gate: `AuthFlagIntegrationTest.roleAction_horizonRoleWithoutAction_roleStaleEvenIfCurrentAllows` proves a later promotion cannot authorize an older review event with a pre-promotion knowledge watermark, while `AuthFlagIntegrationTest.roleAction_roleLabelChangeBothPermitAction_noRoleStale` and `AuthFlagIntegrationTest.roleAction_currentRoleWithoutAction_roleStale` prove current action authority is evaluated by permission, not role-label drift.
 
 ---
 

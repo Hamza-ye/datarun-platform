@@ -42,7 +42,7 @@ FP-005 remains `IN_PROGRESS` and routed, not resolved. Phase 4 must implement it
 
 ### FP-006 Boundary
 
-FP-006 is open and blocks Phase 4 role-action/detection-order implementation. Authorization CD must not over-emit `temporal_authority_expired` from an ended assignment after the actor has synced a replacement covering assignment. Phase 4 role-action, domain uniqueness, and pattern transition passes all depend on authorization flags being precise because unresolved flags exclude otherwise valid events from authoritative projections.
+FP-006 is resolved. Authorization CD now gates `temporal_authority_expired` on the assignment-ended watermark being newer than `min(event.sync_watermark, push.last_pull_watermark)`, so a superseded ended assignment does not over-flag after the actor has synced replacement authority. Phase 4 role-action, domain uniqueness, and pattern transition passes must preserve this precision because unresolved flags exclude otherwise valid events from authoritative projections.
 
 ### IDR-020 Boundary
 
@@ -142,6 +142,17 @@ Tests:
 - Two assignments OR permissions only inside their own scopes.
 - Assignment creation checks both role-action permission and scope containment.
 - Boundary test proves role-action work does not change `/api/sync/pull` into backfill or audit pull.
+
+#### Assignment Mutation Gate: Required Amendment Before Code
+
+The offline `role_stale` portion of IDR-021 is implementation-ready, but the online assignment mutation gate is not yet precise enough to code without inventing policy. Before implementing `createAssignment` / `endAssignment` role-action checks, amend IDR-021 or this spec with the following rules:
+
+1. **Permission target activities**: for `createAssignment`, an explicit `activityList` requires `assignment_changed` permission for every listed activity. `activityList == null` or empty is an unrestricted activity assignment, so the creator must have `assignment_changed` permission for every active activity in Layer 0 config at command time.
+2. **Scope-contained authority**: permission may compose by OR across the creator's active assignments, but only inside each assignment's own geographic, subject, and activity scope. A role attached to one activity-scoped assignment must not authorize assignment changes for another activity.
+3. **Ending assignments**: `endAssignment` must use the assignment being ended as the target scope. The actor ending it needs `assignment_changed` authority over that assignment's geographic, subject, and activity scope, using the same explicit/null activity rule.
+4. **Bootstrap/system behavior**: online actor-authored assignment mutation has no implicit "creator has no assignments" bypass. Initial root/admin provisioning must use an explicit system/provisioning path outside actor-authorized assignment mutation. If no active activities exist, actor-authorized assignment mutation fails closed because there is no activity-scoped role-action table to evaluate.
+
+Until this amendment is adopted, do not implement the assignment mutation gate; the code would otherwise have to guess how `assignment_changed` maps onto activity-scoped role permissions when the assignment event itself has `activity_ref = null`.
 
 ### 4.2 Flag Severity
 
@@ -395,7 +406,7 @@ Phase 4 is not complete until every applicable gate is green.
 - [ ] Multiple assignments OR only across covering scopes.
 - [ ] `assignment_changed` requires role-action permission plus scope containment.
 - [ ] `/api/sync/pull` remains normal live sync, not backfill or audit pull.
-- [ ] FP-006 is resolved: superseded ended assignments do not produce false `temporal_authority_expired` after the actor has synced replacement authority.
+- [x] FP-006 is resolved: superseded ended assignments do not produce false `temporal_authority_expired` after the actor has synced replacement authority.
 
 ### Severity Gates
 
