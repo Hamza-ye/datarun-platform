@@ -86,7 +86,7 @@ FP-006 is resolved. Authorization CD now gates `temporal_authority_expired` on t
 | # | Item | Source | Kind |
 |---|------|--------|------|
 | 4.1 | Role-action config validation, packaging, mobile parsing, advisory device gating, and authoritative server `role_stale` semantics | IDR-021 / IDR-023 | Policy enforcement |
-| 4.2 | Flag severity defaults and deployment-wide `flag_severity_overrides` validation, packaging, server/mobile interpretation | IDR-022 | Config + workflow gating |
+| 4.2 | Flag severity defaults and deployment-wide `flag_severity_overrides` validation, packaging, server/mobile interpretation | IDR-022 | Config + workflow gating (**landed**) |
 | 4.3 | Shape uniqueness schema, DtV validation, advisory device duplicate warnings, server-side `domain_uniqueness_violation` detector | IDR-022 | Shape policy |
 | 4.4 | Platform Pattern Registry and activity pattern binding validation | IDR-020 | Workflow registry |
 | 4.5 | Server and mobile pattern-state projection, including unresolved-flag exclusion and state re-derivation after resolution | IDR-020 / ADR-005 | Projection |
@@ -400,23 +400,23 @@ Phase 4 is not complete until every applicable gate is green.
 
 ### Role-Action Gates
 
-- [ ] Config packaging preserves `activities[*].roles`.
-- [ ] Device advisory behavior prevents or warns on disallowed actions without replacing server detection.
-- [ ] Server accepts action-disallowed events and emits `role_stale`.
-- [ ] Role label changes do not flag when both horizon and current roles permit the action.
-- [ ] Role-action timeline uses `min(event.sync_watermark, push.last_pull_watermark)`.
-- [ ] Multiple assignments OR only across covering scopes.
-- [ ] `activities[*].roles` rejects `assignment_changed`.
-- [ ] Assignment lifecycle create/end behavior is not silently changed by the activity role-action slice.
-- [ ] `/api/sync/pull` remains normal live sync, not backfill or audit pull.
+- [x] Config packaging preserves `activities[*].roles`.
+- [x] Device advisory behavior prevents or warns on disallowed actions without replacing server detection.
+- [x] Server accepts action-disallowed events and emits `role_stale`.
+- [x] Role label changes do not flag when both horizon and current roles permit the action.
+- [x] Role-action timeline uses `min(event.sync_watermark, push.last_pull_watermark)`.
+- [x] Multiple assignments OR only across covering scopes.
+- [x] `activities[*].roles` rejects `assignment_changed`.
+- [x] Assignment lifecycle create/end behavior is not silently changed by the activity role-action slice.
+- [x] `/api/sync/pull` remains normal live sync, not backfill or audit pull.
 - [x] FP-006 is resolved: superseded ended assignments do not produce false `temporal_authority_expired` after the actor has synced replacement authority.
 
 ### Severity Gates
 
-- [ ] `flag_severity_overrides` accepts only known categories and `blocking`/`informational`.
-- [ ] Reserved category and nested per-activity severity config are rejected.
-- [ ] Changing severity does not change `manual_only` vs `auto_eligible`.
-- [ ] Unresolved flagged source events stay excluded from authoritative projections regardless of severity.
+- [x] `flag_severity_overrides` accepts only known categories and `blocking`/`informational`.
+- [x] Reserved category and nested per-activity severity config are rejected.
+- [x] Changing severity does not change `manual_only` vs `auto_eligible`.
+- [x] Unresolved flagged source events stay excluded from authoritative projections regardless of severity.
 
 ### Domain Uniqueness Gates
 
@@ -449,6 +449,10 @@ Phase 4 is not complete until every applicable gate is green.
 - [ ] Alias handling and activity filtering are covered by tests.
 - [ ] Audit/historical pull remains out of Phase 4 live sync unless a successor decision creates a separate pull class/API.
 
+### Scenario-Grade Responsibility Binding Gates
+
+- [ ] P04 Responsibility Binding has a scenario-grade reassignment campaign test or shared fixture covering S03/S09/S20 scale: coordinated campaign work, overlapping responsibility areas, mid-campaign reassignment, scope-filtered sync after reassignment, and role-action authority across the reassignment boundary. Existing primitive assignment and live-contraction tests do not close this gate.
+
 ### Regression Gates
 
 - [ ] Existing Phase 0-3e server tests still pass.
@@ -460,20 +464,18 @@ Phase 4 is not complete until every applicable gate is green.
 
 ## 9. Sequencing
 
-Recommended implementation order:
+Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. Recommended remaining implementation order:
 
-1. Config validation/package foundations: role-action validation, severity overrides, uniqueness schema validation, pattern binding validation.
-2. Role-action server enforcement and mobile advisory behavior.
-3. Flag severity interpretation and tests.
-4. Domain uniqueness detector and mobile advisory uniqueness.
-5. Pattern Registry and binding validation.
-6. Pattern-state projection without `ongoing_resolution` enabled.
-7. FP-005 subject-history backfill decision and implementation.
-8. Enable `ongoing_resolution` projection and transition detection.
-9. Add remaining pattern detectors and mobile advisory transition warnings.
-10. Close docs/status/catalog updates and Phase 4 completion audit.
+1. Domain uniqueness schema, detector, and mobile advisory uniqueness.
+2. Pattern Registry and binding validation.
+3. Pattern-state projection without `ongoing_resolution` enabled.
+4. FP-005 subject-history backfill decision and implementation.
+5. Enable `ongoing_resolution` projection and transition detection.
+6. Add remaining pattern detectors and mobile advisory transition warnings.
+7. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
+8. Close docs/status/catalog updates and Phase 4 completion audit.
 
-This order keeps the security-sensitive role-action work independent of FP-005, activates severity and uniqueness before pattern transitions need ordered flag behavior, and prevents `ongoing_resolution` from landing before the subject-history backfill gap is closed.
+This order keeps landed role-action and severity work independent of FP-005, activates uniqueness before pattern transitions need ordered flag behavior, and prevents `ongoing_resolution` from landing before the subject-history backfill gap is closed. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block the next uniqueness slice unless implementation uncovers a direct dependency.
 
 ---
 
@@ -508,4 +510,7 @@ This order keeps the security-sensitive role-action work independent of FP-005, 
 
 ## 12. Journal
 
-- **2026-05-22**: Spec drafted after Phase 4 prep through IDR-022. No implementation started.
+- **2026-05-22**: Spec drafted after Phase 4 prep through IDR-022; initial entry preceded code work.
+- **2026-05-22**: Phase 4.1 role-action server enforcement and mobile advisory role-action gating landed. Phase 4 remains in progress.
+- **2026-05-22**: Recorded missing scenario-grade P04 Responsibility Binding reassignment campaign gate for S03/S09/S20 scale coverage.
+- **2026-05-22**: Phase 4.2 flag severity landed: platform defaults, deployment-wide L0 `flag_severity_overrides`, validation/package delivery, server/mobile effective severity interpretation, fixed resolvability preservation, and severity-independent projection exclusion tests.

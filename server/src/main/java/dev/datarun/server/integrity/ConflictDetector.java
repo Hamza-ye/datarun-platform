@@ -184,7 +184,6 @@ public class ConflictDetector {
                     Event flag = buildFlagEvent(
                             deterministicUuid(event.id(), TEMPORAL_AUTHORITY_EXPIRED),
                             event.id(), subjectId, TEMPORAL_AUTHORITY_EXPIRED,
-                            "auto_eligible",
                             findBroadestScopeActor(subjectId),
                             "Assignment " + ended.assignmentId() + " expired; actor was unaware");
                     flagEvents.add(flag);
@@ -203,7 +202,6 @@ public class ConflictDetector {
                     Event flag = buildFlagEvent(
                             deterministicUuid(event.id(), SCOPE_VIOLATION),
                             event.id(), subjectId, SCOPE_VIOLATION,
-                            "manual_only",
                             findBroadestScopeActor(subjectId),
                             "Subject outside actor's active scope at push time");
                     flagEvents.add(flag);
@@ -216,7 +214,6 @@ public class ConflictDetector {
                 Event flag = buildFlagEvent(
                         deterministicUuid(event.id(), SCOPE_VIOLATION),
                         event.id(), subjectId, SCOPE_VIOLATION,
-                        "manual_only",
                         findBroadestScopeActor(subjectId),
                         "Actor has no active assignments at push time");
                 flagEvents.add(flag);
@@ -242,7 +239,6 @@ public class ConflictDetector {
                 Event flag = buildFlagEvent(
                         deterministicUuid(event.id(), ROLE_STALE),
                         event.id(), subjectId, ROLE_STALE,
-                        "manual_only",
                         findSupervisorActor(actorId),
                         roleActionMismatchReason(event.type(), horizonPermits, currentPermits));
                 flagEvents.add(flag);
@@ -318,13 +314,13 @@ public class ConflictDetector {
     private Event createFlagEvent(Event sourceEvent, UUID subjectId) {
         UUID flagId = deterministicUuid(sourceEvent.id(), FLAG_CATEGORY);
         return buildFlagEvent(flagId, sourceEvent.id(), subjectId, FLAG_CATEGORY,
-                "manual_only", null,
+                null,
                 "Event created with knowledge horizon before concurrent events from another device");
     }
 
     private Event createFlagEventForSweep(UUID sourceEventId, UUID subjectId, UUID flagId) {
         return buildFlagEvent(flagId, sourceEventId, subjectId, FLAG_CATEGORY,
-                "manual_only", null,
+                null,
                 "Event created with knowledge horizon before concurrent events from another device");
     }
 
@@ -338,12 +334,12 @@ public class ConflictDetector {
                     + ", successor ID: " + archived.targetId();
         };
         return buildFlagEvent(flagId, sourceEvent.id(), subjectId, STALE_REFERENCE_CATEGORY,
-                "auto_eligible", null, reason);
+                null, reason);
     }
 
     private Event buildFlagEvent(UUID flagId, UUID sourceEventId, UUID subjectId,
-                                  String flagCategory, String resolvability,
-                                  UUID designatedResolver, String reason) {
+                                  String flagCategory, UUID designatedResolver,
+                                  String reason) {
         ObjectNode subjectRef = objectMapper.createObjectNode();
         subjectRef.put("type", "subject");
         subjectRef.put("id", subjectId.toString());
@@ -357,7 +353,7 @@ public class ConflictDetector {
         ObjectNode payload = objectMapper.createObjectNode();
         payload.put("source_event_id", sourceEventId.toString());
         payload.put("flag_category", flagCategory);
-        payload.put("resolvability", resolvability);
+        payload.put("resolvability", FlagCatalog.resolvabilityFor(flagCategory));
         // designated_resolver is optional — omit when no specific resolver is known.
         if (designatedResolver != null) {
             ObjectNode resolver = objectMapper.createObjectNode();

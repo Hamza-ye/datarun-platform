@@ -113,8 +113,8 @@ Phase-specific sub-phase breakdowns, quality gates, acceptance criteria, technic
 | Phase 0 | [phase-0.md](phases/phase-0.md) | Complete |
 | Phase 1 | [phase-1.md](phases/phase-1.md) | Complete |
 | Phase 2 | [phase-2.md](phases/phase-2.md) | Complete |
-| Phase 3 | [phase-3.md](phases/phase-3.md) | Not started |
-| Phase 4 | — | Not started |
+| Phase 3 | [phase-3.md](phases/phase-3.md) | Complete |
+| Phase 4 | [phase-4.md](phases/phase-4.md) | In progress |
 
 Previous external references to "execution-plan.md §6" now resolve to the corresponding phase file. Phase 1–4 execution guidance remains in §7 as brief outlines; when each phase starts, a phase file is created with the expanded scope and sub-phase breakdown.
 

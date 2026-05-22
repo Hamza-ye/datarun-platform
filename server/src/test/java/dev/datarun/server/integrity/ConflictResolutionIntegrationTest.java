@@ -1,7 +1,9 @@
 package dev.datarun.server.integrity;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.datarun.server.AbstractIntegrationTest;
+import dev.datarun.server.config.FlagSeverityConfigService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,12 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private FlagSeverityConfigService flagSeverityConfigService;
+
     private static final UUID DEVICE_A = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID DEVICE_B = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static final UUID ACTOR_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
@@ -37,6 +45,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
     @BeforeEach
     void cleanDb() {
         jdbc.execute("DELETE FROM actor_tokens");
+        jdbc.execute("DELETE FROM deployment_config");
         jdbc.execute("DELETE FROM subject_locations");
         jdbc.execute("DELETE FROM events");
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
@@ -217,6 +226,34 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         // List again — should be empty
         var listAfter = rest.getForEntity("/api/conflicts", JsonNode.class);
         assertThat(listAfter.getBody().get("flags").size()).isEqualTo(0);
+    }
+
+    @Test
+    void listFlags_includesEffectiveSeverity_withoutChangingResolvability() throws Exception {
+        JsonNode overrides = objectMapper.readTree("""
+                {"concurrent_state_change": "informational"}
+                """);
+        assertThat(flagSeverityConfigService.updateOverrides(overrides, null)).isEmpty();
+
+        var eventA = buildEvent(SUBJECT_X, DEVICE_A, 1);
+        pushEvents(List.of(eventA), DEVICE_A, 0);
+        var eventB = buildEvent(SUBJECT_X, DEVICE_B, 1);
+        pushEvents(List.of(eventB), DEVICE_B, 0);
+
+        var listResponse = rest.getForEntity("/api/conflicts", JsonNode.class);
+        JsonNode flag = listResponse.getBody().get("flags").get(0);
+        assertThat(flag.get("flag_category").asText()).isEqualTo("concurrent_state_change");
+        assertThat(flag.get("severity").asText()).isEqualTo("informational");
+        assertThat(getProjectedEventCount(SUBJECT_X)).isEqualTo(1);
+
+        String resolvability = jdbc.queryForObject("""
+                SELECT payload->>'resolvability'
+                FROM events
+                WHERE shape_ref = 'conflict_detected/v1'
+                  AND payload->>'flag_category' = 'concurrent_state_change'
+                LIMIT 1
+                """, String.class);
+        assertThat(resolvability).isEqualTo("manual_only");
     }
 
     // --- Manual identity_conflict flag creation ---

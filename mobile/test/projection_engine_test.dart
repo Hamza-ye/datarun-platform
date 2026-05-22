@@ -171,6 +171,32 @@ void main() {
       expect(subjects[0].flagCount, 1); // 1 unresolved flag
     });
 
+    test(
+      'flag exclusion is category-agnostic for informational defaults',
+      () async {
+        await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
+        await store.insert(
+          makeCapture(
+            'e2',
+            'subj-1',
+            name: 'Retired Alias Capture',
+            deviceId: 'dev-2',
+            seq: 2,
+            timestamp: '2026-04-18T10:05:00Z',
+          ),
+        );
+        await store.insertFromServer(
+          makeFlag('f1', 'e2', 'subj-1', category: 'stale_reference'),
+        );
+
+        final subjects = await pe.getSubjectList();
+
+        expect(subjects, hasLength(1));
+        expect(subjects[0].name, 'Alice');
+        expect(subjects[0].captureCount, 1);
+      },
+    );
+
     test('flag resolution (accepted): event re-included in state', () async {
       await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
       await store.insert(

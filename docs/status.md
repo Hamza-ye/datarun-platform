@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-22 (IDR-023 role-action domain boundary)
+**Last updated**: 2026-05-22 (Phase 4.2 flag severity landed)
 
 ---
 
@@ -18,9 +18,9 @@
 | **3d: Close-out** | **Complete** | 153 server + 67 mobile tests. activity_ref plumbing, sensitivity surface on device, ContextResolver. |
 | **3e: Envelope Type Vocabulary Retrofit** | **Complete** | 164 server + 72 mobile tests. Executes [ADR-007](adrs/adr-007-envelope-type-closure.md): envelope `type` closed at 6 values; four identity/integrity facts are platform-bundled shapes. |
 
-**Phase 4: Workflow & Policies** — **IN PROGRESS** (first server role-action slice)
+**Phase 4: Workflow & Policies** — **IN PROGRESS** (Phase 4.2 flag severity landed; domain uniqueness next)
 
-Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. IDR-021 has been drafted as [Role-Action Enforcement Model](decisions/idr-021-role-action-enforcement-model.md), explicitly excluding FP-005 backfill/audit scope. IDR-022 has been drafted as [Flag Severity + Domain Uniqueness](decisions/idr-022-flag-severity-and-domain-uniqueness.md). IDR-023 has been drafted as [Role-Action Domain Boundary and Assignment Administration](decisions/idr-023-role-action-domain-boundary-and-assignment-administration.md), narrowing activity role-action to activity work actions and keeping assignment lifecycle authority out of `activities[*].roles`. The Phase 4 implementation spec is drafted at [phase-4.md](implementation/phases/phase-4.md); the first code slice has started with server-side role-action config validation/package preservation and authorization `role_stale` action-authority semantics.
+Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. IDR-021 has been drafted as [Role-Action Enforcement Model](decisions/idr-021-role-action-enforcement-model.md), explicitly excluding FP-005 backfill/audit scope. IDR-022 has been drafted as [Flag Severity + Domain Uniqueness](decisions/idr-022-flag-severity-and-domain-uniqueness.md). IDR-023 has been drafted as [Role-Action Domain Boundary and Assignment Administration](decisions/idr-023-role-action-domain-boundary-and-assignment-administration.md), narrowing activity role-action to activity work actions and keeping assignment lifecycle authority out of `activities[*].roles`. The Phase 4 implementation spec is drafted at [phase-4.md](implementation/phases/phase-4.md). Phase 4.1 role-action work has landed across server-side config validation/package preservation, authoritative `role_stale` action-authority semantics, assignment-administration boundary checks, and mobile advisory role-action gating. Phase 4.2 flag severity has landed across platform defaults, deployment-wide L0 overrides, package delivery, and server/mobile effective severity interpretation. Phase 4 remains open: domain uniqueness, pattern registry/projection, transition detection, FP-005 backfill, and scenario-grade responsibility-binding coverage are not complete.
 
 ### Carried architectural debt — ADR-007 + Phase 3e retrofit
 
@@ -62,7 +62,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 - `server/` — Spring Boot app: event store, sync push/pull, subject projection, envelope validation
 - `server/authorization/` — AssignmentService (create/end with S5 scope-containment), ScopeResolver (authority reconstruction from event timeline, 3 scope types), ActorTokenInterceptor (Bearer token auth on pull), ActorTokenRepository (SecureRandom 32-byte hex tokens, revocation), LocationRepository (materialized path hierarchy), SubjectLocationRepository, ActiveAssignment (isActive, containsGeographically/Subject/Activity), WebConfig (interceptor on /api/sync/pull only), REST controllers for assignments/locations/tokens
 - `server/identity/` — ServerIdentity (env var + DB fallback, SEQUENCE-backed device_seq), IdentityLifecycleProjection (event-derived lifecycle), SubjectAliasProjection (rebuildable `subject_aliases` projection), IdentityService (merge/split with subject-scoped advisory locking), IdentityController (REST endpoints)
-- `server/integrity/` — ConflictDetector (per-event W_effective detection + stale_reference detection + auth CD: scope_violation, temporal_authority_expired, role_stale), ConflictSweepJob (5-min stateless sweep), ConflictResolutionService (resolve: accepted/rejected/reclassified + manual identity_conflict flags), ConflictController (REST: resolve, list flags, create identity_conflict)
+- `server/integrity/` — ConflictDetector (per-event W_effective detection + stale_reference detection + auth CD: scope_violation, temporal_authority_expired, role_stale), FlagCatalog (fixed resolvability + severity defaults), ConflictSweepJob (5-min stateless sweep), ConflictResolutionService (resolve: accepted/rejected/reclassified + manual identity_conflict flags + effective severity surfaces), ConflictController (REST: resolve, list flags, create identity_conflict)
 - `server/sync/` — Two-Tx pipeline (TransactionTemplate: Tx1 persist, Tx2 identity CD + auth CD + flags). Pull: scope-filtered with post-query activity + subject_list filtering (AND within assignment, OR across assignments)
 - `contracts/flag-catalog.md` — 9 flag-category slots: implemented identity/authorization categories, Phase 4 `domain_uniqueness_violation` and `transition_violation`, plus one reserved slot
 - `server/subject/` — SubjectProjection with flag exclusion + alias resolution + assignment_changed exclusion (CTE-based, LEFT JOIN subject_aliases)
@@ -72,6 +72,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 - Migration V2: server_identity table, server_device_seq SEQUENCE, device_sync_state table
 - Migration V3: subject_aliases table (with CHECK constraint)
 - Migration V4: locations (materialized path), actor_tokens, subject_locations, events.location_path column, covering index (idx_events_scoped_pull), assignment expression index
+- Migration V6: deployment_config table for deployment-wide L0 `flag_severity_overrides`
 - Admin UI: subject list, flag list, assignment list, assignment creation form, location hierarchy browser
 - `docker-compose.yml` — full stack dev setup
 - `docker-compose.test.yml` — test DB with host networking
@@ -83,13 +84,15 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## What's Next
 
-**Phase 4: Workflow & Policies** — active implementation. IDR-020, IDR-021, IDR-022, and IDR-023 are drafted/active; the Phase 4 implementation spec is drafted, and the first server role-action slice is underway.
+**Phase 4: Workflow & Policies** — active implementation. IDR-020, IDR-021, IDR-022, and IDR-023 are drafted/active; the Phase 4 implementation spec is drafted, and Phase 4.1 role-action plus Phase 4.2 flag severity have landed.
 
 - IDR-021 (Role-Action Enforcement Model) is drafted. It builds on FP-001's role timeline check and keeps FP-005 out of role-action scope: live sync stays request-time scoped, subject-history backfill is separate Phase 4 `ongoing_resolution` work, and audit/historical pull is out of Phase 4 live sync unless a successor decision introduces a separate pull class/API.
 - IDR-022 (Flag Severity + Domain Uniqueness) is drafted. It defines deployment-wide L0 severity overrides through `flag_severity_overrides`, keeps resolvability platform-owned, defines shape-declared `domain_uniqueness_violation`, and keeps FP-005 backfill/audit behavior out of scope.
 - IDR-023 (Role-Action Domain Boundary and Assignment Administration) is drafted. It excludes `assignment_changed` from `activities[*].roles`; assignment create/end remains an online authority path, not an activity role-action work event.
-- Phase spec: [docs/implementation/phases/phase-4.md](implementation/phases/phase-4.md) (drafted; implementation has started with the first role-action server slice)
-- First implementation slice: Phase 4.1 server role-action enforcement from IDR-021. This does not implement pattern registry, transition violations, flag severity, domain uniqueness, or `ongoing_resolution`.
+- Phase spec: [docs/implementation/phases/phase-4.md](implementation/phases/phase-4.md) (drafted; tracks landed Phase 4.1 role-action gates and remaining Phase 4 gates)
+- Landed implementation slices: Phase 4.1 role-action enforcement from IDR-021/IDR-023, including authoritative server `role_stale` action-authority semantics and mobile advisory role-action gating; Phase 4.2 flag severity defaults and deployment-wide `flag_severity_overrides` from IDR-022. These do not implement pattern registry, transition violations, domain uniqueness, or `ongoing_resolution`.
+- Recommended next implementation slice: Phase 4.3 domain uniqueness schema, detector, and mobile advisory uniqueness from IDR-022.
+- Coverage gap recorded: Phase 4 still needs a scenario-grade P04 Responsibility Binding quality gate for coordinated campaigns with overlapping areas and mid-campaign reassignment. Existing primitive tests do not close that scenario gate, but it is not currently a blocker for Phase 4.3 domain uniqueness.
 
 ### Test Debt (carried from Phase 3)
 - Multi-version PE fixture
@@ -100,7 +103,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## Blockers
 
-No unresolved blocker remains for Phase 4 role-action enforcement or detection-order implementation. FP-005 remains `IN_PROGRESS` and still blocks Phase 4 `ongoing_resolution` implementation until subject-history backfill is specified and tested.
+No unresolved blocker remains for Phase 4.3 domain uniqueness implementation. FP-005 remains `IN_PROGRESS` and still blocks Phase 4 `ongoing_resolution` implementation until subject-history backfill is specified and tested. The P04 Responsibility Binding scenario-grade test gap is a Phase 4 coverage gate, not a current blocker for domain uniqueness.
 
 ---
 

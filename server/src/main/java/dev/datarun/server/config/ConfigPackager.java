@@ -24,17 +24,20 @@ public class ConfigPackager {
     private final ShapeRepository shapeRepository;
     private final ActivityRepository activityRepository;
     private final ExpressionRepository expressionRepository;
+    private final FlagSeverityConfigService flagSeverityConfigService;
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
 
     public ConfigPackager(ShapeRepository shapeRepository,
                           ActivityRepository activityRepository,
                           ExpressionRepository expressionRepository,
+                          FlagSeverityConfigService flagSeverityConfigService,
                           JdbcTemplate jdbc,
                           ObjectMapper objectMapper) {
         this.shapeRepository = shapeRepository;
         this.activityRepository = activityRepository;
         this.expressionRepository = expressionRepository;
+        this.flagSeverityConfigService = flagSeverityConfigService;
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
     }
@@ -100,8 +103,8 @@ public class ConfigPackager {
         }
         packageJson.set("expressions", expressionsNode);
 
-        // Flag severity overrides: empty stub for Phase 3 (IDR-019)
-        packageJson.set("flag_severity_overrides", objectMapper.createObjectNode());
+        // Flag severity overrides: deployment-wide L0 map (IDR-022).
+        packageJson.set("flag_severity_overrides", flagSeverityConfigService.getValidatedOverrides());
 
         // Sensitivity classifications
         ObjectNode sensClassNode = objectMapper.createObjectNode();

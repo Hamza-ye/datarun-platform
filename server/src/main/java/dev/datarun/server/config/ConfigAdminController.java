@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.datarun.server.integrity.FlagCatalog;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class ConfigAdminController {
     private final ExpressionRepository expressionRepository;
     private final DeployTimeValidator deployTimeValidator;
     private final ShapeRepository shapeRepository;
+    private final FlagSeverityConfigService flagSeverityConfigService;
     private final ObjectMapper objectMapper;
 
     public ConfigAdminController(ShapeService shapeService,
@@ -33,6 +35,7 @@ public class ConfigAdminController {
                                  ExpressionRepository expressionRepository,
                                  DeployTimeValidator deployTimeValidator,
                                  ShapeRepository shapeRepository,
+                                 FlagSeverityConfigService flagSeverityConfigService,
                                  ObjectMapper objectMapper) {
         this.shapeService = shapeService;
         this.activityService = activityService;
@@ -40,6 +43,7 @@ public class ConfigAdminController {
         this.expressionRepository = expressionRepository;
         this.deployTimeValidator = deployTimeValidator;
         this.shapeRepository = shapeRepository;
+        this.flagSeverityConfigService = flagSeverityConfigService;
         this.objectMapper = objectMapper;
     }
 
@@ -253,6 +257,40 @@ public class ConfigAdminController {
         expressionRepository.delete(id);
         redirectAttributes.addFlashAttribute("success", "Expression rule deleted");
         return "redirect:/admin/config/expressions";
+    }
+
+    // --- L0 Flag Severity ---
+
+    @GetMapping("/flag-severity")
+    public String flagSeverityForm(Model model) {
+        try {
+            model.addAttribute("overridesJson",
+                    objectMapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(flagSeverityConfigService.getValidatedOverrides()));
+            model.addAttribute("defaultSeverities", FlagCatalog.defaultSeverities());
+        } catch (Exception e) {
+            model.addAttribute("overridesJson", "{}");
+            model.addAttribute("defaultSeverities", FlagCatalog.defaultSeverities());
+            model.addAttribute("error", e.getMessage());
+        }
+        return "config/flag-severity";
+    }
+
+    @PostMapping("/flag-severity")
+    public String updateFlagSeverity(@RequestParam String overridesJson,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            JsonNode overrides = objectMapper.readTree(overridesJson);
+            List<String> violations = flagSeverityConfigService.updateOverrides(overrides, null);
+            if (!violations.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", String.join("; ", violations));
+                return "redirect:/admin/config/flag-severity";
+            }
+            redirectAttributes.addFlashAttribute("success", "Flag severity overrides updated");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Invalid JSON: " + e.getMessage());
+        }
+        return "redirect:/admin/config/flag-severity";
     }
 
     // --- Config Publishing ---

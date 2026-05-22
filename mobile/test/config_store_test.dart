@@ -4,6 +4,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/config_store.dart';
 import 'package:datarun_mobile/domain/activity_role_actions.dart';
+import 'package:datarun_mobile/domain/flag_severity.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -267,6 +268,66 @@ void main() {
         expect(review.warning, contains('does not allow review'));
       },
     );
+  });
+
+  group('flag severity', () {
+    test('uses platform defaults when no override is packaged', () async {
+      await configStore.applyConfig(sampleConfig);
+
+      expect(
+        configStore.getFlagSeverity('stale_reference'),
+        FlagSeverity.informational,
+      );
+      expect(configStore.getFlagSeverity('role_stale'), FlagSeverity.blocking);
+    });
+
+    test('uses packaged deployment-wide overrides', () async {
+      final config = <String, dynamic>{
+        ...sampleConfig,
+        'flag_severity_overrides': {
+          'role_stale': 'informational',
+          'temporal_authority_expired': 'blocking',
+        },
+      };
+
+      await configStore.applyConfig(config);
+
+      expect(configStore.flagSeverityOverrides, {
+        'role_stale': FlagSeverity.informational,
+        'temporal_authority_expired': FlagSeverity.blocking,
+      });
+      expect(
+        configStore.getFlagSeverity('role_stale'),
+        FlagSeverity.informational,
+      );
+      expect(
+        configStore.getFlagSeverity('temporal_authority_expired'),
+        FlagSeverity.blocking,
+      );
+      expect(
+        configStore.getFlagSeverity('stale_reference'),
+        FlagSeverity.informational,
+      );
+    });
+
+    test('ignores malformed overrides defensively', () async {
+      final config = <String, dynamic>{
+        ...sampleConfig,
+        'flag_severity_overrides': {
+          'role_stale': {'monitoring': 'blocking'},
+          'unknown_category': 'blocking',
+          'scope_violation': 'urgent',
+        },
+      };
+
+      await configStore.applyConfig(config);
+
+      expect(configStore.flagSeverityOverrides, isEmpty);
+      expect(
+        configStore.getFlagSeverity('scope_violation'),
+        FlagSeverity.blocking,
+      );
+    });
   });
 
   test('init loads persisted config from SQLite', () async {

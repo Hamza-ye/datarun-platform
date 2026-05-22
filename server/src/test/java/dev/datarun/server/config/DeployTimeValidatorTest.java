@@ -322,6 +322,72 @@ class DeployTimeValidatorTest {
         assertTrue(violations.stream().anyMatch(v -> v.contains("'roles' object")));
     }
 
+    @Test
+    void flagSeverityOverrides_validFlatMap_passes() {
+        JsonNode overrides = parse("""
+                {
+                  "role_stale": "informational",
+                  "temporal_authority_expired": "blocking"
+                }
+                """);
+
+        List<String> violations = DeployTimeValidator.validateFlagSeverityOverrides(overrides);
+
+        assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
+    }
+
+    @Test
+    void flagSeverityOverrides_unknownCategory_rejected() {
+        JsonNode overrides = parse("""
+                {"not_a_flag": "blocking"}
+                """);
+
+        List<String> violations = DeployTimeValidator.validateFlagSeverityOverrides(overrides);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Unknown flag category 'not_a_flag'")));
+    }
+
+    @Test
+    void flagSeverityOverrides_invalidSeverity_rejected() {
+        JsonNode overrides = parse("""
+                {"role_stale": "urgent"}
+                """);
+
+        List<String> violations = DeployTimeValidator.validateFlagSeverityOverrides(overrides);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Invalid severity 'urgent'")));
+    }
+
+    @Test
+    void flagSeverityOverrides_reservedCategory_rejected() {
+        JsonNode overrides = parse("""
+                {"reserved": "blocking"}
+                """);
+
+        List<String> violations = DeployTimeValidator.validateFlagSeverityOverrides(overrides);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Reserved flag category")));
+    }
+
+    @Test
+    void flagSeverityOverrides_nestedPerActivity_rejected() {
+        JsonNode overrides = parse("""
+                {
+                  "monitoring": {
+                    "role_stale": "blocking"
+                  }
+                }
+                """);
+
+        List<String> violations = DeployTimeValidator.validateFlagSeverityOverrides(overrides);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("nested/per-activity")));
+    }
+
     // --- Helpers ---
 
     private void addField(ArrayNode fields, String name, String type, boolean required) {

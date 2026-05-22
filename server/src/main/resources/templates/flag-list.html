@@ -24,6 +24,9 @@
         .category-scope { background: #fce4ec; color: #880e4f; }
         .category-temporal { background: #fff3e0; color: #e65100; }
         .category-role { background: #e0f2f1; color: #004d40; }
+        .severity { display: inline-block; font-size: 0.8rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; }
+        .severity-blocking { background: #fce8e6; color: #c5221f; }
+        .severity-informational { background: #e8f0fe; color: #1a73e8; }
         .empty { color: #888; padding: 2rem; text-align: center; }
         .mono { font-family: monospace; font-size: 0.82rem; }
     </style>
@@ -44,6 +47,7 @@
         <thead>
             <tr>
                 <th>Category</th>
+                <th>Severity</th>
                 <th>Subject</th>
                 <th>Source Event</th>
                 <th>Flagged At</th>
@@ -63,6 +67,11 @@
                             f.flagCategory() == 'role_stale' ? 'category-role' : ''
                           }"
                           th:text="${f.flagCategory()}">concurrent_state_change</span>
+                </td>
+                <td>
+                    <span class="severity"
+                          th:classappend="${f.severity() == 'blocking'} ? 'severity-blocking' : 'severity-informational'"
+                          th:text="${f.severity()}">blocking</span>
                 </td>
                 <td class="mono">
                     <a th:href="@{/admin/subjects/{id}(id=${f.subjectId()})}"

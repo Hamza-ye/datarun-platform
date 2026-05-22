@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/domain/activity_role_actions.dart';
+import 'package:datarun_mobile/domain/flag_severity.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 
 /// Stores and caches the config package (IDR-019).
@@ -14,6 +15,7 @@ class ConfigStore {
   Map<String, ShapeDefinition> _shapes = {};
   Map<String, Map<String, dynamic>> _activities = {};
   Map<String, ActivityRoleActions> _activityRoleActions = {};
+  Map<String, FlagSeverity> _flagSeverityOverrides = {};
   // Key: "{activity_ref}.{shape_ref}" → List of rule maps
   Map<String, List<Map<String, dynamic>>> _expressions = {};
   // Sensitivity classifications (IDR-019 §sensitivity_classifications)
@@ -84,6 +86,7 @@ class ConfigStore {
     final shapesRaw = packageJson['shapes'];
     final activitiesRaw = packageJson['activities'];
     final expressionsRaw = packageJson['expressions'];
+    final flagSeverityOverridesRaw = packageJson['flag_severity_overrides'];
 
     final shapesMap = shapesRaw is Map
         ? Map<String, dynamic>.from(shapesRaw)
@@ -127,6 +130,9 @@ class ConfigStore {
     _shapes = parsedShapes;
     _activities = parsedActivities;
     _activityRoleActions = parsedActivityRoleActions;
+    _flagSeverityOverrides = FlagSeverityCatalog.parseOverrides(
+      flagSeverityOverridesRaw,
+    );
     _expressions = parsedExpressions;
 
     // Sensitivity classifications (IDR-019). Defaults: shape='standard', activity='routine'.
@@ -164,6 +170,17 @@ class ConfigStore {
   ActivityRoleActions getActivityRoleActions(String activityName) =>
       _activityRoleActions[activityName] ??
       ActivityRoleActions.empty(activityName);
+
+  /// Deployment-wide flag severity overrides from the active package.
+  Map<String, FlagSeverity> get flagSeverityOverrides =>
+      Map.unmodifiable(_flagSeverityOverrides);
+
+  /// Effective severity is deployment override, otherwise platform default.
+  FlagSeverity? getFlagSeverity(String flagCategory) =>
+      FlagSeverityCatalog.effectiveSeverity(
+        flagCategory,
+        _flagSeverityOverrides,
+      );
 
   /// Advisory local decision for whether current assignments allow an activity
   /// work action. Server-side conflict detection remains authoritative.

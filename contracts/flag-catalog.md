@@ -4,17 +4,17 @@ All flag categories raised by the integrity pipeline. Each flag is persisted as 
 
 ## Categories
 
-| # | Category | Raised by | Resolvability | Designated Resolver | Phase |
-|---|----------|-----------|---------------|---------------------|-------|
-| 1 | `concurrent_state_change` | Identity CD | `manual_only` | system | 0 |
-| 2 | `stale_reference` | Identity CD | `auto_eligible` | system | 1 |
-| 3 | `identity_conflict` | Manual (admin) | `manual_only` | system | 1 |
-| 4 | `scope_violation` | Auth CD | `manual_only` | broadest-scope actor | 2c |
-| 5 | `temporal_authority_expired` | Auth CD | `auto_eligible` | broadest-scope actor | 2c |
-| 6 | `role_stale` | Auth CD | `manual_only` | supervisor actor | 2c |
-| 7 | `domain_uniqueness_violation` | Shape-declared uniqueness CD | `manual_only` | TBD | **Deferred — Phase 4 / IDR-022** |
-| 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | TBD | **Deferred — Phase 4 / IDR-020** |
-| 9 | *reserved* | *reserved* | *reserved* | *reserved* | **Reserved — growth slot; do not claim without ADR amendment** |
+| # | Category | Raised by | Resolvability | Default Severity | Designated Resolver | Phase |
+|---|----------|-----------|---------------|------------------|---------------------|-------|
+| 1 | `concurrent_state_change` | Identity CD | `manual_only` | `blocking` | system | 0 |
+| 2 | `stale_reference` | Identity CD | `auto_eligible` | `informational` | system | 1 |
+| 3 | `identity_conflict` | Manual (admin) | `manual_only` | `blocking` | system | 1 |
+| 4 | `scope_violation` | Auth CD | `manual_only` | `blocking` | broadest-scope actor | 2c |
+| 5 | `temporal_authority_expired` | Auth CD | `auto_eligible` | `informational` | broadest-scope actor | 2c |
+| 6 | `role_stale` | Auth CD | `manual_only` | `blocking` | supervisor actor | 2c |
+| 7 | `domain_uniqueness_violation` | Shape-declared uniqueness CD | `manual_only` | `blocking` | TBD | **Detector deferred — Phase 4 / IDR-022** |
+| 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | `informational` | TBD | **Detector deferred — Phase 4 / IDR-020** |
+| 9 | *reserved* | *reserved* | *reserved* | *reserved* | *reserved* | **Reserved — growth slot; do not claim without ADR amendment** |
 
 This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Categories 7 and 8 are specified architecturally but their detectors land with Phase 4. Category 9 is an explicit growth slot — claiming it requires an ADR-level amendment, not an IDR.
 
@@ -33,6 +33,12 @@ Within authorization CD, `temporal_authority_expired` remains before `scope_viol
 ## State Exclusion
 
 All flagged events (any category) are excluded from state derivation in SubjectProjection. The exclusion is category-agnostic — any event targeted by a `shape_ref = conflict_detected/v1` event is excluded.
+
+## Severity
+
+Phase 4.2 implements platform default severity plus deployment-wide L0 overrides through the config package key `flag_severity_overrides`. Effective severity is `override(category) ?? default(category)`. Overrides are flat and deployment-wide; only known categories may be addressed, the reserved slot is rejected, valid values are `blocking` and `informational`, and nested/per-activity severity is rejected.
+
+Severity does not change resolvability. `manual_only` and `auto_eligible` remain platform-owned by this catalog and the flag payload's `resolvability` field.
 
 ## Resolution
 

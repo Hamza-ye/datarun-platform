@@ -1,6 +1,7 @@
 package dev.datarun.server.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import dev.datarun.server.integrity.FlagCatalog;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -137,6 +138,46 @@ public class DeployTimeValidator {
                 if (!ACTIVITY_WORK_ACTION_TYPES.contains(action)) {
                     violations.add("Unknown action '" + action + "' for activity role '" + role + "'");
                 }
+            }
+        });
+
+        return violations;
+    }
+
+    public static List<String> validateFlagSeverityOverrides(JsonNode overridesNode) {
+        List<String> violations = new ArrayList<>();
+        if (overridesNode == null || !overridesNode.isObject()) {
+            violations.add("flag_severity_overrides must be an object");
+            return violations;
+        }
+
+        overridesNode.fields().forEachRemaining(entry -> {
+            String category = entry.getKey();
+            JsonNode severityNode = entry.getValue();
+            if (FlagCatalog.RESERVED_CATEGORY.equals(category)) {
+                violations.add("Reserved flag category 'reserved' cannot be overridden");
+            } else if (!FlagCatalog.isKnownCategory(category)) {
+                violations.add("Unknown flag category '" + category + "'");
+            }
+
+            if (severityNode == null || severityNode.isNull()) {
+                violations.add("Severity for '" + category + "' must be 'blocking' or 'informational'");
+                return;
+            }
+            if (severityNode.isObject() || severityNode.isArray()) {
+                violations.add("flag_severity_overrides must be flat; nested/per-activity severity for '"
+                        + category + "' is not supported");
+                return;
+            }
+            if (!severityNode.isTextual()) {
+                violations.add("Severity for '" + category + "' must be a string");
+                return;
+            }
+
+            String severity = severityNode.asText();
+            if (!FlagCatalog.isValidSeverity(severity)) {
+                violations.add("Invalid severity '" + severity + "' for '" + category
+                        + "'; expected 'blocking' or 'informational'");
             }
         });
 

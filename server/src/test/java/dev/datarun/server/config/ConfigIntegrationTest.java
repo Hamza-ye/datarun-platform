@@ -39,6 +39,9 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private ConfigPackager configPackager;
 
+    @Autowired
+    private FlagSeverityConfigService flagSeverityConfigService;
+
     @LocalServerPort
     private int port;
 
@@ -50,6 +53,7 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         // \u2014 they are registered at startup by PlatformShapeBootstrap and must not
         // be wiped by deployer-scoped cleanup. Only deployer-owned shapes are cleared.
         jdbcTemplate.update("DELETE FROM config_packages");
+        jdbcTemplate.update("DELETE FROM deployment_config");
         jdbcTemplate.update("DELETE FROM expression_rules");
         jdbcTemplate.update("DELETE FROM activities");
         jdbcTemplate.update("""
@@ -262,6 +266,55 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         assertTrue(body.get("activities").has("monitoring"));
         JsonNode packagedRoles = body.get("activities").get("monitoring").get("roles");
         assertEquals(config.get("roles"), packagedRoles);
+    }
+
+    @Test
+    void configEndpoint_deliversFlagSeverityOverrides() throws Exception {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ss.createShape("facility_obs", "standard", buildSchema(3, "facility_obs"));
+
+        JsonNode overrides = objectMapper.readTree("""
+                {
+                  "role_stale": "informational",
+                  "temporal_authority_expired": "blocking"
+                }
+                """);
+        List<String> violations = flagSeverityConfigService.updateOverrides(overrides, null);
+        assertTrue(violations.isEmpty(), "Got violations: " + violations);
+
+        configPackager.publish(null);
+
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
+                "/api/sync/config",
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                JsonNode.class);
+
+        assertEquals(200, response.getStatusCode().value());
+        JsonNode packagedOverrides = response.getBody().get("flag_severity_overrides");
+        assertEquals("informational", packagedOverrides.get("role_stale").asText());
+        assertEquals("blocking", packagedOverrides.get("temporal_authority_expired").asText());
+        assertFalse(packagedOverrides.has("concurrent_state_change"),
+                "Package should carry overrides, not copy platform defaults");
+    }
+
+    @Test
+    void publishBlocked_whenStoredFlagSeverityOverridesInvalid() {
+        jdbcTemplate.update("""
+                INSERT INTO deployment_config (config_key, config_json)
+                VALUES ('flag_severity_overrides', '{"role_stale":{"monitoring":"blocking"}}'::jsonb)
+                """);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/admin/config/publish", HttpMethod.POST, entity, String.class);
+
+        assertTrue(response.getStatusCode().is3xxRedirection());
+        Integer pkgCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM config_packages", Integer.class);
+        assertEquals(0, pkgCount.intValue());
     }
 
     @Test

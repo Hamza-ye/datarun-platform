@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.datarun.server.config.FlagSeverityConfigService;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.identity.ServerIdentity;
@@ -29,13 +30,16 @@ public class ConflictResolutionService {
 
     private final EventRepository eventRepository;
     private final ServerIdentity serverIdentity;
+    private final FlagSeverityConfigService flagSeverityConfigService;
     private final ObjectMapper objectMapper;
 
     public ConflictResolutionService(EventRepository eventRepository,
                                      ServerIdentity serverIdentity,
+                                     FlagSeverityConfigService flagSeverityConfigService,
                                      ObjectMapper objectMapper) {
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
+        this.flagSeverityConfigService = flagSeverityConfigService;
         this.objectMapper = objectMapper;
     }
 
@@ -152,6 +156,7 @@ public class ConflictResolutionService {
                         rs.getString("flag_id"),
                         rs.getString("source_event_id"),
                         rs.getString("flag_category"),
+                        flagSeverityConfigService.effectiveSeverity(rs.getString("flag_category")),
                         rs.getString("subject_id"),
                         rs.getTimestamp("flagged_at").toInstant().atOffset(ZoneOffset.UTC)
                 ));
@@ -177,6 +182,7 @@ public class ConflictResolutionService {
         return new FlagDetail(
                 flagEventId.toString(),
                 flagEvent.payload().get("flag_category").asText(),
+                flagSeverityConfigService.effectiveSeverity(flagEvent.payload().get("flag_category").asText()),
                 flagEvent.subjectRef().get("id").asText(),
                 flagEvent.payload().has("reason") ? flagEvent.payload().get("reason").asText() : "",
                 flagEvent.timestamp(),
@@ -191,6 +197,7 @@ public class ConflictResolutionService {
     public record FlagDetail(
             String flagId,
             String flagCategory,
+            String severity,
             String subjectId,
             String reason,
             OffsetDateTime flaggedAt,
@@ -261,7 +268,7 @@ public class ConflictResolutionService {
         ObjectNode payload = objectMapper.createObjectNode();
         payload.put("source_event_id", sourceEventId.toString());
         payload.put("flag_category", "identity_conflict");
-        payload.put("resolvability", "manual_only");
+        payload.put("resolvability", FlagCatalog.resolvabilityFor("identity_conflict"));
         ObjectNode resolver = objectMapper.createObjectNode();
         resolver.put("type", "actor");
         resolver.put("id", actorId.toString());
@@ -287,6 +294,7 @@ public class ConflictResolutionService {
             @JsonProperty("flag_id") String flagId,
             @JsonProperty("source_event_id") String sourceEventId,
             @JsonProperty("flag_category") String flagCategory,
+            @JsonProperty("severity") String severity,
             @JsonProperty("subject_id") String subjectId,
             @JsonProperty("flagged_at") OffsetDateTime flaggedAt
     ) {}
