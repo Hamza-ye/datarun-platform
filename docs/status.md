@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-22 (FP-001 resolved; FP-005 live contraction verified)
+**Last updated**: 2026-05-22 (IDR-022 drafted)
 
 ---
 
@@ -20,7 +20,7 @@
 
 **Phase 4: Workflow & Policies** — **NOT STARTED**
 
-Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. Phase 4 implementation still needs IDR-021, IDR-022, and a Phase 4 spec before code begins.
+Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. IDR-021 has been drafted as [Role-Action Enforcement Model](decisions/idr-021-role-action-enforcement-model.md), explicitly excluding FP-005 backfill/audit scope. IDR-022 has been drafted as [Flag Severity + Domain Uniqueness](decisions/idr-022-flag-severity-and-domain-uniqueness.md). Phase 4 implementation still needs a Phase 4 spec before code begins.
 
 ### Carried architectural debt — ADR-007 + Phase 3e retrofit
 
@@ -36,7 +36,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 | FP-002 | `subject_lifecycle` table read-discipline audit | Phase 4 | B | **RESOLVED** |
 | FP-003 | Envelope schema parity test | — | C | **RESOLVED** (EnvelopeSchemaParityTest) |
 | FP-004 | `assignment_ref` as potential future envelope field | future assignment-targeting ADR/work | B | **OPEN** |
-| FP-005 | Scoped pull temporal anchor and subject-history backfill | IDR-021, Phase 4 `ongoing_resolution` | A | **IN_PROGRESS** |
+| FP-005 | Scoped pull temporal anchor and subject-history backfill | Phase 4 `ongoing_resolution` | A | **IN_PROGRESS** (routed; IDR-021 drafting unblocked) |
 
 **Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
 
@@ -82,10 +82,10 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## What's Next
 
-**Phase 4: Workflow & Policies** — next phase. IDR-020 is rewritten; remaining prep is IDR-021, IDR-022, and the Phase 4 spec.
+**Phase 4: Workflow & Policies** — next phase. IDR-020, IDR-021, and IDR-022 are drafted/active; remaining prep is the Phase 4 spec.
 
-- IDR-021 (Role-Action Enforcement Model) may now build on FP-001's resolved role timeline check, but must still either resolve or explicitly route FP-005 before role-action code begins.
-- IDR-022 (Flag Severity + Domain Uniqueness) must define severity authoring and `domain_uniqueness_violation`.
+- IDR-021 (Role-Action Enforcement Model) is drafted. It builds on FP-001's role timeline check and keeps FP-005 out of role-action scope: live sync stays request-time scoped, subject-history backfill is separate Phase 4 `ongoing_resolution` work, and audit/historical pull is out of Phase 4 live sync unless a successor decision introduces a separate pull class/API.
+- IDR-022 (Flag Severity + Domain Uniqueness) is drafted. It defines deployment-wide L0 severity overrides through `flag_severity_overrides`, keeps resolvability platform-owned, defines shape-declared `domain_uniqueness_violation`, and keeps FP-005 backfill/audit behavior out of scope.
 - Phase spec: `docs/implementation/phases/phase-4.md` (once written)
 
 ### Test Debt (carried from Phase 3)
@@ -106,5 +106,5 @@ _(None)_
 | Decision | Status | Reference |
 |----------|--------|-----------|
 | IDR-020: Pattern State Machine Representation | **ACTIVE** | [idr-020-pattern-state-machine-representation.md](decisions/idr-020-pattern-state-machine-representation.md) |
-| IDR-021: Role-Action Enforcement Model | **NEEDED** | FP-001 closed; must resolve or explicitly route FP-005 before Phase 4 role-action code |
-| IDR-022: Flag Severity + Domain Uniqueness | **NEEDED** | Must cover severity authoring and `domain_uniqueness_violation` |
+| IDR-021: Role-Action Enforcement Model | **ACTIVE** | [idr-021-role-action-enforcement-model.md](decisions/idr-021-role-action-enforcement-model.md) |
+| IDR-022: Flag Severity + Domain Uniqueness | **ACTIVE** | [idr-022-flag-severity-and-domain-uniqueness.md](decisions/idr-022-flag-severity-and-domain-uniqueness.md) |

@@ -26,6 +26,8 @@
 | [idr-018](idr-018-expression-grammar.md) | Expression grammar — JSON AST with prefix-operator nodes (DD-2) | active | 3b | decision | configuration, expression, dd, grammar, cross-platform |
 | [idr-019](idr-019-config-package.md) | Config package — atomic JSON delivery via dedicated endpoint (DD-3) | active | 3c | decision | configuration, package, dd, sync, delivery |
 | [idr-020](idr-020-pattern-state-machine-representation.md) | Pattern state machine representation | active | 4-prep | decision | workflow, pattern-registry, projection, conflict, phase-4 |
+| [idr-021](idr-021-role-action-enforcement-model.md) | Role-action enforcement model | active | 4-prep | decision | authorization, role-action, configuration, conflict, phase-4 |
+| [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) | Flag Severity + Domain Uniqueness | active | 4-prep | decision | configuration, flags, conflict, uniqueness, phase-4 |
 
 ## By Component
 
@@ -42,12 +44,15 @@
 - [idr-010](idr-010-conflict-detection-intercept.md) — CD intercept point
 - [idr-011](idr-011-identity-conflict-scope.md) — Identity conflict scope
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Transition violation evaluation
+- [idr-021](idr-021-role-action-enforcement-model.md) — Role-action violation evaluation
+- [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity and domain uniqueness evaluation
 
 ### server/authorization
 - [idr-013](idr-013-assignment-payload.md) — Assignment payload design
 - [idr-014](idr-014-materialized-path-locations.md) — Materialized path locations
 - [idr-015](idr-015-scope-filtered-sync-query.md) — Scope-filtered sync query
 - [idr-016](idr-016-actor-token-table.md) — Actor token table
+- [idr-021](idr-021-role-action-enforcement-model.md) — Role-action permission semantics
 
 ### server/identity
 - [idr-008](idr-008-server-event-producer.md) — Server event producer
@@ -58,6 +63,8 @@
 - [idr-018](idr-018-expression-grammar.md) — Expression grammar
 - [idr-019](idr-019-config-package.md) — Config package & delivery
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding in config package
+- [idr-021](idr-021-role-action-enforcement-model.md) — Activity role-action mappings
+- [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity overrides and shape uniqueness constraints
 
 ### server/admin
 - [idr-006](idr-006-thymeleaf-admin.md) — Thymeleaf admin
@@ -66,11 +73,15 @@
 - [idr-003](idr-003-snake-case-json.md) — snake_case JSON
 - [idr-019](idr-019-config-package.md) — Config package (device-side management)
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding parsing
+- [idr-021](idr-021-role-action-enforcement-model.md) — Role-action config parsing
+- [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Severity and uniqueness config parsing
 
 ### mobile/domain
 - [idr-018](idr-018-expression-grammar.md) — Expression evaluator
 - [idr-009](idr-009-alias-table.md) — Alias table (device schema)
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern state projection
+- [idr-021](idr-021-role-action-enforcement-model.md) — Advisory role-action gating
+- [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Advisory uniqueness checks and flag severity behavior
 
 ### mobile/test
 - [idr-012](idr-012-sqflite-memory-path.md) — sqflite memory path
@@ -80,6 +91,8 @@
 - [idr-007](idr-007-concurrency-detection.md) — Concurrency detection
 - [idr-013](idr-013-assignment-payload.md) — Assignment payload design
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding contract
+- [idr-021](idr-021-role-action-enforcement-model.md) — Activity role-action contract
+- [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity and uniqueness contract
 
 ### ci
 - [idr-001](idr-001-test-infrastructure.md) — Test infrastructure

@@ -182,7 +182,7 @@ A successor ADR must exist, and either:
 
 **Status**: IN_PROGRESS
 **Opened**: 2026-05-22 by ADR-003 / Phase 4 readiness review
-**Blocks**: IDR-021 (Role-Action Enforcement), Phase 4 `ongoing_resolution` implementation
+**Blocks**: Phase 4 `ongoing_resolution` implementation. IDR-021 drafting is unblocked by the 2026-05-22 route below; role-action code must not absorb subject-history backfill or audit pull.
 **Severity**: A — touches ADR-003 S2 ("sync scope = access scope") and ADR-003 S3 authority-as-projection
 
 ### Context
@@ -210,10 +210,21 @@ All four must be true:
 3. **Audit/historical pull is classified**: a decision artifact states whether audit reconstruction is out of Phase 4 or requires a separate pull class/API. It must not be implied by live sync.
 4. **Push-path authority semantics are not assumed from the old FP**: IDR-021 either resolves this through FP-001 or adds tests that prove role/action checks reconstruct authority from the assignment event timeline at the intended event causal position, not from a cache, envelope field, or unexamined request-time shortcut.
 
+### Phase 4 route
+
+This FP is explicitly routed, not fully resolved:
+
+1. **Normal live sync remains request-time scoped.** `/api/sync/pull` must continue to evaluate current active assignments at request time and must not become a historical reconstruction channel.
+2. **Subject-history backfill is required for `ongoing_resolution`.** Phase 4 must introduce or specify a distinct subject-bound history/backfill behavior before implementing `ongoing_resolution`, because a newly assigned actor with a high normal sync watermark cannot derive a long-running subject's state from live pull alone.
+3. **Backfill is separate from role-action enforcement.** IDR-021 must not write role-action enforcement around this gap or make live pull historical to cover it.
+4. **Audit/historical pull is out of Phase 4 live sync.** If audit reconstruction is needed later, it requires a separate pull class/API or successor decision; it must not be silently folded into normal sync or subject-history backfill.
+5. **Backfill design points for Phase 4 spec/IDR.** The future backfill decision must define idempotence/cursor behavior without lowering the normal sync watermark, request-time authorization on every page, alias handling after merge/split, activity filtering for pattern state keys, and how assignment/transfer events become visible to subject-level projections.
+
 ### Resolution log
 
 - **2026-05-22**: Opened. Current repo read found live pull uses active assignments at request time and watermark pagination; no current subject-history backfill or audit pull class is specified.
 - **2026-05-22**: Live contraction portion verified. `ScopeFilteredSyncIntegrationTest.liveSyncContraction_reassignedAway_doesNotDeliverNewOldScopeEvents` proves normal `/api/sync/pull` is request-time scoped: after reassignment away from a geographic scope, a later pull from the actor's prior watermark does not deliver new events from the old scope. Remaining before role-action code begins: decide/test subject-history backfill for already-active `ongoing_resolution` subjects, and classify audit/historical pull as out of Phase 4 or as a separate pull class/API. Neither may be folded silently into live sync.
+- **2026-05-22**: ROUTED for IDR-021. FP-001 satisfies the push-path authority semantics needed before drafting IDR-021. FP-005 remains `IN_PROGRESS` for Phase 4 `ongoing_resolution`, but no longer blocks IDR-021 drafting because the route above explicitly keeps live-sync contraction request-time scoped, requires a separate subject-history backfill decision before `ongoing_resolution` implementation, and classifies audit/historical pull as out of Phase 4 live sync unless a successor decision introduces a separate pull class/API.
 
 ---
 
