@@ -11,16 +11,21 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
  * Assignment management: creates assignment events through the Event Store.
- * Enforces scope-containment on create (ADR-3 S5): new.scope ⊆ creator.scope.
- * Online-only (same precedent as merge/split: ADR-2 S10).
+ * Enforces scope containment on create (ADR-003 S5): new.scope <= creator.scope.
+ * Online-only (same precedent as merge/split: ADR-002 S10).
  */
 @Service
 public class AssignmentService {
+
+    private static final String INITIAL_BOOTSTRAP_ACTOR = "system:assignment_bootstrap/initial";
 
     private final EventRepository eventRepository;
     private final ServerIdentity serverIdentity;
@@ -57,75 +62,37 @@ public class AssignmentService {
     public Event createAssignment(UUID creatorActorId, UUID targetActorId, String role,
                                   UUID geographicId, List<UUID> subjectList, List<String> activityList,
                                   OffsetDateTime validFrom, OffsetDateTime validTo) {
-        // S5: scope-containment validation — new.scope ⊆ creator.scope
-        validateScopeContainment(creatorActorId, geographicId);
-
-        UUID assignmentId = UUID.randomUUID();
-
-        // Build payload per IDR-013
-        ObjectNode payload = objectMapper.createObjectNode();
-        
-        ObjectNode targetActor = objectMapper.createObjectNode();
-        targetActor.put("type", "actor");
-        targetActor.put("id", targetActorId.toString());
-        payload.set("target_actor", targetActor);
-        
-        payload.put("role", role);
-
-        ObjectNode scope = objectMapper.createObjectNode();
-        if (geographicId != null) {
-            scope.put("geographic", geographicId.toString());
-        } else {
-            scope.putNull("geographic");
-        }
-        if (subjectList != null) {
-            ArrayNode arr = objectMapper.createArrayNode();
-            subjectList.forEach(id -> arr.add(id.toString()));
-            scope.set("subject_list", arr);
-        } else {
-            scope.putNull("subject_list");
-        }
-        if (activityList != null) {
-            ArrayNode arr = objectMapper.createArrayNode();
-            activityList.forEach(arr::add);
-            scope.set("activity", arr);
-        } else {
-            scope.putNull("activity");
-        }
-        payload.set("scope", scope);
-
-        payload.put("valid_from", validFrom.toString());
-        if (validTo != null) {
-            payload.put("valid_to", validTo.toString());
-        } else {
-            payload.putNull("valid_to");
-        }
-
-        // Build envelope
-        ObjectNode subjectRef = objectMapper.createObjectNode();
-        subjectRef.put("type", "assignment");
-        subjectRef.put("id", assignmentId.toString());
+        validateAssignmentScopeInput(subjectList, activityList);
+        validateScopeContainment(creatorActorId, geographicId, subjectList, activityList);
 
         ObjectNode actorRef = objectMapper.createObjectNode();
         actorRef.put("type", "actor");
         actorRef.put("id", creatorActorId.toString());
 
-        Event event = new Event(
-                UUID.randomUUID(),
-                "assignment_changed",
-                "assignment_created/v1",
-                null,
-                subjectRef,
-                actorRef,
-                serverIdentity.getDeviceId(),
-                (int) serverIdentity.nextDeviceSeq(),
-                null,  // sync_watermark assigned by DB
-                OffsetDateTime.now(ZoneOffset.UTC),
-                payload
-        );
+        return insertAssignmentCreatedEvent(actorRef, targetActorId, role,
+                geographicId, subjectList, activityList, validFrom, validTo);
+    }
 
-        eventRepository.insert(event);
-        return event;
+    /**
+     * Explicit initial bootstrap path. This is intentionally separate from the
+     * actor command path so "creator has no assignments" is not production root.
+     */
+    public Event createInitialBootstrapAssignment(UUID targetActorId, String role,
+                                                  UUID geographicId, List<UUID> subjectList,
+                                                  List<String> activityList,
+                                                  OffsetDateTime validFrom, OffsetDateTime validTo) {
+        validateAssignmentScopeInput(subjectList, activityList);
+        if (hasAnyAssignmentCreatedEvent()) {
+            throw new IllegalArgumentException(
+                    "Bootstrap authority unavailable: assignments already exist");
+        }
+
+        ObjectNode actorRef = objectMapper.createObjectNode();
+        actorRef.put("type", "actor");
+        actorRef.put("id", INITIAL_BOOTSTRAP_ACTOR);
+
+        return insertAssignmentCreatedEvent(actorRef, targetActorId, role,
+                geographicId, subjectList, activityList, validFrom, validTo);
     }
 
     /**
@@ -137,6 +104,14 @@ public class AssignmentService {
      * @return the created event
      */
     public Event endAssignment(UUID assignmentId, UUID actorId, String reason) {
+        AssignmentScope targetScope = findAssignmentScope(assignmentId);
+        if (assignmentEnded(assignmentId)) {
+            throw new IllegalArgumentException("Assignment is already ended: " + assignmentId);
+        }
+        validateScopeContainment(actorId, targetScope.geographicId(), targetScope.geographicPath(),
+                targetScope.subjectList(), targetScope.activityList(),
+                "Assignment authority violation: actor cannot end assignment outside their scope");
+
         ObjectNode payload = objectMapper.createObjectNode();
         if (reason != null) {
             payload.put("reason", reason);
@@ -170,47 +145,255 @@ public class AssignmentService {
         return event;
     }
 
-    /**
-     * Validate scope containment (S5): the new assignment's geographic scope
-     * must be within the creator's geographic scope.
-     */
-    private void validateScopeContainment(UUID creatorActorId, UUID newGeoScopeId) {
-        if (newGeoScopeId == null) {
-            // No geographic restriction in new assignment — only root/admin can do this
-            // For Phase 2a: allow if creator has no assignments (bootstrap)
-            // or if creator has a null geographic scope
-            List<ActiveAssignment> creatorAssignments = scopeResolver.getActiveAssignments(creatorActorId);
-            if (creatorAssignments.isEmpty()) {
-                // Bootstrap: no assignments exist yet, allow creation
-                return;
+    private Event insertAssignmentCreatedEvent(ObjectNode actorRef,
+                                               UUID targetActorId, String role,
+                                               UUID geographicId, List<UUID> subjectList,
+                                               List<String> activityList,
+                                               OffsetDateTime validFrom, OffsetDateTime validTo) {
+        UUID assignmentId = UUID.randomUUID();
+
+        ObjectNode payload = objectMapper.createObjectNode();
+
+        ObjectNode targetActor = objectMapper.createObjectNode();
+        targetActor.put("type", "actor");
+        targetActor.put("id", targetActorId.toString());
+        payload.set("target_actor", targetActor);
+
+        payload.put("role", role);
+
+        ObjectNode scope = objectMapper.createObjectNode();
+        if (geographicId != null) {
+            scope.put("geographic", geographicId.toString());
+        } else {
+            scope.putNull("geographic");
+        }
+        if (subjectList != null) {
+            ArrayNode arr = objectMapper.createArrayNode();
+            subjectList.forEach(id -> arr.add(id.toString()));
+            scope.set("subject_list", arr);
+        } else {
+            scope.putNull("subject_list");
+        }
+        if (activityList != null) {
+            ArrayNode arr = objectMapper.createArrayNode();
+            activityList.forEach(arr::add);
+            scope.set("activity", arr);
+        } else {
+            scope.putNull("activity");
+        }
+        payload.set("scope", scope);
+
+        payload.put("valid_from", validFrom.toString());
+        if (validTo != null) {
+            payload.put("valid_to", validTo.toString());
+        } else {
+            payload.putNull("valid_to");
+        }
+
+        ObjectNode subjectRef = objectMapper.createObjectNode();
+        subjectRef.put("type", "assignment");
+        subjectRef.put("id", assignmentId.toString());
+
+        Event event = new Event(
+                UUID.randomUUID(),
+                "assignment_changed",
+                "assignment_created/v1",
+                null,
+                subjectRef,
+                actorRef,
+                serverIdentity.getDeviceId(),
+                (int) serverIdentity.nextDeviceSeq(),
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                payload
+        );
+
+        eventRepository.insert(event);
+        return event;
+    }
+
+    private void validateScopeContainment(UUID creatorActorId, UUID newGeoScopeId,
+                                          List<UUID> subjectList, List<String> activityList) {
+        String newPath = null;
+        if (newGeoScopeId != null) {
+            newPath = locationRepository.findPathById(newGeoScopeId);
+            if (newPath == null) {
+                throw new IllegalArgumentException("Location not found: " + newGeoScopeId);
             }
-            boolean hasUnrestrictedGeo = creatorAssignments.stream()
-                    .anyMatch(a -> a.geographicPath() == null);
-            if (!hasUnrestrictedGeo) {
-                throw new IllegalArgumentException(
-                        "Scope containment violation: cannot create assignment with unrestricted " +
-                        "geographic scope when creator's scope is restricted");
-            }
-            return;
         }
 
-        String newPath = locationRepository.findPathById(newGeoScopeId);
-        if (newPath == null) {
-            throw new IllegalArgumentException("Location not found: " + newGeoScopeId);
+        validateScopeContainment(creatorActorId, newGeoScopeId, newPath, subjectList, activityList,
+                "Scope containment violation: new assignment scope is not within one active creator assignment");
+    }
+
+    private void validateScopeContainment(UUID actorId, UUID requestedGeoId, String requestedGeoPath,
+                                          List<UUID> requestedSubjects,
+                                          List<String> requestedActivities,
+                                          String violationMessage) {
+        List<ActiveAssignment> actorAssignments = scopeResolver.getActiveAssignments(actorId);
+        if (actorAssignments.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Assignment authority violation: actor has no active assignments");
         }
 
-        List<ActiveAssignment> creatorAssignments = scopeResolver.getActiveAssignments(creatorActorId);
-        if (creatorAssignments.isEmpty()) {
-            // Bootstrap: allow (no assignments yet in the system)
-            return;
-        }
-
-        boolean contained = creatorAssignments.stream()
-                .anyMatch(a -> a.containsGeographically(newPath));
+        boolean contained = actorAssignments.stream()
+                .anyMatch(assignment -> containsAssignmentScope(
+                        assignment, requestedGeoId, requestedGeoPath,
+                        requestedSubjects, requestedActivities));
 
         if (!contained) {
-            throw new IllegalArgumentException(
-                    "Scope containment violation: new geographic scope is not within creator's scope");
+            throw new IllegalArgumentException(violationMessage);
         }
     }
+
+    private boolean containsAssignmentScope(ActiveAssignment coveringAssignment,
+                                            UUID requestedGeoId, String requestedGeoPath,
+                                            List<UUID> requestedSubjects,
+                                            List<String> requestedActivities) {
+        return containsGeographicScope(coveringAssignment, requestedGeoId, requestedGeoPath)
+                && containsSubjectScope(coveringAssignment, requestedSubjects)
+                && containsActivityScope(coveringAssignment, requestedActivities);
+    }
+
+    private boolean containsGeographicScope(ActiveAssignment coveringAssignment,
+                                            UUID requestedGeoId, String requestedGeoPath) {
+        if (requestedGeoId == null) {
+            return coveringAssignment.geographicPath() == null;
+        }
+        return coveringAssignment.containsGeographically(requestedGeoPath);
+    }
+
+    private boolean containsSubjectScope(ActiveAssignment coveringAssignment,
+                                         List<UUID> requestedSubjects) {
+        if (requestedSubjects == null) {
+            return coveringAssignment.subjectList() == null;
+        }
+        if (coveringAssignment.subjectList() == null) {
+            return true;
+        }
+        return coveringAssignment.subjectList().containsAll(requestedSubjects);
+    }
+
+    private boolean containsActivityScope(ActiveAssignment coveringAssignment,
+                                          List<String> requestedActivities) {
+        if (requestedActivities == null) {
+            return coveringAssignment.activityList() == null;
+        }
+        if (coveringAssignment.activityList() == null) {
+            return true;
+        }
+        return coveringAssignment.activityList().containsAll(requestedActivities);
+    }
+
+    private void validateAssignmentScopeInput(List<UUID> subjectList, List<String> activityList) {
+        if (subjectList != null) {
+            if (subjectList.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Invalid assignment scope: subject_list must be null or contain at least one subject id");
+            }
+            if (subjectList.stream().anyMatch(Objects::isNull)) {
+                throw new IllegalArgumentException(
+                        "Invalid assignment scope: subject_list cannot contain null values");
+            }
+        }
+        if (activityList != null) {
+            if (activityList.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Invalid assignment scope: activity must be null or contain at least one activity_ref");
+            }
+            if (activityList.stream().anyMatch(activity -> activity == null || activity.isBlank())) {
+                throw new IllegalArgumentException(
+                        "Invalid assignment scope: activity cannot contain null or blank values");
+            }
+        }
+    }
+
+    private boolean hasAnyAssignmentCreatedEvent() {
+        Integer count = eventRepository.getJdbcTemplate().queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE type = 'assignment_changed'
+                  AND shape_ref = 'assignment_created/v1'
+                """, Integer.class);
+        return count != null && count > 0;
+    }
+
+    private boolean assignmentEnded(UUID assignmentId) {
+        Integer count = eventRepository.getJdbcTemplate().queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE type = 'assignment_changed'
+                  AND shape_ref = 'assignment_ended/v1'
+                  AND subject_ref->>'id' = ?
+                """, Integer.class, assignmentId.toString());
+        return count != null && count > 0;
+    }
+
+    private AssignmentScope findAssignmentScope(UUID assignmentId) {
+        List<Map<String, Object>> rows = eventRepository.getJdbcTemplate().queryForList("""
+                SELECT payload
+                FROM events
+                WHERE type = 'assignment_changed'
+                  AND shape_ref = 'assignment_created/v1'
+                  AND subject_ref->>'id' = ?
+                ORDER BY sync_watermark ASC
+                LIMIT 1
+                """, assignmentId.toString());
+        if (rows.isEmpty()) {
+            throw new IllegalArgumentException("Assignment not found: " + assignmentId);
+        }
+
+        try {
+            JsonNode payload = objectMapper.readTree(rows.get(0).get("payload").toString());
+            JsonNode scope = payload.path("scope");
+
+            UUID geographicId = null;
+            String geographicPath = null;
+            JsonNode geographicNode = scope.path("geographic");
+            if (!geographicNode.isMissingNode() && !geographicNode.isNull()) {
+                geographicId = UUID.fromString(geographicNode.asText());
+                geographicPath = locationRepository.findPathById(geographicId);
+                if (geographicPath == null) {
+                    throw new IllegalArgumentException("Location not found: " + geographicId);
+                }
+            }
+
+            List<UUID> subjects = null;
+            JsonNode subjectNode = scope.path("subject_list");
+            if (!subjectNode.isMissingNode() && !subjectNode.isNull()) {
+                if (!subjectNode.isArray()) {
+                    throw new IllegalArgumentException("Assignment has invalid subject_list scope");
+                }
+                subjects = new ArrayList<>();
+                for (JsonNode item : subjectNode) {
+                    subjects.add(UUID.fromString(item.asText()));
+                }
+            }
+
+            List<String> activities = null;
+            JsonNode activityNode = scope.path("activity");
+            if (!activityNode.isMissingNode() && !activityNode.isNull()) {
+                if (!activityNode.isArray()) {
+                    throw new IllegalArgumentException("Assignment has invalid activity scope");
+                }
+                activities = new ArrayList<>();
+                for (JsonNode item : activityNode) {
+                    activities.add(item.asText());
+                }
+            }
+
+            return new AssignmentScope(geographicId, geographicPath, subjects, activities);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Assignment has invalid scope payload: " + assignmentId, e);
+        }
+    }
+
+    private record AssignmentScope(
+            UUID geographicId,
+            String geographicPath,
+            List<UUID> subjectList,
+            List<String> activityList
+    ) {}
 }

@@ -264,6 +264,26 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
     }
 
     /**
+     * IDR-024 / FP-007: activity-restricted assignments do not authorize
+     * ordinary work events whose activity_ref is null.
+     */
+    @Test
+    void activityRestrictedAssignment_nullActivityWorkEvent_scopeViolation() {
+        Event assignment = assignmentService.createAssignment(ADMIN, WORKER, "field_worker",
+                villageX1, null, List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        long knowledge = syncWatermark(assignment.id());
+
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, villageX1);
+        UUID event = pushEvent(subject, WORKER, DEVICE_W,
+                "capture", "basic_capture/v1", null, "Null activity work", knowledge);
+
+        assertThat(flagSources("scope_violation")).containsExactly(event.toString());
+        assertThat(flagSources("role_stale")).isEmpty();
+    }
+
+    /**
      * Phase 4: field workers with capture permission can push capture cleanly.
      */
     @Test
@@ -447,12 +467,18 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
 
     private UUID pushEvent(UUID subjectId, UUID actorId, UUID deviceId, String type, String shapeRef,
                            String notes, Long lastPullWatermark) {
+        return pushEvent(subjectId, actorId, deviceId, type, shapeRef,
+                "vaccination", notes, lastPullWatermark);
+    }
+
+    private UUID pushEvent(UUID subjectId, UUID actorId, UUID deviceId, String type, String shapeRef,
+                           String activityRef, String notes, Long lastPullWatermark) {
         UUID eventId = UUID.randomUUID();
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("id", eventId.toString());
         event.put("type", type);
         event.put("shape_ref", shapeRef);
-        event.put("activity_ref", "vaccination");
+        event.put("activity_ref", activityRef);
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
         event.put("actor_ref", Map.of("type", "actor", "id", actorId.toString()));
         event.put("device_id", deviceId.toString());

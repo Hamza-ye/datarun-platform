@@ -45,7 +45,8 @@ public record ActiveAssignment(
      * Check subject list containment.
      */
     public boolean containsSubject(UUID subjectId) {
-        if (subjectList == null || subjectList.isEmpty()) return true;  // null = no restriction
+        if (subjectList == null) return true;  // null = no restriction
+        if (subjectId == null) return false;
         return subjectList.contains(subjectId);
     }
 
@@ -53,8 +54,8 @@ public record ActiveAssignment(
      * Check activity containment.
      */
     public boolean containsActivity(String activityRef) {
-        if (activityList == null || activityList.isEmpty()) return true;  // null = no restriction
-        if (activityRef == null) return true;  // event with no activity_ref passes
+        if (activityList == null) return true;  // null = no restriction
+        if (activityRef == null) return false;
         return activityList.contains(activityRef);
     }
 }

@@ -272,7 +272,7 @@ All three must be true:
 
 ## FP-007 — Multi-axis assignment containment and null-activity semantics
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-05-22 by assignment administration scope-containment review
 **Blocks**: Phase 4 assignment-administration hardening; any implementation pass that claims ADR-003 S5 containment complete
 **Severity**: A — touches ADR-003 S5 and ADR-004/ADR-009 platform-fixed scope semantics
@@ -305,6 +305,7 @@ All of the following must be true:
 ### Resolution log
 
 - **2026-05-22**: Opened. Code read confirmed geography-only assignment creation containment in `AssignmentService`, null-activity wildcard behavior in `ActiveAssignment`, and the need for explicit bootstrap/root semantics before implementation. Routed to [IDR-024](decisions/idr-024-multi-axis-assignment-containment.md) for the decision/doc stop.
+- **2026-05-22**: RESOLVED. `AssignmentService.createAssignment(...)` now validates `geographic`, `subject_list`, and `activity` containment against one active covering creator assignment, rejects empty subject/activity arrays, and removes the requester-personal no-assignment bootstrap. `createInitialBootstrapAssignment(...)` provides an explicit initial bootstrap path bounded to the no-assignment-created system state, and `endAssignment(...)` now requires authority over the target assignment scope. `ActiveAssignment` no longer treats empty lists as unrestricted or null activity as passing activity-restricted assignments. Coverage landed in `AssignmentContainmentIntegrationTest`, `AuthFlagIntegrationTest.activityRestrictedAssignment_nullActivityWorkEvent_scopeViolation`, and the existing `DeployTimeValidatorTest.activityRoles_assignmentChangedRejected` gate.
 
 ---
 
