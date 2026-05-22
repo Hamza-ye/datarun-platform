@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-22 (IDR-022 drafted)
+**Last updated**: 2026-05-22 (Phase 4 spec drafted)
 
 ---
 
@@ -20,7 +20,7 @@
 
 **Phase 4: Workflow & Policies** — **NOT STARTED**
 
-Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. IDR-021 has been drafted as [Role-Action Enforcement Model](decisions/idr-021-role-action-enforcement-model.md), explicitly excluding FP-005 backfill/audit scope. IDR-022 has been drafted as [Flag Severity + Domain Uniqueness](decisions/idr-022-flag-severity-and-domain-uniqueness.md). Phase 4 implementation still needs a Phase 4 spec before code begins.
+Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 has now been rewritten as [Pattern State Machine Representation](decisions/idr-020-pattern-state-machine-representation.md), grounded in `docs/architecture/patterns.md` and `docs/exploration/28-pattern-inventory-walkthrough.md`. IDR-021 has been drafted as [Role-Action Enforcement Model](decisions/idr-021-role-action-enforcement-model.md), explicitly excluding FP-005 backfill/audit scope. IDR-022 has been drafted as [Flag Severity + Domain Uniqueness](decisions/idr-022-flag-severity-and-domain-uniqueness.md). The Phase 4 implementation spec is drafted at [phase-4.md](implementation/phases/phase-4.md); code has not started.
 
 ### Carried architectural debt — ADR-007 + Phase 3e retrofit
 
@@ -82,11 +82,11 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## What's Next
 
-**Phase 4: Workflow & Policies** — next phase. IDR-020, IDR-021, and IDR-022 are drafted/active; remaining prep is the Phase 4 spec.
+**Phase 4: Workflow & Policies** — next phase. IDR-020, IDR-021, and IDR-022 are drafted/active; the Phase 4 implementation spec is drafted and code has not started.
 
 - IDR-021 (Role-Action Enforcement Model) is drafted. It builds on FP-001's role timeline check and keeps FP-005 out of role-action scope: live sync stays request-time scoped, subject-history backfill is separate Phase 4 `ongoing_resolution` work, and audit/historical pull is out of Phase 4 live sync unless a successor decision introduces a separate pull class/API.
 - IDR-022 (Flag Severity + Domain Uniqueness) is drafted. It defines deployment-wide L0 severity overrides through `flag_severity_overrides`, keeps resolvability platform-owned, defines shape-declared `domain_uniqueness_violation`, and keeps FP-005 backfill/audit behavior out of scope.
-- Phase spec: `docs/implementation/phases/phase-4.md` (once written)
+- Phase spec: [docs/implementation/phases/phase-4.md](implementation/phases/phase-4.md) (drafted; implementation not started)
 
 ### Test Debt (carried from Phase 3)
 - Multi-version PE fixture
