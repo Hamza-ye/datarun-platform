@@ -85,7 +85,8 @@ public class ConfigPackager {
             JsonNode config = activity.configJson();
             if (config.has("shapes")) activityEntry.set("shapes", config.get("shapes"));
             if (config.has("roles")) activityEntry.set("roles", config.get("roles"));
-            activityEntry.putNull("pattern"); // Phase 4
+            if (config.has("pattern")) activityEntry.set("pattern", config.get("pattern"));
+            else activityEntry.putNull("pattern");
             activitiesNode.set(activity.name(), activityEntry);
         }
         packageJson.set("activities", activitiesNode);

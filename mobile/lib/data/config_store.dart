@@ -166,6 +166,14 @@ class ConfigStore {
   /// Get an activity config by name. Returns null if not found.
   Map<String, dynamic>? getActivity(String name) => _activities[name];
 
+  /// Raw pattern binding set for an activity. Projection support lands later;
+  /// Phase 4.4 only preserves the validated config package shape.
+  Map<String, dynamic>? getActivityPattern(String activityName) {
+    final pattern = _activities[activityName]?['pattern'];
+    if (pattern is! Map) return null;
+    return Map.unmodifiable(Map<String, dynamic>.from(pattern));
+  }
+
   /// Parsed role-action map for an activity.
   ActivityRoleActions getActivityRoleActions(String activityName) =>
       _activityRoleActions[activityName] ??

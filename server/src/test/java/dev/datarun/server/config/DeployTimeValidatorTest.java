@@ -323,6 +323,465 @@ class DeployTimeValidatorTest {
     }
 
     @Test
+    void patternRegistry_bundlesInitialDefinitionsAndKeepsOngoingDisabled() {
+        PatternRegistry registry = new PatternRegistry();
+
+        assertTrue(registry.find("capture_with_review/v1").isPresent());
+        assertTrue(registry.find("ongoing_resolution/v1").isPresent());
+        assertTrue(registry.find("multi_step_approval/v1").isPresent());
+        assertTrue(registry.find("transfer_with_acknowledgment/v1").isPresent());
+        assertFalse(registry.find("ongoing_resolution/v1").orElseThrow().bindingEnabled());
+    }
+
+    @Test
+    void activityPattern_validCaptureReviewBinding_passes() {
+        JsonNode config = parse("""
+                {
+                  "shapes": ["facility_observation/v1", "facility_observation_review/v1"],
+                  "roles": {
+                    "field_worker": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "capture_with_review/v1",
+                        "composition": "event",
+                        "shape_roles": {
+                          "review_decision": ["facility_observation_review/v1"]
+                        },
+                        "activation_roles": {
+                          "on_shapes": ["facility_observation/v1"]
+                        },
+                        "participant_roles": {
+                          "capturer": ["field_worker"],
+                          "reviewer": ["supervisor"]
+                        },
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config,
+                "facility_observation/v1", "facility_observation_review/v1");
+
+        assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
+    }
+
+    @Test
+    void activityPattern_unknownPatternRef_rejected() {
+        JsonNode config = parse("""
+                {
+                  "roles": {"field_worker": ["capture"]},
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "unknown_pattern/v1",
+                        "composition": "event",
+                        "shape_roles": {},
+                        "participant_roles": {},
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Unknown pattern ref 'unknown_pattern/v1'")));
+    }
+
+    @Test
+    void activityPattern_twoSubjectBindings_rejected() {
+        JsonNode config = parse("""
+                {
+                  "roles": {"sender": ["capture"], "receiver": ["capture"]},
+                  "pattern": {
+                    "subject": [
+                      {"ref": "transfer_with_acknowledgment/v1", "composition": "subject"},
+                      {"ref": "multi_step_approval/v1", "composition": "subject"}
+                    ],
+                    "event": []
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("at most one subject-level")));
+    }
+
+    @Test
+    void activityPattern_duplicateTransitionBoundShapeOwnership_rejected() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "field_worker": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "capture_with_review/v1",
+                        "composition": "event",
+                        "shape_roles": {"review_decision": ["shared_review/v1"]},
+                        "activation_roles": {"on_shapes": ["capture_a/v1"]},
+                        "participant_roles": {
+                          "capturer": ["field_worker"],
+                          "reviewer": ["supervisor"]
+                        },
+                        "parameters": {}
+                      },
+                      {
+                        "ref": "capture_with_review/v1",
+                        "composition": "event",
+                        "shape_roles": {"review_decision": ["shared_review/v1"]},
+                        "activation_roles": {"on_shapes": ["capture_b/v1"]},
+                        "participant_roles": {
+                          "capturer": ["field_worker"],
+                          "reviewer": ["supervisor"]
+                        },
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config,
+                "shared_review/v1", "capture_a/v1", "capture_b/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Duplicate transition-bound shape ownership")));
+    }
+
+    @Test
+    void activityPattern_missingRequiredShapeRole_rejected() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "field_worker": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "capture_with_review/v1",
+                        "composition": "event",
+                        "shape_roles": {},
+                        "activation_roles": {"on_shapes": ["facility_observation/v1"]},
+                        "participant_roles": {
+                          "capturer": ["field_worker"],
+                          "reviewer": ["supervisor"]
+                        },
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config, "facility_observation/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("missing required shape_roles.review_decision")));
+    }
+
+    @Test
+    void activityPattern_missingRequiredParticipantRole_rejected() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "field_worker": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "capture_with_review/v1",
+                        "composition": "event",
+                        "shape_roles": {"review_decision": ["review/v1"]},
+                        "activation_roles": {"on_shapes": ["capture/v1"]},
+                        "participant_roles": {
+                          "capturer": ["field_worker"]
+                        },
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config, "capture/v1", "review/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("missing required participant_roles.reviewer")));
+    }
+
+    @Test
+    void activityPattern_compositionMismatch_rejected() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "field_worker": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": {
+                      "ref": "capture_with_review/v1",
+                      "composition": "subject",
+                      "shape_roles": {"review_decision": ["review/v1"]},
+                      "activation_roles": {"on_shapes": ["capture/v1"]},
+                      "participant_roles": {
+                        "capturer": ["field_worker"],
+                        "reviewer": ["supervisor"]
+                      },
+                      "parameters": {}
+                    },
+                    "event": []
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config, "capture/v1", "review/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("does not match platform definition")));
+    }
+
+    @Test
+    void activityPattern_participantRoleMustPermitTransitionAction() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "field_worker": ["capture"],
+                    "supervisor": ["capture"]
+                  },
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "capture_with_review/v1",
+                        "composition": "event",
+                        "shape_roles": {"review_decision": ["review/v1"]},
+                        "activation_roles": {"on_shapes": ["capture/v1"]},
+                        "participant_roles": {
+                          "capturer": ["field_worker"],
+                          "reviewer": ["supervisor"]
+                        },
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config, "capture/v1", "review/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("does not allow action 'review'")));
+    }
+
+    @Test
+    void activityPattern_requiredParametersRejectedWhenMissing() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "submitter": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "multi_step_approval/v1",
+                        "composition": "event",
+                        "shape_roles": {
+                          "submission": ["submission/v1"],
+                          "level_decision": ["level_decision/v1"]
+                        },
+                        "participant_roles": {
+                          "submitter": ["submitter"],
+                          "level_1_reviewer": ["supervisor"],
+                          "level_2_reviewer": ["supervisor"]
+                        },
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config, "submission/v1", "level_decision/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("missing required parameters.levels")));
+    }
+
+    @Test
+    void activityPattern_multiStepApprovalRequiresConfiguredLevelReviewers() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "submitter": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "multi_step_approval/v1",
+                        "composition": "event",
+                        "shape_roles": {
+                          "submission": ["submission/v1"],
+                          "level_decision": ["level_decision/v1"]
+                        },
+                        "participant_roles": {
+                          "submitter": ["submitter"],
+                          "level_1_reviewer": ["supervisor"]
+                        },
+                        "parameters": {"levels": 2}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config, "submission/v1", "level_decision/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("missing required participant_roles.level_2_reviewer")));
+    }
+
+    @Test
+    void activityPattern_transferSupervisorRequiredWhenDiscrepancyRolesMapped() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "sender": ["capture"],
+                    "receiver": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": {
+                      "ref": "transfer_with_acknowledgment/v1",
+                      "composition": "subject",
+                      "shape_roles": {
+                        "dispatch": ["dispatch/v1"],
+                        "receipt": ["receipt/v1"],
+                        "discrepancy_resolution": ["discrepancy_resolution/v1"]
+                      },
+                      "participant_roles": {
+                        "sender": ["sender"],
+                        "receiver": ["receiver"]
+                      },
+                      "parameters": {}
+                    },
+                    "event": []
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config,
+                "dispatch/v1", "receipt/v1", "discrepancy_resolution/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("missing required participant_roles.supervisor")));
+    }
+
+    @Test
+    void activityPattern_eventReviewOverlayCanActivateOnSubjectOwnedShape() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "sender": ["capture"],
+                    "receiver": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": {
+                      "ref": "transfer_with_acknowledgment/v1",
+                      "composition": "subject",
+                      "shape_roles": {
+                        "dispatch": ["dispatch/v1"],
+                        "receipt": ["receipt/v1"]
+                      },
+                      "participant_roles": {
+                        "sender": ["sender"],
+                        "receiver": ["receiver"]
+                      },
+                      "parameters": {}
+                    },
+                    "event": [
+                      {
+                        "ref": "capture_with_review/v1",
+                        "composition": "event",
+                        "shape_roles": {"review_decision": ["dispatch_review/v1"]},
+                        "activation_roles": {"on_shapes": ["dispatch/v1"]},
+                        "participant_roles": {
+                          "capturer": ["sender"],
+                          "reviewer": ["supervisor"]
+                        },
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config,
+                "dispatch/v1", "receipt/v1", "dispatch_review/v1");
+
+        assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
+    }
+
+    @Test
+    void activityPattern_ongoingResolutionBindingBlockedByFp005() {
+        JsonNode config = parse("""
+                {
+                  "roles": {
+                    "chv": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": {
+                      "ref": "ongoing_resolution/v1",
+                      "composition": "subject",
+                      "shape_roles": {
+                        "opening": ["opening/v1"],
+                        "interaction": ["interaction/v1"],
+                        "resolution": ["resolution/v1"],
+                        "closure_review": ["closure_review/v1"]
+                      },
+                      "participant_roles": {
+                        "assigned_worker": ["chv"],
+                        "supervisor": ["supervisor"]
+                      },
+                      "parameters": {}
+                    },
+                    "event": []
+                  }
+                }
+                """);
+
+        List<String> violations = validatePattern(config,
+                "opening/v1", "interaction/v1", "resolution/v1", "closure_review/v1");
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("not enabled for Phase 4.4")));
+    }
+
+    @Test
     void flagSeverityOverrides_validFlatMap_passes() {
         JsonNode overrides = parse("""
                 {
@@ -523,5 +982,11 @@ class DeployTimeValidatorTest {
         // For unit tests, we use a validator with null repositories
         // Only validateRule is used (doesn't need repos)
         return new DeployTimeValidator(null, null);
+    }
+
+    private List<String> validatePattern(JsonNode activityConfig, String... knownShapeRefs) {
+        java.util.Set<String> known = new java.util.LinkedHashSet<>(java.util.Arrays.asList(knownShapeRefs));
+        return DeployTimeValidator.validateActivityPatternBinding(
+                "test_activity", activityConfig, known::contains, new PatternRegistry());
     }
 }

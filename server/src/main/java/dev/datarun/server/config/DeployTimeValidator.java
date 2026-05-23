@@ -2,6 +2,7 @@ package dev.datarun.server.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.datarun.server.integrity.FlagCatalog;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -32,13 +33,28 @@ public class DeployTimeValidator {
     private static final Set<String> SCALAR_PAYLOAD_TYPES = Set.of(
             "text", "integer", "decimal", "boolean", "date", "select",
             "location", "subject_ref", "narrative");
+    private static final Set<String> PATTERN_SET_KEYS = Set.of("subject", "event");
+    private static final Set<String> PATTERN_BINDING_KEYS = Set.of(
+            "ref", "composition", "shape_roles", "activation_roles", "participant_roles", "parameters");
 
     private final ShapeRepository shapeRepository;
     private final ExpressionRepository expressionRepository;
+    private final ActivityRepository activityRepository;
+    private final PatternRegistry patternRegistry;
 
-    public DeployTimeValidator(ShapeRepository shapeRepository, ExpressionRepository expressionRepository) {
+    @Autowired
+    public DeployTimeValidator(ShapeRepository shapeRepository,
+                               ExpressionRepository expressionRepository,
+                               ActivityRepository activityRepository,
+                               PatternRegistry patternRegistry) {
         this.shapeRepository = shapeRepository;
         this.expressionRepository = expressionRepository;
+        this.activityRepository = activityRepository;
+        this.patternRegistry = patternRegistry;
+    }
+
+    public DeployTimeValidator(ShapeRepository shapeRepository, ExpressionRepository expressionRepository) {
+        this(shapeRepository, expressionRepository, null, new PatternRegistry());
     }
 
     /**
@@ -122,7 +138,26 @@ public class DeployTimeValidator {
                 violations.add("Rule " + rule.id() + " (" + rule.fieldName() + "/" + rule.ruleType() + "): " + v);
             }
         }
+
+        if (activityRepository != null) {
+            for (Activity activity : activityRepository.findActive()) {
+                List<String> roleViolations = validateActivityRoles(activity.configJson().get("roles"));
+                for (String v : roleViolations) {
+                    violations.add("Activity " + activity.name() + ": " + v);
+                }
+                List<String> patternViolations = validateActivityPatternBinding(
+                        activity.name(), activity.configJson(), this::shapeRefExists, patternRegistry);
+                for (String v : patternViolations) {
+                    violations.add("Activity " + activity.name() + ": " + v);
+                }
+            }
+        }
         return violations;
+    }
+
+    @FunctionalInterface
+    public interface ShapeRefLookup {
+        boolean exists(String shapeRef);
     }
 
     public static List<String> validateActivityRoles(JsonNode rolesNode) {
@@ -158,6 +193,437 @@ public class DeployTimeValidator {
         });
 
         return violations;
+    }
+
+    public static List<String> validateActivityPatternBinding(String activityName,
+                                                              JsonNode activityConfig,
+                                                              ShapeRefLookup shapeRefLookup,
+                                                              PatternRegistry registry) {
+        List<String> violations = new ArrayList<>();
+        if (activityConfig == null || activityConfig.isNull()) {
+            return violations;
+        }
+        JsonNode patternNode = activityConfig.get("pattern");
+        if (patternNode == null || patternNode.isNull()) {
+            return violations;
+        }
+        if (!patternNode.isObject()) {
+            violations.add("Activity '" + activityName + "' pattern must be an object or null");
+            return violations;
+        }
+
+        patternNode.fields().forEachRemaining(entry -> {
+            if (!PATTERN_SET_KEYS.contains(entry.getKey())) {
+                violations.add("Activity '" + activityName + "' pattern key '" + entry.getKey()
+                        + "' is not supported; deployers bind platform patterns only");
+            }
+        });
+
+        Map<String, String> transitionBoundOwners = new LinkedHashMap<>();
+        int[] subjectBindingCount = new int[]{0};
+
+        JsonNode subjectNode = patternNode.get("subject");
+        if (subjectNode != null && !subjectNode.isNull()) {
+            if (subjectNode.isArray()) {
+                if (subjectNode.size() > 1) {
+                    violations.add("Activity '" + activityName
+                            + "' may have at most one subject-level pattern binding");
+                }
+                violations.add("Activity '" + activityName + "' pattern.subject must be an object or null");
+            } else if (!subjectNode.isObject()) {
+                violations.add("Activity '" + activityName + "' pattern.subject must be an object or null");
+            } else {
+                subjectBindingCount[0]++;
+                validatePatternBinding(activityName, "subject", subjectNode, "subject",
+                        activityConfig.get("roles"), shapeRefLookup, registry, transitionBoundOwners, violations);
+            }
+        }
+
+        JsonNode eventNode = patternNode.get("event");
+        if (eventNode != null && !eventNode.isNull()) {
+            if (!eventNode.isArray()) {
+                violations.add("Activity '" + activityName + "' pattern.event must be an array");
+            } else {
+                for (int i = 0; i < eventNode.size(); i++) {
+                    JsonNode binding = eventNode.get(i);
+                    if (binding == null || !binding.isObject()) {
+                        violations.add("Activity '" + activityName + "' pattern.event[" + i
+                                + "] must be an object");
+                        continue;
+                    }
+                    if ("subject".equals(binding.path("composition").asText(null))) {
+                        subjectBindingCount[0]++;
+                    }
+                    validatePatternBinding(activityName, "event[" + i + "]", binding, "event",
+                            activityConfig.get("roles"), shapeRefLookup, registry, transitionBoundOwners, violations);
+                }
+            }
+        }
+
+        if (subjectBindingCount[0] > 1) {
+            violations.add("Activity '" + activityName
+                    + "' may have at most one subject-level pattern binding");
+        }
+
+        return violations;
+    }
+
+    private static void validatePatternBinding(String activityName,
+                                               String bindingPath,
+                                               JsonNode binding,
+                                               String expectedSlotComposition,
+                                               JsonNode activityRolesNode,
+                                               ShapeRefLookup shapeRefLookup,
+                                               PatternRegistry registry,
+                                               Map<String, String> transitionBoundOwners,
+                                               List<String> violations) {
+        binding.fields().forEachRemaining(entry -> {
+            if (!PATTERN_BINDING_KEYS.contains(entry.getKey())) {
+                violations.add("Activity '" + activityName + "' pattern." + bindingPath
+                        + " key '" + entry.getKey()
+                        + "' is not supported; deployers bind platform patterns only");
+            }
+        });
+
+        JsonNode refNode = binding.get("ref");
+        if (refNode == null || !refNode.isTextual() || refNode.asText().isBlank()) {
+            violations.add("Activity '" + activityName + "' pattern." + bindingPath
+                    + ".ref must be a non-empty string");
+            return;
+        }
+        String ref = refNode.asText();
+        Optional<PatternRegistry.PatternDefinition> definitionOpt = registry.find(ref);
+        if (definitionOpt.isEmpty()) {
+            violations.add("Unknown pattern ref '" + ref + "' in activity '" + activityName + "'");
+            return;
+        }
+        PatternRegistry.PatternDefinition definition = definitionOpt.get();
+        if (!definition.bindingEnabled()) {
+            violations.add("Pattern ref '" + ref
+                    + "' is registered but not enabled for Phase 4.4 binding; FP-005 must close first");
+        }
+
+        JsonNode compositionNode = binding.get("composition");
+        if (compositionNode == null || !compositionNode.isTextual()) {
+            violations.add("Pattern binding '" + ref + "' composition must be a string");
+        } else {
+            String composition = compositionNode.asText();
+            if (!expectedSlotComposition.equals(composition)) {
+                violations.add("Pattern binding '" + ref + "' in " + bindingPath
+                        + " must use composition '" + expectedSlotComposition + "'");
+            }
+            if (!definition.allowedCompositions().contains(composition)) {
+                violations.add("Pattern binding '" + ref + "' composition '" + composition
+                        + "' does not match platform definition");
+            }
+        }
+
+        JsonNode parametersNode = binding.get("parameters");
+        int approvalLevels = validatePatternParameters(ref, definition, parametersNode, violations);
+
+        JsonNode shapeRolesNode = binding.get("shape_roles");
+        validateShapeRoles(activityName, bindingPath, ref, definition, shapeRolesNode,
+                shapeRefLookup, transitionBoundOwners, violations);
+
+        JsonNode activationRolesNode = binding.get("activation_roles");
+        validateActivationRoles(ref, definition, activationRolesNode, shapeRefLookup, violations);
+
+        JsonNode participantRolesNode = binding.get("participant_roles");
+        validateParticipantRoles(ref, definition, participantRolesNode,
+                activityRolesNode, shapeRolesNode, approvalLevels, violations);
+    }
+
+    private static int validatePatternParameters(String ref,
+                                                 PatternRegistry.PatternDefinition definition,
+                                                 JsonNode parametersNode,
+                                                 List<String> violations) {
+        if (parametersNode == null || parametersNode.isNull()) {
+            if (!definition.requiredParameters().isEmpty()) {
+                violations.add("Pattern binding '" + ref + "' parameters must be an object");
+            }
+            for (String required : definition.requiredParameters()) {
+                violations.add("Pattern binding '" + ref + "' missing required parameters." + required);
+            }
+            return -1;
+        }
+        if (!parametersNode.isObject()) {
+            violations.add("Pattern binding '" + ref + "' parameters must be an object");
+            return -1;
+        }
+
+        parametersNode.fields().forEachRemaining(entry -> {
+            if (!definition.allParameters().contains(entry.getKey())) {
+                violations.add("Pattern binding '" + ref + "' parameter '" + entry.getKey()
+                        + "' is not supported");
+            }
+        });
+        for (String required : definition.requiredParameters()) {
+            if (!parametersNode.has(required) || parametersNode.get(required).isNull()) {
+                violations.add("Pattern binding '" + ref + "' missing required parameters." + required);
+            }
+        }
+
+        if (!definition.levelBasedApproval()) {
+            return -1;
+        }
+
+        JsonNode levelsNode = parametersNode.get("levels");
+        if (levelsNode == null || !levelsNode.isIntegralNumber() || !levelsNode.canConvertToInt()) {
+            violations.add("Pattern binding '" + ref + "' parameters.levels must be an integer >= 2");
+            return -1;
+        }
+        int levels = levelsNode.asInt();
+        if (levels < 2) {
+            violations.add("Pattern binding '" + ref + "' parameters.levels must be >= 2");
+            return -1;
+        }
+        return levels;
+    }
+
+    private static void validateShapeRoles(String activityName,
+                                           String bindingPath,
+                                           String ref,
+                                           PatternRegistry.PatternDefinition definition,
+                                           JsonNode shapeRolesNode,
+                                           ShapeRefLookup shapeRefLookup,
+                                           Map<String, String> transitionBoundOwners,
+                                           List<String> violations) {
+        if (shapeRolesNode == null || shapeRolesNode.isNull()) {
+            if (!definition.requiredShapeRoles().isEmpty()) {
+                violations.add("Pattern binding '" + ref + "' shape_roles must be an object");
+            }
+            for (String required : definition.requiredShapeRoles()) {
+                violations.add("Pattern binding '" + ref + "' missing required shape_roles." + required);
+            }
+            return;
+        }
+        if (!shapeRolesNode.isObject()) {
+            violations.add("Pattern binding '" + ref + "' shape_roles must be an object");
+            return;
+        }
+
+        shapeRolesNode.fields().forEachRemaining(entry -> {
+            String role = entry.getKey();
+            if (!definition.allShapeRoles().contains(role)) {
+                violations.add("Pattern binding '" + ref + "' shape_roles." + role + " is not supported");
+            }
+            List<String> refs = validateShapeRefArray("Pattern binding '" + ref + "' shape_roles." + role,
+                    entry.getValue(), shapeRefLookup, violations);
+            if (definition.transitionBoundShapeRoles().contains(role)) {
+                for (String shapeRef : refs) {
+                    String owner = "pattern." + bindingPath + ".shape_roles." + role;
+                    String previous = transitionBoundOwners.putIfAbsent(shapeRef, owner);
+                    if (previous != null) {
+                        violations.add("Duplicate transition-bound shape ownership in activity '"
+                                + activityName + "': shape '" + shapeRef + "' is bound by both '"
+                                + previous + "' and '" + owner + "'");
+                    }
+                }
+            }
+        });
+
+        for (String required : definition.requiredShapeRoles()) {
+            JsonNode requiredNode = shapeRolesNode.get(required);
+            if (requiredNode == null || !requiredNode.isArray() || requiredNode.isEmpty()) {
+                violations.add("Pattern binding '" + ref + "' missing required shape_roles." + required);
+            }
+        }
+    }
+
+    private static void validateActivationRoles(String ref,
+                                                PatternRegistry.PatternDefinition definition,
+                                                JsonNode activationRolesNode,
+                                                ShapeRefLookup shapeRefLookup,
+                                                List<String> violations) {
+        if (activationRolesNode == null || activationRolesNode.isNull()) {
+            for (String required : definition.requiredActivationRoleLists()) {
+                violations.add("Pattern binding '" + ref + "' missing required activation_roles." + required);
+            }
+            return;
+        }
+        if (!activationRolesNode.isObject()) {
+            violations.add("Pattern binding '" + ref + "' activation_roles must be an object");
+            return;
+        }
+        if (definition.allActivationRoleLists().isEmpty() && activationRolesNode.size() > 0) {
+            violations.add("Pattern binding '" + ref + "' does not support activation_roles");
+        }
+
+        activationRolesNode.fields().forEachRemaining(entry -> {
+            String role = entry.getKey();
+            if (!definition.allActivationRoleLists().contains(role)) {
+                violations.add("Pattern binding '" + ref + "' activation_roles." + role + " is not supported");
+            }
+            validateShapeRefArray("Pattern binding '" + ref + "' activation_roles." + role,
+                    entry.getValue(), shapeRefLookup, violations);
+        });
+
+        for (String required : definition.requiredActivationRoleLists()) {
+            JsonNode requiredNode = activationRolesNode.get(required);
+            if (requiredNode == null || !requiredNode.isArray() || requiredNode.isEmpty()) {
+                violations.add("Pattern binding '" + ref + "' missing required activation_roles." + required);
+            }
+        }
+    }
+
+    private static void validateParticipantRoles(String ref,
+                                                 PatternRegistry.PatternDefinition definition,
+                                                 JsonNode participantRolesNode,
+                                                 JsonNode activityRolesNode,
+                                                 JsonNode shapeRolesNode,
+                                                 int approvalLevels,
+                                                 List<String> violations) {
+        Map<String, Set<String>> actionRequirements =
+                participantActionRequirements(definition, shapeRolesNode, approvalLevels);
+        Set<String> requiredParticipants =
+                requiredParticipantRoles(definition, shapeRolesNode, approvalLevels);
+        Set<String> allowedParticipants = new LinkedHashSet<>(definition.allFixedParticipantRoles());
+        allowedParticipants.addAll(actionRequirements.keySet());
+
+        if (participantRolesNode == null || participantRolesNode.isNull()) {
+            if (!requiredParticipants.isEmpty()) {
+                violations.add("Pattern binding '" + ref + "' participant_roles must be an object");
+            }
+            for (String required : requiredParticipants) {
+                violations.add("Pattern binding '" + ref + "' missing required participant_roles." + required);
+            }
+            return;
+        }
+        if (!participantRolesNode.isObject()) {
+            violations.add("Pattern binding '" + ref + "' participant_roles must be an object");
+            return;
+        }
+
+        participantRolesNode.fields().forEachRemaining(entry -> {
+            String participantRole = entry.getKey();
+            if (!allowedParticipants.contains(participantRole)) {
+                violations.add("Pattern binding '" + ref + "' participant_roles."
+                        + participantRole + " is not supported");
+            }
+            List<String> activityRoles = validateStringArray("Pattern binding '" + ref
+                    + "' participant_roles." + participantRole, entry.getValue(), violations);
+            Set<String> requiredActions = actionRequirements.getOrDefault(participantRole, Set.of());
+            for (String activityRole : activityRoles) {
+                JsonNode actions = activityRolesNode == null ? null : activityRolesNode.get(activityRole);
+                if (actions == null || !actions.isArray()) {
+                    violations.add("Pattern binding '" + ref + "' participant_roles." + participantRole
+                            + " references unknown activity role '" + activityRole + "'");
+                    continue;
+                }
+                for (String action : requiredActions) {
+                    if (!arrayContains(actions, action)) {
+                        violations.add("Pattern binding '" + ref + "' participant_roles." + participantRole
+                                + " maps activity role '" + activityRole
+                                + "' but that role does not allow action '" + action + "'");
+                    }
+                }
+            }
+        });
+
+        for (String required : requiredParticipants) {
+            JsonNode requiredNode = participantRolesNode.get(required);
+            if (requiredNode == null || !requiredNode.isArray() || requiredNode.isEmpty()) {
+                violations.add("Pattern binding '" + ref + "' missing required participant_roles." + required);
+            }
+        }
+    }
+
+    private static Map<String, Set<String>> participantActionRequirements(
+            PatternRegistry.PatternDefinition definition,
+            JsonNode shapeRolesNode,
+            int approvalLevels) {
+        Map<String, Set<String>> requirements = new LinkedHashMap<>(definition.participantActionRequirements());
+        if (definition.levelBasedApproval() && approvalLevels >= 2) {
+            for (int i = 1; i <= approvalLevels; i++) {
+                requirements.put("level_" + i + "_reviewer", Set.of("review"));
+            }
+        }
+        if (definition.transferSupervisorConditional() && hasAnyShapeRole(shapeRolesNode,
+                Set.of("discrepancy_report", "discrepancy_resolution"))) {
+            requirements.put("supervisor", Set.of("review"));
+        }
+        return requirements;
+    }
+
+    private static Set<String> requiredParticipantRoles(PatternRegistry.PatternDefinition definition,
+                                                        JsonNode shapeRolesNode,
+                                                        int approvalLevels) {
+        Set<String> required = new LinkedHashSet<>(definition.requiredParticipantRoles());
+        if (definition.levelBasedApproval() && approvalLevels >= 2) {
+            for (int i = 1; i <= approvalLevels; i++) {
+                required.add("level_" + i + "_reviewer");
+            }
+        }
+        if (definition.transferSupervisorConditional() && hasAnyShapeRole(shapeRolesNode,
+                Set.of("discrepancy_report", "discrepancy_resolution"))) {
+            required.add("supervisor");
+        }
+        return required;
+    }
+
+    private static boolean hasAnyShapeRole(JsonNode shapeRolesNode, Set<String> roles) {
+        if (shapeRolesNode == null || !shapeRolesNode.isObject()) {
+            return false;
+        }
+        for (String role : roles) {
+            JsonNode value = shapeRolesNode.get(role);
+            if (value != null && value.isArray() && !value.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<String> validateShapeRefArray(String path,
+                                                      JsonNode node,
+                                                      ShapeRefLookup shapeRefLookup,
+                                                      List<String> violations) {
+        List<String> refs = validateStringArray(path, node, violations);
+        Set<String> seen = new LinkedHashSet<>();
+        for (String shapeRef : refs) {
+            if (!seen.add(shapeRef)) {
+                violations.add(path + " contains duplicate shape_ref '" + shapeRef + "'");
+            }
+            String[] parsed = ShapeService.parseShapeRef(shapeRef);
+            if (parsed == null) {
+                violations.add(path + " contains invalid shape_ref '" + shapeRef + "'");
+            } else if (shapeRefLookup == null || !shapeRefLookup.exists(shapeRef)) {
+                violations.add(path + " references unknown shape_ref '" + shapeRef + "'");
+            }
+        }
+        return refs;
+    }
+
+    private static List<String> validateStringArray(String path, JsonNode node, List<String> violations) {
+        List<String> values = new ArrayList<>();
+        if (node == null || !node.isArray()) {
+            violations.add(path + " must be an array");
+            return values;
+        }
+        if (node.isEmpty()) {
+            violations.add(path + " must be non-empty");
+            return values;
+        }
+        for (JsonNode value : node) {
+            if (!value.isTextual() || value.asText().isBlank()) {
+                violations.add(path + " values must be non-empty strings");
+                continue;
+            }
+            values.add(value.asText());
+        }
+        return values;
+    }
+
+    private static boolean arrayContains(JsonNode arrayNode, String expected) {
+        if (arrayNode == null || !arrayNode.isArray()) {
+            return false;
+        }
+        for (JsonNode item : arrayNode) {
+            if (item.isTextual() && expected.equals(item.asText())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static List<String> validateShapeUniqueness(String shapeRef, JsonNode schemaJson) {
@@ -475,6 +941,13 @@ public class DeployTimeValidator {
             return fieldTypes.get(text.substring("payload.".length()));
         }
         return null;
+    }
+
+    private boolean shapeRefExists(String shapeRef) {
+        if (shapeRepository == null) return false;
+        String[] parts = ShapeService.parseShapeRef(shapeRef);
+        if (parts == null) return false;
+        return shapeRepository.exists(parts[0], Integer.parseInt(parts[1]));
     }
 
     private Map<String, String> buildFieldTypeMap(Shape shape) {

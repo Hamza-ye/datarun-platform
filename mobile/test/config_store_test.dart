@@ -183,6 +183,37 @@ void main() {
     expect(shape.uniqueness!.deviceAction, 'warn');
   });
 
+  test('applyConfig preserves activity pattern binding unchanged', () async {
+    final config = cloneConfig(sampleConfig);
+    final pattern = {
+      'subject': null,
+      'event': [
+        {
+          'ref': 'capture_with_review/v1',
+          'composition': 'event',
+          'shape_roles': {
+            'review_decision': ['household_visit_review/v1'],
+          },
+          'activation_roles': {
+            'on_shapes': ['household_visit/v1'],
+          },
+          'participant_roles': {
+            'capturer': ['field_worker'],
+            'reviewer': ['supervisor'],
+          },
+          'parameters': {},
+        },
+      ],
+    };
+    (config['activities']['monitoring'] as Map<String, dynamic>)['pattern'] =
+        pattern;
+
+    await configStore.applyConfig(config);
+
+    expect(configStore.getActivityPattern('monitoring'), pattern);
+    expect(configStore.getActivityPattern('child_health'), isNull);
+  });
+
   test('domain uniqueness advisory warns from local events only', () async {
     final config = cloneConfig(sampleConfig);
     (config['shapes']['household_visit/v1']

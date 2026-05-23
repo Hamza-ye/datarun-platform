@@ -354,6 +354,134 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void configEndpoint_preservesPatternBindingSetWithDeprecatedShapeVersions() {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        assertTrue(ss.createShape("facility_observation", "standard", buildSchema(2, null)).isEmpty());
+        assertTrue(ss.createVersion("facility_observation", "standard", buildSchema(2, null)).isEmpty());
+        ss.deprecate("facility_observation", 1);
+        assertTrue(ss.createShape("facility_observation_review", "standard", buildSchema(2, null)).isEmpty());
+        assertTrue(ss.createVersion("facility_observation_review", "standard", buildSchema(2, null)).isEmpty());
+        ss.deprecate("facility_observation_review", 1);
+
+        JsonNode pattern = parse("""
+                {
+                  "subject": null,
+                  "event": [
+                    {
+                      "ref": "capture_with_review/v1",
+                      "composition": "event",
+                      "shape_roles": {
+                        "review_decision": [
+                          "facility_observation_review/v1",
+                          "facility_observation_review/v2"
+                        ]
+                      },
+                      "activation_roles": {
+                        "on_shapes": [
+                          "facility_observation/v1",
+                          "facility_observation/v2"
+                        ]
+                      },
+                      "participant_roles": {
+                        "capturer": ["field_worker"],
+                        "reviewer": ["supervisor"]
+                      },
+                      "parameters": {}
+                    }
+                  ]
+                }
+                """);
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("facility_observation/v2").add("facility_observation_review/v2");
+        ObjectNode roles = config.putObject("roles");
+        roles.putArray("field_worker").add("capture");
+        roles.putArray("supervisor").add("review");
+        config.set("pattern", pattern);
+
+        List<String> violations = as.createActivity("facility_monitoring", "standard", config);
+        assertTrue(violations.isEmpty(), "Got violations: " + violations);
+
+        configPackager.publish(null);
+
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
+                "/api/sync/config",
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                JsonNode.class);
+
+        assertEquals(200, response.getStatusCode().value());
+        JsonNode body = response.getBody();
+        assertEquals("deprecated", body.get("shapes").get("facility_observation/v1").get("status").asText());
+        assertEquals("deprecated", body.get("shapes").get("facility_observation_review/v1").get("status").asText());
+        assertEquals(pattern, body.get("activities").get("facility_monitoring").get("pattern"));
+    }
+
+    @Test
+    void createActivity_unknownPatternRefRejected() {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        assertTrue(ss.createShape("facility_observation", "standard", buildSchema(2, null)).isEmpty());
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.putArray("shapes").add("facility_observation/v1");
+        config.putObject("roles").putArray("field_worker").add("capture");
+        config.set("pattern", parse("""
+                {
+                  "subject": null,
+                  "event": [
+                    {
+                      "ref": "unknown_pattern/v1",
+                      "composition": "event",
+                      "shape_roles": {},
+                      "participant_roles": {},
+                      "parameters": {}
+                    }
+                  ]
+                }
+                """));
+
+        List<String> violations = as.createActivity("bad_pattern_activity", "standard", config);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("Unknown pattern ref 'unknown_pattern/v1'")));
+        assertFalse(activityRepository.exists("bad_pattern_activity"));
+    }
+
+    @Test
+    void publishBlocked_whenStoredActivityPatternInvalid() {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        assertTrue(ss.createShape("facility_observation", "standard", buildSchema(2, null)).isEmpty());
+
+        jdbcTemplate.update("""
+                INSERT INTO activities (name, config_json, status, sensitivity)
+                VALUES ('bad_pattern', ?::jsonb, 'active', 'standard')
+                """, """
+                {
+                  "shapes": ["facility_observation/v1"],
+                  "roles": {"field_worker": ["capture"]},
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "unknown_pattern/v1",
+                        "composition": "event",
+                        "shape_roles": {},
+                        "participant_roles": {},
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> configPackager.publish(null));
+        assertTrue(ex.getMessage().contains("unknown_pattern/v1"));
+    }
+
+    @Test
     void publishBlocked_whenStoredFlagSeverityOverridesInvalid() {
         jdbcTemplate.update("""
                 INSERT INTO deployment_config (config_key, config_json)

@@ -3,6 +3,7 @@ package dev.datarun.server.config;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,13 +23,23 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ShapeRepository shapeRepository;
     private final ObjectMapper objectMapper;
+    private final PatternRegistry patternRegistry;
+
+    @Autowired
+    public ActivityService(ActivityRepository activityRepository,
+                           ShapeRepository shapeRepository,
+                           ObjectMapper objectMapper,
+                           PatternRegistry patternRegistry) {
+        this.activityRepository = activityRepository;
+        this.shapeRepository = shapeRepository;
+        this.objectMapper = objectMapper;
+        this.patternRegistry = patternRegistry;
+    }
 
     public ActivityService(ActivityRepository activityRepository,
                            ShapeRepository shapeRepository,
                            ObjectMapper objectMapper) {
-        this.activityRepository = activityRepository;
-        this.shapeRepository = shapeRepository;
-        this.objectMapper = objectMapper;
+        this(activityRepository, shapeRepository, objectMapper, new PatternRegistry());
     }
 
     /**
@@ -62,7 +73,18 @@ public class ActivityService {
         // Roles must be an object keyed by role with closed envelope action arrays.
         violations.addAll(DeployTimeValidator.validateActivityRoles(configJson.get("roles")));
 
+        violations.addAll(DeployTimeValidator.validateActivityPatternBinding(
+                name, configJson, this::shapeRefExists, patternRegistry));
+
         return violations;
+    }
+
+    private boolean shapeRefExists(String shapeRef) {
+        String[] parsed = ShapeService.parseShapeRef(shapeRef);
+        if (parsed == null) {
+            return false;
+        }
+        return shapeRepository.exists(parsed[0], Integer.parseInt(parsed[1]));
     }
 
     public List<String> createActivity(String name, String sensitivity, JsonNode configJson) {

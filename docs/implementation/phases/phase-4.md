@@ -501,10 +501,13 @@ Phase 4 is not complete until every applicable gate is green.
 
 ### Pattern Gates
 
-- [ ] Pattern definitions are platform-bundled, not deployer-authored.
-- [ ] One subject-level binding per activity is enforced.
-- [ ] Duplicate transition-bound shape ownership is rejected.
-- [ ] Deprecated-but-known shape versions bound to one `shape_role` remain projectable.
+- [x] Pattern binding metadata is platform-bundled, not deployer-authored.
+- [x] One subject-level binding per activity is enforced.
+- [x] Duplicate transition-bound shape ownership is rejected.
+- [x] Binding composition must match the platform pattern definition.
+- [x] Missing required shape roles and participant roles are rejected.
+- [x] Participant role-action prerequisites are checked for activity work transitions.
+- [x] Deprecated-but-known shape versions bound to one `shape_role` remain valid in bindings/packages for future projection.
 - [ ] Unresolved flagged events do not advance pattern state.
 - [ ] Resolving a flag as accepted re-derives state including the event.
 - [ ] `transition_violation` emits with `type = "alert"` and `shape_ref = "conflict_detected/v1"`.
@@ -589,3 +592,4 @@ This order keeps landed role-action, severity, assignment-administration, and un
 - **2026-05-22**: Phase 4.2 flag severity landed: platform defaults, deployment-wide L0 `flag_severity_overrides`, validation/package delivery, server/mobile effective severity interpretation, fixed resolvability preservation, and severity-independent projection exclusion tests.
 - **2026-05-22**: IDR-024/FP-007 recorded the multi-axis assignment containment gap and routed assignment-administration hardening before the remaining Phase 4 workflow-policy slices.
 - **2026-05-23**: Phase 4.3 domain uniqueness landed: `shapes[*].uniqueness` validation/package preservation, server `domain_uniqueness_violation` accept-and-flag detection after identity/auth checks, unresolved-flag exclusion from the duplicate basis, accepted-resolution re-inclusion, and mobile advisory duplicate checks. FP-005 remains open and `ongoing_resolution` remains unimplemented.
+- **2026-05-24**: Phase 4.4 pattern registry and binding validation landed: platform-bundled binding metadata for `capture_with_review/v1`, `ongoing_resolution/v1`, `multi_step_approval/v1`, and `transfer_with_acknowledgment/v1`; deploy-time validation for pattern refs, composition, subject/event binding shape, required shape/participant roles, parameters, participant role-action prerequisites, and duplicate transition-bound shape ownership; config package and mobile raw binding preservation. Executable transition specs remain Phase 4.5 work. `ongoing_resolution/v1` remains registered but disabled until FP-005 closes. FP-009 remains open and no `transition_violation`, resolver routing, conflict-resolution authority enforcement, or auto-resolution was implemented.
