@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-24 (agent onboarding and contract coherence pass after Phase 4.3)
+**Last updated**: 2026-05-24 (FP-009 resolver-designation debt surfaced before Phase 4.4)
 
 ---
 
@@ -40,6 +40,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 | FP-006 | `temporal_authority_expired` superseded-assignment false positive | Phase 4 role-action / detection ordering | A | **RESOLVED** |
 | FP-007 | Multi-axis assignment containment and null-activity semantics | Phase 4 assignment-administration hardening | A | **RESOLVED** |
 | FP-008 | Assignment command actor identity binding | Phase 4.3 entry / assignment command exposure | A | **RESOLVED** |
+| FP-009 | Conflict resolver designation and single-writer resolution enforcement | Phase 4.6 `transition_violation`; resolver routing / auto-resolution | A | **OPEN** (not a Phase 4.4 blocker if registry/binding stays flag-free) |
 
 **Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
 
@@ -106,7 +107,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## Blockers
 
-FP-005 remains `IN_PROGRESS` and still blocks Phase 4 `ongoing_resolution` implementation until subject-history backfill is specified and tested. The P04 Responsibility Binding scenario-grade test gap is a Phase 4 coverage gate, not a current blocker for pattern registry/binding validation.
+FP-005 remains `IN_PROGRESS` and still blocks Phase 4 `ongoing_resolution` implementation until subject-history backfill is specified and tested. FP-009 is `OPEN` and blocks Phase 4.6 `transition_violation` emission, resolver routing, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out if resolver routing remains unresolved; it does not block Phase 4.4 pattern registry/binding validation while that slice stays flag-free. The P04 Responsibility Binding scenario-grade test gap is a Phase 4 coverage gate, not a current blocker for pattern registry/binding validation.
 
 ---
 

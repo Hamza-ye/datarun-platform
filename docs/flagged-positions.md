@@ -343,6 +343,48 @@ All five must be true:
 
 ---
 
+## FP-009 — Conflict resolver designation and single-writer resolution enforcement
+
+**Status**: OPEN
+**Opened**: 2026-05-24 by ADR-002 S11 parity review before Phase 4.4
+**Blocks**: Phase 4.6 `transition_violation` detector; any resolver-routing, conflict-resolution authority, or auto-resolution slice; Phase 4 close-out if implemented flag categories still have unresolved resolver routing
+**Severity**: A — touches ADR-002 S11 single-writer conflict resolution and prevents recursive resolution conflicts
+
+### Context
+
+ADR-002 S11 requires every `ConflictDetected` event to designate exactly one resolver identity. Only a `ConflictResolved` event authored by that designated resolver is canonical; resolution events from other actors are accepted but flagged as unauthorized. ADR-007 later canonicalized these as `conflict_detected/v1` and `conflict_resolved/v1` shapes under the closed envelope type vocabulary, but it did not remove the S11 obligation.
+
+Current implementation and contracts have partial resolver metadata only. `contracts/flag-catalog.md` still lists newer categories such as `domain_uniqueness_violation` and `transition_violation` with designated resolver `TBD`, and current resolution paths do not enforce single-writer resolver authority. That is acceptable only while the active slice does not depend on resolver routing. It must not become a silent IDR-level omission.
+
+Phase 4.4 pattern registry and binding validation does not emit `transition_violation`, create flags, resolve flags, route resolvers, or run auto-resolution, so this FP does not block 4.4 if the slice stays clean. It becomes blocking before any slice that emits resolver-dependent flags or claims conflict-resolution authority.
+
+### Trigger
+
+Before any of the following:
+
+1. Implementing Phase 4.6 `transition_violation` detection.
+2. Defining or using designated resolver routing for any flag category.
+3. Enforcing conflict-resolution authority.
+4. Implementing auto-resolution policies or system-authored `conflict_resolved/v1` events.
+5. Closing Phase 4 while any implemented flag category still has unresolved resolver routing.
+
+### Gate
+
+All of the following must be true:
+
+1. A decision artifact defines resolver routing for every implemented flag category, including `domain_uniqueness_violation` and `transition_violation` if their detectors are active.
+2. Every emitted `conflict_detected/v1` has exactly one designated resolver identity or a deliberately defined system resolver identity.
+3. `conflict_resolved/v1` authored by a non-designated resolver is accepted but flagged as unauthorized, rather than treated as canonical.
+4. Resolver reassignment, if supported, is an explicit administrative event or explicitly deferred; it is not an implicit fallback.
+5. Auto-resolution, if implemented, authors standard `conflict_resolved/v1` events through a designated system resolver path and does not bypass S11.
+6. Tests cover authorized manual resolution, unauthorized resolution flagging, resolver routing for active categories, and system auto-resolution authority if auto-resolution is implemented.
+
+### Resolution log
+
+- **2026-05-24**: Opened. Routed as carried ADR debt, not a Phase 4.4 blocker. Phase 4.4 may proceed only if it remains limited to platform pattern registry and binding validation. This FP blocks transition-violation emission, resolver routing, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out until the gate is met or explicitly re-deferred with a recorded reason.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
