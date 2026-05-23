@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/config_store.dart';
 import 'package:datarun_mobile/domain/activity_role_actions.dart';
+import 'package:datarun_mobile/domain/event.dart';
 import 'package:datarun_mobile/domain/flag_severity.dart';
 
 void main() {
@@ -111,6 +113,9 @@ void main() {
     'published_at': '2026-04-20T10:00:00Z',
   };
 
+  Map<String, dynamic> cloneConfig(Map<String, dynamic> source) =>
+      jsonDecode(jsonEncode(source)) as Map<String, dynamic>;
+
   setUp(() async {
     dbPath =
         '${Directory.systemTemp.path}/datarun_config_test_${DateTime.now().microsecondsSinceEpoch}.db';
@@ -153,6 +158,76 @@ void main() {
     expect(visitTypeField.type, 'select');
     expect(visitTypeField.options, ['initial', 'follow_up', 'referral']);
     expect(visitTypeField.label, 'Visit Type');
+  });
+
+  test('applyConfig parses shape uniqueness unchanged', () async {
+    final config = cloneConfig(sampleConfig);
+    (config['shapes']['household_visit/v1']
+        as Map<String, dynamic>)['uniqueness'] = {
+      'scope': ['subject_ref', 'activity_ref', 'payload.visit_type'],
+      'period': {'type': 'calendar_day', 'timezone': 'deployment'},
+      'device_action': 'warn',
+    };
+
+    await configStore.applyConfig(config);
+
+    final shape = configStore.getShape('household_visit/v1');
+    expect(shape!.uniqueness, isNotNull);
+    expect(shape.uniqueness!.scope, [
+      'subject_ref',
+      'activity_ref',
+      'payload.visit_type',
+    ]);
+    expect(shape.uniqueness!.period!.type, 'calendar_day');
+    expect(shape.uniqueness!.period!.timezone, 'deployment');
+    expect(shape.uniqueness!.deviceAction, 'warn');
+  });
+
+  test('domain uniqueness advisory warns from local events only', () async {
+    final config = cloneConfig(sampleConfig);
+    (config['shapes']['household_visit/v1']
+        as Map<String, dynamic>)['uniqueness'] = {
+      'scope': ['subject_ref', 'activity_ref', 'payload.visit_type'],
+      'period': {'type': 'calendar_day', 'timezone': 'deployment'},
+      'device_action': 'warn',
+    };
+    await configStore.applyConfig(config);
+
+    await eventStore.insertFromServer(
+      Event(
+        id: 'event-1',
+        type: 'capture',
+        shapeRef: 'household_visit/v1',
+        activityRef: 'monitoring',
+        subjectRef: {'type': 'subject', 'id': 'subject-1'},
+        actorRef: {'type': 'actor', 'id': 'actor-1'},
+        deviceId: 'device-1',
+        deviceSeq: 1,
+        syncWatermark: 10,
+        timestamp: '2026-05-20T10:00:00Z',
+        payload: {'visit_type': 'initial'},
+      ),
+    );
+
+    final duplicate = await configStore.evaluateDomainUniqueness(
+      shapeRef: 'household_visit/v1',
+      activityRef: 'monitoring',
+      subjectId: 'subject-1',
+      payload: {'visit_type': 'initial'},
+      timestamp: '2026-05-20T12:00:00Z',
+    );
+    expect(duplicate.duplicate, true);
+    expect(duplicate.conflictingEventIds, ['event-1']);
+    expect(duplicate.warning, isNotNull);
+
+    final nextDay = await configStore.evaluateDomainUniqueness(
+      shapeRef: 'household_visit/v1',
+      activityRef: 'monitoring',
+      subjectId: 'subject-1',
+      payload: {'visit_type': 'initial'},
+      timestamp: '2026-05-21T12:00:00Z',
+    );
+    expect(nextDay.duplicate, false);
   });
 
   test('getShape with valid ref returns ShapeDefinition', () async {

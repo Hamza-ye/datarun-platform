@@ -195,6 +195,64 @@ class ConfigStore {
     action: action,
   );
 
+  /// Warning-only local uniqueness advisory. The server remains authoritative:
+  /// this method never creates flags and never blocks sync.
+  Future<DomainUniquenessDecision> evaluateDomainUniqueness({
+    required String shapeRef,
+    required String? activityRef,
+    required String subjectId,
+    required Map<String, dynamic> payload,
+    String? timestamp,
+  }) async {
+    final shape = getShape(shapeRef);
+    final uniqueness = shape?.uniqueness;
+    if (uniqueness == null) {
+      return const DomainUniquenessDecision.none();
+    }
+
+    final aliases = await _eventStore.getAllAliases();
+    final allEvents = await _eventStore.getAll();
+    final excluded = _nonAcceptedFlaggedEventIds(allEvents);
+    final incomingTimestamp =
+        timestamp ?? DateTime.now().toUtc().toIso8601String();
+    final incomingKey = _uniquenessKey(
+      uniqueness,
+      aliases[subjectId] ?? subjectId,
+      activityRef,
+      payload,
+    );
+    final incomingWindow = _periodWindow(uniqueness.period, incomingTimestamp);
+
+    final conflicts = <String>[];
+    for (final event in allEvents) {
+      if (event.shapeRef != shapeRef) continue;
+      if (_isIntegrityOrIdentityEvent(event) ||
+          event.type == 'assignment_changed') {
+        continue;
+      }
+      if (excluded.contains(event.id)) continue;
+
+      final eventSubjectId = event.subjectRef['id'];
+      if (eventSubjectId == null) continue;
+      final eventKey = _uniquenessKey(
+        uniqueness,
+        aliases[eventSubjectId] ?? eventSubjectId,
+        event.activityRef,
+        event.payload,
+      );
+      if (eventKey != incomingKey) continue;
+      if (_periodWindow(uniqueness.period, event.timestamp) != incomingWindow) {
+        continue;
+      }
+      conflicts.add(event.id);
+    }
+
+    if (conflicts.isEmpty) {
+      return const DomainUniquenessDecision.none();
+    }
+    return DomainUniquenessDecision.duplicate(conflictingEventIds: conflicts);
+  }
+
   /// Names of all active activities.
   List<String> getActiveActivities() => _activities.entries
       .where((e) => (e.value['status'] as String?) == 'active')
@@ -296,4 +354,98 @@ class ConfigStore {
   /// Returns 'routine' if the activity has no explicit classification.
   String getActivitySensitivity(String activityName) =>
       _activitySensitivity[activityName] ?? 'routine';
+
+  Set<String> _nonAcceptedFlaggedEventIds(Iterable<dynamic> events) {
+    final excluded = <String>{};
+    for (final event in events) {
+      if (_isIntegrityFlag(event)) {
+        final sourceId = event.payload['source_event_id'] as String?;
+        if (sourceId != null) excluded.add(sourceId);
+      }
+    }
+    for (final event in events) {
+      if (_isIntegrityResolution(event)) {
+        final sourceId = event.payload['source_event_id'] as String?;
+        final resolution = event.payload['resolution'] as String?;
+        if (sourceId != null && resolution == 'accepted') {
+          excluded.remove(sourceId);
+        }
+      }
+    }
+    return excluded;
+  }
+
+  bool _isIntegrityFlag(dynamic event) =>
+      (event.shapeRef as String).startsWith('conflict_detected/');
+
+  bool _isIntegrityResolution(dynamic event) =>
+      (event.shapeRef as String).startsWith('conflict_resolved/');
+
+  bool _isIntegrityOrIdentityEvent(dynamic event) {
+    final shapeRef = event.shapeRef as String;
+    return shapeRef.startsWith('conflict_detected/') ||
+        shapeRef.startsWith('conflict_resolved/') ||
+        shapeRef.startsWith('subjects_merged/') ||
+        shapeRef.startsWith('subject_split/');
+  }
+
+  String _uniquenessKey(
+    ShapeUniqueness uniqueness,
+    String canonicalSubjectId,
+    String? activityRef,
+    Map<String, dynamic> payload,
+  ) {
+    final parts = <String>[];
+    for (final dimension in uniqueness.scope) {
+      final value = switch (dimension) {
+        'subject_ref' => canonicalSubjectId,
+        'activity_ref' => activityRef ?? '<null>',
+        _ when dimension.startsWith('payload.') => _normalizeValue(
+          payload[dimension.substring('payload.'.length)],
+        ),
+        _ => '<unsupported>',
+      };
+      parts.add('$dimension=$value');
+    }
+    return parts.join('\n');
+  }
+
+  String _normalizeValue(Object? value) {
+    if (value == null) return '<null>';
+    if (value is num || value is bool || value is String) {
+      return value.toString();
+    }
+    return jsonEncode(value);
+  }
+
+  String? _periodWindow(ShapeUniquenessPeriod? period, String timestamp) {
+    if (period == null) return null;
+    final dt = DateTime.parse(timestamp).toUtc();
+    final start = switch (period.type) {
+      'calendar_day' => DateTime.utc(dt.year, dt.month, dt.day),
+      'calendar_week' => DateTime.utc(
+        dt.year,
+        dt.month,
+        dt.day,
+      ).subtract(Duration(days: dt.weekday - DateTime.monday)),
+      'calendar_month' => DateTime.utc(dt.year, dt.month),
+      _ => null,
+    };
+    return start?.toIso8601String();
+  }
+}
+
+class DomainUniquenessDecision {
+  final bool duplicate;
+  final List<String> conflictingEventIds;
+  final String? warning;
+
+  const DomainUniquenessDecision.none()
+    : duplicate = false,
+      conflictingEventIds = const [],
+      warning = null;
+
+  const DomainUniquenessDecision.duplicate({required this.conflictingEventIds})
+    : duplicate = true,
+      warning = 'This entry may duplicate an existing local record.';
 }

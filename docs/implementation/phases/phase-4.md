@@ -107,7 +107,7 @@ FP-006 is resolved. Authorization CD now gates `temporal_authority_expired` on t
 |---|------|--------|------|
 | 4.1 | Role-action config validation, packaging, mobile parsing, advisory device gating, and authoritative server `role_stale` semantics | IDR-021 / IDR-023 | Policy enforcement |
 | 4.2 | Flag severity defaults and deployment-wide `flag_severity_overrides` validation, packaging, server/mobile interpretation | IDR-022 | Config + workflow gating (**landed**) |
-| 4.3 | Shape uniqueness schema, DtV validation, advisory device duplicate warnings, server-side `domain_uniqueness_violation` detector | IDR-022 | Shape policy |
+| 4.3 | Shape uniqueness schema, DtV validation, advisory device duplicate warnings, server-side `domain_uniqueness_violation` detector | IDR-022 | Shape policy (**landed**) |
 | 4.4 | Platform Pattern Registry and activity pattern binding validation | IDR-020 | Workflow registry |
 | 4.5 | Server and mobile pattern-state projection, including unresolved-flag exclusion and state re-derivation after resolution | IDR-020 / ADR-005 | Projection |
 | 4.6 | Server `transition_violation` detector in the push pipeline | IDR-020 / ADR-005 | Conflict detection |
@@ -492,12 +492,12 @@ Phase 4 is not complete until every applicable gate is green.
 
 ### Domain Uniqueness Gates
 
-- [ ] DtV rejects unknown fields, non-scalar fields, unsupported periods, and expression-like uniqueness definitions.
-- [ ] Device uniqueness checks are advisory only.
-- [ ] Server accepts, persists, and flags duplicates.
-- [ ] `domain_uniqueness_violation` targets only the incoming conflicting event.
-- [ ] Resolving the flag as accepted re-derives projections including the event.
-- [ ] Uniqueness implementation does not alter normal live sync or FP-005 backfill behavior.
+- [x] DtV rejects unknown fields, non-scalar fields, unsupported periods, and expression-like uniqueness definitions.
+- [x] Device uniqueness checks are advisory only.
+- [x] Server accepts, persists, and flags duplicates.
+- [x] `domain_uniqueness_violation` targets only the incoming conflicting event.
+- [x] Resolving the flag as accepted re-derives projections including the event.
+- [x] Uniqueness implementation does not alter normal live sync or FP-005 backfill behavior.
 
 ### Pattern Gates
 
@@ -527,28 +527,26 @@ Phase 4 is not complete until every applicable gate is green.
 
 ### Regression Gates
 
-- [ ] Existing Phase 0-3e server tests still pass.
-- [ ] Existing Phase 0-3e mobile tests still pass.
+- [x] Existing Phase 0-3e server tests still pass.
+- [x] Existing Phase 0-3e mobile tests still pass.
 - [ ] Shared server/mobile projection fixtures pass for Phase 4 pattern state.
-- [ ] `git diff --check` passes.
+- [x] `git diff --check` passes.
 
 ---
 
 ## 9. Sequencing
 
-Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. Recommended remaining implementation order:
+Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Recommended remaining implementation order:
 
-1. Multi-axis assignment containment hardening from IDR-024.
-2. Domain uniqueness schema, detector, and mobile advisory uniqueness.
-3. Pattern Registry and binding validation.
-4. Pattern-state projection without `ongoing_resolution` enabled.
-5. FP-005 subject-history backfill decision and implementation.
-6. Enable `ongoing_resolution` projection and transition detection.
-7. Add remaining pattern detectors and mobile advisory transition warnings.
-8. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
-9. Close docs/status/catalog updates and Phase 4 completion audit.
+1. Pattern Registry and binding validation.
+2. Pattern-state projection without `ongoing_resolution` enabled.
+3. FP-005 subject-history backfill decision and implementation.
+4. Enable `ongoing_resolution` projection and transition detection only after FP-005 is resolved.
+5. Add remaining pattern detectors and mobile advisory transition warnings.
+6. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
+7. Close docs/status/catalog updates and Phase 4 completion audit.
 
-This order closes the assignment-administration parity gap before more workflow policy lands, keeps landed role-action and severity work independent of FP-005, activates uniqueness before pattern transitions need ordered flag behavior, and prevents `ongoing_resolution` from landing before the subject-history backfill gap is closed. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block the next uniqueness slice unless implementation uncovers a direct dependency.
+This order keeps landed role-action, severity, assignment-administration, and uniqueness work independent of FP-005, activates uniqueness before pattern transitions need ordered flag behavior, and prevents `ongoing_resolution` from landing before the subject-history backfill gap is closed. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block the next registry/binding slice unless implementation uncovers a direct dependency.
 
 ---
 
@@ -590,3 +588,4 @@ This order closes the assignment-administration parity gap before more workflow 
 - **2026-05-22**: Recorded missing scenario-grade P04 Responsibility Binding reassignment campaign gate for S03/S09/S20 scale coverage.
 - **2026-05-22**: Phase 4.2 flag severity landed: platform defaults, deployment-wide L0 `flag_severity_overrides`, validation/package delivery, server/mobile effective severity interpretation, fixed resolvability preservation, and severity-independent projection exclusion tests.
 - **2026-05-22**: IDR-024/FP-007 recorded the multi-axis assignment containment gap and routed assignment-administration hardening before the remaining Phase 4 workflow-policy slices.
+- **2026-05-23**: Phase 4.3 domain uniqueness landed: `shapes[*].uniqueness` validation/package preservation, server `domain_uniqueness_violation` accept-and-flag detection after identity/auth checks, unresolved-flag exclusion from the duplicate basis, accepted-resolution re-inclusion, and mobile advisory duplicate checks. FP-005 remains open and `ongoing_resolution` remains unimplemented.

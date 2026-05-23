@@ -12,6 +12,7 @@ import dev.datarun.server.event.EnvelopeValidator;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.integrity.ConflictDetector;
+import dev.datarun.server.integrity.DomainUniquenessDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -43,11 +44,13 @@ public class SyncController {
     private final ScopeResolver scopeResolver;
     private final ConfigPackager configPackager;
     private final ShapePayloadValidator shapePayloadValidator;
+    private final DomainUniquenessDetector domainUniquenessDetector;
 
     public SyncController(EventRepository eventRepository,
                           EnvelopeValidator envelopeValidator,
                           ObjectMapper objectMapper,
                           ConflictDetector conflictDetector,
+                          DomainUniquenessDetector domainUniquenessDetector,
                           TransactionTemplate transactionTemplate,
                           JdbcTemplate jdbc,
                           ScopeResolver scopeResolver,
@@ -57,6 +60,7 @@ public class SyncController {
         this.envelopeValidator = envelopeValidator;
         this.objectMapper = objectMapper;
         this.conflictDetector = conflictDetector;
+        this.domainUniquenessDetector = domainUniquenessDetector;
         this.transactionTemplate = transactionTemplate;
         this.jdbc = jdbc;
         this.scopeResolver = scopeResolver;
@@ -150,6 +154,16 @@ public class SyncController {
                     log.warn("Authorization conflict detection failed (events persisted, auth flags missing): {}",
                             e.getMessage());
                 }
+            }
+
+            try {
+                List<Event> uniquenessFlags = domainUniquenessDetector.evaluate(acceptedEvents);
+                if (!uniquenessFlags.isEmpty()) {
+                    flagsRaised += persistFlagEvents(uniquenessFlags);
+                }
+            } catch (Exception e) {
+                log.warn("Domain uniqueness detection failed (events persisted, uniqueness flags missing): {}",
+                        e.getMessage());
             }
         }
 

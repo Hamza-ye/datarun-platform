@@ -238,6 +238,44 @@ public class EventRepository {
     }
 
     /**
+     * Find prior authoritative events for a shape before an incoming event's watermark.
+     * Excludes integrity/identity records, assignment records, and events with any flag that
+     * has not been resolved as accepted. Reclassified and rejected resolutions remain excluded
+     * from the duplicate basis.
+     */
+    public List<Event> findPriorAuthoritativeByShape(String shapeRef, long beforeWatermark) {
+        return jdbc.query("""
+                SELECT e.id, e.type, e.shape_ref, e.activity_ref, e.subject_ref, e.actor_ref,
+                       e.device_id, e.device_seq, e.sync_watermark, e.timestamp, e.payload
+                FROM events e
+                WHERE e.shape_ref = ?
+                  AND e.sync_watermark < ?
+                  AND e.shape_ref NOT LIKE 'conflict_detected/%'
+                  AND e.shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND e.shape_ref NOT LIKE 'subjects_merged/%'
+                  AND e.shape_ref NOT LIKE 'subject_split/%'
+                  AND e.type != 'assignment_changed'
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM events cd
+                      WHERE cd.shape_ref LIKE 'conflict_detected/%'
+                        AND cd.payload->>'source_event_id' = e.id::text
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM events cr
+                            WHERE cr.shape_ref LIKE 'conflict_resolved/%'
+                              AND cr.payload->>'flag_event_id' = cd.id::text
+                              AND cr.payload->>'resolution' = 'accepted'
+                        )
+                  )
+                ORDER BY e.sync_watermark ASC
+                """,
+                eventRowMapper(),
+                shapeRef,
+                beforeWatermark);
+    }
+
+    /**
      * Check if an event with this ID already exists.
      */
     public boolean existsById(UUID id) {

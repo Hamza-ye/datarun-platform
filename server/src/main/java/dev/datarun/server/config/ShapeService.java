@@ -123,6 +123,8 @@ public class ShapeService {
             }
         }
 
+        violations.addAll(DeployTimeValidator.validateShapeUniqueness(name, schemaJson));
+
         return violations;
     }
 

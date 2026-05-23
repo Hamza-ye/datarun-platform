@@ -12,11 +12,11 @@ All flag categories raised by the integrity pipeline. Each flag is persisted as 
 | 4 | `scope_violation` | Auth CD | `manual_only` | `blocking` | broadest-scope actor | 2c |
 | 5 | `temporal_authority_expired` | Auth CD | `auto_eligible` | `informational` | broadest-scope actor | 2c |
 | 6 | `role_stale` | Auth CD | `manual_only` | `blocking` | supervisor actor | 2c |
-| 7 | `domain_uniqueness_violation` | Shape-declared uniqueness CD | `manual_only` | `blocking` | TBD | **Detector deferred — Phase 4 / IDR-022** |
+| 7 | `domain_uniqueness_violation` | Shape-declared uniqueness CD | `manual_only` | `blocking` | TBD | **Implemented — Phase 4.3 / IDR-022** |
 | 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | `informational` | TBD | **Detector deferred — Phase 4 / IDR-020** |
 | 9 | *reserved* | *reserved* | *reserved* | *reserved* | *reserved* | **Reserved — growth slot; do not claim without ADR amendment** |
 
-This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Categories 7 and 8 are specified architecturally but their detectors land with Phase 4. Category 9 is an explicit growth slot — claiming it requires an ADR-level amendment, not an IDR.
+This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Category 7 lands in Phase 4.3. Category 8 is specified architecturally but its detector lands later in Phase 4. Category 9 is an explicit growth slot — claiming it requires an ADR-level amendment, not an IDR.
 
 ## Detection Ordering
 
@@ -32,7 +32,7 @@ Within authorization CD, `temporal_authority_expired` remains before `scope_viol
 
 ## State Exclusion
 
-All flagged events (any category) are excluded from state derivation in SubjectProjection. The exclusion is category-agnostic — any event targeted by a `shape_ref = conflict_detected/v1` event is excluded.
+Unresolved flagged events (any category) are excluded from state derivation in SubjectProjection and from the domain-uniqueness authoritative duplicate basis. The exclusion is category-agnostic: any event targeted by a `shape_ref = conflict_detected/v1` event is excluded until that flag is resolved as `accepted`.
 
 ## Severity
 

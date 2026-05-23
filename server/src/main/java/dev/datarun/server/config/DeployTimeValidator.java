@@ -23,6 +23,15 @@ public class DeployTimeValidator {
     private static final Set<String> ORDERING_TYPES = Set.of("integer", "decimal", "date");
     private static final Set<String> LOGICAL_OPS = Set.of("and", "or", "not");
     private static final Set<String> RULE_TYPES = Set.of("show_condition", "warning", "default");
+    private static final Set<String> UNIQUENESS_KEYS = Set.of("scope", "period", "device_action");
+    private static final Set<String> UNIQUENESS_PERIOD_KEYS = Set.of("type", "timezone");
+    private static final Set<String> UNIQUENESS_PERIOD_TYPES = Set.of(
+            "calendar_day", "calendar_week", "calendar_month");
+    private static final Set<String> UNIQUENESS_DEVICE_ACTIONS = Set.of(
+            "warn", "confirm", "require_confirmation");
+    private static final Set<String> SCALAR_PAYLOAD_TYPES = Set.of(
+            "text", "integer", "decimal", "boolean", "date", "select",
+            "location", "subject_ref", "narrative");
 
     private final ShapeRepository shapeRepository;
     private final ExpressionRepository expressionRepository;
@@ -90,6 +99,13 @@ public class DeployTimeValidator {
         List<String> violations = new ArrayList<>();
         List<ExpressionRule> rules = expressionRepository.findAll();
 
+        for (Shape shape : shapeRepository.findAll()) {
+            List<String> shapeViolations = validateShapeUniqueness(shape.shapeRef(), shape.schemaJson());
+            for (String v : shapeViolations) {
+                violations.add("Shape " + shape.shapeRef() + ": " + v);
+            }
+        }
+
         for (ExpressionRule rule : rules) {
             String[] parts = ShapeService.parseShapeRef(rule.shapeRef());
             if (parts == null) {
@@ -144,6 +160,63 @@ public class DeployTimeValidator {
         return violations;
     }
 
+    public static List<String> validateShapeUniqueness(String shapeRef, JsonNode schemaJson) {
+        List<String> violations = new ArrayList<>();
+        if (schemaJson == null || schemaJson.isNull()) {
+            return violations;
+        }
+
+        JsonNode uniqueness = schemaJson.get("uniqueness");
+        if (uniqueness == null || uniqueness.isNull()) {
+            return violations;
+        }
+        if (!uniqueness.isObject()) {
+            violations.add("uniqueness must be a single object");
+            return violations;
+        }
+
+        Map<String, String> fieldTypes = buildFieldTypeMap(schemaJson);
+
+        uniqueness.fields().forEachRemaining(entry -> {
+            String key = entry.getKey();
+            if ("action".equals(key)) {
+                violations.add("uniqueness uses old key 'action'; use 'device_action'");
+            } else if (!UNIQUENESS_KEYS.contains(key)) {
+                violations.add("uniqueness key '" + key + "' is not supported");
+            }
+        });
+
+        JsonNode scope = uniqueness.get("scope");
+        if (scope == null || !scope.isArray() || scope.isEmpty()) {
+            violations.add("uniqueness.scope must be a non-empty array");
+        } else {
+            for (JsonNode dimensionNode : scope) {
+                if (!dimensionNode.isTextual()) {
+                    violations.add("uniqueness.scope dimensions must be strings");
+                    continue;
+                }
+                validateUniquenessScopeDimension(dimensionNode.asText(), fieldTypes, violations);
+            }
+        }
+
+        JsonNode period = uniqueness.get("period");
+        if (period != null && !period.isNull()) {
+            validateUniquenessPeriod(period, violations);
+        }
+
+        JsonNode deviceAction = uniqueness.get("device_action");
+        if (deviceAction != null && !deviceAction.isNull()) {
+            if (!deviceAction.isTextual()) {
+                violations.add("uniqueness.device_action must be a string");
+            } else if (!UNIQUENESS_DEVICE_ACTIONS.contains(deviceAction.asText())) {
+                violations.add("uniqueness.device_action '" + deviceAction.asText()
+                        + "' is not supported");
+            }
+        }
+
+        return violations;
+    }
+
     public static List<String> validateFlagSeverityOverrides(JsonNode overridesNode) {
         List<String> violations = new ArrayList<>();
         if (overridesNode == null || !overridesNode.isObject()) {
@@ -182,6 +255,66 @@ public class DeployTimeValidator {
         });
 
         return violations;
+    }
+
+    private static void validateUniquenessScopeDimension(String dimension,
+                                                         Map<String, String> fieldTypes,
+                                                         List<String> violations) {
+        if (dimension == null || dimension.isBlank()) {
+            violations.add("uniqueness.scope dimensions must be non-empty");
+            return;
+        }
+        if ("subject_ref".equals(dimension) || "activity_ref".equals(dimension)) {
+            return;
+        }
+        if (!dimension.startsWith("payload.")) {
+            violations.add("uniqueness.scope dimension '" + dimension
+                    + "' is not supported; use subject_ref, activity_ref, or payload.<field_name>");
+            return;
+        }
+
+        String fieldName = dimension.substring("payload.".length());
+        if (fieldName.isBlank()) {
+            violations.add("uniqueness.scope payload dimension must name a field");
+            return;
+        }
+        String fieldType = fieldTypes.get(fieldName);
+        if (fieldType == null) {
+            violations.add("uniqueness.scope references unknown payload field '" + fieldName + "'");
+            return;
+        }
+        if (!SCALAR_PAYLOAD_TYPES.contains(fieldType)) {
+            violations.add("uniqueness.scope payload field '" + fieldName
+                    + "' has non-scalar type '" + fieldType + "'");
+        }
+    }
+
+    private static void validateUniquenessPeriod(JsonNode period, List<String> violations) {
+        if (!period.isObject()) {
+            violations.add("uniqueness.period must be an object");
+            return;
+        }
+        period.fields().forEachRemaining(entry -> {
+            if (!UNIQUENESS_PERIOD_KEYS.contains(entry.getKey())) {
+                violations.add("uniqueness.period key '" + entry.getKey() + "' is not supported");
+            }
+        });
+
+        JsonNode type = period.get("type");
+        if (type == null || !type.isTextual()) {
+            violations.add("uniqueness.period.type must be a string");
+        } else if (!UNIQUENESS_PERIOD_TYPES.contains(type.asText())) {
+            violations.add("uniqueness.period.type '" + type.asText() + "' is not supported");
+        }
+
+        JsonNode timezone = period.get("timezone");
+        if (timezone != null && !timezone.isNull()) {
+            if (!timezone.isTextual()) {
+                violations.add("uniqueness.period.timezone must be a string");
+            } else if (!"deployment".equals(timezone.asText())) {
+                violations.add("uniqueness.period.timezone must be 'deployment' when present");
+            }
+        }
     }
 
     private void validateConditionNode(JsonNode node, Map<String, String> fieldTypes,
@@ -345,8 +478,12 @@ public class DeployTimeValidator {
     }
 
     private Map<String, String> buildFieldTypeMap(Shape shape) {
+        return buildFieldTypeMap(shape.schemaJson());
+    }
+
+    private static Map<String, String> buildFieldTypeMap(JsonNode schemaJson) {
         Map<String, String> map = new HashMap<>();
-        JsonNode fieldsNode = shape.schemaJson().get("fields");
+        JsonNode fieldsNode = schemaJson.get("fields");
         if (fieldsNode != null && fieldsNode.isArray()) {
             for (JsonNode field : fieldsNode) {
                 String name = field.path("name").asText("");

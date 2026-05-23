@@ -24,6 +24,7 @@ public class ConfigPackager {
     private final ShapeRepository shapeRepository;
     private final ActivityRepository activityRepository;
     private final ExpressionRepository expressionRepository;
+    private final DeployTimeValidator deployTimeValidator;
     private final FlagSeverityConfigService flagSeverityConfigService;
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
@@ -31,12 +32,14 @@ public class ConfigPackager {
     public ConfigPackager(ShapeRepository shapeRepository,
                           ActivityRepository activityRepository,
                           ExpressionRepository expressionRepository,
+                          DeployTimeValidator deployTimeValidator,
                           FlagSeverityConfigService flagSeverityConfigService,
                           JdbcTemplate jdbc,
                           ObjectMapper objectMapper) {
         this.shapeRepository = shapeRepository;
         this.activityRepository = activityRepository;
         this.expressionRepository = expressionRepository;
+        this.deployTimeValidator = deployTimeValidator;
         this.flagSeverityConfigService = flagSeverityConfigService;
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
@@ -47,6 +50,11 @@ public class ConfigPackager {
      * Fetches all shapes (including deprecated) and active activities.
      */
     public int publish(java.util.UUID publishedBy) {
+        List<String> violations = deployTimeValidator.validateAll();
+        if (!violations.isEmpty()) {
+            throw new IllegalStateException("DtV violations: " + String.join("; ", violations));
+        }
+
         ObjectNode packageJson = objectMapper.createObjectNode();
 
         // Shapes: all versions, keyed by shape_ref (IDR-019: "all shape versions including deprecated")

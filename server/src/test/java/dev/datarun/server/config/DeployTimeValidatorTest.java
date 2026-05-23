@@ -388,6 +388,103 @@ class DeployTimeValidatorTest {
         assertTrue(violations.stream().anyMatch(v -> v.contains("nested/per-activity")));
     }
 
+    @Test
+    void shapeUniqueness_validDefinition_passes() {
+        ObjectNode schema = testShape.schemaJson().deepCopy();
+        schema.set("uniqueness", parse("""
+                {
+                  "scope": ["subject_ref", "activity_ref", "payload.status"],
+                  "period": {"type": "calendar_week", "timezone": "deployment"},
+                  "device_action": "warn"
+                }
+                """));
+
+        List<String> violations = DeployTimeValidator.validateShapeUniqueness("test_shape/v1", schema);
+
+        assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
+    }
+
+    @Test
+    void shapeUniqueness_unknownPayloadField_rejected() {
+        ObjectNode schema = testShape.schemaJson().deepCopy();
+        schema.set("uniqueness", parse("""
+                {"scope": ["payload.not_a_field"], "device_action": "warn"}
+                """));
+
+        List<String> violations = DeployTimeValidator.validateShapeUniqueness("test_shape/v1", schema);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("unknown payload field 'not_a_field'")));
+    }
+
+    @Test
+    void shapeUniqueness_multiSelectPayloadField_rejected() {
+        ObjectNode schema = testShape.schemaJson().deepCopy();
+        schema.set("uniqueness", parse("""
+                {"scope": ["payload.stockout_items"], "device_action": "warn"}
+                """));
+
+        List<String> violations = DeployTimeValidator.validateShapeUniqueness("test_shape/v1", schema);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("non-scalar type 'multi_select'")));
+    }
+
+    @Test
+    void shapeUniqueness_unsupportedPeriod_rejected() {
+        ObjectNode schema = testShape.schemaJson().deepCopy();
+        schema.set("uniqueness", parse("""
+                {
+                  "scope": ["subject_ref"],
+                  "period": {"type": "rolling_7_days", "timezone": "deployment"}
+                }
+                """));
+
+        List<String> violations = DeployTimeValidator.validateShapeUniqueness("test_shape/v1", schema);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("rolling_7_days")));
+    }
+
+    @Test
+    void shapeUniqueness_oldActionKey_rejected() {
+        ObjectNode schema = testShape.schemaJson().deepCopy();
+        schema.set("uniqueness", parse("""
+                {"scope": ["subject_ref"], "action": "warn"}
+                """));
+
+        List<String> violations = DeployTimeValidator.validateShapeUniqueness("test_shape/v1", schema);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("old key 'action'")));
+    }
+
+    @Test
+    void shapeUniqueness_invalidDeviceAction_rejected() {
+        ObjectNode schema = testShape.schemaJson().deepCopy();
+        schema.set("uniqueness", parse("""
+                {"scope": ["subject_ref"], "device_action": "block"}
+                """));
+
+        List<String> violations = DeployTimeValidator.validateShapeUniqueness("test_shape/v1", schema);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("device_action 'block'")));
+    }
+
+    @Test
+    void shapeUniqueness_expressionLikeCustomKey_rejected() {
+        ObjectNode schema = testShape.schemaJson().deepCopy();
+        schema.set("uniqueness", parse("""
+                {"scope": ["subject_ref"], "when": {"eq": ["payload.status", "active"]}}
+                """));
+
+        List<String> violations = DeployTimeValidator.validateShapeUniqueness("test_shape/v1", schema);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("key 'when' is not supported")));
+    }
+
     // --- Helpers ---
 
     private void addField(ArrayNode fields, String name, String type, boolean required) {

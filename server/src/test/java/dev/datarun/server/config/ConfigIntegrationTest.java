@@ -135,6 +135,28 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void createShape_invalidUniqueness_rejected() {
+        ObjectNode schema = buildSchema(0, null);
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+        ObjectNode codeField = objectMapper.createObjectNode();
+        codeField.put("name", "visit_code");
+        codeField.put("type", "text");
+        codeField.put("required", false);
+        codeField.put("deprecated", false);
+        fields.add(codeField);
+        schema.set("uniqueness", objectMapper.createObjectNode()
+                .set("scope", objectMapper.createArrayNode().add("payload.missing_code")));
+
+        ShapeService service = new ShapeService(shapeRepository, objectMapper);
+
+        List<String> violations = service.createShape("bad_uniqueness", "standard", schema);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.contains("missing_code")));
+        assertFalse(shapeRepository.exists("bad_uniqueness", 1));
+    }
+
+    @Test
     void deprecateShape_hiddenButProjectable() {
         // QG: Shape deprecated → hidden from new form list, existing events still project
         ShapeService service = new ShapeService(shapeRepository, objectMapper);
@@ -299,6 +321,39 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void configEndpoint_preservesShapeUniqueness() {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ObjectNode schema = buildSchema(0, null);
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+        ObjectNode visitCode = objectMapper.createObjectNode();
+        visitCode.put("name", "visit_code");
+        visitCode.put("type", "text");
+        visitCode.put("required", false);
+        visitCode.put("deprecated", false);
+        fields.add(visitCode);
+        JsonNode uniqueness = parse("""
+                {
+                  "scope": ["subject_ref", "activity_ref", "payload.visit_code"],
+                  "period": {"type": "calendar_day", "timezone": "deployment"},
+                  "device_action": "warn"
+                }
+                """);
+        schema.set("uniqueness", uniqueness);
+        assertTrue(ss.createShape("unique_visit", "standard", schema).isEmpty());
+
+        configPackager.publish(null);
+
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
+                "/api/sync/config",
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                JsonNode.class);
+
+        JsonNode packaged = response.getBody().get("shapes").get("unique_visit/v1").get("uniqueness");
+        assertEquals(uniqueness, packaged);
+    }
+
+    @Test
     void publishBlocked_whenStoredFlagSeverityOverridesInvalid() {
         jdbcTemplate.update("""
                 INSERT INTO deployment_config (config_key, config_json)
@@ -312,6 +367,34 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
                 "/admin/config/publish", HttpMethod.POST, entity, String.class);
 
         assertTrue(response.getStatusCode().is3xxRedirection());
+        Integer pkgCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM config_packages", Integer.class);
+        assertEquals(0, pkgCount.intValue());
+    }
+
+    @Test
+    void publishBlocked_whenStoredShapeUniquenessInvalid() throws Exception {
+        ObjectNode schema = buildSchema(0, null);
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+        ObjectNode visitCode = objectMapper.createObjectNode();
+        visitCode.put("name", "visit_code");
+        visitCode.put("type", "text");
+        visitCode.put("required", false);
+        visitCode.put("deprecated", false);
+        fields.add(visitCode);
+        schema.set("uniqueness", parse("""
+                {"scope": ["payload.missing_code"], "device_action": "warn"}
+                """));
+        jdbcTemplate.update("""
+                INSERT INTO shapes (name, version, status, sensitivity, schema_json)
+                VALUES ('db_bad_uniqueness', 1, 'active', 'standard', ?::jsonb)
+                """, objectMapper.writeValueAsString(schema));
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> configPackager.publish(null));
+
+        assertTrue(ex.getMessage().contains("missing_code"));
         Integer pkgCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM config_packages", Integer.class);
         assertEquals(0, pkgCount.intValue());
@@ -913,6 +996,14 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         schema.putNull("subject_binding");
         schema.putNull("uniqueness");
         return schema;
+    }
+
+    private JsonNode parse(String json) {
+        try {
+            return objectMapper.readTree(json);
+        } catch (Exception e) {
+            throw new RuntimeException("Bad test JSON", e);
+        }
     }
 
     private ObjectNode buildEvent(String shapeRef, JsonNode payload) {
