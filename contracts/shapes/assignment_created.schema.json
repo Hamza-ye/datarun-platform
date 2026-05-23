@@ -24,7 +24,7 @@
     "role": {
       "type": "string",
       "minLength": 1,
-      "description": "Opaque role label. Deployer vocabulary validated in Phase 3."
+      "description": "Opaque assignment role label. Activity role-action config may reference role names, and command authority is enforced server-side."
     },
     "scope": {
       "type": "object",

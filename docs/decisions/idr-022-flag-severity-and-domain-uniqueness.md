@@ -157,7 +157,7 @@ The detector may emit multiple flags for one event if multiple independent anoma
 - `flag_severity_overrides` remains a stable top-level package key and becomes populated in Phase 4.
 - `shapes[*].uniqueness` becomes an active L1 shape contract, but its device action is advisory and its server behavior is always accept-and-flag.
 - `domain_uniqueness_violation` is manual-only and separate from role-action, transition, and subject-history backfill behavior.
-- The flag catalog should be updated during Phase 4 implementation to point category 7 at this IDR and to record the chosen resolver routing once the Phase 4 spec defines resolver assignment.
+- The flag catalog points category 7 at this IDR after Phase 4.3. Resolver routing remains `TBD` until a dedicated resolver-routing decision or implementation slice lands.
 
 ## Traces
 

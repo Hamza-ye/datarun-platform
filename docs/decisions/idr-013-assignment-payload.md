@@ -52,7 +52,7 @@ Phase 2 introduces `assignment_changed` events (ADR-4 S3) to bind actors to scop
 
 3. **No `ended_by` in `assignment_ended` payload.** The `actor_ref` on the envelope already records who ended the assignment (the coordinator). No redundant field.
 
-4. **`role` is an opaque string** in Phase 2. Deployer-defined vocabulary validated against configuration in Phase 3. Phase 2 stores and passes through; no role-action logic.
+4. **`role` is an opaque string** in Phase 2. Later Phase 4 role-action config may reference role labels, but the assignment payload itself does not define a closed role vocabulary or store capability fields.
 
 5. **`valid_to: null`** means indefinite — assignment active until explicitly ended.
 

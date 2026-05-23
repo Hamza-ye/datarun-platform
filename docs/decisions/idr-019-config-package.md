@@ -64,26 +64,24 @@ ADR-4 S6 establishes atomic config delivery with at-most-2 versions on device. T
     }
   },
   "expressions": {
-    "facility_monitoring": {
-      "facility_observation/v2": [
-        {
-          "field": "stockout_items",
-          "type": "show_condition",
-          "expression": { "when": { "neq": ["entity.facility_type", "community_health_post"] } }
-        },
-        {
-          "field": "needs_followup",
-          "type": "default",
-          "expression": { "value": { "gt": ["context.days_since_last_event", 90] } }
-        },
-        {
-          "field": "staff_present",
-          "type": "warning",
-          "expression": { "when": { "and": [{ "eq": ["payload.service_availability", "full"] }, { "lt": ["payload.staff_present", 3] }] } },
-          "message": "Full service with fewer than 3 staff — please verify"
-        }
-      ]
-    }
+    "facility_monitoring.facility_observation/v2": [
+      {
+        "field_name": "stockout_items",
+        "rule_type": "show_condition",
+        "expression": { "when": { "neq": ["entity.facility_type", "community_health_post"] } }
+      },
+      {
+        "field_name": "needs_followup",
+        "rule_type": "default",
+        "expression": { "value": { "gt": ["context.days_since_last_event", 90] } }
+      },
+      {
+        "field_name": "staff_present",
+        "rule_type": "warning",
+        "expression": { "when": { "and": [{ "eq": ["payload.service_availability", "full"] }, { "lt": ["payload.staff_present", 3] }] } },
+        "message": "Full service with fewer than 3 staff — please verify"
+      }
+    ]
   },
   "flag_severity_overrides": {},
   "sensitivity_classifications": {
@@ -152,11 +150,13 @@ Each publish increments version by 1. The full package is stored as a snapshot (
 
 **Response** (304 Not Modified): If `If-None-Match: 12` header matches current version. Saves bandwidth on no-change syncs.
 
-**Discovery mechanism**: The existing sync pull response (`GET /api/sync/pull`) gains one field:
+**Discovery mechanism**: The sync pull response (`POST /api/sync/pull`) includes `config_version`:
 
 ```json
 {
   "events": [...],
+  "latest_watermark": 42,
+  "has_more": false,
   "config_version": 12
 }
 ```
@@ -171,20 +171,19 @@ The device compares `config_version` from pull response with its local config ve
 
 ### Expression Key Structure in Package
 
-Expressions are keyed hierarchically: `expressions[activity_ref][shape_ref]` → array of rules.
+Expressions are keyed by a composite `{activity_ref}.{shape_ref}` string. This matches the package emitted by `ConfigPackager` and read by the mobile config store.
 
 ```
 expressions
-  └── "facility_monitoring"              (activity_ref)
-        └── "facility_observation/v2"    (shape_ref)
-              ├── { field, type, expression, message? }
-              ├── ...
+  └── "facility_monitoring.facility_observation/v2"
+        ├── { field_name, rule_type, expression, message? }
+        ├── ...
 ```
 
 **Why this structure**:
 - The device form engine needs expressions for a specific `(activity, shape)` pair at form-open time. This key structure gives O(1) lookup.
 - Activity references the "current" shape version in its `shapes` array. Expressions reference the same version. When shape upgrades v1→v2, expressions are written for v2. Old v1 expressions are not included (v1 is for projection only, not new captures).
-- If an activity references multiple shapes, each shape has its own expression array under the activity key.
+- If an activity references multiple shapes, each shape has its own expression array under its composite key.
 
 ### Device-Side Config Management
 
@@ -255,7 +254,7 @@ The package structure accommodates Phase 4 additions without schema migration:
 |------------------|-------------|
 | Triggers (L3a, L3b) | New top-level key `"triggers": {}` — devices already parse unknown keys as ignored in Phase 3. Or: add to package schema when Phase 4 ships (the package JSON schema itself is Lean — only the structural keys are Lock). |
 | Pattern Registry | `activities[name].pattern` goes from `null` to the pattern-binding set object defined by [IDR-020](idr-020-pattern-state-machine-representation.md). |
-| Uniqueness constraints | `shapes[ref].uniqueness` goes from `null` to `{scope, period, action}`. |
+| Uniqueness constraints | `shapes[ref].uniqueness` goes from `null` to `{scope, period, device_action}` under IDR-022. `device_action` is advisory UX only; server behavior remains accept-and-flag. |
 | Flag severity overrides | `flag_severity_overrides` goes from `{}` to populated. |
 | Projection rules | New top-level key `"projection_rules": {}`. |
 

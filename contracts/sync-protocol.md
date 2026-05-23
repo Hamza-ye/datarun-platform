@@ -66,13 +66,14 @@ Device sends events to server. Server deduplicates by `id`, assigns `sync_waterm
 | Ordering | Events may arrive in any order. Server does not require `device_seq` ordering. |
 | Validation | Every event is validated against `envelope.schema.json`. Invalid events → `400 Bad Request` with details. Nothing persisted from the batch if any event is invalid. |
 | Atomicity | All-or-nothing per request. Either all valid events are persisted, or none are (on validation failure). |
-| Concurrency detection | After persisting events (Tx1), the server evaluates each accepted event for concurrency conflicts (Tx2). For each event, `W_effective = min(event.sync_watermark, last_pull_watermark)`. If the event's subject has events from other devices with `sync_watermark > W_effective`, a `concurrent_state_change` flag is raised. CD failure does not affect event persistence. |
+| Concurrency detection | After persisting events (Tx1), the server evaluates each accepted event for concurrency conflicts (Tx2). For each event, `W_effective = min(server-assigned event.sync_watermark, last_pull_watermark)`. If the event's subject has events from other devices with `sync_watermark > W_effective`, a `concurrent_state_change` flag is raised. CD failure does not affect event persistence. |
 
 ### Error Responses
 
 | Status | Condition | Body |
 |--------|-----------|------|
 | `400` | One or more events fail schema validation | `{ "error": "validation_failed", "details": [...] }` |
+| `400` | One or more payloads fail shape validation | `{ "error": "shape_validation_failed", "details": [...] }` |
 | `400` | Empty events array | `{ "error": "empty_batch" }` |
 | `500` | Server error | `{ "error": "internal_error" }` |
 
@@ -80,14 +81,16 @@ Device sends events to server. Server deduplicates by `id`, assigns `sync_waterm
 
 ## Pull — `POST /api/sync/pull`
 
-Device requests events it hasn't seen. Server returns events after the given watermark.
+Device requests events it hasn't seen. Server returns events after the given watermark. Pull is actor-scoped and requires `Authorization: Bearer <actor_token>`.
 
 ### Request
 
 ```json
 {
   "since_watermark": 0,
-  "limit": 100
+  "limit": 100,
+  "device_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "config_version": 12
 }
 ```
 
@@ -95,6 +98,8 @@ Device requests events it hasn't seen. Server returns events after the given wat
 |-------|------|----------|---------|-------------|
 | `since_watermark` | integer | yes | — | Return events with `sync_watermark > since_watermark`. Use `0` for first sync. |
 | `limit` | integer | no | 100 | Max events to return. Server may cap this. |
+| `device_id` | string (uuid) | no | — | Pulling device's identity. When provided, the server records pull progress in `device_sync_state`. |
+| `config_version` | integer | no | — | Config version currently known by the device. When provided with `device_id`, stored for sync/config observability. |
 
 ### Response — `200 OK`
 
@@ -115,7 +120,9 @@ Device requests events it hasn't seen. Server returns events after the given wat
       "payload": { "name": "Site Alpha", "category": "urban", "notes": "Initial survey" }
     }
   ],
-  "latest_watermark": 42
+  "latest_watermark": 42,
+  "has_more": false,
+  "config_version": 12
 }
 ```
 
@@ -127,6 +134,8 @@ Device requests events it hasn't seen. Server returns events after the given wat
 | Pagination | If `len(events) == limit`, more events may exist. Client should pull again with `since_watermark = latest_watermark`. |
 | Completion | If `len(events) < limit`, client has all available events. |
 | `latest_watermark` | The highest `sync_watermark` in the returned batch. Client stores this for next pull. If no events returned, equals `since_watermark`. |
+| `has_more` | Server hint that the page filled the requested/capped limit. Clients may still use the `len(events) == limit` rule for compatibility. |
+| `config_version` | Latest published config package version. Device compares it with local config and fetches `/api/sync/config` when newer. |
 | Stability | Pulling the same watermark range returns the same events. Events are immutable and never deleted. |
 
 ### Error Responses
@@ -134,6 +143,9 @@ Device requests events it hasn't seen. Server returns events after the given wat
 | Status | Condition | Body |
 |--------|-----------|------|
 | `400` | Missing or invalid `since_watermark` | `{ "error": "invalid_watermark" }` |
+| `401` | Missing bearer token | `{ "error": "missing_token" }` |
+| `401` | Empty bearer token | `{ "error": "empty_token" }` |
+| `401` | Invalid or revoked bearer token | `{ "error": "invalid_token" }` |
 | `500` | Server error | `{ "error": "internal_error" }` |
 
 ---
@@ -186,6 +198,6 @@ Returns the full event timeline for one subject, ordered by `sync_watermark`.
 
 1. **Events are never modified or deleted** (C1, ADR-1 S1)
 2. **Deduplication is by `id`** — same UUID always resolves to same event
-3. **`sync_watermark` is monotonically increasing** — no gaps, no reuse
+3. **`sync_watermark` is monotonically increasing** — committed event watermarks are ordered and never reused; sequence gaps are allowed
 4. **Push is idempotent** — safe to retry on network failure
 5. **Pull is stable** — same query returns same results (append-only store)

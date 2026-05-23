@@ -443,7 +443,7 @@ The detector may emit multiple independent flags for one event. Later checks mus
 
 ### Contracts and Docs
 
-- Update `contracts/flag-catalog.md` during implementation to point categories 7 and 8 at IDR-022/IDR-020 and record final resolver routing.
+- Keep `contracts/flag-catalog.md` aligned with categories 7 and 8. Category pointers to IDR-022/IDR-020 are present; resolver routing stays `TBD` until a dedicated resolver-routing decision or implementation slice lands.
 - Update assignment scope contract/tests during IDR-024 implementation if needed so empty subject/activity arrays cannot be interpreted as unrestricted.
 - Add or update shared projection/flag fixtures for role-action, uniqueness, severity, and pattern state.
 - Update `docs/status.md` only when implementation begins or lands; the existence of this spec alone does not make Phase 4 started.

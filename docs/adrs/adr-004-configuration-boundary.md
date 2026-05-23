@@ -210,6 +210,8 @@ Four policy areas where the platform defines the vocabulary and defaults; the de
 
 **Domain uniqueness constraints** (Q7): Shapes declare uniqueness rules — scope dimensions, time period, and violation action (warn or block). Example: "one `household_visit` per subject per activity per calendar week." Evaluated optimistically on-device against locally known events, authoritatively on the server at sync. Violations produce ADR-2 conflict flags with a `domain_uniqueness_violation` type, reusing the existing detection and resolution infrastructure. Domain-specific conflict _resolution_ strategies (auto-resolve based on role seniority, etc.) are deferred to ADR-5.
 
+Implementation note: [IDR-022](../decisions/idr-022-flag-severity-and-domain-uniqueness.md) narrows the ambiguous `action` wording to `device_action`, an advisory device UX hint. Server behavior remains accept-and-flag, and operational severity comes from deployment-wide `flag_severity_overrides`.
+
 **Scope type composition** (Q10): Deployers compose assignments from three platform-fixed scope types (S7). This is L0 parameterization: selecting which scope dimensions apply to each role's assignments and what values they take.
 
 **Sensitivity classification** (Q12): Shapes and/or activities are marked with a sensitivity level: `standard` (default), `elevated`, or `restricted`. Sensitivity affects sync scope filtering (actors need explicit sensitive-access role), device retention policy (sensitive data is purge-eligible on scope contraction per ADR-3 S10), and audit level. No new envelope fields — sensitivity is a property of the shape/activity configuration, evaluated server-side during sync scope computation.

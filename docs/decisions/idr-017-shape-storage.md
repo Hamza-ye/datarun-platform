@@ -109,7 +109,7 @@ Each row is a **standalone snapshot** — no delta-application logic. Creating a
 | Property | Type | Purpose |
 |----------|------|---------|
 | `fields` | array | Ordered list of field objects. Max 60 (DtV-enforced). |
-| `uniqueness` | object\|null | Phase 4 stub. Format: `{scope, period, action}`. Null in Phase 3. |
+| `uniqueness` | object\|null | Phase 4 stub. IDR-022 implements this as `{scope, period, device_action}` where `device_action` is advisory only. Null in Phase 3. |
 | `subject_binding` | string\|null | Name of the `subject_ref`-typed field that maps to the event envelope's `subject_ref.id`. Null if shape has no subject link. |
 
 ### L1/L2 Separation: Expressions Are External
