@@ -520,11 +520,11 @@ Phase 4 is not complete until every applicable gate is green.
 - [x] Pattern contract files validate against `contracts/pattern-definition.schema.json`.
 - [x] Referenced pattern definitions are delivered in the atomic config package.
 - [x] Mobile preserves packaged pattern definitions from the active config slot.
-- [ ] Unresolved flagged events do not advance pattern state.
-- [ ] Resolving a flag as accepted re-derives state including the event.
+- [x] Unresolved flagged events do not advance pattern state.
+- [x] Resolving a flag as accepted re-derives state including the event.
 - [ ] `transition_violation` emits with `type = "alert"` and `shape_ref = "conflict_detected/v1"`.
-- [ ] No new envelope type or envelope field is introduced.
-- [ ] Pattern identity never uses `subject_ref.type = "process"`.
+- [x] No new envelope type or envelope field is introduced.
+- [x] Pattern identity never uses `subject_ref.type = "process"`.
 - [ ] `entity_lifecycle` is implemented before S06 support is claimed, or S06 remains explicitly deferred.
 
 ### FP-005 Gates
@@ -544,23 +544,22 @@ Phase 4 is not complete until every applicable gate is green.
 
 - [x] Existing Phase 0-3e server tests still pass.
 - [x] Existing Phase 0-3e mobile tests still pass.
-- [ ] Shared server/mobile projection fixtures pass for Phase 4 pattern state.
+- [x] Shared server/mobile projection fixtures pass for Phase 4 pattern state.
 - [x] `git diff --check` passes.
 
 ---
 
 ## 9. Sequencing
 
-Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Recommended remaining implementation order:
+Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed without `ongoing_resolution`, `transition_violation`, resolver routing, normal sync backfill, or durable workflow-state tables. Recommended remaining implementation order:
 
-1. Pattern-state projection without `ongoing_resolution` enabled.
-2. FP-005 subject-history backfill decision and implementation.
-3. Enable `ongoing_resolution` projection and transition detection only after FP-005 is resolved.
-4. Add remaining pattern detectors and mobile advisory transition warnings.
-5. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
-6. Close docs/status/catalog updates and Phase 4 completion audit.
+1. FP-005 subject-history backfill decision and implementation.
+2. Enable `ongoing_resolution` projection only after FP-005 is resolved.
+3. Add pattern transition detection and mobile advisory transition warnings after the FP-009 resolver gate is addressed.
+4. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
+5. Close docs/status/catalog updates and Phase 4 completion audit.
 
-This order keeps landed role-action, severity, assignment-administration, and uniqueness work independent of FP-005, activates uniqueness before pattern transitions need ordered flag behavior, and prevents `ongoing_resolution` from landing before the subject-history backfill gap is closed. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block the next registry/binding slice unless implementation uncovers a direct dependency.
+This order keeps landed role-action, severity, assignment-administration, uniqueness, registry, and enabled-binding projection work independent of FP-005, and prevents `ongoing_resolution` from landing before the subject-history backfill gap is closed. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block remaining workflow-policy slices unless implementation uncovers a direct dependency.
 
 ---
 
@@ -606,3 +605,4 @@ This order keeps landed role-action, severity, assignment-administration, and un
 - **2026-05-23**: Phase 4.3 domain uniqueness landed: `shapes[*].uniqueness` validation/package preservation, server `domain_uniqueness_violation` accept-and-flag detection after identity/auth checks, unresolved-flag exclusion from the duplicate basis, accepted-resolution re-inclusion, and mobile advisory duplicate checks. FP-005 remains open and `ongoing_resolution` remains unimplemented.
 - **2026-05-24**: Phase 4.4 pattern registry and binding validation landed: platform-bundled binding metadata for `capture_with_review/v1`, `ongoing_resolution/v1`, `multi_step_approval/v1`, and `transfer_with_acknowledgment/v1`; deploy-time validation for pattern refs, composition, subject/event binding shape, required shape/participant roles, parameters, participant role-action prerequisites, and duplicate transition-bound shape ownership; config package and mobile raw binding preservation. Executable transition specs remain Phase 4.5 work. `ongoing_resolution/v1` remains registered but disabled until FP-005 closes. FP-009 remains open and no `transition_violation`, resolver routing, conflict-resolution authority enforcement, or auto-resolution was implemented.
 - **2026-05-24**: IDR-025 pattern definition contract/delivery landed: `contracts/pattern-definition.schema.json`, canonical `contracts/patterns/*.json`, server registry loading from packaged contract resources, config package `pattern_definitions` delivery for referenced refs, and mobile packaged-definition preservation. No pattern-state projection, `transition_violation`, resolver routing, conflict-resolution authority enforcement, or auto-resolution was implemented.
+- **2026-05-24**: Phase 4.5 enabled-binding pattern-state projection landed for `capture_with_review/v1`, `multi_step_approval/v1`, and `transfer_with_acknowledgment/v1`: server `PatternStateProjection` rebuilds on demand from active activity bindings and contract-backed pattern definitions; mobile `PatternProjectionEngine` reads ConfigStore bindings and packaged `pattern_definitions`; shared fixture coverage now spans no-pattern, enabled patterns, unresolved flag exclusion, accepted re-inclusion, and rejected exclusion. `ongoing_resolution/v1`, normal sync backfill, `transition_violation`, resolver routing, conflict-resolution authority enforcement, auto-resolution, and durable workflow-state tables remain unimplemented.

@@ -1,0 +1,1126 @@
+{
+  "description": "Phase 4.5 pattern-state projection fixture. Server and mobile must derive the same pattern_states from the same activity bindings, packaged pattern definitions, and ordered events.",
+  "as_of": "2026-05-24T12:00:01.123456Z",
+  "config_package": {
+    "version": 1,
+    "shapes": {},
+    "activities": {
+      "no_pattern": {
+        "name": "no_pattern",
+        "sensitivity": "standard",
+        "pattern": null
+      },
+      "review_activity": {
+        "name": "review_activity",
+        "sensitivity": "standard",
+        "pattern": {
+          "subject": null,
+          "event": [
+            {
+              "ref": "capture_with_review/v1",
+              "composition": "event",
+              "shape_roles": {
+                "review_decision": [
+                  "observation_review/v1"
+                ]
+              },
+              "activation_roles": {
+                "on_shapes": [
+                  "observation/v1"
+                ]
+              },
+              "participant_roles": {
+                "capturer": [
+                  "field_worker"
+                ],
+                "reviewer": [
+                  "supervisor"
+                ]
+              },
+              "parameters": {}
+            }
+          ]
+        }
+      },
+      "approval_activity": {
+        "name": "approval_activity",
+        "sensitivity": "standard",
+        "pattern": {
+          "subject": {
+            "ref": "multi_step_approval/v1",
+            "composition": "subject",
+            "shape_roles": {
+              "submission": [
+                "approval_submission/v1"
+              ],
+              "level_decision": [
+                "approval_decision/v1"
+              ]
+            },
+            "participant_roles": {
+              "submitter": [
+                "submitter"
+              ],
+              "level_1_reviewer": [
+                "supervisor"
+              ],
+              "level_2_reviewer": [
+                "supervisor"
+              ]
+            },
+            "parameters": {
+              "levels": 2
+            }
+          },
+          "event": []
+        }
+      },
+      "transfer_activity": {
+        "name": "transfer_activity",
+        "sensitivity": "standard",
+        "pattern": {
+          "subject": {
+            "ref": "transfer_with_acknowledgment/v1",
+            "composition": "subject",
+            "shape_roles": {
+              "dispatch": [
+                "transfer_dispatch/v1"
+              ],
+              "receipt": [
+                "transfer_receipt/v1"
+              ],
+              "discrepancy_resolution": [
+                "transfer_resolution/v1"
+              ]
+            },
+            "participant_roles": {
+              "sender": [
+                "sender"
+              ],
+              "receiver": [
+                "receiver"
+              ],
+              "supervisor": [
+                "supervisor"
+              ]
+            },
+            "parameters": {}
+          },
+          "event": []
+        }
+      }
+    },
+    "pattern_definitions": {
+      "schema_version": 1,
+      "definitions": {
+        "capture_with_review/v1": {
+          "ref": "capture_with_review/v1",
+          "definition_version": 1,
+          "binding_enabled": true,
+          "allowed_compositions": [
+            "event"
+          ],
+          "shape_roles": {
+            "required": [
+              "review_decision"
+            ],
+            "optional": [],
+            "transition_bound": [
+              "review_decision"
+            ]
+          },
+          "activation_roles": {
+            "required": [
+              "on_shapes"
+            ],
+            "optional": []
+          },
+          "participant_roles": {
+            "required": [
+              "capturer",
+              "reviewer"
+            ],
+            "optional": [],
+            "action_requirements": {
+              "capturer": [
+                "capture"
+              ],
+              "reviewer": [
+                "review"
+              ]
+            }
+          },
+          "parameters": {
+            "required": [],
+            "optional": [
+              "review_deadline"
+            ]
+          },
+          "semantics": {
+            "level_based_approval": false,
+            "transfer_supervisor_conditional": false
+          },
+          "states": [
+            {
+              "name": "pending_review",
+              "markers": [
+                "I"
+              ]
+            },
+            {
+              "name": "accepted",
+              "markers": [
+                "T"
+              ]
+            },
+            {
+              "name": "returned",
+              "markers": [
+                "T"
+              ]
+            }
+          ],
+          "transitions": [
+            {
+              "id": "T1",
+              "from": null,
+              "event_type": "capture",
+              "activation_role": "on_shapes",
+              "to": "pending_review",
+              "effect": "SC*"
+            },
+            {
+              "id": "T2",
+              "from": "pending_review",
+              "event_type": "review",
+              "shape_role": "review_decision",
+              "to": "accepted",
+              "effect": "SC",
+              "branch": {
+                "field": "decision",
+                "equals": "accepted"
+              }
+            },
+            {
+              "id": "T3",
+              "from": "pending_review",
+              "event_type": "review",
+              "shape_role": "review_decision",
+              "to": "returned",
+              "effect": "SC",
+              "branch": {
+                "field": "decision",
+                "equals": "returned"
+              }
+            }
+          ],
+          "projections": {
+            "auto_maintained": [
+              "current_state",
+              "pending_since",
+              "time_in_state"
+            ],
+            "pattern_specific": [
+              "pending_review_count",
+              "accepted_count",
+              "returned_count",
+              "latest_review_outcome"
+            ]
+          }
+        },
+        "multi_step_approval/v1": {
+          "ref": "multi_step_approval/v1",
+          "definition_version": 1,
+          "binding_enabled": true,
+          "allowed_compositions": [
+            "subject",
+            "event"
+          ],
+          "shape_roles": {
+            "required": [
+              "submission",
+              "level_decision"
+            ],
+            "optional": [],
+            "transition_bound": [
+              "submission",
+              "level_decision"
+            ]
+          },
+          "activation_roles": {
+            "required": [],
+            "optional": []
+          },
+          "participant_roles": {
+            "required": [
+              "submitter"
+            ],
+            "optional": [],
+            "action_requirements": {
+              "submitter": [
+                "capture"
+              ]
+            },
+            "dynamic_requirements": {
+              "level_reviewers": true
+            }
+          },
+          "parameters": {
+            "required": [
+              "levels"
+            ],
+            "optional": [
+              "review_deadline"
+            ]
+          },
+          "semantics": {
+            "level_based_approval": true,
+            "transfer_supervisor_conditional": false
+          },
+          "states": [
+            {
+              "name": "pending",
+              "markers": [
+                "I"
+              ]
+            },
+            {
+              "name": "returned",
+              "markers": []
+            },
+            {
+              "name": "final_approved",
+              "markers": [
+                "T"
+              ]
+            },
+            {
+              "name": "final_rejected",
+              "markers": [
+                "T"
+              ]
+            }
+          ],
+          "transitions": [
+            {
+              "id": "T1",
+              "from": null,
+              "event_type": "capture",
+              "shape_role": "submission",
+              "to": "pending",
+              "effect": "SC*",
+              "attributes": {
+                "level": 1
+              }
+            },
+            {
+              "id": "T2",
+              "from": "pending",
+              "event_type": "review",
+              "shape_role": "level_decision",
+              "to": "pending",
+              "effect": "SC",
+              "branch": {
+                "field": "decision",
+                "equals": "approved",
+                "when_level": "less_than_levels"
+              },
+              "attributes": {
+                "level": "current_plus_1"
+              }
+            },
+            {
+              "id": "T3",
+              "from": "pending",
+              "event_type": "review",
+              "shape_role": "level_decision",
+              "to": "final_approved",
+              "effect": "SC",
+              "branch": {
+                "field": "decision",
+                "equals": "approved",
+                "when_level": "equals_levels"
+              }
+            },
+            {
+              "id": "T4",
+              "from": "pending",
+              "event_type": "review",
+              "shape_role": "level_decision",
+              "to": "returned",
+              "effect": "SC",
+              "branch": {
+                "field": "decision",
+                "equals": "returned"
+              }
+            },
+            {
+              "id": "T5",
+              "from": "pending",
+              "event_type": "review",
+              "shape_role": "level_decision",
+              "to": "final_rejected",
+              "effect": "SC",
+              "branch": {
+                "field": "decision",
+                "equals": "rejected"
+              }
+            },
+            {
+              "id": "T6",
+              "from": "returned",
+              "event_type": "capture",
+              "shape_role": "submission",
+              "to": "pending",
+              "effect": "SC",
+              "attributes": {
+                "level": 1
+              }
+            }
+          ],
+          "projections": {
+            "auto_maintained": [
+              "current_state",
+              "pending_since",
+              "time_in_state"
+            ],
+            "pattern_specific": [
+              "current_level",
+              "approval_chain",
+              "time_at_current_level",
+              "submission_count"
+            ]
+          }
+        },
+        "transfer_with_acknowledgment/v1": {
+          "ref": "transfer_with_acknowledgment/v1",
+          "definition_version": 1,
+          "binding_enabled": true,
+          "allowed_compositions": [
+            "subject"
+          ],
+          "shape_roles": {
+            "required": [
+              "dispatch",
+              "receipt"
+            ],
+            "optional": [
+              "discrepancy_report",
+              "discrepancy_resolution"
+            ],
+            "transition_bound": [
+              "dispatch",
+              "receipt",
+              "discrepancy_report",
+              "discrepancy_resolution"
+            ]
+          },
+          "activation_roles": {
+            "required": [],
+            "optional": []
+          },
+          "participant_roles": {
+            "required": [
+              "sender",
+              "receiver"
+            ],
+            "optional": [
+              "supervisor"
+            ],
+            "action_requirements": {
+              "sender": [
+                "capture"
+              ],
+              "receiver": [
+                "capture"
+              ],
+              "supervisor": [
+                "review"
+              ]
+            },
+            "dynamic_requirements": {
+              "supervisor_when_discrepancy_roles_mapped": true
+            }
+          },
+          "parameters": {
+            "required": [],
+            "optional": [
+              "receipt_deadline",
+              "resolution_deadline"
+            ]
+          },
+          "semantics": {
+            "level_based_approval": false,
+            "transfer_supervisor_conditional": true
+          },
+          "states": [
+            {
+              "name": "in_transit",
+              "markers": [
+                "I"
+              ]
+            },
+            {
+              "name": "received",
+              "markers": [
+                "T"
+              ]
+            },
+            {
+              "name": "partial_receipt",
+              "markers": []
+            },
+            {
+              "name": "disputed",
+              "markers": []
+            },
+            {
+              "name": "resolved",
+              "markers": [
+                "T"
+              ]
+            }
+          ],
+          "transitions": [
+            {
+              "id": "T1",
+              "from": null,
+              "event_type": "capture",
+              "shape_role": "dispatch",
+              "to": "in_transit",
+              "effect": "SC*"
+            },
+            {
+              "id": "T2",
+              "from": "in_transit",
+              "event_type": "capture",
+              "shape_role": "receipt",
+              "to": "received",
+              "effect": "SC",
+              "branch": {
+                "field": "discrepancies",
+                "equals": false
+              }
+            },
+            {
+              "id": "T3",
+              "from": "in_transit",
+              "event_type": "capture",
+              "shape_role": "receipt",
+              "to": "partial_receipt",
+              "effect": "SC",
+              "branch": {
+                "field": "discrepancies",
+                "equals": true
+              }
+            },
+            {
+              "id": "T4",
+              "from": [
+                "in_transit",
+                "partial_receipt"
+              ],
+              "event_type": "capture",
+              "shape_role": "discrepancy_report",
+              "to": "disputed",
+              "effect": "SC"
+            },
+            {
+              "id": "T5",
+              "from": [
+                "partial_receipt",
+                "disputed"
+              ],
+              "event_type": "review",
+              "shape_role": "discrepancy_resolution",
+              "to": "resolved",
+              "effect": "SC"
+            }
+          ],
+          "projections": {
+            "auto_maintained": [
+              "current_state",
+              "pending_since",
+              "time_in_state"
+            ],
+            "pattern_specific": [
+              "items_dispatched",
+              "items_received",
+              "discrepancy_summary",
+              "time_in_transit"
+            ]
+          }
+        }
+      }
+    },
+    "expressions": {},
+    "flag_severity_overrides": {},
+    "sensitivity_classifications": {
+      "shapes": {},
+      "activities": {}
+    }
+  },
+  "events": [
+    {
+      "id": "aaaaaaaa-1000-0000-0000-000000000001",
+      "type": "capture",
+      "shape_ref": "simple_capture/v1",
+      "activity_ref": "no_pattern",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000001000"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000001"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000001",
+      "device_seq": 1,
+      "sync_watermark": 1,
+      "timestamp": "2026-05-24T07:00:01Z",
+      "payload": {
+        "value": "no pattern"
+      }
+    },
+    {
+      "id": "aaaaaaaa-1001-0000-0000-000000000001",
+      "type": "capture",
+      "shape_ref": "observation/v1",
+      "activity_ref": "review_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000001001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000001"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000001",
+      "device_seq": 2,
+      "sync_watermark": 2,
+      "timestamp": "2026-05-24T09:00:01Z",
+      "payload": {
+        "value": "needs review"
+      }
+    },
+    {
+      "id": "aaaaaaaa-1001-0000-0000-000000000002",
+      "type": "review",
+      "shape_ref": "observation_review/v1",
+      "activity_ref": "review_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000001001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000002"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000002",
+      "device_seq": 1,
+      "sync_watermark": 3,
+      "timestamp": "2026-05-24T10:00:01Z",
+      "payload": {
+        "source_event_ref": {
+          "type": "event",
+          "id": "aaaaaaaa-1001-0000-0000-000000000001"
+        },
+        "decision": "accepted"
+      }
+    },
+    {
+      "id": "aaaaaaaa-2001-0000-0000-000000000001",
+      "type": "capture",
+      "shape_ref": "approval_submission/v1",
+      "activity_ref": "approval_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000002001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000001"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000001",
+      "device_seq": 3,
+      "sync_watermark": 4,
+      "timestamp": "2026-05-24T08:00:01Z",
+      "payload": {
+        "submission": "A"
+      }
+    },
+    {
+      "id": "aaaaaaaa-2001-0000-0000-000000000002",
+      "type": "review",
+      "shape_ref": "approval_decision/v1",
+      "activity_ref": "approval_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000002001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000002"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000002",
+      "device_seq": 2,
+      "sync_watermark": 5,
+      "timestamp": "2026-05-24T09:00:01Z",
+      "payload": {
+        "level": 1,
+        "decision": "approved"
+      }
+    },
+    {
+      "id": "aaaaaaaa-2001-0000-0000-000000000003",
+      "type": "review",
+      "shape_ref": "approval_decision/v1",
+      "activity_ref": "approval_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000002001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000002"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000002",
+      "device_seq": 3,
+      "sync_watermark": 6,
+      "timestamp": "2026-05-24T10:00:01.123456Z",
+      "payload": {
+        "level": 2,
+        "decision": "approved"
+      }
+    },
+    {
+      "id": "aaaaaaaa-3001-0000-0000-000000000001",
+      "type": "capture",
+      "shape_ref": "transfer_dispatch/v1",
+      "activity_ref": "transfer_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000003001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000001"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000001",
+      "device_seq": 4,
+      "sync_watermark": 7,
+      "timestamp": "2026-05-24T08:00:01Z",
+      "payload": {
+        "items": [
+          {
+            "sku": "a",
+            "qty": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "aaaaaaaa-3001-0000-0000-000000000002",
+      "type": "capture",
+      "shape_ref": "transfer_receipt/v1",
+      "activity_ref": "transfer_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000003001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000003"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000003",
+      "device_seq": 1,
+      "sync_watermark": 8,
+      "timestamp": "2026-05-24T09:30:01Z",
+      "payload": {
+        "discrepancies": false,
+        "items": [
+          {
+            "sku": "a",
+            "qty": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "aaaaaaaa-4001-0000-0000-000000000001",
+      "type": "capture",
+      "shape_ref": "transfer_dispatch/v1",
+      "activity_ref": "transfer_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000004001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000001"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000001",
+      "device_seq": 5,
+      "sync_watermark": 9,
+      "timestamp": "2026-05-24T08:00:01Z",
+      "payload": {}
+    },
+    {
+      "id": "aaaaaaaa-4001-0000-0000-000000000002",
+      "type": "capture",
+      "shape_ref": "transfer_receipt/v1",
+      "activity_ref": "transfer_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000004001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000003"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000003",
+      "device_seq": 2,
+      "sync_watermark": 10,
+      "timestamp": "2026-05-24T09:00:01Z",
+      "payload": {
+        "discrepancies": false
+      }
+    },
+    {
+      "id": "aaaaaaaa-4001-0000-0000-000000000003",
+      "type": "alert",
+      "shape_ref": "conflict_detected/v1",
+      "activity_ref": null,
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000004001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "system:conflict_detector/domain_uniqueness"
+      },
+      "device_id": "00000000-0000-0000-0000-000000000000",
+      "device_seq": 1,
+      "sync_watermark": 11,
+      "timestamp": "2026-05-24T09:05:01Z",
+      "payload": {
+        "source_event_id": "aaaaaaaa-4001-0000-0000-000000000002",
+        "flag_category": "domain_uniqueness_violation"
+      }
+    },
+    {
+      "id": "aaaaaaaa-5001-0000-0000-000000000001",
+      "type": "capture",
+      "shape_ref": "transfer_dispatch/v1",
+      "activity_ref": "transfer_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000005001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000001"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000001",
+      "device_seq": 6,
+      "sync_watermark": 12,
+      "timestamp": "2026-05-24T08:00:01Z",
+      "payload": {}
+    },
+    {
+      "id": "aaaaaaaa-5001-0000-0000-000000000002",
+      "type": "capture",
+      "shape_ref": "transfer_receipt/v1",
+      "activity_ref": "transfer_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000005001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000003"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000003",
+      "device_seq": 3,
+      "sync_watermark": 13,
+      "timestamp": "2026-05-24T09:00:01Z",
+      "payload": {
+        "discrepancies": false
+      }
+    },
+    {
+      "id": "aaaaaaaa-5001-0000-0000-000000000003",
+      "type": "alert",
+      "shape_ref": "conflict_detected/v1",
+      "activity_ref": null,
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000005001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "system:conflict_detector/domain_uniqueness"
+      },
+      "device_id": "00000000-0000-0000-0000-000000000000",
+      "device_seq": 2,
+      "sync_watermark": 14,
+      "timestamp": "2026-05-24T09:05:01Z",
+      "payload": {
+        "source_event_id": "aaaaaaaa-5001-0000-0000-000000000002",
+        "flag_category": "domain_uniqueness_violation"
+      }
+    },
+    {
+      "id": "aaaaaaaa-5001-0000-0000-000000000004",
+      "type": "review",
+      "shape_ref": "conflict_resolved/v1",
+      "activity_ref": null,
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000005001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000002"
+      },
+      "device_id": "00000000-0000-0000-0000-000000000000",
+      "device_seq": 3,
+      "sync_watermark": 15,
+      "timestamp": "2026-05-24T09:10:01Z",
+      "payload": {
+        "flag_event_id": "aaaaaaaa-5001-0000-0000-000000000003",
+        "source_event_id": "aaaaaaaa-5001-0000-0000-000000000002",
+        "resolution": "accepted"
+      }
+    },
+    {
+      "id": "aaaaaaaa-6001-0000-0000-000000000001",
+      "type": "capture",
+      "shape_ref": "transfer_dispatch/v1",
+      "activity_ref": "transfer_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000006001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000001"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000001",
+      "device_seq": 7,
+      "sync_watermark": 16,
+      "timestamp": "2026-05-24T08:00:01Z",
+      "payload": {}
+    },
+    {
+      "id": "aaaaaaaa-6001-0000-0000-000000000002",
+      "type": "capture",
+      "shape_ref": "transfer_receipt/v1",
+      "activity_ref": "transfer_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000006001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000003"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000003",
+      "device_seq": 4,
+      "sync_watermark": 17,
+      "timestamp": "2026-05-24T09:00:01Z",
+      "payload": {
+        "discrepancies": false
+      }
+    },
+    {
+      "id": "aaaaaaaa-6001-0000-0000-000000000003",
+      "type": "alert",
+      "shape_ref": "conflict_detected/v1",
+      "activity_ref": null,
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000006001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "system:conflict_detector/domain_uniqueness"
+      },
+      "device_id": "00000000-0000-0000-0000-000000000000",
+      "device_seq": 4,
+      "sync_watermark": 18,
+      "timestamp": "2026-05-24T09:05:01Z",
+      "payload": {
+        "source_event_id": "aaaaaaaa-6001-0000-0000-000000000002",
+        "flag_category": "domain_uniqueness_violation"
+      }
+    },
+    {
+      "id": "aaaaaaaa-6001-0000-0000-000000000004",
+      "type": "review",
+      "shape_ref": "conflict_resolved/v1",
+      "activity_ref": null,
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000006001"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000002"
+      },
+      "device_id": "00000000-0000-0000-0000-000000000000",
+      "device_seq": 5,
+      "sync_watermark": 19,
+      "timestamp": "2026-05-24T09:10:01Z",
+      "payload": {
+        "flag_event_id": "aaaaaaaa-6001-0000-0000-000000000003",
+        "source_event_id": "aaaaaaaa-6001-0000-0000-000000000002",
+        "resolution": "rejected"
+      }
+    }
+  ],
+  "expected_output": {
+    "pattern_states": [
+      {
+        "composition": "event",
+        "state_key": {
+          "source_event_id": "aaaaaaaa-1001-0000-0000-000000000001",
+          "binding_ref": "capture_with_review/v1"
+        },
+        "current_state": "accepted",
+        "pending_since": "2026-05-24T10:00:01.000000Z",
+        "time_in_state": 7200,
+        "pattern_specific": {
+          "latest_review_outcome": "accepted"
+        },
+        "unsupported_pattern_specific_fields": [
+          "accepted_count",
+          "pending_review_count",
+          "returned_count"
+        ]
+      },
+      {
+        "composition": "subject",
+        "state_key": {
+          "subject_ref": {
+            "type": "subject",
+            "id": "bbbbbbbb-0000-0000-0000-000000002001"
+          },
+          "activity_ref": "approval_activity",
+          "binding_ref": "multi_step_approval/v1"
+        },
+        "current_state": "final_approved",
+        "pending_since": "2026-05-24T10:00:01.123456Z",
+        "time_in_state": 7200,
+        "pattern_specific": {
+          "submission_count": 1,
+          "approval_chain": [
+            {
+              "level": 1,
+              "actor_ref": {
+                "type": "actor",
+                "id": "cccccccc-0000-0000-0000-000000000002"
+              },
+              "decision": "approved",
+              "timestamp": "2026-05-24T09:00:01.000000Z"
+            },
+            {
+              "level": 2,
+              "actor_ref": {
+                "type": "actor",
+                "id": "cccccccc-0000-0000-0000-000000000002"
+              },
+              "decision": "approved",
+              "timestamp": "2026-05-24T10:00:01.123456Z"
+            }
+          ],
+          "current_level": null
+        }
+      },
+      {
+        "composition": "subject",
+        "state_key": {
+          "subject_ref": {
+            "type": "subject",
+            "id": "bbbbbbbb-0000-0000-0000-000000003001"
+          },
+          "activity_ref": "transfer_activity",
+          "binding_ref": "transfer_with_acknowledgment/v1"
+        },
+        "current_state": "received",
+        "pending_since": "2026-05-24T09:30:01.000000Z",
+        "time_in_state": 9000,
+        "pattern_specific": {
+          "time_in_transit": 5400
+        },
+        "unsupported_pattern_specific_fields": [
+          "discrepancy_summary",
+          "items_dispatched",
+          "items_received"
+        ]
+      },
+      {
+        "composition": "subject",
+        "state_key": {
+          "subject_ref": {
+            "type": "subject",
+            "id": "bbbbbbbb-0000-0000-0000-000000004001"
+          },
+          "activity_ref": "transfer_activity",
+          "binding_ref": "transfer_with_acknowledgment/v1"
+        },
+        "current_state": "in_transit",
+        "pending_since": "2026-05-24T08:00:01.000000Z",
+        "time_in_state": 14400,
+        "pattern_specific": {},
+        "unsupported_pattern_specific_fields": [
+          "discrepancy_summary",
+          "items_dispatched",
+          "items_received"
+        ]
+      },
+      {
+        "composition": "subject",
+        "state_key": {
+          "subject_ref": {
+            "type": "subject",
+            "id": "bbbbbbbb-0000-0000-0000-000000005001"
+          },
+          "activity_ref": "transfer_activity",
+          "binding_ref": "transfer_with_acknowledgment/v1"
+        },
+        "current_state": "received",
+        "pending_since": "2026-05-24T09:00:01.000000Z",
+        "time_in_state": 10800,
+        "pattern_specific": {
+          "time_in_transit": 3600
+        },
+        "unsupported_pattern_specific_fields": [
+          "discrepancy_summary",
+          "items_dispatched",
+          "items_received"
+        ]
+      },
+      {
+        "composition": "subject",
+        "state_key": {
+          "subject_ref": {
+            "type": "subject",
+            "id": "bbbbbbbb-0000-0000-0000-000000006001"
+          },
+          "activity_ref": "transfer_activity",
+          "binding_ref": "transfer_with_acknowledgment/v1"
+        },
+        "current_state": "in_transit",
+        "pending_since": "2026-05-24T08:00:01.000000Z",
+        "time_in_state": 14400,
+        "pattern_specific": {},
+        "unsupported_pattern_specific_fields": [
+          "discrepancy_summary",
+          "items_dispatched",
+          "items_received"
+        ]
+      }
+    ]
+  }
+}

@@ -238,6 +238,21 @@ public class EventRepository {
     }
 
     /**
+     * Find all events in causal replay order for rebuildable projections.
+     * This is intentionally separate from normal /api/sync/pull and does not
+     * change live sync scope or watermark behavior.
+     */
+    public List<Event> findAllOrdered() {
+        return jdbc.query("""
+                SELECT id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                       device_id, device_seq, sync_watermark, timestamp, payload
+                FROM events
+                ORDER BY sync_watermark ASC, timestamp ASC
+                """,
+                eventRowMapper());
+    }
+
+    /**
      * Find prior authoritative events for a shape before an incoming event's watermark.
      * Excludes integrity/identity records, assignment records, and events with any flag that
      * has not been resolved as accepted. Reclassified and rejected resolutions remain excluded
