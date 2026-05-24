@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -235,6 +237,138 @@ public class EventRepository {
                 """,
                 eventRowMapper(),
                 subjectId.toString());
+    }
+
+    /**
+     * Find one subject-history backfill page for a specific activity.
+     * This is intentionally separate from normal /api/sync/pull and uses the
+     * supplied cursor only for this subject-bound history page.
+     */
+    public List<Event> findSubjectHistoryBackfillPage(List<UUID> subjectIds,
+                                                      String activityRef,
+                                                      long cursor,
+                                                      int limit) {
+        if (subjectIds == null || subjectIds.isEmpty()) {
+            return List.of();
+        }
+
+        String subjectPlaceholders = placeholders(subjectIds.size());
+        String assignmentCreatedRelevant = assignmentScopePredicate("e", subjectPlaceholders);
+        String assignmentEndedRelevant = assignmentScopePredicate("created", subjectPlaceholders);
+
+        String sql = """
+                SELECT e.id, e.type, e.shape_ref, e.activity_ref, e.subject_ref, e.actor_ref,
+                       e.device_id, e.device_seq, e.sync_watermark, e.timestamp, e.payload
+                FROM events e
+                WHERE e.sync_watermark > ?
+                  AND (
+                    (
+                      e.subject_ref->>'type' = 'subject'
+                      AND e.subject_ref->>'id' IN (%s)
+                      AND (
+                        e.activity_ref = ?
+                        OR e.shape_ref LIKE 'subjects_merged/%%'
+                        OR e.shape_ref LIKE 'subject_split/%%'
+                      )
+                    )
+                    OR (
+                      e.shape_ref LIKE 'conflict_detected/%%'
+                      AND EXISTS (
+                        SELECT 1
+                        FROM events src
+                        WHERE src.id::text = e.payload->>'source_event_id'
+                          AND src.subject_ref->>'id' IN (%s)
+                          AND src.activity_ref = ?
+                      )
+                    )
+                    OR (
+                      e.shape_ref LIKE 'conflict_resolved/%%'
+                      AND EXISTS (
+                        SELECT 1
+                        FROM events src
+                        WHERE src.id::text = e.payload->>'source_event_id'
+                          AND src.subject_ref->>'id' IN (%s)
+                          AND src.activity_ref = ?
+                      )
+                    )
+                    OR (
+                      e.type = 'assignment_changed'
+                      AND (
+                        (
+                          e.shape_ref = 'assignment_created/v1'
+                          AND %s
+                        )
+                        OR (
+                          e.shape_ref = 'assignment_ended/v1'
+                          AND EXISTS (
+                            SELECT 1
+                            FROM events created
+                            WHERE created.type = 'assignment_changed'
+                              AND created.shape_ref = 'assignment_created/v1'
+                              AND created.subject_ref->>'id' = e.subject_ref->>'id'
+                              AND %s
+                          )
+                        )
+                      )
+                    )
+                  )
+                ORDER BY e.sync_watermark ASC
+                LIMIT ?
+                """.formatted(
+                subjectPlaceholders,
+                subjectPlaceholders,
+                subjectPlaceholders,
+                assignmentCreatedRelevant,
+                assignmentEndedRelevant);
+
+        List<Object> params = new ArrayList<>();
+        params.add(cursor);
+        addSubjectIds(params, subjectIds);
+        params.add(activityRef);
+        addSubjectIds(params, subjectIds);
+        params.add(activityRef);
+        addSubjectIds(params, subjectIds);
+        params.add(activityRef);
+        addSubjectIds(params, subjectIds);
+        params.add(activityRef);
+        addSubjectIds(params, subjectIds);
+        params.add(activityRef);
+        params.add(limit);
+
+        return jdbc.query(sql, eventRowMapper(), params.toArray());
+    }
+
+    private String assignmentScopePredicate(String alias, String subjectPlaceholders) {
+        return """
+                jsonb_typeof(%s.payload->'scope'->'subject_list') = 'array'
+                AND EXISTS (
+                  SELECT 1
+                  FROM jsonb_array_elements_text(%s.payload->'scope'->'subject_list') AS subject_id(value)
+                  WHERE subject_id.value IN (%s)
+                )
+                AND (
+                  %s.payload->'scope'->'activity' IS NULL
+                  OR %s.payload->'scope'->'activity' = 'null'::jsonb
+                  OR (
+                    jsonb_typeof(%s.payload->'scope'->'activity') = 'array'
+                    AND EXISTS (
+                      SELECT 1
+                      FROM jsonb_array_elements_text(%s.payload->'scope'->'activity') AS activity(value)
+                      WHERE activity.value = ?
+                    )
+                  )
+                )
+                """.formatted(
+                alias, alias, subjectPlaceholders,
+                alias, alias, alias, alias);
+    }
+
+    private String placeholders(int count) {
+        return String.join(", ", Collections.nCopies(count, "?"));
+    }
+
+    private void addSubjectIds(List<Object> params, List<UUID> subjectIds) {
+        subjectIds.forEach(subjectId -> params.add(subjectId.toString()));
     }
 
     /**

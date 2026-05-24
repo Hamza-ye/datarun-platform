@@ -45,6 +45,7 @@ public class SyncController {
     private final ConfigPackager configPackager;
     private final ShapePayloadValidator shapePayloadValidator;
     private final DomainUniquenessDetector domainUniquenessDetector;
+    private final SubjectHistoryBackfillService subjectHistoryBackfillService;
 
     public SyncController(EventRepository eventRepository,
                           EnvelopeValidator envelopeValidator,
@@ -55,7 +56,8 @@ public class SyncController {
                           JdbcTemplate jdbc,
                           ScopeResolver scopeResolver,
                           ConfigPackager configPackager,
-                          ShapePayloadValidator shapePayloadValidator) {
+                          ShapePayloadValidator shapePayloadValidator,
+                          SubjectHistoryBackfillService subjectHistoryBackfillService) {
         this.eventRepository = eventRepository;
         this.envelopeValidator = envelopeValidator;
         this.objectMapper = objectMapper;
@@ -66,6 +68,7 @@ public class SyncController {
         this.scopeResolver = scopeResolver;
         this.configPackager = configPackager;
         this.shapePayloadValidator = shapePayloadValidator;
+        this.subjectHistoryBackfillService = subjectHistoryBackfillService;
     }
 
     @PostMapping("/push")
@@ -255,6 +258,48 @@ public class SyncController {
         ));
     }
 
+    @PostMapping("/subject-history")
+    public ResponseEntity<?> subjectHistory(@RequestBody SubjectHistoryRequest request,
+                                            HttpServletRequest httpRequest) {
+        if (request.subjectId() == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "invalid_subject"));
+        }
+        if (request.activityRef() == null || request.activityRef().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "invalid_activity"));
+        }
+
+        long cursor = request.cursor() != null ? request.cursor() : 0L;
+        if (cursor < 0) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "invalid_cursor"));
+        }
+
+        int limit = request.limit() != null ? request.limit() : 100;
+        if (limit < 1) limit = 1;
+        if (limit > 1000) limit = 1000;
+
+        UUID actorId = (UUID) httpRequest.getAttribute(ActorTokenInterceptor.ACTOR_ID_ATTR);
+        try {
+            SubjectHistoryBackfillService.SubjectHistoryPage page =
+                    subjectHistoryBackfillService.page(
+                            actorId, request.subjectId(), request.activityRef(), cursor, limit);
+            return ResponseEntity.ok(Map.of(
+                    "requested_subject_id", page.requestedSubjectId().toString(),
+                    "subject_id", page.subjectId().toString(),
+                    "activity_ref", page.activityRef(),
+                    "cursor", page.cursor(),
+                    "next_cursor", page.nextCursor(),
+                    "has_more", page.hasMore(),
+                    "events", page.events()
+            ));
+        } catch (SubjectHistoryBackfillService.UnauthorizedSubjectHistoryException e) {
+            return ResponseEntity.status(403)
+                    .body(Map.of("error", "subject_history_not_authorized"));
+        }
+    }
+
     private int persistFlagEvents(List<Event> flagEvents) {
         Integer result = transactionTemplate.execute(status -> {
             int persisted = 0;
@@ -339,5 +384,12 @@ public class SyncController {
             Integer limit,
             @JsonProperty("device_id") UUID deviceId,
             @JsonProperty("config_version") Integer configVersion
+    ) {}
+
+    public record SubjectHistoryRequest(
+            @JsonProperty("subject_id") UUID subjectId,
+            @JsonProperty("activity_ref") String activityRef,
+            Long cursor,
+            Integer limit
     ) {}
 }

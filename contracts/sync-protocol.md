@@ -150,6 +150,72 @@ Device requests events it hasn't seen. Server returns events after the given wat
 
 ---
 
+## Subject History Backfill — `POST /api/sync/subject-history`
+
+Device requests a subject-bound historical page for projection repair after an actor receives a subject assignment whose prior event timeline is older than the device's normal live-sync watermark. This is a distinct backfill surface; it is not normal pull and requires `Authorization: Bearer <actor_token>`.
+
+### Request
+
+```json
+{
+  "subject_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "activity_ref": "malaria_case_activity",
+  "cursor": 0,
+  "limit": 100
+}
+```
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `subject_id` | string (uuid) | yes | — | Subject whose activity-specific history is requested. Merge aliases resolve to the canonical surviving subject for history selection. Split lineage is not aliasing. |
+| `activity_ref` | string | yes | — | Activity key for the subject-level pattern state key. Domain events from other activities are not returned. |
+| `cursor` | integer | no | 0 | Backfill page cursor. It is compared to event `sync_watermark`, but is independent of the device's normal `last_pull_watermark`. |
+| `limit` | integer | no | 100 | Max events to return. Server may cap this. |
+
+### Response — `200 OK`
+
+```json
+{
+  "requested_subject_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "subject_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "activity_ref": "malaria_case_activity",
+  "cursor": 0,
+  "next_cursor": 42,
+  "has_more": false,
+  "events": [
+    { "...full envelope..." }
+  ]
+}
+```
+
+### Semantics
+
+| Aspect | Behavior |
+|--------|----------|
+| Authorization | Evaluated at request time on every page from the bearer token's current active assignments. If the actor is no longer assigned to the requested subject/activity, the page is rejected with `403`. |
+| Pagination | Events are ordered by `sync_watermark` ascending. Clients continue with `cursor = next_cursor` while `has_more` is true. Retrying the same request is idempotent. |
+| Live-sync isolation | Backfill does not call or mutate `/api/sync/pull`, does not update `device_sync_state`, and does not lower or rewrite the normal live-sync watermark. |
+| Activity filtering | Domain events must match the requested `activity_ref`. Related conflict flags/resolutions are included only when their source event is in the requested subject/activity slice. |
+| Assignment events | Assignment lifecycle events are returned only when their assignment scope explicitly names the requested subject alias group and is activity-unrestricted or includes the requested `activity_ref`. Broad geographic assignment history is not exposed as audit pull. |
+| Merge aliases | Reads for a surviving subject or any retired alias include the surviving subject's events plus retired-alias events in that merge chain. |
+| Split lineage | Split successors do not inherit source history. Backfill for an archived split source, when currently authorized, returns only source history. |
+| Audit scope | The endpoint is subject-bound. It does not provide arbitrary historical reconstruction by actor, geography, activity, or time range. |
+
+### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `400` | Missing or invalid `subject_id` | `{ "error": "invalid_subject" }` |
+| `400` | Missing or blank `activity_ref` | `{ "error": "invalid_activity" }` |
+| `400` | Negative cursor | `{ "error": "invalid_cursor" }` |
+| `401` | Missing bearer token | `{ "error": "missing_token" }` |
+| `401` | Empty bearer token | `{ "error": "empty_token" }` |
+| `401` | Invalid or revoked bearer token | `{ "error": "invalid_token" }` |
+| `403` | Actor is not currently authorized for the subject/activity page | `{ "error": "subject_history_not_authorized" }` |
+| `500` | Server error | `{ "error": "internal_error" }` |
+
+---
+
 ## Read APIs
 
 ### List Subjects — `GET /api/subjects`
@@ -201,3 +267,4 @@ Returns the full event timeline for one subject, ordered by `sync_watermark`.
 3. **`sync_watermark` is monotonically increasing** — committed event watermarks are ordered and never reused; sequence gaps are allowed
 4. **Push is idempotent** — safe to retry on network failure
 5. **Pull is stable** — same query returns same results (append-only store)
+6. **Subject-history backfill is not live sync** — it uses an independent cursor and never mutates normal pull watermarks

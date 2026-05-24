@@ -33,13 +33,13 @@ The following constraints are load-bearing. Phase 4 implementation must fail rev
 
 ### FP-005 Boundary
 
-FP-005 remains `IN_PROGRESS` and routed, not resolved. Phase 4 must implement its route exactly:
+FP-005 is resolved by a distinct subject-history backfill surface. Phase 4 must preserve its route exactly:
 
 1. Normal `/api/sync/pull` remains request-time scoped against current active assignments. It must not become historical reconstruction, subject-history replay, or audit pull.
-2. `ongoing_resolution` cannot be implemented or enabled until subject-history backfill is specified and tested.
+2. `ongoing_resolution` may be implemented only against the separate subject-history backfill surface; it remains unimplemented and disabled until that slice lands.
 3. Subject-history backfill is separate from role-action enforcement, flag severity, domain uniqueness, and pattern transition logic.
 4. Audit/historical pull is out of Phase 4 live sync. If audit reconstruction is needed later, it requires a successor decision and a separate pull class/API.
-5. The backfill design must define idempotence/cursor behavior without lowering the normal sync watermark, request-time authorization on every page, alias handling after merge/split, activity filtering for pattern state keys, and visibility of assignment/transfer events needed by subject-level projections.
+5. The backfill design uses independent cursor pagination without lowering the normal sync watermark, request-time authorization on every page, merge-alias inclusion, split-lineage separation, activity filtering for pattern state keys, and subject-list assignment/transfer event inclusion only where needed by subject-level projections.
 
 ### FP-006 Boundary
 
@@ -258,7 +258,7 @@ Registry work:
 
 - Implement a small platform-bundled registry for the initial pattern definitions from `docs/architecture/patterns.md`:
   - `capture_with_review/v1`;
-  - `ongoing_resolution/v1`, not implemented or enabled until the FP-005 backfill prerequisite is closed;
+  - `ongoing_resolution/v1`, registered but not implemented or enabled until a dedicated projection slice consumes the resolved FP-005 backfill surface;
   - `multi_step_approval/v1`;
   - `transfer_with_acknowledgment/v1`.
 - Keep `entity_lifecycle` deferred unless explicitly promoted. Do not claim S06 support without it.
@@ -352,33 +352,34 @@ Tests:
 
 ### 4.7 Subject-History Backfill for `ongoing_resolution`
 
-This slice must happen before `ongoing_resolution` is implemented or enabled.
+This slice has landed before `ongoing_resolution` is implemented or enabled.
 
-Decision required before code:
+Implemented decision:
 
-- Either specify and implement a subject-bound backfill path, or explicitly document that Phase 4 does not support `ongoing_resolution`.
-- The preferred Phase 4 direction is a distinct subject-history backfill behavior, not a mutation of normal live pull.
+- `POST /api/sync/subject-history` is a distinct subject-bound backfill behavior, not a mutation of normal live pull.
+- Request fields are `subject_id`, `activity_ref`, `cursor`, and `limit`; response fields are `requested_subject_id`, canonical `subject_id`, `activity_ref`, `cursor`, `next_cursor`, `has_more`, and `events`.
+- The cursor is based on event `sync_watermark` but is independent of the device's normal live-sync watermark and does not update `device_sync_state`.
 
-Minimum backfill requirements if implemented:
+Implemented backfill requirements:
 
 - Separate request/cursor surface from normal `last_pull_watermark`.
 - Does not lower or reuse the normal sync watermark.
 - Idempotent pagination with a cursor independent of live sync.
 - Request-time authorization on every page.
-- Subject alias handling after merge/split.
+- Merge aliases are included for surviving/retired subject reads; split lineage is not aliasing, split successors do not inherit source history, and authorized split-source reads return source history only.
 - Activity filtering compatible with pattern state key `(subject_ref, activity_ref, binding.ref)`.
-- Includes assignment/transfer events needed by subject-level projections where the actor is authorized to receive them.
+- Includes assignment/transfer events only when an assignment scope explicitly names the requested subject alias group and is activity-unrestricted or includes the requested `activity_ref`.
 - Does not become audit/historical pull for arbitrary scopes or actors.
 
 Tests:
 
 - Existing live contraction test stays green: after reassignment away, normal pull does not deliver new events from old scope.
-- Actor synced past watermark 500 receives a new `subject_list` assignment for a subject whose relevant events are watermarks 100-200; the backfill path returns the subject history needed for pattern state derivation.
-- Backfill page authorization is evaluated at request time.
-- Alias chains are included correctly after merge/split.
-- Backfill cursor retries are idempotent.
-- Normal sync watermark is unchanged by backfill.
-- Audit-style broad historical reconstruction remains unavailable unless a successor decision adds it.
+- `SubjectHistoryBackfillIntegrationTest.subjectListAssignment_backfillReturnsPriorTimeline_normalPullDoesNot` proves actor-high-watermark subject-list backfill while normal pull does not replay old events.
+- `SubjectHistoryBackfillIntegrationTest.subjectHistoryBackfill_doesNotUpdateNormalDeviceWatermark` proves normal sync watermark/device state is unchanged by backfill.
+- `SubjectHistoryBackfillIntegrationTest.subjectHistoryBackfill_cursorRetriesAreIdempotentAndAuthorizationIsPerPage` proves retry idempotence and per-page request-time authorization.
+- `SubjectHistoryBackfillIntegrationTest.subjectHistoryBackfill_mergeAliasHistoryIsIncludedForSurvivingAndRetiredReads` covers merge alias inclusion.
+- `SubjectHistoryBackfillIntegrationTest.subjectHistoryBackfill_splitSuccessorDoesNotInheritSourceHistory_sourceKeepsOwnHistory` covers split lineage separation.
+- `SubjectHistoryBackfillIntegrationTest.subjectHistoryBackfill_doesNotExposeUnrelatedSubjectsActivitiesOrAuditWideAssignments` proves subject/activity scoping and blocks audit-wide assignment leakage.
 
 ---
 
@@ -435,7 +436,7 @@ The detector may emit multiple independent flags for one event. Later checks mus
 - `PatternRegistry`: contract-backed platform definitions and generic transition matcher.
 - `SubjectProjection` or a workflow projection component: flag-aware state derivation.
 - `AssignmentService` / `ActiveAssignment`: IDR-024 multi-axis assignment create/end containment and ordinary null-activity work-event semantics.
-- `SyncController`: preserve request-time live pull; add a distinct subject-history backfill surface only after the FP-005 decision is recorded.
+- `SyncController`: preserve request-time live pull; provide the distinct subject-history backfill surface for FP-005.
 - Tests for each quality gate below.
 
 ### Mobile
@@ -529,12 +530,12 @@ Phase 4 is not complete until every applicable gate is green.
 
 ### FP-005 Gates
 
-- [ ] Live contraction stays request-time scoped.
-- [ ] Subject-history backfill is decided and tested before `ongoing_resolution` is implemented or enabled.
-- [ ] Backfill cursor behavior is idempotent and independent of the normal sync watermark.
-- [ ] Backfill authorization is evaluated at request time for every page.
-- [ ] Alias handling and activity filtering are covered by tests.
-- [ ] Audit/historical pull remains out of Phase 4 live sync unless a successor decision creates a separate pull class/API.
+- [x] Live contraction stays request-time scoped.
+- [x] Subject-history backfill is decided and tested before `ongoing_resolution` is implemented or enabled.
+- [x] Backfill cursor behavior is idempotent and independent of the normal sync watermark.
+- [x] Backfill authorization is evaluated at request time for every page.
+- [x] Alias handling and activity filtering are covered by tests.
+- [x] Audit/historical pull remains out of Phase 4 live sync unless a successor decision creates a separate pull class/API.
 
 ### Scenario-Grade Responsibility Binding Gates
 
@@ -551,15 +552,14 @@ Phase 4 is not complete until every applicable gate is green.
 
 ## 9. Sequencing
 
-Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed without `ongoing_resolution`, `transition_violation`, resolver routing, normal sync backfill, or durable workflow-state tables. Recommended remaining implementation order:
+Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed without `ongoing_resolution`, `transition_violation`, resolver routing, normal sync backfill, or durable workflow-state tables. FP-005 subject-history backfill has landed as a separate sync surface. Recommended remaining implementation order:
 
-1. FP-005 subject-history backfill decision and implementation.
-2. Enable `ongoing_resolution` projection only after FP-005 is resolved.
-3. Add pattern transition detection and mobile advisory transition warnings after the FP-009 resolver gate is addressed.
-4. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
-5. Close docs/status/catalog updates and Phase 4 completion audit.
+1. Enable `ongoing_resolution` projection against the subject-history backfill surface.
+2. Add pattern transition detection and mobile advisory transition warnings after the FP-009 resolver gate is addressed.
+3. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
+4. Close docs/status/catalog updates and Phase 4 completion audit.
 
-This order keeps landed role-action, severity, assignment-administration, uniqueness, registry, and enabled-binding projection work independent of FP-005, and prevents `ongoing_resolution` from landing before the subject-history backfill gap is closed. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block remaining workflow-policy slices unless implementation uncovers a direct dependency.
+This order keeps landed role-action, severity, assignment-administration, uniqueness, registry, enabled-binding projection, and FP-005 backfill work independent of FP-009. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block remaining workflow-policy slices unless implementation uncovers a direct dependency.
 
 ---
 
@@ -583,7 +583,7 @@ This order keeps landed role-action, severity, assignment-administration, unique
 
 | Risk | Likelihood | Mitigation |
 |------|:---:|------------|
-| `ongoing_resolution` lands without history backfill and produces wrong state for newly assigned long-running subjects. | High if unchecked | Gate all `ongoing_resolution` implementation and enablement behind FP-005 backfill decision/tests. |
+| `ongoing_resolution` lands without using subject-history backfill and produces wrong state for newly assigned long-running subjects. | Medium | Implement `ongoing_resolution` projection against `/api/sync/subject-history`; keep normal `/api/sync/pull` live-only. |
 | Role-action enforcement accidentally uses current role only. | Medium | Timeline tests must prove horizon authority uses `min(event.sync_watermark, push.last_pull_watermark)`. |
 | Severity gets conflated with resolvability. | Medium | Dedicated tests prove severity changes do not alter `manual_only` / `auto_eligible`. |
 | `device_action` for uniqueness becomes server policy. | Medium | Server detector tests assert accept-and-flag regardless of device hint. |
@@ -606,3 +606,4 @@ This order keeps landed role-action, severity, assignment-administration, unique
 - **2026-05-24**: Phase 4.4 pattern registry and binding validation landed: platform-bundled binding metadata for `capture_with_review/v1`, `ongoing_resolution/v1`, `multi_step_approval/v1`, and `transfer_with_acknowledgment/v1`; deploy-time validation for pattern refs, composition, subject/event binding shape, required shape/participant roles, parameters, participant role-action prerequisites, and duplicate transition-bound shape ownership; config package and mobile raw binding preservation. Executable transition specs remain Phase 4.5 work. `ongoing_resolution/v1` remains registered but disabled until FP-005 closes. FP-009 remains open and no `transition_violation`, resolver routing, conflict-resolution authority enforcement, or auto-resolution was implemented.
 - **2026-05-24**: IDR-025 pattern definition contract/delivery landed: `contracts/pattern-definition.schema.json`, canonical `contracts/patterns/*.json`, server registry loading from packaged contract resources, config package `pattern_definitions` delivery for referenced refs, and mobile packaged-definition preservation. No pattern-state projection, `transition_violation`, resolver routing, conflict-resolution authority enforcement, or auto-resolution was implemented.
 - **2026-05-24**: Phase 4.5 enabled-binding pattern-state projection landed for `capture_with_review/v1`, `multi_step_approval/v1`, and `transfer_with_acknowledgment/v1`: server `PatternStateProjection` rebuilds on demand from active activity bindings and contract-backed pattern definitions; mobile `PatternProjectionEngine` reads ConfigStore bindings and packaged `pattern_definitions`; shared fixture coverage now spans no-pattern, enabled patterns, unresolved flag exclusion, accepted re-inclusion, and rejected exclusion. `ongoing_resolution/v1`, normal sync backfill, `transition_violation`, resolver routing, conflict-resolution authority enforcement, auto-resolution, and durable workflow-state tables remain unimplemented.
+- **2026-05-24**: FP-005 subject-history backfill landed: `/api/sync/subject-history` is bearer-authenticated, request-time authorized on every page, cursor-paginated independently from normal live sync, merge-alias aware, split-lineage preserving, activity-filtered, and constrained to subject-list assignment/transfer events needed for subject-level projections. Normal `/api/sync/pull` remains request-time scoped live sync and `device_sync_state` is not changed by backfill. `ongoing_resolution/v1` remains unimplemented and disabled.

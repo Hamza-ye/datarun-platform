@@ -180,8 +180,9 @@ A successor ADR must exist, and either:
 
 ## FP-005 — Scoped pull temporal anchor and subject-history backfill
 
-**Status**: IN_PROGRESS
+**Status**: RESOLVED
 **Opened**: 2026-05-22 by ADR-003 / Phase 4 readiness review
+**Resolved**: 2026-05-24 by subject-history backfill API and integration tests
 **Blocks**: Phase 4 `ongoing_resolution` implementation. IDR-021 drafting is unblocked by the 2026-05-22 route below; role-action code must not absorb subject-history backfill or audit pull.
 **Severity**: A — touches ADR-003 S2 ("sync scope = access scope") and ADR-003 S3 authority-as-projection
 
@@ -225,6 +226,7 @@ This FP is explicitly routed, not fully resolved:
 - **2026-05-22**: Opened. Current repo read found live pull uses active assignments at request time and watermark pagination; no current subject-history backfill or audit pull class is specified.
 - **2026-05-22**: Live contraction portion verified. `ScopeFilteredSyncIntegrationTest.liveSyncContraction_reassignedAway_doesNotDeliverNewOldScopeEvents` proves normal `/api/sync/pull` is request-time scoped: after reassignment away from a geographic scope, a later pull from the actor's prior watermark does not deliver new events from the old scope. Remaining before role-action code begins: decide/test subject-history backfill for already-active `ongoing_resolution` subjects, and classify audit/historical pull as out of Phase 4 or as a separate pull class/API. Neither may be folded silently into live sync.
 - **2026-05-22**: ROUTED for IDR-021. FP-001 satisfies the push-path authority semantics needed before drafting IDR-021. FP-005 remains `IN_PROGRESS` for Phase 4 `ongoing_resolution`, but no longer blocks IDR-021 drafting because the route above explicitly keeps live-sync contraction request-time scoped, requires a separate subject-history backfill decision before `ongoing_resolution` implementation, and classifies audit/historical pull as out of Phase 4 live sync unless a successor decision introduces a separate pull class/API.
+- **2026-05-24**: RESOLVED. `POST /api/sync/subject-history` provides the required distinct subject-bound backfill path without changing normal `/api/sync/pull` or `device_sync_state`. `SubjectHistoryBackfillIntegrationTest` covers the remaining gate: high-watermark subject-list assignment backfill, normal pull not replaying historical subject events, idempotent cursor retries, per-page request-time authorization after assignment revocation, merge-alias inclusion for surviving/retired reads, split successor/source history separation, activity filtering, and no unrelated subject/activity/audit-wide assignment leakage. Audit/historical pull remains out of Phase 4 live sync unless a successor decision creates a separate pull class/API.
 
 ---
 
