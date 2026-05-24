@@ -214,6 +214,44 @@ void main() {
     expect(configStore.getActivityPattern('child_health'), isNull);
   });
 
+  test('applyConfig preserves packaged pattern definitions', () async {
+    final config = cloneConfig(sampleConfig);
+    final definition = {
+      'ref': 'capture_with_review/v1',
+      'binding_enabled': true,
+      'allowed_compositions': ['event'],
+      'states': [
+        {
+          'name': 'pending_review',
+          'markers': ['I'],
+        },
+      ],
+      'transitions': [
+        {
+          'id': 'T1',
+          'from': null,
+          'event_type': 'capture',
+          'activation_role': 'on_shapes',
+          'to': 'pending_review',
+          'effect': 'SC*',
+        },
+      ],
+    };
+    config['pattern_definitions'] = {
+      'schema_version': 1,
+      'definitions': {'capture_with_review/v1': definition},
+    };
+
+    await configStore.applyConfig(config);
+
+    expect(
+      configStore.getPatternDefinition('capture_with_review/v1'),
+      definition,
+    );
+    expect(configStore.patternDefinitions.keys, ['capture_with_review/v1']);
+    expect(configStore.getPatternDefinition('missing/v1'), isNull);
+  });
+
   test('domain uniqueness advisory warns from local events only', () async {
     final config = cloneConfig(sampleConfig);
     (config['shapes']['household_visit/v1']

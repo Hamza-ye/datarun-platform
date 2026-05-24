@@ -16,6 +16,7 @@ class ConfigStore {
   Map<String, Map<String, dynamic>> _activities = {};
   Map<String, ActivityRoleActions> _activityRoleActions = {};
   Map<String, FlagSeverity> _flagSeverityOverrides = {};
+  Map<String, Map<String, dynamic>> _patternDefinitions = {};
   // Key: "{activity_ref}.{shape_ref}" → List of rule maps
   Map<String, List<Map<String, dynamic>>> _expressions = {};
   // Sensitivity classifications (IDR-019 §sensitivity_classifications)
@@ -87,6 +88,7 @@ class ConfigStore {
     final activitiesRaw = packageJson['activities'];
     final expressionsRaw = packageJson['expressions'];
     final flagSeverityOverridesRaw = packageJson['flag_severity_overrides'];
+    final patternDefinitionsRaw = packageJson['pattern_definitions'];
 
     final shapesMap = shapesRaw is Map
         ? Map<String, dynamic>.from(shapesRaw)
@@ -125,6 +127,19 @@ class ConfigStore {
       parsedExpressions[entry.key] = rules;
     }
 
+    final parsedPatternDefinitions = <String, Map<String, dynamic>>{};
+    if (patternDefinitionsRaw is Map) {
+      final definitions = patternDefinitionsRaw['definitions'];
+      if (definitions is Map) {
+        for (final entry in definitions.entries) {
+          if (entry.key is String && entry.value is Map) {
+            parsedPatternDefinitions[entry.key as String] =
+                Map<String, dynamic>.from(entry.value as Map);
+          }
+        }
+      }
+    }
+
     // Atomic swap
     _configVersion = version;
     _shapes = parsedShapes;
@@ -133,6 +148,7 @@ class ConfigStore {
     _flagSeverityOverrides = FlagSeverityCatalog.parseOverrides(
       flagSeverityOverridesRaw,
     );
+    _patternDefinitions = parsedPatternDefinitions;
     _expressions = parsedExpressions;
 
     // Sensitivity classifications (IDR-019). Defaults: shape='standard', activity='routine'.
@@ -173,6 +189,16 @@ class ConfigStore {
     if (pattern is! Map) return null;
     return Map.unmodifiable(Map<String, dynamic>.from(pattern));
   }
+
+  /// Platform-owned pattern definitions delivered in the active config package.
+  Map<String, dynamic>? getPatternDefinition(String ref) {
+    final definition = _patternDefinitions[ref];
+    if (definition == null) return null;
+    return Map.unmodifiable(definition);
+  }
+
+  Map<String, Map<String, dynamic>> get patternDefinitions =>
+      Map.unmodifiable(_patternDefinitions);
 
   /// Parsed role-action map for an activity.
   ActivityRoleActions getActivityRoleActions(String activityName) =>

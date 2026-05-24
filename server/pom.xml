@@ -68,6 +68,24 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/../contracts/patterns</directory>
+                <targetPath>patterns</targetPath>
+                <includes>
+                    <include>*.json</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/../contracts</directory>
+                <includes>
+                    <include>pattern-definition.schema.json</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

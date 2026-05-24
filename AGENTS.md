@@ -30,6 +30,7 @@ Current contract roles:
 - `contracts/sync-protocol.md` describes push/pull protocol intent and invariants. Verify against current server/mobile code when changing sync behavior.
 - `contracts/flag-catalog.md` defines flag categories, default severity, resolvability, detection ordering, and state-exclusion semantics.
 - `contracts/shapes/*.schema.json` documents platform-bundled assignment, identity, and integrity payload shapes. Server runtime uses mirrored platform shape definitions; keep references and mirrors coherent.
+- `contracts/pattern-definition.schema.json` and `contracts/patterns/*.json` define platform-owned workflow pattern definitions. Server runtime loads these as the Pattern Registry source of truth, config packages deliver referenced definitions under `pattern_definitions`, and mobile reads the packaged definitions.
 - `contracts/fixtures/*.json` are shared equivalence fixtures used by server and mobile tests.
 
 Update contracts and tests together when touching:
@@ -38,6 +39,7 @@ Update contracts and tests together when touching:
 - sync request/response fields, pagination, watermarks, auth-visible sync behavior, or scope filtering;
 - platform shape payloads;
 - flag categories, resolver semantics, severity/resolvability, or detection ordering;
+- platform pattern refs, state/transition semantics, projection semantics, or pattern definition delivery;
 - server/mobile projection or expression equivalence behavior.
 
 If a contract appears stale, do not silently code around it. Either update it in the same slice or report the drift clearly.

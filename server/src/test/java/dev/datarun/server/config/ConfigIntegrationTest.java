@@ -416,6 +416,13 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         assertEquals("deprecated", body.get("shapes").get("facility_observation/v1").get("status").asText());
         assertEquals("deprecated", body.get("shapes").get("facility_observation_review/v1").get("status").asText());
         assertEquals(pattern, body.get("activities").get("facility_monitoring").get("pattern"));
+        JsonNode packagedDefinitions = body.get("pattern_definitions").get("definitions");
+        assertTrue(packagedDefinitions.has("capture_with_review/v1"));
+        assertEquals("capture_with_review/v1",
+                packagedDefinitions.get("capture_with_review/v1").get("ref").asText());
+        assertTrue(packagedDefinitions.get("capture_with_review/v1").has("transitions"));
+        assertFalse(packagedDefinitions.has("ongoing_resolution/v1"),
+                "Package should include referenced definitions only");
     }
 
     @Test

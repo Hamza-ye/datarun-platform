@@ -1,6 +1,7 @@
 # Pattern Specifications
 
 > Formal specifications for the platform's workflow patterns. Each pattern was validated through scenario walk-throughs in [exploration/28](../exploration/28-pattern-inventory-walkthrough.md) and traced to ADR-005 S5 (Pattern Registry).
+> Machine-readable platform pattern definitions live in `contracts/patterns/` and are validated by `contracts/pattern-definition.schema.json` per [IDR-025](../decisions/idr-025-pattern-definition-contract-and-delivery.md).
 
 ---
 
@@ -41,6 +42,7 @@ Each pattern specification follows a fixed structure:
 | Source | What it provides |
 |--------|-----------------|
 | [ADR-005](../adrs/adr-005-state-progression.md) S4–S6 | Pattern architecture: projection-derived state, Pattern Registry, composition rules |
+| [IDR-025](../decisions/idr-025-pattern-definition-contract-and-delivery.md) | Pattern definition contract files and atomic package delivery |
 | [primitives.md §11](primitives.md#11-pattern-registry) | Pattern Registry primitive: invariant, constraints, composition rules, config surface |
 | [contracts.md](contracts.md) C15, C16, C18 | Pattern Registry contracts → PE, CD, DtV |
 | [exploration/28](../exploration/28-pattern-inventory-walkthrough.md) | Detailed walk-throughs, composition validation, entity_lifecycle disposition |

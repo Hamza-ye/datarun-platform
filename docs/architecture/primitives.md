@@ -295,6 +295,7 @@ The configuration delivery pipeline endpoint. Gets validated configuration from 
 - Activity definitions (role-action mappings, pattern selections, scope compositions)
 - Trigger definitions (L3a, L3b, auto-resolution)
 - Pattern bindings (selected platform-bundled pattern refs + deployer parameterization)
+- Referenced platform pattern definitions (states, transitions, projection metadata)
 - Expression rules (L2 show/hide, computed defaults)
 - Flag severity overrides (blocking vs. informational per flag type)
 - Sensitivity classifications (per shape/activity)
@@ -332,7 +333,7 @@ Platform-fixed workflow definitions that deployers select and parameterize. The 
 
 **Escape hatch**: Pattern inventory insufficient if >2 deployments request custom state machines matching no existing pattern [5-S5].
 
-**Pattern specifications**: 4 patterns formally specified with full state machines, transitions, roles, projections, and parameterization points. See [patterns.md](patterns.md) for the concluded specifications. Exploration walk-throughs: [exploration/28](../exploration/28-pattern-inventory-walkthrough.md).
+**Pattern specifications**: 4 patterns formally specified with full state machines, transitions, roles, projections, and parameterization points. See [patterns.md](patterns.md) for the concluded specifications. Machine-readable contract definitions live under `contracts/patterns/` per IDR-025. Exploration walk-throughs: [exploration/28](../exploration/28-pattern-inventory-walkthrough.md).
 
 ---
 

@@ -1,16 +1,27 @@
 package dev.datarun.server.config;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 /**
- * Platform-bundled workflow pattern definitions.
+ * Platform-bundled workflow pattern definitions loaded from contracts/patterns.
  *
  * Deployer config may bind shapes, participant roles, and parameters to these
  * refs; it must not define states or transition tables.
@@ -18,93 +29,19 @@ import java.util.Set;
 @Component
 public class PatternRegistry {
 
-    private static final String SUBJECT = "subject";
-    private static final String EVENT = "event";
+    private static final String RESOURCE_PATTERN = "classpath*:patterns/*.json";
 
+    private final ObjectMapper objectMapper;
     private final Map<String, PatternDefinition> definitions;
 
+    @Autowired
+    public PatternRegistry(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.definitions = loadDefinitions(objectMapper);
+    }
+
     public PatternRegistry() {
-        LinkedHashMap<String, PatternDefinition> defs = new LinkedHashMap<>();
-        register(defs, new PatternDefinition(
-                "capture_with_review/v1",
-                Set.of(EVENT),
-                true,
-                Set.of("review_decision"),
-                Set.of(),
-                Set.of("review_decision"),
-                Set.of("on_shapes"),
-                Set.of(),
-                Set.of("capturer", "reviewer"),
-                Set.of(),
-                Map.of(
-                        "capturer", Set.of("capture"),
-                        "reviewer", Set.of("review")
-                ),
-                Set.of(),
-                Set.of("review_deadline"),
-                false,
-                false));
-
-        register(defs, new PatternDefinition(
-                "ongoing_resolution/v1",
-                Set.of(SUBJECT),
-                false,
-                Set.of("opening", "interaction", "resolution", "closure_review"),
-                Set.of("referral", "reopening", "transfer", "general_review"),
-                Set.of("opening", "interaction", "referral", "resolution",
-                        "closure_review", "reopening", "transfer", "general_review"),
-                Set.of(),
-                Set.of(),
-                Set.of("assigned_worker", "supervisor"),
-                Set.of(),
-                Map.of(
-                        "assigned_worker", Set.of("capture"),
-                        "supervisor", Set.of("review")
-                ),
-                Set.of(),
-                Set.of("follow_up_interval", "overdue_threshold", "resolution_target"),
-                false,
-                false));
-
-        register(defs, new PatternDefinition(
-                "multi_step_approval/v1",
-                Set.of(SUBJECT, EVENT),
-                true,
-                Set.of("submission", "level_decision"),
-                Set.of(),
-                Set.of("submission", "level_decision"),
-                Set.of(),
-                Set.of(),
-                Set.of("submitter"),
-                Set.of(),
-                Map.of("submitter", Set.of("capture")),
-                Set.of("levels"),
-                Set.of("review_deadline"),
-                true,
-                false));
-
-        register(defs, new PatternDefinition(
-                "transfer_with_acknowledgment/v1",
-                Set.of(SUBJECT),
-                true,
-                Set.of("dispatch", "receipt"),
-                Set.of("discrepancy_report", "discrepancy_resolution"),
-                Set.of("dispatch", "receipt", "discrepancy_report", "discrepancy_resolution"),
-                Set.of(),
-                Set.of(),
-                Set.of("sender", "receiver"),
-                Set.of("supervisor"),
-                Map.of(
-                        "sender", Set.of("capture"),
-                        "receiver", Set.of("capture"),
-                        "supervisor", Set.of("review")
-                ),
-                Set.of(),
-                Set.of("receipt_deadline", "resolution_deadline"),
-                false,
-                true));
-
-        this.definitions = Collections.unmodifiableMap(defs);
+        this(new ObjectMapper());
     }
 
     public Optional<PatternDefinition> find(String ref) {
@@ -115,8 +52,83 @@ public class PatternRegistry {
         return definitions.values();
     }
 
-    private void register(Map<String, PatternDefinition> defs, PatternDefinition definition) {
-        defs.put(definition.ref(), definition);
+    public ObjectNode packageDefinitions(Collection<String> refs) {
+        ObjectNode root = objectMapper.createObjectNode();
+        root.put("schema_version", 1);
+        ObjectNode defs = objectMapper.createObjectNode();
+        refs.stream().sorted().forEach(ref -> find(ref).ifPresent(definition ->
+                defs.set(ref, definition.definitionJson().deepCopy())));
+        root.set("definitions", defs);
+        return root;
+    }
+
+    private static Map<String, PatternDefinition> loadDefinitions(ObjectMapper objectMapper) {
+        try {
+            Resource[] resources = new PathMatchingResourcePatternResolver(
+                    PatternRegistry.class.getClassLoader()).getResources(RESOURCE_PATTERN);
+            Arrays.sort(resources, Comparator.comparing(Resource::getFilename,
+                    Comparator.nullsLast(String::compareTo)));
+            LinkedHashMap<String, PatternDefinition> defs = new LinkedHashMap<>();
+            for (Resource resource : resources) {
+                JsonNode json;
+                try (InputStream input = resource.getInputStream()) {
+                    json = objectMapper.readTree(input);
+                }
+                PatternDefinition definition = parseDefinition(json);
+                if (defs.put(definition.ref(), definition) != null) {
+                    throw new IllegalStateException("Duplicate pattern definition ref: " + definition.ref());
+                }
+            }
+            if (defs.isEmpty()) {
+                throw new IllegalStateException("No pattern definitions found on classpath at " + RESOURCE_PATTERN);
+            }
+            return Collections.unmodifiableMap(defs);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load pattern definitions", e);
+        }
+    }
+
+    private static PatternDefinition parseDefinition(JsonNode json) {
+        return new PatternDefinition(
+                json.path("ref").asText(),
+                textSet(json.get("allowed_compositions")),
+                json.path("binding_enabled").asBoolean(false),
+                textSet(json.at("/shape_roles/required")),
+                textSet(json.at("/shape_roles/optional")),
+                textSet(json.at("/shape_roles/transition_bound")),
+                textSet(json.at("/activation_roles/required")),
+                textSet(json.at("/activation_roles/optional")),
+                textSet(json.at("/participant_roles/required")),
+                textSet(json.at("/participant_roles/optional")),
+                actionRequirements(json.at("/participant_roles/action_requirements")),
+                textSet(json.at("/parameters/required")),
+                textSet(json.at("/parameters/optional")),
+                json.at("/semantics/level_based_approval").asBoolean(false),
+                json.at("/semantics/transfer_supervisor_conditional").asBoolean(false),
+                json.deepCopy());
+    }
+
+    private static Set<String> textSet(JsonNode node) {
+        if (node == null || !node.isArray()) {
+            return Set.of();
+        }
+        LinkedHashSet<String> result = new LinkedHashSet<>();
+        for (JsonNode item : node) {
+            if (item.isTextual()) {
+                result.add(item.asText());
+            }
+        }
+        return Collections.unmodifiableSet(result);
+    }
+
+    private static Map<String, Set<String>> actionRequirements(JsonNode node) {
+        if (node == null || !node.isObject()) {
+            return Map.of();
+        }
+        LinkedHashMap<String, Set<String>> result = new LinkedHashMap<>();
+        node.fields().forEachRemaining(entry ->
+                result.put(entry.getKey(), textSet(entry.getValue())));
+        return Collections.unmodifiableMap(result);
     }
 
     public record PatternDefinition(
@@ -134,7 +146,8 @@ public class PatternRegistry {
             Set<String> requiredParameters,
             Set<String> optionalParameters,
             boolean levelBasedApproval,
-            boolean transferSupervisorConditional
+            boolean transferSupervisorConditional,
+            JsonNode definitionJson
     ) {
         public Set<String> allShapeRoles() {
             return union(requiredShapeRoles, optionalShapeRoles);

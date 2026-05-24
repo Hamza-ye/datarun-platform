@@ -1,0 +1,66 @@
+{
+  "ref": "ongoing_resolution/v1",
+  "definition_version": 1,
+  "binding_enabled": false,
+  "allowed_compositions": ["subject"],
+  "shape_roles": {
+    "required": ["opening", "interaction", "resolution", "closure_review"],
+    "optional": ["referral", "reopening", "transfer", "general_review"],
+    "transition_bound": [
+      "opening",
+      "interaction",
+      "referral",
+      "resolution",
+      "closure_review",
+      "reopening",
+      "transfer",
+      "general_review"
+    ]
+  },
+  "activation_roles": {
+    "required": [],
+    "optional": []
+  },
+  "participant_roles": {
+    "required": ["assigned_worker", "supervisor"],
+    "optional": [],
+    "action_requirements": {
+      "assigned_worker": ["capture"],
+      "supervisor": ["review"]
+    }
+  },
+  "parameters": {
+    "required": [],
+    "optional": ["follow_up_interval", "overdue_threshold", "resolution_target"]
+  },
+  "semantics": {
+    "level_based_approval": false,
+    "transfer_supervisor_conditional": false
+  },
+  "states": [
+    {"name": "opened", "markers": ["I"]},
+    {"name": "active", "markers": []},
+    {"name": "referred", "markers": []},
+    {"name": "resolved", "markers": []},
+    {"name": "closed", "markers": ["Q"]},
+    {"name": "reopened", "markers": []}
+  ],
+  "transitions": [
+    {"id": "T1", "from": null, "event_type": "capture", "shape_role": "opening", "to": "opened", "effect": "SC*"},
+    {"id": "T2", "from": "opened", "event_type": "capture", "shape_role": "interaction", "to": "active", "effect": "SC"},
+    {"id": "T3", "from": "active", "event_type": "capture", "shape_role": "interaction", "to": "active", "effect": "SP"},
+    {"id": "T4", "from": "active", "event_type": "capture", "shape_role": "referral", "to": "referred", "effect": "SC"},
+    {"id": "T5", "from": "referred", "event_type": "capture", "shape_role": "interaction", "to": "active", "effect": "SC"},
+    {"id": "T6", "from": ["active", "referred"], "event_type": "capture", "shape_role": "resolution", "to": "resolved", "effect": "SC"},
+    {"id": "T7", "from": "resolved", "event_type": "review", "shape_role": "closure_review", "to": "closed", "effect": "SC", "branch": {"field": "decision", "equals": "closed"}},
+    {"id": "T7b", "from": "resolved", "event_type": "review", "shape_role": "closure_review", "to": "resolved", "effect": "SP", "branch": {"field": "decision", "equals": "continue"}},
+    {"id": "T8", "from": ["resolved", "closed"], "event_type": "capture", "shape_role": "reopening", "to": "reopened", "effect": "SC"},
+    {"id": "T9", "from": "reopened", "event_type": "capture", "shape_role": "interaction", "to": "active", "effect": "SC"},
+    {"id": "T10", "from": "any", "event_type": "assignment_changed", "shape_role": "transfer", "to": "same", "effect": "SP"},
+    {"id": "T11", "from": "any", "event_type": "review", "shape_role": "general_review", "to": "same", "effect": "SP", "requires_existing_instance": true}
+  ],
+  "projections": {
+    "auto_maintained": ["current_state", "pending_since", "time_in_state"],
+    "pattern_specific": ["current_assignee", "last_interaction_date", "interaction_count", "referral_count", "reopen_count"]
+  }
+}

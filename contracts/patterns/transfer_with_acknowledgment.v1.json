@@ -1,0 +1,53 @@
+{
+  "ref": "transfer_with_acknowledgment/v1",
+  "definition_version": 1,
+  "binding_enabled": true,
+  "allowed_compositions": ["subject"],
+  "shape_roles": {
+    "required": ["dispatch", "receipt"],
+    "optional": ["discrepancy_report", "discrepancy_resolution"],
+    "transition_bound": ["dispatch", "receipt", "discrepancy_report", "discrepancy_resolution"]
+  },
+  "activation_roles": {
+    "required": [],
+    "optional": []
+  },
+  "participant_roles": {
+    "required": ["sender", "receiver"],
+    "optional": ["supervisor"],
+    "action_requirements": {
+      "sender": ["capture"],
+      "receiver": ["capture"],
+      "supervisor": ["review"]
+    },
+    "dynamic_requirements": {
+      "supervisor_when_discrepancy_roles_mapped": true
+    }
+  },
+  "parameters": {
+    "required": [],
+    "optional": ["receipt_deadline", "resolution_deadline"]
+  },
+  "semantics": {
+    "level_based_approval": false,
+    "transfer_supervisor_conditional": true
+  },
+  "states": [
+    {"name": "in_transit", "markers": ["I"]},
+    {"name": "received", "markers": ["T"]},
+    {"name": "partial_receipt", "markers": []},
+    {"name": "disputed", "markers": []},
+    {"name": "resolved", "markers": ["T"]}
+  ],
+  "transitions": [
+    {"id": "T1", "from": null, "event_type": "capture", "shape_role": "dispatch", "to": "in_transit", "effect": "SC*"},
+    {"id": "T2", "from": "in_transit", "event_type": "capture", "shape_role": "receipt", "to": "received", "effect": "SC", "branch": {"field": "discrepancies", "equals": false}},
+    {"id": "T3", "from": "in_transit", "event_type": "capture", "shape_role": "receipt", "to": "partial_receipt", "effect": "SC", "branch": {"field": "discrepancies", "equals": true}},
+    {"id": "T4", "from": ["in_transit", "partial_receipt"], "event_type": "capture", "shape_role": "discrepancy_report", "to": "disputed", "effect": "SC"},
+    {"id": "T5", "from": ["partial_receipt", "disputed"], "event_type": "review", "shape_role": "discrepancy_resolution", "to": "resolved", "effect": "SC"}
+  ],
+  "projections": {
+    "auto_maintained": ["current_state", "pending_since", "time_in_state"],
+    "pattern_specific": ["items_dispatched", "items_received", "discrepancy_summary", "time_in_transit"]
+  }
+}

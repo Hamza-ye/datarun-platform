@@ -30,6 +30,7 @@
 | [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) | Flag Severity + Domain Uniqueness | active | 4-prep | decision | configuration, flags, conflict, uniqueness, phase-4 |
 | [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) | Role-action domain boundary and assignment administration | active | 4-prep | decision | authorization, role-action, assignment, configuration, phase-4 |
 | [idr-024](idr-024-multi-axis-assignment-containment.md) | Multi-axis assignment containment | active | 4-prep | decision | authorization, assignment, scope, phase-4 |
+| [idr-025](idr-025-pattern-definition-contract-and-delivery.md) | Pattern definition contract and delivery | active | 4-prep | decision | workflow, pattern-registry, contracts, configuration, phase-4 |
 
 ## By Component
 
@@ -47,6 +48,7 @@
 - [idr-010](idr-010-conflict-detection-intercept.md) — CD intercept point
 - [idr-011](idr-011-identity-conflict-scope.md) — Identity conflict scope
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Transition violation evaluation
+- [idr-025](idr-025-pattern-definition-contract-and-delivery.md) — Packaged pattern definitions for transition evaluation
 - [idr-021](idr-021-role-action-enforcement-model.md) — Role-action violation evaluation
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity and domain uniqueness evaluation
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Role-action domain boundary
@@ -70,6 +72,7 @@
 - [idr-018](idr-018-expression-grammar.md) — Expression grammar
 - [idr-019](idr-019-config-package.md) — Config package & delivery
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding in config package
+- [idr-025](idr-025-pattern-definition-contract-and-delivery.md) — Pattern definition contract and package delivery
 - [idr-021](idr-021-role-action-enforcement-model.md) — Activity role-action mappings
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity overrides and shape uniqueness constraints
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Activity role-action vocabulary boundary
@@ -81,6 +84,7 @@
 - [idr-003](idr-003-snake-case-json.md) — snake_case JSON
 - [idr-019](idr-019-config-package.md) — Config package (device-side management)
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern binding parsing
+- [idr-025](idr-025-pattern-definition-contract-and-delivery.md) — Packaged pattern definition parsing
 - [idr-021](idr-021-role-action-enforcement-model.md) — Role-action config parsing
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Severity and uniqueness config parsing
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Role-action config boundary
@@ -89,6 +93,7 @@
 - [idr-018](idr-018-expression-grammar.md) — Expression evaluator
 - [idr-009](idr-009-alias-table.md) — Alias table (device schema)
 - [idr-020](idr-020-pattern-state-machine-representation.md) — Pattern state projection
+- [idr-025](idr-025-pattern-definition-contract-and-delivery.md) — Pattern definition contract for projection
 - [idr-021](idr-021-role-action-enforcement-model.md) — Advisory role-action gating
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Advisory uniqueness checks and flag severity behavior
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Advisory role-action vocabulary boundary
@@ -105,6 +110,7 @@
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity and uniqueness contract
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Activity role-action vocabulary boundary
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Assignment scope containment contract
+- [idr-025](idr-025-pattern-definition-contract-and-delivery.md) — Pattern definition schema and canonical files
 
 ### ci
 - [idr-001](idr-001-test-infrastructure.md) — Test infrastructure

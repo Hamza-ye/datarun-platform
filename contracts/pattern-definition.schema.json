@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/pattern-definition.schema.json",
+  "title": "Datarun platform pattern definition",
+  "description": "Platform-owned workflow pattern definition. Deployer config may reference and bind these definitions, but must not author them.",
+  "type": "object",
+  "required": [
+    "ref",
+    "definition_version",
+    "binding_enabled",
+    "allowed_compositions",
+    "shape_roles",
+    "activation_roles",
+    "participant_roles",
+    "parameters",
+    "semantics",
+    "states",
+    "transitions",
+    "projections"
+  ],
+  "properties": {
+    "ref": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*/v[0-9]+$"
+    },
+    "definition_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "binding_enabled": {
+      "type": "boolean"
+    },
+    "allowed_compositions": {
+      "$ref": "#/$defs/composition_array"
+    },
+    "shape_roles": {
+      "type": "object",
+      "required": ["required", "optional", "transition_bound"],
+      "properties": {
+        "required": {"$ref": "#/$defs/name_array"},
+        "optional": {"$ref": "#/$defs/name_array"},
+        "transition_bound": {"$ref": "#/$defs/name_array"}
+      },
+      "additionalProperties": false
+    },
+    "activation_roles": {
+      "type": "object",
+      "required": ["required", "optional"],
+      "properties": {
+        "required": {"$ref": "#/$defs/name_array"},
+        "optional": {"$ref": "#/$defs/name_array"}
+      },
+      "additionalProperties": false
+    },
+    "participant_roles": {
+      "type": "object",
+      "required": ["required", "optional", "action_requirements"],
+      "properties": {
+        "required": {"$ref": "#/$defs/name_array"},
+        "optional": {"$ref": "#/$defs/name_array"},
+        "action_requirements": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/action_array"}
+        },
+        "dynamic_requirements": {
+          "type": "object",
+          "additionalProperties": {"type": "boolean"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "parameters": {
+      "type": "object",
+      "required": ["required", "optional"],
+      "properties": {
+        "required": {"$ref": "#/$defs/name_array"},
+        "optional": {"$ref": "#/$defs/name_array"}
+      },
+      "additionalProperties": false
+    },
+    "semantics": {
+      "type": "object",
+      "properties": {
+        "level_based_approval": {"type": "boolean"},
+        "transfer_supervisor_conditional": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "markers"],
+        "properties": {
+          "name": {"$ref": "#/$defs/name"},
+          "markers": {
+            "type": "array",
+            "items": {"enum": ["I", "T", "Q"]}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "from", "event_type", "to", "effect"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "from": {
+            "anyOf": [
+              {"type": "null"},
+              {"$ref": "#/$defs/name"},
+              {"$ref": "#/$defs/name_array"},
+              {"const": "any"}
+            ]
+          },
+          "event_type": {
+            "enum": ["capture", "review", "alert", "task_created", "task_completed", "assignment_changed"]
+          },
+          "shape_role": {"$ref": "#/$defs/name"},
+          "activation_role": {"$ref": "#/$defs/name"},
+          "to": {
+            "anyOf": [
+              {"$ref": "#/$defs/name"},
+              {"const": "same"}
+            ]
+          },
+          "effect": {
+            "enum": ["SC*", "SC", "SP"]
+          },
+          "branch": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "requires_existing_instance": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "projections": {
+      "type": "object",
+      "required": ["auto_maintained", "pattern_specific"],
+      "properties": {
+        "auto_maintained": {"$ref": "#/$defs/name_array"},
+        "pattern_specific": {"$ref": "#/$defs/name_array"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_array": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/name"},
+      "uniqueItems": true
+    },
+    "action_array": {
+      "type": "array",
+      "items": {
+        "enum": ["capture", "review", "alert", "task_created", "task_completed"]
+      },
+      "uniqueItems": true
+    },
+    "composition_array": {
+      "type": "array",
+      "items": {
+        "enum": ["subject", "event"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  }
+}

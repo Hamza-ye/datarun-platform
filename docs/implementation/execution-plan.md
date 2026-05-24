@@ -220,6 +220,7 @@ The `contracts/` directory is the source of truth. Both codebases validate again
 | Event envelope structure | `envelope.schema.json` validated in server (Java JSON Schema library) and mobile (Dart JSON Schema library) |
 | Sync protocol | Server integration tests exercise push/pull contracts. Mobile sync tests exercise the same contracts from the client side. |
 | Shape definitions | Shape JSON validated against `shape-format.schema.json` in both codebases |
+| Pattern definitions | Platform-owned pattern JSON validated against `pattern-definition.schema.json`; server packages referenced definitions and mobile reads them from the atomic config package |
 
 Contract tests run in CI. A schema change that breaks a consumer fails the build. This is the primary defense against mobile/server divergence.
 

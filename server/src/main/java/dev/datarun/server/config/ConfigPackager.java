@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Config Packager: assembles validated configuration into atomic JSON payload (IDR-019).
@@ -26,6 +28,7 @@ public class ConfigPackager {
     private final ExpressionRepository expressionRepository;
     private final DeployTimeValidator deployTimeValidator;
     private final FlagSeverityConfigService flagSeverityConfigService;
+    private final PatternRegistry patternRegistry;
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
 
@@ -34,6 +37,7 @@ public class ConfigPackager {
                           ExpressionRepository expressionRepository,
                           DeployTimeValidator deployTimeValidator,
                           FlagSeverityConfigService flagSeverityConfigService,
+                          PatternRegistry patternRegistry,
                           JdbcTemplate jdbc,
                           ObjectMapper objectMapper) {
         this.shapeRepository = shapeRepository;
@@ -41,6 +45,7 @@ public class ConfigPackager {
         this.expressionRepository = expressionRepository;
         this.deployTimeValidator = deployTimeValidator;
         this.flagSeverityConfigService = flagSeverityConfigService;
+        this.patternRegistry = patternRegistry;
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
     }
@@ -78,6 +83,7 @@ public class ConfigPackager {
 
         // Activities: all active, keyed by name
         ObjectNode activitiesNode = objectMapper.createObjectNode();
+        Set<String> referencedPatternRefs = new LinkedHashSet<>();
         for (Activity activity : activityRepository.findActive()) {
             ObjectNode activityEntry = objectMapper.createObjectNode();
             activityEntry.put("name", activity.name());
@@ -85,11 +91,16 @@ public class ConfigPackager {
             JsonNode config = activity.configJson();
             if (config.has("shapes")) activityEntry.set("shapes", config.get("shapes"));
             if (config.has("roles")) activityEntry.set("roles", config.get("roles"));
-            if (config.has("pattern")) activityEntry.set("pattern", config.get("pattern"));
-            else activityEntry.putNull("pattern");
+            if (config.has("pattern")) {
+                activityEntry.set("pattern", config.get("pattern"));
+                collectPatternRefs(config.get("pattern"), referencedPatternRefs);
+            } else {
+                activityEntry.putNull("pattern");
+            }
             activitiesNode.set(activity.name(), activityEntry);
         }
         packageJson.set("activities", activitiesNode);
+        packageJson.set("pattern_definitions", patternRegistry.packageDefinitions(referencedPatternRefs));
 
         // Expressions: grouped by "{activity_ref}.{shape_ref}" key (IDR-018/IDR-019)
         ObjectNode expressionsNode = objectMapper.createObjectNode();
@@ -182,4 +193,27 @@ public class ConfigPackager {
     }
 
     public record ConfigPackage(int version, JsonNode packageJson, OffsetDateTime publishedAt) {}
+
+    private void collectPatternRefs(JsonNode patternNode, Set<String> refs) {
+        if (patternNode == null || !patternNode.isObject()) {
+            return;
+        }
+        collectPatternRef(patternNode.get("subject"), refs);
+        JsonNode eventBindings = patternNode.get("event");
+        if (eventBindings != null && eventBindings.isArray()) {
+            for (JsonNode binding : eventBindings) {
+                collectPatternRef(binding, refs);
+            }
+        }
+    }
+
+    private void collectPatternRef(JsonNode binding, Set<String> refs) {
+        if (binding == null || !binding.isObject()) {
+            return;
+        }
+        JsonNode ref = binding.get("ref");
+        if (ref != null && ref.isTextual()) {
+            refs.add(ref.asText());
+        }
+    }
 }

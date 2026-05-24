@@ -1,0 +1,51 @@
+{
+  "ref": "multi_step_approval/v1",
+  "definition_version": 1,
+  "binding_enabled": true,
+  "allowed_compositions": ["subject", "event"],
+  "shape_roles": {
+    "required": ["submission", "level_decision"],
+    "optional": [],
+    "transition_bound": ["submission", "level_decision"]
+  },
+  "activation_roles": {
+    "required": [],
+    "optional": []
+  },
+  "participant_roles": {
+    "required": ["submitter"],
+    "optional": [],
+    "action_requirements": {
+      "submitter": ["capture"]
+    },
+    "dynamic_requirements": {
+      "level_reviewers": true
+    }
+  },
+  "parameters": {
+    "required": ["levels"],
+    "optional": ["review_deadline"]
+  },
+  "semantics": {
+    "level_based_approval": true,
+    "transfer_supervisor_conditional": false
+  },
+  "states": [
+    {"name": "pending", "markers": ["I"]},
+    {"name": "returned", "markers": []},
+    {"name": "final_approved", "markers": ["T"]},
+    {"name": "final_rejected", "markers": ["T"]}
+  ],
+  "transitions": [
+    {"id": "T1", "from": null, "event_type": "capture", "shape_role": "submission", "to": "pending", "effect": "SC*", "attributes": {"level": 1}},
+    {"id": "T2", "from": "pending", "event_type": "review", "shape_role": "level_decision", "to": "pending", "effect": "SC", "branch": {"field": "decision", "equals": "approved", "when_level": "less_than_levels"}, "attributes": {"level": "current_plus_1"}},
+    {"id": "T3", "from": "pending", "event_type": "review", "shape_role": "level_decision", "to": "final_approved", "effect": "SC", "branch": {"field": "decision", "equals": "approved", "when_level": "equals_levels"}},
+    {"id": "T4", "from": "pending", "event_type": "review", "shape_role": "level_decision", "to": "returned", "effect": "SC", "branch": {"field": "decision", "equals": "returned"}},
+    {"id": "T5", "from": "pending", "event_type": "review", "shape_role": "level_decision", "to": "final_rejected", "effect": "SC", "branch": {"field": "decision", "equals": "rejected"}},
+    {"id": "T6", "from": "returned", "event_type": "capture", "shape_role": "submission", "to": "pending", "effect": "SC", "attributes": {"level": 1}}
+  ],
+  "projections": {
+    "auto_maintained": ["current_state", "pending_since", "time_in_state"],
+    "pattern_specific": ["current_level", "approval_chain", "time_at_current_level", "submission_count"]
+  }
+}

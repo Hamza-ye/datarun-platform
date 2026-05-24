@@ -1,0 +1,68 @@
+{
+  "ref": "capture_with_review/v1",
+  "definition_version": 1,
+  "binding_enabled": true,
+  "allowed_compositions": ["event"],
+  "shape_roles": {
+    "required": ["review_decision"],
+    "optional": [],
+    "transition_bound": ["review_decision"]
+  },
+  "activation_roles": {
+    "required": ["on_shapes"],
+    "optional": []
+  },
+  "participant_roles": {
+    "required": ["capturer", "reviewer"],
+    "optional": [],
+    "action_requirements": {
+      "capturer": ["capture"],
+      "reviewer": ["review"]
+    }
+  },
+  "parameters": {
+    "required": [],
+    "optional": ["review_deadline"]
+  },
+  "semantics": {
+    "level_based_approval": false,
+    "transfer_supervisor_conditional": false
+  },
+  "states": [
+    {"name": "pending_review", "markers": ["I"]},
+    {"name": "accepted", "markers": ["T"]},
+    {"name": "returned", "markers": ["T"]}
+  ],
+  "transitions": [
+    {
+      "id": "T1",
+      "from": null,
+      "event_type": "capture",
+      "activation_role": "on_shapes",
+      "to": "pending_review",
+      "effect": "SC*"
+    },
+    {
+      "id": "T2",
+      "from": "pending_review",
+      "event_type": "review",
+      "shape_role": "review_decision",
+      "to": "accepted",
+      "effect": "SC",
+      "branch": {"field": "decision", "equals": "accepted"}
+    },
+    {
+      "id": "T3",
+      "from": "pending_review",
+      "event_type": "review",
+      "shape_role": "review_decision",
+      "to": "returned",
+      "effect": "SC",
+      "branch": {"field": "decision", "equals": "returned"}
+    }
+  ],
+  "projections": {
+    "auto_maintained": ["current_state", "pending_since", "time_in_state"],
+    "pattern_specific": ["pending_review_count", "accepted_count", "returned_count", "latest_review_outcome"]
+  }
+}
