@@ -36,7 +36,7 @@ The following constraints are load-bearing. Phase 4 implementation must fail rev
 FP-005 is resolved by a distinct subject-history backfill surface. Phase 4 must preserve its route exactly:
 
 1. Normal `/api/sync/pull` remains request-time scoped against current active assignments. It must not become historical reconstruction, subject-history replay, or audit pull.
-2. `ongoing_resolution` may be implemented only against the separate subject-history backfill surface; it remains unimplemented and disabled until that slice lands.
+2. `ongoing_resolution` projection may be implemented only against the separate subject-history backfill surface; that projection slice has landed, while transition-violation enforcement remains deferred.
 3. Subject-history backfill is separate from role-action enforcement, flag severity, domain uniqueness, and pattern transition logic.
 4. Audit/historical pull is out of Phase 4 live sync. If audit reconstruction is needed later, it requires a successor decision and a separate pull class/API.
 5. The backfill design uses independent cursor pagination without lowering the normal sync watermark, request-time authorization on every page, merge-alias inclusion, split-lineage separation, activity filtering for pattern state keys, and subject-list assignment/transfer event inclusion only where needed by subject-level projections.
@@ -258,7 +258,7 @@ Registry work:
 
 - Implement a small platform-bundled registry for the initial pattern definitions from `docs/architecture/patterns.md`:
   - `capture_with_review/v1`;
-  - `ongoing_resolution/v1`, registered but not implemented or enabled until a dedicated projection slice consumes the resolved FP-005 backfill surface;
+  - `ongoing_resolution/v1`, enabled for projection after the dedicated FP-005 backfill-consuming slice;
   - `multi_step_approval/v1`;
   - `transfer_with_acknowledgment/v1`.
 - Keep `entity_lifecycle` deferred unless explicitly promoted. Do not claim S06 support without it.
@@ -352,7 +352,7 @@ Tests:
 
 ### 4.7 Subject-History Backfill for `ongoing_resolution`
 
-This slice has landed before `ongoing_resolution` is implemented or enabled.
+This slice landed before `ongoing_resolution` was implemented or enabled. `ongoing_resolution/v1` projection now consumes this surface for newly assigned long-running subjects without changing normal live sync.
 
 Implemented decision:
 
@@ -552,14 +552,13 @@ Phase 4 is not complete until every applicable gate is green.
 
 ## 9. Sequencing
 
-Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed without `ongoing_resolution`, `transition_violation`, resolver routing, normal sync backfill, or durable workflow-state tables. FP-005 subject-history backfill has landed as a separate sync surface. Recommended remaining implementation order:
+Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed, and the follow-on `ongoing_resolution/v1` projection slice now consumes the FP-005 subject-history backfill surface. No `transition_violation`, resolver routing, normal sync backfill, or durable workflow-state tables have landed. Recommended remaining implementation order:
 
-1. Enable `ongoing_resolution` projection against the subject-history backfill surface.
-2. Add pattern transition detection and mobile advisory transition warnings after the FP-009 resolver gate is addressed.
-3. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
-4. Close docs/status/catalog updates and Phase 4 completion audit.
+1. Address FP-009 before adding pattern transition detection, mobile advisory transition warnings, resolver routing, conflict-resolution authority enforcement, or auto-resolution.
+2. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
+3. Close docs/status/catalog updates and Phase 4 completion audit.
 
-This order keeps landed role-action, severity, assignment-administration, uniqueness, registry, enabled-binding projection, and FP-005 backfill work independent of FP-009. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block remaining workflow-policy slices unless implementation uncovers a direct dependency.
+This order keeps landed role-action, severity, assignment-administration, uniqueness, registry, enabled-binding and `ongoing_resolution` projection, and FP-005 backfill work independent of FP-009. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block remaining workflow-policy slices unless implementation uncovers a direct dependency.
 
 ---
 
@@ -583,7 +582,7 @@ This order keeps landed role-action, severity, assignment-administration, unique
 
 | Risk | Likelihood | Mitigation |
 |------|:---:|------------|
-| `ongoing_resolution` lands without using subject-history backfill and produces wrong state for newly assigned long-running subjects. | Medium | Implement `ongoing_resolution` projection against `/api/sync/subject-history`; keep normal `/api/sync/pull` live-only. |
+| `ongoing_resolution` projection drifts from the subject-history backfill contract and produces wrong state for newly assigned long-running subjects. | Medium | Keep `ongoing_resolution` projection covered by `/api/sync/subject-history` tests; keep normal `/api/sync/pull` live-only. |
 | Role-action enforcement accidentally uses current role only. | Medium | Timeline tests must prove horizon authority uses `min(event.sync_watermark, push.last_pull_watermark)`. |
 | Severity gets conflated with resolvability. | Medium | Dedicated tests prove severity changes do not alter `manual_only` / `auto_eligible`. |
 | `device_action` for uniqueness becomes server policy. | Medium | Server detector tests assert accept-and-flag regardless of device hint. |
@@ -607,3 +606,4 @@ This order keeps landed role-action, severity, assignment-administration, unique
 - **2026-05-24**: IDR-025 pattern definition contract/delivery landed: `contracts/pattern-definition.schema.json`, canonical `contracts/patterns/*.json`, server registry loading from packaged contract resources, config package `pattern_definitions` delivery for referenced refs, and mobile packaged-definition preservation. No pattern-state projection, `transition_violation`, resolver routing, conflict-resolution authority enforcement, or auto-resolution was implemented.
 - **2026-05-24**: Phase 4.5 enabled-binding pattern-state projection landed for `capture_with_review/v1`, `multi_step_approval/v1`, and `transfer_with_acknowledgment/v1`: server `PatternStateProjection` rebuilds on demand from active activity bindings and contract-backed pattern definitions; mobile `PatternProjectionEngine` reads ConfigStore bindings and packaged `pattern_definitions`; shared fixture coverage now spans no-pattern, enabled patterns, unresolved flag exclusion, accepted re-inclusion, and rejected exclusion. `ongoing_resolution/v1`, normal sync backfill, `transition_violation`, resolver routing, conflict-resolution authority enforcement, auto-resolution, and durable workflow-state tables remain unimplemented.
 - **2026-05-24**: FP-005 subject-history backfill landed: `/api/sync/subject-history` is bearer-authenticated, request-time authorized on every page, cursor-paginated independently from normal live sync, merge-alias aware, split-lineage preserving, activity-filtered, and constrained to subject-list assignment/transfer events needed for subject-level projections. Normal `/api/sync/pull` remains request-time scoped live sync and `device_sync_state` is not changed by backfill. `ongoing_resolution/v1` remains unimplemented and disabled.
+- **2026-05-24**: `ongoing_resolution/v1` projection landed against the resolved FP-005 subject-history backfill surface. Server and mobile projection now derive `opened`, `active`, `referred`, `resolved`, `closed`, and `reopened` from bound subject timelines; compute `current_assignee`, `last_interaction_date`, `interaction_count`, `referral_count`, and `reopen_count`; canonicalize merge aliases without treating split successors as aliases; preserve event-level review overlays; and keep unresolved/accepted/rejected flag exclusion semantics. Normal `/api/sync/pull` remains live-only. FP-009 remains open: no `transition_violation`, resolver routing, conflict-resolution authority enforcement, or auto-resolution was implemented.

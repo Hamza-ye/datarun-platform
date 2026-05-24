@@ -75,28 +75,39 @@ public class PatternStateProjection {
     public ArrayNode project(List<Event> events, Map<String, JsonNode> activityConfigs, OffsetDateTime asOf) {
         Map<String, List<Binding>> bindingsByActivity = parseBindings(activityConfigs);
         Set<String> excludedEventIds = nonAcceptedFlaggedEventIds(events);
+        Map<String, String> subjectAliases = subjectAliases(events);
+        Map<String, AssignmentFact> assignmentsById = new HashMap<>();
+        Map<String, AssignmentFact> latestAssignmentsBySubjectActivity = new HashMap<>();
         Map<String, StateInstance> states = new LinkedHashMap<>();
 
-        events.stream()
+        List<Event> orderedEvents = events.stream()
                 .sorted(Comparator
                         .comparing((Event e) -> e.syncWatermark() == null ? Long.MAX_VALUE : e.syncWatermark())
                         .thenComparing(Event::timestamp))
-                .forEach(event -> {
-                    if (excludedEventIds.contains(event.id().toString()) || isProjectionMetadata(event)) {
-                        return;
-                    }
-                    if (event.activityRef() == null) {
-                        return;
-                    }
-                    List<Binding> bindings = bindingsByActivity.getOrDefault(event.activityRef(), List.of());
-                    for (Binding binding : bindings) {
-                        if ("subject".equals(binding.composition())) {
-                            applySubjectEvent(event, binding, states);
-                        } else if ("event".equals(binding.composition())) {
-                            applyEventEvent(event, binding, states);
-                        }
-                    }
-                });
+                .toList();
+
+        for (Event event : orderedEvents) {
+            if (excludedEventIds.contains(event.id().toString()) || isProjectionMetadata(event)) {
+                continue;
+            }
+            if (isAssignmentChanged(event)) {
+                applyAssignmentEvent(event, bindingsByActivity, states, subjectAliases,
+                        assignmentsById, latestAssignmentsBySubjectActivity);
+                continue;
+            }
+            if (event.activityRef() == null) {
+                continue;
+            }
+            List<Binding> bindings = bindingsByActivity.getOrDefault(event.activityRef(), List.of());
+            for (Binding binding : bindings) {
+                if ("subject".equals(binding.composition())) {
+                    applySubjectEvent(event, binding, states, subjectAliases,
+                            latestAssignmentsBySubjectActivity);
+                } else if ("event".equals(binding.composition())) {
+                    applyEventEvent(event, binding, states);
+                }
+            }
+        }
 
         ArrayNode output = objectMapper.createArrayNode();
         states.values().stream()
@@ -131,6 +142,26 @@ public class PatternStateProjection {
             }
         });
         return result;
+    }
+
+    private Map<String, String> subjectAliases(List<Event> events) {
+        Map<String, String> aliases = new LinkedHashMap<>();
+        events.stream()
+                .sorted(Comparator
+                        .comparing((Event e) -> e.syncWatermark() == null ? Long.MAX_VALUE : e.syncWatermark())
+                        .thenComparing(Event::timestamp))
+                .filter(event -> event.shapeRef().startsWith("subjects_merged/"))
+                .forEach(event -> {
+                    String retiredId = text(event.payload(), "retired_id");
+                    String survivingId = text(event.payload(), "surviving_id");
+                    if (retiredId == null || survivingId == null) {
+                        return;
+                    }
+                    aliases.replaceAll((ignored, existing) ->
+                            existing.equals(retiredId) ? survivingId : existing);
+                    aliases.put(retiredId, survivingId);
+                });
+        return aliases;
     }
 
     private java.util.Optional<Binding> parseBinding(String activityRef, JsonNode binding, String expectedComposition) {
@@ -218,22 +249,143 @@ public class PatternStateProjection {
         return excluded;
     }
 
-    private void applySubjectEvent(Event event, Binding binding, Map<String, StateInstance> states) {
+    private void applySubjectEvent(Event event,
+                                   Binding binding,
+                                   Map<String, StateInstance> states,
+                                   Map<String, String> subjectAliases,
+                                   Map<String, AssignmentFact> latestAssignmentsBySubjectActivity) {
         String shapeRole = binding.shapeRole(event.shapeRef());
         if (shapeRole == null) {
             return;
         }
-        String key = subjectKey(event, binding);
+        String canonicalSubjectId = canonicalSubjectId(event.subjectRef(), subjectAliases);
+        JsonNode subjectRef = canonicalSubjectRef(event.subjectRef(), canonicalSubjectId);
+        String key = subjectKey(subjectRef, binding);
         StateInstance current = states.get(key);
         JsonNode transition = matchingTransition(event, binding, current, shapeRole, null);
         if (transition == null) {
             return;
         }
         StateInstance next = current == null
-                ? StateInstance.subject(key, event.subjectRef().deepCopy(), binding)
+                ? StateInstance.subject(key, subjectRef, binding)
                 : current;
+        if (current == null) {
+            applyInitialAssignment(next, canonicalSubjectId, binding, latestAssignmentsBySubjectActivity);
+        }
         applyTransition(next, event, binding, transition, shapeRole);
         states.put(key, next);
+    }
+
+    private void applyAssignmentEvent(Event event,
+                                      Map<String, List<Binding>> bindingsByActivity,
+                                      Map<String, StateInstance> states,
+                                      Map<String, String> subjectAliases,
+                                      Map<String, AssignmentFact> assignmentsById,
+                                      Map<String, AssignmentFact> latestAssignmentsBySubjectActivity) {
+        String assignmentId = event.subjectRef().path("id").asText(null);
+        if (assignmentId == null) {
+            return;
+        }
+        if ("assignment_created/v1".equals(event.shapeRef())) {
+            AssignmentFact fact = assignmentFact(event, assignmentId, subjectAliases);
+            if (fact == null) {
+                return;
+            }
+            assignmentsById.put(assignmentId, fact);
+            applyAssignmentFact(event, fact, false, bindingsByActivity, states,
+                    latestAssignmentsBySubjectActivity);
+        } else if ("assignment_ended/v1".equals(event.shapeRef())) {
+            AssignmentFact fact = assignmentsById.get(assignmentId);
+            if (fact == null) {
+                return;
+            }
+            applyAssignmentFact(event, fact, true, bindingsByActivity, states,
+                    latestAssignmentsBySubjectActivity);
+        }
+    }
+
+    private AssignmentFact assignmentFact(Event event,
+                                          String assignmentId,
+                                          Map<String, String> subjectAliases) {
+        JsonNode targetActor = event.payload().get("target_actor");
+        if (targetActor == null || !targetActor.isObject()) {
+            return null;
+        }
+        JsonNode scope = event.payload().get("scope");
+        JsonNode subjectList = scope == null ? null : scope.get("subject_list");
+        if (subjectList == null || !subjectList.isArray() || subjectList.isEmpty()) {
+            return null;
+        }
+        List<String> subjectIds = new ArrayList<>();
+        for (JsonNode subjectId : subjectList) {
+            if (subjectId.isTextual()) {
+                subjectIds.add(subjectAliases.getOrDefault(subjectId.asText(), subjectId.asText()));
+            }
+        }
+        if (subjectIds.isEmpty()) {
+            return null;
+        }
+        JsonNode activityList = scope == null ? null : scope.get("activity");
+        Set<String> activityRefs = null;
+        if (activityList != null && activityList.isArray()) {
+            activityRefs = new LinkedHashSet<>();
+            for (JsonNode activity : activityList) {
+                if (activity.isTextual()) {
+                    activityRefs.add(activity.asText());
+                }
+            }
+        }
+        return new AssignmentFact(assignmentId, targetActor.deepCopy(),
+                List.copyOf(subjectIds), activityRefs, event.timestamp());
+    }
+
+    private void applyAssignmentFact(Event event,
+                                     AssignmentFact fact,
+                                     boolean ending,
+                                     Map<String, List<Binding>> bindingsByActivity,
+                                     Map<String, StateInstance> states,
+                                     Map<String, AssignmentFact> latestAssignmentsBySubjectActivity) {
+        for (var entry : bindingsByActivity.entrySet()) {
+            String activityRef = entry.getKey();
+            if (!fact.appliesToActivity(activityRef)) {
+                continue;
+            }
+            for (Binding binding : entry.getValue()) {
+                if (!"subject".equals(binding.composition())) {
+                    continue;
+                }
+                String shapeRole = binding.shapeRole(event.shapeRef());
+                if (!"transfer".equals(shapeRole)) {
+                    continue;
+                }
+                for (String subjectId : fact.subjectIds()) {
+                    String assignmentKey = subjectActivityKey(subjectId, activityRef);
+                    if (ending) {
+                        AssignmentFact latest = latestAssignmentsBySubjectActivity.get(assignmentKey);
+                        if (latest != null && latest.assignmentId().equals(fact.assignmentId())) {
+                            latestAssignmentsBySubjectActivity.remove(assignmentKey);
+                        }
+                    } else {
+                        latestAssignmentsBySubjectActivity.put(assignmentKey, fact);
+                    }
+                    ObjectNode subjectRef = objectMapper.createObjectNode();
+                    subjectRef.put("type", "subject");
+                    subjectRef.put("id", subjectId);
+                    String stateKey = subjectKey(subjectRef, binding);
+                    StateInstance current = states.get(stateKey);
+                    JsonNode transition = matchingTransition(event, binding, current, shapeRole, null);
+                    if (transition == null || current == null) {
+                        continue;
+                    }
+                    applyTransition(current, event, binding, transition, shapeRole);
+                    if (ending) {
+                        clearCurrentAssigneeIfMatches(current, fact);
+                    } else {
+                        setCurrentAssignee(current, fact.targetActor());
+                    }
+                }
+            }
+        }
     }
 
     private void applyEventEvent(Event event, Binding binding, Map<String, StateInstance> states) {
@@ -437,7 +589,58 @@ public class PatternStateProjection {
                 state.unsupportedPatternSpecific.add("items_received");
                 state.unsupportedPatternSpecific.add("discrepancy_summary");
             }
+            case "ongoing_resolution/v1" -> {
+                if ("interaction".equals(shapeRole) && "capture".equals(event.type())) {
+                    state.patternSpecific.put("last_interaction_date",
+                            formatProjectionTimestamp(event.timestamp()));
+                    state.patternSpecific.put("interaction_count",
+                            ((Number) state.patternSpecific.getOrDefault("interaction_count", 0)).intValue() + 1);
+                }
+                if ("referral".equals(shapeRole) && "capture".equals(event.type())) {
+                    state.patternSpecific.put("referral_count",
+                            ((Number) state.patternSpecific.getOrDefault("referral_count", 0)).intValue() + 1);
+                }
+                if ("reopening".equals(shapeRole) && "capture".equals(event.type())) {
+                    state.patternSpecific.put("reopen_count",
+                            ((Number) state.patternSpecific.getOrDefault("reopen_count", 0)).intValue() + 1);
+                }
+                if ("transfer".equals(shapeRole) && "assignment_created/v1".equals(event.shapeRef())) {
+                    JsonNode targetActor = event.payload().get("target_actor");
+                    if (targetActor != null && targetActor.isObject()) {
+                        setCurrentAssignee(state, targetActor);
+                    }
+                }
+            }
             default -> {
+            }
+        }
+    }
+
+    private void applyInitialAssignment(StateInstance state,
+                                        String subjectId,
+                                        Binding binding,
+                                        Map<String, AssignmentFact> latestAssignmentsBySubjectActivity) {
+        if (!"ongoing_resolution/v1".equals(binding.ref())) {
+            return;
+        }
+        AssignmentFact fact = latestAssignmentsBySubjectActivity.get(
+                subjectActivityKey(subjectId, binding.activityRef()));
+        if (fact != null) {
+            setCurrentAssignee(state, fact.targetActor());
+        }
+    }
+
+    private void setCurrentAssignee(StateInstance state, JsonNode actorRef) {
+        state.patternSpecific.put("current_assignee", actorRef.deepCopy());
+    }
+
+    private void clearCurrentAssigneeIfMatches(StateInstance state, AssignmentFact fact) {
+        Object current = state.patternSpecific.get("current_assignee");
+        if (current instanceof JsonNode currentAssignee) {
+            String currentId = text(currentAssignee, "id");
+            String endedId = text(fact.targetActor(), "id");
+            if (currentId != null && currentId.equals(endedId)) {
+                state.patternSpecific.put("current_assignee", null);
             }
         }
     }
@@ -489,6 +692,10 @@ public class PatternStateProjection {
         return NON_DOMAIN_SHAPE_PREFIXES.stream().anyMatch(prefix -> event.shapeRef().startsWith(prefix));
     }
 
+    private static boolean isAssignmentChanged(Event event) {
+        return "assignment_changed".equals(event.type());
+    }
+
     private static boolean isIntegrityFlag(Event event) {
         return event.shapeRef().startsWith("conflict_detected/");
     }
@@ -497,11 +704,29 @@ public class PatternStateProjection {
         return event.shapeRef().startsWith("conflict_resolved/");
     }
 
-    private static String subjectKey(Event event, Binding binding) {
-        return "subject|" + event.subjectRef().path("type").asText()
-                + "|" + event.subjectRef().path("id").asText()
+    private static String subjectKey(JsonNode subjectRef, Binding binding) {
+        return "subject|" + subjectRef.path("type").asText()
+                + "|" + subjectRef.path("id").asText()
                 + "|" + binding.activityRef()
                 + "|" + binding.ref();
+    }
+
+    private static String canonicalSubjectId(JsonNode subjectRef, Map<String, String> subjectAliases) {
+        String subjectId = subjectRef.path("id").asText();
+        return subjectAliases.getOrDefault(subjectId, subjectId);
+    }
+
+    private static JsonNode canonicalSubjectRef(JsonNode subjectRef, String canonicalSubjectId) {
+        if (canonicalSubjectId.equals(subjectRef.path("id").asText())) {
+            return subjectRef.deepCopy();
+        }
+        ObjectNode copy = subjectRef.deepCopy();
+        copy.put("id", canonicalSubjectId);
+        return copy;
+    }
+
+    private static String subjectActivityKey(String subjectId, String activityRef) {
+        return subjectId + "|" + activityRef;
     }
 
     private static String eventKey(String sourceEventId, Binding binding) {
@@ -547,6 +772,18 @@ public class PatternStateProjection {
 
         String activationRole(String shapeRef) {
             return activationRolesByRef.get(shapeRef);
+        }
+    }
+
+    private record AssignmentFact(
+            String assignmentId,
+            JsonNode targetActor,
+            List<String> subjectIds,
+            Set<String> activityRefs,
+            OffsetDateTime timestamp
+    ) {
+        boolean appliesToActivity(String activityRef) {
+            return activityRefs == null || activityRefs.contains(activityRef);
         }
     }
 

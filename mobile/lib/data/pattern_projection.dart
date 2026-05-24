@@ -41,6 +41,9 @@ class PatternProjectionEngine {
       patternDefinitions,
     );
     final excludedEventIds = _nonAcceptedFlaggedEventIds(events);
+    final subjectAliases = _subjectAliases(events);
+    final assignmentsById = <String, _AssignmentFact>{};
+    final latestAssignmentsBySubjectActivity = <String, _AssignmentFact>{};
     final states = <String, _StateInstance>{};
     final ordered = [...events]..sort(_compareEvents);
 
@@ -48,12 +51,30 @@ class PatternProjectionEngine {
       if (excludedEventIds.contains(event.id) || _isProjectionMetadata(event)) {
         continue;
       }
+      if (event.type == 'assignment_changed') {
+        _applyAssignmentEvent(
+          event: event,
+          bindingsByActivity: bindingsByActivity,
+          states: states,
+          subjectAliases: subjectAliases,
+          assignmentsById: assignmentsById,
+          latestAssignmentsBySubjectActivity:
+              latestAssignmentsBySubjectActivity,
+        );
+        continue;
+      }
       final activityRef = event.activityRef;
       if (activityRef == null) continue;
       final bindings = bindingsByActivity[activityRef] ?? const <_Binding>[];
       for (final binding in bindings) {
         if (binding.composition == 'subject') {
-          _applySubjectEvent(event, binding, states);
+          _applySubjectEvent(
+            event,
+            binding,
+            states,
+            subjectAliases,
+            latestAssignmentsBySubjectActivity,
+          );
         } else if (binding.composition == 'event') {
           _applyEventEvent(event, binding, states);
         }
@@ -182,14 +203,40 @@ class PatternProjectionEngine {
     return excluded;
   }
 
+  Map<String, String> _subjectAliases(List<Event> events) {
+    final aliases = <String, String>{};
+    final ordered = [...events]..sort(_compareEvents);
+    for (final event in ordered) {
+      if (!event.shapeRef.startsWith('subjects_merged/')) continue;
+      final retiredId = event.payload['retired_id'];
+      final survivingId = event.payload['surviving_id'];
+      if (retiredId is! String || survivingId is! String) continue;
+      for (final entry in aliases.entries.toList()) {
+        if (entry.value == retiredId) aliases[entry.key] = survivingId;
+      }
+      aliases[retiredId] = survivingId;
+    }
+    return aliases;
+  }
+
   void _applySubjectEvent(
     Event event,
     _Binding binding,
     Map<String, _StateInstance> states,
+    Map<String, String> subjectAliases,
+    Map<String, _AssignmentFact> latestAssignmentsBySubjectActivity,
   ) {
     final shapeRole = binding.shapeRole(event.shapeRef);
     if (shapeRole == null) return;
-    final key = _subjectKey(event, binding);
+    final canonicalSubjectId = _canonicalSubjectId(
+      event.subjectRef,
+      subjectAliases,
+    );
+    final subjectRef = _canonicalSubjectRef(
+      event.subjectRef,
+      canonicalSubjectId,
+    );
+    final key = _subjectKey(subjectRef, binding);
     final current = states[key];
     final transition = _matchingTransition(
       event: event,
@@ -203,11 +250,136 @@ class PatternProjectionEngine {
         current ??
         _StateInstance.subject(
           key: key,
-          subjectRef: Map<String, dynamic>.from(event.subjectRef),
+          subjectRef: subjectRef,
           binding: binding,
         );
+    if (current == null) {
+      _applyInitialAssignment(
+        next,
+        canonicalSubjectId,
+        binding,
+        latestAssignmentsBySubjectActivity,
+      );
+    }
     _applyTransition(next, event, binding, transition, shapeRole);
     states[key] = next;
+  }
+
+  void _applyAssignmentEvent({
+    required Event event,
+    required Map<String, List<_Binding>> bindingsByActivity,
+    required Map<String, _StateInstance> states,
+    required Map<String, String> subjectAliases,
+    required Map<String, _AssignmentFact> assignmentsById,
+    required Map<String, _AssignmentFact> latestAssignmentsBySubjectActivity,
+  }) {
+    final assignmentId = event.subjectRef['id'];
+    if (assignmentId is! String) return;
+    if (event.shapeRef == 'assignment_created/v1') {
+      final fact = _assignmentFact(event, assignmentId, subjectAliases);
+      if (fact == null) return;
+      assignmentsById[assignmentId] = fact;
+      _applyAssignmentFact(
+        event: event,
+        fact: fact,
+        ending: false,
+        bindingsByActivity: bindingsByActivity,
+        states: states,
+        latestAssignmentsBySubjectActivity: latestAssignmentsBySubjectActivity,
+      );
+    } else if (event.shapeRef == 'assignment_ended/v1') {
+      final fact = assignmentsById[assignmentId];
+      if (fact == null) return;
+      _applyAssignmentFact(
+        event: event,
+        fact: fact,
+        ending: true,
+        bindingsByActivity: bindingsByActivity,
+        states: states,
+        latestAssignmentsBySubjectActivity: latestAssignmentsBySubjectActivity,
+      );
+    }
+  }
+
+  _AssignmentFact? _assignmentFact(
+    Event event,
+    String assignmentId,
+    Map<String, String> subjectAliases,
+  ) {
+    final targetActor = event.payload['target_actor'];
+    final scope = event.payload['scope'];
+    final subjectList = scope is Map ? scope['subject_list'] : null;
+    if (targetActor is! Map || subjectList is! List || subjectList.isEmpty) {
+      return null;
+    }
+    final subjectIds = <String>[];
+    for (final subjectId in subjectList) {
+      if (subjectId is String) {
+        subjectIds.add(subjectAliases[subjectId] ?? subjectId);
+      }
+    }
+    if (subjectIds.isEmpty) return null;
+
+    final activityList = scope is Map ? scope['activity'] : null;
+    final activityRefs = <String>{};
+    if (activityList is List) {
+      for (final activity in activityList) {
+        if (activity is String) activityRefs.add(activity);
+      }
+    }
+    return _AssignmentFact(
+      assignmentId: assignmentId,
+      targetActor: Map<String, dynamic>.from(targetActor),
+      subjectIds: subjectIds,
+      activityRefs: activityList is List ? activityRefs : null,
+    );
+  }
+
+  void _applyAssignmentFact({
+    required Event event,
+    required _AssignmentFact fact,
+    required bool ending,
+    required Map<String, List<_Binding>> bindingsByActivity,
+    required Map<String, _StateInstance> states,
+    required Map<String, _AssignmentFact> latestAssignmentsBySubjectActivity,
+  }) {
+    for (final entry in bindingsByActivity.entries) {
+      final activityRef = entry.key;
+      if (!fact.appliesToActivity(activityRef)) continue;
+      for (final binding in entry.value) {
+        if (binding.composition != 'subject') continue;
+        final shapeRole = binding.shapeRole(event.shapeRef);
+        if (shapeRole != 'transfer') continue;
+        for (final subjectId in fact.subjectIds) {
+          final assignmentKey = _subjectActivityKey(subjectId, activityRef);
+          if (ending) {
+            final latest = latestAssignmentsBySubjectActivity[assignmentKey];
+            if (latest?.assignmentId == fact.assignmentId) {
+              latestAssignmentsBySubjectActivity.remove(assignmentKey);
+            }
+          } else {
+            latestAssignmentsBySubjectActivity[assignmentKey] = fact;
+          }
+          final subjectRef = {'type': 'subject', 'id': subjectId};
+          final stateKey = _subjectKey(subjectRef, binding);
+          final current = states[stateKey];
+          final transition = _matchingTransition(
+            event: event,
+            binding: binding,
+            current: current,
+            shapeRole: shapeRole,
+            activationRole: null,
+          );
+          if (transition == null || current == null) continue;
+          _applyTransition(current, event, binding, transition, shapeRole);
+          if (ending) {
+            _clearCurrentAssigneeIfMatches(current, fact);
+          } else {
+            _setCurrentAssignee(current, fact.targetActor);
+          }
+        }
+      }
+    }
   }
 
   void _applyEventEvent(
@@ -425,6 +597,64 @@ class PatternProjectionEngine {
           ..add('items_dispatched')
           ..add('items_received')
           ..add('discrepancy_summary');
+      case 'ongoing_resolution/v1':
+        if (shapeRole == 'interaction' && event.type == 'capture') {
+          state.patternSpecific['last_interaction_date'] =
+              _formatProjectionTimestamp(DateTime.parse(event.timestamp));
+          state.patternSpecific['interaction_count'] =
+              (state.patternSpecific['interaction_count'] as int? ?? 0) + 1;
+        }
+        if (shapeRole == 'referral' && event.type == 'capture') {
+          state.patternSpecific['referral_count'] =
+              (state.patternSpecific['referral_count'] as int? ?? 0) + 1;
+        }
+        if (shapeRole == 'reopening' && event.type == 'capture') {
+          state.patternSpecific['reopen_count'] =
+              (state.patternSpecific['reopen_count'] as int? ?? 0) + 1;
+        }
+        if (shapeRole == 'transfer' &&
+            event.shapeRef == 'assignment_created/v1') {
+          final targetActor = event.payload['target_actor'];
+          if (targetActor is Map) {
+            _setCurrentAssignee(state, Map<String, dynamic>.from(targetActor));
+          }
+        }
+    }
+  }
+
+  void _applyInitialAssignment(
+    _StateInstance state,
+    String subjectId,
+    _Binding binding,
+    Map<String, _AssignmentFact> latestAssignmentsBySubjectActivity,
+  ) {
+    if (binding.ref != 'ongoing_resolution/v1') return;
+    final fact =
+        latestAssignmentsBySubjectActivity[_subjectActivityKey(
+          subjectId,
+          binding.activityRef,
+        )];
+    if (fact != null) _setCurrentAssignee(state, fact.targetActor);
+  }
+
+  void _setCurrentAssignee(
+    _StateInstance state,
+    Map<String, dynamic> actorRef,
+  ) {
+    state.patternSpecific['current_assignee'] = Map<String, dynamic>.from(
+      actorRef,
+    );
+  }
+
+  void _clearCurrentAssigneeIfMatches(
+    _StateInstance state,
+    _AssignmentFact fact,
+  ) {
+    final current = state.patternSpecific['current_assignee'];
+    final currentId = current is Map ? current['id'] : null;
+    final endedId = fact.targetActor['id'];
+    if (currentId is String && currentId == endedId) {
+      state.patternSpecific['current_assignee'] = null;
     }
   }
 
@@ -448,12 +678,32 @@ class PatternProjectionEngine {
   bool _isIntegrityResolution(Event event) =>
       event.shapeRef.startsWith('conflict_resolved/');
 
-  String _subjectKey(Event event, _Binding binding) =>
-      'subject|${event.subjectRef['type']}|${event.subjectRef['id']}|'
+  String _subjectKey(Map<String, dynamic> subjectRef, _Binding binding) =>
+      'subject|${subjectRef['type']}|${subjectRef['id']}|'
       '${binding.activityRef}|${binding.ref}';
 
   String _eventKey(String sourceEventId, _Binding binding) =>
       'event|$sourceEventId|${binding.ref}';
+
+  String _canonicalSubjectId(
+    Map<String, dynamic> subjectRef,
+    Map<String, String> subjectAliases,
+  ) {
+    final subjectId = subjectRef['id'];
+    return subjectId is String ? subjectAliases[subjectId] ?? subjectId : '';
+  }
+
+  Map<String, dynamic> _canonicalSubjectRef(
+    Map<String, dynamic> subjectRef,
+    String canonicalSubjectId,
+  ) {
+    final copy = Map<String, dynamic>.from(subjectRef);
+    copy['id'] = canonicalSubjectId;
+    return copy;
+  }
+
+  String _subjectActivityKey(String subjectId, String activityRef) =>
+      '$subjectId|$activityRef';
 
   String? _sourceEventId(Map<String, dynamic> payload) {
     final source = payload['source_event_id'];
@@ -489,6 +739,23 @@ class _Binding {
   String? shapeRole(String shapeRef) => shapeRolesByRef[shapeRef];
 
   String? activationRole(String shapeRef) => activationRolesByRef[shapeRef];
+}
+
+class _AssignmentFact {
+  final String assignmentId;
+  final Map<String, dynamic> targetActor;
+  final List<String> subjectIds;
+  final Set<String>? activityRefs;
+
+  const _AssignmentFact({
+    required this.assignmentId,
+    required this.targetActor,
+    required this.subjectIds,
+    required this.activityRefs,
+  });
+
+  bool appliesToActivity(String activityRef) =>
+      activityRefs == null || activityRefs!.contains(activityRef);
 }
 
 class _StateInstance {

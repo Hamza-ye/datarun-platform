@@ -68,7 +68,7 @@ class PatternDefinitionContractTest {
         assertTrue(registry.find("ongoing_resolution/v1").isPresent());
         assertTrue(registry.find("multi_step_approval/v1").isPresent());
         assertTrue(registry.find("transfer_with_acknowledgment/v1").isPresent());
-        assertFalse(registry.find("ongoing_resolution/v1").orElseThrow().bindingEnabled());
+        assertTrue(registry.find("ongoing_resolution/v1").orElseThrow().bindingEnabled());
         assertTrue(registry.find("capture_with_review/v1").orElseThrow()
                 .definitionJson().has("transitions"));
     }

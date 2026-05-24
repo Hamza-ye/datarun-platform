@@ -323,14 +323,14 @@ class DeployTimeValidatorTest {
     }
 
     @Test
-    void patternRegistry_bundlesInitialDefinitionsAndKeepsOngoingDisabled() {
+    void patternRegistry_bundlesInitialDefinitionsAndEnablesOngoingProjection() {
         PatternRegistry registry = new PatternRegistry();
 
         assertTrue(registry.find("capture_with_review/v1").isPresent());
         assertTrue(registry.find("ongoing_resolution/v1").isPresent());
         assertTrue(registry.find("multi_step_approval/v1").isPresent());
         assertTrue(registry.find("transfer_with_acknowledgment/v1").isPresent());
-        assertFalse(registry.find("ongoing_resolution/v1").orElseThrow().bindingEnabled());
+        assertTrue(registry.find("ongoing_resolution/v1").orElseThrow().bindingEnabled());
     }
 
     @Test
@@ -746,7 +746,7 @@ class DeployTimeValidatorTest {
     }
 
     @Test
-    void activityPattern_ongoingResolutionBindingBlockedByFp005() {
+    void activityPattern_validOngoingResolutionBinding_passesAfterBackfillLanded() {
         JsonNode config = parse("""
                 {
                   "roles": {
@@ -777,8 +777,7 @@ class DeployTimeValidatorTest {
         List<String> violations = validatePattern(config,
                 "opening/v1", "interaction/v1", "resolution/v1", "closure_review/v1");
 
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream().anyMatch(v -> v.contains("not enabled for Phase 4.4")));
+        assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
     }
 
     @Test

@@ -1,7 +1,7 @@
 {
   "ref": "ongoing_resolution/v1",
   "definition_version": 1,
-  "binding_enabled": false,
+  "binding_enabled": true,
   "allowed_compositions": ["subject"],
   "shape_roles": {
     "required": ["opening", "interaction", "resolution", "closure_review"],

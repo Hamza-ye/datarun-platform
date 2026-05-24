@@ -1,11 +1,14 @@
 package dev.datarun.server.sync;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import dev.datarun.server.AbstractIntegrationTest;
 import dev.datarun.server.authorization.ActorTokenRepository;
 import dev.datarun.server.authorization.AssignmentService;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.identity.IdentityService;
+import dev.datarun.server.projection.PatternStateProjection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,12 @@ class SubjectHistoryBackfillIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private IdentityService identityService;
+
+    @Autowired
+    private PatternStateProjection patternStateProjection;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private String token;
     private int deviceSeq;
@@ -220,26 +229,76 @@ class SubjectHistoryBackfillIntegrationTest extends AbstractIntegrationTest {
         assertThat(unrelatedActivityRead.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
+    @Test
+    void ongoingResolutionProjection_backfilledHistoryDerivesStateAndDoesNotEmitTransitionViolation() throws Exception {
+        UUID subject = UUID.randomUUID();
+        UUID opening = pushEvent(subject, ACTIVITY, "capture", "case_opening/v1",
+                OffsetDateTime.parse("2026-05-24T07:00:01Z"), Map.of("status", "opened"));
+        pushEvent(subject, ACTIVITY, "capture", "case_follow_up/v1",
+                OffsetDateTime.parse("2026-05-24T08:00:01Z"), Map.of("notes", "follow up"));
+        pushEvent(subject, ACTIVITY, "capture", "case_resolution/v1",
+                OffsetDateTime.parse("2026-05-24T09:00:01Z"), Map.of("outcome", "resolved"));
+        pushEvent(subject, ACTIVITY, "review", "case_closure_review/v1",
+                OffsetDateTime.parse("2026-05-24T10:00:01Z"), Map.of("decision", "closed"));
+        UUID postClosureInteraction = pushEvent(subject, ACTIVITY, "capture", "case_follow_up/v1",
+                OffsetDateTime.parse("2026-05-24T11:00:01Z"),
+                Map.of("notes", "post closure interaction is accepted but not a state transition"));
+        long highWatermark = watermark(postClosureInteraction);
+
+        assignmentService.createAssignment(ADMIN, ACTOR, "field_worker",
+                null, List.of(subject), List.of(ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        ResponseEntity<JsonNode> normalPull = pull(token, highWatermark, 100);
+        assertThat(normalPull.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(eventIds(normalPull.getBody().get("events"))).doesNotContain(opening.toString());
+
+        ResponseEntity<JsonNode> backfill = subjectHistory(token, subject, ACTIVITY, 0, 100);
+        assertThat(backfill.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(eventIds(backfill.getBody().get("events"))).contains(opening.toString());
+
+        ArrayNode states = patternStateProjection.project(
+                eventsFrom(backfill.getBody().get("events")),
+                Map.of(ACTIVITY, ongoingActivityConfig()),
+                OffsetDateTime.parse("2026-05-24T12:00:01Z"));
+
+        assertThat(states).hasSize(1);
+        JsonNode state = states.get(0);
+        assertThat(state.get("current_state").asText()).isEqualTo("closed");
+        assertThat(state.at("/state_key/activity_ref").asText()).isEqualTo(ACTIVITY);
+        assertThat(state.at("/state_key/binding_ref").asText()).isEqualTo("ongoing_resolution/v1");
+        assertThat(state.at("/pattern_specific/interaction_count").asInt()).isEqualTo(1);
+        assertThat(state.at("/pattern_specific/current_assignee/id").asText()).isEqualTo(ACTOR.toString());
+        assertThat(flagSources("transition_violation")).isEmpty();
+    }
+
     private UUID pushCapture(UUID subjectId, String activityRef, String notes) {
+        return pushEvent(subjectId, activityRef, "capture", "basic_capture/v1",
+                OffsetDateTime.now(ZoneOffset.UTC),
+                Map.of(
+                        "name", "Subject " + subjectId,
+                        "category", "test",
+                        "notes", notes,
+                        "date", "2026-05-24",
+                        "value", deviceSeq
+                ));
+    }
+
+    private UUID pushEvent(UUID subjectId, String activityRef, String type, String shapeRef,
+                           OffsetDateTime timestamp, Map<String, Object> payload) {
         UUID eventId = UUID.randomUUID();
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("id", eventId.toString());
-        event.put("type", "capture");
-        event.put("shape_ref", "basic_capture/v1");
+        event.put("type", type);
+        event.put("shape_ref", shapeRef);
         event.put("activity_ref", activityRef);
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
         event.put("actor_ref", Map.of("type", "actor", "id", ADMIN.toString()));
         event.put("device_id", DEVICE.toString());
         event.put("device_seq", deviceSeq++);
         event.put("sync_watermark", null);
-        event.put("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
-        event.put("payload", Map.of(
-                "name", "Subject " + subjectId,
-                "category", "test",
-                "notes", notes,
-                "date", "2026-05-24",
-                "value", deviceSeq
-        ));
+        event.put("timestamp", timestamp.toString());
+        event.put("payload", payload);
 
         ResponseEntity<JsonNode> response = rest.exchange("/api/sync/push",
                 HttpMethod.POST, new HttpEntity<>(Map.of("events", List.of(event)), jsonHeaders()),
@@ -318,5 +377,51 @@ class SubjectHistoryBackfillIntegrationTest extends AbstractIntegrationTest {
             ids.add(event.get("id").asText());
         }
         return ids;
+    }
+
+    private List<Event> eventsFrom(JsonNode events) {
+        List<Event> result = new ArrayList<>();
+        for (JsonNode event : events) {
+            result.add(objectMapper.convertValue(event, Event.class));
+        }
+        return result;
+    }
+
+    private JsonNode ongoingActivityConfig() throws Exception {
+        return objectMapper.readTree("""
+                {
+                  "name": "case_activity",
+                  "sensitivity": "standard",
+                  "pattern": {
+                    "subject": {
+                      "ref": "ongoing_resolution/v1",
+                      "composition": "subject",
+                      "shape_roles": {
+                        "opening": ["case_opening/v1"],
+                        "interaction": ["case_follow_up/v1"],
+                        "resolution": ["case_resolution/v1"],
+                        "closure_review": ["case_closure_review/v1"],
+                        "transfer": ["assignment_created/v1", "assignment_ended/v1"]
+                      },
+                      "participant_roles": {
+                        "assigned_worker": ["field_worker"],
+                        "supervisor": ["supervisor"]
+                      },
+                      "parameters": {}
+                    },
+                    "event": []
+                  }
+                }
+                """);
+    }
+
+    private List<String> flagSources(String category) {
+        return jdbcTemplate.queryForList("""
+                SELECT payload->>'source_event_id'
+                FROM events
+                WHERE shape_ref = 'conflict_detected/v1'
+                  AND payload->>'flag_category' = ?
+                ORDER BY sync_watermark ASC
+                """, String.class, category);
     }
 }

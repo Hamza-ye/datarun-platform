@@ -300,7 +300,7 @@ public class DeployTimeValidator {
         PatternRegistry.PatternDefinition definition = definitionOpt.get();
         if (!definition.bindingEnabled()) {
             violations.add("Pattern ref '" + ref
-                    + "' is registered but not enabled for Phase 4.4 binding; FP-005 must close first");
+                    + "' is registered but not enabled for binding");
         }
 
         JsonNode compositionNode = binding.get("composition");
