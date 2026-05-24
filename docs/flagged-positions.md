@@ -385,6 +385,47 @@ All of the following must be true:
 
 ---
 
+## FP-010 — Platform-bundled payload shape contract parity
+
+**Status**: OPEN
+**Opened**: 2026-05-24 by IDR-025 contract-delivery review
+**Blocks**: any slice that changes platform-bundled event payload shapes or claims platform payload shape contract parity; production contract-hygiene close-out
+**Severity**: C — contract hygiene, but prevents cross-boundary drift
+
+### Context
+
+Platform-bundled event payload shapes are real cross-boundary contracts, but they are not workflow pattern definitions. They live under `contracts/shapes/` and govern platform-emitted or platform-administered events such as `assignment_created/v1`, `assignment_ended/v1`, `conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, and `subject_split/v1`.
+
+The IDR-025 pattern-definition work deliberately kept workflow pattern definitions separate from payload shape contracts. That was correct, but it leaves a known contract-hygiene risk: runtime server code still mirrors some platform-bundled payload shape definitions in code, and emission sites build payloads independently from the JSON Schema files. `PlatformShapeBootstrap` documents the mirror for the four identity/integrity shapes, but the mirror is not currently parity-tested against `contracts/shapes/*.schema.json`. Assignment payloads have the same drift risk through their command/emission paths.
+
+This does not block Phase 4.5 pattern-state projection if that slice consumes only packaged pattern definitions and existing event payload fields. It must be closed or explicitly re-routed before changing platform-bundled payload schemas, claiming contract parity for payload shapes, or doing a production contract-hygiene close-out.
+
+### Trigger
+
+Before any of the following:
+
+1. Changing any file under `contracts/shapes/`.
+2. Changing payload fields emitted for `assignment_created/v1`, `assignment_ended/v1`, `conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, or `subject_split/v1`.
+3. Loading platform-bundled payload shapes from contract files at runtime.
+4. Claiming that platform payload shape contracts are tested, not trusted.
+5. Production contract-hygiene close-out.
+
+### Gate
+
+All of the following must be true:
+
+1. A parity or loading strategy exists for all six platform-bundled payload shapes: `assignment_created/v1`, `assignment_ended/v1`, `conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, and `subject_split/v1`.
+2. Either the server runtime loads platform shape definitions from `contracts/shapes/*.schema.json`, or tests prove the runtime mirrors and emission payloads stay aligned with those contract files.
+3. Server-emitted platform payloads are validated against the relevant platform payload contract, or a deliberate permissive boundary is documented with tests that prove required fields and stable semantics cannot drift silently.
+4. Mobile/server classifiers and shared fixtures remain aligned with the platform shape refs and their versioned payload contracts.
+5. CI fails if a platform-bundled payload shape contract changes without updating the relevant runtime mirror, emission path, or fixture coverage.
+
+### Resolution log
+
+- **2026-05-24**: Opened as a separate contract-hygiene follow-up after IDR-025. Pattern definitions are workflow contracts under `contracts/patterns/`; platform-bundled payload shapes remain event payload contracts under `contracts/shapes/` and need their own parity/loading gate.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.

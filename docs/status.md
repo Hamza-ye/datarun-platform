@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-24 (IDR-025 pattern definition contract/delivery landed; FP-009 remains open)
+**Last updated**: 2026-05-24 (FP-010 platform payload shape contract parity surfaced; Phase 4.5 remains unblocked)
 
 ---
 
@@ -41,6 +41,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 | FP-007 | Multi-axis assignment containment and null-activity semantics | Phase 4 assignment-administration hardening | A | **RESOLVED** |
 | FP-008 | Assignment command actor identity binding | Phase 4.3 entry / assignment command exposure | A | **RESOLVED** |
 | FP-009 | Conflict resolver designation and single-writer resolution enforcement | Phase 4.6 `transition_violation`; resolver routing / auto-resolution | A | **OPEN** (not a Phase 4.4 blocker if registry/binding stays flag-free) |
+| FP-010 | Platform-bundled payload shape contract parity | platform payload shape changes / production contract-hygiene close-out | C | **OPEN** (not a Phase 4.5 blocker if projection consumes existing payload fields) |
 
 **Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
 
@@ -96,7 +97,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 - IDR-025 (Pattern Definition Contract and Delivery) is active. It makes `contracts/patterns/*.json` the canonical platform-owned pattern source, loads those definitions into the server registry, and delivers referenced definitions through the atomic config package for mobile runtime use.
 - Phase spec: [docs/implementation/phases/phase-4.md](implementation/phases/phase-4.md) (drafted; tracks landed Phase 4.1 role-action gates, Phase 4.2 severity gates, Phase 4.3 uniqueness gates, Phase 4.4 registry/binding gates, and remaining Phase 4 gates)
 - Landed implementation slices: Phase 4.1 role-action enforcement from IDR-021/IDR-023, including authoritative server `role_stale` action-authority semantics and mobile advisory role-action gating; Phase 4.2 flag severity defaults and deployment-wide `flag_severity_overrides` from IDR-022; IDR-024 / FP-007 assignment administration hardening; FP-008 assignment command identity binding; Phase 4.3 domain uniqueness schema, detector, and mobile advisory uniqueness from IDR-022; Phase 4.4 platform pattern registry and activity binding validation from IDR-020; IDR-025 pattern definition contract/package delivery. These do not implement pattern-state projection, transition violations, `ongoing_resolution`, resolver routing, or auto-resolution.
-- Recommended next implementation slice: Phase 4.5 pattern-state projection for enabled bindings using the packaged pattern definitions for `capture_with_review/v1`, `multi_step_approval/v1`, and `transfer_with_acknowledgment/v1`, without `ongoing_resolution` until FP-005 is resolved and without `transition_violation` emission while FP-009 remains open.
+- Recommended next implementation slice: Phase 4.5 pattern-state projection for enabled bindings using the packaged pattern definitions for `capture_with_review/v1`, `multi_step_approval/v1`, and `transfer_with_acknowledgment/v1`, without `ongoing_resolution` until FP-005 is resolved and without `transition_violation` emission while FP-009 remains open. FP-010 is a separate platform payload shape contract-hygiene follow-up and does not block this slice unless the projection work changes platform-bundled payload shapes.
 - Coverage gap recorded: Phase 4 still needs a scenario-grade P04 Responsibility Binding quality gate for coordinated campaigns with overlapping areas and mid-campaign reassignment. Existing primitive tests do not close that scenario gate, but it is not currently a blocker for Phase 4.4 registry/binding validation.
 
 ### Test Debt (carried from Phase 3)
@@ -108,7 +109,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## Blockers
 
-FP-005 remains `IN_PROGRESS` and still blocks Phase 4 `ongoing_resolution` implementation until subject-history backfill is specified and tested. FP-009 is `OPEN` and blocks Phase 4.6 `transition_violation` emission, resolver routing, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out if resolver routing remains unresolved; it does not block Phase 4.4 pattern registry/binding validation while that slice stays flag-free. The P04 Responsibility Binding scenario-grade test gap is a Phase 4 coverage gate, not a current blocker for pattern registry/binding validation.
+FP-005 remains `IN_PROGRESS` and still blocks Phase 4 `ongoing_resolution` implementation until subject-history backfill is specified and tested. FP-009 is `OPEN` and blocks Phase 4.6 `transition_violation` emission, resolver routing, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out if resolver routing remains unresolved; it does not block Phase 4.5 pattern-state projection while that slice stays flag-free. FP-010 is `OPEN` as platform payload shape contract hygiene; it does not block Phase 4.5 unless the slice changes platform-bundled payload shapes or claims payload-shape contract parity. The P04 Responsibility Binding scenario-grade test gap is a Phase 4 coverage gate, not a current blocker for pattern-state projection.
 
 ---
 
