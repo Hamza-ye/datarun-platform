@@ -96,6 +96,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         assertThat(flags).hasSize(1);
         String payload = flags.get(0).get("payload").toString();
         assertThat(payload).contains("scope_violation");
+        assertDesignatedResolver("scope_violation", ADMIN);
     }
 
     /**
@@ -122,6 +123,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         assertThat(flags).hasSize(1);
         String payload = flags.get(0).get("payload").toString();
         assertThat(payload).contains("temporal_authority_expired");
+        assertDesignatedResolver("temporal_authority_expired", ADMIN);
     }
 
     /**
@@ -327,6 +329,7 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         UUID event = pushReviewEvent(subject, WORKER, DEVICE_W, "Unauthorized review", knowledge);
 
         assertThat(flagSources("role_stale")).containsExactly(event.toString());
+        assertDesignatedResolver("role_stale", ADMIN);
     }
 
     /**
@@ -539,5 +542,17 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
     private long syncWatermark(UUID eventId) {
         return jdbc.queryForObject("SELECT sync_watermark FROM events WHERE id = ?::uuid",
                 Long.class, eventId.toString());
+    }
+
+    private void assertDesignatedResolver(String category, UUID resolver) {
+        String resolverId = jdbc.queryForObject("""
+                SELECT payload->'designated_resolver'->>'id'
+                FROM events
+                WHERE shape_ref = 'conflict_detected/v1'
+                  AND payload->>'flag_category' = ?
+                ORDER BY sync_watermark DESC
+                LIMIT 1
+                """, String.class, category);
+        assertThat(resolverId).isEqualTo(resolver.toString());
     }
 }

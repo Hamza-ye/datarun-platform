@@ -164,15 +164,15 @@ class PatternProjectionEngine {
   }
 
   Set<String> _nonAcceptedFlaggedEventIds(List<Event> events) {
-    final flagToSource = <String, String>{};
+    final flagToResolver = <String, String>{};
     final flagsBySource = <String, Set<String>>{};
     final acceptedFlagIds = <String>{};
-    final acceptedSourcesWithoutFlagIds = <String>{};
     for (final event in events) {
       if (_isIntegrityFlag(event)) {
         final sourceId = event.payload['source_event_id'];
         if (sourceId is String) {
-          flagToSource[event.id] = sourceId;
+          final resolver = _resolverKey(event.payload['designated_resolver']);
+          if (resolver != null) flagToResolver[event.id] = resolver;
           flagsBySource.putIfAbsent(sourceId, () => <String>{}).add(event.id);
         }
       }
@@ -180,27 +180,30 @@ class PatternProjectionEngine {
     for (final event in events) {
       if (_isIntegrityResolution(event) &&
           event.payload['resolution'] == 'accepted') {
-        var sourceId = event.payload['source_event_id'];
         final flagEventId = event.payload['flag_event_id'];
         if (flagEventId is String) {
-          acceptedFlagIds.add(flagEventId);
-          if (sourceId is! String) {
-            sourceId = flagToSource[flagEventId];
+          final resolver = flagToResolver[flagEventId];
+          if (resolver != null && resolver == _resolverKey(event.actorRef)) {
+            acceptedFlagIds.add(flagEventId);
           }
-        }
-        if (sourceId is String && flagEventId is! String) {
-          acceptedSourcesWithoutFlagIds.add(sourceId);
         }
       }
     }
     final excluded = <String>{};
     for (final entry in flagsBySource.entries) {
-      if (acceptedSourcesWithoutFlagIds.contains(entry.key)) continue;
       if (!entry.value.every(acceptedFlagIds.contains)) {
         excluded.add(entry.key);
       }
     }
     return excluded;
+  }
+
+  String? _resolverKey(dynamic ref) {
+    if (ref is! Map) return null;
+    final type = ref['type'];
+    final id = ref['id'];
+    if (type is! String || id is! String) return null;
+    return '$type:$id';
   }
 
   Map<String, String> _subjectAliases(List<Event> events) {

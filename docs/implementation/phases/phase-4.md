@@ -451,7 +451,7 @@ The detector may emit multiple independent flags for one event. Later checks mus
 
 ### Contracts and Docs
 
-- Keep `contracts/flag-catalog.md` aligned with categories 7 and 8. Category pointers to IDR-022/IDR-020 are present, and resolver routing is decided by [IDR-026](../../decisions/idr-026-conflict-resolver-routing-and-single-writer-resolution.md). [FP-009](../../flagged-positions.md#fp-009--conflict-resolver-designation-and-single-writer-resolution-enforcement) still tracks the runtime ADR-002 S11 single-writer resolver gate and blocks resolver-dependent slices until implementation and tests land.
+- Keep `contracts/flag-catalog.md` aligned with categories 7 and 8. Category pointers to IDR-022/IDR-020 are present, and resolver routing plus runtime single-writer enforcement are governed by [IDR-026](../../decisions/idr-026-conflict-resolver-routing-and-single-writer-resolution.md). [FP-009](../../flagged-positions.md#fp-009--conflict-resolver-designation-and-single-writer-resolution-enforcement) is resolved for runtime resolver designation and canonical resolution enforcement.
 - Keep `contracts/pattern-definition.schema.json` and `contracts/patterns/*.json` aligned with IDR-025 and `docs/architecture/patterns.md`.
 - Update assignment scope contract/tests during IDR-024 implementation if needed so empty subject/activity arrays cannot be interpreted as unrestricted.
 - Add or update shared projection/flag fixtures for role-action, uniqueness, severity, and pattern state.
@@ -508,6 +508,17 @@ Phase 4 is not complete until every applicable gate is green.
 - [x] Resolving the flag as accepted re-derives projections including the event.
 - [x] Uniqueness implementation does not alter normal live sync or FP-005 backfill behavior.
 
+### Conflict Resolver Gates
+
+- [x] Runtime `conflict_detected/v1` emission includes exactly one `designated_resolver` for active categories.
+- [x] Resolver routing uses IDR-026 source subject/activity context and converges multiple flags on one source event to one resolver.
+- [x] `/api/conflicts/**` uses bearer-token actor context; request-body `actor_id` is not authoritative.
+- [x] Canonical `conflict_resolved/v1` handling requires exact resolver equality.
+- [x] Non-designated resolution events persist for audit, do not clear the original flag, and emit deterministic `scope_violation`.
+- [x] Legacy flags without `designated_resolver` are not silently resolved as canonical.
+- [x] Server and mobile projections only re-admit flagged source events for canonical accepted/reclassified resolutions.
+- [x] No auto-resolution, resolver reassignment, Keycloak/JWT/group authority, envelope change, durable workflow-state table, or `contracts/shapes/*` tightening is introduced by FP-009.
+
 ### Pattern Gates
 
 - [x] Pattern binding metadata is platform-bundled, not deployer-authored.
@@ -552,13 +563,13 @@ Phase 4 is not complete until every applicable gate is green.
 
 ## 9. Sequencing
 
-Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed, and the follow-on `ongoing_resolution/v1` projection slice now consumes the FP-005 subject-history backfill surface. No `transition_violation`, runtime resolver enforcement, normal sync backfill, or durable workflow-state tables have landed. Recommended remaining implementation order:
+Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed, and the follow-on `ongoing_resolution/v1` projection slice now consumes the FP-005 subject-history backfill surface. IDR-026 / FP-009 runtime resolver designation and single-writer enforcement has landed. No `transition_violation`, auto-resolution, normal sync backfill, or durable workflow-state tables have landed. Recommended remaining implementation order:
 
-1. Implement IDR-026 / FP-009 runtime resolver designation and single-writer enforcement before adding pattern transition detection, mobile advisory transition warnings, conflict-resolution authority enforcement, or auto-resolution.
+1. Implement Phase 4.6 `transition_violation` detection and resolver routing using IDR-020 pattern transitions plus IDR-026 single-writer semantics; do not include auto-resolution or resolver reassignment.
 2. Add the scenario-grade P04 Responsibility Binding reassignment campaign gate before Phase 4 close-out.
 3. Close docs/status/catalog updates and Phase 4 completion audit.
 
-This order keeps landed role-action, severity, assignment-administration, uniqueness, registry, enabled-binding and `ongoing_resolution` projection, and FP-005 backfill work independent of FP-009 runtime enforcement. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block remaining workflow-policy slices unless implementation uncovers a direct dependency.
+This order keeps landed role-action, severity, assignment-administration, uniqueness, registry, enabled-binding and `ongoing_resolution` projection, FP-005 backfill, and FP-009 resolver enforcement work independent of auto-resolution and resolver reassignment. The P04 scenario-grade campaign gate is required before Phase 4 completion, but it does not block remaining workflow-policy slices unless implementation uncovers a direct dependency.
 
 ---
 
@@ -608,3 +619,4 @@ This order keeps landed role-action, severity, assignment-administration, unique
 - **2026-05-24**: FP-005 subject-history backfill landed: `/api/sync/subject-history` is bearer-authenticated, request-time authorized on every page, cursor-paginated independently from normal live sync, merge-alias aware, split-lineage preserving, activity-filtered, and constrained to subject-list assignment/transfer events needed for subject-level projections. Normal `/api/sync/pull` remains request-time scoped live sync and `device_sync_state` is not changed by backfill. `ongoing_resolution/v1` remains unimplemented and disabled.
 - **2026-05-24**: `ongoing_resolution/v1` projection landed against the resolved FP-005 subject-history backfill surface. Server and mobile projection now derive `opened`, `active`, `referred`, `resolved`, `closed`, and `reopened` from bound subject timelines; compute `current_assignee`, `last_interaction_date`, `interaction_count`, `referral_count`, and `reopen_count`; canonicalize merge aliases without treating split successors as aliases; preserve event-level review overlays; and keep unresolved/accepted/rejected flag exclusion semantics. Normal `/api/sync/pull` remains live-only. FP-009 remains open: no `transition_violation`, resolver routing, conflict-resolution authority enforcement, or auto-resolution was implemented.
 - **2026-05-24**: IDR-026 resolver routing decision landed. It defines resolver routing for all active/imminent categories, canonical single-writer resolution, production `/api/conflicts/**` actor binding, unauthorized-resolution flagging, and explicit reassignment/auto-resolution deferrals. FP-009 remains open until runtime resolver emission, canonical enforcement, API binding, and tests land.
+- **2026-05-24**: FP-009 runtime enforcement landed: active conflict detectors emit `designated_resolver`, `/api/conflicts/**` is bearer actor-bound, request-body `actor_id` is non-authoritative, canonical resolution requires exact resolver equality, unauthorized resolutions emit `scope_violation`, legacy missing-resolver flags do not resolve canonically, and server/mobile projections only re-admit events through canonical accepted/reclassified resolutions. `transition_violation`, auto-resolution, resolver reassignment, Keycloak/JWT/group authority, envelope changes, durable workflow-state tables, and `contracts/shapes/*` tightening remain out of scope.

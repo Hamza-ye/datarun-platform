@@ -106,8 +106,7 @@ public class AdminController {
                               @RequestParam(required = false) String reclassifiedSubjectId,
                               @RequestParam String reason,
                               RedirectAttributes redirectAttributes) {
-        // Hardcoded actor for Phase 1 (no auth yet — Phase 2)
-        UUID actorId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        UUID actorId = DEV_ADMIN_ACTOR_ID;
         try {
             UUID reclassifiedId = (reclassifiedSubjectId != null && !reclassifiedSubjectId.isBlank())
                     ? UUID.fromString(reclassifiedSubjectId) : null;

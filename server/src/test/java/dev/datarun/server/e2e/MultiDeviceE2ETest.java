@@ -62,7 +62,8 @@ class MultiDeviceE2ETest extends AbstractIntegrationTest {
         assertThat(pushB.getBody().get("accepted").asInt()).isEqualTo(1);
 
         // --- Step 3: Verify conflict flag raised ---
-        var flagsResponse = rest.getForEntity("/api/conflicts", JsonNode.class);
+        var flagsResponse = rest.exchange(
+                "/api/conflicts", HttpMethod.GET, new HttpEntity<>(authHeaders()), JsonNode.class);
         assertThat(flagsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode flags = flagsResponse.getBody().get("flags");
         assertThat(flags.size()).as("Exactly one flag should be raised").isEqualTo(1);
@@ -83,12 +84,10 @@ class MultiDeviceE2ETest extends AbstractIntegrationTest {
                 "actor_id", ACTOR_ID.toString(),
                 "reason", "Verified correct by supervisor"
         );
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         var resolveResponse = rest.exchange(
                 "/api/conflicts/" + flagId + "/resolve",
                 HttpMethod.POST,
-                new HttpEntity<>(resolveBody, headers),
+                new HttpEntity<>(resolveBody, authHeaders()),
                 JsonNode.class);
         assertThat(resolveResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(resolveResponse.getBody().get("resolution").asText()).isEqualTo("accepted");
@@ -101,7 +100,8 @@ class MultiDeviceE2ETest extends AbstractIntegrationTest {
         assertThat(afterResolve.get(0).flagCount()).isEqualTo(0);
 
         // --- Step 7: No unresolved flags remain ---
-        var flagsAfter = rest.getForEntity("/api/conflicts", JsonNode.class);
+        var flagsAfter = rest.exchange(
+                "/api/conflicts", HttpMethod.GET, new HttpEntity<>(authHeaders()), JsonNode.class);
         assertThat(flagsAfter.getBody().get("flags").size()).isEqualTo(0);
 
         // --- Step 8: Pull from watermark 0 returns all events including system events ---

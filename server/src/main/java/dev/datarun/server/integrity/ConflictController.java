@@ -1,7 +1,9 @@
 package dev.datarun.server.integrity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.datarun.server.authorization.ActorTokenInterceptor;
 import dev.datarun.server.event.Event;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +28,10 @@ public class ConflictController {
      * List unresolved conflict flags, grouped by subject + category.
      */
     @GetMapping
-    public ResponseEntity<?> listFlags() {
-        List<ConflictResolutionService.FlagSummary> flags = resolutionService.listUnresolvedFlags();
+    public ResponseEntity<?> listFlags(HttpServletRequest httpRequest) {
+        UUID actorId = (UUID) httpRequest.getAttribute(ActorTokenInterceptor.ACTOR_ID_ATTR);
+        List<ConflictResolutionService.FlagSummary> flags =
+                resolutionService.listResolvableFlags(actorId);
         return ResponseEntity.ok(Map.of("flags", flags));
     }
 
@@ -37,17 +41,19 @@ public class ConflictController {
      */
     @PostMapping("/{flagId}/resolve")
     public ResponseEntity<?> resolve(@PathVariable UUID flagId,
-                                      @RequestBody ResolveRequest request) {
-        if (request.resolution() == null || request.actorId() == null) {
+                                      @RequestBody ResolveRequest request,
+                                      HttpServletRequest httpRequest) {
+        if (request.resolution() == null) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "missing_required_fields",
-                            "message", "resolution and actor_id are required"));
+                            "message", "resolution is required"));
         }
+        UUID actorId = (UUID) httpRequest.getAttribute(ActorTokenInterceptor.ACTOR_ID_ATTR);
 
         try {
             Event event = resolutionService.resolve(
                     flagId, request.resolution(), request.reclassifiedSubjectId(),
-                    request.actorId(), request.reason());
+                    actorId, request.reason());
             return ResponseEntity.ok(Map.of(
                     "event_id", event.id().toString(),
                     "flag_event_id", flagId.toString(),
@@ -63,16 +69,18 @@ public class ConflictController {
      * POST /api/conflicts/identity
      */
     @PostMapping("/identity")
-    public ResponseEntity<?> createIdentityConflict(@RequestBody IdentityConflictRequest request) {
-        if (request.sourceEventId() == null || request.actorId() == null) {
+    public ResponseEntity<?> createIdentityConflict(@RequestBody IdentityConflictRequest request,
+                                                    HttpServletRequest httpRequest) {
+        if (request.sourceEventId() == null) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "missing_required_fields",
-                            "message", "source_event_id and actor_id are required"));
+                            "message", "source_event_id is required"));
         }
+        UUID actorId = (UUID) httpRequest.getAttribute(ActorTokenInterceptor.ACTOR_ID_ATTR);
 
         try {
             Event event = resolutionService.createManualIdentityConflict(
-                    request.sourceEventId(), request.actorId(), request.reason());
+                    request.sourceEventId(), actorId, request.reason());
             return ResponseEntity.ok(Map.of(
                     "event_id", event.id().toString(),
                     "source_event_id", request.sourceEventId().toString(),

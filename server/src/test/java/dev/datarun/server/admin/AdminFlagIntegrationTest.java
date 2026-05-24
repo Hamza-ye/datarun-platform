@@ -31,6 +31,7 @@ class AdminFlagIntegrationTest extends AbstractIntegrationTest {
     private static final UUID DEVICE_A = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID DEVICE_B = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static final UUID ACTOR_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
+    private static final UUID WORKER_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000101");
     private static final UUID SUBJECT_X = UUID.fromString("7c9e6679-7425-40de-944b-e07fc1f90ae7");
 
     @BeforeEach
@@ -145,7 +146,7 @@ class AdminFlagIntegrationTest extends AbstractIntegrationTest {
         event.put("shape_ref", "basic_capture/v1");
         event.put("activity_ref", null);
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
-        event.put("actor_ref", Map.of("type", "actor", "id", ACTOR_ID.toString()));
+        event.put("actor_ref", Map.of("type", "actor", "id", WORKER_ID.toString()));
         event.put("device_id", deviceId.toString());
         event.put("device_seq", seq);
         event.put("sync_watermark", null);

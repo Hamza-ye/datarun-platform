@@ -30,6 +30,7 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
     private static final UUID DEVICE_A = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID DEVICE_B = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static final UUID ACTOR_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
+    private static final UUID WORKER_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000101");
     private static final UUID SUBJECT_X = UUID.fromString("7c9e6679-7425-40de-944b-e07fc1f90ae7");
 
     @BeforeEach
@@ -188,8 +189,9 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         assertThat(payload.has("flag_category")).isTrue();
         assertThat(payload.get("flag_category").asText()).isEqualTo("concurrent_state_change");
         assertThat(payload.has("resolvability")).isTrue();
+        assertThat(payload.get("designated_resolver").get("type").asText()).isEqualTo("actor");
+        assertThat(payload.get("designated_resolver").get("id").asText()).isEqualTo(ACTOR_ID.toString());
         assertThat(payload.has("reason")).isTrue();
-        // designated_resolver is optional when no specific resolver is known.
     }
 
     /**
@@ -259,10 +261,11 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         }
         assertThat(flagEvent).isNotNull();
 
-        // C8: conflict_detected event has source ref and flag category; designated_resolver optional.
+        // C8: conflict_detected event has source ref, flag category, and designated_resolver.
         JsonNode payload = flagEvent.get("payload");
         assertThat(payload.get("source_event_id").asText()).isNotEmpty();
         assertThat(payload.get("flag_category").asText()).isEqualTo("concurrent_state_change");
+        assertThat(payload.get("designated_resolver").get("id").asText()).isEqualTo(ACTOR_ID.toString());
     }
 
     /**
@@ -296,6 +299,19 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         assertThat(id).isEqualTo("system:conflict_detector/" + flagCategory);
     }
 
+    @Test
+    void staleReferenceFlag_hasDesignatedResolver() {
+        UUID retired = UUID.randomUUID();
+        UUID surviving = UUID.randomUUID();
+        pushEventsWithMeta(List.of(buildEvent(retired, DEVICE_A, 1)), DEVICE_A, 0);
+        pushEventsWithMeta(List.of(buildEvent(surviving, DEVICE_A, 2)), DEVICE_A, 0);
+        assertThat(merge(retired, surviving).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        pushEventsWithMeta(List.of(buildEvent(retired, DEVICE_A, 3)), DEVICE_A, 0);
+
+        assertDesignatedResolver("stale_reference", ACTOR_ID);
+    }
+
     // --- Helpers ---
 
     private Map<String, Object> buildEvent(UUID subjectId, UUID deviceId, int seq) {
@@ -305,7 +321,7 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         event.put("shape_ref", "basic_capture/v1");
         event.put("activity_ref", null);
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
-        event.put("actor_ref", Map.of("type", "actor", "id", ACTOR_ID.toString()));
+        event.put("actor_ref", Map.of("type", "actor", "id", WORKER_ID.toString()));
         event.put("device_id", deviceId.toString());
         event.put("device_seq", seq);
         event.put("sync_watermark", null);
@@ -346,5 +362,30 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
                 Integer.class,
                 subjectId.toString());
         assertThat(count).isGreaterThan(0);
+    }
+
+    private void assertDesignatedResolver(String category, UUID resolver) {
+        String resolverId = jdbc.queryForObject("""
+                SELECT payload->'designated_resolver'->>'id'
+                FROM events
+                WHERE shape_ref = 'conflict_detected/v1'
+                  AND payload->>'flag_category' = ?
+                ORDER BY sync_watermark DESC
+                LIMIT 1
+                """, String.class, category);
+        assertThat(resolverId).isEqualTo(resolver.toString());
+    }
+
+    private ResponseEntity<JsonNode> merge(UUID retiredId, UUID survivingId) {
+        Map<String, Object> request = Map.of(
+                "retired_id", retiredId.toString(),
+                "surviving_id", survivingId.toString(),
+                "actor_id", ACTOR_ID.toString(),
+                "reason", "Test merge"
+        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return rest.exchange("/api/identity/merge", HttpMethod.POST,
+                new HttpEntity<>(request, headers), JsonNode.class);
     }
 }

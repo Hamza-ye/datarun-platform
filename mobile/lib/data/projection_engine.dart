@@ -40,12 +40,19 @@ class ProjectionEngine {
 
     // Build flagged event set from conflict_detected flag events.
     final flaggedEventIds = <String>{};
+    final flagToSource = <String, String>{};
+    final flagToResolver = <String, String>{};
     final resolvedFlagIds = <String>{};
 
     for (final e in events) {
       if (isIntegrityFlag(e)) {
         final sourceId = e.payload['source_event_id'] as String?;
-        if (sourceId != null) flaggedEventIds.add(sourceId);
+        if (sourceId != null) {
+          flagToSource[e.id] = sourceId;
+          flaggedEventIds.add(sourceId);
+        }
+        final resolver = _resolverKey(e.payload['designated_resolver']);
+        if (resolver != null) flagToResolver[e.id] = resolver;
       }
     }
 
@@ -53,14 +60,19 @@ class ProjectionEngine {
     for (final e in events) {
       if (isIntegrityResolution(e)) {
         final resolution = e.payload['resolution'] as String?;
-        final sourceId = e.payload['source_event_id'] as String?;
-        if (sourceId != null &&
+        final flagEventId = e.payload['flag_event_id'] as String?;
+        final canonical =
+            flagEventId != null &&
+            flagToResolver[flagEventId] == _resolverKey(e.actorRef);
+        final sourceId = flagEventId != null
+            ? flagToSource[flagEventId]
+            : e.payload['source_event_id'] as String?;
+        if (canonical &&
+            sourceId != null &&
             (resolution == 'accepted' || resolution == 'reclassified')) {
           flaggedEventIds.remove(sourceId);
         }
-        // Track all resolved flag IDs regardless of resolution type.
-        final flagEventId = e.payload['flag_event_id'] as String?;
-        if (flagEventId != null) resolvedFlagIds.add(flagEventId);
+        if (canonical && flagEventId != null) resolvedFlagIds.add(flagEventId);
       }
     }
 
@@ -143,11 +155,18 @@ class ProjectionEngine {
   Future<Set<String>> getFlaggedEventIds() async {
     final events = await _eventStore.getAll();
     final flagged = <String>{};
+    final flagToSource = <String, String>{};
+    final flagToResolver = <String, String>{};
 
     for (final e in events) {
       if (isIntegrityFlag(e)) {
         final sourceId = e.payload['source_event_id'] as String?;
-        if (sourceId != null) flagged.add(sourceId);
+        if (sourceId != null) {
+          flagToSource[e.id] = sourceId;
+          flagged.add(sourceId);
+        }
+        final resolver = _resolverKey(e.payload['designated_resolver']);
+        if (resolver != null) flagToResolver[e.id] = resolver;
       }
     }
 
@@ -155,8 +174,15 @@ class ProjectionEngine {
     for (final e in events) {
       if (isIntegrityResolution(e)) {
         final resolution = e.payload['resolution'] as String?;
-        final sourceId = e.payload['source_event_id'] as String?;
-        if (sourceId != null &&
+        final flagEventId = e.payload['flag_event_id'] as String?;
+        final canonical =
+            flagEventId != null &&
+            flagToResolver[flagEventId] == _resolverKey(e.actorRef);
+        final sourceId = flagEventId != null
+            ? flagToSource[flagEventId]
+            : e.payload['source_event_id'] as String?;
+        if (canonical &&
+            sourceId != null &&
             (resolution == 'accepted' || resolution == 'reclassified')) {
           flagged.remove(sourceId);
         }
@@ -169,5 +195,13 @@ class ProjectionEngine {
   /// Resolve a subject ID through the alias table (single-hop after eager closure).
   String _resolveSubjectId(String subjectId, Map<String, String> aliases) {
     return aliases[subjectId] ?? subjectId;
+  }
+
+  String? _resolverKey(dynamic ref) {
+    if (ref is! Map) return null;
+    final type = ref['type'];
+    final id = ref['id'];
+    if (type is! String || id is! String) return null;
+    return '$type:$id';
   }
 }

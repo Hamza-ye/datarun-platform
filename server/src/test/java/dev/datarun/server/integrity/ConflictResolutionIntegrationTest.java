@@ -11,6 +11,10 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -39,6 +43,9 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
     private static final UUID DEVICE_A = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID DEVICE_B = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static final UUID ACTOR_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
+    private static final UUID WORKER_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000101");
+    private static final UUID OTHER_ACTOR_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000202");
+    private static final String OTHER_TOKEN = "other_actor_token_000000000000000000000000000000000000";
     private static final UUID SUBJECT_X = UUID.fromString("7c9e6679-7425-40de-944b-e07fc1f90ae7");
     private static final UUID SUBJECT_Y = UUID.fromString("8d0f7780-8536-41ef-a55c-f18ad2a01bf8");
 
@@ -52,6 +59,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         jdbc.execute("DELETE FROM device_sync_state");
         jdbc.execute("DELETE FROM subject_aliases");
         provisionTestToken();
+        provisionToken(OTHER_TOKEN, OTHER_ACTOR_ID);
     }
 
     // --- QG3: Resolve flag (accepted) → event re-included in projection ---
@@ -215,7 +223,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         pushEvents(List.of(eventB), DEVICE_B, 0);
 
         // List flags — should have 1 unresolved
-        var listResponse = rest.getForEntity("/api/conflicts", JsonNode.class);
+        var listResponse = listConflicts(TEST_TOKEN);
         assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(listResponse.getBody().get("flags").size()).isEqualTo(1);
 
@@ -224,7 +232,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         resolveFlag(flagId, "accepted", null);
 
         // List again — should be empty
-        var listAfter = rest.getForEntity("/api/conflicts", JsonNode.class);
+        var listAfter = listConflicts(TEST_TOKEN);
         assertThat(listAfter.getBody().get("flags").size()).isEqualTo(0);
     }
 
@@ -240,7 +248,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         var eventB = buildEvent(SUBJECT_X, DEVICE_B, 1);
         pushEvents(List.of(eventB), DEVICE_B, 0);
 
-        var listResponse = rest.getForEntity("/api/conflicts", JsonNode.class);
+        var listResponse = listConflicts(TEST_TOKEN);
         JsonNode flag = listResponse.getBody().get("flags").get(0);
         assertThat(flag.get("flag_category").asText()).isEqualTo("concurrent_state_change");
         assertThat(flag.get("severity").asText()).isEqualTo("informational");
@@ -272,7 +280,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getBody().get("flag_category").asText()).isEqualTo("identity_conflict");
 
         // Flag should appear in list
-        var listResponse = rest.getForEntity("/api/conflicts", JsonNode.class);
+        var listResponse = listConflicts(TEST_TOKEN);
         JsonNode flags = listResponse.getBody().get("flags");
         assertThat(flags.size()).isEqualTo(1);
         assertThat(flags.get(0).get("flag_category").asText()).isEqualTo("identity_conflict");
@@ -297,6 +305,89 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void conflictApi_requiresBearerToken() throws Exception {
+        var listMissing = rest.getForEntity("/api/conflicts", JsonNode.class);
+        assertThat(listMissing.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+
+        HttpHeaders invalid = new HttpHeaders();
+        invalid.setBearerAuth("not-a-valid-token");
+        var listInvalid = rest.exchange(
+                "/api/conflicts", HttpMethod.GET, new HttpEntity<>(invalid), JsonNode.class);
+        assertThat(listInvalid.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+
+        assertThat(postWithoutTokenStatus("/api/conflicts/" + UUID.randomUUID() + "/resolve"))
+                .isEqualTo(HttpStatus.UNAUTHORIZED.value());
+        assertThat(postWithoutTokenStatus("/api/conflicts/identity"))
+                .isEqualTo(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
+    void unauthorizedResolution_persistsAuditDoesNotClearAndRaisesScopeViolation() {
+        pushEvents(List.of(buildEvent(SUBJECT_X, DEVICE_A, 1)), DEVICE_A, 0);
+        pushEvents(List.of(buildEvent(SUBJECT_X, DEVICE_B, 1)), DEVICE_B, 0);
+
+        UUID flagId = findFlagEventId();
+        int countBefore = getProjectedEventCount(SUBJECT_X);
+
+        var response = resolveFlag(
+                flagId, "accepted", null, OTHER_TOKEN, ACTOR_ID);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        UUID resolutionEventId = UUID.fromString(response.getBody().get("event_id").asText());
+
+        String resolutionActor = jdbc.queryForObject("""
+                SELECT actor_ref->>'id'
+                FROM events
+                WHERE id = ?::uuid
+                """, String.class, resolutionEventId.toString());
+        assertThat(resolutionActor).isEqualTo(OTHER_ACTOR_ID.toString());
+        assertThat(getProjectedEventCount(SUBJECT_X)).isEqualTo(countBefore);
+        assertThat(canonicalResolutionCount(flagId)).isZero();
+
+        Map<String, Object> unauthorizedFlag = jdbc.queryForMap("""
+                SELECT payload
+                FROM events
+                WHERE shape_ref = 'conflict_detected/v1'
+                  AND payload->>'flag_category' = 'scope_violation'
+                  AND payload->>'source_event_id' = ?
+                """, resolutionEventId.toString());
+        String payload = unauthorizedFlag.get("payload").toString();
+        assertThat(payload).contains("\"designated_resolver\": {\"id\": \"" + ACTOR_ID + "\"");
+
+        var adminQueue = listConflicts(TEST_TOKEN);
+        assertThat(adminQueue.getBody().get("flags").size()).isEqualTo(2);
+    }
+
+    @Test
+    void bodySpoofedActorId_doesNotGrantCanonicalResolution() {
+        pushEvents(List.of(buildEvent(SUBJECT_X, DEVICE_A, 1)), DEVICE_A, 0);
+        pushEvents(List.of(buildEvent(SUBJECT_X, DEVICE_B, 1)), DEVICE_B, 0);
+
+        UUID flagId = findFlagEventId();
+        int countBefore = getProjectedEventCount(SUBJECT_X);
+
+        var response = resolveFlag(flagId, "accepted", null, OTHER_TOKEN, ACTOR_ID);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(canonicalResolutionCount(flagId)).isZero();
+        assertThat(getProjectedEventCount(SUBJECT_X)).isEqualTo(countBefore);
+    }
+
+    @Test
+    void legacyFlagWithoutDesignatedResolver_isNotCanonicalResolved() {
+        var event = buildEvent(SUBJECT_X, DEVICE_A, 1);
+        pushEvents(List.of(event), DEVICE_A, 0);
+        UUID sourceEventId = UUID.fromString(event.get("id").toString());
+        UUID flagId = insertLegacyFlagWithoutResolver(sourceEventId, SUBJECT_X);
+
+        assertThat(getProjectedEventCount(SUBJECT_X)).isZero();
+
+        var response = resolveFlag(flagId, "accepted", null);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(canonicalResolutionCount(flagId)).isZero();
+        assertThat(getProjectedEventCount(SUBJECT_X)).isZero();
+    }
+
     // --- Helpers ---
 
     private Map<String, Object> buildEvent(UUID subjectId, UUID deviceId, int seq) {
@@ -306,7 +397,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         event.put("shape_ref", "basic_capture/v1");
         event.put("activity_ref", null);
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
-        event.put("actor_ref", Map.of("type", "actor", "id", ACTOR_ID.toString()));
+        event.put("actor_ref", Map.of("type", "actor", "id", WORKER_ID.toString()));
         event.put("device_id", deviceId.toString());
         event.put("device_seq", seq);
         event.put("sync_watermark", null);
@@ -339,14 +430,22 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
     }
 
     private ResponseEntity<JsonNode> resolveFlag(UUID flagId, String resolution, UUID reclassifiedSubjectId) {
+        return resolveFlag(flagId, resolution, reclassifiedSubjectId, TEST_TOKEN, ACTOR_ID);
+    }
+
+    private ResponseEntity<JsonNode> resolveFlag(UUID flagId, String resolution,
+                                                 UUID reclassifiedSubjectId,
+                                                 String bearerToken,
+                                                 UUID bodyActorId) {
         Map<String, Object> request = new LinkedHashMap<>();
         request.put("resolution", resolution);
-        request.put("actor_id", ACTOR_ID.toString());
+        request.put("actor_id", bodyActorId.toString());
         if (reclassifiedSubjectId != null) {
             request.put("reclassified_subject_id", reclassifiedSubjectId.toString());
         }
         request.put("reason", "Test resolution: " + resolution);
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(bearerToken);
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
         return rest.exchange("/api/conflicts/" + flagId + "/resolve",
@@ -359,9 +458,26 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         request.put("actor_id", ACTOR_ID.toString());
         request.put("reason", "Suspected wrong subject attribution");
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(TEST_TOKEN);
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
         return rest.exchange("/api/conflicts/identity", HttpMethod.POST, entity, JsonNode.class);
+    }
+
+    private ResponseEntity<JsonNode> listConflicts(String bearerToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(bearerToken);
+        return rest.exchange("/api/conflicts", HttpMethod.GET,
+                new HttpEntity<>(headers), JsonNode.class);
+    }
+
+    private int postWithoutTokenStatus(String path) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(rest.getRootUri() + path))
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+        return HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.discarding())
+                .statusCode();
     }
 
     private UUID findFlagEventId() {
@@ -389,5 +505,49 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
             }
         }
         return 0;
+    }
+
+    private void provisionToken(String token, UUID actorId) {
+        jdbc.update("""
+                INSERT INTO actor_tokens (token, actor_id, revoked)
+                VALUES (?, ?::uuid, FALSE)
+                ON CONFLICT (token) DO NOTHING
+                """, token, actorId.toString());
+    }
+
+    private int canonicalResolutionCount(UUID flagId) {
+        Integer count = jdbc.queryForObject("""
+                SELECT COUNT(*)
+                FROM events cr
+                JOIN events cd ON cd.id::text = cr.payload->>'flag_event_id'
+                WHERE cr.shape_ref = 'conflict_resolved/v1'
+                  AND cr.payload->>'flag_event_id' = ?
+                  AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                  AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
+                """, Integer.class, flagId.toString());
+        return count != null ? count : 0;
+    }
+
+    private UUID insertLegacyFlagWithoutResolver(UUID sourceEventId, UUID subjectId) {
+        UUID flagId = UUID.randomUUID();
+        UUID serverDeviceId = jdbc.queryForObject(
+                "SELECT device_id FROM server_identity LIMIT 1", UUID.class);
+        long seq = jdbc.queryForObject("SELECT nextval('server_device_seq')", Long.class);
+        jdbc.update("""
+                INSERT INTO events (id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                                    device_id, device_seq, timestamp, payload)
+                VALUES (?::uuid, 'alert', 'conflict_detected/v1', NULL,
+                        ?::jsonb, ?::jsonb, ?::uuid, ?, NOW()::timestamptz, ?::jsonb)
+                """,
+                flagId.toString(),
+                "{\"type\":\"subject\",\"id\":\"" + subjectId + "\"}",
+                "{\"type\":\"actor\",\"id\":\"system:conflict_detector/concurrent_state_change\"}",
+                serverDeviceId.toString(),
+                seq,
+                "{\"source_event_id\":\"" + sourceEventId + "\"," +
+                        "\"flag_category\":\"concurrent_state_change\"," +
+                        "\"resolvability\":\"manual_only\"," +
+                        "\"reason\":\"Legacy flag without resolver\"}");
+        return flagId;
     }
 }

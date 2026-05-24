@@ -69,6 +69,7 @@
         "source_event_id": "aaaaaaaa-0002-0000-0000-000000000002",
         "flag_category": "concurrent_state_change",
         "resolvability": "manual_only",
+        "designated_resolver": { "type": "actor", "id": "cccccccc-0001-0000-0000-000000000001" },
         "reason": "Concurrent capture from different device"
       }
     },

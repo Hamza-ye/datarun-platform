@@ -207,15 +207,17 @@ public class PatternStateProjection {
     }
 
     private Set<String> nonAcceptedFlaggedEventIds(List<Event> events) {
-        Map<String, String> flagToSource = new HashMap<>();
+        Map<String, String> flagToResolver = new HashMap<>();
         Map<String, Set<String>> flagsBySource = new HashMap<>();
         Set<String> acceptedFlagIds = new LinkedHashSet<>();
-        Set<String> acceptedSourcesWithoutFlagIds = new LinkedHashSet<>();
         for (Event event : events) {
             if (isIntegrityFlag(event)) {
                 String sourceId = text(event.payload(), "source_event_id");
                 if (sourceId != null) {
-                    flagToSource.put(event.id().toString(), sourceId);
+                    String resolver = resolverKey(event.payload().get("designated_resolver"));
+                    if (resolver != null) {
+                        flagToResolver.put(event.id().toString(), resolver);
+                    }
                     flagsBySource.computeIfAbsent(sourceId, ignored -> new LinkedHashSet<>())
                             .add(event.id().toString());
                 }
@@ -223,30 +225,36 @@ public class PatternStateProjection {
         }
         for (Event event : events) {
             if (isIntegrityResolution(event) && "accepted".equals(text(event.payload(), "resolution"))) {
-                String sourceId = text(event.payload(), "source_event_id");
                 String flagEventId = text(event.payload(), "flag_event_id");
                 if (flagEventId != null) {
-                    acceptedFlagIds.add(flagEventId);
-                    if (sourceId == null) {
-                        sourceId = flagToSource.get(flagEventId);
+                    String designatedResolver = flagToResolver.get(flagEventId);
+                    if (designatedResolver != null
+                            && designatedResolver.equals(resolverKey(event.actorRef()))) {
+                        acceptedFlagIds.add(flagEventId);
                     }
-                }
-                if (sourceId != null && flagEventId == null) {
-                    acceptedSourcesWithoutFlagIds.add(sourceId);
                 }
             }
         }
         Set<String> excluded = new LinkedHashSet<>();
         flagsBySource.forEach((sourceId, flagIds) -> {
-            if (acceptedSourcesWithoutFlagIds.contains(sourceId)) {
-                return;
-            }
             boolean allAccepted = flagIds.stream().allMatch(acceptedFlagIds::contains);
             if (!allAccepted) {
                 excluded.add(sourceId);
             }
         });
         return excluded;
+    }
+
+    private String resolverKey(JsonNode node) {
+        if (node == null || !node.isObject()) {
+            return null;
+        }
+        String type = text(node, "type");
+        String id = text(node, "id");
+        if (type == null || id == null) {
+            return null;
+        }
+        return type + ":" + id;
     }
 
     private void applySubjectEvent(Event event,

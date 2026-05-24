@@ -11,6 +11,7 @@ import dev.datarun.server.identity.ServerIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -32,15 +33,18 @@ public class ConflictResolutionService {
     private final ServerIdentity serverIdentity;
     private final FlagSeverityConfigService flagSeverityConfigService;
     private final ObjectMapper objectMapper;
+    private final ResolverRoutingService resolverRoutingService;
 
     public ConflictResolutionService(EventRepository eventRepository,
                                      ServerIdentity serverIdentity,
                                      FlagSeverityConfigService flagSeverityConfigService,
-                                     ObjectMapper objectMapper) {
+                                     ObjectMapper objectMapper,
+                                     ResolverRoutingService resolverRoutingService) {
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
         this.flagSeverityConfigService = flagSeverityConfigService;
         this.objectMapper = objectMapper;
+        this.resolverRoutingService = resolverRoutingService;
     }
 
     /**
@@ -54,6 +58,7 @@ public class ConflictResolutionService {
      * @return the conflict_resolved event
      * @throws IllegalArgumentException if preconditions fail
      */
+    @Transactional
     public Event resolve(UUID flagEventId, String resolution, UUID reclassifiedSubjectId,
                          UUID actorId, String reason) {
         // Validate resolution value
@@ -96,8 +101,17 @@ public class ConflictResolutionService {
                 reclassifiedSubjectId, actorId, reason);
 
         eventRepository.insert(resolvedEvent);
-        log.info("Conflict resolved: flag={}, resolution={}, source_event={}",
-                flagEventId, resolution, sourceEventId);
+        boolean canonical = isCanonicalResolution(flagEvent, resolvedEvent);
+        if (!canonical) {
+            Event unauthorizedFlag = buildUnauthorizedResolutionFlag(
+                    flagEvent, resolvedEvent, subjectId);
+            eventRepository.insert(unauthorizedFlag);
+            log.info("Unauthorized conflict resolution recorded: flag={}, resolver={}, resolution_event={}",
+                    flagEventId, actorId, resolvedEvent.id());
+        } else {
+            log.info("Conflict resolved: flag={}, resolution={}, source_event={}",
+                    flagEventId, resolution, sourceEventId);
+        }
 
         return resolvedEvent;
     }
@@ -125,7 +139,8 @@ public class ConflictResolutionService {
                     "Identity conflict flag already exists for event " + sourceEventId);
         }
 
-        Event flagEvent = buildIdentityConflictFlag(flagId, sourceEventId, subjectId, actorId, reason);
+        ResolverRef resolver = resolverRoutingService.routeManualIdentityConflict(sourceEvent, actorId);
+        Event flagEvent = buildIdentityConflictFlag(flagId, sourceEventId, subjectId, actorId, resolver, reason);
         eventRepository.insert(flagEvent);
         log.info("Manual identity_conflict created: source_event={}, subject={}",
                 sourceEventId, subjectId);
@@ -149,6 +164,8 @@ public class ConflictResolutionService {
                       SELECT 1 FROM events cr
                       WHERE cr.shape_ref LIKE 'conflict_resolved/%'
                         AND cr.payload->>'flag_event_id' = cd.id::text
+                        AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                        AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
                   )
                 ORDER BY cd.timestamp DESC
                 """,
@@ -160,6 +177,40 @@ public class ConflictResolutionService {
                         rs.getString("subject_id"),
                         rs.getTimestamp("flagged_at").toInstant().atOffset(ZoneOffset.UTC)
                 ));
+    }
+
+    /**
+     * List unresolved flags designated to one authenticated actor.
+     */
+    public List<FlagSummary> listResolvableFlags(UUID actorId) {
+        return eventRepository.getJdbcTemplate().query("""
+                SELECT cd.id AS flag_id,
+                       cd.payload->>'source_event_id' AS source_event_id,
+                       cd.payload->>'flag_category' AS flag_category,
+                       cd.subject_ref->>'id' AS subject_id,
+                       cd.timestamp AS flagged_at
+                FROM events cd
+                WHERE cd.shape_ref LIKE 'conflict_detected/%'
+                  AND cd.payload->'designated_resolver'->>'type' = 'actor'
+                  AND cd.payload->'designated_resolver'->>'id' = ?
+                  AND NOT EXISTS (
+                      SELECT 1 FROM events cr
+                      WHERE cr.shape_ref LIKE 'conflict_resolved/%'
+                        AND cr.payload->>'flag_event_id' = cd.id::text
+                        AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                        AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
+                  )
+                ORDER BY cd.timestamp DESC
+                """,
+                (rs, rowNum) -> new FlagSummary(
+                        rs.getString("flag_id"),
+                        rs.getString("source_event_id"),
+                        rs.getString("flag_category"),
+                        flagSeverityConfigService.effectiveSeverity(rs.getString("flag_category")),
+                        rs.getString("subject_id"),
+                        rs.getTimestamp("flagged_at").toInstant().atOffset(ZoneOffset.UTC)
+                ),
+                actorId.toString());
     }
 
     /**
@@ -210,12 +261,22 @@ public class ConflictResolutionService {
 
     private boolean isAlreadyResolved(UUID flagEventId) {
         Integer count = eventRepository.getJdbcTemplate().queryForObject("""
-                SELECT COUNT(*) FROM events
-                WHERE shape_ref LIKE 'conflict_resolved/%'
-                  AND payload->>'flag_event_id' = ?
+                SELECT COUNT(*)
+                FROM events cr
+                JOIN events cd ON cd.id::text = cr.payload->>'flag_event_id'
+                WHERE cr.shape_ref LIKE 'conflict_resolved/%'
+                  AND cd.shape_ref LIKE 'conflict_detected/%'
+                  AND cr.payload->>'flag_event_id' = ?
+                  AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                  AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
                 """,
                 Integer.class, flagEventId.toString());
         return count != null && count > 0;
+    }
+
+    private boolean isCanonicalResolution(Event flagEvent, Event resolvedEvent) {
+        ResolverRef resolver = ResolverRef.fromJson(flagEvent.payload().get("designated_resolver"));
+        return resolver != null && resolver.matchesActorRef(resolvedEvent.actorRef());
     }
 
     private Event buildResolvedEvent(UUID flagEventId, UUID sourceEventId, String subjectId,
@@ -255,8 +316,46 @@ public class ConflictResolutionService {
         );
     }
 
+    private Event buildUnauthorizedResolutionFlag(Event originalFlag,
+                                                  Event unauthorizedResolution,
+                                                  String subjectId) {
+        ObjectNode subjectRef = objectMapper.createObjectNode();
+        subjectRef.put("type", "subject");
+        subjectRef.put("id", subjectId);
+
+        ObjectNode actorRef = objectMapper.createObjectNode();
+        actorRef.put("type", "actor");
+        actorRef.put("id", "system:conflict_detector/scope_violation");
+
+        ResolverRef resolver = resolverRoutingService.routeUnauthorizedResolution(originalFlag);
+        ObjectNode resolverNode = objectMapper.createObjectNode();
+        resolver.writeTo(resolverNode);
+
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("source_event_id", unauthorizedResolution.id().toString());
+        payload.put("flag_category", "scope_violation");
+        payload.put("resolvability", FlagCatalog.resolvabilityFor("scope_violation"));
+        payload.set("designated_resolver", resolverNode);
+        payload.put("reason", "Conflict resolution event was not authored by the designated resolver");
+
+        return new Event(
+                ConflictDetector.deterministicUuid(unauthorizedResolution.id(), "scope_violation"),
+                "alert",
+                "conflict_detected/v1",
+                null,
+                subjectRef,
+                actorRef,
+                serverIdentity.getDeviceId(),
+                (int) serverIdentity.nextDeviceSeq(),
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                payload
+        );
+    }
+
     private Event buildIdentityConflictFlag(UUID flagId, UUID sourceEventId, String subjectId,
-                                             UUID actorId, String reason) {
+                                             UUID actorId, ResolverRef designatedResolver,
+                                             String reason) {
         ObjectNode subjectRef = objectMapper.createObjectNode();
         subjectRef.put("type", "subject");
         subjectRef.put("id", subjectId);
@@ -270,8 +369,7 @@ public class ConflictResolutionService {
         payload.put("flag_category", "identity_conflict");
         payload.put("resolvability", FlagCatalog.resolvabilityFor("identity_conflict"));
         ObjectNode resolver = objectMapper.createObjectNode();
-        resolver.put("type", "actor");
-        resolver.put("id", actorId.toString());
+        designatedResolver.writeTo(resolver);
         payload.set("designated_resolver", resolver);
         payload.put("reason", reason != null ? reason : "Manual identity conflict flag");
 

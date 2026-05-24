@@ -20,8 +20,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -56,6 +58,7 @@ public class ConflictDetector {
     private final ScopeResolver scopeResolver;
     private final SubjectLocationRepository subjectLocationRepository;
     private final ActivityRepository activityRepository;
+    private final ResolverRoutingService resolverRoutingService;
 
     public ConflictDetector(EventRepository eventRepository,
                             ServerIdentity serverIdentity,
@@ -63,7 +66,8 @@ public class ConflictDetector {
                             ObjectMapper objectMapper,
                             ScopeResolver scopeResolver,
                             SubjectLocationRepository subjectLocationRepository,
-                            ActivityRepository activityRepository) {
+                            ActivityRepository activityRepository,
+                            ResolverRoutingService resolverRoutingService) {
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
         this.lifecycleProjection = lifecycleProjection;
@@ -71,6 +75,7 @@ public class ConflictDetector {
         this.scopeResolver = scopeResolver;
         this.subjectLocationRepository = subjectLocationRepository;
         this.activityRepository = activityRepository;
+        this.resolverRoutingService = resolverRoutingService;
     }
 
     /**
@@ -94,12 +99,13 @@ public class ConflictDetector {
                 continue;
             }
 
+            List<PendingFlag> pendingFlags = new ArrayList<>();
+
             // stale_reference check: event references a retired/archived subject ID.
             Optional<IdentityLifecycleProjection.ArchivedSubject> archived =
                     lifecycleProjection.findArchived(subjectId);
             if (archived.isPresent()) {
-                Event staleFlag = createStaleReferenceFlag(event, subjectId, archived.get());
-                flagEvents.add(staleFlag);
+                pendingFlags.add(staleReferencePendingFlag(event, subjectId, archived.get()));
                 log.info("Stale reference detected for subject {} (event {})",
                         subjectId, event.id());
             }
@@ -115,10 +121,21 @@ public class ConflictDetector {
 
             // Check: does subject have events from OTHER devices with sync_watermark > W_effective?
             if (eventRepository.hasNewerEventsFromOtherDevices(subjectId, event.deviceId(), wEffective)) {
-                Event flagEvent = createFlagEvent(event, subjectId);
-                flagEvents.add(flagEvent);
+                pendingFlags.add(new PendingFlag(
+                        deterministicUuid(event.id(), FLAG_CATEGORY),
+                        event.id(),
+                        subjectId,
+                        FLAG_CATEGORY,
+                        "Event created with knowledge horizon before concurrent events from another device"));
                 log.info("Concurrent state change detected for subject {} (event {})",
                         subjectId, event.id());
+            }
+
+            if (!pendingFlags.isEmpty()) {
+                ResolverRef resolver = resolverRoutingService.route(event, categories(pendingFlags));
+                pendingFlags.forEach(pending -> flagEvents.add(buildFlagEvent(
+                        pending.flagId(), pending.sourceEventId(), pending.subjectId(),
+                        pending.category(), resolver, pending.reason())));
             }
         }
 
@@ -163,6 +180,7 @@ public class ConflictDetector {
             if (eventWatermark == null) continue;
             long effectiveWatermark = Math.min(eventWatermark, lastPullWatermark);
             String subjectPath = subjectLocationRepository.findPathBySubjectId(subjectId);
+            List<PendingFlag> pendingFlags = new ArrayList<>();
 
             // --- 1. temporal_authority_expired ---
             // Check if any covering assignment ended after the device's knowledge horizon.
@@ -181,12 +199,10 @@ public class ConflictDetector {
                         && ended.containsSubject(subjectId)
                         && ended.containsActivity(event.activityRef())) {
                     // Assignment covered this event's subject and has since ended
-                    Event flag = buildFlagEvent(
+                    pendingFlags.add(new PendingFlag(
                             deterministicUuid(event.id(), TEMPORAL_AUTHORITY_EXPIRED),
                             event.id(), subjectId, TEMPORAL_AUTHORITY_EXPIRED,
-                            findBroadestScopeActor(subjectId),
-                            "Assignment " + ended.assignmentId() + " expired; actor was unaware");
-                    flagEvents.add(flag);
+                            "Assignment " + ended.assignmentId() + " expired; actor was unaware"));
                     temporalFlagged = true;
                     log.info("Temporal authority expired for subject {} (event {}, assignment {})",
                             subjectId, event.id(), ended.assignmentId());
@@ -199,24 +215,20 @@ public class ConflictDetector {
                 boolean inScope = scopeResolver.isInScope(
                         activeAssignments, subjectPath, subjectId, event.activityRef());
                 if (!inScope) {
-                    Event flag = buildFlagEvent(
+                    pendingFlags.add(new PendingFlag(
                             deterministicUuid(event.id(), SCOPE_VIOLATION),
                             event.id(), subjectId, SCOPE_VIOLATION,
-                            findBroadestScopeActor(subjectId),
-                            "Subject outside actor's active scope at push time");
-                    flagEvents.add(flag);
+                            "Subject outside actor's active scope at push time"));
                     log.info("Scope violation detected for subject {} (event {})",
                             subjectId, event.id());
                 }
             }
             // If actor has zero active assignments → flag all events
             if (!temporalFlagged && activeAssignments.isEmpty()) {
-                Event flag = buildFlagEvent(
+                pendingFlags.add(new PendingFlag(
                         deterministicUuid(event.id(), SCOPE_VIOLATION),
                         event.id(), subjectId, SCOPE_VIOLATION,
-                        findBroadestScopeActor(subjectId),
-                        "Actor has no active assignments at push time");
-                flagEvents.add(flag);
+                        "Actor has no active assignments at push time"));
                 log.info("Scope violation (no assignments) for subject {} (event {})",
                         subjectId, event.id());
             }
@@ -224,26 +236,30 @@ public class ConflictDetector {
             // --- 3. role_stale ---
             // Phase 4: role_stale means action authority mismatch, not role-label drift.
             Optional<JsonNode> activityRoles = findActivityRoles(event.activityRef());
-            if (activityRoles.isEmpty()) {
-                continue;
+            if (activityRoles.isPresent()) {
+                List<ActiveAssignment> horizonAssignments =
+                        assignmentsAtWatermark(allAssignments, effectiveWatermark);
+                boolean horizonPermits = hasCoveringActionAuthority(
+                        horizonAssignments, activityRoles.get(), subjectPath, subjectId,
+                        event.activityRef(), event.type());
+                boolean currentPermits = hasCoveringActionAuthority(
+                        activeAssignments, activityRoles.get(), subjectPath, subjectId,
+                        event.activityRef(), event.type());
+                if (!horizonPermits || !currentPermits) {
+                    pendingFlags.add(new PendingFlag(
+                            deterministicUuid(event.id(), ROLE_STALE),
+                            event.id(), subjectId, ROLE_STALE,
+                            roleActionMismatchReason(event.type(), horizonPermits, currentPermits)));
+                    log.info("Role action authority mismatch for subject {} (event {}): action={}, horizon={}, current={}",
+                            subjectId, event.id(), event.type(), horizonPermits, currentPermits);
+                }
             }
-            List<ActiveAssignment> horizonAssignments =
-                    assignmentsAtWatermark(allAssignments, effectiveWatermark);
-            boolean horizonPermits = hasCoveringActionAuthority(
-                    horizonAssignments, activityRoles.get(), subjectPath, subjectId,
-                    event.activityRef(), event.type());
-            boolean currentPermits = hasCoveringActionAuthority(
-                    activeAssignments, activityRoles.get(), subjectPath, subjectId,
-                    event.activityRef(), event.type());
-            if (!horizonPermits || !currentPermits) {
-                Event flag = buildFlagEvent(
-                        deterministicUuid(event.id(), ROLE_STALE),
-                        event.id(), subjectId, ROLE_STALE,
-                        findSupervisorActor(actorId),
-                        roleActionMismatchReason(event.type(), horizonPermits, currentPermits));
-                flagEvents.add(flag);
-                log.info("Role action authority mismatch for subject {} (event {}): action={}, horizon={}, current={}",
-                        subjectId, event.id(), event.type(), horizonPermits, currentPermits);
+
+            if (!pendingFlags.isEmpty()) {
+                ResolverRef resolver = resolverRoutingService.route(event, categories(pendingFlags));
+                pendingFlags.forEach(pending -> flagEvents.add(buildFlagEvent(
+                        pending.flagId(), pending.sourceEventId(), pending.subjectId(),
+                        pending.category(), resolver, pending.reason())));
             }
         }
 
@@ -268,8 +284,12 @@ public class ConflictDetector {
                 // Check if flag already exists (deterministic ID)
                 UUID flagId = deterministicUuid(candidate.eventId, FLAG_CATEGORY);
                 if (!eventRepository.existsById(flagId)) {
+                    Event sourceEvent = eventRepository.findById(candidate.eventId);
+                    ResolverRef resolver = sourceEvent != null
+                            ? resolverRoutingService.route(sourceEvent, FLAG_CATEGORY)
+                            : resolverRoutingService.unassigned(FLAG_CATEGORY);
                     Event flagEvent = createFlagEventForSweep(
-                            candidate.eventId, candidate.subjectId, flagId);
+                            candidate.eventId, candidate.subjectId, flagId, resolver);
                     flagEvents.add(flagEvent);
                     log.info("Sweep: concurrent state change detected for subject {} (event {})",
                             candidate.subjectId, candidate.eventId);
@@ -311,21 +331,15 @@ public class ConflictDetector {
                 trailingWindowWatermark);
     }
 
-    private Event createFlagEvent(Event sourceEvent, UUID subjectId) {
-        UUID flagId = deterministicUuid(sourceEvent.id(), FLAG_CATEGORY);
-        return buildFlagEvent(flagId, sourceEvent.id(), subjectId, FLAG_CATEGORY,
-                null,
-                "Event created with knowledge horizon before concurrent events from another device");
-    }
-
-    private Event createFlagEventForSweep(UUID sourceEventId, UUID subjectId, UUID flagId) {
+    private Event createFlagEventForSweep(UUID sourceEventId, UUID subjectId, UUID flagId,
+                                          ResolverRef resolver) {
         return buildFlagEvent(flagId, sourceEventId, subjectId, FLAG_CATEGORY,
-                null,
+                resolver,
                 "Event created with knowledge horizon before concurrent events from another device");
     }
 
-    private Event createStaleReferenceFlag(Event sourceEvent, UUID subjectId,
-                                           IdentityLifecycleProjection.ArchivedSubject archived) {
+    private PendingFlag staleReferencePendingFlag(Event sourceEvent, UUID subjectId,
+                                                  IdentityLifecycleProjection.ArchivedSubject archived) {
         UUID flagId = deterministicUuid(sourceEvent.id(), STALE_REFERENCE_CATEGORY);
         String reason = switch (archived.type()) {
             case MERGED -> "Event references retired subject " + subjectId
@@ -333,12 +347,11 @@ public class ConflictDetector {
             case SPLIT -> "Event references archived split source " + subjectId
                     + ", successor ID: " + archived.targetId();
         };
-        return buildFlagEvent(flagId, sourceEvent.id(), subjectId, STALE_REFERENCE_CATEGORY,
-                null, reason);
+        return new PendingFlag(flagId, sourceEvent.id(), subjectId, STALE_REFERENCE_CATEGORY, reason);
     }
 
     private Event buildFlagEvent(UUID flagId, UUID sourceEventId, UUID subjectId,
-                                  String flagCategory, UUID designatedResolver,
+                                  String flagCategory, ResolverRef designatedResolver,
                                   String reason) {
         ObjectNode subjectRef = objectMapper.createObjectNode();
         subjectRef.put("type", "subject");
@@ -354,13 +367,9 @@ public class ConflictDetector {
         payload.put("source_event_id", sourceEventId.toString());
         payload.put("flag_category", flagCategory);
         payload.put("resolvability", FlagCatalog.resolvabilityFor(flagCategory));
-        // designated_resolver is optional — omit when no specific resolver is known.
-        if (designatedResolver != null) {
-            ObjectNode resolver = objectMapper.createObjectNode();
-            resolver.put("type", "actor");
-            resolver.put("id", designatedResolver.toString());
-            payload.set("designated_resolver", resolver);
-        }
+        ObjectNode resolver = objectMapper.createObjectNode();
+        designatedResolver.writeTo(resolver);
+        payload.set("designated_resolver", resolver);
         payload.put("reason", reason);
 
         return new Event(
@@ -467,72 +476,10 @@ public class ConflictDetector {
         return "Action '" + action + "' is no longer permitted at push time";
     }
 
-    /**
-     * Find the broadest-scope actor whose scope contains the given subject.
-     * Designated resolver for scope_violation and temporal_authority_expired flags.
-     * Falls back to system if no suitable actor found.
-     */
-    private UUID findBroadestScopeActor(UUID subjectId) {
-        // For Phase 2c: use the coordinator who created the subject's location assignment.
-        // Simple heuristic: find actors with assignments containing this subject's location,
-        // ordered by path length (shortest path = broadest scope).
-        String subjectPath = subjectLocationRepository.findPathBySubjectId(subjectId);
-        if (subjectPath == null) return null;
-
-        List<String> actors = eventRepository.getJdbcTemplate().queryForList("""
-                SELECT actor_id FROM (
-                    SELECT DISTINCT e.payload->'target_actor'->>'id' AS actor_id, LENGTH(l.path) AS path_len
-                    FROM events e
-                    JOIN locations l ON l.id::text = e.payload->'scope'->>'geographic'
-                    WHERE e.type = 'assignment_changed'
-                      AND e.shape_ref = 'assignment_created/v1'
-                      AND ? LIKE l.path || '%'
-                      AND NOT EXISTS (
-                          SELECT 1 FROM events e2
-                          WHERE e2.type = 'assignment_changed'
-                            AND e2.shape_ref = 'assignment_ended/v1'
-                            AND e2.subject_ref->>'id' = e.subject_ref->>'id'
-                      )
-                ) sub ORDER BY path_len ASC LIMIT 1
-                """, String.class, subjectPath);
-        return actors.isEmpty() ? null : UUID.fromString(actors.get(0));
-    }
-
-    /**
-     * Find the supervisor actor for a given actor (broadest scope that contains the actor's scope).
-     * Falls back to null (system resolver) if no supervisor found.
-     */
-    private UUID findSupervisorActor(UUID actorId) {
-        // Simple approach: find actors with broader geographic scope containing this actor's area
-        List<ActiveAssignment> actorAssignments = scopeResolver.getActiveAssignments(actorId);
-        if (actorAssignments.isEmpty()) return null;
-
-        String actorPath = actorAssignments.stream()
-                .map(ActiveAssignment::geographicPath)
-                .filter(p -> p != null)
-                .findFirst()
-                .orElse(null);
-        if (actorPath == null) return null;
-
-        List<String> supervisors = eventRepository.getJdbcTemplate().queryForList("""
-                SELECT actor_id FROM (
-                    SELECT DISTINCT e.payload->'target_actor'->>'id' AS actor_id, LENGTH(l.path) AS path_len
-                    FROM events e
-                    JOIN locations l ON l.id::text = e.payload->'scope'->>'geographic'
-                    WHERE e.type = 'assignment_changed'
-                      AND e.shape_ref = 'assignment_created/v1'
-                      AND ? LIKE l.path || '%'
-                      AND LENGTH(l.path) < LENGTH(?)
-                      AND e.payload->'target_actor'->>'id' != ?
-                      AND NOT EXISTS (
-                          SELECT 1 FROM events e2
-                          WHERE e2.type = 'assignment_changed'
-                            AND e2.shape_ref = 'assignment_ended/v1'
-                            AND e2.subject_ref->>'id' = e.subject_ref->>'id'
-                      )
-                ) sub ORDER BY path_len ASC LIMIT 1
-                """, String.class, actorPath, actorPath, actorId.toString());
-        return supervisors.isEmpty() ? null : UUID.fromString(supervisors.get(0));
+    private Set<String> categories(List<PendingFlag> pendingFlags) {
+        Set<String> categories = new LinkedHashSet<>();
+        pendingFlags.forEach(flag -> categories.add(flag.category()));
+        return categories;
     }
 
     private boolean isAssignmentEvent(Event e) {
@@ -572,4 +519,10 @@ public class ConflictDetector {
     }
 
     record SweepCandidate(UUID eventId, UUID deviceId, long eventWatermark, UUID subjectId) {}
+
+    private record PendingFlag(UUID flagId,
+                               UUID sourceEventId,
+                               UUID subjectId,
+                               String category,
+                               String reason) {}
 }

@@ -57,6 +57,7 @@ void main() {
     String sourceEventId,
     String subjectId, {
     String category = 'concurrent_state_change',
+    String resolverId = 'admin-1',
     String timestamp = '2026-04-18T11:00:00Z',
   }) {
     return Event(
@@ -73,6 +74,7 @@ void main() {
       payload: {
         'source_event_id': sourceEventId,
         'flag_category': category,
+        'designated_resolver': {'type': 'actor', 'id': resolverId},
         'reason': 'test flag',
       },
     );
@@ -84,6 +86,7 @@ void main() {
     String sourceEventId,
     String subjectId,
     String resolution, {
+    String actorId = 'admin-1',
     String timestamp = '2026-04-18T12:00:00Z',
   }) {
     return Event(
@@ -91,7 +94,7 @@ void main() {
       type: 'review',
       shapeRef: 'conflict_resolved/v1',
       subjectRef: {'type': 'subject', 'id': subjectId},
-      actorRef: {'type': 'actor', 'id': 'admin-1'},
+      actorRef: {'type': 'actor', 'id': actorId},
       deviceId: 'server',
       deviceSeq: serverSeq++,
       syncWatermark: 60,
@@ -246,6 +249,42 @@ void main() {
       expect(subjects[0].captureCount, 1); // Only e1 — e2 rejected
       expect(subjects[0].flagCount, 0); // Flag resolved (even if rejected)
     });
+
+    test(
+      'non-designated accepted resolution does not re-include event',
+      () async {
+        await store.insert(makeCapture('e1', 'subj-1', name: 'Alice'));
+        await store.insert(
+          makeCapture(
+            'e2',
+            'subj-1',
+            name: 'Alice Updated',
+            deviceId: 'dev-2',
+            seq: 2,
+            timestamp: '2026-04-18T10:05:00Z',
+          ),
+        );
+        await store.insertFromServer(makeFlag('f1', 'e2', 'subj-1'));
+        await store.insertFromServer(
+          makeResolution(
+            'r1',
+            'f1',
+            'e2',
+            'subj-1',
+            'accepted',
+            actorId: 'other-admin',
+          ),
+        );
+
+        final subjects = await pe.getSubjectList();
+        final flagged = await pe.getFlaggedEventIds();
+
+        expect(subjects, hasLength(1));
+        expect(subjects[0].captureCount, 1);
+        expect(subjects[0].flagCount, 1);
+        expect(flagged, contains('e2'));
+      },
+    );
 
     test('alias resolution: merged subjects shown as one', () async {
       await store.insert(makeCapture('e1', 'subj-A', name: 'Alice'));

@@ -1097,7 +1097,8 @@
       "timestamp": "2026-05-24T09:05:01Z",
       "payload": {
         "source_event_id": "aaaaaaaa-4001-0000-0000-000000000002",
-        "flag_category": "domain_uniqueness_violation"
+        "flag_category": "domain_uniqueness_violation",
+        "designated_resolver": { "type": "actor", "id": "cccccccc-0000-0000-0000-000000000002" }
       }
     },
     {
@@ -1159,7 +1160,8 @@
       "timestamp": "2026-05-24T09:05:01Z",
       "payload": {
         "source_event_id": "aaaaaaaa-5001-0000-0000-000000000002",
-        "flag_category": "domain_uniqueness_violation"
+        "flag_category": "domain_uniqueness_violation",
+        "designated_resolver": { "type": "actor", "id": "cccccccc-0000-0000-0000-000000000002" }
       }
     },
     {
@@ -1244,7 +1246,8 @@
       "timestamp": "2026-05-24T09:05:01Z",
       "payload": {
         "source_event_id": "aaaaaaaa-6001-0000-0000-000000000002",
-        "flag_category": "domain_uniqueness_violation"
+        "flag_category": "domain_uniqueness_violation",
+        "designated_resolver": { "type": "actor", "id": "cccccccc-0000-0000-0000-000000000002" }
       }
     },
     {
@@ -1536,7 +1539,8 @@
       "timestamp": "2026-05-24T08:21:01Z",
       "payload": {
         "source_event_id": "aaaaaaaa-7101-0000-0000-000000000002",
-        "flag_category": "domain_uniqueness_violation"
+        "flag_category": "domain_uniqueness_violation",
+        "designated_resolver": { "type": "actor", "id": "cccccccc-0000-0000-0000-000000000102" }
       }
     },
     {
@@ -1600,7 +1604,8 @@
       "timestamp": "2026-05-24T08:26:01Z",
       "payload": {
         "source_event_id": "aaaaaaaa-7102-0000-0000-000000000002",
-        "flag_category": "domain_uniqueness_violation"
+        "flag_category": "domain_uniqueness_violation",
+        "designated_resolver": { "type": "actor", "id": "cccccccc-0000-0000-0000-000000000102" }
       }
     },
     {
@@ -1687,7 +1692,8 @@
       "timestamp": "2026-05-24T08:36:01Z",
       "payload": {
         "source_event_id": "aaaaaaaa-7103-0000-0000-000000000002",
-        "flag_category": "domain_uniqueness_violation"
+        "flag_category": "domain_uniqueness_violation",
+        "designated_resolver": { "type": "actor", "id": "cccccccc-0000-0000-0000-000000000102" }
       }
     },
     {

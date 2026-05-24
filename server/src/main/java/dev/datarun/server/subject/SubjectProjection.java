@@ -42,6 +42,8 @@ public class SubjectProjection {
                           WHERE cr.shape_ref LIKE 'conflict_resolved/%'
                             AND cr.payload->>'flag_event_id' = events.id::text
                             AND cr.payload->>'resolution' IN ('accepted', 'reclassified')
+                            AND cr.actor_ref->>'type' = events.payload->'designated_resolver'->>'type'
+                            AND cr.actor_ref->>'id' = events.payload->'designated_resolver'->>'id'
                       )
                 ),
                 archived_subjects AS (
@@ -83,6 +85,8 @@ public class SubjectProjection {
                           SELECT 1 FROM events cr
                           WHERE cr.shape_ref LIKE 'conflict_resolved/%'
                             AND cr.payload->>'flag_event_id' = cd.id::text
+                            AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                            AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
                       )
                 )
                 SELECT

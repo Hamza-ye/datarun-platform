@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
+import dev.datarun.server.authorization.AssignmentService;
+import dev.datarun.server.authorization.LocationRepository;
 import dev.datarun.server.config.FlagSeverityConfigService;
 import dev.datarun.server.config.ShapeRepository;
 import dev.datarun.server.config.ShapeService;
@@ -14,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,14 +40,23 @@ class DomainUniquenessIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private FlagSeverityConfigService flagSeverityConfigService;
 
+    @Autowired
+    private AssignmentService assignmentService;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
     private static final UUID DEVICE_A = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID SUBJECT_X = UUID.fromString("7c9e6679-7425-40de-944b-e07fc1f90ae7");
+    private static final UUID WORKER_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000101");
+    private static final UUID SUPERVISOR_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000202");
 
     @BeforeEach
     void cleanDb() {
         jdbcTemplate.execute("DELETE FROM actor_tokens");
         jdbcTemplate.execute("DELETE FROM deployment_config");
         jdbcTemplate.execute("DELETE FROM subject_locations");
+        jdbcTemplate.execute("DELETE FROM locations");
         jdbcTemplate.execute("DELETE FROM subject_aliases");
         jdbcTemplate.execute("DELETE FROM events");
         jdbcTemplate.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
@@ -75,6 +88,8 @@ class DomainUniquenessIntegrationTest extends AbstractIntegrationTest {
         JsonNode payload = flag.get("payload");
         assertThat(payload.get("flag_category").asText()).isEqualTo("domain_uniqueness_violation");
         assertThat(payload.get("resolvability").asText()).isEqualTo("manual_only");
+        assertThat(payload.get("designated_resolver").get("id").asText())
+                .isEqualTo(TEST_ACTOR_ID.toString());
         assertThat(payload.get("source_event_id").asText()).isEqualTo(duplicate.get("id").toString());
         assertThat(payload.get("constraint_ref").asText()).isEqualTo("unique_visit/v1#uniqueness");
         assertThat(payload.get("shape_ref").asText()).isEqualTo("unique_visit/v1");
@@ -141,6 +156,27 @@ class DomainUniquenessIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void domainUniquenessFlag_routesToNearestActivitySteward() {
+        UUID region = UUID.randomUUID();
+        UUID village = UUID.randomUUID();
+        locationRepository.insert(region, "Region", null, "region");
+        locationRepository.insert(village, "Village", region, "village");
+        registerSubjectLocation(SUBJECT_X, village);
+        assignmentService.createAssignment(TEST_ACTOR_ID, SUPERVISOR_ID, "supervisor",
+                village, null, List.of("monitoring"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        Map<String, Object> first = buildVisitEvent(1, "household-42", "2026-05-20T10:00:00Z");
+        Map<String, Object> duplicate = buildVisitEvent(2, "household-42", "2026-05-20T12:00:00Z");
+        pushEvents(List.of(first));
+        pushEvents(List.of(duplicate));
+
+        JsonNode flag = findDomainUniquenessFlagFor(duplicate.get("id").toString());
+        assertThat(flag.get("payload").get("designated_resolver").get("id").asText())
+                .isEqualTo(SUPERVISOR_ID.toString());
+    }
+
+    @Test
     void subjectAliasesAreNormalizedForUniquenessKey() {
         UUID retiredSubject = UUID.fromString("11111111-2222-3333-4444-555555555555");
         jdbcTemplate.update("""
@@ -176,7 +212,8 @@ class DomainUniquenessIntegrationTest extends AbstractIntegrationTest {
         pushEvents(List.of(first));
         pushEvents(List.of(duplicate));
 
-        ResponseEntity<JsonNode> listResponse = rest.getForEntity("/api/conflicts", JsonNode.class);
+        ResponseEntity<JsonNode> listResponse = rest.exchange(
+                "/api/conflicts", HttpMethod.GET, new HttpEntity<>(authHeaders()), JsonNode.class);
         JsonNode listed = listResponse.getBody().get("flags").get(0);
         assertThat(listed.get("flag_category").asText()).isEqualTo("domain_uniqueness_violation");
         assertThat(listed.get("severity").asText()).isEqualTo("informational");
@@ -248,7 +285,7 @@ class DomainUniquenessIntegrationTest extends AbstractIntegrationTest {
         event.put("shape_ref", "unique_visit/v1");
         event.put("activity_ref", "monitoring");
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
-        event.put("actor_ref", Map.of("type", "actor", "id", TEST_ACTOR_ID.toString()));
+        event.put("actor_ref", Map.of("type", "actor", "id", WORKER_ID.toString()));
         event.put("device_id", DEVICE_A.toString());
         event.put("device_seq", seq);
         event.put("sync_watermark", null);
@@ -291,13 +328,19 @@ class DomainUniquenessIntegrationTest extends AbstractIntegrationTest {
         request.put("resolution", resolution);
         request.put("actor_id", TEST_ACTOR_ID.toString());
         request.put("reason", "Test domain uniqueness resolution");
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         return rest.exchange(
                 "/api/conflicts/" + flagId + "/resolve",
                 HttpMethod.POST,
-                new HttpEntity<>(request, headers),
+                new HttpEntity<>(request, authHeaders()),
                 JsonNode.class);
+    }
+
+    private void registerSubjectLocation(UUID subjectId, UUID locationId) {
+        jdbcTemplate.update("""
+                INSERT INTO subject_locations (subject_id, location_id, path)
+                VALUES (?::uuid, ?::uuid, (SELECT path FROM locations WHERE id = ?::uuid))
+                ON CONFLICT (subject_id) DO UPDATE SET location_id = EXCLUDED.location_id, path = EXCLUDED.path
+                """, subjectId.toString(), locationId.toString(), locationId.toString());
     }
 
     private int projectedEventCount(UUID subjectId) {

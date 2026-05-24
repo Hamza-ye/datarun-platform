@@ -34,7 +34,7 @@ Within authorization CD, `temporal_authority_expired` remains before `scope_viol
 
 ## State Exclusion
 
-Unresolved flagged events (any category) are excluded from state derivation in SubjectProjection and from the domain-uniqueness authoritative duplicate basis. The exclusion is category-agnostic: any event targeted by a `shape_ref = conflict_detected/v1` event is excluded until that flag is resolved as `accepted`.
+Unresolved flagged events (any category) are excluded from state derivation in SubjectProjection and from the domain-uniqueness authoritative duplicate basis. The exclusion is category-agnostic: any event targeted by a `shape_ref = conflict_detected/v1` event is excluded until that flag is resolved as `accepted` by the exact `designated_resolver`.
 
 ## Severity
 

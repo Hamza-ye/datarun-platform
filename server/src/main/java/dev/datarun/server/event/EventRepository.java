@@ -415,6 +415,8 @@ public class EventRepository {
                             WHERE cr.shape_ref LIKE 'conflict_resolved/%'
                               AND cr.payload->>'flag_event_id' = cd.id::text
                               AND cr.payload->>'resolution' = 'accepted'
+                              AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                              AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
                         )
                   )
                 ORDER BY e.sync_watermark ASC

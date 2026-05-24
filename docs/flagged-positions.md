@@ -347,9 +347,9 @@ All five must be true:
 
 ## FP-009 — Conflict resolver designation and single-writer resolution enforcement
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-05-24 by ADR-002 S11 parity review before Phase 4.4
-**Blocks**: Phase 4.6 `transition_violation` detector; any resolver-routing, conflict-resolution authority, or auto-resolution slice; Phase 4 close-out if implemented flag categories still have unresolved resolver routing
+**Blocks**: Resolved for runtime resolver designation and single-writer enforcement. Auto-resolution and resolver reassignment remain deferred successor surfaces; `transition_violation` may now proceed using IDR-026 routing.
 **Severity**: A — touches ADR-002 S11 single-writer conflict resolution and prevents recursive resolution conflicts
 
 ### Context
@@ -385,6 +385,7 @@ All of the following must be true:
 
 - **2026-05-24**: Opened. Routed as carried ADR debt, not a Phase 4.4 blocker. Phase 4.4 may proceed only if it remains limited to platform pattern registry and binding validation. This FP blocks transition-violation emission, resolver routing, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out until the gate is met or explicitly re-deferred with a recorded reason.
 - **2026-05-24**: PARTIALLY ROUTED. [IDR-026](decisions/idr-026-conflict-resolver-routing-and-single-writer-resolution.md) defines resolver routing for all active/imminent categories, canonical single-writer resolution semantics, production conflict API actor binding, unauthorized-resolution flagging, and explicit deferral of reassignment/auto-resolution mechanics. FP-009 remains `OPEN` because runtime emission of required `designated_resolver`, bearer-bound `/api/conflicts/**`, canonical resolution enforcement, unauthorized-resolution flagging, and tests have not landed. `contracts/shapes/*` was deliberately left untouched; schema-required `designated_resolver` remains deferred to FP-010.
+- **2026-05-24**: RESOLVED. Runtime enforcement landed: active detectors emit `payload.designated_resolver`, `/api/conflicts/**` uses bearer-token actor context rather than request-body `actor_id`, canonical resolution requires exact resolver equality, unauthorized resolution events persist without clearing the original flag and emit deterministic `scope_violation`, legacy missing-resolver flags do not resolve canonically, and server/mobile projection exclusion honors only canonical resolutions. `transition_violation` detection, auto-resolution, resolver reassignment, Keycloak/JWT/group authority, envelope changes, durable workflow-state tables, and `contracts/shapes/*` tightening remain out of this resolution.
 
 ---
 

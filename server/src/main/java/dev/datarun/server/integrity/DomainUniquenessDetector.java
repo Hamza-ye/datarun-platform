@@ -50,6 +50,7 @@ public class DomainUniquenessDetector {
     private final SubjectAliasProjection subjectAliasProjection;
     private final ServerIdentity serverIdentity;
     private final ObjectMapper objectMapper;
+    private final ResolverRoutingService resolverRoutingService;
     private final ZoneId deploymentZone;
 
     public DomainUniquenessDetector(EventRepository eventRepository,
@@ -57,12 +58,14 @@ public class DomainUniquenessDetector {
                                     SubjectAliasProjection subjectAliasProjection,
                                     ServerIdentity serverIdentity,
                                     ObjectMapper objectMapper,
+                                    ResolverRoutingService resolverRoutingService,
                                     @Value("${datarun.uniqueness.timezone:UTC}") String timezone) {
         this.eventRepository = eventRepository;
         this.shapeRepository = shapeRepository;
         this.subjectAliasProjection = subjectAliasProjection;
         this.serverIdentity = serverIdentity;
         this.objectMapper = objectMapper;
+        this.resolverRoutingService = resolverRoutingService;
         this.deploymentZone = resolveZone(timezone);
     }
 
@@ -282,10 +285,20 @@ public class DomainUniquenessDetector {
         actorRef.put("type", "actor");
         actorRef.put("id", "system:conflict_detector/" + FLAG_CATEGORY);
 
+        List<Event> conflictingEvents = conflictingEventIds.stream()
+                .map(eventRepository::findById)
+                .filter(event -> event != null)
+                .toList();
+        ResolverRef resolver = resolverRoutingService.route(
+                sourceEvent, List.of(FLAG_CATEGORY), conflictingEvents);
+
         ObjectNode payload = objectMapper.createObjectNode();
         payload.put("source_event_id", sourceEvent.id().toString());
         payload.put("flag_category", FLAG_CATEGORY);
         payload.put("resolvability", FlagCatalog.resolvabilityFor(FLAG_CATEGORY));
+        ObjectNode resolverNode = objectMapper.createObjectNode();
+        resolver.writeTo(resolverNode);
+        payload.set("designated_resolver", resolverNode);
         payload.put("reason", "Incoming event duplicates a shape-declared domain uniqueness constraint");
         payload.put("constraint_ref", constraint.constraintRef());
         payload.put("shape_ref", sourceEvent.shapeRef());
