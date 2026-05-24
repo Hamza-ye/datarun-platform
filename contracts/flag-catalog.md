@@ -6,17 +6,19 @@ All flag categories raised by the integrity pipeline. Each flag is persisted as 
 
 | # | Category | Raised by | Resolvability | Default Severity | Designated Resolver | Phase |
 |---|----------|-----------|---------------|------------------|---------------------|-------|
-| 1 | `concurrent_state_change` | Identity CD | `manual_only` | `blocking` | system | 0 |
-| 2 | `stale_reference` | Identity CD | `auto_eligible` | `informational` | system | 1 |
-| 3 | `identity_conflict` | Manual (admin) | `manual_only` | `blocking` | system | 1 |
-| 4 | `scope_violation` | Auth CD | `manual_only` | `blocking` | broadest-scope actor | 2c |
-| 5 | `temporal_authority_expired` | Auth CD | `auto_eligible` | `informational` | broadest-scope actor | 2c |
-| 6 | `role_stale` | Auth CD | `manual_only` | `blocking` | supervisor actor | 2c |
-| 7 | `domain_uniqueness_violation` | Shape-declared uniqueness CD | `manual_only` | `blocking` | TBD | **Implemented — Phase 4.3 / IDR-022** |
-| 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | `informational` | TBD | **Detector deferred — Phase 4 / IDR-020** |
-| 9 | *reserved* | *reserved* | *reserved* | *reserved* | *reserved* | **Reserved — growth slot; do not claim without ADR amendment** |
+| 1 | `concurrent_state_change` | Identity CD | `manual_only` | `blocking` | source-event human resolver per IDR-026 | 0 |
+| 2 | `stale_reference` | Identity CD | `auto_eligible` | `informational` | human identity/source-event resolver unless active auto policy designates `system:auto_resolution/stale_reference_alias_v1` | 1 |
+| 3 | `identity_conflict` | Manual (admin) | `manual_only` | `blocking` | human identity resolver per IDR-026 | 1 |
+| 4 | `scope_violation` | Auth CD | `manual_only` | `blocking` | nearest common human steward per IDR-026 | 2c |
+| 5 | `temporal_authority_expired` | Auth CD | `auto_eligible` | `informational` | nearest common human steward unless active auto policy designates `system:auto_resolution/temporal_authority_prior_scope_v1` | 2c |
+| 6 | `role_stale` | Auth CD | `manual_only` | `blocking` | activity supervisor / role-authority resolver per IDR-026 | 2c |
+| 7 | `domain_uniqueness_violation` | Shape-declared uniqueness CD | `manual_only` | `blocking` | domain/activity data steward per IDR-026 | **Implemented - Phase 4.3 / IDR-022** |
+| 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | `informational` | workflow/activity supervisor unless active auto policy designates `system:auto_resolution/transition_late_confirmation_v1` | **Detector deferred - Phase 4 / IDR-020** |
+| 9 | *reserved* | *reserved* | *reserved* | *reserved* | *reserved* | **Reserved - growth slot; do not claim without ADR amendment** |
 
-This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Category 7 landed in Phase 4.3. Category 8 is specified architecturally but its detector lands later in Phase 4. Category 9 is an explicit growth slot — claiming it requires an ADR-level amendment, not an IDR.
+This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Category 7 landed in Phase 4.3. Category 8 is specified architecturally but its detector lands later in Phase 4. Category 9 is an explicit growth slot - claiming it requires an ADR-level amendment, not an IDR.
+
+Resolver routing is defined by [IDR-026](../docs/decisions/idr-026-conflict-resolver-routing-and-single-writer-resolution.md). Earlier `system` entries were shorthand and are not resolver identities unless they name an exact system actor such as `system:auto_resolution/{policy_id}` or `system:resolver_unassigned/{category}`.
 
 ## Detection Ordering
 
@@ -42,10 +44,12 @@ Severity does not change resolvability. `manual_only` and `auto_eligible` remain
 
 ## Resolution
 
-Flags are resolved via the admin UI (`/admin/flags`). Resolution options:
+Flags are resolved through server-validated conflict-resolution surfaces. IDR-026 makes production `/api/conflicts/**` bearer-token actor-bound; the HTML admin UI (`/admin/flags`) is development-only until production admin/root auth exists. Resolution options:
 
 - **accepted** — the flagged event is accepted into state derivation (flag cleared).
 - **rejected** — the flagged event is permanently excluded from state derivation (flag cleared, event stays in the store).
 - **reclassified** — the flagged event has been reclassified to a different subject; requires a target `reclassified_subject_id`. Only valid for `identity_conflict` flags.
 
-Authorship discriminates manual vs. auto resolution: manual resolutions are emitted with `type = review` by a human actor; auto resolutions, once implemented, are emitted with `type = capture` by an actor whose `id` is prefixed `system:auto_resolution/...` (see ADR-007 §S2/F-A3/F-A5 and ADR-008 §S2). Auto-resolution remains deferred to a later trigger/auto-resolution slice and is not part of Phase 4.4 registry/binding validation.
+Authorship discriminates manual vs. auto resolution: manual resolutions are emitted with `type = review` by a human actor; auto resolutions, once implemented, are emitted with `type = capture` by an actor whose `id` is prefixed `system:auto_resolution/...` (see ADR-007 §S2/F-A3/F-A5 and ADR-008 §S2).
+
+Only a `conflict_resolved/v1` authored by the flag's exact `designated_resolver` is canonical. A non-designated resolution event is accepted for audit but does not clear the target flag; IDR-026 routes it to a deterministic `scope_violation` flag on the unauthorized resolution event. `auto_eligible` does not itself make the system the designated resolver. Auto-resolution remains deferred to a later trigger/auto-resolution slice and is not part of the IDR-026 runtime enforcement pass.

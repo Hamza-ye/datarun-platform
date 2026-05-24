@@ -356,7 +356,7 @@ All five must be true:
 
 ADR-002 S11 requires every `ConflictDetected` event to designate exactly one resolver identity. Only a `ConflictResolved` event authored by that designated resolver is canonical; resolution events from other actors are accepted but flagged as unauthorized. ADR-007 later canonicalized these as `conflict_detected/v1` and `conflict_resolved/v1` shapes under the closed envelope type vocabulary, but it did not remove the S11 obligation.
 
-Current implementation and contracts have partial resolver metadata only. `contracts/flag-catalog.md` still lists newer categories such as `domain_uniqueness_violation` and `transition_violation` with designated resolver `TBD`, and current resolution paths do not enforce single-writer resolver authority. That is acceptable only while the active slice does not depend on resolver routing. It must not become a silent IDR-level omission.
+At opening, current implementation and contracts had partial resolver metadata only. `contracts/flag-catalog.md` listed newer categories such as `domain_uniqueness_violation` and `transition_violation` with designated resolver `TBD`, and current resolution paths did not enforce single-writer resolver authority. That was acceptable only while the active slice did not depend on resolver routing. It must not become a silent IDR-level omission.
 
 Phase 4.4 pattern registry and binding validation does not emit `transition_violation`, create flags, resolve flags, route resolvers, or run auto-resolution, so this FP does not block 4.4 if the slice stays clean. It becomes blocking before any slice that emits resolver-dependent flags or claims conflict-resolution authority.
 
@@ -384,6 +384,7 @@ All of the following must be true:
 ### Resolution log
 
 - **2026-05-24**: Opened. Routed as carried ADR debt, not a Phase 4.4 blocker. Phase 4.4 may proceed only if it remains limited to platform pattern registry and binding validation. This FP blocks transition-violation emission, resolver routing, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out until the gate is met or explicitly re-deferred with a recorded reason.
+- **2026-05-24**: PARTIALLY ROUTED. [IDR-026](decisions/idr-026-conflict-resolver-routing-and-single-writer-resolution.md) defines resolver routing for all active/imminent categories, canonical single-writer resolution semantics, production conflict API actor binding, unauthorized-resolution flagging, and explicit deferral of reassignment/auto-resolution mechanics. FP-009 remains `OPEN` because runtime emission of required `designated_resolver`, bearer-bound `/api/conflicts/**`, canonical resolution enforcement, unauthorized-resolution flagging, and tests have not landed. `contracts/shapes/*` was deliberately left untouched; schema-required `designated_resolver` remains deferred to FP-010.
 
 ---
 

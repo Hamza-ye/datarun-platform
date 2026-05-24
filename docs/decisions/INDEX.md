@@ -31,6 +31,7 @@
 | [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) | Role-action domain boundary and assignment administration | active | 4-prep | decision | authorization, role-action, assignment, configuration, phase-4 |
 | [idr-024](idr-024-multi-axis-assignment-containment.md) | Multi-axis assignment containment | active | 4-prep | decision | authorization, assignment, scope, phase-4 |
 | [idr-025](idr-025-pattern-definition-contract-and-delivery.md) | Pattern definition contract and delivery | active | 4-prep | decision | workflow, pattern-registry, contracts, configuration, phase-4 |
+| [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) | Conflict resolver routing and single-writer resolution | active | 4-prep | decision | conflict, authorization, resolver-routing, phase-4 |
 
 ## By Component
 
@@ -42,6 +43,7 @@
 - [idr-015](idr-015-scope-filtered-sync-query.md) — Scope-filtered sync query
 - [idr-016](idr-016-actor-token-table.md) — Actor token table
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Multi-axis assignment containment in sync/auth helpers
+- [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Conflict resolution API actor binding
 
 ### server/integrity
 - [idr-007](idr-007-concurrency-detection.md) — Concurrency detection
@@ -53,6 +55,7 @@
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Flag severity and domain uniqueness evaluation
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Role-action domain boundary
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Null-activity authority semantics
+- [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Resolver routing and canonical resolution enforcement
 
 ### server/authorization
 - [idr-013](idr-013-assignment-payload.md) — Assignment payload design
@@ -62,6 +65,7 @@
 - [idr-021](idr-021-role-action-enforcement-model.md) — Role-action permission semantics
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Assignment administration boundary
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Assignment creation/end containment
+- [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Conflict API bearer-token actor binding
 
 ### server/identity
 - [idr-008](idr-008-server-event-producer.md) — Server event producer
@@ -79,6 +83,7 @@
 
 ### server/admin
 - [idr-006](idr-006-thymeleaf-admin.md) — Thymeleaf admin
+- [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Development-only flag-resolution boundary
 
 ### mobile/data
 - [idr-003](idr-003-snake-case-json.md) — snake_case JSON
@@ -111,6 +116,7 @@
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Activity role-action vocabulary boundary
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Assignment scope containment contract
 - [idr-025](idr-025-pattern-definition-contract-and-delivery.md) — Pattern definition schema and canonical files
+- [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Flag resolver routing catalog
 
 ### ci
 - [idr-001](idr-001-test-infrastructure.md) — Test infrastructure
