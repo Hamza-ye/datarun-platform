@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-24 (IDR-026 resolver-routing decision landed; FP-009 implementation remains open)
+**Last updated**: 2026-05-24 (IDR-026 resolver-routing decision landed; FP-011 auth-provider mapping tracked)
 
 ---
 
@@ -42,6 +42,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 | FP-008 | Assignment command actor identity binding | Phase 4.3 entry / assignment command exposure | A | **RESOLVED** |
 | FP-009 | Conflict resolver designation and single-writer resolution enforcement | Phase 4.6 `transition_violation`; runtime resolver enforcement / auto-resolution | A | **OPEN** (IDR-026 routing decided; implementation gates unmet) |
 | FP-010 | Platform-bundled payload shape contract parity | platform payload shape changes / production contract-hygiene close-out | C | **OPEN** (not blocking landed Phase 4.5 projection because it consumes existing payload fields) |
+| FP-011 | Authentication principal-to-actor mapping and group non-authority | production Keycloak/OIDC/JWT integration; group/claim authority models | B | **OPEN** (not an FP-009 blocker while conflict APIs stay bearer actor-bound) |
 
 **Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
 
@@ -112,7 +113,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## Blockers
 
-FP-005 is `RESOLVED`; `ongoing_resolution/v1` projection now uses the distinct subject-history backfill surface for newly assigned long-running subjects. FP-009 is routed by IDR-026 but remains `OPEN` and blocks Phase 4.6 `transition_violation` emission, runtime resolver enforcement, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out until implementation gates and tests land. FP-010 is `OPEN` as platform payload shape contract hygiene; it does not block current projection/backfill behavior unless the slice changes platform-bundled payload shapes or claims payload-shape contract parity. The P04 Responsibility Binding scenario-grade test gap is a Phase 4 coverage gate, not a current blocker for pattern-state projection.
+FP-005 is `RESOLVED`; `ongoing_resolution/v1` projection now uses the distinct subject-history backfill surface for newly assigned long-running subjects. FP-009 is routed by IDR-026 but remains `OPEN` and blocks Phase 4.6 `transition_violation` emission, runtime resolver enforcement, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out until implementation gates and tests land. FP-010 is `OPEN` as platform payload shape contract hygiene; it does not block current projection/backfill behavior unless the slice changes platform-bundled payload shapes or claims payload-shape contract parity. FP-011 is `OPEN` and blocks production Keycloak/OIDC/JWT integration or group/claim authority, but it does not block the FP-009 implementation pass while that pass stays provider-neutral and actor-bound through the existing bearer context. The P04 Responsibility Binding scenario-grade test gap is a Phase 4 coverage gate, not a current blocker for pattern-state projection.
 
 ---
 

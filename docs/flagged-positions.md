@@ -429,6 +429,75 @@ All of the following must be true:
 
 ---
 
+## FP-011 — Authentication principal-to-actor mapping and group non-authority
+
+**Status**: OPEN
+**Opened**: 2026-05-24 by authentication/provider planning review
+**Blocks**: production authentication provider integration; any Keycloak/OIDC/JWT slice; any account, user-group, or IdP-claim authority model
+**Severity**: B — protects ADR-003 assignment-derived authority and ADR-002 actor authorship
+
+### Context
+
+The current implementation uses the Phase 2 simple actor-token path from IDR-016:
+`Authorization: Bearer <token>` resolves to an `actor_id`, and assignments remain
+the source of sync scope and action authority. IDR-016 deliberately left a
+migration path to Keycloak/JWT validation behind the same bearer-header
+convention.
+
+Future Keycloak or OIDC integration must not silently turn authentication
+accounts, IdP groups, or token claims into direct event/data authority. That
+would create a second authorization system beside ADR-003 assignments and could
+make group changes retroactively alter access semantics without assignment
+events. Authentication may prove that a principal can act as an actor; it does
+not decide what the actor may see or do.
+
+This does not block FP-009. FP-009 may bind `/api/conflicts/**` to the current
+bearer-resolved actor context as long as it does not add account IDs, group IDs,
+IdP claims, or Keycloak-specific authority rules. The production provider
+integration itself needs this FP resolved or explicitly routed first.
+
+### Trigger
+
+Before any of the following:
+
+1. Replacing or extending `ActorTokenInterceptor` with Keycloak/OIDC/JWT
+   validation.
+2. Adding account, user, group, or IdP-claim tables/fields that affect sync
+   scope, action authority, resolver designation, assignment administration, or
+   event authorship.
+3. Treating Keycloak groups, realm roles, client roles, or JWT claims as direct
+   assignment, scope, role-action, resolver, or admin authority.
+4. Adding `user_id`, `account_id`, `group_id`, or equivalent fields to the event
+   envelope or platform-bundled event payloads.
+5. Implementing shared-device or multi-actor session semantics.
+
+### Gate
+
+All of the following must be true:
+
+1. A decision artifact defines the account/principal-to-actor mapping for
+   production authentication.
+2. The decision explicitly states that effective authority remains derived from
+   assignment events, assignment roles, scope axes, and platform resolver rules,
+   not directly from authentication provider groups or claims.
+3. If IdP groups are used, they are classified as provisioning/admin-convenience
+   inputs only, or a formal ADR/IDR defines how they emit assignment or
+   assignment-administration events before affecting authority.
+4. Tests prove a principal with no assignment-derived authority cannot sync,
+   act, administer assignments, or resolve conflicts merely because of account,
+   group, realm-role, client-role, or JWT claim membership.
+5. Event authorship continues to use `actor_ref`; no account/group/user field is
+   added to the event envelope without formal ADR-level change control.
+
+### Resolution log
+
+- **2026-05-24**: Opened from `.review/temporary-authentication-discussion.md`.
+  This is not an FP-009 blocker because the FP-009 pass can remain provider-neutral
+  and actor-bound through the existing bearer context. It blocks production
+  Keycloak/OIDC/JWT integration and any group/claim authority model.
+
+---
+
 ## Standing Register Rules
 
 These rules govern how the register is used. They are not items — they are the discipline.
