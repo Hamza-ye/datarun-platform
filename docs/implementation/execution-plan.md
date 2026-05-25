@@ -114,9 +114,11 @@ Phase-specific sub-phase breakdowns, quality gates, acceptance criteria, technic
 | Phase 1 | [phase-1.md](phases/phase-1.md) | Complete |
 | Phase 2 | [phase-2.md](phases/phase-2.md) | Complete |
 | Phase 3 | [phase-3.md](phases/phase-3.md) | Complete |
-| Phase 4 | [phase-4.md](phases/phase-4.md) | In progress |
+| Phase 4 | [phase-4.md](phases/phase-4.md) | Complete |
 
 Previous external references to "execution-plan.md §6" now resolve to the corresponding phase file. Phase 1–4 execution guidance remains in §7 as brief outlines; when each phase starts, a phase file is created with the expanded scope and sub-phase breakdown.
+
+Current implemented module boundaries are recorded in [module-interfaces.md](module-interfaces.md). That document is descriptive: update it when an implementation slice changes a module's public inputs, outputs, owned storage, or forbidden dependencies.
 
 ### 6.1 Reversibility Triage (required step)
 
