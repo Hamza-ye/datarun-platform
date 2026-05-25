@@ -1,17 +1,29 @@
 # Datarun Platform - Agent Onboarding
 
-This file exists to reduce wrong assumptions in fresh AI-agent sessions. It is an onboarding map, not a replacement for the ADRs, IDRs, phase specs, contracts, or code.
+This file exists to reduce wrong assumptions in fresh AI-agent sessions. It is the repo's context router, not a request to read the whole documentation set.
 
 ## Start Here
 
-Before writing code or drafting design, read:
+Default implementer packet:
 
-1. `docs/status.md` - current phase, landed work, open blockers, active ADRs/IDRs, and recommended next slice.
-2. `docs/flagged-positions.md` - deferred gates and blockers. Check existing FPs before adding a new one.
-3. The active phase spec and decision files named by `docs/status.md` or by the user prompt.
-4. Relevant `contracts/` files when touching any cross-boundary behavior.
+1. This file.
+2. The top **Current Routing** section of `docs/status.md`.
+3. The relevant section of `docs/implementation/module-interfaces.md` for the touched module.
+4. The exact `contracts/` files and code paths named by the task or discovered from the touched surface.
+
+Open additional docs only when routed:
+
+- `docs/flagged-positions.md` - read the summary table first; open a specific FP section only when its `Blocks` field or topic matches the task, or when adding/updating an FP.
+- ADRs/IDRs - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision.
+- `docs/architecture/`, phase specs, scenarios, and exploration archives - use for architecture-steward planning, drift investigation, or when a task explicitly depends on that context.
 
 If these sources disagree with each other or with the code, stop and surface the drift before implementing.
+
+## Steward And Implementer Split
+
+- Architecture-steward sessions may read broadly, reconcile status, and produce bounded implementation prompts.
+- Implementer sessions should read only the bounded task packet plus the default implementer packet above.
+- A task packet should state goal, files to read, authority/guardrails, forbidden work, expected tests, commit boundary, and stop-and-report conditions.
 
 ## Repository Map
 
@@ -50,7 +62,7 @@ If a contract appears stale, do not silently code around it. Either update it in
 - Structurally valid state/policy anomalies are accepted and flagged; do not reject them unless the relevant ADR/IDR explicitly says structural validation applies.
 - Authority and state are projections from events unless a documented B-to-C escape hatch has been explicitly activated.
 - Respect the active phase boundaries in `docs/status.md`. Do not implement work listed as blocked or deferred.
-- `docs/flagged-positions.md` is append-only. Add a new FP only for a real deferred architectural position with a specific trigger and gate, and only after confirming no existing FP covers it.
+- `docs/flagged-positions.md` is append-only. Use its table as the default lookup surface; add a new FP only for a real deferred architectural position with a specific trigger and gate, and only after confirming no existing FP covers it.
 
 ## Build And Test
 

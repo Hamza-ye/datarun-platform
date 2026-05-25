@@ -3,7 +3,9 @@
 > Deferred verification items and quiet-decision markers that must not be forgotten.
 > This file is **append-only**. Items move to `RESOLVED` with a resolution log entry — never deleted.
 >
-> **When to consult**: before drafting any new IDR, before starting any new phase, during any close-out audit. Every agent working on this platform is expected to read this register as part of onboarding to a new phase.
+> **Default reading rule**: read the summary table first. Open a specific FP section only when its `Blocks` field or topic matches the task, when the task changes that surface, or when adding/updating an FP.
+>
+> **Architecture-steward reading rule**: before drafting any new IDR, starting any new phase, or running a close-out audit, grep/read this register for items whose `Blocks:` field names the upcoming work.
 
 ---
 
@@ -519,7 +521,7 @@ Moving an item from `OPEN` to `RESOLVED` requires the resolution log to cite a c
 
 ### Rule R-4: Consult before writing an IDR or starting a phase
 
-Before any of the following, the active agent MUST grep/read this register for items whose `Blocks:` field names the upcoming work:
+Before any of the following, the architecture-steward agent MUST grep/read this register for items whose `Blocks:` field names the upcoming work:
 
 - Drafting a new IDR
 - Starting a new phase spec

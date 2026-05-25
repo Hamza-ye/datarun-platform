@@ -6,7 +6,20 @@
 
 ---
 
-## Current Phase
+## Current Routing
+
+Use this section as the low-token bootstrap for new sessions.
+
+- Phase 4 is complete; the completion audit is green.
+- FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
+- FP-011 remains open only for production Keycloak/OIDC/JWT integration or group/claim authority models. Do not take it unless that work is explicitly in scope.
+- The next product/architecture phase has not been selected.
+- Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md`, and the exact contracts/code touched by the task.
+- Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
+
+---
+
+## Current Phase And Historical Detail
 
 **Phase 3: Configuration** — **COMPLETE** (including 3d close-out and 3e envelope-type retrofit)
 
@@ -44,7 +57,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 | FP-010 | Platform-bundled payload shape contract parity | platform payload shape changes / production contract-hygiene close-out | C | **RESOLVED** |
 | FP-011 | Authentication principal-to-actor mapping and group non-authority | production Keycloak/OIDC/JWT integration; group/claim authority models | B | **OPEN** (not an FP-009 blocker while conflict APIs stay bearer actor-bound) |
 
-**Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
+**Rule R-4**: before drafting a new IDR or starting a new phase, grep/read the register for items whose `Blocks:` field names the upcoming work. Blocking items must be resolved or explicitly re-deferred.
 
 ### Previous Phases
 
