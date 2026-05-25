@@ -16,7 +16,7 @@ All flag categories raised by the integrity pipeline. Each flag is persisted as 
 | 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | `informational` | workflow/activity supervisor unless active auto policy designates `system:auto_resolution/transition_late_confirmation_v1` | **Implemented - Phase 4.6 / IDR-020** |
 | 9 | *reserved* | *reserved* | *reserved* | *reserved* | *reserved* | **Reserved - growth slot; do not claim without ADR amendment** |
 
-This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Category 7 landed in Phase 4.3. Category 8 is specified architecturally but its detector lands later in Phase 4. Category 9 is an explicit growth slot - claiming it requires an ADR-level amendment, not an IDR.
+This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Category 7 landed in Phase 4.3. Category 8 landed in Phase 4.6. Category 9 is an explicit growth slot - claiming it requires an ADR-level amendment, not an IDR.
 
 Resolver routing is defined by [IDR-026](../docs/decisions/idr-026-conflict-resolver-routing-and-single-writer-resolution.md). Earlier `system` entries were shorthand and are not resolver identities unless they name an exact system actor such as `system:auto_resolution/{policy_id}` or `system:resolver_unassigned/{category}`.
 

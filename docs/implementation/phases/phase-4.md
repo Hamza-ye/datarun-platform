@@ -108,12 +108,12 @@ FP-006 is resolved. Authorization CD now gates `temporal_authority_expired` on t
 | 4.1 | Role-action config validation, packaging, mobile parsing, advisory device gating, and authoritative server `role_stale` semantics | IDR-021 / IDR-023 | Policy enforcement |
 | 4.2 | Flag severity defaults and deployment-wide `flag_severity_overrides` validation, packaging, server/mobile interpretation | IDR-022 | Config + workflow gating (**landed**) |
 | 4.3 | Shape uniqueness schema, DtV validation, advisory device duplicate warnings, server-side `domain_uniqueness_violation` detector | IDR-022 | Shape policy (**landed**) |
-| 4.4 | Platform Pattern Registry and activity pattern binding validation | IDR-020 | Workflow registry |
-| 4.5 | Server and mobile pattern-state projection, including unresolved-flag exclusion and state re-derivation after resolution | IDR-020 / ADR-005 | Projection |
-| 4.6 | Server `transition_violation` detector in the push pipeline | IDR-020 / ADR-005 | Conflict detection |
-| 4.7 | Subject-history backfill decision and implementation before any `ongoing_resolution` support | FP-005 / IDR-020 | Sync support |
-| 4.8 | Phase 4 shared fixtures and quality gates spanning server/mobile equivalence | IDR-020/021/022/023/024 | Test infrastructure |
-| 4.9 | Multi-axis assignment creation/end containment and null-activity work-event semantics | IDR-024 / FP-007 | Assignment administration |
+| 4.4 | Platform Pattern Registry and activity pattern binding validation | IDR-020 | Workflow registry (**landed**) |
+| 4.5 | Server and mobile pattern-state projection, including unresolved-flag exclusion and state re-derivation after resolution | IDR-020 / ADR-005 | Projection (**landed**) |
+| 4.6 | Server `transition_violation` detector in the push pipeline | IDR-020 / ADR-005 | Conflict detection (**landed**) |
+| 4.7 | Subject-history backfill decision and implementation before any `ongoing_resolution` support | FP-005 / IDR-020 | Sync support (**landed**) |
+| 4.8 | Phase 4 shared fixtures and quality gates spanning server/mobile equivalence | IDR-020/021/022/023/024 | Test infrastructure (**landed**) |
+| 4.9 | Multi-axis assignment creation/end containment and null-activity work-event semantics | IDR-024 / FP-007 | Assignment administration (**landed**) |
 
 ---
 
@@ -537,7 +537,7 @@ Phase 4 is not complete until every applicable gate is green.
 - [x] `transition_violation` emits with `type = "alert"` and `shape_ref = "conflict_detected/v1"`.
 - [x] No new envelope type or envelope field is introduced.
 - [x] Pattern identity never uses `subject_ref.type = "process"`.
-- [ ] `entity_lifecycle` is implemented before S06 support is claimed, or S06 remains explicitly deferred.
+- [x] `entity_lifecycle` is implemented before S06 support is claimed, or S06 remains explicitly deferred. S06 remains deferred in Phase 4.
 
 ### FP-005 Gates
 
@@ -563,9 +563,10 @@ Phase 4 is not complete until every applicable gate is green.
 
 ## 9. Sequencing
 
-Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed, and the follow-on `ongoing_resolution/v1` projection slice now consumes the FP-005 subject-history backfill surface. IDR-026 / FP-009 runtime resolver designation and single-writer enforcement has landed. Phase 4.6 `transition_violation` detection has landed. The scenario-grade P04 Responsibility Binding reassignment campaign gate has landed. No auto-resolution, resolver reassignment, normal sync backfill, durable workflow-state tables, or `contracts/shapes/*` tightening have landed. Recommended remaining close-out order:
+Phase 4.1 role-action server enforcement and mobile advisory behavior has landed. Phase 4.2 flag severity has landed. IDR-024/FP-007 assignment containment hardening and FP-008 assignment command identity binding have landed. Phase 4.3 domain uniqueness has landed. Phase 4.4 registry/binding validation and IDR-025 pattern definition delivery have landed. Phase 4.5 enabled-binding pattern-state projection has landed, and the follow-on `ongoing_resolution/v1` projection slice now consumes the FP-005 subject-history backfill surface. IDR-026 / FP-009 runtime resolver designation and single-writer enforcement has landed. Phase 4.6 `transition_violation` detection has landed. The scenario-grade P04 Responsibility Binding reassignment campaign gate has landed. The Phase 4 completion audit found every applicable Phase 4 gate green, with S06 explicitly deferred and no auto-resolution, resolver reassignment, normal sync backfill, durable workflow-state tables, or `contracts/shapes/*` tightening landed. Recommended next order:
 
-1. Close docs/status/catalog updates and Phase 4 completion audit.
+1. Treat Phase 4 as complete.
+2. Decide whether to pull FP-010 forward as production contract-hygiene hardening before starting a new implementation phase.
 
 This order keeps landed role-action, severity, assignment-administration, uniqueness, registry, enabled-binding and `ongoing_resolution` projection, FP-005 backfill, FP-009 resolver enforcement, Phase 4.6 transition detection, and P04 scenario-grade campaign coverage independent of auto-resolution and resolver reassignment.
 
@@ -620,3 +621,4 @@ This order keeps landed role-action, severity, assignment-administration, unique
 - **2026-05-24**: FP-009 runtime enforcement landed: active conflict detectors emit `designated_resolver`, `/api/conflicts/**` is bearer actor-bound, request-body `actor_id` is non-authoritative, canonical resolution requires exact resolver equality, unauthorized resolutions emit `scope_violation`, legacy missing-resolver flags do not resolve canonically, and server/mobile pattern projections only re-admit events through canonical accepted resolutions. `reclassified` remains identity-conflict subject-attribution behavior; `transition_violation`, auto-resolution, resolver reassignment, Keycloak/JWT/group authority, envelope changes, durable workflow-state tables, and `contracts/shapes/*` tightening remain out of scope.
 - **2026-05-25**: Phase 4.6 `transition_violation` detection landed: server push runs transition detection after domain uniqueness, reuses the server PatternStateProjection transition matcher against canonical `contracts/patterns/*.json`, derives current state before applying the incoming event, skips events with prior unresolved same-pass flags, emits `conflict_detected/v1` alert flags with IDR-026 `designated_resolver`, and re-includes canonically accepted transition-flag sources only through legal IDR-020 transitions without bypassing `from`. Server/mobile shared projection fixtures cover legal-transition-only accepted transition violation behavior. Auto-resolution, resolver reassignment, Keycloak/JWT/group authority, envelope changes, durable workflow-state tables, normal sync backfill changes, and `contracts/shapes/*` tightening remain out of scope.
 - **2026-05-25**: P04 scenario-grade Responsibility Binding gate landed as a server integration scenario covering coordinated campaign work, overlapping responsibility areas, mid-campaign reassignment, scope-filtered sync expansion/contraction after reassignment, role-action authority across the reassignment boundary, and stale offline work after authority moves.
+- **2026-05-25**: Phase 4 completion audit landed: all applicable Phase 4 gates are green, S06/entity lifecycle remains explicitly deferred, FP-010 and FP-011 remain open but untriggered by the Phase 4 implementation, and `contracts/flag-catalog.md` was reconciled with the landed `transition_violation` detector.
