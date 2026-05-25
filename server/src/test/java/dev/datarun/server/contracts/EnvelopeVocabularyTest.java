@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,5 +84,32 @@ class EnvelopeVocabularyTest {
                     .as("Canonical type '%s' must validate", type)
                     .isEmpty();
         }
+    }
+
+    @Test
+    void envelopeFieldSetAndTypeVocabularyRemainClosed() throws Exception {
+        JsonNode schema = mapper.readTree(getClass().getResourceAsStream("/envelope.schema.json"));
+
+        List<String> propertyNames = new ArrayList<>();
+        schema.get("properties").fieldNames().forEachRemaining(propertyNames::add);
+        List<String> typeValues = new ArrayList<>();
+        schema.at("/properties/type/enum").forEach(value -> typeValues.add(value.asText()));
+
+        assertThat(propertyNames)
+                .containsExactlyInAnyOrder(
+                        "id",
+                        "type",
+                        "shape_ref",
+                        "activity_ref",
+                        "subject_ref",
+                        "actor_ref",
+                        "device_id",
+                        "device_seq",
+                        "sync_watermark",
+                        "timestamp",
+                        "payload");
+        assertThat(typeValues)
+                .containsExactly("capture", "review", "alert", "task_created",
+                        "task_completed", "assignment_changed");
     }
 }

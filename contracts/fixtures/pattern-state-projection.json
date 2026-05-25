@@ -1869,6 +1869,159 @@
       "payload": {
         "status": "successor opened independently"
       }
+    },
+    {
+      "id": "aaaaaaaa-7401-0000-0000-000000000001",
+      "type": "capture",
+      "shape_ref": "case_opening/v1",
+      "activity_ref": "ongoing_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000007401"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000101"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000101",
+      "device_seq": 47,
+      "sync_watermark": 47,
+      "timestamp": "2026-05-24T08:00:01Z",
+      "payload": {
+        "status": "opened"
+      }
+    },
+    {
+      "id": "aaaaaaaa-7401-0000-0000-000000000002",
+      "type": "capture",
+      "shape_ref": "case_follow_up/v1",
+      "activity_ref": "ongoing_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000007401"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000101"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000101",
+      "device_seq": 48,
+      "sync_watermark": 48,
+      "timestamp": "2026-05-24T09:00:01Z",
+      "payload": {
+        "notes": "first interaction"
+      }
+    },
+    {
+      "id": "aaaaaaaa-7401-0000-0000-000000000003",
+      "type": "capture",
+      "shape_ref": "case_resolution/v1",
+      "activity_ref": "ongoing_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000007401"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000101"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000101",
+      "device_seq": 49,
+      "sync_watermark": 49,
+      "timestamp": "2026-05-24T10:00:01Z",
+      "payload": {
+        "outcome": "resolved"
+      }
+    },
+    {
+      "id": "aaaaaaaa-7401-0000-0000-000000000004",
+      "type": "review",
+      "shape_ref": "case_closure_review/v1",
+      "activity_ref": "ongoing_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000007401"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000102"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000101",
+      "device_seq": 50,
+      "sync_watermark": 50,
+      "timestamp": "2026-05-24T10:30:01Z",
+      "payload": {
+        "decision": "closed"
+      }
+    },
+    {
+      "id": "aaaaaaaa-7401-0000-0000-000000000005",
+      "type": "capture",
+      "shape_ref": "case_follow_up/v1",
+      "activity_ref": "ongoing_activity",
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000007401"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000101"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000101",
+      "device_seq": 51,
+      "sync_watermark": 51,
+      "timestamp": "2026-05-24T11:00:01Z",
+      "payload": {
+        "notes": "post-closure interaction accepted by resolver"
+      }
+    },
+    {
+      "id": "aaaaaaaa-7401-0000-0000-000000000006",
+      "type": "alert",
+      "shape_ref": "conflict_detected/v1",
+      "activity_ref": null,
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000007401"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "system:conflict_detector/transition_violation"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000000",
+      "device_seq": 52,
+      "sync_watermark": 52,
+      "timestamp": "2026-05-24T11:00:02Z",
+      "payload": {
+        "source_event_id": "aaaaaaaa-7401-0000-0000-000000000005",
+        "flag_category": "transition_violation",
+        "resolvability": "auto_eligible",
+        "designated_resolver": { "type": "actor", "id": "cccccccc-0000-0000-0000-000000000102" }
+      }
+    },
+    {
+      "id": "aaaaaaaa-7401-0000-0000-000000000007",
+      "type": "review",
+      "shape_ref": "conflict_resolved/v1",
+      "activity_ref": null,
+      "subject_ref": {
+        "type": "subject",
+        "id": "bbbbbbbb-0000-0000-0000-000000007401"
+      },
+      "actor_ref": {
+        "type": "actor",
+        "id": "cccccccc-0000-0000-0000-000000000102"
+      },
+      "device_id": "dddddddd-0000-0000-0000-000000000000",
+      "device_seq": 53,
+      "sync_watermark": 53,
+      "timestamp": "2026-05-24T11:05:01Z",
+      "payload": {
+        "flag_event_id": "aaaaaaaa-7401-0000-0000-000000000006",
+        "source_event_id": "aaaaaaaa-7401-0000-0000-000000000005",
+        "resolution": "accepted",
+        "reason": "late interaction accepted by supervisor"
+      }
     }
   ],
   "expected_output": {
@@ -2149,6 +2302,24 @@
         "pending_since": "2026-05-24T09:50:01.000000Z",
         "time_in_state": 7800,
         "pattern_specific": {}
+      },
+      {
+        "composition": "subject",
+        "state_key": {
+          "subject_ref": {
+            "type": "subject",
+            "id": "bbbbbbbb-0000-0000-0000-000000007401"
+          },
+          "activity_ref": "ongoing_activity",
+          "binding_ref": "ongoing_resolution/v1"
+        },
+        "current_state": "closed",
+        "pending_since": "2026-05-24T10:30:01.000000Z",
+        "time_in_state": 5400,
+        "pattern_specific": {
+          "last_interaction_date": "2026-05-24T09:00:01.000000Z",
+          "interaction_count": 1
+        }
       }
     ]
   }

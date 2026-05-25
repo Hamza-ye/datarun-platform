@@ -73,6 +73,53 @@ public class PatternStateProjection {
     }
 
     public ArrayNode project(List<Event> events, Map<String, JsonNode> activityConfigs, OffsetDateTime asOf) {
+        ProjectionContext context = buildProjectionContext(events, activityConfigs);
+
+        ArrayNode output = objectMapper.createArrayNode();
+        context.states().values().stream()
+                .sorted(Comparator.comparing(StateInstance::sortKey))
+                .map(state -> toJson(state, asOf))
+                .forEach(output::add);
+        return output;
+    }
+
+    public List<TransitionCheck> checkTransition(Event event,
+                                                 List<Event> projectionBasis,
+                                                 Map<String, JsonNode> activityConfigs) {
+        if (event == null || isProjectionMetadata(event) || isAssignmentChanged(event)
+                || event.activityRef() == null) {
+            return List.of();
+        }
+        ProjectionContext context = buildProjectionContext(projectionBasis, activityConfigs);
+        List<Binding> bindings = context.bindingsByActivity()
+                .getOrDefault(event.activityRef(), List.of());
+        if (bindings.isEmpty()) {
+            return List.of();
+        }
+
+        List<TransitionCheck> checks = new ArrayList<>();
+        for (Binding binding : bindings) {
+            String shapeRole = binding.shapeRole(event.shapeRef());
+            if (shapeRole == null) {
+                continue;
+            }
+            StateInstance current = currentStateFor(event, binding, context);
+            JsonNode transition = matchingTransition(event, binding, current, shapeRole, null);
+            checks.add(new TransitionCheck(
+                    binding.composition(),
+                    binding.activityRef(),
+                    binding.ref(),
+                    shapeRole,
+                    current == null ? null : current.currentState,
+                    transition != null,
+                    transition == null ? null : transition.path("id").asText(null)
+            ));
+        }
+        return checks;
+    }
+
+    private ProjectionContext buildProjectionContext(List<Event> events,
+                                                     Map<String, JsonNode> activityConfigs) {
         Map<String, List<Binding>> bindingsByActivity = parseBindings(activityConfigs);
         Set<String> excludedEventIds = nonAcceptedFlaggedEventIds(events);
         Map<String, String> subjectAliases = subjectAliases(events);
@@ -108,13 +155,7 @@ public class PatternStateProjection {
                 }
             }
         }
-
-        ArrayNode output = objectMapper.createArrayNode();
-        states.values().stream()
-                .sorted(Comparator.comparing(StateInstance::sortKey))
-                .map(state -> toJson(state, asOf))
-                .forEach(output::add);
-        return output;
+        return new ProjectionContext(bindingsByActivity, states, subjectAliases);
     }
 
     private Map<String, List<Binding>> parseBindings(Map<String, JsonNode> activityConfigs) {
@@ -458,6 +499,22 @@ public class PatternStateProjection {
         return null;
     }
 
+    private StateInstance currentStateFor(Event event, Binding binding, ProjectionContext context) {
+        if ("subject".equals(binding.composition())) {
+            String canonicalSubjectId = canonicalSubjectId(event.subjectRef(), context.subjectAliases());
+            JsonNode subjectRef = canonicalSubjectRef(event.subjectRef(), canonicalSubjectId);
+            return context.states().get(subjectKey(subjectRef, binding));
+        }
+        if ("event".equals(binding.composition())) {
+            String sourceEventId = sourceEventId(event.payload());
+            if (sourceEventId == null) {
+                sourceEventId = event.id().toString();
+            }
+            return context.states().get(eventKey(sourceEventId, binding));
+        }
+        return null;
+    }
+
     private boolean fromMatches(JsonNode from, StateInstance current) {
         if (from == null || from.isNull()) {
             return current == null;
@@ -794,6 +851,22 @@ public class PatternStateProjection {
             return activityRefs == null || activityRefs.contains(activityRef);
         }
     }
+
+    public record TransitionCheck(
+            String composition,
+            String activityRef,
+            String bindingRef,
+            String shapeRole,
+            String currentState,
+            boolean allowed,
+            String transitionId
+    ) {}
+
+    private record ProjectionContext(
+            Map<String, List<Binding>> bindingsByActivity,
+            Map<String, StateInstance> states,
+            Map<String, String> subjectAliases
+    ) {}
 
     private static class StateInstance {
         private final String key;

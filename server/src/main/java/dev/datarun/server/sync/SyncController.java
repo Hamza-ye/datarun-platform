@@ -13,6 +13,7 @@ import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.integrity.ConflictDetector;
 import dev.datarun.server.integrity.DomainUniquenessDetector;
+import dev.datarun.server.integrity.TransitionViolationDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,7 @@ public class SyncController {
     private final ConfigPackager configPackager;
     private final ShapePayloadValidator shapePayloadValidator;
     private final DomainUniquenessDetector domainUniquenessDetector;
+    private final TransitionViolationDetector transitionViolationDetector;
     private final SubjectHistoryBackfillService subjectHistoryBackfillService;
 
     public SyncController(EventRepository eventRepository,
@@ -52,6 +54,7 @@ public class SyncController {
                           ObjectMapper objectMapper,
                           ConflictDetector conflictDetector,
                           DomainUniquenessDetector domainUniquenessDetector,
+                          TransitionViolationDetector transitionViolationDetector,
                           TransactionTemplate transactionTemplate,
                           JdbcTemplate jdbc,
                           ScopeResolver scopeResolver,
@@ -63,6 +66,7 @@ public class SyncController {
         this.objectMapper = objectMapper;
         this.conflictDetector = conflictDetector;
         this.domainUniquenessDetector = domainUniquenessDetector;
+        this.transitionViolationDetector = transitionViolationDetector;
         this.transactionTemplate = transactionTemplate;
         this.jdbc = jdbc;
         this.scopeResolver = scopeResolver;
@@ -166,6 +170,16 @@ public class SyncController {
                 }
             } catch (Exception e) {
                 log.warn("Domain uniqueness detection failed (events persisted, uniqueness flags missing): {}",
+                        e.getMessage());
+            }
+
+            try {
+                List<Event> transitionFlags = transitionViolationDetector.evaluate(acceptedEvents);
+                if (!transitionFlags.isEmpty()) {
+                    flagsRaised += persistFlagEvents(transitionFlags);
+                }
+            } catch (Exception e) {
+                log.warn("Pattern transition detection failed (events persisted, transition flags missing): {}",
                         e.getMessage());
             }
         }

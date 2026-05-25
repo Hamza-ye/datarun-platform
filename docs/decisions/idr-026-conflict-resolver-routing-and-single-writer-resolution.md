@@ -289,7 +289,7 @@ the platform can move an unresolved flag from one resolver to another.
 | Category routing | One test per active category proving emitted flags include exactly one `designated_resolver` and the route matches this IDR. |
 | Domain uniqueness | Duplicate event flag designates a human domain/activity resolver who can see the source and conflicting events. |
 | Multi-flag convergence | One source event with multiple flags gets the same resolver on every flag. |
-| Authorized resolution | A `conflict_resolved/v1` authored by the designated resolver clears the flag and re-derives projections according to `accepted`, `rejected`, or `reclassified`. |
+| Authorized resolution | A `conflict_resolved/v1` authored by the designated resolver clears the flag and re-derives projections according to the supported resolution semantics. Pattern projections re-admit through canonical `accepted`; `reclassified` remains identity-conflict subject-attribution behavior unless a later decision broadens it. |
 | Unauthorized resolution | A non-designated resolver's `conflict_resolved/v1` is persisted, does not clear the original flag, and creates a `scope_violation` flag on the resolution event. |
 | API auth | `/api/conflicts/**` rejects missing/invalid bearer tokens on production endpoints. |
 | Body spoofing | A request-body `actor_id` cannot make a non-designated bearer actor canonical. |

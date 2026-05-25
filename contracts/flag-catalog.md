@@ -13,7 +13,7 @@ All flag categories raised by the integrity pipeline. Each flag is persisted as 
 | 5 | `temporal_authority_expired` | Auth CD | `auto_eligible` | `informational` | nearest common human steward unless active auto policy designates `system:auto_resolution/temporal_authority_prior_scope_v1` | 2c |
 | 6 | `role_stale` | Auth CD | `manual_only` | `blocking` | activity supervisor / role-authority resolver per IDR-026 | 2c |
 | 7 | `domain_uniqueness_violation` | Shape-declared uniqueness CD | `manual_only` | `blocking` | domain/activity data steward per IDR-026 | **Implemented - Phase 4.3 / IDR-022** |
-| 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | `informational` | workflow/activity supervisor unless active auto policy designates `system:auto_resolution/transition_late_confirmation_v1` | **Detector deferred - Phase 4 / IDR-020** |
+| 8 | `transition_violation` | Pattern state-machine CD | `auto_eligible` | `informational` | workflow/activity supervisor unless active auto policy designates `system:auto_resolution/transition_late_confirmation_v1` | **Implemented - Phase 4.6 / IDR-020** |
 | 9 | *reserved* | *reserved* | *reserved* | *reserved* | *reserved* | **Reserved - growth slot; do not claim without ADR amendment** |
 
 This catalog matches the 9 categories defined in [`docs/architecture/boundary.md`](../docs/architecture/boundary.md) SG-2 and [`docs/architecture/cross-cutting.md`](../docs/architecture/cross-cutting.md) §7. Category 7 landed in Phase 4.3. Category 8 is specified architecturally but its detector lands later in Phase 4. Category 9 is an explicit growth slot - claiming it requires an ADR-level amendment, not an IDR.
