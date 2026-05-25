@@ -17,6 +17,12 @@
       "general_review"
     ]
   },
+  "platform_shape_roles": {
+    "transfer": [
+      "assignment_created/v1",
+      "assignment_ended/v1"
+    ]
+  },
   "activation_roles": {
     "required": [],
     "optional": []

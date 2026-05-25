@@ -29,7 +29,7 @@ Current contract roles:
 - `contracts/envelope.schema.json` defines the 11-field event envelope and closed 6-value envelope `type` vocabulary. The server validates against a bundled copy in `server/src/main/resources/envelope.schema.json`; `EnvelopeSchemaParityTest` requires the two copies to match.
 - `contracts/sync-protocol.md` describes push/pull protocol intent and invariants. Verify against current server/mobile code when changing sync behavior.
 - `contracts/flag-catalog.md` defines flag categories, default severity, resolvability, detection ordering, and state-exclusion semantics.
-- `contracts/shapes/*.schema.json` documents platform-bundled assignment, identity, and integrity payload shapes. Server runtime uses mirrored platform shape definitions; keep references and mirrors coherent. FP-010 tracks the open parity/loading cleanup for these payload contracts.
+- `contracts/shapes/*.schema.json` defines platform-bundled assignment, identity, and integrity payload shapes. Server runtime bundles these contract schemas for platform payload validation. They are not deployer-authored shape registry rows, not deployer-editable, not packaged as deployer `shapes`, and not activity-bindable as form shapes.
 - `contracts/pattern-definition.schema.json` and `contracts/patterns/*.json` define platform-owned workflow pattern definitions. Server runtime loads these as the Pattern Registry source of truth, config packages deliver referenced definitions under `pattern_definitions`, and mobile reads the packaged definitions.
 - `contracts/fixtures/*.json` are shared equivalence fixtures used by server and mobile tests.
 

@@ -51,7 +51,7 @@ public class ConfigAdminController {
 
     @GetMapping("/shapes")
     public String shapeList(Model model) {
-        List<Shape> shapes = shapeService.getAllShapes();
+        List<Shape> shapes = shapeService.getDeployerShapes();
         // Group by name
         Map<String, List<Shape>> grouped = new LinkedHashMap<>();
         for (Shape s : shapes) {
@@ -89,6 +89,9 @@ public class ConfigAdminController {
 
     @GetMapping("/shapes/{name}")
     public String shapeDetail(@PathVariable String name, Model model) {
+        if (ShapeService.isPlatformShapeName(name)) {
+            return "redirect:/admin/config/shapes";
+        }
         List<Shape> versions = shapeService.getShapeVersions(name);
         if (versions.isEmpty()) return "redirect:/admin/config/shapes";
         model.addAttribute("shapeName", name);
@@ -140,7 +143,7 @@ public class ConfigAdminController {
 
     @GetMapping("/activities/create")
     public String activityCreateForm(Model model) {
-        model.addAttribute("shapes", shapeService.getAllShapes());
+        model.addAttribute("shapes", shapeService.getDeployerShapes());
         return "config/activity-create";
     }
 
@@ -206,7 +209,7 @@ public class ConfigAdminController {
     @GetMapping("/expressions/create")
     public String expressionCreateForm(Model model) {
         model.addAttribute("activities", activityService.getAllActivities());
-        model.addAttribute("shapes", shapeService.getAllShapes());
+        model.addAttribute("shapes", shapeService.getDeployerShapes());
         return "config/expression-create";
     }
 
@@ -298,7 +301,7 @@ public class ConfigAdminController {
     @GetMapping("/publish")
     public String publishPage(Model model) {
         model.addAttribute("currentVersion", configPackager.getLatestVersion());
-        model.addAttribute("shapes", shapeService.getAllShapes());
+        model.addAttribute("shapes", shapeService.getDeployerShapes());
         model.addAttribute("activities", activityService.getAllActivities());
         return "config/publish";
     }

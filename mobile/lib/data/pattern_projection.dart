@@ -137,12 +137,15 @@ class PatternProjectionEngine {
     if (definition == null || definition['binding_enabled'] != true) {
       return null;
     }
+    final shapeRolesByRef = _reverseRoleMap(binding['shape_roles']);
+    shapeRolesByRef.addAll(_reverseRoleMap(definition['platform_shape_roles']));
+
     return _Binding(
       activityRef: activityRef,
       ref: ref,
       composition: composition,
       definition: definition,
-      shapeRolesByRef: _reverseRoleMap(binding['shape_roles']),
+      shapeRolesByRef: shapeRolesByRef,
       activationRolesByRef: _reverseRoleMap(binding['activation_roles']),
       parameters: binding['parameters'] is Map
           ? Map<String, dynamic>.from(binding['parameters'] as Map)

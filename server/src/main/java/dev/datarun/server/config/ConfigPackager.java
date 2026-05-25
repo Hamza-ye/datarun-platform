@@ -65,6 +65,9 @@ public class ConfigPackager {
         // Shapes: all versions, keyed by shape_ref (IDR-019: "all shape versions including deprecated")
         ObjectNode shapesNode = objectMapper.createObjectNode();
         for (Shape shape : shapeRepository.findAll()) {
+            if (ShapeService.isPlatformShapeName(shape.name())) {
+                continue;
+            }
             ObjectNode shapeEntry = objectMapper.createObjectNode();
             shapeEntry.put("name", shape.name());
             shapeEntry.put("version", shape.version());
@@ -130,6 +133,9 @@ public class ConfigPackager {
         ObjectNode sensClassNode = objectMapper.createObjectNode();
         ObjectNode shapesSens = objectMapper.createObjectNode();
         for (Shape shape : shapeRepository.findAll()) {
+            if (ShapeService.isPlatformShapeName(shape.name())) {
+                continue;
+            }
             shapesSens.put(shape.shapeRef(), shape.sensitivity());
         }
         sensClassNode.set("shapes", shapesSens);

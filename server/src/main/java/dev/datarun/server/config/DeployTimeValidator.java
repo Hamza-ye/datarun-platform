@@ -116,6 +116,9 @@ public class DeployTimeValidator {
         List<ExpressionRule> rules = expressionRepository.findAll();
 
         for (Shape shape : shapeRepository.findAll()) {
+            if (ShapeService.isPlatformShapeName(shape.name())) {
+                continue;
+            }
             List<String> shapeViolations = validateShapeUniqueness(shape.shapeRef(), shape.schemaJson());
             for (String v : shapeViolations) {
                 violations.add("Shape " + shape.shapeRef() + ": " + v);
@@ -404,6 +407,11 @@ public class DeployTimeValidator {
 
         shapeRolesNode.fields().forEachRemaining(entry -> {
             String role = entry.getKey();
+            if (definition.platformShapeRoles().containsKey(role)) {
+                violations.add("Pattern binding '" + ref + "' shape_roles." + role
+                        + " is platform-owned by the pattern definition");
+                return;
+            }
             if (!definition.allShapeRoles().contains(role)) {
                 violations.add("Pattern binding '" + ref + "' shape_roles." + role + " is not supported");
             }
@@ -945,6 +953,7 @@ public class DeployTimeValidator {
 
     private boolean shapeRefExists(String shapeRef) {
         if (shapeRepository == null) return false;
+        if (ShapeService.isPlatformShapeRef(shapeRef)) return false;
         String[] parts = ShapeService.parseShapeRef(shapeRef);
         if (parts == null) return false;
         return shapeRepository.exists(parts[0], Integer.parseInt(parts[1]));

@@ -35,6 +35,6 @@
       "description": "Human-readable context for the flag."
     }
   },
-  "required": ["source_event_id", "flag_category"],
+  "required": ["source_event_id", "flag_category", "resolvability", "designated_resolver"],
   "additionalProperties": true
 }

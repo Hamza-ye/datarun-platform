@@ -219,12 +219,15 @@ public class PatternStateProjection {
             return java.util.Optional.empty();
         }
 
+        Map<String, String> shapeRolesByRef = reverseRoleMap(binding.get("shape_roles"));
+        shapeRolesByRef.putAll(reverseRoleMap(definitionOpt.get().definitionJson().get("platform_shape_roles")));
+
         return java.util.Optional.of(new Binding(
                 activityRef,
                 ref,
                 composition,
                 definitionOpt.get().definitionJson(),
-                reverseRoleMap(binding.get("shape_roles")),
+                shapeRolesByRef,
                 reverseRoleMap(binding.get("activation_roles")),
                 binding.path("parameters")
         ));

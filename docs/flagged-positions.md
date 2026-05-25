@@ -391,16 +391,17 @@ All of the following must be true:
 
 ## FP-010 — Platform-bundled payload shape contract parity
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-05-24 by IDR-025 contract-delivery review
-**Blocks**: any slice that changes platform-bundled event payload shapes or claims platform payload shape contract parity; production contract-hygiene close-out
+**Resolved**: 2026-05-25 by runtime platform payload contract validation
+**Blocks**: Resolved for platform-bundled event payload shape parity and production contract-hygiene close-out. Future payload field changes must update contracts, runtime validation, and emission tests together.
 **Severity**: C — contract hygiene, but prevents cross-boundary drift
 
 ### Context
 
 Platform-bundled event payload shapes are real cross-boundary contracts, but they are not workflow pattern definitions. They live under `contracts/shapes/` and govern platform-emitted or platform-administered events such as `assignment_created/v1`, `assignment_ended/v1`, `conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, and `subject_split/v1`.
 
-The IDR-025 pattern-definition work deliberately kept workflow pattern definitions separate from payload shape contracts. That was correct, but it leaves a known contract-hygiene risk: runtime server code still mirrors some platform-bundled payload shape definitions in code, and emission sites build payloads independently from the JSON Schema files. `PlatformShapeBootstrap` documents the mirror for the four identity/integrity shapes, but the mirror is not currently parity-tested against `contracts/shapes/*.schema.json`. Assignment payloads have the same drift risk through their command/emission paths.
+The IDR-025 pattern-definition work deliberately kept workflow pattern definitions separate from payload shape contracts. That was correct, but it left a known contract-hygiene risk at opening: runtime server code still mirrored some platform-bundled payload shape definitions in code, and emission sites built payloads independently from the JSON Schema files. `PlatformShapeBootstrap` documented the mirror for the four identity/integrity shapes, but the mirror was not parity-tested against `contracts/shapes/*.schema.json`. Assignment payloads had the same drift risk through their command/emission paths.
 
 This does not block Phase 4.5 pattern-state projection if that slice consumes only packaged pattern definitions and existing event payload fields. It must be closed or explicitly re-routed before changing platform-bundled payload schemas, claiming contract parity for payload shapes, or doing a production contract-hygiene close-out.
 
@@ -427,6 +428,7 @@ All of the following must be true:
 ### Resolution log
 
 - **2026-05-24**: Opened as a separate contract-hygiene follow-up after IDR-025. Pattern definitions are workflow contracts under `contracts/patterns/`; platform-bundled payload shapes remain event payload contracts under `contracts/shapes/` and need their own parity/loading gate.
+- **2026-05-25**: RESOLVED. Server build now bundles all six `contracts/shapes/*.schema.json` payload contracts under classpath `shapes/`, and `PlatformPayloadContractValidator` loads them as Draft 2020-12 JSON Schemas for runtime validation. `ShapePayloadValidator` uses the platform payload contracts for sync push structural validation, and `EventRepository.insert(...)` enforces the same contracts as a backstop for server-emitted platform events. `PlatformPayloadShapeContractTest` verifies all six contracts are bundled and enforce required fields; `PlatformPayloadEmissionContractIntegrationTest` validates actual assignment, conflict, and identity emission paths and proves invalid platform payload inserts fail; `PlatformPayloadBoundaryTest` proves platform payload schemas are not seeded as deployer shape rows, not deployer-editable, not activity-bindable as form shapes, and filtered out of config packages even if old mirror rows exist. `ongoing_resolution/v1` assignment transfer now comes from platform-owned pattern `platform_shape_roles`, not deployer shape bindings. The deployer-facing shape DSL remains intentionally separate from these payload JSON Schemas.
 
 ---
 

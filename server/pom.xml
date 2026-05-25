@@ -85,6 +85,13 @@
                     <include>pattern-definition.schema.json</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>${project.basedir}/../contracts/shapes</directory>
+                <targetPath>shapes</targetPath>
+                <includes>
+                    <include>*.schema.json</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>

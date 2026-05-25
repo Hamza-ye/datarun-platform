@@ -231,6 +231,7 @@ class SubjectHistoryBackfillIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void ongoingResolutionProjection_backfilledHistoryDerivesStateAndDoesNotEmitTransitionViolation() throws Exception {
+        provisionRolesOnlyActivity(ACTIVITY);
         UUID subject = UUID.randomUUID();
         UUID opening = pushEvent(subject, ACTIVITY, "capture", "case_opening/v1",
                 OffsetDateTime.parse("2026-05-24T07:00:01Z"), Map.of("status", "opened"));
@@ -400,8 +401,7 @@ class SubjectHistoryBackfillIntegrationTest extends AbstractIntegrationTest {
                         "opening": ["case_opening/v1"],
                         "interaction": ["case_follow_up/v1"],
                         "resolution": ["case_resolution/v1"],
-                        "closure_review": ["case_closure_review/v1"],
-                        "transfer": ["assignment_created/v1", "assignment_ended/v1"]
+                        "closure_review": ["case_closure_review/v1"]
                       },
                       "participant_roles": {
                         "assigned_worker": ["field_worker"],
@@ -411,6 +411,30 @@ class SubjectHistoryBackfillIntegrationTest extends AbstractIntegrationTest {
                     },
                     "event": []
                   }
+                }
+                """);
+    }
+
+    private void provisionRolesOnlyActivity(String activityRef) {
+        jdbcTemplate.update("""
+                INSERT INTO activities (name, config_json, status, sensitivity)
+                VALUES (?, ?::jsonb, 'active', 'standard')
+                ON CONFLICT (name) DO UPDATE
+                SET config_json = EXCLUDED.config_json,
+                    status = EXCLUDED.status,
+                    sensitivity = EXCLUDED.sensitivity
+                """,
+                activityRef,
+                """
+                {
+                  "shapes": ["case_opening/v1", "case_follow_up/v1",
+                             "case_resolution/v1", "case_closure_review/v1"],
+                  "roles": {
+                    "admin": ["capture", "review"],
+                    "field_worker": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": null
                 }
                 """);
     }

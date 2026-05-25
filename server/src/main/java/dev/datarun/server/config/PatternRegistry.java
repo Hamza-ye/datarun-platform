@@ -96,6 +96,7 @@ public class PatternRegistry {
                 textSet(json.at("/shape_roles/required")),
                 textSet(json.at("/shape_roles/optional")),
                 textSet(json.at("/shape_roles/transition_bound")),
+                roleMap(json.get("platform_shape_roles")),
                 textSet(json.at("/activation_roles/required")),
                 textSet(json.at("/activation_roles/optional")),
                 textSet(json.at("/participant_roles/required")),
@@ -131,6 +132,16 @@ public class PatternRegistry {
         return Collections.unmodifiableMap(result);
     }
 
+    private static Map<String, Set<String>> roleMap(JsonNode node) {
+        if (node == null || !node.isObject()) {
+            return Map.of();
+        }
+        LinkedHashMap<String, Set<String>> result = new LinkedHashMap<>();
+        node.fields().forEachRemaining(entry ->
+                result.put(entry.getKey(), textSet(entry.getValue())));
+        return Collections.unmodifiableMap(result);
+    }
+
     public record PatternDefinition(
             String ref,
             Set<String> allowedCompositions,
@@ -138,6 +149,7 @@ public class PatternRegistry {
             Set<String> requiredShapeRoles,
             Set<String> optionalShapeRoles,
             Set<String> transitionBoundShapeRoles,
+            Map<String, Set<String>> platformShapeRoles,
             Set<String> requiredActivationRoleLists,
             Set<String> optionalActivationRoleLists,
             Set<String> requiredParticipantRoles,

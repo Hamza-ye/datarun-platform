@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-25 (Phase 4 complete; FP-010/FP-011 remain routed follow-ups)
+**Last updated**: 2026-05-25 (Phase 4 complete; FP-010 resolved; FP-011 remains routed follow-up)
 
 ---
 
@@ -28,7 +28,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ### Flagged positions register (living)
 
-[`docs/flagged-positions.md`](flagged-positions.md) — deferred verification items and quiet positions that must not be forgotten. State as of 2026-05-24:
+[`docs/flagged-positions.md`](flagged-positions.md) — deferred verification items and quiet positions that must not be forgotten. State as of 2026-05-25:
 
 | FP# | Item | Blocks | Severity | Status |
 |-----|------|--------|:--------:|--------|
@@ -41,7 +41,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 | FP-007 | Multi-axis assignment containment and null-activity semantics | Phase 4 assignment-administration hardening | A | **RESOLVED** |
 | FP-008 | Assignment command actor identity binding | Phase 4.3 entry / assignment command exposure | A | **RESOLVED** |
 | FP-009 | Conflict resolver designation and single-writer resolution enforcement | Phase 4.6 `transition_violation`; runtime resolver enforcement / auto-resolution | A | **RESOLVED** |
-| FP-010 | Platform-bundled payload shape contract parity | platform payload shape changes / production contract-hygiene close-out | C | **OPEN** (not blocking landed Phase 4.5 projection because it consumes existing payload fields) |
+| FP-010 | Platform-bundled payload shape contract parity | platform payload shape changes / production contract-hygiene close-out | C | **RESOLVED** |
 | FP-011 | Authentication principal-to-actor mapping and group non-authority | production Keycloak/OIDC/JWT integration; group/claim authority models | B | **OPEN** (not an FP-009 blocker while conflict APIs stay bearer actor-bound) |
 
 **Rule R-4**: before drafting a new IDR or starting a new phase, read the register end-to-end. Items whose `Blocks:` field names the upcoming work must be resolved or explicitly re-deferred.
@@ -63,7 +63,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## What's Built
 
-- `contracts/` — envelope schema (11 fields, closed 6-type envelope vocabulary per ADR-4 S3 and ADR-007, Draft 2020-12), sync protocol (extended: push `device_id`/`last_pull_watermark`/`flags_raised`, pull bearer-token scope plus `config_version`/`has_more`, and separate subject-history backfill), shape schemas: assignment_created/v1, assignment_ended/v1, conflict_detected/v1, conflict_resolved/v1, subjects_merged/v1, subject_split/v1 (latter four are platform-bundled internal shapes per ADR-007), pattern definition schema plus canonical platform pattern definitions under `contracts/patterns/`
+- `contracts/` — envelope schema (11 fields, closed 6-type envelope vocabulary per ADR-4 S3 and ADR-007, Draft 2020-12), sync protocol (extended: push `device_id`/`last_pull_watermark`/`flags_raised`, pull bearer-token scope plus `config_version`/`has_more`, and separate subject-history backfill), platform payload shape schemas: assignment_created/v1, assignment_ended/v1, conflict_detected/v1, conflict_resolved/v1, subjects_merged/v1, subject_split/v1 (bundled into server runtime for payload validation; not deployer shape registry rows), pattern definition schema plus canonical platform pattern definitions under `contracts/patterns/`
 - `server/` — Spring Boot app: event store, sync push/pull, subject projection, envelope validation
 - `server/authorization/` — AssignmentService (create/end with IDR-024 multi-axis scope containment, explicit initial bootstrap path, and target-assignment end authority), ScopeResolver (authority reconstruction from event timeline, 3 scope types), ActorTokenInterceptor (Bearer token auth on sync pull/subject-history/config and assignment APIs), ActorTokenRepository (SecureRandom 32-byte hex tokens, revocation), LocationRepository (materialized path hierarchy), SubjectLocationRepository, ActiveAssignment (isActive, containsGeographically/Subject/Activity with null activity not authorized by activity-restricted assignments), WebConfig (interceptor on `/api/sync/pull`, `/api/sync/subject-history`, `/api/sync/config`, and `/api/assignments/**`), REST controllers for assignments/locations/tokens
 - `server/identity/` — ServerIdentity (env var + DB fallback, SEQUENCE-backed device_seq), IdentityLifecycleProjection (event-derived lifecycle), SubjectAliasProjection (rebuildable `subject_aliases` projection), IdentityService (merge/split with subject-scoped advisory locking), IdentityController (REST endpoints)
@@ -100,8 +100,8 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 - IDR-025 (Pattern Definition Contract and Delivery) is active. It makes `contracts/patterns/*.json` the canonical platform-owned pattern source, loads those definitions into the server registry, and delivers referenced definitions through the atomic config package for mobile runtime use.
 - IDR-026 (Conflict Resolver Routing and Single-Writer Resolution) is active. It defines resolver routing for all active/imminent flag categories, canonical resolution semantics, production conflict API actor binding, and defers resolver reassignment and auto-resolution mechanics.
 - Phase spec: [docs/implementation/phases/phase-4.md](implementation/phases/phase-4.md) (reconciled; tracks landed Phase 4.1 role-action gates, Phase 4.2 severity gates, Phase 4.3 uniqueness gates, Phase 4.4 registry/binding gates, Phase 4.6 transition gates, and P04 scenario-grade Responsibility Binding coverage)
-- Landed implementation slices: Phase 4.1 role-action enforcement from IDR-021/IDR-023, including authoritative server `role_stale` action-authority semantics and mobile advisory role-action gating; Phase 4.2 flag severity defaults and deployment-wide `flag_severity_overrides` from IDR-022; IDR-024 / FP-007 assignment administration hardening; FP-008 assignment command identity binding; Phase 4.3 domain uniqueness schema, detector, and mobile advisory uniqueness from IDR-022; Phase 4.4 platform pattern registry and activity binding validation from IDR-020; IDR-025 pattern definition contract/package delivery; Phase 4.5 rebuildable pattern-state projection for enabled bindings including `ongoing_resolution/v1`; FP-005 subject-history backfill; FP-009 runtime resolver designation and single-writer resolution enforcement; Phase 4.6 transition detection; and P04 scenario-grade Responsibility Binding coverage. These do not implement auto-resolution, resolver reassignment, normal sync backfill, durable workflow-state tables, or FP-010 payload-shape contract parity.
-- Recommended next implementation slice: decide whether to take FP-010 platform-bundled payload shape contract parity as production contract-hygiene hardening before starting a new implementation phase. Do not take FP-011 until production authentication/OIDC work is in scope.
+- Landed implementation slices: Phase 4.1 role-action enforcement from IDR-021/IDR-023, including authoritative server `role_stale` action-authority semantics and mobile advisory role-action gating; Phase 4.2 flag severity defaults and deployment-wide `flag_severity_overrides` from IDR-022; IDR-024 / FP-007 assignment administration hardening; FP-008 assignment command identity binding; Phase 4.3 domain uniqueness schema, detector, and mobile advisory uniqueness from IDR-022; Phase 4.4 platform pattern registry and activity binding validation from IDR-020; IDR-025 pattern definition contract/package delivery; Phase 4.5 rebuildable pattern-state projection for enabled bindings including `ongoing_resolution/v1`; FP-005 subject-history backfill; FP-009 runtime resolver designation and single-writer resolution enforcement; Phase 4.6 transition detection; P04 scenario-grade Responsibility Binding coverage; and FP-010 platform payload shape contract parity. These do not implement auto-resolution, resolver reassignment, normal sync backfill, durable workflow-state tables, or production OIDC/JWT authority.
+- Recommended next implementation slice: choose the next product/architecture phase only after a fresh status pass. Do not take FP-011 until production authentication/OIDC work is explicitly in scope.
 - Coverage gap closed: P04 now has a scenario-grade reassignment campaign integration test covering coordinated work, overlapping responsibility areas, mid-campaign reassignment, scope-filtered sync expansion/contraction after reassignment, role-action authority across the boundary, and stale offline work after authority moves.
 
 ### Test Debt (carried from Phase 3)
@@ -113,7 +113,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## Blockers
 
-FP-005 is `RESOLVED`; `ongoing_resolution/v1` projection now uses the distinct subject-history backfill surface for newly assigned long-running subjects. FP-009 is `RESOLVED`; Phase 4.6 `transition_violation` emission has landed and uses IDR-026 resolver routing, but auto-resolution and resolver reassignment remain deferred successor work. FP-010 is `OPEN` as platform payload shape contract hygiene; it does not block completed Phase 4 behavior because Phase 4 did not change `contracts/shapes/*` or claim payload-shape contract parity. FP-011 is `OPEN` and blocks production Keycloak/OIDC/JWT integration or group/claim authority, but it does not block provider-neutral bearer actor-bound conflict APIs. The P04 Responsibility Binding scenario-grade test gap is closed.
+FP-005 is `RESOLVED`; `ongoing_resolution/v1` projection now uses the distinct subject-history backfill surface for newly assigned long-running subjects. FP-009 is `RESOLVED`; Phase 4.6 `transition_violation` emission has landed and uses IDR-026 resolver routing, but auto-resolution and resolver reassignment remain deferred successor work. FP-010 is `RESOLVED`; server runtime now bundles and enforces the six platform payload shape schemas from `contracts/shapes/`, and platform payload schemas are not deployer shape registry rows or packaged as deployer `shapes`. FP-011 is `OPEN` and blocks production Keycloak/OIDC/JWT integration or group/claim authority, but it does not block provider-neutral bearer actor-bound conflict APIs. The P04 Responsibility Binding scenario-grade test gap is closed.
 
 ---
 

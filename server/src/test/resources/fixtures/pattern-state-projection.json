@@ -136,10 +136,6 @@
               "reopening": [
                 "case_reopening/v1"
               ],
-              "transfer": [
-                "assignment_created/v1",
-                "assignment_ended/v1"
-              ],
               "general_review": [
                 "case_general_review/v1"
               ]
@@ -493,6 +489,12 @@
               "reopening",
               "transfer",
               "general_review"
+            ]
+          },
+          "platform_shape_roles": {
+            "transfer": [
+              "assignment_created/v1",
+              "assignment_ended/v1"
             ]
           },
           "activation_roles": {

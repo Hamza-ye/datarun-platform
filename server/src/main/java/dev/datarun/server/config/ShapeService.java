@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.datarun.server.contracts.PlatformPayloadShapes;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -28,7 +29,6 @@ public class ShapeService {
             java.util.regex.Pattern.compile("^[a-z][a-z0-9_]*$");
     private static final java.util.regex.Pattern SHAPE_NAME_PATTERN =
             java.util.regex.Pattern.compile("^[a-z][a-z0-9_]*$");
-
     private final ShapeRepository shapeRepository;
     private final ObjectMapper objectMapper;
 
@@ -133,6 +133,9 @@ public class ShapeService {
      * Returns violations if invalid, empty list on success.
      */
     public List<String> createShape(String name, String sensitivity, JsonNode schemaJson) {
+        if (isPlatformShapeName(name)) {
+            return List.of(platformShapeMutationMessage(name + "/v1"));
+        }
         List<String> violations = validateShape(name, schemaJson);
         if (!violations.isEmpty()) return violations;
 
@@ -150,6 +153,9 @@ public class ShapeService {
      * Version number = latest + 1.
      */
     public List<String> createVersion(String name, String sensitivity, JsonNode schemaJson) {
+        if (isPlatformShapeName(name)) {
+            return List.of(platformShapeMutationMessage(name));
+        }
         List<String> violations = validateShape(name, schemaJson);
         if (!violations.isEmpty()) return violations;
 
@@ -168,6 +174,9 @@ public class ShapeService {
      * Deprecate a shape version. Hidden from new form creation but events still project.
      */
     public void deprecate(String name, int version) {
+        if (isPlatformShapeName(name)) {
+            throw new IllegalArgumentException(platformShapeMutationMessage(name + "/v" + version));
+        }
         if (!shapeRepository.exists(name, version)) {
             throw new IllegalArgumentException("Shape '" + name + "/v" + version + "' not found");
         }
@@ -199,6 +208,12 @@ public class ShapeService {
         return shapeRepository.findAll();
     }
 
+    public List<Shape> getDeployerShapes() {
+        return shapeRepository.findAll().stream()
+                .filter(shape -> !isPlatformShapeName(shape.name()))
+                .toList();
+    }
+
     public List<Shape> getShapeVersions(String name) {
         return shapeRepository.findByName(name);
     }
@@ -211,5 +226,18 @@ public class ShapeService {
                 .map(Shape::name)
                 .distinct()
                 .toList();
+    }
+
+    public static boolean isPlatformShapeName(String name) {
+        return PlatformPayloadShapes.isPlatformShapeName(name);
+    }
+
+    public static boolean isPlatformShapeRef(String shapeRef) {
+        return PlatformPayloadShapes.isPlatformShapeRef(shapeRef);
+    }
+
+    private String platformShapeMutationMessage(String shapeRef) {
+        return "Platform-bundled shape '" + shapeRef
+                + "' is not deployer-editable; update contracts/shapes and platform runtime together";
     }
 }

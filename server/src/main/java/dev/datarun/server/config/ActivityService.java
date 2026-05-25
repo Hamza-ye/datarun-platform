@@ -65,6 +65,9 @@ public class ActivityService {
             String[] parsed = ShapeService.parseShapeRef(shapeRef);
             if (parsed == null) {
                 violations.add("Invalid shape_ref format: '" + shapeRef + "'");
+            } else if (ShapeService.isPlatformShapeRef(shapeRef)) {
+                violations.add("Shape '" + shapeRef
+                        + "' is platform-bundled and cannot be bound to deployer activities");
             } else if (!shapeRepository.exists(parsed[0], Integer.parseInt(parsed[1]))) {
                 violations.add("Shape '" + shapeRef + "' does not exist");
             }
@@ -80,6 +83,9 @@ public class ActivityService {
     }
 
     private boolean shapeRefExists(String shapeRef) {
+        if (ShapeService.isPlatformShapeRef(shapeRef)) {
+            return false;
+        }
         String[] parsed = ShapeService.parseShapeRef(shapeRef);
         if (parsed == null) {
             return false;

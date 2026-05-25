@@ -1,6 +1,7 @@
 package dev.datarun.server.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import dev.datarun.server.contracts.PlatformPayloadContractValidator;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -14,9 +15,12 @@ import java.util.*;
 public class ShapePayloadValidator {
 
     private final ShapeRepository shapeRepository;
+    private final PlatformPayloadContractValidator platformPayloadContractValidator;
 
-    public ShapePayloadValidator(ShapeRepository shapeRepository) {
+    public ShapePayloadValidator(ShapeRepository shapeRepository,
+                                 PlatformPayloadContractValidator platformPayloadContractValidator) {
         this.shapeRepository = shapeRepository;
+        this.platformPayloadContractValidator = platformPayloadContractValidator;
     }
 
     /**
@@ -27,6 +31,10 @@ public class ShapePayloadValidator {
      */
     public List<String> validate(String shapeRef, JsonNode payload) {
         if (shapeRef == null || payload == null) return List.of();
+
+        if (platformPayloadContractValidator.isPlatformPayloadShape(shapeRef)) {
+            return platformPayloadContractValidator.validate(shapeRef, payload);
+        }
 
         String[] parsed = ShapeService.parseShapeRef(shapeRef);
         if (parsed == null) return List.of(); // Can't parse → skip validation

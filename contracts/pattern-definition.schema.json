@@ -43,6 +43,19 @@
       },
       "additionalProperties": false
     },
+    "platform_shape_roles": {
+      "type": "object",
+      "description": "Platform-owned shape-role bindings intrinsic to the pattern definition. Deployer activity bindings must not provide these roles.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*/v[0-9]+$"
+        },
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    },
     "activation_roles": {
       "type": "object",
       "required": ["required", "optional"],

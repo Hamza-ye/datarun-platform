@@ -3,6 +3,7 @@ package dev.datarun.server.event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.datarun.server.contracts.PlatformPayloadContractValidator;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,10 +25,14 @@ public class EventRepository {
 
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
+    private final PlatformPayloadContractValidator platformPayloadContractValidator;
 
-    public EventRepository(JdbcTemplate jdbc, ObjectMapper objectMapper) {
+    public EventRepository(JdbcTemplate jdbc,
+                           ObjectMapper objectMapper,
+                           PlatformPayloadContractValidator platformPayloadContractValidator) {
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
+        this.platformPayloadContractValidator = platformPayloadContractValidator;
     }
 
     public JdbcTemplate getJdbcTemplate() {
@@ -40,6 +45,7 @@ public class EventRepository {
      * Uses ON CONFLICT DO NOTHING for transaction-safe deduplication.
      */
     public boolean insert(Event event) {
+        platformPayloadContractValidator.requireValid(event.shapeRef(), event.payload());
         try {
             int rows = jdbc.update("""
                     INSERT INTO events (id, type, shape_ref, activity_ref, subject_ref, actor_ref,
