@@ -25,7 +25,7 @@ Synchronous, same request, **two separate transactions**:
 
 Uses `TransactionTemplate` (programmatic) — makes two-Tx boundary explicit, avoids `@Transactional` proxy pitfalls. Single Tx2 for all flags in batch.
 
-Deterministic flag IDs: derived from `(source_event_id + flag_category)` — enables idempotent sweep with `ON CONFLICT DO NOTHING`.
+Deterministic flag IDs: derived from `(source_event_id + flag_category)` — enables idempotent sweep with `ON CONFLICT DO NOTHING`. (superseded by adr-007 in phase-3e, now it is `(source_event_id + shape_ref + flag_category)`).
 
 Sweep job: stateless 5-min re-evaluation, trailing-window, no tracking tables. Catches Tx2 failures and asymmetric-flagging race.
 

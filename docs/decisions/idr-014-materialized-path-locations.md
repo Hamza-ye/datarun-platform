@@ -46,7 +46,7 @@ This is a btree prefix match — O(log N), index-backed with `text_pattern_ops`.
 
 ### Why static reference data over event-sourced
 
-Location hierarchies change rarely — restructuring a health district is an administrative event, not a daily operation. Event-sourcing locations would be permanent (events are immutable) for data that occasionally needs correction. A mutable reference table with admin API is simpler and sufficient.
+Location hierarchies change rarely — restructuring a health district is an administrative event, not a daily operation. Event-sourcing locations would be permanent (events are immutable) for data that occasionally needs correction. A mutable reference table with admin API is simpler and sufficient. (audit pass after adrs 007 landed: `events.location_path` is aligned only if treated as immutable write-time infrastructure metadata for each event. Location reparenting must not rewrite historical event `location_path` values.)
 
 ### Subject-to-location mapping
 
@@ -71,7 +71,7 @@ The `path` column is denormalized from `locations.path` at insert/update time fo
 
 - Location CRUD is admin-only (seeded via migration + managed via admin API)
 - Mobile receives locations as reference data during sync (not as events)
-- Path must be recomputed if a location is reparented (cascade update on `locations` + `subject_locations`)
+- Path must be recomputed if a location is reparented (cascade update on `locations` + `subject_locations`).
 - Scale: hundreds to low thousands of locations, 3-4 levels. Well within btree prefix match performance.
 
 ## Traces
