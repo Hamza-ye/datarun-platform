@@ -1,7 +1,9 @@
 # Platform Implementation Evidence Pack
 
 > Status: **implementation evidence pack — not architecture authority**  
-> Architecture authority: `canonical-decision-ledger.md`  
+> Authority role: **claim/evidence index** for documented implementation status  
+> Architecture authority: [canonical-decision-ledger.md](docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md)  
+> Implemented boundary map: [module-interfaces.md](docs/implementation/module-interfaces.md)  
 > Generated for: scenario walkthroughs and implementation gap analysis
 >
 > Date: 2026-05-29
@@ -25,9 +27,12 @@ This file must not be treated as proof that the code works. It records what the 
 ### Authority rule
 
 - `canonical-decision-ledger.md` is the architecture authority.
-- This evidence pack is implementation evidence.
-- Phase files and IDRs are implementation/planning evidence.
+- `module-interfaces.md` is the implemented boundary map.
+- This evidence pack is the claim/evidence index.
+- Phase files and IDRs are provenance and implementation history. They do not override the CDL.
 - A claim marked `claimed_implemented` or `tested_in_docs` still requires source-code or runtime verification before being treated as operational proof.
+- Deferred, ambiguous, or `known_gap` items must not be promoted by scenario wording, implementation prompts, or agent inference.
+- Platform mechanisms and deployer-authored configuration instances must remain separated according to the CDL mechanism/instance rule.
 
 ### Claim language rule
 
@@ -72,7 +77,9 @@ docs/reviews/post-phase-4-review/002-platform-implementation-evidence-pack.md
 docs/implementation/module-interfaces.md
 ```
 
-### Phase files
+### Phase/provenance files
+
+These files are provenance and implementation-history inputs for this evidence pack. They are not active architecture authority and do not override the CDL.
 
 at: `docs/implementation/phases/`
 
@@ -86,7 +93,9 @@ phase-3e.md
 phase-4.md
 ```
 
-### Implementation decision records
+### Implementation decision records / provenance
+
+These records explain implementation choices and documented implementation history. They may supply evidence, but they are not active architecture authority after CDL consolidation.
 
 at: `docs/decisions/`. indexed at: `docs/decisions/INDEX.md`
 
@@ -118,7 +127,6 @@ idr-024-multi-axis-assignment-containment.md
 idr-025-pattern-definition-contract-and-delivery.md
 idr-026-conflict-resolver-routing-and-single-writer-resolution.md
 ```
-
 
 ---
 
@@ -382,7 +390,7 @@ canonical_constraints:
   - non-designated authors cannot create canonical resolution
 implementation_evidence:
   - idr-026 defines designated_resolver requirement, resolver_unassigned sentinel, and exact resolver equality
-  - phase-4 sequencing claims runtime resolver designation and single-writer enforcement landed
+  - phase-4 sequencing documents a claim that runtime resolver designation and single-writer enforcement landed
 implementation_claims:
   - new conflict_detected/v1 flags include designated_resolver
   - detector author is separate from resolver
@@ -391,7 +399,7 @@ implementation_claims:
 known_risks:
   - JSON schema requirement may lag semantic requirement
   - legacy flags without designated_resolver must not become canonically resolvable by accident
-  - resolver reassignment is not landed unless a later source proves it
+  - resolver reassignment is not documented as landed unless a later source proves it
 verification_questions:
   - Does the API reject conflict_resolved/v1 authored by a non-designated actor?
   - Does a body-supplied actor ID fail to impersonate resolver authority?
@@ -628,7 +636,7 @@ canonical_constraints:
   - deployers cannot make manual-only flags auto-resolvable
 implementation_evidence:
   - idr-022 defines flat deployment-wide flag_severity_overrides with blocking/informational
-  - phase-4 claims flag severity landed and tests prove severity does not change resolvability
+  - phase-4 documents a claim that flag severity landed and that tests prove severity does not change resolvability
 implementation_claims:
   - missing severity entries use platform defaults
   - per-activity severity rejected in Phase 4
@@ -661,7 +669,7 @@ canonical_constraints:
   - accept-and-flag for violations
 implementation_evidence:
   - idr-022 activates shapes[*].uniqueness with scope, optional period, device_action
-  - phase-4 claims server-side domain_uniqueness_violation detector landed
+  - phase-4 documents a claim that the server-side domain_uniqueness_violation detector landed
 implementation_claims:
   - device may warn from local data but server remains authoritative
   - duplicate event is accepted and flagged, not rejected
@@ -770,7 +778,7 @@ canonical_constraints:
 implementation_evidence:
   - idr-021 defines activity-scoped role-action permissions and role_stale semantics
   - idr-023 excludes assignment_changed from activity role maps
-  - phase-4 claims role-action enforcement landed
+  - phase-4 documents a claim that role-action enforcement landed
 implementation_claims:
   - allowed action vocabulary: capture, review, alert, task_created, task_completed
   - role_stale means action-authority mismatch, not any role-label change
@@ -965,9 +973,9 @@ These items must not be assumed available or correct merely because the architec
 | Item                                                                  | Current evidence status                                                                                                  | How to verify or handle                                                                  |
 | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
 | Production authentication/OIDC                                        | Not proven. Phase 4 warns not to take production auth unless explicitly in scope.                                        | Inspect auth code/config and run authz tests.                                            |
-| Auto-resolution execution                                             | Not landed according to Phase 4 completion notes, despite earlier phase summary wording.                                 | Treat as missing unless later source/code proves it.                                     |
-| Resolver reassignment                                                 | Not landed unless later source proves it.                                                                                | Do not design scenarios depending on reassignment.                                       |
-| Durable workflow-state table                                          | Not landed and should not be assumed; workflow state is projection-derived.                                              | Use projection/read model only.                                                          |
+| Auto-resolution execution                                             | Not documented as landed according to Phase 4 completion notes, despite earlier phase summary wording.                                 | Treat as missing unless later source/code proves it.                                     |
+| Resolver reassignment                                                 | Not documented as landed unless later source proves it.                                                                                | Do not design scenarios depending on reassignment.                                       |
+| Durable workflow-state table                                          | Not documented as landed and should not be assumed; workflow state is projection-derived.                                | Use projection/read model only.                                                          |
 | S06 / entity_lifecycle                                                | Explicitly deferred in Phase 4.                                                                                          | Scenario requiring entity_lifecycle is not currently supported unless new source exists. |
 | General trigger engine                                                | Earlier summaries mention triggers; Phase 4 scope excludes general trigger/auto-resolution unless scheduled by addendum. | Verify code before assuming.                                                             |
 | Deterministic flag UUID algorithm                                     | Canonical/implementation wording mismatch.                                                                               | Decide whether to amend CDL-015 or migrate code.                                         |
@@ -1113,7 +1121,7 @@ scenario:
 
 | Verdict | Meaning |
 |---|---|
-| `runs_with_documented_implementation` | Docs claim all required capabilities landed and tests/gates exist; still needs runtime run for certainty. |
+| `runs_with_documented_implementation` | Docs claim all required capabilities are implemented and tests/gates exist; still needs runtime run for certainty. |
 | `runs_with_assumptions` | Likely supported, but one or more behaviors depend on assumptions not directly evidenced. |
 | `architecturally_supported_but_implementation_unproven` | Canonical ledger supports it, but implementation evidence is insufficient. |
 | `partially_supported` | Some steps are supported; missing/deferred capability blocks full scenario. |
@@ -1156,7 +1164,7 @@ For scenario walkthrough work, keep the project source set small:
 ```text
 docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md
 001-platform-implementation-evidence-pack.md
-selected scenario files
+selected scenario files: docs/scenarios/*.md, README.md
 docs/behavioral_patterns.md
 docs/access-control-scenario.md
 docs/principles.md

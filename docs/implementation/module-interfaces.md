@@ -2,13 +2,23 @@
 
 > Current as of the post-Phase-4 FP-010 contract-hygiene slice. This file records implemented module boundaries; it is not a roadmap for new subsystems.
 
+## Authority role
+
+This file is the **implemented boundary map** for the current platform codebase. It is subordinate to `canonical-decision-ledger.md`.
+
+Use this file to understand module ownership, inputs, outputs, storage, forbidden responsibilities, and guard tests. Do not use it to introduce new architecture decisions, revise CDL constraints, promote implementation claims to architecture truth, or activate deferred platform-evolution items.
+
+Mechanism/instance rule: module boundaries must preserve the CDL mechanism/instance split. Platform-owned mechanisms remain platform-owned; deployer-authored instances remain configuration-package content.
+
+Claim rule: "implemented" in this file means the boundary is recorded as implemented by the current documentation set. Operational proof still requires source-code inspection, test evidence, or scenario execution.
+
 ## Event Store
 
 - **Owns**: append-only event persistence, idempotent event insert, sync watermark assignment, ordered event reads.
 - **Inputs**: structurally valid event envelopes plus payload JSON.
 - **Outputs**: stored events, ordered event streams, subject/event lookup rows.
 - **Storage**: `events` table and `events_sync_watermark_seq`.
-- **Forbidden**: hidden workflow state, resolver reassignment, envelope field/type expansion without ADR authority.
+- **Forbidden**: hidden workflow state, resolver reassignment, envelope field/type expansion without CDL authority.
 - **Guards**: `EnvelopeVocabularyTest`, `EnvelopeSchemaParityTest`, sync/subject/projection integration tests, platform payload backstop validation for platform-owned shape refs.
 
 ## Projection Engine
@@ -85,18 +95,20 @@
 
 ## Trigger Engine
 
-- **Owns**: future trigger semantics when scheduled by a phase spec.
+- **Owns**: no active runtime trigger behavior. This boundary is reserved for future server-side trigger semantics only when scheduled by a successor platform decision and implementation slice.
 - **Inputs**: not active in current implementation.
 - **Outputs**: not active in current implementation.
 - **Storage**: none currently.
-- **Forbidden**: introducing trigger side effects outside Event Store without ADR/phase authority.
+- **Forbidden**: introducing trigger side effects outside Event Store without CDL authority and an implementation-evidence update.
 - **Guards**: no active runtime tests beyond config package empty-section preservation.
 
-## Command Validator
+## Command Validator (Advisory Only)
 
-- **Owns**: command-time structural validation before event emission.
-- **Inputs**: assignment, identity, config, sync push, and conflict-resolution commands.
-- **Outputs**: validation errors or accepted event creation.
+**Role**: On-device advisory component that warns users about potentially invalid actions. Reduces unnecessary flags by warning users before they submit invalid transitions. Its work is always redundant to the Conflict Detector + Projection Engine. Without it, the system works identically — just with more flags to resolve.
+
+- **Owns**: ux warning users before they submit invalid transitions.
+- **Depends on**: Projection Engine (current workflow state) and Pattern Registry (valid transitions).
+- **Outputs**: validation warning.
 - **Storage**: none.
 - **Forbidden**: using command validation to reject structurally valid state/policy anomalies that should be accepted and flagged.
-- **Guards**: assignment/admin/config/sync/conflict integration tests plus platform payload contract tests.
+  

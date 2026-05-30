@@ -2,7 +2,7 @@
 
 > Status: Review artifact  
 > Authority checked against: `canonical-decision-ledger.md`  
-> Reviewed scope: uploaded phase plans and IDRs listed in `Pasted markdown.md`, plus the current `canonical-decision-ledger.md`.
+> Reviewed scope: uploaded phase plans and IDRs listed in `Pasted markdown.md`, plus `canonical-decision-ledger.md`.
 >
 > Date: 2026-05-29
 
@@ -15,6 +15,7 @@ Old ADR references inside phase and IDR files are treated as stale provenance la
 ## 2. Inputs reviewed
 
 Phase files:
+at: `docs/implementation/phases/`
 
 ```text
 phase-0.md
@@ -27,6 +28,7 @@ phase-4.md
 ```
 
 Implementation decision records:
+at: `docs/decisions/`
 
 ```text
 idr-008-server-event-producer.md

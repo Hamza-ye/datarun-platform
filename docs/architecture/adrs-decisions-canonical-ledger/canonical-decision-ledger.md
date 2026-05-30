@@ -6,6 +6,8 @@ Purpose: provide one settled decision surface for the platform architecture. Thi
 
 Use rule: agents and implementation/specification prompts should consume this file as the primary architectural decision input.
 
+Normalization rule: this ledger uses **mechanism** for platform-owned semantics and **configuration instance** for deployer-authored objects. The term **primitive** is not used as a broad name for capability areas or modules; when a smaller irreducible construct is needed, it must be named through its actual contract, grammar, protocol, vocabulary, or platform-owned registry.
+
 ---
 
 ## 1. Authority
@@ -234,7 +236,7 @@ Trigger engines, projection engines, workflow views, and flag resolution flows m
 **Decision:**  
 When a platform concept has both a platform-owned mechanism and a deployer-authored instance surface, the mechanism and the instance are separate ledger concepts.
 
-- Mechanism: platform-fixed primitive, contract, grammar, protocol, or closed registry.
+- Mechanism: platform-fixed construct, contract, grammar, protocol, closed vocabulary, or platform-owned registry.
 - Instance: deployer-authored configuration shipped in a configuration package.
 
 **Rationale:**  
@@ -244,7 +246,7 @@ A single classification hides either platform closure or deployer authoring. Sco
 
 - Classifying the whole concept by whichever side seems more important.
 - Treating platform-fixed mechanisms as deployer configuration.
-- Treating deployer-authored instances as platform primitives.
+- Treating deployer-authored instances as platform mechanisms.
 
 **Binding constraints:**
 
@@ -761,12 +763,12 @@ Conflict detection, sync idempotency, and flag queues rely on deterministic flag
 A reference field and the object it points to are different ledger concepts. `subject_ref`, `actor_ref`, and `activity_ref` are envelope contracts. Subject, actor, assignment, process, and activity instances are classified separately according to their own semantics.
 
 **Rationale:**  
-Conflating a reference field with its referent causes classification errors. A field can be a platform contract while the referenced instance is deployer configuration or a domain primitive.
+Conflating a reference field with its referent causes classification errors. A field can be a platform contract while the referenced instance is deployer configuration or a domain concept.
 
 **Rejected alternatives:**
 
 - Classifying `activity_ref` as config because activity is config.
-- Classifying `subject_ref` as a domain primitive because Subject is a domain object.
+- Classifying `subject_ref` as a domain concept because Subject is a domain object.
 - Treating reference grammar and referent lifecycle as the same decision.
 
 **Binding constraints:**
@@ -1174,7 +1176,7 @@ After a merge, new events may reference the surviving identity. A later unmerge 
 
 **Must not happen:**
 
-- An unmerge operation must not exist as a platform event shape or workflow primitive.
+- An unmerge operation must not exist as a platform event shape or workflow construct.
 
 **Scope boundary:**  
 Manual review or domain-specific attribution workflow may exist, but it does not rewrite merge history.
@@ -2183,7 +2185,7 @@ Conflict detection gains a workflow transition evaluation step.
 ### CDL-049: Pattern registry is platform-fixed; activities bind patterns
 
 **Status:** Accepted  
-**Classification:** Primitive / config split
+**Classification:** Mechanism / config split
 
 **Decision:**  
 The platform provides a closed pattern registry: platform-owned workflow skeletons that deployers select and parameterize through activity configuration. Deployers do not author new pattern mechanisms.
@@ -2474,7 +2476,7 @@ Policy validation, trigger engine, and flag resolvers must enforce resolvability
 ### CDL-055: Scope mechanism is platform-fixed; scope instances are configuration
 
 **Status:** Accepted  
-**Classification:** Primitive / config split
+**Classification:** Mechanism / config split
 
 **Decision:**  
 The scope mechanism is platform-fixed. Initial scope types are:
@@ -2495,7 +2497,7 @@ Scope controls what data reaches devices. Custom deployer-defined containment lo
 - Deployment-defined custom scope types.
 - Custom containment scripts.
 - Geography-only scope forever.
-- Classifying all scope concerns as either purely primitive or purely config.
+- Classifying all scope concerns as either purely platform mechanism or purely deployer config.
 
 **Binding constraints:**
 
