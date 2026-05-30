@@ -416,3 +416,10 @@ Do not re-run the whole architecture consolidation. Make a narrow patch:
 1. `canonical-decision-ledger.patch-001.md` or direct edit to `canonical-decision-ledger.md` for `CDL-015` and `CDL-054`.
 2. Small IDR cleanup patch for `idr-010`, `idr-014`, and `idr-015`.
 3. Keep this review artifact as provenance only. The canonical ledger remains the agent-facing architecture surface after patching.
+
+## Post-patch verification (2026-05-31)
+
+- **Canonical ledger:** `CDL-015` and `CDL-054` were updated in the canonical ledger (see `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md`). I confirmed the deterministic flag identity pseudocode and the flag-category table include the expected entries.
+- **IDR updates:** `idr-010-conflict-detection-intercept.md` has been patched to reflect the corrected deterministic ID input including `shape_ref` (see that file). Confirmed.
+- **Remaining harmonization:** `idr-014` and `idr-015` still contain inconsistent wording about `events.location_path` (one references cascade recompute on reparenting; the other allows backfill for NULL-only events while claiming existing events are "never stale"). Recommend a small IDR harmonization patch to explicitly forbid rewriting historical `events.location_path` except for controlled backfill of events that lacked a location at insertion.
+- **Next action:** apply the IDR harmonization patch for `idr-014`/`idr-015`, then re-run this verification and update the evidence pack and module-boundary notes.

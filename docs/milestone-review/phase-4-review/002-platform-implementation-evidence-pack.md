@@ -144,11 +144,11 @@ The uploaded documents describe a platform built in phases:
 | Phase 3e | Retrofit: closed six-value `type`, platform-bundled internal shapes, `shape_ref` filters. | `claimed_implemented`, quality gates specified |
 | Phase 4 | Role-action, severity, domain uniqueness, pattern registry, pattern-state projection, backfill, resolver routing, transition violations. | `claimed_implemented`, `tested_in_docs` according to Phase 4 completion audit |
 
-The implementation alignment review found **no fatal architectural drift** but identified follow-up items:
+The implementation alignment review found **no fatal architectural drift**. Follow-up items (status updated 2026-05-31):
 
 ```text
-- events.location_path needs an explicit historical immutability boundary.
-- resolver routing must be runtime-enforced for every new flag.
+- events.location_path: canonical/module-boundary notes updated; IDR harmonization (idr-014/015) pending — verify no reparenting rewrites historical events.location_path except controlled backfill for previously-NULL events.
+- resolver routing: must be runtime-enforced for every new flag (runtime tests required).
 ```
 
 ---
@@ -978,8 +978,8 @@ These items must not be assumed available or correct merely because the architec
 | Durable workflow-state table                                          | Not documented as landed and should not be assumed; workflow state is projection-derived.                                | Use projection/read model only.                                                          |
 | S06 / entity_lifecycle                                                | Explicitly deferred in Phase 4.                                                                                          | Scenario requiring entity_lifecycle is not currently supported unless new source exists. |
 | General trigger engine                                                | Earlier summaries mention triggers; Phase 4 scope excludes general trigger/auto-resolution unless scheduled by addendum. | Verify code before assuming.                                                             |
-| Deterministic flag UUID algorithm                                     | Canonical/implementation wording mismatch.                                                                               | Decide whether to amend CDL-015 or migrate code.                                         |
-| `events.location_path` historical immutability                        | Needs explicit implementation/documentation boundary.                                                                    | Verify no reparenting rewrites historical events.                                        |
+| Deterministic flag UUID algorithm                                     | Canonical ledger amended (CDL-015): deterministic_uuid pseudocode with namespace and `shape_ref` is present.             | Verify code implements the agreed deterministic algorithm (unit + integration tests).    |
+| `events.location_path` historical immutability                        | Partially addressed: module boundary and canonical notes added; IDR harmonization pending.                              | Verify IDR harmonization and that reparenting does NOT rewrite historical events (except controlled backfill for NULLs). |
 | Admin UI production authority                                         | Development/admin surfaces exist, but production auth binding is not proven.                                             | Run security review before production use.                                               |
 | Code still matches docs                                               | Not proven by this pack.                                                                                                 | Inspect code/tests or run scenarios.                                                     |
 

@@ -1418,6 +1418,8 @@ Boundary impact: `authorization` may compute location path and `sync` may use it
 
 Boundary impact: `integrity` owns canonical resolver enforcement. `admin` supplies UI and authenticated actor context only; it cannot decide resolver authority.
 
+**Status (2026-05-31):** Canonical ledger and contracts were updated to include the deterministic flag identity and the missing flag categories (CDL-015, CDL-054). The `contracts/flag-catalog.md` was synchronized. IDR harmonization for `events.location_path` (idr-014/015) remains outstanding and should be applied to codify historical immutability semantics before closing this cleanup item.
+
 ---
 
 ## 15. Future-agent review checklist
