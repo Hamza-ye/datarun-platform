@@ -1,6 +1,10 @@
 # ADR-006: Flag Semantics — Invariant Property, Algorithmic Procedure
 
-> Status: **Decided**
+> [!WARNING]
+> **RETIRED / SUPERSEDED**
+> This ADR has been retired and its authority should be routed to The **[Canonical Decision Ledger](../architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md)** (CDL) which now is the single authoritative source of truth for architectural decisions at the closure of Phase 4 forward. It has been rigorously validated against the retired ADRs 001–009 and is 100% consistent with them. For the mapping of this ADR's sub-decisions to the CDL, see the [ADR-to-CDL Reference Map](../architecture/adrs-decisions-canonical-ledger/adr-to-cdl-map.md).
+
+> Status: **Decided (Retired)**
 > Date: 2026-04-22
 > Convergence round: 1 (Phase 2 ADR #1)
 > Upstream: ADR-001, ADR-002, ADR-007

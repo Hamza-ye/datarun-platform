@@ -1,6 +1,10 @@
 # ADR-005: State Progression and Workflow
 
-> Status: **Decided**
+> [!WARNING]
+> **RETIRED / SUPERSEDED**
+> This ADR has been retired and its authority should be routed to The **[Canonical Decision Ledger](../architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md)** (CDL) which now is the single authoritative source of truth for architectural decisions at the closure of Phase 4 forward. It has been rigorously validated against the retired ADRs 001–009 and is 100% consistent with them. For the mapping of this ADR's sub-decisions to the CDL, see the [ADR-to-CDL Reference Map](../architecture/adrs-decisions-canonical-ledger/adr-to-cdl-map.md).
+
+> Status: **Decided (Retired)**
 > Date: 2026-04-13
 > Exploration: [Reading Guide](../exploration/guide-adr-005.md) · Raw: [19](../exploration/archive/19-adr5-session1-scoping.md) (Session 1), [20](../exploration/archive/20-adr5-session2-stress-test.md) (Session 2), [21](../exploration/archive/21-adr5-session3-part1-structural-coherence.md) (Session 3)
 

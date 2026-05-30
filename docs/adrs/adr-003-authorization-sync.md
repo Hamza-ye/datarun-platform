@@ -1,6 +1,10 @@
 # ADR-003: Authorization and Selective Sync
 
-> Status: **Decided**
+> [!WARNING]
+> **RETIRED / SUPERSEDED**
+> This ADR has been retired and its authority should be routed to The **[Canonical Decision Ledger](../architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md)** (CDL) which now is the single authoritative source of truth for architectural decisions at the closure of Phase 4 forward. It has been rigorously validated against the retired ADRs 001–009 and is 100% consistent with them. For the mapping of this ADR's sub-decisions to the CDL, see the [ADR-to-CDL Reference Map](../architecture/adrs-decisions-canonical-ledger/adr-to-cdl-map.md).
+
+> Status: **Decided (Retired)**
 > Date: 2026-04-12
 > Promoted: 2026-04-12
 > Exploration: [Reading Guide](../exploration/guide-adr-003.md) · Raw: [10](../exploration/archive/10-adr3-phase1-policy-scenarios.md) (Phase 1), [12](../exploration/archive/12-adr3-course-correction.md) (Correction), [11](../exploration/archive/11-adr3-phase2-stress-test.md) (Phase 2)

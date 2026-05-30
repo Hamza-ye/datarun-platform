@@ -1,6 +1,6 @@
 # Implementation Decision Records (IDRs)
 
-Micro-decisions made during implementation. Each file documents one choice with its context, alternatives, and consequences. Separate from [ADRs](../adrs/) (architecture-grade) and [Phase Specs](../implementation/phases/) (scope, deliverables, milestones).
+Micro-decisions made during implementation. Each file documents one choice with its context, alternatives, and consequences. Separate from [CDL](../architecture/adrs-decisions-canonical-ledger/README.md) (architecture-grade) and [Phase Specs](../implementation/phases/) (scope, deliverables, milestones).
 
 ## When to create an IDR
 
@@ -15,7 +15,7 @@ Same triggers as [execution-plan.md §14](../implementation/execution-plan.md#14
 ## When NOT to create an IDR
 
 - Milestones (progress markers) → stay in phase specs
-- Architecture-grade decisions → ADRs
+- Architecture-grade decisions → CDL
 - Obvious, uncontroversial choices with no rejected alternatives
 
 ## How to find relevant IDRs
@@ -40,7 +40,7 @@ Added to support the [Reversibility Triage](../implementation/execution-plan.md#
 
 | Type | Location | Contains |
 |------|----------|----------|
-| **ADR** | `docs/adrs/` | Architecture constraints (stored data, cross-device contracts) |
+| **CDL** | `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.json` | Architecture constraints (stored data, cross-device contracts) |
 | **IDR** | `docs/decisions/` | Implementation choices (code patterns, tooling, conventions) |
 | **Phase Spec** | `docs/implementation/phases/` | Scope, deliverables, quality gates, milestones |
 | **Checkpoint** | `docs/checkpoints/` | Periodic project state snapshots |

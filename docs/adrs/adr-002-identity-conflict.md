@@ -1,6 +1,10 @@
 # ADR-002: Identity Model and Conflict Resolution
 
-> Status: **Decided**
+> [!WARNING]
+> **RETIRED / SUPERSEDED**
+> This ADR has been retired and its authority should be routed to The **[Canonical Decision Ledger](../architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md)** (CDL) which now is the single authoritative source of truth for architectural decisions at the closure of Phase 4 forward. It has been rigorously validated against the retired ADRs 001–009 and is 100% consistent with them. For the mapping of this ADR's sub-decisions to the CDL, see the [ADR-to-CDL Reference Map](../architecture/adrs-decisions-canonical-ledger/adr-to-cdl-map.md).
+
+> Status: **Decided (Retired)**
 > Date: 2026-04-10
 > Exploration: [Reading Guide](../exploration/guide-adr-002.md) · Raw: [05](../exploration/archive/05-adr2-event-storm-identity.md) (Phase 1), [07](../exploration/archive/07-adr2-phase2-stress-test-results.md) (Phase 2), [09](../exploration/archive/09-adr2-phase3-classification-results.md) (Phase 3)
 > **Envelope type mapping (canonicalized 2026-04-23)**: The former [ADR-002 Addendum](adr-002-addendum-type-vocabulary.md) is superseded by [ADR-007](adr-007-envelope-type-closure.md). Read ADR-007 before writing or modifying any code that touches `conflict_detected`, `conflict_resolved`, `subjects_merged`, or `subject_split`.

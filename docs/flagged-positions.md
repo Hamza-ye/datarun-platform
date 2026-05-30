@@ -24,23 +24,23 @@ This register is the counter-mechanism: every deferred verification item, every 
 
 ## Format (for every entry)
 
-```
-## FP-NNN — Short name
+```md
+## FP-NNN: Short name
 Status: OPEN | IN_PROGRESS | RESOLVED | SUPERSEDED
 Opened: YYYY-MM-DD by <source>
 Blocks: <IDR / Phase / nothing>
 Severity: A (blocks architecture) | B (blocks an IDR) | C (cleanup hygiene)
 
-### Context
+**Context:**
 What was observed, and why it matters.
 
-### Trigger
+**Trigger:**
 When this item should be picked up. Usually "before IDR-NNN" or "before Phase N".
 
-### Gate
+**Gate:**
 The specific, verifiable outcome that proves the item is resolved. If the gate is not met, the item stays OPEN. No soft closures.
 
-### Resolution log
+**Resolution log:**
 Dated entries as work progresses. When RESOLVED, the final entry cites the commit or artifact that closes it.
 ```
 
@@ -50,7 +50,7 @@ Dated entries as work progresses. When RESOLVED, the final entry cites the commi
 
 ---
 
-## FP-001 — `role_stale` projection-derived role verification
+## FP-001: `role_stale` projection-derived role verification
 
 **Status**: RESOLVED
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding A3)
@@ -58,17 +58,17 @@ Dated entries as work progresses. When RESOLVED, the final entry cites the commi
 **Blocks**: IDR-021 (Role-Action Enforcement)
 **Severity**: A — touches ADR-3 S3 structural constraint
 
-### Context
+**Context:**
 
 ADR-3 S3 is a **Structural** constraint: *"Authority context is a projection, not an envelope field."* The existing `role_stale` detection in `server/src/main/java/dev/datarun/server/integrity/ConflictDetector.java` (lines 226–234) compares an actor's current role against their role at the time of the event. **It is not verified** whether this comparison reconstructs the role-as-of-event from the assignment event timeline, or reads it from a cache, or uses some other source.
 
 If the implementation quietly violates S3 (reads role from anything other than replayed assignment events), IDR-021 would inherit the drift and cascade it into role-action enforcement — the same failure mode as the Phase 1/2 envelope-type drift. There is no existing test that would fail if role were read from a cache rather than derived, so the correctness here is load-bearing but unproven.
 
-### Trigger
+**Trigger:**
 
 Before IDR-021 drafting begins. One hour of focused code reading, plus one integration test.
 
-### Gate
+**Gate:**
 
 All three must be true:
 
@@ -83,7 +83,7 @@ All three must be true:
 
 ---
 
-## FP-002 — `subject_lifecycle` table removal
+## FP-002: `subject_lifecycle` table removal
 
 **Status**: RESOLVED
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding B3)
@@ -92,17 +92,17 @@ All three must be true:
 **Blocks**: Phase 4 (not a specific IDR — pattern state machines will interact with identity lifecycle)
 **Severity**: B — projection discipline
 
-### Context
+**Context:**
 
 The V3 Flyway migration introduced a `subject_lifecycle` table, populated during merge/split operations. Per ADR-1 S2 and ADR-5 S4, **state is always a projection of events, never an independent source of truth**. The escape hatch B→C permits projection caches only after a read-cost pressure justifies them.
 
 The 2026-05-21 read-discipline audit found the table was implemented as a disciplined cache, but the stricter ADR-001/002 posture is simpler: no `subject_lifecycle` cache by default. Subject identity lifecycle should be projected from `subjects_merged/v1` and `subject_split/v1` events on demand, following the `ScopeResolver` precedent. B→C remains available only if a future fixture proves lifecycle projection cost is real.
 
-### Trigger
+**Trigger:**
 
 Before Phase 4 implementation begins. Phase 4 adds pattern state machines that interact with subject identity; keeping identity lifecycle event-derived prevents ADR-005 workflow state from accidentally growing around an identity cache.
 
-### Gate
+**Gate:**
 
 All four must be true:
 
@@ -111,7 +111,7 @@ All four must be true:
 3. Split-archived sources are excluded from active subject projections while their historical event stream remains accessible.
 4. Post-split events referencing the archived source are accepted and flagged, not rejected or silently projected into a successor.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-04-21**: Opened.
 - **2026-05-21**: Resolved. `subject_lifecycle` is classified as a projection cache used for merge/split precondition locking; `IdentityService.rebuildSubjectLifecycleFromEvents()` rebuilds it from `subjects_merged/v1` and `subject_split/v1` events; `IdentityResolverIntegrationTest.subjectLifecycleProjection_rebuildsFromIdentityLifecycleEvents` proves the cache can be discarded and reconstructed with identical rows; V3 migration now carries the projection-cache warning.
@@ -120,46 +120,46 @@ All four must be true:
 
 ---
 
-## FP-003 — Envelope schema parity test (meta-drift protection)
+## FP-003: Envelope schema parity test (meta-drift protection)
 
 **Status**: RESOLVED
 **Opened**: 2026-04-21 by Phase 3e review pass (audit finding B4)
 **Blocks**: Phase 3e Commit 3 (folded into 3e.5)
 **Severity**: C — cleanup hygiene, but directly prevents a repeat of the root-cause drift
 
-### Context
+**Context:**
 
 Two envelope schema files exist as independently-maintained copies: `contracts/envelope.schema.json` and `server/src/main/resources/envelope.schema.json`. Nothing enforces that they agree. The Phase 1/2 type-vocabulary drift was present in both because they were edited together — but nothing structural prevents one from being updated without the other, and that is the exact kind of invisible failure this register exists to prevent.
 
-### Trigger
+**Trigger:**
 
 Phase 3e Commit 3 (docs). Already folded into scope — tracked here so that if the test is deferred for any reason, the deferral is explicit, not silent.
 
-### Gate
+**Gate:**
 
 A JUnit test `EnvelopeSchemaParityTest` exists in the server test suite that reads both schema files and asserts byte-for-byte equality (normalized for trailing newline). Test fails if they diverge.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-04-21**: Opened. Folded into Phase 3e.5 as an in-scope deliverable.
 - **2026-04-21**: RESOLVED. `server/src/test/java/dev/datarun/server/contracts/EnvelopeSchemaParityTest.java` landed in Phase 3e Commit 3. The test reads both files with `Files.readString`, normalizes trailing newlines only, and fails the build on any other divergence. Gate met.
 
 ---
 
-## FP-004 — `assignment_ref` as potential future envelope field
+## FP-004: `assignment_ref` as potential future envelope field
 
 **Status**: OPEN
 **Opened**: 2026-04-23 by ADR-008 drafting pass (convergence round 1)
 **Blocks**: any future ADR/work that introduces an Assignment-targeting emission site distinct from the current `subject_ref.type = "assignment"` channel
 **Severity**: B — architecture-grade question, no current forcing function
 
-### Context
+**Context:**
 
 ADR-008 §S1 settles `subject_ref` as a CONTRACT with a closed four-value type enum including `assignment`. This covers all current emission sites that target an assignment as the referent of an event. The harvest (Group 2, `actor-ref` section) notes that if Assignment evolves into a reference type with emission sites that do not fit the `subject_ref.type = "assignment"` channel — for example, events that reference *both* a subject and an assignment distinctly — a structural design decision surfaces: parameterize existing fields, or add a dedicated `assignment_ref` envelope field.
 
 No archive material commits either way. No current operational surface forces the question.
 
-### Trigger
+**Trigger:**
 
 Any of the following lifts this item to `BLOCKS`:
 
@@ -167,20 +167,20 @@ Any of the following lifts this item to `BLOCKS`:
 2. A deployer or platform request to correlate events to assignment lifecycle without collapsing into the subject channel.
 3. Any ADR draft that touches assignment authority, assignment projection, or the assignment shape pair (`assignment_created/v1`, `assignment_ended/v1`) in a way that implies a dedicated ref.
 
-### Gate
+**Gate:**
 
 A successor ADR must exist, and either:
 
 - **(resolve by decision)** explicitly close the question (parameterize vs. dedicated field) with rationale, **or**
 - **(resolve by subsumption)** demonstrate that the forcing case can be handled under the existing `subject_ref` contract and record that reading as canonical.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-04-23**: Opened by ADR-008 §S4 / Alt-4. No current forcing function; filed to prevent silent deferral per R-1.
 
 ---
 
-## FP-005 — Scoped pull temporal anchor and subject-history backfill
+## FP-005: Scoped pull temporal anchor and subject-history backfill
 
 **Status**: RESOLVED
 **Opened**: 2026-05-22 by ADR-003 / Phase 4 readiness review
@@ -188,7 +188,7 @@ A successor ADR must exist, and either:
 **Blocks**: Phase 4 `ongoing_resolution` implementation. IDR-021 drafting is unblocked by the 2026-05-22 route below; role-action code must not absorb subject-history backfill or audit pull.
 **Severity**: A — touches ADR-003 S2 ("sync scope = access scope") and ADR-003 S3 authority-as-projection
 
-### Context
+**Context:**
 
 A rolled-back Ship-era FP raised a real ambiguity that still has a current-repo analogue: scope evaluation has different correct anchors depending on the pull class. The old text must not be imported verbatim because its repository, code paths, and "ships" strategy no longer apply, but the underlying question remains load-bearing for IDR-021 and Phase 4.
 
@@ -198,11 +198,11 @@ The unresolved risk is **subject-history backfill** for long-running subjects. N
 
 Historical/audit pull is also not implemented. ADR-003 explicitly deferred auditor access, so it should not be silently folded into live sync. If audit reconstruction is needed, it needs an explicit pull class/API or an explicit out-of-Phase-4 deferral.
 
-### Trigger
+**Trigger:**
 
 Before drafting IDR-021, and again before the first Phase 4 implementation commit for `ongoing_resolution`.
 
-### Gate
+**Gate:**
 
 All four must be true:
 
@@ -223,7 +223,7 @@ This FP is explicitly routed, not fully resolved:
 4. **Audit/historical pull is out of Phase 4 live sync.** If audit reconstruction is needed later, it requires a separate pull class/API or successor decision; it must not be silently folded into normal sync or subject-history backfill.
 5. **Backfill design points for Phase 4 spec/IDR.** The future backfill decision must define idempotence/cursor behavior without lowering the normal sync watermark, request-time authorization on every page, alias handling after merge/split, activity filtering for pattern state keys, and how assignment/transfer events become visible to subject-level projections.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-05-22**: Opened. Current repo read found live pull uses active assignments at request time and watermark pagination; no current subject-history backfill or audit pull class is specified.
 - **2026-05-22**: Live contraction portion verified. `ScopeFilteredSyncIntegrationTest.liveSyncContraction_reassignedAway_doesNotDeliverNewOldScopeEvents` proves normal `/api/sync/pull` is request-time scoped: after reassignment away from a geographic scope, a later pull from the actor's prior watermark does not deliver new events from the old scope. Remaining before role-action code begins: decide/test subject-history backfill for already-active `ongoing_resolution` subjects, and classify audit/historical pull as out of Phase 4 or as a separate pull class/API. Neither may be folded silently into live sync.
@@ -232,7 +232,7 @@ This FP is explicitly routed, not fully resolved:
 
 ---
 
-## FP-006 — `temporal_authority_expired` superseded-assignment false positive
+## FP-006: `temporal_authority_expired` superseded-assignment false positive
 
 **Status**: RESOLVED
 **Opened**: 2026-05-22 by Phase 4 challenge/code-readiness review
@@ -240,7 +240,7 @@ This FP is explicitly routed, not fully resolved:
 **Blocks**: Phase 4 role-action implementation and Phase 4 detection-order work
 **Severity**: A — false auth flags exclude otherwise valid events from Phase 4 projections
 
-### Context
+**Context:**
 
 Current `ConflictDetector.evaluateAuth(...)` iterates all ended assignments for the pushing actor and emits `temporal_authority_expired` when an ended assignment covered the event's subject/activity. The code obtains the ended assignment watermark but does not compare it against the event's effective knowledge horizon or check whether a replacement covering assignment was visible to the actor before capture.
 
@@ -255,11 +255,11 @@ That means a common reassignment/role-change path can over-flag:
 
 Phase 4 makes this more dangerous because unresolved flags are excluded from pattern-state and uniqueness-derived authoritative projections. A false temporal flag on otherwise valid work would suppress valid Phase 4 state transitions and could mask role-action behavior.
 
-### Trigger
+**Trigger:**
 
 Before implementing IDR-021 role-action enforcement or adding Phase 4 domain uniqueness / pattern transition passes after authorization CD.
 
-### Gate
+**Gate:**
 
 All three must be true:
 
@@ -267,21 +267,21 @@ All three must be true:
 2. An integration test preserves the real stale-temporal case: actor syncs under assignment A -> A ends -> actor does not sync the ending/replacement authority -> actor pushes an event created under stale authority -> `temporal_authority_expired` is emitted.
 3. Auth CD uses assignment timeline knowledge explicitly enough that Phase 4 role-action evaluation can run after temporal/scope checks without inheriting false temporal flags from superseded assignments.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-05-22**: Opened during Phase 4 challenge review. Code read found `ConflictDetector.evaluateAuth(...)` computes `endedWatermark` but does not use it to distinguish stale authority from a superseded assignment that the actor has already synced past.
 - **2026-05-22**: RESOLVED. `ConflictDetector.evaluateAuth(...)` now emits `temporal_authority_expired` for an ended covering assignment only when `assignment_ended.sync_watermark > min(event.sync_watermark, push.last_pull_watermark)`, so actors who synced past an assignment end and replacement do not inherit false temporal flags. `AuthFlagIntegrationTest.replacementAssignmentSynced_noTemporalAuthorityExpiredFromEndedAssignment` proves the replacement visibility case, and `AuthFlagIntegrationTest.assignmentEndsAfterActorSync_withoutResync_temporalAuthorityExpiredFlagged` preserves the real stale temporal case.
 
 ---
 
-## FP-007 — Multi-axis assignment containment and null-activity semantics
+## FP-007: Multi-axis assignment containment and null-activity semantics
 
 **Status**: RESOLVED
 **Opened**: 2026-05-22 by assignment administration scope-containment review
 **Blocks**: Phase 4 assignment-administration hardening; any implementation pass that claims ADR-003 S5 containment complete
 **Severity**: A — touches ADR-003 S5 and ADR-004/ADR-009 platform-fixed scope semantics
 
-### Context
+**Context:**
 
 ADR-003 S5 requires `new_assignment.scope <= creating_actor.assignment.scope`. ADR-004 S7 and ADR-009 S2 define the platform-fixed scope axes as `geographic`, `subject_list`, and `activity`, with AND composition across non-null axes and `null` meaning unrestricted only on that axis. IDR-013 already carries all three axes in `assignment_created/v1`.
 
@@ -289,11 +289,11 @@ Current code does not enforce that full shape. `AssignmentService.createAssignme
 
 `ActiveAssignment.containsActivity(...)` currently treats `activity_ref = null` as passing even when the assignment has a non-null activity restriction. That conflicts with the ADR-004 S7 reading that an activity scope axis means "event.activity_ref in actor's permitted activities" for ordinary activity work. IDR-023 correctly excludes `assignment_changed` from `activities[*].roles`; this FP must not be resolved by moving assignment administration into activity role-action config.
 
-### Trigger
+**Trigger:**
 
 Before implementing assignment-administration hardening, before claiming Phase 4 assignment authority gates complete, and before any future IDR or code path changes assignment create/end authorization.
 
-### Gate
+**Gate:**
 
 All of the following must be true:
 
@@ -306,14 +306,14 @@ All of the following must be true:
 7. Assignment ending requires target-assignment authority or explicit bootstrap/root authority, not merely a request actor ID.
 8. Tests cover the above behavior and prove `assignment_changed` remains outside `activities[*].roles`.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-05-22**: Opened. Code read confirmed geography-only assignment creation containment in `AssignmentService`, null-activity wildcard behavior in `ActiveAssignment`, and the need for explicit bootstrap/root semantics before implementation. Routed to [IDR-024](decisions/idr-024-multi-axis-assignment-containment.md) for the decision/doc stop.
 - **2026-05-22**: RESOLVED. `AssignmentService.createAssignment(...)` now validates `geographic`, `subject_list`, and `activity` containment against one active covering creator assignment, rejects empty subject/activity arrays, and removes the requester-personal no-assignment bootstrap. `createInitialBootstrapAssignment(...)` provides an explicit initial bootstrap path bounded to the no-assignment-created system state, and `endAssignment(...)` now requires authority over the target assignment scope. `ActiveAssignment` no longer treats empty lists as unrestricted or null activity as passing activity-restricted assignments. Coverage landed in `AssignmentContainmentIntegrationTest`, `AuthFlagIntegrationTest.activityRestrictedAssignment_nullActivityWorkEvent_scopeViolation`, and the existing `DeployTimeValidatorTest.activityRoles_assignmentChangedRejected` gate.
 
 ---
 
-## FP-008 — Assignment command actor identity binding
+## FP-008: Assignment command actor identity binding
 
 **Status**: RESOLVED
 **Opened**: 2026-05-22 by assignment command boundary review after FP-007
@@ -321,17 +321,17 @@ All of the following must be true:
 **Blocks**: Phase 4.3 domain uniqueness entry; any production exposure of assignment command endpoints
 **Severity**: A — otherwise ADR-003 S5/IDR-024 containment can be evaluated for a spoofed actor
 
-### Context
+**Context:**
 
 FP-007 closed multi-axis containment inside `AssignmentService`, but the ordinary command boundary still let callers supply the authority actor. `AssignmentController` accepted `creator_actor_id` on create and `actor_id` on end, while `WebConfig` only token-bound sync pull/config endpoints. If `/api/assignments` was exposed, a caller could ask the service to evaluate containment for a different actor than the authenticated caller.
 
 The HTML `AdminController` assignment forms had the same shape: they accepted creator/actor IDs as request parameters even though this repo has no production admin authentication yet. That must not be mistaken for production assignment-administration semantics.
 
-### Trigger
+**Trigger:**
 
 Before starting Phase 4.3 domain uniqueness, and before any deployment exposes ordinary assignment command endpoints beyond a trusted development environment.
 
-### Gate
+**Gate:**
 
 All five must be true:
 
@@ -341,20 +341,20 @@ All five must be true:
 4. Tests cover unauthenticated rejection, spoofed actor rejection, insufficient authenticated scope rejection, and successful covering multi-axis authenticated scope.
 5. The HTML admin assignment surface either binds to authenticated admin/root actor context or is explicitly documented as non-production/dev-only while no admin auth exists.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-05-22**: RESOLVED. `WebConfig` now token-binds `/api/assignments` and `/api/assignments/**`. `AssignmentController` reads the acting actor from `ActorTokenInterceptor.ACTOR_ID_ATTR`, ignores legacy `creator_actor_id`/`actor_id` request fields, and calls only the ordinary `AssignmentService.createAssignment(...)`/`endAssignment(...)` flow. `AssignmentContainmentIntegrationTest` covers unauthenticated create/end rejection, spoofed create/end actor rejection, insufficient authenticated scope rejection, covering multi-axis authenticated success, and ordinary API inability to reach initial bootstrap by spoofing. `AdminController` assignment commands are marked development-only and bind to a fixed dev admin actor until real admin auth exists; assignment forms no longer accept creator/ending actor IDs.
 
 ---
 
-## FP-009 — Conflict resolver designation and single-writer resolution enforcement
+## FP-009: Conflict resolver designation and single-writer resolution enforcement
 
 **Status**: RESOLVED
 **Opened**: 2026-05-24 by ADR-002 S11 parity review before Phase 4.4
 **Blocks**: Resolved for runtime resolver designation and single-writer enforcement. Auto-resolution and resolver reassignment remain deferred successor surfaces; `transition_violation` may now proceed using IDR-026 routing.
 **Severity**: A — touches ADR-002 S11 single-writer conflict resolution and prevents recursive resolution conflicts
 
-### Context
+**Context:**
 
 ADR-002 S11 requires every `ConflictDetected` event to designate exactly one resolver identity. Only a `ConflictResolved` event authored by that designated resolver is canonical; resolution events from other actors are accepted but flagged as unauthorized. ADR-007 later canonicalized these as `conflict_detected/v1` and `conflict_resolved/v1` shapes under the closed envelope type vocabulary, but it did not remove the S11 obligation.
 
@@ -362,7 +362,7 @@ At opening, current implementation and contracts had partial resolver metadata o
 
 Phase 4.4 pattern registry and binding validation does not emit `transition_violation`, create flags, resolve flags, route resolvers, or run auto-resolution, so this FP does not block 4.4 if the slice stays clean. It becomes blocking before any slice that emits resolver-dependent flags or claims conflict-resolution authority.
 
-### Trigger
+**Trigger:**
 
 Before any of the following:
 
@@ -372,7 +372,7 @@ Before any of the following:
 4. Implementing auto-resolution policies or system-authored `conflict_resolved/v1` events.
 5. Closing Phase 4 while any implemented flag category still has unresolved resolver routing.
 
-### Gate
+**Gate:**
 
 All of the following must be true:
 
@@ -383,7 +383,7 @@ All of the following must be true:
 5. Auto-resolution, if implemented, authors standard `conflict_resolved/v1` events through a designated system resolver path and does not bypass S11.
 6. Tests cover authorized manual resolution, unauthorized resolution flagging, resolver routing for active categories, and system auto-resolution authority if auto-resolution is implemented.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-05-24**: Opened. Routed as carried ADR debt, not a Phase 4.4 blocker. Phase 4.4 may proceed only if it remains limited to platform pattern registry and binding validation. This FP blocks transition-violation emission, resolver routing, conflict-resolution authority enforcement, auto-resolution, and Phase 4 close-out until the gate is met or explicitly re-deferred with a recorded reason.
 - **2026-05-24**: PARTIALLY ROUTED. [IDR-026](decisions/idr-026-conflict-resolver-routing-and-single-writer-resolution.md) defines resolver routing for all active/imminent categories, canonical single-writer resolution semantics, production conflict API actor binding, unauthorized-resolution flagging, and explicit deferral of reassignment/auto-resolution mechanics. FP-009 remains `OPEN` because runtime emission of required `designated_resolver`, bearer-bound `/api/conflicts/**`, canonical resolution enforcement, unauthorized-resolution flagging, and tests have not landed. `contracts/shapes/*` was deliberately left untouched; schema-required `designated_resolver` remains deferred to FP-010.
@@ -391,7 +391,7 @@ All of the following must be true:
 
 ---
 
-## FP-010 — Platform-bundled payload shape contract parity
+## FP-010: Platform-bundled payload shape contract parity
 
 **Status**: RESOLVED
 **Opened**: 2026-05-24 by IDR-025 contract-delivery review
@@ -399,7 +399,7 @@ All of the following must be true:
 **Blocks**: Resolved for platform-bundled event payload shape parity and production contract-hygiene close-out. Future payload field changes must update contracts, runtime validation, and emission tests together.
 **Severity**: C — contract hygiene, but prevents cross-boundary drift
 
-### Context
+**Context:**
 
 Platform-bundled event payload shapes are real cross-boundary contracts, but they are not workflow pattern definitions. They live under `contracts/shapes/` and govern platform-emitted or platform-administered events such as `assignment_created/v1`, `assignment_ended/v1`, `conflict_detected/v1`, `conflict_resolved/v1`, `subjects_merged/v1`, and `subject_split/v1`.
 
@@ -407,7 +407,7 @@ The IDR-025 pattern-definition work deliberately kept workflow pattern definitio
 
 This does not block Phase 4.5 pattern-state projection if that slice consumes only packaged pattern definitions and existing event payload fields. It must be closed or explicitly re-routed before changing platform-bundled payload schemas, claiming contract parity for payload shapes, or doing a production contract-hygiene close-out.
 
-### Trigger
+**Trigger:**
 
 Before any of the following:
 
@@ -417,7 +417,7 @@ Before any of the following:
 4. Claiming that platform payload shape contracts are tested, not trusted.
 5. Production contract-hygiene close-out.
 
-### Gate
+**Gate:**
 
 All of the following must be true:
 
@@ -427,21 +427,21 @@ All of the following must be true:
 4. Mobile/server classifiers and shared fixtures remain aligned with the platform shape refs and their versioned payload contracts.
 5. CI fails if a platform-bundled payload shape contract changes without updating the relevant runtime mirror, emission path, or fixture coverage.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-05-24**: Opened as a separate contract-hygiene follow-up after IDR-025. Pattern definitions are workflow contracts under `contracts/patterns/`; platform-bundled payload shapes remain event payload contracts under `contracts/shapes/` and need their own parity/loading gate.
 - **2026-05-25**: RESOLVED. Server build now bundles all six `contracts/shapes/*.schema.json` payload contracts under classpath `shapes/`, and `PlatformPayloadContractValidator` loads them as Draft 2020-12 JSON Schemas for runtime validation. `ShapePayloadValidator` uses the platform payload contracts for sync push structural validation, and `EventRepository.insert(...)` enforces the same contracts as a backstop for server-emitted platform events. `PlatformPayloadShapeContractTest` verifies all six contracts are bundled and enforce required fields; `PlatformPayloadEmissionContractIntegrationTest` validates actual assignment, conflict, and identity emission paths and proves invalid platform payload inserts fail; `PlatformPayloadBoundaryTest` proves platform payload schemas are not seeded as deployer shape rows, not deployer-editable, not activity-bindable as form shapes, and filtered out of config packages even if old mirror rows exist. `ongoing_resolution/v1` assignment transfer now comes from platform-owned pattern `platform_shape_roles`, not deployer shape bindings. The deployer-facing shape DSL remains intentionally separate from these payload JSON Schemas.
 
 ---
 
-## FP-011 — Authentication principal-to-actor mapping and group non-authority
+## FP-011: Authentication principal-to-actor mapping and group non-authority
 
 **Status**: OPEN
 **Opened**: 2026-05-24 by authentication/provider planning review
 **Blocks**: production authentication provider integration; any Keycloak/OIDC/JWT slice; any account, user-group, or IdP-claim authority model
 **Severity**: B — protects ADR-003 assignment-derived authority and ADR-002 actor authorship
 
-### Context
+**Context:**
 
 The current implementation uses the Phase 2 simple actor-token path from IDR-016:
 `Authorization: Bearer <token>` resolves to an `actor_id`, and assignments remain
@@ -461,7 +461,7 @@ bearer-resolved actor context as long as it does not add account IDs, group IDs,
 IdP claims, or Keycloak-specific authority rules. The production provider
 integration itself needs this FP resolved or explicitly routed first.
 
-### Trigger
+**Trigger:**
 
 Before any of the following:
 
@@ -476,7 +476,7 @@ Before any of the following:
    envelope or platform-bundled event payloads.
 5. Implementing shared-device or multi-actor session semantics.
 
-### Gate
+**Gate:**
 
 All of the following must be true:
 
@@ -494,7 +494,7 @@ All of the following must be true:
 5. Event authorship continues to use `actor_ref`; no account/group/user field is
    added to the event envelope without formal ADR-level change control.
 
-### Resolution log
+**Resolution log:**
 
 - **2026-05-24**: Opened from `.review/temporary-authentication-discussion.md`.
   This is not an FP-009 blocker because the FP-009 pass can remain provider-neutral

@@ -14,10 +14,19 @@ Default implementer packet:
 Open additional docs only when routed:
 
 - `docs/flagged-positions.md` - read the summary table first; open a specific FP section only when its `Blocks` field or topic matches the task, or when adding/updating an FP.
-- ADRs/IDRs - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision.
+- ADRs, CDL/IDRs - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision.
 - `docs/architecture/`, phase specs, scenarios, and exploration archives - use for architecture-steward planning, drift investigation, or when a task explicitly depends on that context.
+- `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` 
 
 If these sources disagree with each other or with the code, stop and surface the drift before implementing.
+
+### Slicing Canonical Decisions (the new authority replacement of the now retired `adrs/`)
+
+When routed, to prevent loading the entire 2600+ line `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` into your context window, use the following resources:
+
+- **JSON Catalog:** Refer to `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.json` for a structured, low-token representation of all decisions, constraints, and guardrails.
+- **README Index:** Refer to `docs/architecture/adrs-decisions-canonical-ledger/README.md` for a categorized directory linking direct line numbers to specific decisions.
+- **Query Tool:** Run `python3 scripts/query_cdl.py --tag <tag>`, `--id <CDL-ID>`, or `--search "<term>"` to extract exactly the relevant decisions and constraints for your task.
 
 ## Steward And Implementer Split
 
