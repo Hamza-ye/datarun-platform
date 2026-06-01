@@ -342,6 +342,57 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
         assertThat(bSubjects).doesNotContain(subjectNoLoc.toString());
     }
 
+    @Test
+    void subjectListAndActivityScope_paginatesPastFilteredRows() {
+        UUID allowedSubject = UUID.randomUUID();
+        UUID blockedSubject = UUID.randomUUID();
+        registerSubjectLocation(allowedSubject, districtX);
+        registerSubjectLocation(blockedSubject, districtX);
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                null, List.of(allowedSubject), List.of("survey"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        long cursor = latestWatermark();
+
+        pushCaptureEvent(blockedSubject, "survey", "Blocked by subject list");
+        pushCaptureEvent(allowedSubject, "vaccination", "Blocked by activity");
+        pushCaptureEvent(allowedSubject, "survey", "Authorized");
+
+        ResponseEntity<JsonNode> response = pullEvents(tokenA, cursor, 1);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(extractCaptureSubjectActivityKeys(response.getBody().get("events")))
+                .containsExactly(allowedSubject + "|survey");
+        assertThat(response.getBody().get("has_more").asBoolean()).isTrue();
+    }
+
+    @Test
+    void scopeAxesComposeAndWithinAssignmentOrAcrossAssignments() {
+        UUID subjectA = UUID.randomUUID();
+        UUID subjectB = UUID.randomUUID();
+        registerSubjectLocation(subjectA, districtX);
+        registerSubjectLocation(subjectB, districtX);
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                districtX, List.of(subjectA), List.of("survey"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                districtX, List.of(subjectB), List.of("vaccination"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        long cursor = latestWatermark();
+
+        pushCaptureEvent(subjectA, "survey", "First assignment permits this");
+        pushCaptureEvent(subjectB, "vaccination", "Second assignment permits this");
+        pushCaptureEvent(subjectA, "vaccination", "Subject from one assignment cannot borrow activity from another");
+        pushCaptureEvent(subjectB, "survey", "Subject from one assignment cannot borrow activity from another");
+
+        ResponseEntity<JsonNode> response = pullEvents(tokenA, cursor, 100);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(extractCaptureSubjectActivityKeys(response.getBody().get("events")))
+                .containsExactlyInAnyOrder(
+                        subjectA + "|survey",
+                        subjectB + "|vaccination");
+    }
+
     // --- Helpers ---
 
     private void registerSubjectLocation(UUID subjectId, UUID locationId) {
@@ -353,11 +404,15 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
     }
 
     private void pushCaptureEvent(UUID subjectId, String notes) {
+        pushCaptureEvent(subjectId, null, notes);
+    }
+
+    private void pushCaptureEvent(UUID subjectId, String activityRef, String notes) {
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("id", UUID.randomUUID().toString());
         event.put("type", "capture");
         event.put("shape_ref", "basic_capture/v1");
-        event.put("activity_ref", null);
+        event.put("activity_ref", activityRef);
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
         event.put("actor_ref", Map.of("type", "actor", "id", ADMIN.toString()));
         event.put("device_id", DEVICE_A.toString());
@@ -383,6 +438,13 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
                 new HttpEntity<>(request, headers), JsonNode.class);
     }
 
+    private long latestWatermark() {
+        Long watermark = jdbc.queryForObject(
+                "SELECT COALESCE(MAX(sync_watermark), 0) FROM events",
+                Long.class);
+        return watermark == null ? 0 : watermark;
+    }
+
     private List<String> extractCaptureSubjectIds(JsonNode events) {
         List<String> ids = new ArrayList<>();
         for (JsonNode e : events) {
@@ -391,5 +453,20 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
             }
         }
         return ids;
+    }
+
+    private List<String> extractCaptureSubjectActivityKeys(JsonNode events) {
+        List<String> keys = new ArrayList<>();
+        for (JsonNode e : events) {
+            if (e.get("type").asText().equals("capture")) {
+                String subjectId = e.get("subject_ref").get("id").asText();
+                JsonNode activityNode = e.get("activity_ref");
+                String activityRef = activityNode == null || activityNode.isNull()
+                        ? "null"
+                        : activityNode.asText();
+                keys.add(subjectId + "|" + activityRef);
+            }
+        }
+        return keys;
     }
 }

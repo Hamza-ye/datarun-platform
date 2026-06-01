@@ -208,47 +208,8 @@ public class SyncController {
         // Compute actor's scope from active assignments
         List<ActiveAssignment> assignments = scopeResolver.getActiveAssignments(actorId);
 
-        // If any assignment has unrestricted geographic scope (null), actor sees all events
-        boolean hasUnrestrictedGeo = assignments.stream()
-                .anyMatch(a -> a.geographicPath() == null);
-
-        List<String> scopePaths = assignments.stream()
-                .map(ActiveAssignment::geographicPath)
-                .filter(p -> p != null)
-                .toList();
-
-        List<Event> events;
-        if (assignments.isEmpty()) {
-            // No active assignments → empty result (no events authorized)
-            events = List.of();
-        } else if (hasUnrestrictedGeo) {
-            // Unrestricted geographic scope → return all events (same as pre-Phase 2)
-            events = eventRepository.findSince(request.sinceWatermark(), limit);
-        } else {
-            events = eventRepository.findSinceScoped(
-                    request.sinceWatermark(), limit, actorId, scopePaths);
-        }
-
-        // Post-query filtering: apply activity + subject_list scope (AND composition).
-        // Geographic filtering is done at SQL level; activity and subject_list filter in Java.
-        // Check against each assignment — event passes if ANY assignment accepts it
-        // (OR across assignments, AND within: activity + subject_list must both pass).
-        boolean hasActivityOrSubjectListScope = assignments.stream()
-                .anyMatch(a -> a.activityList() != null || a.subjectList() != null);
-        if (hasActivityOrSubjectListScope && !events.isEmpty()) {
-            events = events.stream().filter(event -> {
-                // Assignment events (E9) and integrity/identity events always pass
-                if ("assignment_changed".equals(event.type())) return true;
-                if (isIntegrityOrIdentityEvent(event)) return true;
-                // Extract subject_id and activity_ref for scope check
-                String subjectId = event.subjectRef() != null
-                        ? event.subjectRef().path("id").asText(null) : null;
-                UUID subjectUuid = subjectId != null ? UUID.fromString(subjectId) : null;
-                // OR across assignments: passes if ANY assignment passes both checks
-                return assignments.stream().anyMatch(a ->
-                        a.containsActivity(event.activityRef()) && a.containsSubject(subjectUuid));
-            }).toList();
-        }
+        List<Event> events = findAuthorizedPullEvents(
+                request.sinceWatermark(), limit, actorId, assignments);
 
         long latestWatermark = events.isEmpty()
                 ? request.sinceWatermark()
@@ -328,14 +289,156 @@ public class SyncController {
         return result != null ? result : 0;
     }
 
-    private boolean isIntegrityOrIdentityEvent(Event event) {
-        String shapeRef = event.shapeRef();
-        if (shapeRef == null) return false;
-        return shapeRef.startsWith("conflict_detected/")
-                || shapeRef.startsWith("conflict_resolved/")
-                || shapeRef.startsWith("subjects_merged/")
-                || shapeRef.startsWith("subject_split/");
+    private List<Event> findAuthorizedPullEvents(long sinceWatermark, int limit,
+                                                 UUID actorId,
+                                                 List<ActiveAssignment> assignments) {
+        if (assignments.isEmpty()) {
+            return List.of();
+        }
+
+        List<Event> authorized = new ArrayList<>();
+        long scanWatermark = sinceWatermark;
+        int candidateLimit = Math.max(limit, 100);
+
+        while (authorized.size() < limit) {
+            List<Event> candidates = findPullCandidates(
+                    scanWatermark, candidateLimit, actorId, assignments);
+            if (candidates.isEmpty()) {
+                break;
+            }
+
+            boolean exhausted = candidates.size() < candidateLimit;
+            for (Event event : candidates) {
+                scanWatermark = event.syncWatermark();
+                if (isAuthorizedPullEvent(event, actorId, assignments)) {
+                    authorized.add(event);
+                    if (authorized.size() == limit) {
+                        break;
+                    }
+                }
+            }
+
+            if (authorized.size() == limit || exhausted) {
+                break;
+            }
+        }
+
+        return authorized;
     }
+
+    private List<Event> findPullCandidates(long sinceWatermark, int limit,
+                                           UUID actorId,
+                                           List<ActiveAssignment> assignments) {
+        boolean hasUnrestrictedGeo = assignments.stream()
+                .anyMatch(a -> a.geographicPath() == null);
+        if (hasUnrestrictedGeo) {
+            return eventRepository.findSince(sinceWatermark, limit);
+        }
+
+        List<String> scopePaths = assignments.stream()
+                .map(ActiveAssignment::geographicPath)
+                .filter(p -> p != null)
+                .toList();
+        return eventRepository.findSinceScoped(sinceWatermark, limit, actorId, scopePaths);
+    }
+
+    private boolean isAuthorizedPullEvent(Event event, UUID actorId,
+                                          List<ActiveAssignment> assignments) {
+        if (assignments.stream().anyMatch(this::isUnrestrictedAssignment)) {
+            return true;
+        }
+
+        if ("assignment_changed".equals(event.type())) {
+            return isOwnAssignmentEvent(event, actorId);
+        }
+
+        PullAuthorizationContext context = authorizationContext(event);
+        if (context.subjectId() == null) {
+            return false;
+        }
+
+        return assignments.stream().anyMatch(assignment ->
+                assignment.containsGeographically(context.locationPath())
+                        && assignment.containsSubject(context.subjectId())
+                        && (context.ignoreActivity()
+                                || assignment.containsActivity(context.activityRef())));
+    }
+
+    private boolean isUnrestrictedAssignment(ActiveAssignment assignment) {
+        return assignment.geographicPath() == null
+                && assignment.subjectList() == null
+                && assignment.activityList() == null;
+    }
+
+    private boolean isOwnAssignmentEvent(Event event, UUID actorId) {
+        String targetActor = event.payload() == null
+                ? null
+                : event.payload().path("target_actor").path("id").asText(null);
+        return actorId.toString().equals(targetActor);
+    }
+
+    private PullAuthorizationContext authorizationContext(Event event) {
+        if (isConflictEvent(event)) {
+            Event source = sourceEvent(event);
+            if (source != null) {
+                return authorizationContextFor(source, false);
+            }
+        }
+        boolean identityLifecycle = event.shapeRef() != null
+                && (event.shapeRef().startsWith("subjects_merged/")
+                || event.shapeRef().startsWith("subject_split/"));
+        return authorizationContextFor(event, identityLifecycle);
+    }
+
+    private PullAuthorizationContext authorizationContextFor(Event event, boolean ignoreActivity) {
+        UUID subjectId = extractSubjectId(event);
+        String locationPath = eventRepository.getLocationPath(event.id());
+        return new PullAuthorizationContext(
+                subjectId,
+                locationPath,
+                event.activityRef(),
+                ignoreActivity);
+    }
+
+    private Event sourceEvent(Event event) {
+        String sourceEventId = event.payload() == null
+                ? null
+                : event.payload().path("source_event_id").asText(null);
+        if (sourceEventId == null || sourceEventId.isBlank()) {
+            return null;
+        }
+        try {
+            return eventRepository.findById(UUID.fromString(sourceEventId));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private boolean isConflictEvent(Event event) {
+        String shapeRef = event.shapeRef();
+        return shapeRef != null
+                && (shapeRef.startsWith("conflict_detected/")
+                || shapeRef.startsWith("conflict_resolved/"));
+    }
+
+    private UUID extractSubjectId(Event event) {
+        if (event.subjectRef() == null
+                || !"subject".equals(event.subjectRef().path("type").asText(null))) {
+            return null;
+        }
+        try {
+            return UUID.fromString(event.subjectRef().path("id").asText());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private record PullAuthorizationContext(
+            UUID subjectId,
+            String locationPath,
+            String activityRef,
+            boolean ignoreActivity
+    ) {}
 
     /**
      * Extract actor_id from the first event in a batch.

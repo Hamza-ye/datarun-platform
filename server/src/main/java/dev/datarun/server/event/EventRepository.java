@@ -111,6 +111,17 @@ public class EventRepository {
     }
 
     /**
+     * Return the write-time location_path recorded for a persisted event.
+     */
+    public String getLocationPath(UUID eventId) {
+        List<String> paths = jdbc.queryForList(
+                "SELECT location_path FROM events WHERE id = ?::uuid",
+                String.class,
+                eventId.toString());
+        return paths.isEmpty() ? null : paths.get(0);
+    }
+
+    /**
      * Check if a subject has events from devices OTHER than the given device
      * with sync_watermark strictly greater than the given horizon.
      * Used by ConflictDetector for concurrent_state_change detection.

@@ -37,7 +37,7 @@ This backlog orders post-Phase-4 stabilization work. It is not architecture auth
 | NW-005 | Verify envelope/type closure | baseline_acceptance | P0 | `accepted` | BAR-001 | NW-003 | Targeted server contract tests pass and evidence is attached to BAR-001. |
 | NW-006 | Verify platform payload contract boundary | baseline_acceptance | P0 | `accepted` | BAR-005 | NW-003 | Platform payload contract tests pass and deployer-shape boundary remains intact. |
 | NW-007 | Verify flag catalog and resolver routing | baseline_acceptance | P0 | `accepted` | BAR-006 | NW-003 | Targeted flag/resolution tests prove exact resolver equality and resolver payload presence. |
-| NW-008 | Verify sync and authority baseline | baseline_acceptance | P1 | `ready` | BAR-003, BAR-004, BAR-007 | NW-003 | Scope-filtered sync, subject-history backfill, assignment containment, and responsibility-binding tests pass. |
+| NW-008 | Verify sync and authority baseline | baseline_acceptance | P1 | `accepted` | BAR-003, BAR-004, BAR-007 | NW-003 | Scope-filtered sync, subject-history backfill, assignment containment, and responsibility-binding tests pass. |
 | NW-009 | Verify projection and integrity baseline | baseline_acceptance | P1 | `ready` | BAR-009, BAR-012, BAR-013, BAR-014 | NW-003 | Identity, projection equivalence, pattern state, transition, and uniqueness tests pass. |
 | NW-010 | Verify mobile baseline | baseline_acceptance | P1 | `ready` | BAR-008, BAR-011, BAR-012, BAR-014 | NW-003 | Targeted Flutter tests for config, expression, projection, pattern, and selective retention pass. |
 | NW-011 | Create viability closure review | viability_review | P1 | `accepted` | viability assessment; post-Phase-4 plan | NW-003 | V1-V6, tensions, and blind spots have closure routes. |
