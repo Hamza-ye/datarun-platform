@@ -1,5 +1,5 @@
 ---
-description: "Create a Datarun Platform checkpoint snapshot: current standing, accepted baseline, open work, risks, and next march orders."
+description: "Create a Datarun Platform checkpoint snapshot: current standing, active assumptions, open work, risks, and next march orders."
 name: "Project Checkpoint"
 argument-hint: "Optional focus, e.g. 'post NW-008', 'before new phase', 'returning after time away'"
 agent: "agent"
@@ -21,23 +21,21 @@ and what should happen next.
 
 ## Context Rules
 
-Use the current post-Phase-4 working surface. Do not reconstruct truth from old document chronology.
+Use the repository's current routing surfaces. Do not reconstruct truth from old document chronology, stale phase notes, or prior checkpoint wording.
 
 Read, in this order:
 
 1. `AGENTS.md`
 2. `docs/status.md` Current Routing section only.
-3. `docs/agent-working-surface/README.md`
-4. `docs/agent-working-surface/baseline-acceptance-register.md`
-5. `docs/agent-working-surface/platform-next-work-backlog.md`
-6. `docs/agent-working-surface/escape-hatch-register.md`
-7. `docs/checklists/architecture-routing-checklist.md`
-8. `docs/reviews/viability-closure-review.md`
-9. `docs/scenarios/README.md`
-10. The most recent checkpoint in `docs/checkpoints/`.
-11. `git status --short`, `git log --oneline -8`, and focused diffs for recent commits named by the checkpoint trigger.
+3. The active working-surface router named by Current Routing, if present.
+4. Current status registers named by that router, such as baseline, backlog, escape-hatch, risk, viability, or review registers.
+5. `docs/scenarios/README.md` for problem-space pressure.
+6. The most recent checkpoint in `docs/checkpoints/`.
+7. `git status --short`, `git log --oneline -8`, and focused diffs for recent commits named by the checkpoint trigger.
 
-Open CDL rows, IDRs, contracts, scenario files, or code only when the working surface routes you there or when recent changes need verification. Use `scripts/query_cdl.py` or the CDL README/JSON catalog instead of loading the full CDL.
+Open CDL rows, IDRs, contracts, scenario files, or code only when the current router, a touched surface, or recent changes route you there. Use `scripts/query_cdl.py` or the CDL README/JSON catalog instead of loading the full CDL.
+
+If a named register no longer exists, do not recreate its old model. Use the current replacement named by the router and note the replacement in the checkpoint.
 
 ## Output Location
 
@@ -73,18 +71,18 @@ Include:
 
 Then add a short narrative of 2-4 sentences.
 
-### 2. Standing Baseline
+### 2. Standing Snapshot
 
-Purpose: current accepted/candidate/deferred state.
+Purpose: current accepted/candidate/deferred or equivalent state.
 
-Summarize:
+Summarize, using the vocabulary of the current status registers:
 
-- Accepted BAR rows.
-- Remaining baseline candidates.
-- Deferred/future-decision rows that must not be promoted by implication.
-- Current active backlog rows by priority.
+- Accepted or settled rows/items.
+- Candidate or verification-needed rows/items.
+- Deferred or future-decision rows/items that must not be promoted by implication.
+- Current active backlog or next-work rows by priority.
 
-Use compact tables. Do not paste the full BAR or backlog.
+Use compact tables. Do not paste full registers.
 
 ### 3. Recent Movement
 
@@ -105,7 +103,7 @@ Include:
 - Current source order.
 - Non-negotiable guardrails.
 - Escape-hatch status summary.
-- FP-011/auth boundary reminder.
+- Auth/identity-provider boundary reminder when present.
 
 Reference CDL/IDR rows by ID or file path; do not quote large sections.
 
@@ -129,7 +127,7 @@ Purpose: keep product reality visible without turning scenarios into implementat
 Summarize:
 
 - New/thickened scenarios.
-- Which pressures are current baseline, verification-needed, deferred, or future-decision.
+- Which pressures are accepted/current, verification-needed, deferred, or future-decision.
 - Any wording or routing corrections made since the last checkpoint.
 
 ### 7. Verification Ledger
@@ -151,13 +149,13 @@ Scope:
 Stop condition:
 ```
 
-Tie each item to a BAR/NW row where possible.
+Tie each item to the current register IDs where possible.
 
 ## Output Rules
 
 1. Be concrete. A checkpoint is useful only if it names files, rows, commits, and evidence.
 2. Keep it readable. This is a snapshot, not a full audit.
-3. Do not mark anything accepted unless the BAR already accepts it or the checkpoint work verified it.
+3. Do not mark anything accepted unless the current status register already accepts it or the checkpoint work verified it.
 4. Do not promote deferred/future-decision surfaces.
 5. Record low-severity review findings if they can affect future assumptions.
 6. If the working tree is dirty, include a clear overlay section before march orders.
