@@ -4,13 +4,13 @@
 
 ## 1. Bearing
 
-- **Anchor commit**: `828a0ea test(sync): verify sync authority baseline`
+- **Anchor commit**: `99d6d76 docs(reviews): map scenario pressure to baseline`
 - **Phase**: Post-Phase-4 stabilization.
-- **Momentum**: `ADVANCING` — the project has moved from broad Phase 4 closure claims into BAR-backed targeted verification.
-- **Last milestone**: NW-008 accepted sync and authority baseline rows BAR-003, BAR-004, and BAR-007 with focused runtime evidence.
-- **Horizon**: accept the remaining projection/integrity and mobile baseline candidates, then decide whether a new product/architecture phase is justified.
+- **Momentum**: `ADVANCING` — the project has moved from broad Phase 4 closure claims into BAR-backed verification and scenario-grade probe selection.
+- **Last milestone**: NW-023 accepted the scenario-to-baseline pressure map and selected S00, S19, S21, and S27 as the near-term probe set.
+- **Horizon**: accept the remaining projection/integrity and mobile baseline candidates, then turn S00/S19 into first scenario-grade runtime probes.
 
-Phase 4 is complete and the project is intentionally not in a new feature phase. The current work is stabilization: keep the authority surface clean, verify baseline candidates with targeted tests, and preserve deferred/future-decision boundaries. The working assumption is that CDL remains architecture authority, the Baseline Acceptance Register records current implementation standing, and old review artifacts no longer define active truth.
+Phase 4 is complete and the project is intentionally not in a new feature phase. The current work is stabilization: keep the authority surface clean, verify baseline candidates with targeted tests, preserve deferred/future-decision boundaries, and only then promote scenario pressure into runtime probes. The working assumption is that CDL remains architecture authority, the Baseline Acceptance Register records current implementation standing, and old review artifacts no longer define active truth.
 
 ---
 
@@ -58,7 +58,7 @@ Phase 4 is complete and the project is intentionally not in a new feature phase.
 
 | NW | Status | Meaning |
 |---|---|---|
-| NW-001 through NW-008, NW-011 through NW-017, NW-022 | `accepted` | Working surface, BAR, cleanup, core verification, viability review, scenario thickening, and escape-hatch register are in place. |
+| NW-001 through NW-008, NW-011 through NW-017, NW-022, NW-023 | `accepted` | Working surface, BAR, cleanup, core verification, viability review, scenario thickening, escape-hatch register, and scenario pressure map are in place. |
 | NW-009 | `ready` | Verify projection and integrity baseline. |
 | NW-010 | `ready` | Verify mobile baseline. |
 | NW-018 through NW-020 | `deferred` | Mini-briefs only; do not promote as implementation. |
@@ -70,11 +70,12 @@ Phase 4 is complete and the project is intentionally not in a new feature phase.
 
 | Commit | Meaning | Evidence |
 |---|---|---|
+| `99d6d76` | NW-023 accepted the scenario-to-baseline pressure map. | `docs/reviews/scenario-baseline-pressure-map.md`; S00/S19/S21/S27 selected with deferred/future surfaces routed rather than promoted. |
+| `50e07dc` | Added the NW-023 handoff prompt. | `docs/agent-working-surface/prompts/NW-023-create-scenario-to-baseline-pressure-map.md`. |
+| `c5f0b61` | Added the scenario pressure-map protocol. | `docs/reviews/scenario-baseline-pressure-map-protocol.md`. |
 | `828a0ea` | NW-008 accepted sync/authority baseline. | Two targeted Maven commands passed: 37 tests and 33 tests; BAR-003/BAR-004/BAR-007 accepted. |
 | `4cbce70` | Added NW-008 handoff prompt. | `docs/agent-working-surface/prompts/NW-008-verify-sync-authority-baseline.md`. |
 | `a88aeb9` | Clarified scenario routing. | S12 now explicitly routes trigger execution to BAR-101/CDL-042; S25/S27 wording avoids auth/entity-lifecycle cues. |
-| `ad0ec6d` | NW-007 accepted flag resolver baseline. | Targeted integrity tests passed: 56 tests; BAR-006 accepted. |
-| `e51e6c7` | Established post-Phase-4 working surface. | BAR, backlog, routing checklist, escape-hatch register, viability review, scenario thickening. |
 
 Superseded review drafts were removed from active use. Current implementation status belongs in BAR, not legacy evidence packs or Phase 4 review chronology.
 
@@ -119,6 +120,7 @@ All six escape hatches are `inactive_until_triggered`: projection materializatio
 | Conservative `has_more` after scoped pull filtering | Low | NW-008 pull now scans past filtered rows; if exactly `limit` authorized rows are found while candidates are exhausted, `has_more` may overstate and cause one extra empty pull. | Add a focused pagination semantics test when touching sync again; not a data leak or baseline blocker. | Optional follow-up if client UX/perf makes it visible. |
 | Remaining baseline candidates are broad | Medium | NW-009 spans identity, projection equivalence, pattern state, transition, uniqueness, and conflict behavior. | Keep next prompts tightly sliced; accept BAR rows independently. | Covered by NW-009/NW-010. |
 | Production auth drift | Medium | FP-011 remains open and may be tempting during worker-exit or reporting work. | Keep bearer actor-bound model until production OIDC/JWT work is explicitly selected. | Existing BAR-104/FP-011 sufficient. |
+| Scenario probes becoming accidental feature phases | Medium | S00/S19/S21/S27 are now selected pressure probes and could attract trigger, lifecycle, auth-provider, or custom-scope work. | Treat the pressure map as routing, not authority; each probe prompt must name forbidden deferred/future surfaces. | Covered by NW-023 map; add probe-specific backlog rows only when drafting runtime probes. |
 
 ### Resolved Or De-Risked Items
 
@@ -128,6 +130,7 @@ All six escape hatches are `inactive_until_triggered`: projection materializatio
 | Resolver routing ambiguity | Manual identity conflict now preserves first unresolved resolver; exact resolver equality tested. | `ad0ec6d` |
 | Scope-filtered pull leaking across subject/activity axes | Live pull now composes geographic, subject-list, and activity axes within the same assignment. | `828a0ea` |
 | Subject-history backfill coupling to normal watermark | Targeted tests accepted independent cursor/no normal watermark mutation. | `828a0ea` |
+| Unordered scenario pressure | NW-023 triaged S00-S16, S18, and S19-S27 against BAR/deferred surfaces. | `99d6d76` |
 
 ---
 
@@ -138,6 +141,8 @@ Scenarios 23-27 were added to thicken post-Phase-4 blind spots: setup/configurat
 Scenario 12 remains active pressure for follow-up actions after observations, but BAR-101 keeps general trigger execution deferred. Current architecture says any future L3 trigger execution is server-only per CDL-042.
 
 S25 and S27 were corrected after review to avoid accidental implementation cues: worker exit is phrased as access/responsibility rather than login/auth provider behavior, and logistics uses "real-world things being tracked" rather than implying generic platform entity lifecycle.
+
+NW-023 now gives scenario pressure a bounded routing surface. It selects S00 and S19 as first scenario-grade probe designs, with S21 and S27 prepared in parallel but gated on NW-009/NW-010 evidence. S23 and S26 remain next-wave probes; S06, S15, S16, and S18 stay deferred/future-decision pressure unless successor work explicitly selects them.
 
 ---
 
@@ -151,6 +156,7 @@ S25 and S27 were corrected after review to avoid accidental implementation cues:
 | Sync/authority second group | `mvn -Dtest=MultiDeviceE2ETest,AssignmentContainmentIntegrationTest,ResponsibilityBindingScenarioIntegrationTest,AuthFlagIntegrationTest test` | Passed: 33 tests; BAR-003/BAR-007 accepted. |
 | Compile guard | `./mvnw -DskipTests clean test-compile` | Passed after NW-008. |
 | Location path rewrite search | Code search after NW-008 | `events.location_path` update path remains insert-time resolution, not normal sync/backfill/reparent. |
+| Scenario pressure map review | `git diff --cached --check`; targeted `rg` for trigger/auth/entity/envelope/scope/sensitivity terms | Passed; expected hits route deferred/future work instead of promoting it. |
 
 Full Maven/Flutter suites were not rerun for this checkpoint. The stabilization strategy remains targeted verification first, broader suites when cross-module behavior changes or before a release-like checkpoint.
 
@@ -181,3 +187,9 @@ Full Maven/Flutter suites were not rerun for this checkpoint. The stabilization 
    - Expected artifact: no code unless a successor decision selects one of those surfaces; prompts should name them as forbidden work.
    - Scope: ongoing guardrail.
    - Stop condition: any ordinary implementation prompt starts using production auth/group claims, general trigger execution, or entity lifecycle as assumed baseline.
+
+5. **Prepare first scenario-probe prompts from NW-023, but sequence them behind the right baseline evidence.**
+   - Why now: S00 and S19 are selected as the first scenario-grade probes, while S21/S27 are intentionally gated on projection/mobile evidence.
+   - Expected artifact: bounded prompts for S00 and S19 runtime probes, each naming BAR rows, contracts touched, forbidden work, and stop conditions.
+   - Scope: SESSION.
+   - Stop condition: a probe requires trigger execution, auto-resolution, resolver reassignment, production auth authority, entity lifecycle, field-level sensitivity, new envelope fields/types, or new scope mechanisms.
