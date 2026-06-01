@@ -42,7 +42,7 @@ Datarun's ambition is to **eliminate that rebuilding**. Instead of bespoke syste
 
 An evaluator assessing the architecture should read in this order:
 
-1. **Problem definition**: [Constraints](constraints.md) → [Scenar   ios](scenarios/README.md) → [Access Control](access-control-scenario.md)
+1. **Problem definition**: [Constraints](constraints.md) → [Scenarios](scenarios/README.md) → [Access Control](access-control-scenario.md)
 2. **Viability analysis**: [Viability Assessment](viability-assessment.md)
 3. **Design foundations**: [Principles](principles.md) → [Behavioral Patterns](behavioral_patterns.md)
 4. **Architecture description**: [Architecture](architecture/) — the consolidated reference: primitives, contracts, cross-cutting concerns, boundaries
@@ -55,7 +55,7 @@ An evaluator assessing the architecture should read in this order:
 
 | Area                                            | Contents                                                                                                                    |
 | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [Scenarios](scenarios/README.md)                | 21 real-world operational situations the platform must support — domain perspective, no solution prescription              |
+| [Scenarios](scenarios/README.md)                | 27 real-world operational situations the platform must support, including post-Phase-4 thickening scenarios — domain perspective, no solution prescription |
 | [Constraints](constraints.md)                   | Operational context and boundaries — target users, connectivity, scale, data sensitivity                                   |
 | [Access Control](access-control-scenario.md)    | Cross-cutting concern: who can see and do what, under what circumstances                                                    |
 | [Principles](principles.md)                     | 7 working principles — all confirmed through 5 ADRs                                                                        |
@@ -74,7 +74,7 @@ An evaluator assessing the architecture should read in this order:
 
 The project has completed its **initial architecture sequence**:
 
-1. ✅ Scenarios defined — 21 domain-pure, solution-independent scenarios
+1. ✅ Initial scenarios defined — 21 domain-pure, solution-independent scenarios; post-Phase-4 stabilization adds targeted scenario-thickening items in the scenario index
 2. ✅ Cross-cutting concerns identified — offline work, access control
 3. ✅ Architectural constraint decisions — five ADRs decided
    - **[ADR-001: Offline Data Model](adrs/adr-001-offline-data-model.md)** — immutable events, append-only, client-generated UUIDs (*[Reading Guide](exploration/guide-adr-001.md)*)

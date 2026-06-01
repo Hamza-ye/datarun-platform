@@ -1,0 +1,54 @@
+# Baseline Acceptance Register
+
+Status: active working surface
+
+Authority: the CDL governs architecture. This register governs current baseline acceptance status for post-Phase-4 work.
+
+## Status Vocabulary
+
+| Status | Meaning |
+|---|---|
+| `baseline_accepted` | Accepted into the current working baseline with architecture anchor and sufficient code/runtime evidence. |
+| `baseline_candidate` | Documented or implemented enough to evaluate, but not yet accepted as baseline by this register. |
+| `verification_scheduled` | Candidate selected for code/runtime verification. |
+| `deferred` | Intentionally postponed; not part of the current baseline. |
+| `future_decision` | Requires a successor architecture/platform decision before implementation. |
+| `out_of_scope` | Explicitly outside the current platform boundary. |
+| `superseded` | Replaced by a newer decision, contract, or implementation route. |
+
+## Evidence Rule
+
+Test names, phase claims, and IDR claims are anchors, not acceptance by themselves. A row moves to `baseline_accepted` only when the verifying agent attaches fresh code inspection, targeted test execution, or runtime scenario evidence.
+
+## Capability Register
+
+| ID | Capability | CDL anchor | Contract/spec anchor | Code/runtime anchor | Status | Exit condition | Owner/agent route |
+|---|---|---|---|---|---|---|---|
+| BAR-001 | Event envelope and type closure | CDL-006, CDL-007, CDL-008, CDL-013 | `contracts/envelope.schema.json`; server bundled copy | 2026-06-01: `./mvnw -Dtest=EnvelopeVocabularyTest,EnvelopeSchemaParityTest,PlatformPayloadShapeContractTest,PlatformPayloadEmissionContractIntegrationTest,PlatformPayloadBoundaryTest,FlagCatalogTest test` passed, including `EnvelopeVocabularyTest` and `EnvelopeSchemaParityTest` | `baseline_accepted` | Targeted contract tests pass and illegal type/domain-fact-as-type cases are rejected. | contract verifier |
+| BAR-002 | Append-only event store | CDL-001, CDL-002, CDL-019, CDL-021 | `contracts/sync-protocol.md`; event store module boundary | `EventRepository`; migration V1; sync/subject tests | `baseline_candidate` | Code inspection proves no operational event update/delete path; sync tests prove idempotent inserts. | backend verifier |
+| BAR-003 | Push/pull sync core | CDL-010, CDL-021, CDL-031 | `contracts/sync-protocol.md` | `SyncControllerIntegrationTest`; `MultiDeviceE2ETest` | `baseline_candidate` | Targeted tests prove idempotent push, ordered pull, pagination/watermark behavior, and scoped delivery. | sync verifier |
+| BAR-004 | Subject-history backfill | CDL-021, CDL-031, CDL-037 | `contracts/sync-protocol.md` subject-history section; FP-005 | `SubjectHistoryBackfillIntegrationTest` | `baseline_candidate` | Targeted tests prove independent cursor, per-page authorization, alias behavior, and no normal watermark mutation. | sync/projection verifier |
+| BAR-005 | Platform payload contracts | CDL-014, CDL-015 | `contracts/shapes/*.schema.json` | 2026-06-01: targeted server contract slice passed, including `PlatformPayloadShapeContractTest`, `PlatformPayloadEmissionContractIntegrationTest`, and `PlatformPayloadBoundaryTest` | `baseline_accepted` | Contract tests pass and runtime rejects invalid platform-owned payloads without treating them as deployer shapes. | contract verifier |
+| BAR-006 | Flag catalog and resolver routing | CDL-015, CDL-028, CDL-054 | `contracts/flag-catalog.md`; conflict payload schemas; IDR-026 | 2026-06-01: `FlagCatalogTest` passed in contract slice; resolver-routing runtime tests still pending | `baseline_candidate` | Tests prove each emitted flag has `designated_resolver`, resolvability is platform-owned, and only exact resolver resolutions are canonical. | integrity verifier |
+| BAR-007 | Assignment containment and scope-filtered sync | CDL-030, CDL-031, CDL-034, CDL-055 | assignment payload schemas; `contracts/sync-protocol.md`; IDR-024 | `AssignmentContainmentIntegrationTest`, `ScopeFilteredSyncIntegrationTest`, `ResponsibilityBindingScenarioIntegrationTest` | `baseline_candidate` | Tests prove creator containment, actor-bound assignment commands, three-axis scope filtering, and reassignment behavior. | authorization verifier |
+| BAR-008 | Selective retention | CDL-037, CDL-046 | module boundary; mobile sync/store behavior | `mobile/test/selective_retain_test.dart`; `mobile/lib/data/event_store.dart` | `baseline_candidate` | Mobile tests prove own events retained and out-of-scope other-device events purged according to current policy. | mobile verifier |
+| BAR-009 | Identity merge/split and alias projection | CDL-022, CDL-023, CDL-024, CDL-025, CDL-026, CDL-027, CDL-029 | `contracts/shapes/subjects_merged.schema.json`; `contracts/shapes/subject_split.schema.json` | `IdentityResolverIntegrationTest`; subject projection tests | `baseline_candidate` | Tests prove merge/split append events, no historical rewrite, rebuildable aliases, lifecycle checks, and raw-ref detection. | identity verifier |
+| BAR-010 | Config package delivery | CDL-038, CDL-039, CDL-041, CDL-044, CDL-056 | config package specs/IDRs; pattern delivery contracts | `ConfigIntegrationTest`; `DeployTimeValidatorTest` | `baseline_candidate` | Tests prove deploy-time validation, package atomicity, version coexistence, pattern definition delivery, and safe unknown-key behavior. | config verifier |
+| BAR-011 | Expression evaluator | CDL-043, CDL-052 | `contracts/fixtures/expression-evaluation.json`; IDR-018 | server/mobile expression tests | `baseline_candidate` | Server and mobile evaluator fixtures pass; invalid functions/namespaces/depth are rejected. | config/mobile verifier |
+| BAR-012 | Pattern registry and pattern-state projection | CDL-047, CDL-048, CDL-049, CDL-050, CDL-051 | `contracts/pattern-definition.schema.json`; `contracts/patterns/*.json`; `contracts/fixtures/pattern-state-projection.json` | `PatternDefinitionContractTest`; `PatternStateProjectionTest`; mobile pattern tests | `baseline_candidate` | Tests prove platform-owned definitions, valid binding delivery, rebuildable projection, and unresolved-flag exclusion. | workflow verifier |
+| BAR-013 | Transition and domain-uniqueness detection | CDL-003, CDL-004, CDL-045, CDL-048, CDL-054 | `contracts/flag-catalog.md`; pattern and shape contracts | `TransitionViolationIntegrationTest`; `DomainUniquenessIntegrationTest` | `baseline_candidate` | Tests prove accept-and-flag behavior, detector ordering, duplicate-basis exclusion, and legal accepted re-inclusion. | integrity/workflow verifier |
+| BAR-014 | Mobile/server projection equivalence | CDL-002, CDL-047, CDL-051 | `contracts/fixtures/*.json` | `ProjectionEquivalenceTest`; mobile projection tests | `baseline_candidate` | Shared fixtures pass on server and mobile; divergent projection semantics are either fixed or recorded. | projection verifier |
+| BAR-015 | Historical `events.location_path` immutability | CDL-031, CDL-033; IDR-014/015 | `docs/decisions/idr-014-materialized-path-locations.md`; `docs/decisions/idr-015-scope-filtered-sync-query.md` | 2026-06-01 code search: only `EventRepository.resolveLocationPath()` updates `events.location_path` immediately after insert; no reparent cascade path found | `baseline_candidate` | IDRs are harmonized; add regression guard if location reparenting or controlled backfill is implemented. | authorization/sync verifier |
+
+## Deferred Or Future-Decision Register
+
+| ID | Capability | CDL/FP anchor | Status | Exit condition | Owner/agent route |
+|---|---|---|---|---|---|
+| BAR-101 | General trigger execution | CDL-042; module Trigger Engine boundary | `deferred` | Successor implementation slice explicitly schedules server-side L3 trigger execution and defines tests. | platform decision |
+| BAR-102 | Auto-resolution execution | CDL-053, CDL-054; FP-009 notes | `deferred` | Successor policy/trigger slice implements event-emitting auto-resolution without direct flag mutation. | platform decision |
+| BAR-103 | Resolver reassignment | CDL-028; IDR-026 deferral | `future_decision` | Successor decision defines reassignment authority, audit semantics, and migration/legacy handling. | platform decision |
+| BAR-104 | Production OIDC/JWT/Keycloak authority | FP-011 | `future_decision` | FP-011 gate passes; auth principal-to-actor mapping is defined and groups/claims are not direct authority. | auth architecture steward |
+| BAR-105 | S06/entity lifecycle | `docs/scenarios/06-entity-registry-lifecycle.md`; Phase 4 deferral | `deferred` | Product decision promotes entity lifecycle with bounded scope and acceptance tests. | product/platform decision |
+| BAR-106 | Field-level sensitivity, encryption, redaction | CDL-037, CDL-046 | `future_decision` | Platform security/export/retention decision defines behavior beyond shape/activity sensitivity. | security/platform decision |
+| BAR-107 | New envelope fields or event types | CDL-006, CDL-007, CDL-012; FP-004 for assignment refs | `future_decision` | Successor CDL decision authorizes exact contract change, compatibility, and migration path. | architecture steward |
+| BAR-108 | New scope mechanisms | CDL-055; FP-011 for auth-provider authority | `future_decision` | Successor decision defines platform-owned scope semantics and security tests. | authorization architecture steward |

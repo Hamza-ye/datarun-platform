@@ -44,6 +44,11 @@ This progression supports incremental reasoning — each scenario adds real-worl
 | [20](20-chv-field-operations.md) | Community Health Volunteer Field Work | A CHV's day-to-day work in the community |
 | [21](21-chv-supervisor-operations.md) | Supervisor Visit and Assessment | A supervisor visiting a volunteer to review their work |
 | [22](22-coordinated-distribution-campaign-across-grouped-locations.md) | Coordinated Work Across Grouped Locations | Visiting units within locations during a time-bound effort with supply flow |
+| [23](23-configure-new-operational-activity.md) | Setting Up a New Operational Activity | Coordinator setup experience for new configured work |
+| [24](24-long-running-deployment-data-lifecycle.md) | Long-Running Deployment Data Lifecycle | Active data, retained history, audit access, and sensitive local retention |
+| [25](25-worker-onboarding-transfer-and-exit.md) | Worker Onboarding, Transfer, Leave, and Exit | Responsibility changes, stale offline work, handoff, and exit |
+| [26](26-operational-reporting-and-aggregate-oversight.md) | Operational Reporting and Aggregate Oversight | Reporting freshness, unresolved issues, scoped views, and traceability |
+| [27](27-logistics-distribution-composite.md) | Logistics Distribution Across Multiple Handoffs | Non-health composite distribution with custody and discrepancy review |
 
 ---
 
@@ -54,6 +59,9 @@ Scenarios 00–14, 22. These describe a set of operational situations that share
 
 ### Phase 2 — Extensions (Deferred)
 Scenarios 15, 16, 18. These describe situations that are compatible with the core but introduce specialized operational demands that should not drive initial decisions.
+
+### Post-Phase-4 Stabilization Scenarios
+Scenarios 23–27 were added after Phase 4 to thicken known viability blind spots: setup/configuration experience, long-running data lifecycle, worker transitions, reporting/aggregate oversight, and non-health domain proof. They are problem-space scenarios and do not by themselves promote any deferred implementation surface.
 
 ### Cross-Cutting
 Scenario 19 (working without connectivity) is not a separate operational situation — it's a constraint that applies to many of the scenarios above. It describes the reality that the people doing the work in scenarios 00–14 often do so without reliable connectivity.

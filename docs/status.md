@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-05-25 (Phase 4 complete; FP-010 resolved; FP-011 remains routed follow-up)
+**Last updated**: 2026-06-01 (Phase 4 complete; post-Phase-4 stabilization working surface added; FP-011 remains routed follow-up)
 
 ---
 
@@ -11,6 +11,8 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Phase 4 is complete; the completion audit is green.
+- Post-Phase-4 stabilization now uses `docs/agent-working-surface/README.md` as the active agent working-surface router.
+- Current implementation acceptance status belongs in `docs/agent-working-surface/baseline-acceptance-register.md`; do not treat legacy Phase 4 review drafts as active baseline truth.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
 - FP-011 remains open only for production Keycloak/OIDC/JWT integration or group/claim authority models. Do not take it unless that work is explicitly in scope.
 - The next product/architecture phase has not been selected.

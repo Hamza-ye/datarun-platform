@@ -99,7 +99,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Inputs**: not active in current implementation.
 - **Outputs**: not active in current implementation.
 - **Storage**: none currently.
-- **Forbidden**: introducing trigger side effects outside Event Store without CDL authority and an implementation-evidence update.
+- **Forbidden**: introducing trigger side effects outside Event Store without CDL authority and a Baseline Acceptance Register update.
 - **Guards**: no active runtime tests beyond config package empty-section preservation.
 
 ## Command Validator (Advisory Only)
@@ -111,4 +111,3 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Outputs**: validation warning.
 - **Storage**: none.
 - **Forbidden**: using command validation to reject structurally valid state/policy anomalies that should be accepted and flagged.
-  

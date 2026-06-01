@@ -24,7 +24,7 @@ Every pull request must filter events by actor scope. The server must: identify 
 
 ### Why this works
 
-ADR-3 S4 (alias-respects-original-scope) means the scope evaluation for an event is permanently fixed to the original `subject_ref` at write time. The denormalized `location_path` is **never stale for existing events**. This eliminates the fundamental weakness of denormalization (stale data) while preserving its strength (fastest reads).
+ADR-3 S4 (alias-respects-original-scope) means the scope evaluation for an event is permanently fixed to the original `subject_ref` and write-time location context. The denormalized `location_path` is immutable infrastructure metadata for existing events. This eliminates the fundamental weakness of denormalization for historical scope interpretation while preserving its strength (fastest reads).
 
 ### Schema
 
@@ -43,7 +43,7 @@ CREATE INDEX idx_events_assignment_actor
     WHERE type = 'assignment_changed';
 ```
 
-`location_path` is infrastructure metadata with the same status as `sync_watermark` — server-managed, not in the event envelope, invisible to the API contract.
+`location_path` is infrastructure metadata with the same status as `sync_watermark` — server-managed, not in the event envelope, invisible to the API contract. Once set for an event, it is not rewritten by later location hierarchy reparenting or subject-location correction.
 
 ### Write path
 
@@ -84,7 +84,8 @@ The actor's active assignments are reconstructed via a small CTE (typically 1-10
 
 ### Known behaviors
 
-- Events written before a subject has a location get `location_path = NULL` and are invisible to geographic scopes. A backfill query can update them when the subject gets a location — this is a controlled admin operation.
+- Events written before a subject has a location get `location_path = NULL` and are invisible to geographic scopes. A backfill query can update only those previously `NULL` event rows when the subject gets a location — this is a controlled admin operation.
+- Location hierarchy reparenting or subject-location correction must not rewrite non-NULL historical `events.location_path` values. Future events use the current resolved path at insert time.
 - Subject-list-only scopes (no geographic) match events regardless of `location_path` value, including NULL.
 
 ## Alternatives Rejected
