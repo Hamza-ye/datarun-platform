@@ -24,4 +24,4 @@ Offline devices may act on stale knowledge. A worker who has not yet learned tha
 
 Handoff requires enough history to be useful. A successor cannot continue work if they only receive future assignments and no context about what happened before.
 
-Exit is not just disabling login. The organization must preserve attribution for what the person did while also preventing continuing access after their role ends.
+Exit is not just ending access. The organization must preserve attribution for what the person did while also preventing continued use after their responsibility ends.

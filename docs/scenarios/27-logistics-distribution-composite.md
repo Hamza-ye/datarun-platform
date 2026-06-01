@@ -24,4 +24,4 @@ Discrepancies are not always simple errors. A district may receive less than exp
 
 Work can proceed while a discrepancy is being reviewed. Some downstream distribution may continue using confirmed received quantities, while the unresolved difference remains visible for oversight.
 
-The same general coordination patterns must work without health-specific assumptions. The subjects are supplies, dispatches, teams, and delivery points rather than patients, facilities, or cases.
+The same general coordination patterns must work without health-specific assumptions. The real-world things being tracked are supplies, dispatches, teams, and delivery points rather than patients, facilities, or cases.

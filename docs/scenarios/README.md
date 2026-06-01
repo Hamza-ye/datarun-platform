@@ -57,6 +57,8 @@ This progression supports incremental reasoning — each scenario adds real-worl
 ### Phase 1 — Core
 Scenarios 00–14, 22. These describe a set of operational situations that share enough common ground that a unified platform approach clearly makes sense.
 
+Scenario 12 remains active scenario pressure, but general trigger execution is deferred under BAR-101. Current architecture constrains future trigger execution to server-side L3 policy per CDL-042.
+
 ### Phase 2 — Extensions (Deferred)
 Scenarios 15, 16, 18. These describe situations that are compatible with the core but introduce specialized operational demands that should not drive initial decisions.
 
