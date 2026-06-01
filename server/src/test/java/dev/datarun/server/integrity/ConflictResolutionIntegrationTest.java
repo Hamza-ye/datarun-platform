@@ -284,10 +284,27 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
         JsonNode flags = listResponse.getBody().get("flags");
         assertThat(flags.size()).isEqualTo(1);
         assertThat(flags.get(0).get("flag_category").asText()).isEqualTo("identity_conflict");
+        UUID flagId = UUID.fromString(response.getBody().get("event_id").asText());
+        assertFlagResolver(flagId, ACTOR_ID);
 
         // Event should be excluded from projection
         int projected = getProjectedEventCount(SUBJECT_X);
         assertThat(projected).isEqualTo(0);
+    }
+
+    @Test
+    void manualIdentityConflict_preservesExistingUnresolvedResolverForSourceEvent() {
+        var event = buildEvent(SUBJECT_X, DEVICE_A, 1);
+        pushEvents(List.of(event), DEVICE_A, 0);
+        UUID sourceEventId = UUID.fromString(event.get("id").toString());
+
+        insertFlagWithResolver(sourceEventId, SUBJECT_X, "concurrent_state_change", OTHER_ACTOR_ID);
+
+        var response = createIdentityConflict(sourceEventId);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        UUID identityFlagId = UUID.fromString(response.getBody().get("event_id").asText());
+
+        assertFlagResolver(identityFlagId, OTHER_ACTOR_ID);
     }
 
     // --- Duplicate manual identity_conflict → 400 ---
@@ -526,6 +543,42 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
                   AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
                 """, Integer.class, flagId.toString());
         return count != null ? count : 0;
+    }
+
+    private void assertFlagResolver(UUID flagId, UUID resolverId) {
+        Map<String, Object> row = jdbc.queryForMap("""
+                SELECT payload->'designated_resolver'->>'type' AS resolver_type,
+                       payload->'designated_resolver'->>'id' AS resolver_id
+                FROM events
+                WHERE id = ?::uuid
+                """, flagId.toString());
+        assertThat(row.get("resolver_type")).isEqualTo("actor");
+        assertThat(row.get("resolver_id")).isEqualTo(resolverId.toString());
+    }
+
+    private UUID insertFlagWithResolver(UUID sourceEventId, UUID subjectId,
+                                        String category, UUID resolverId) {
+        UUID flagId = ConflictDetector.deterministicUuid(sourceEventId, category);
+        UUID serverDeviceId = jdbc.queryForObject(
+                "SELECT device_id FROM server_identity LIMIT 1", UUID.class);
+        long seq = jdbc.queryForObject("SELECT nextval('server_device_seq')", Long.class);
+        jdbc.update("""
+                INSERT INTO events (id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                                    device_id, device_seq, timestamp, payload)
+                VALUES (?::uuid, 'alert', 'conflict_detected/v1', NULL,
+                        ?::jsonb, ?::jsonb, ?::uuid, ?, NOW()::timestamptz, ?::jsonb)
+                """,
+                flagId.toString(),
+                "{\"type\":\"subject\",\"id\":\"" + subjectId + "\"}",
+                "{\"type\":\"actor\",\"id\":\"system:conflict_detector/" + category + "\"}",
+                serverDeviceId.toString(),
+                seq,
+                "{\"source_event_id\":\"" + sourceEventId + "\"," +
+                        "\"flag_category\":\"" + category + "\"," +
+                        "\"resolvability\":\"" + FlagCatalog.resolvabilityFor(category) + "\"," +
+                        "\"designated_resolver\":{\"type\":\"actor\",\"id\":\"" + resolverId + "\"}," +
+                        "\"reason\":\"Existing unresolved flag for resolver routing test\"}");
+        return flagId;
     }
 
     private UUID insertLegacyFlagWithoutResolver(UUID sourceEventId, UUID subjectId) {

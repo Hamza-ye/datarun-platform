@@ -79,6 +79,11 @@ public class ResolverRoutingService {
     }
 
     public ResolverRef routeManualIdentityConflict(Event sourceEvent, UUID creatorActorId) {
+        ResolverRef existing = existingUnresolvedResolver(sourceEvent.id()).orElse(null);
+        if (existing != null) {
+            return existing;
+        }
+
         if (creatorActorId != null) {
             List<EventContext> contexts = contextsFor(sourceEvent, List.of());
             if (!contexts.isEmpty()) {
