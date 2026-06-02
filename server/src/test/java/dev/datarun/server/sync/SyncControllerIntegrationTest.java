@@ -208,6 +208,93 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(page2.getBody().get("events").size()).isEqualTo(3);
     }
 
+    @Test
+    void s00StructuredCaptureCorrectionIsAppendOnlyIdempotentAndFlagsConcurrentAnomaly() {
+        UUID subjectId = UUID.randomUUID();
+        Map<String, Object> original = buildEvent(subjectId, DEVICE_ID, 1,
+                Map.of(
+                        "name", "Site Alpha",
+                        "category", "urban",
+                        "notes", "Initial structured capture",
+                        "date", "2026-06-03",
+                        "value", 10
+                ));
+
+        ResponseEntity<JsonNode> originalResponse =
+                pushEventsWithMeta(List.of(original), DEVICE_ID, 0);
+        assertThat(originalResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(originalResponse.getBody().get("accepted").asInt()).isEqualTo(1);
+        assertThat(originalResponse.getBody().get("duplicates").asInt()).isZero();
+        assertThat(originalResponse.getBody().get("flags_raised").asInt()).isZero();
+
+        String originalPayloadBefore = storedPayload(original);
+        long originalWatermark = syncWatermark(original);
+
+        Map<String, Object> correction = buildEvent(subjectId, DEVICE_ID, 2,
+                Map.of(
+                        "name", "Site Alpha",
+                        "category", "urban",
+                        "notes", "Corrected value from offline amendment",
+                        "date", "2026-06-03",
+                        "value", 11
+                ));
+
+        ResponseEntity<JsonNode> correctionResponse =
+                pushEventsWithMeta(List.of(correction), DEVICE_ID, originalWatermark);
+        assertThat(correctionResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(correctionResponse.getBody().get("accepted").asInt()).isEqualTo(1);
+        assertThat(eventCount(original)).isEqualTo(1);
+        assertThat(eventCount(correction)).isEqualTo(1);
+        assertThat(storedPayload(original)).isEqualTo(originalPayloadBefore);
+
+        ResponseEntity<JsonNode> duplicateCorrectionResponse =
+                pushEventsWithMeta(List.of(correction), DEVICE_ID, originalWatermark);
+        assertThat(duplicateCorrectionResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(duplicateCorrectionResponse.getBody().get("accepted").asInt()).isZero();
+        assertThat(duplicateCorrectionResponse.getBody().get("duplicates").asInt()).isEqualTo(1);
+        assertThat(duplicateCorrectionResponse.getBody().get("flags_raised").asInt()).isZero();
+        assertThat(eventCount(correction)).isEqualTo(1);
+
+        UUID otherDevice = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
+        Map<String, Object> staleConcurrent = buildEvent(subjectId, otherDevice, 1,
+                Map.of(
+                        "name", "Site Alpha",
+                        "category", "urban",
+                        "notes", "Concurrent offline duplicate observation",
+                        "date", "2026-06-03",
+                        "value", 12
+                ));
+
+        ResponseEntity<JsonNode> concurrentResponse =
+                pushEventsWithMeta(List.of(staleConcurrent), otherDevice, originalWatermark);
+        assertThat(concurrentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(concurrentResponse.getBody().get("accepted").asInt()).isEqualTo(1);
+        assertThat(concurrentResponse.getBody().get("flags_raised").asInt()).isEqualTo(1);
+        assertThat(flagSources("concurrent_state_change"))
+                .contains(staleConcurrent.get("id").toString());
+
+        ResponseEntity<JsonNode> pullResponse = pullEvents(0, 100);
+        assertThat(pullResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode pulledEvents = pullResponse.getBody().get("events");
+        assertThat(eventIds(pulledEvents))
+                .contains(original.get("id").toString(), correction.get("id").toString());
+        assertThat(syncWatermarks(pulledEvents)).isSorted();
+
+        JsonNode pulledOriginal = eventById(pulledEvents, original.get("id").toString());
+        JsonNode pulledCorrection = eventById(pulledEvents, correction.get("id").toString());
+        assertThat(pulledOriginal.get("type").asText()).isEqualTo("capture");
+        assertThat(pulledOriginal.get("shape_ref").asText()).isEqualTo("basic_capture/v1");
+        assertThat(pulledOriginal.get("activity_ref").asText()).isEqualTo("site_survey");
+        assertThat(pulledOriginal.get("payload").get("notes").asText())
+                .isEqualTo("Initial structured capture");
+        assertThat(pulledCorrection.get("payload").get("notes").asText())
+                .isEqualTo("Corrected value from offline amendment");
+        assertThat(pulledCorrection.get("sync_watermark").asLong())
+                .isGreaterThan(pulledOriginal.get("sync_watermark").asLong());
+        assertEnvelopeFieldsPresent(pulledOriginal);
+        assertEnvelopeFieldsPresent(pulledCorrection);
+    }
+
     // --- Helpers ---
 
     private List<Map<String, Object>> buildEvents(int count) {
@@ -218,31 +305,54 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
         UUID subjectId = UUID.fromString("7c9e6679-7425-40de-944b-e07fc1f90ae7");
         List<Map<String, Object>> events = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            Map<String, Object> event = new LinkedHashMap<>();
-            event.put("id", UUID.randomUUID().toString());
-            event.put("type", "capture");
-            event.put("shape_ref", "basic_capture/v1");
-            event.put("activity_ref", null);
-            event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
-            event.put("actor_ref", Map.of("type", "actor", "id", ACTOR_ID.toString()));
-            event.put("device_id", DEVICE_ID.toString());
-            event.put("device_seq", startSeq + i);
-            event.put("sync_watermark", null);
-            event.put("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
-            event.put("payload", Map.of(
+            Map<String, Object> payload = Map.of(
                     "name", "Site " + (startSeq + i),
                     "category", "urban",
                     "notes", "Test event " + (startSeq + i),
                     "date", "2026-04-16",
                     "value", (startSeq + i) * 10
-            ));
-            events.add(event);
+            );
+            events.add(buildEvent(subjectId, DEVICE_ID, startSeq + i, null, payload));
         }
         return events;
     }
 
+    private Map<String, Object> buildEvent(UUID subjectId, UUID deviceId, int seq,
+                                           Map<String, Object> payload) {
+        return buildEvent(subjectId, deviceId, seq, "site_survey", payload);
+    }
+
+    private Map<String, Object> buildEvent(UUID subjectId, UUID deviceId, int seq,
+                                           String activityRef, Map<String, Object> payload) {
+        Map<String, Object> event = new LinkedHashMap<>();
+        event.put("id", UUID.randomUUID().toString());
+        event.put("type", "capture");
+        event.put("shape_ref", "basic_capture/v1");
+        event.put("activity_ref", activityRef);
+        event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
+        event.put("actor_ref", Map.of("type", "actor", "id", ACTOR_ID.toString()));
+        event.put("device_id", deviceId.toString());
+        event.put("device_seq", seq);
+        event.put("sync_watermark", null);
+        event.put("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
+        event.put("payload", payload);
+        return event;
+    }
+
     private ResponseEntity<JsonNode> pushEvents(List<?> events) {
         Map<String, Object> request = Map.of("events", events);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+        return rest.exchange("/api/sync/push", HttpMethod.POST, entity, JsonNode.class);
+    }
+
+    private ResponseEntity<JsonNode> pushEventsWithMeta(List<?> events, UUID deviceId,
+                                                        long lastPullWatermark) {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("events", events);
+        request.put("device_id", deviceId.toString());
+        request.put("last_pull_watermark", lastPullWatermark);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
@@ -254,5 +364,78 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
         HttpHeaders headers = authHeaders();
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
         return rest.exchange("/api/sync/pull", HttpMethod.POST, entity, JsonNode.class);
+    }
+
+    private String storedPayload(Map<String, Object> event) {
+        return jdbc.queryForObject("""
+                SELECT payload::text
+                FROM events
+                WHERE id = ?::uuid
+                """, String.class, event.get("id").toString());
+    }
+
+    private long syncWatermark(Map<String, Object> event) {
+        return jdbc.queryForObject("""
+                SELECT sync_watermark
+                FROM events
+                WHERE id = ?::uuid
+                """, Long.class, event.get("id").toString());
+    }
+
+    private int eventCount(Map<String, Object> event) {
+        return jdbc.queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE id = ?::uuid
+                """, Integer.class, event.get("id").toString());
+    }
+
+    private List<String> flagSources(String category) {
+        return jdbc.queryForList("""
+                SELECT payload->>'source_event_id'
+                FROM events
+                WHERE shape_ref = 'conflict_detected/v1'
+                  AND payload->>'flag_category' = ?
+                ORDER BY sync_watermark ASC
+                """, String.class, category);
+    }
+
+    private List<String> eventIds(JsonNode events) {
+        List<String> ids = new ArrayList<>();
+        for (JsonNode event : events) {
+            ids.add(event.get("id").asText());
+        }
+        return ids;
+    }
+
+    private List<Long> syncWatermarks(JsonNode events) {
+        List<Long> watermarks = new ArrayList<>();
+        for (JsonNode event : events) {
+            watermarks.add(event.get("sync_watermark").asLong());
+        }
+        return watermarks;
+    }
+
+    private JsonNode eventById(JsonNode events, String id) {
+        for (JsonNode event : events) {
+            if (id.equals(event.get("id").asText())) {
+                return event;
+            }
+        }
+        throw new AssertionError("event not found: " + id);
+    }
+
+    private void assertEnvelopeFieldsPresent(JsonNode event) {
+        assertThat(event.has("id")).isTrue();
+        assertThat(event.has("type")).isTrue();
+        assertThat(event.has("shape_ref")).isTrue();
+        assertThat(event.has("activity_ref")).isTrue();
+        assertThat(event.has("subject_ref")).isTrue();
+        assertThat(event.has("actor_ref")).isTrue();
+        assertThat(event.has("device_id")).isTrue();
+        assertThat(event.has("device_seq")).isTrue();
+        assertThat(event.has("sync_watermark")).isTrue();
+        assertThat(event.has("timestamp")).isTrue();
+        assertThat(event.has("payload")).isTrue();
     }
 }
