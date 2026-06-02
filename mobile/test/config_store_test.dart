@@ -406,9 +406,9 @@ void main() {
           activeAssignments: assignments,
         );
 
-        expect(capture.allowed, true);
+        expect(capture.permitted, true);
         expect(capture.warning, isNull);
-        expect(review.allowed, false);
+        expect(review.permitted, false);
         expect(review.warning, contains('does not allow review'));
       },
     );

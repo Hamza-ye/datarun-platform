@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/presentation/screens/form_screen.dart';
-import 'package:datarun_mobile/domain/activity_role_actions.dart';
 import 'package:datarun_mobile/domain/event.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 
@@ -83,17 +82,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     // activity for each shape.
     final allShapes = <ShapeDefinition>[];
     final shapeToActivity = <String, String>{};
-    String? firstBlockedWarning;
     for (final actName in activeActivities) {
-      final decision = configStore.evaluateActivityAction(
-        activityRef: actName,
-        action: ActivityAction.capture,
-        activeAssignments: state.activeAssignments,
-      );
-      if (!decision.allowed) {
-        firstBlockedWarning ??= decision.warning;
-        continue;
-      }
       for (final shape in configStore.getShapesForActivity(actName)) {
         allShapes.add(shape);
         shapeToActivity[shape.shapeRef] = actName;
@@ -101,11 +90,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     }
 
     if (allShapes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(firstBlockedWarning ?? 'No activities configured'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No shapes available')));
       return;
     }
 

@@ -71,16 +71,22 @@ class ActivityRoleActions {
       role != null && (_actionsByRole[role]?.contains(action) ?? false);
 }
 
+/// Result of a *local advisory* evaluation for whether the current
+/// assignments/roles permit an activity-level action.
 class ActivityActionDecision {
-  final bool allowed;
+  final bool permitted;
   final String? warning;
 
-  const ActivityActionDecision._({required this.allowed, this.warning});
+  const ActivityActionDecision._({required this.permitted, this.warning});
 
-  const ActivityActionDecision.allowed() : this._(allowed: true, warning: null);
+  /// Advisory-positive: role permits the action.
+  const ActivityActionDecision.permitted()
+    : this._(permitted: true, warning: null);
 
-  const ActivityActionDecision.blocked(String warning)
-    : this._(allowed: false, warning: warning);
+  /// Advisory-negative: role does not permit the action. Treated as a
+  /// warning on the device;
+  const ActivityActionDecision.warn(String warning)
+    : this._(permitted: false, warning: warning);
 }
 
 class ActivityActionAdvisory {
@@ -97,7 +103,7 @@ class ActivityActionAdvisory {
         .toList();
 
     if (coveringAssignments.isEmpty) {
-      return ActivityActionDecision.blocked(
+      return ActivityActionDecision.warn(
         'No current assignment covers $activityRef for ${action.type}.',
       );
     }
@@ -105,11 +111,11 @@ class ActivityActionAdvisory {
     for (final assignment in coveringAssignments) {
       final role = assignment['role'] as String?;
       if (roleActions.rolePermits(role, action)) {
-        return const ActivityActionDecision.allowed();
+        return const ActivityActionDecision.permitted();
       }
     }
 
-    return ActivityActionDecision.blocked(
+    return ActivityActionDecision.warn(
       'Your current role does not allow ${action.type} in $activityRef.',
     );
   }

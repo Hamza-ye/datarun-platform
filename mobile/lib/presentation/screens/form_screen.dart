@@ -34,7 +34,6 @@ class _FormScreenState extends State<FormScreen> {
   bool _loading = true;
   bool _dirty = false;
   bool _saving = false;
-  bool _captureAllowed = true;
 
   @override
   void initState() {
@@ -59,7 +58,6 @@ class _FormScreenState extends State<FormScreen> {
     if (!mounted) return;
     setState(() {
       _shape = shape;
-      _captureAllowed = decision.allowed;
       _actionWarning = decision.warning;
       _loading = false;
     });
@@ -172,7 +170,7 @@ class _FormScreenState extends State<FormScreen> {
           title: Text(_shape?.name ?? 'Loading...'),
           actions: [
             TextButton(
-              onPressed: _saving || !_captureAllowed ? null : _save,
+              onPressed: _saving ? null : _save,
               child: _saving
                   ? const SizedBox(
                       width: 16,
@@ -243,17 +241,14 @@ class _FormScreenState extends State<FormScreen> {
 
     final state = context.read<AppState>();
     final decision = await _currentCaptureDecision(state);
-    if (!decision.allowed) {
+    if (decision.warning != null) {
       if (!mounted) return;
       setState(() {
-        _saving = false;
-        _captureAllowed = false;
         _actionWarning = decision.warning;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(decision.warning ?? 'Capture unavailable')),
-      );
-      return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(decision.warning!)));
     }
 
     // Clean nulls from payload
@@ -282,7 +277,7 @@ class _FormScreenState extends State<FormScreen> {
   Future<ActivityActionDecision> _currentCaptureDecision(AppState state) async {
     final activityRef = widget.activityRef;
     if (activityRef == null) {
-      return const ActivityActionDecision.allowed();
+      return const ActivityActionDecision.permitted();
     }
     final assignments = await state.eventStore.getActiveAssignments();
     return state.configStore.evaluateActivityAction(

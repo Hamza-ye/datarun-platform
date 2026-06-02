@@ -18,11 +18,11 @@ void main() {
         action: ActivityAction.capture,
       );
 
-      expect(decision.allowed, true);
+      expect(decision.permitted, true);
       expect(decision.warning, isNull);
     });
 
-    test('warns and blocks review when current role lacks that action', () {
+    test('warns when current role lacks that action', () {
       final decision = ActivityActionAdvisory.evaluate(
         roleActions: roleActions,
         activeAssignments: [
@@ -32,7 +32,7 @@ void main() {
         action: ActivityAction.review,
       );
 
-      expect(decision.allowed, false);
+      expect(decision.permitted, false);
       expect(decision.warning, contains('does not allow review'));
     });
 
@@ -46,7 +46,7 @@ void main() {
         action: ActivityAction.review,
       );
 
-      expect(decision.allowed, false);
+      expect(decision.permitted, false);
       expect(decision.warning, contains('No current assignment covers'));
     });
 
@@ -60,7 +60,19 @@ void main() {
         action: ActivityAction.review,
       );
 
-      expect(decision.allowed, true);
+      expect(decision.permitted, true);
+    });
+
+    test('negative advisory remains warning-only metadata', () {
+      final decision = ActivityActionAdvisory.evaluate(
+        roleActions: roleActions,
+        activeAssignments: const [],
+        activityRef: 'monitoring',
+        action: ActivityAction.capture,
+      );
+
+      expect(decision.permitted, false);
+      expect(decision.warning, isNotNull);
     });
   });
 }
