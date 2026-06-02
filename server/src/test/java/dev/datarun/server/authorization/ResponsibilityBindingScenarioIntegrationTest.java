@@ -175,6 +175,65 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         assertThat(flagSources("role_stale")).doesNotContain(supervisorReview.toString());
     }
 
+    @Test
+    void s19OfflineStaleAuthorityPersistsFlagsAndKeepsScopedSyncBoundaries() {
+        Event workerAInitial = assignmentService.createAssignment(ADMIN, WORKER_A, "field_worker",
+                villageA1, null, List.of(CAMPAIGN_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        UUID workerAInitialId = UUID.fromString(workerAInitial.subjectRef().get("id").asText());
+
+        UUID subjectA1 = subjectAt(villageA1);
+        UUID subjectB1 = subjectAt(villageB1);
+
+        UUID historicalB1 = pushEvent(ADMIN, DEVICE_ADMIN, subjectB1, CAMPAIGN_ACTIVITY,
+                "capture", "basic_capture/v1", "B1 history before reassignment", 0);
+        UUID visibleA1 = pushEvent(WORKER_A, DEVICE_A, subjectA1, CAMPAIGN_ACTIVITY,
+                "capture", "basic_capture/v1", "A1 baseline before offline window", 0);
+
+        ResponseEntity<JsonNode> initialPull = pullEvents(tokenA, 0, 100, DEVICE_A);
+        long workerAKnowledge = latestWatermark(initialPull);
+        assertThat(workerAKnowledge).isGreaterThan(syncWatermark(historicalB1));
+        assertCaptureContains(initialPull, visibleA1);
+        assertCaptureExcludes(initialPull, historicalB1);
+        long liveDeviceWatermarkBeforeBackfill = deviceWatermark(DEVICE_A);
+        assertThat(liveDeviceWatermarkBeforeBackfill).isEqualTo(workerAKnowledge);
+
+        assignmentService.endAssignment(workerAInitialId, ADMIN, "S19 stale authority");
+        assignmentService.createAssignment(ADMIN, WORKER_A, "field_worker",
+                villageB1, null, List.of(CAMPAIGN_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusHours(1), null);
+
+        UUID staleOfflineA1 = pushEvent(WORKER_A, DEVICE_A, subjectA1, CAMPAIGN_ACTIVITY,
+                "capture", "basic_capture/v1", "A1 stale offline capture", workerAKnowledge);
+
+        assertThat(eventCount(staleOfflineA1)).isEqualTo(1);
+        assertThat(flagSources("temporal_authority_expired")).contains(staleOfflineA1.toString());
+        assertThat(flagSources("role_stale")).contains(staleOfflineA1.toString());
+        assertThat(flagSources("scope_violation")).doesNotContain(staleOfflineA1.toString());
+
+        ResponseEntity<JsonNode> pullAfterReassignment = pullEvents(tokenA, workerAKnowledge, 100, DEVICE_A);
+        assertThat(pullAfterReassignment.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertCaptureExcludes(pullAfterReassignment, visibleA1, staleOfflineA1);
+        assertThat(captureEventIds(pullAfterReassignment.getBody().get("events")))
+                .doesNotContain(historicalB1.toString());
+        assertThat(pullAfterReassignment.getBody().get("latest_watermark").asLong())
+                .isGreaterThanOrEqualTo(workerAKnowledge);
+
+        long liveDeviceWatermarkAfterPull = deviceWatermark(DEVICE_A);
+        ResponseEntity<JsonNode> oldScopeBackfill =
+                subjectHistory(tokenA, subjectA1, CAMPAIGN_ACTIVITY, 0, 100);
+        assertThat(oldScopeBackfill.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+        ResponseEntity<JsonNode> newScopeBackfill =
+                subjectHistory(tokenA, subjectB1, CAMPAIGN_ACTIVITY, 0, 100);
+        assertThat(newScopeBackfill.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(captureEventIds(newScopeBackfill.getBody().get("events")))
+                .contains(historicalB1.toString());
+        assertThat(newScopeBackfill.getBody().get("next_cursor").asLong())
+                .isGreaterThanOrEqualTo(syncWatermark(historicalB1));
+        assertThat(deviceWatermark(DEVICE_A)).isEqualTo(liveDeviceWatermarkAfterPull);
+    }
+
     private void configureCampaignActivity() {
         ObjectNode config = objectMapper.createObjectNode();
         config.putArray("shapes").add("basic_capture/v1").add("basic_review/v1");
@@ -228,11 +287,35 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
     }
 
     private ResponseEntity<JsonNode> pullEvents(String token, long sinceWatermark, int limit) {
+        return pullEvents(token, sinceWatermark, limit, null);
+    }
+
+    private ResponseEntity<JsonNode> pullEvents(String token, long sinceWatermark, int limit,
+                                                UUID deviceId) {
         Map<String, Object> request = Map.of("since_watermark", sinceWatermark, "limit", limit);
+        if (deviceId != null) {
+            request = new LinkedHashMap<>(request);
+            request.put("device_id", deviceId.toString());
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return rest.exchange("/api/sync/pull", HttpMethod.POST,
+                new HttpEntity<>(request, headers), JsonNode.class);
+    }
+
+    private ResponseEntity<JsonNode> subjectHistory(String token, UUID subjectId,
+                                                    String activityRef, long cursor, int limit) {
+        Map<String, Object> request = Map.of(
+                "subject_id", subjectId.toString(),
+                "activity_ref", activityRef,
+                "cursor", cursor,
+                "limit", limit
+        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return rest.exchange("/api/sync/subject-history", HttpMethod.POST,
                 new HttpEntity<>(request, headers), JsonNode.class);
     }
 
@@ -278,5 +361,27 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                   AND payload->>'flag_category' = ?
                 ORDER BY sync_watermark ASC
                 """, String.class, category);
+    }
+
+    private long syncWatermark(UUID eventId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT sync_watermark FROM events WHERE id = ?::uuid",
+                Long.class,
+                eventId.toString());
+    }
+
+    private long deviceWatermark(UUID deviceId) {
+        return jdbcTemplate.queryForObject("""
+                SELECT last_pull_watermark
+                FROM device_sync_state
+                WHERE device_id = ?::uuid
+                """, Long.class, deviceId.toString());
+    }
+
+    private int eventCount(UUID eventId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM events WHERE id = ?::uuid",
+                Integer.class,
+                eventId.toString());
     }
 }
