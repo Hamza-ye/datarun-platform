@@ -46,10 +46,10 @@ The original viability assessment returned a conditional go. Phase 4 has now com
 
 | Blind spot | Current closure | Route |
 |---|---|---|
-| Configuration/setup experience | `needs_runtime_verification` | S23 exists; BAR-010 is accepted, so setup/config can now be exercised as a bounded runtime/product workflow probe. |
+| Configuration/setup experience | `runtime_verified_current_baseline` | NW-032/S23 proves bounded setup/config composition without custom development. |
 | Long-running data lifecycle and retention | `closed_architecturally` for sync/retention split; `future_decision` beyond current policy | S24 exists; keep CDL-037 distinction between sync and local retention and BAR-106 for field-level sensitivity. |
 | Worker onboarding, transfer, leave, and exit | `closed_architecturally` for assignment-derived authority pressure | S25 exists; production auth-provider behavior remains BAR-104/FP-011 future work. |
-| Reporting and aggregate oversight | `needs_runtime_verification` | S26 exists; next-wave probe candidate after BAR-010 or phase selection. |
+| Reporting and aggregate oversight | `needs_runtime_verification` | S26 exists; NW-033 is the selected next-wave probe, constrained to current projection, freshness, flag, and scope semantics. |
 | Non-health domain proof | `runtime_verified_current_baseline` | S27 exists and NW-030 accepted the logistics transfer runtime probe. |
 | Emergency authority override | `intentionally_deferred` | NW-019 mini-brief only; do not bypass assignment authority. |
 | Analytics-derived initiation | `future_decision` | NW-020 mini-brief only; do not treat as ordinary trigger/config behavior. |
@@ -59,6 +59,6 @@ The original viability assessment returned a conditional go. Phase 4 has now com
 
 The conditional-go concerns are not a signal to reopen the whole architecture. As of 2026-06-03, BAR-001 through BAR-015 are accepted and the remaining pressure has moved into deliberate next-wave scenario/runtime choices. Deferred/future-decision rows remain intentionally outside the current baseline.
 
-1. Run S23 setup/config as the first next-wave probe, because it directly exercises the "set up, not built" promise now that BAR-010 is accepted.
-2. Keep S26 reporting/aggregate oversight as the next candidate after S23, constrained to current projection, freshness, flag, and scope semantics.
+1. Treat S23 setup/config as accepted runtime evidence for the "set up, not built" promise.
+2. Run S26 reporting/aggregate oversight as NW-033, constrained to current projection, freshness, flag, and scope semantics.
 3. Keep deferred platform evolution clearly marked until a successor decision selects it.

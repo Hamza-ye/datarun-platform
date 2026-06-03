@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-03 (post-Phase-4 stabilization baseline accepted; S00/S19/S21/S27 runtime probes landed; S23 setup/config routed next)
+**Last updated**: 2026-06-03 (post-Phase-4 stabilization baseline accepted; S23 accepted; NW-033/NW-034 routed next)
 
 ---
 
@@ -17,7 +17,7 @@ Use this section as the low-token bootstrap for new sessions.
 - Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, and NW-032/S23. Use the backlog rows for exact evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
 - FP-011 remains open only for production Keycloak/OIDC/JWT integration or group/claim authority models. Do not take it unless that work is explicitly in scope.
-- No baseline acceptance candidate is currently active. S26 reporting, contract hygiene, production auth, and entity/trigger expansions remain ordered follow-ups in the backlog; do not start them unless explicitly selected.
+- No baseline acceptance candidate is currently active. The selected next handoffs are NW-033/S26 reporting and NW-034 deployer shape/config schema hygiene; production auth and entity/trigger expansions remain future-decision follow-ups.
 - Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md`, and the exact contracts/code touched by the task.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
 

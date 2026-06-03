@@ -6,13 +6,14 @@ Authority: none. This document does not change architecture, contracts, BAR stat
 
 ## 2026-06-03 Execution Update
 
-The first-wave probe set recommended by this map has now executed:
+The accepted probe set recommended or routed from this map has now executed:
 
 | Probe | Backlog row | Current standing |
 |---|---|---|
 | S19 - offline/stale authority | NW-025 | `accepted`; runtime probe proves stale structurally valid work is persisted and flagged while live sync and subject-history remain separate. |
 | S00 - structured capture | NW-026 | `accepted`; runtime probe proves append-only correction, idempotent replay, server-watermark pull ordering, and existing concurrency flag mechanics. |
 | S21 - supervisor review | NW-029 | `accepted`; runtime probe proves scoped supervisor visibility, `capture_with_review/v1` state, unresolved/non-designated flagged review exclusion, and exact resolver re-inclusion. |
+| S23 - setup/config | NW-032 | `accepted`; runtime probe proves invalid setup rejection, bounded atomic config delivery, version coexistence, mobile current/pending promotion, and advisory-only warnings. |
 | S27 - logistics transfer | NW-030 | `accepted`; runtime probe proves non-health `transfer_with_acknowledgment/v1` state, scoped sync, manual discrepancy review, exact resolver handling, and out-of-order accept-and-flag behavior. |
 
 The original map remains useful as pressure/provenance. It should no longer be read as saying S00/S19/S21/S23/S27 are unexecuted or gated. BAR-010 config package delivery and NW-032/S23 setup-config runtime evidence are now accepted; S26 reporting remains a ready-with-constraints later candidate when explicitly selected.
@@ -426,7 +427,7 @@ Original call:
 Original NW-009/NW-010 gate (satisfied as of 2026-06-03):
 
 - Anything that claims pattern-state projection, projection equivalence, expression parity, mobile selective retention, or unresolved-flag exclusion as baseline behavior should wait for those verification rows or attach fresh equivalent evidence.
-- S23 setup/config has landed as NW-032. S26 reporting/aggregate oversight remains the later ready-with-constraints probe when explicitly selected.
+- S23 setup/config has landed as NW-032. S26 reporting/aggregate oversight is now routed as NW-033 by explicit selection.
 
 Needs successor decisions:
 
@@ -439,4 +440,4 @@ Needs successor decisions:
 - New envelope fields or event types remain BAR-107 future-decision work.
 - New scope mechanisms remain BAR-108 future-decision work.
 
-Safe recommendation as of 2026-06-03: treat S00/S19/S21/S23/S27 as accepted scenario evidence, not as pending work. S26 reporting/aggregate oversight remains a later ready-with-constraints movement if explicitly selected. Deferred/future-decision surfaces above remain unpromoted.
+Safe recommendation as of 2026-06-03: treat S00/S19/S21/S23/S27 as accepted scenario evidence, not as pending work. S26 reporting/aggregate oversight is the next selected ready-with-constraints movement. Deferred/future-decision surfaces above remain unpromoted.
