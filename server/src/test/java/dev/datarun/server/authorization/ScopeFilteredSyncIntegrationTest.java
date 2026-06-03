@@ -276,6 +276,38 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
         assertThat(visibleSubjects).doesNotContain(oldScopeAfterReassignment.toString());
     }
 
+    @Test
+    void subjectLocationUpdate_doesNotRewriteHistoricalEventLocationPath() {
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                districtX, null, null,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, ACTOR_B, "field_worker",
+                districtZ, null, null,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        UUID subject = UUID.randomUUID();
+        registerSubjectLocation(subject, districtX);
+        UUID originalEvent = pushCaptureEvent(subject, "Capture before subject-location correction");
+        String originalPath = eventLocationPath(originalEvent);
+        assertThat(originalPath).isEqualTo(locationRepository.findPathById(districtX));
+
+        registerSubjectLocation(subject, districtZ);
+
+        assertThat(eventLocationPath(originalEvent)).isEqualTo(originalPath);
+        UUID futureEvent = pushCaptureEvent(subject, "Capture after subject-location correction");
+        assertThat(eventLocationPath(futureEvent)).isEqualTo(locationRepository.findPathById(districtZ));
+
+        ResponseEntity<JsonNode> pullX = pullEvents(tokenA, 0, 100);
+        ResponseEntity<JsonNode> pullZ = pullEvents(tokenB, 0, 100);
+
+        assertThat(extractCaptureEventIds(pullX.getBody().get("events")))
+                .contains(originalEvent.toString())
+                .doesNotContain(futureEvent.toString());
+        assertThat(extractCaptureEventIds(pullZ.getBody().get("events")))
+                .contains(futureEvent.toString())
+                .doesNotContain(originalEvent.toString());
+    }
+
     /**
      * QG: Assignment events have valid 11-field envelope, type = assignment_changed.
      */
@@ -403,13 +435,14 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
                 """, subjectId.toString(), locationId.toString(), locationId.toString());
     }
 
-    private void pushCaptureEvent(UUID subjectId, String notes) {
-        pushCaptureEvent(subjectId, null, notes);
+    private UUID pushCaptureEvent(UUID subjectId, String notes) {
+        return pushCaptureEvent(subjectId, null, notes);
     }
 
-    private void pushCaptureEvent(UUID subjectId, String activityRef, String notes) {
+    private UUID pushCaptureEvent(UUID subjectId, String activityRef, String notes) {
+        UUID eventId = UUID.randomUUID();
         Map<String, Object> event = new LinkedHashMap<>();
-        event.put("id", UUID.randomUUID().toString());
+        event.put("id", eventId.toString());
         event.put("type", "capture");
         event.put("shape_ref", "basic_capture/v1");
         event.put("activity_ref", activityRef);
@@ -427,6 +460,7 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
         ResponseEntity<JsonNode> response = rest.exchange("/api/sync/push",
                 HttpMethod.POST, new HttpEntity<>(request, headers), JsonNode.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return eventId;
     }
 
     private ResponseEntity<JsonNode> pullEvents(String token, long sinceWatermark, int limit) {
@@ -453,6 +487,23 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
             }
         }
         return ids;
+    }
+
+    private List<String> extractCaptureEventIds(JsonNode events) {
+        List<String> ids = new ArrayList<>();
+        for (JsonNode e : events) {
+            if (e.get("type").asText().equals("capture")) {
+                ids.add(e.get("id").asText());
+            }
+        }
+        return ids;
+    }
+
+    private String eventLocationPath(UUID eventId) {
+        return jdbc.queryForObject(
+                "SELECT location_path FROM events WHERE id = ?::uuid",
+                String.class,
+                eventId.toString());
     }
 
     private List<String> extractCaptureSubjectActivityKeys(JsonNode events) {
