@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
 import dev.datarun.server.event.Event;
+import dev.datarun.server.projection.PatternStateProjection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +50,14 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
 
     private static final String CAMPAIGN_ACTIVITY = "campaign_capture";
     private static final String INVENTORY_ACTIVITY = "inventory";
+    private static final String REVIEW_ACTIVITY = "supervisor_review_activity";
 
     @Autowired private TestRestTemplate rest;
     @Autowired private AssignmentService assignmentService;
     @Autowired private LocationRepository locationRepository;
     @Autowired private ActorTokenRepository actorTokenRepository;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private PatternStateProjection patternStateProjection;
 
     private UUID region;
     private UUID districtA;
@@ -234,6 +237,82 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         assertThat(deviceWatermark(DEVICE_A)).isEqualTo(liveDeviceWatermarkAfterPull);
     }
 
+    @Test
+    void s21SupervisorReviewUsesScopedVisibilityPatternStateAndExactResolverSemantics() {
+        configureSupervisorReviewActivity();
+        assignmentService.createAssignment(ADMIN, WORKER_A, "field_worker",
+                villageA1, null, List.of(REVIEW_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, SUPERVISOR, "supervisor",
+                districtA, null, List.of(REVIEW_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        UUID subjectA1 = subjectAt(villageA1);
+        UUID secondSubjectA1 = subjectAt(villageA1);
+        UUID outsideSubjectB1 = subjectAt(villageB1);
+
+        long workerKnowledge = latestWatermark(pullEvents(tokenA, 0, 100, DEVICE_A));
+        UUID sourceCapture = pushEvent(WORKER_A, DEVICE_A, subjectA1, REVIEW_ACTIVITY,
+                "capture", "chv_visit/v1", "CHV visit ready for supervisor review", workerKnowledge);
+        UUID reviewableCapture = pushEvent(WORKER_A, DEVICE_A, secondSubjectA1, REVIEW_ACTIVITY,
+                "capture", "chv_visit/v1", "Questionable CHV visit", workerKnowledge);
+        UUID outsideCapture = pushEvent(ADMIN, DEVICE_ADMIN, outsideSubjectB1, REVIEW_ACTIVITY,
+                "capture", "chv_visit/v1", "Outside supervisor district", 0);
+
+        ResponseEntity<JsonNode> supervisorPull = pullEvents(supervisorToken, 0, 100, DEVICE_SUPERVISOR);
+        assertCaptureContains(supervisorPull, sourceCapture, reviewableCapture);
+        assertCaptureExcludes(supervisorPull, outsideCapture);
+        long supervisorKnowledge = latestWatermark(supervisorPull);
+
+        UUID supervisorReview = pushEventWithPayload(SUPERVISOR, DEVICE_SUPERVISOR, subjectA1,
+                REVIEW_ACTIVITY, "review", "chv_visit_review/v1",
+                Map.of("source_event_id", sourceCapture.toString(),
+                        "decision", "accepted",
+                        "notes", "supervisor accepted visit record"),
+                supervisorKnowledge).id();
+
+        JsonNode acceptedReviewState = eventState(sourceCapture, "capture_with_review/v1");
+        assertThat(acceptedReviewState.get("current_state").asText()).isEqualTo("accepted");
+        assertThat(acceptedReviewState.at("/pattern_specific/latest_review_outcome").asText())
+                .isEqualTo("accepted");
+        assertThat(flagSources("role_stale")).doesNotContain(supervisorReview.toString());
+
+        PushedEvent unauthorizedReview = pushEventWithPayload(WORKER_A, DEVICE_A, secondSubjectA1,
+                REVIEW_ACTIVITY, "review", "chv_visit_review/v1",
+                Map.of("source_event_id", reviewableCapture.toString(),
+                        "decision", "returned",
+                        "notes", "field worker attempted review"),
+                workerKnowledge);
+
+        assertThat(unauthorizedReview.response().getBody().get("accepted").asInt()).isEqualTo(1);
+        assertThat(flagSources("role_stale")).contains(unauthorizedReview.id().toString());
+        JsonNode roleFlag = findFlagFor(unauthorizedReview.id(), "role_stale");
+        assertThat(roleFlag.at("/payload/designated_resolver/type").asText()).isEqualTo("actor");
+        assertThat(roleFlag.at("/payload/designated_resolver/id").asText())
+                .isEqualTo(SUPERVISOR.toString());
+
+        JsonNode unresolvedReviewState = eventState(reviewableCapture, "capture_with_review/v1");
+        assertThat(unresolvedReviewState.get("current_state").asText()).isEqualTo("pending_review");
+        assertThat(unresolvedReviewState.at("/pattern_specific/latest_review_outcome").isMissingNode())
+                .isTrue();
+
+        ResponseEntity<JsonNode> nonDesignatedResolution = resolveFlag(
+                UUID.fromString(roleFlag.get("id").asText()), tokenA, "accepted");
+        assertThat(nonDesignatedResolution.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(flagSources("scope_violation"))
+                .contains(nonDesignatedResolution.getBody().get("event_id").asText());
+        JsonNode nonDesignatedState = eventState(reviewableCapture, "capture_with_review/v1");
+        assertThat(nonDesignatedState.get("current_state").asText()).isEqualTo("pending_review");
+
+        ResponseEntity<JsonNode> exactResolution = resolveFlag(
+                UUID.fromString(roleFlag.get("id").asText()), supervisorToken, "accepted");
+        assertThat(exactResolution.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode resolvedReviewState = eventState(reviewableCapture, "capture_with_review/v1");
+        assertThat(resolvedReviewState.get("current_state").asText()).isEqualTo("returned");
+        assertThat(resolvedReviewState.at("/pattern_specific/latest_review_outcome").asText())
+                .isEqualTo("returned");
+    }
+
     private void configureCampaignActivity() {
         ObjectNode config = objectMapper.createObjectNode();
         config.putArray("shapes").add("basic_capture/v1").add("basic_review/v1");
@@ -249,6 +328,43 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 """, CAMPAIGN_ACTIVITY, config.toString());
     }
 
+    private void configureSupervisorReviewActivity() {
+        String config = """
+                {
+                  "name": "supervisor_review_activity",
+                  "sensitivity": "standard",
+                  "roles": {
+                    "field_worker": ["capture"],
+                    "supervisor": ["review"]
+                  },
+                  "pattern": {
+                    "subject": null,
+                    "event": [
+                      {
+                        "ref": "capture_with_review/v1",
+                        "composition": "event",
+                        "shape_roles": {
+                          "review_decision": ["chv_visit_review/v1"]
+                        },
+                        "activation_roles": {
+                          "on_shapes": ["chv_visit/v1"]
+                        },
+                        "participant_roles": {
+                          "capturer": ["field_worker"],
+                          "reviewer": ["supervisor"]
+                        },
+                        "parameters": {}
+                      }
+                    ]
+                  }
+                }
+                """;
+        jdbcTemplate.update("""
+                INSERT INTO activities (name, config_json, status, sensitivity)
+                VALUES (?, ?::jsonb, 'active', 'standard')
+                """, REVIEW_ACTIVITY, config);
+    }
+
     private UUID subjectAt(UUID locationId) {
         UUID subject = UUID.randomUUID();
         jdbcTemplate.update("""
@@ -260,6 +376,14 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
 
     private UUID pushEvent(UUID actorId, UUID deviceId, UUID subjectId, String activityRef,
                            String type, String shapeRef, String notes, long lastPullWatermark) {
+        return pushEventWithPayload(actorId, deviceId, subjectId, activityRef, type, shapeRef,
+                Map.of("name", "Subject", "category", "campaign", "notes", notes),
+                lastPullWatermark).id();
+    }
+
+    private PushedEvent pushEventWithPayload(UUID actorId, UUID deviceId, UUID subjectId,
+                                             String activityRef, String type, String shapeRef,
+                                             Map<String, Object> payload, long lastPullWatermark) {
         UUID eventId = UUID.randomUUID();
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("id", eventId.toString());
@@ -272,7 +396,7 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         event.put("device_seq", seqCounter++);
         event.put("sync_watermark", null);
         event.put("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
-        event.put("payload", Map.of("name", "Subject", "category", "campaign", "notes", notes));
+        event.put("payload", payload);
 
         Map<String, Object> request = new LinkedHashMap<>();
         request.put("events", List.of(event));
@@ -283,7 +407,7 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 HttpMethod.POST, new HttpEntity<>(request, headers), JsonNode.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().get("accepted").asInt()).isEqualTo(1);
-        return eventId;
+        return new PushedEvent(eventId, response);
     }
 
     private ResponseEntity<JsonNode> pullEvents(String token, long sinceWatermark, int limit) {
@@ -317,6 +441,15 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         headers.setContentType(MediaType.APPLICATION_JSON);
         return rest.exchange("/api/sync/subject-history", HttpMethod.POST,
                 new HttpEntity<>(request, headers), JsonNode.class);
+    }
+
+    private ResponseEntity<JsonNode> resolveFlag(UUID flagId, String token, String resolution) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return rest.exchange("/api/conflicts/" + flagId + "/resolve", HttpMethod.POST,
+                new HttpEntity<>(Map.of("resolution", resolution, "reason", "S21 probe"), headers),
+                JsonNode.class);
     }
 
     private long latestWatermark(ResponseEntity<JsonNode> response) {
@@ -363,6 +496,38 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 """, String.class, category);
     }
 
+    private JsonNode findFlagFor(UUID sourceEventId, String category) {
+        String eventJson = jdbcTemplate.queryForObject("""
+                SELECT row_to_json(e)::text
+                FROM events e
+                WHERE e.shape_ref = 'conflict_detected/v1'
+                  AND e.payload->>'flag_category' = ?
+                  AND e.payload->>'source_event_id' = ?
+                ORDER BY e.sync_watermark ASC
+                LIMIT 1
+                """, String.class, category, sourceEventId.toString());
+        try {
+            return objectMapper.readTree(eventJson);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private JsonNode eventState(UUID sourceEventId, String bindingRef) {
+        ArrayNode states = patternStateProjection.projectCurrent(OffsetDateTime.now(ZoneOffset.UTC));
+        for (JsonNode state : states) {
+            if (!"event".equals(state.get("composition").asText())) {
+                continue;
+            }
+            JsonNode key = state.get("state_key");
+            if (sourceEventId.toString().equals(key.get("source_event_id").asText())
+                    && bindingRef.equals(key.get("binding_ref").asText())) {
+                return state;
+            }
+        }
+        throw new AssertionError("Missing event pattern state for " + sourceEventId + " " + bindingRef);
+    }
+
     private long syncWatermark(UUID eventId) {
         return jdbcTemplate.queryForObject(
                 "SELECT sync_watermark FROM events WHERE id = ?::uuid",
@@ -384,4 +549,6 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 Integer.class,
                 eventId.toString());
     }
+
+    private record PushedEvent(UUID id, ResponseEntity<JsonNode> response) {}
 }
