@@ -82,7 +82,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Outputs**: config package JSON with deployer shapes, activities, expressions, severity overrides, and referenced platform pattern definitions.
 - **Storage**: `config_packages` and `deployment_config`.
 - **Forbidden**: packaging platform payload schemas as deployer `shapes`, mutating sync watermarks.
-- **Guards**: `ConfigIntegrationTest`, `DeployTimeValidatorTest`, platform payload boundary tests. BAR-010 remains the active acceptance row for config package delivery.
+- **Guards**: `ConfigIntegrationTest`, `DeployTimeValidatorTest`, platform payload boundary tests. BAR-010 is accepted for config package delivery.
 
 ## Pattern Registry
 

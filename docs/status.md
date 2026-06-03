@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-03 (post-Phase-4 stabilization baseline mostly accepted; S00/S19/S21/S27 runtime probes landed; FP-011 remains routed follow-up)
+**Last updated**: 2026-06-03 (post-Phase-4 stabilization baseline accepted; S00/S19/S21/S27 runtime probes landed; S23 setup/config routed next)
 
 ---
 
@@ -17,7 +17,7 @@ Use this section as the low-token bootstrap for new sessions.
 - Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, and NW-030/S27. Use the backlog rows for exact evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
 - FP-011 remains open only for production Keycloak/OIDC/JWT integration or group/claim authority models. Do not take it unless that work is explicitly in scope.
-- The next product/architecture phase has not been selected. No baseline acceptance candidate is currently active.
+- No baseline acceptance candidate is currently active. The next routed implementation handoff is NW-032/S23 setup-config runtime evidence; S26 reporting, contract hygiene, production auth, and entity/trigger expansions remain ordered follow-ups in the backlog.
 - Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md`, and the exact contracts/code touched by the task.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
 
@@ -108,7 +108,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## What's Next
 
-**Post-Phase-4 stabilization** — active. Phase 4 is complete; the active status surfaces are the working-surface BAR/backlog, not old review chronology. BAR-001 through BAR-015 are accepted except BAR-010 config package delivery, which remains the remaining baseline candidate. The first scenario runtime probe set selected by NW-023 has landed: NW-025/S19, NW-026/S00, NW-029/S21, and NW-030/S27.
+**Post-Phase-4 stabilization** — active. Phase 4 is complete; the active status surfaces are the working-surface BAR/backlog, not old review chronology. BAR-001 through BAR-015 are accepted, including BAR-010 config package delivery. The first scenario runtime probe set selected by NW-023 has landed: NW-025/S19, NW-026/S00, NW-029/S21, and NW-030/S27.
 
 - IDR-021 (Role-Action Enforcement Model) is active. It builds on FP-001's role timeline check and keeps FP-005 out of role-action scope: live sync stays request-time scoped, subject-history backfill is separate Phase 4 `ongoing_resolution` work, and audit/historical pull is out of Phase 4 live sync unless a successor decision introduces a separate pull class/API.
 - IDR-022 (Flag Severity + Domain Uniqueness) is active. It defines deployment-wide L0 severity overrides through `flag_severity_overrides`, keeps resolvability platform-owned, defines shape-declared `domain_uniqueness_violation`, and keeps FP-005 backfill/audit behavior out of scope.
@@ -118,7 +118,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 - IDR-026 (Conflict Resolver Routing and Single-Writer Resolution) is active. It defines resolver routing for all active/imminent flag categories, canonical resolution semantics, production conflict API actor binding, and defers resolver reassignment and auto-resolution mechanics.
 - Phase spec: [docs/implementation/phases/phase-4.md](implementation/phases/phase-4.md) (reconciled; tracks landed Phase 4.1 role-action gates, Phase 4.2 severity gates, Phase 4.3 uniqueness gates, Phase 4.4 registry/binding gates, Phase 4.6 transition gates, and P04 scenario-grade Responsibility Binding coverage)
 - Landed implementation slices: Phase 4.1 role-action enforcement from IDR-021/IDR-023, including authoritative server `role_stale` action-authority semantics and mobile advisory role-action gating; Phase 4.2 flag severity defaults and deployment-wide `flag_severity_overrides` from IDR-022; IDR-024 / FP-007 assignment administration hardening; FP-008 assignment command identity binding; Phase 4.3 domain uniqueness schema, detector, and mobile advisory uniqueness from IDR-022; Phase 4.4 platform pattern registry and activity binding validation from IDR-020; IDR-025 pattern definition contract/package delivery; Phase 4.5 rebuildable pattern-state projection for enabled bindings including `ongoing_resolution/v1`; FP-005 subject-history backfill; FP-009 runtime resolver designation and single-writer resolution enforcement; Phase 4.6 transition detection; P04 scenario-grade Responsibility Binding coverage; and FP-010 platform payload shape contract parity. These do not implement auto-resolution, resolver reassignment, normal sync backfill, durable workflow-state tables, or production OIDC/JWT authority.
-- Recommended next stabilization slice: verify BAR-010 config package delivery with targeted server/config and mobile config-package evidence. After that, choose the next product/architecture phase only through an explicit checkpoint/phase-selection pass. Do not take FP-011 until production authentication/OIDC work is explicitly in scope.
+- Recommended next slice: run NW-032/S23 setup-config runtime evidence. S26 reporting, deployer shape/config schema hygiene, production auth/FP-011, and entity/trigger expansion remain ordered follow-ups in the backlog; do not take FP-011 until production authentication/OIDC work is explicitly in scope.
 - Coverage gap closed: P04 now has scenario-grade coverage for reassignment plus S19 stale offline authority, S00 structured capture, S21 scoped supervisor review, and S27 logistics transfer.
 
 ### Test Debt (carried from Phase 3)
@@ -130,7 +130,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## Blockers
 
-FP-005 is `RESOLVED`; `ongoing_resolution/v1` projection now uses the distinct subject-history backfill surface for newly assigned long-running subjects. FP-009 is `RESOLVED`; Phase 4.6 `transition_violation` emission has landed and uses IDR-026 resolver routing, but auto-resolution and resolver reassignment remain deferred successor work. FP-010 is `RESOLVED`; server runtime now bundles and enforces the six platform payload shape schemas from `contracts/shapes/`, and platform payload schemas are not deployer shape registry rows or packaged as deployer `shapes`. FP-011 is `OPEN` and blocks production Keycloak/OIDC/JWT integration or group/claim authority, but it does not block provider-neutral bearer actor-bound conflict APIs. The P04/S00/S19/S21/S27 scenario-grade probe gaps selected for first-wave stabilization are closed. BAR-010 remains a baseline candidate, not a blocker.
+FP-005 is `RESOLVED`; `ongoing_resolution/v1` projection now uses the distinct subject-history backfill surface for newly assigned long-running subjects. FP-009 is `RESOLVED`; Phase 4.6 `transition_violation` emission has landed and uses IDR-026 resolver routing, but auto-resolution and resolver reassignment remain deferred successor work. FP-010 is `RESOLVED`; server runtime now bundles and enforces the six platform payload shape schemas from `contracts/shapes/`, and platform payload schemas are not deployer shape registry rows or packaged as deployer `shapes`. FP-011 is `OPEN` and blocks production Keycloak/OIDC/JWT integration or group/claim authority, but it does not block provider-neutral bearer actor-bound conflict APIs. The P04/S00/S19/S21/S27 scenario-grade probe gaps selected for first-wave stabilization are closed. BAR-010 is accepted; no baseline acceptance candidate is currently active.
 
 ---
 
