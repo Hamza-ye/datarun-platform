@@ -64,7 +64,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Outputs**: deployer shape definitions for config packages, form rendering, payload structural validation.
 - **Storage**: `shapes` table.
 - **Forbidden**: treating platform payload JSON Schemas as deployer-editable shape rows.
-- **Guards**: `ConfigIntegrationTest`, deploy-time validator tests, `PlatformPayloadBoundaryTest`.
+- **Guards**: `ConfigIntegrationTest`, deploy-time validator tests, `ShapeFormatSchemaContractTest`, `PlatformPayloadBoundaryTest`.
 
 ## Platform Payload Contracts
 
@@ -82,7 +82,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Outputs**: config package JSON with deployer shapes, activities, expressions, severity overrides, and referenced platform pattern definitions.
 - **Storage**: `config_packages` and `deployment_config`.
 - **Forbidden**: packaging platform payload schemas as deployer `shapes`, mutating sync watermarks.
-- **Guards**: `ConfigIntegrationTest`, `DeployTimeValidatorTest`, platform payload boundary tests. BAR-010 is accepted for config package delivery.
+- **Guards**: `ConfigIntegrationTest`, `DeployTimeValidatorTest`, `ConfigPackageSchemaContractTest`, platform payload boundary tests. BAR-010 is accepted for config package delivery.
 
 ## Pattern Registry
 

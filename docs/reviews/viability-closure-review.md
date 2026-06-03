@@ -49,7 +49,7 @@ The original viability assessment returned a conditional go. Phase 4 has now com
 | Configuration/setup experience | `runtime_verified_current_baseline` | NW-032/S23 proves bounded setup/config composition without custom development. |
 | Long-running data lifecycle and retention | `closed_architecturally` for sync/retention split; `future_decision` beyond current policy | S24 exists; keep CDL-037 distinction between sync and local retention and BAR-106 for field-level sensitivity. |
 | Worker onboarding, transfer, leave, and exit | `closed_architecturally` for assignment-derived authority pressure | S25 exists; production auth-provider behavior remains BAR-104/FP-011 future work. |
-| Reporting and aggregate oversight | `needs_runtime_verification` | S26 exists; NW-033 is the selected next-wave probe, constrained to current projection, freshness, flag, and scope semantics. |
+| Reporting and aggregate oversight | `runtime_verified_current_baseline` | NW-033/S26 accepted a reporting/aggregate oversight probe constrained to current projection, freshness, flag, scope, and event drill-back semantics. |
 | Non-health domain proof | `runtime_verified_current_baseline` | S27 exists and NW-030 accepted the logistics transfer runtime probe. |
 | Emergency authority override | `intentionally_deferred` | NW-019 mini-brief only; do not bypass assignment authority. |
 | Analytics-derived initiation | `future_decision` | NW-020 mini-brief only; do not treat as ordinary trigger/config behavior. |
@@ -57,8 +57,8 @@ The original viability assessment returned a conditional go. Phase 4 has now com
 
 ## Working Conclusion
 
-The conditional-go concerns are not a signal to reopen the whole architecture. As of 2026-06-03, BAR-001 through BAR-015 are accepted and the remaining pressure has moved into deliberate next-wave scenario/runtime choices. Deferred/future-decision rows remain intentionally outside the current baseline.
+The conditional-go concerns are not a signal to reopen the whole architecture. As of 2026-06-04, BAR-001 through BAR-015 are accepted, the selected S00/S19/S21/S23/S26/S27 scenario runtime probes are accepted, and deployer shape/config package contract hygiene has landed. Deferred/future-decision rows remain intentionally outside the current baseline.
 
 1. Treat S23 setup/config as accepted runtime evidence for the "set up, not built" promise.
-2. Run S26 reporting/aggregate oversight as NW-033, constrained to current projection, freshness, flag, and scope semantics.
+2. Treat S26 reporting/aggregate oversight as accepted runtime evidence for current projection, freshness, flag, scope, and event drill-back semantics.
 3. Keep deferred platform evolution clearly marked until a successor decision selects it.

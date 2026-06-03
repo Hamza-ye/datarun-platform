@@ -4,7 +4,7 @@ Status: review/map for NW-023
 
 Authority: none. This document does not change architecture, contracts, BAR status, or backlog status.
 
-## 2026-06-03 Execution Update
+## 2026-06-04 Execution Update
 
 The accepted probe set recommended or routed from this map has now executed:
 
@@ -14,9 +14,10 @@ The accepted probe set recommended or routed from this map has now executed:
 | S00 - structured capture | NW-026 | `accepted`; runtime probe proves append-only correction, idempotent replay, server-watermark pull ordering, and existing concurrency flag mechanics. |
 | S21 - supervisor review | NW-029 | `accepted`; runtime probe proves scoped supervisor visibility, `capture_with_review/v1` state, unresolved/non-designated flagged review exclusion, and exact resolver re-inclusion. |
 | S23 - setup/config | NW-032 | `accepted`; runtime probe proves invalid setup rejection, bounded atomic config delivery, version coexistence, mobile current/pending promotion, and advisory-only warnings. |
+| S26 - operational reporting and aggregate oversight | NW-033 | `accepted`; runtime probe proves freshness inputs, unresolved-flag exclusion/count visibility, scoped aggregate visibility, exact resolver re-inclusion, and event drill-back traceability without a reporting warehouse. |
 | S27 - logistics transfer | NW-030 | `accepted`; runtime probe proves non-health `transfer_with_acknowledgment/v1` state, scoped sync, manual discrepancy review, exact resolver handling, and out-of-order accept-and-flag behavior. |
 
-The original map remains useful as pressure/provenance. It should no longer be read as saying S00/S19/S21/S23/S27 are unexecuted or gated. BAR-010 config package delivery and NW-032/S23 setup-config runtime evidence are now accepted; S26 reporting remains a ready-with-constraints later candidate when explicitly selected.
+The original map remains useful as pressure/provenance. It should no longer be read as saying S00/S19/S21/S23/S26/S27 are unexecuted or gated. BAR-010 config package delivery, NW-032/S23 setup-config runtime evidence, and NW-033/S26 reporting runtime evidence are now accepted.
 
 ## 1. Purpose And Method
 
@@ -399,7 +400,7 @@ These probes deliberately avoid S12/S18 trigger-derived work, S06 entity lifecyc
 
 ## 6. Original Test And Backlog Recommendations
 
-Current status: the S00, S19, S21, and S27 runtime-probe recommendations below have been executed through NW-026, NW-025, NW-029, and NW-030 respectively. NW-009 and NW-010 are also accepted. The table is retained as the original NW-023 route, not as an open task list.
+Current status: the S00, S19, S21, S23, S26, and S27 runtime-probe recommendations below have been executed through NW-026, NW-025, NW-029, NW-032, NW-033, and NW-030 respectively. NW-009 and NW-010 are also accepted. The table is retained as the original NW-023 route, not as an open task list.
 
 | Recommendation | Type | Priority | Depends on | Exit condition |
 |---|---|---|---|---|
@@ -427,7 +428,7 @@ Original call:
 Original NW-009/NW-010 gate (satisfied as of 2026-06-03):
 
 - Anything that claims pattern-state projection, projection equivalence, expression parity, mobile selective retention, or unresolved-flag exclusion as baseline behavior should wait for those verification rows or attach fresh equivalent evidence.
-- S23 setup/config has landed as NW-032. S26 reporting/aggregate oversight is now routed as NW-033 by explicit selection.
+- S23 setup/config has landed as NW-032. S26 reporting/aggregate oversight has landed as NW-033.
 
 Needs successor decisions:
 
@@ -440,4 +441,4 @@ Needs successor decisions:
 - New envelope fields or event types remain BAR-107 future-decision work.
 - New scope mechanisms remain BAR-108 future-decision work.
 
-Safe recommendation as of 2026-06-03: treat S00/S19/S21/S23/S27 as accepted scenario evidence, not as pending work. S26 reporting/aggregate oversight is the next selected ready-with-constraints movement. Deferred/future-decision surfaces above remain unpromoted.
+Safe recommendation as of 2026-06-04: treat S00/S19/S21/S23/S26/S27 as accepted scenario evidence, not as pending work. Deferred/future-decision surfaces above remain unpromoted until a successor decision explicitly selects one.
