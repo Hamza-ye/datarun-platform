@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/shape-format.schema.json",
+  "title": "Datarun deployer shape format",
+  "description": "Deployer-authored form shape DSL stored in the shapes table. This is not a platform payload schema and must not be used for contracts/shapes platform event payloads.",
+  "type": "object",
+  "required": ["fields"],
+  "properties": {
+    "fields": {
+      "type": "array",
+      "description": "Ordered deployer form fields. Current deploy-time validation allows empty shapes and caps the list at 60 fields.",
+      "maxItems": 60,
+      "items": {"$ref": "#/$defs/field"}
+    },
+    "uniqueness": {
+      "description": "Optional domain-uniqueness declaration interpreted by deploy-time validation and mobile advisory checks.",
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/uniqueness"}
+      ]
+    },
+    "subject_binding": {
+      "description": "Name of the required subject_ref field that populates the event subject_ref, or null when the shape is not subject-bound.",
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/name"}
+      ]
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "field_type": {
+      "enum": [
+        "text",
+        "integer",
+        "decimal",
+        "boolean",
+        "date",
+        "select",
+        "multi_select",
+        "location",
+        "subject_ref",
+        "narrative"
+      ]
+    },
+    "field": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {"$ref": "#/$defs/name"},
+        "type": {"$ref": "#/$defs/field_type"},
+        "required": {"type": "boolean"},
+        "description": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string"}
+          ]
+        },
+        "display_order": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "integer"}
+          ]
+        },
+        "group": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string"}
+          ]
+        },
+        "deprecated": {"type": "boolean"},
+        "options": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/options"}
+          ]
+        },
+        "validation": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/validation"}
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {"enum": ["select", "multi_select"]}
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["options"],
+            "properties": {
+              "options": {"$ref": "#/$defs/options"}
+            }
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    "options": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "min": {"type": "number"},
+        "max": {"type": "number"},
+        "min_length": {"type": "integer", "minimum": 0},
+        "max_length": {"type": "integer", "minimum": 0},
+        "precision": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "uniqueness": {
+      "type": "object",
+      "required": ["scope"],
+      "properties": {
+        "scope": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/uniqueness_scope_dimension"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "period": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/uniqueness_period"}
+          ]
+        },
+        "device_action": {
+          "enum": ["warn", "confirm", "require_confirmation"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "uniqueness_scope_dimension": {
+      "oneOf": [
+        {"const": "subject_ref"},
+        {"const": "activity_ref"},
+        {
+          "type": "string",
+          "pattern": "^payload\\.[a-z][a-z0-9_]*$"
+        }
+      ]
+    },
+    "uniqueness_period": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["calendar_day", "calendar_week", "calendar_month"]
+        },
+        "timezone": {
+          "oneOf": [
+            {"type": "null"},
+            {"const": "deployment"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

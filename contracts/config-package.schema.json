@@ -1,0 +1,422 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datarun.dev/schemas/config-package.schema.json",
+  "title": "Datarun config package",
+  "description": "Server-emitted, mobile-consumed atomic config package. Unknown top-level keys are allowed for forward-compatible mobile parsing; known package sections remain bounded here.",
+  "type": "object",
+  "required": [
+    "version",
+    "published_at",
+    "shapes",
+    "activities",
+    "expressions",
+    "flag_severity_overrides",
+    "sensitivity_classifications",
+    "pattern_definitions"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "shapes": {
+      "type": "object",
+      "description": "Deployer form shapes keyed by shape_ref. Platform payload refs from contracts/shapes are intentionally excluded.",
+      "propertyNames": {
+        "allOf": [
+          {"$ref": "#/$defs/shape_ref"},
+          {
+            "not": {
+              "enum": [
+                "assignment_created/v1",
+                "assignment_ended/v1",
+                "conflict_detected/v1",
+                "conflict_resolved/v1",
+                "subjects_merged/v1",
+                "subject_split/v1"
+              ]
+            }
+          }
+        ]
+      },
+      "additionalProperties": {"$ref": "#/$defs/package_shape"}
+    },
+    "activities": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/name"},
+      "additionalProperties": {"$ref": "#/$defs/activity"}
+    },
+    "expressions": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*/v[0-9]+$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {"$ref": "#/$defs/expression_rule"}
+      }
+    },
+    "flag_severity_overrides": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/flag_category"},
+      "additionalProperties": {
+        "enum": ["blocking", "informational"]
+      }
+    },
+    "sensitivity_classifications": {
+      "type": "object",
+      "required": ["shapes", "activities"],
+      "properties": {
+        "shapes": {
+          "type": "object",
+          "propertyNames": {"$ref": "#/$defs/shape_ref"},
+          "additionalProperties": {"$ref": "#/$defs/sensitivity"}
+        },
+        "activities": {
+          "type": "object",
+          "propertyNames": {"$ref": "#/$defs/name"},
+          "additionalProperties": {"$ref": "#/$defs/sensitivity"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "pattern_definitions": {
+      "type": "object",
+      "description": "Packaged platform pattern definitions. Individual definitions are governed by pattern-definition.schema.json.",
+      "required": ["schema_version", "definitions"],
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "definitions": {
+          "type": "object",
+          "propertyNames": {"$ref": "#/$defs/shape_ref"},
+          "additionalProperties": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "shape_ref": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*/v[0-9]+$"
+    },
+    "sensitivity": {
+      "enum": ["standard", "elevated", "restricted"]
+    },
+    "shape_status": {
+      "enum": ["active", "deprecated"]
+    },
+    "action": {
+      "enum": ["capture", "review", "alert", "task_created", "task_completed"]
+    },
+    "field_type": {
+      "enum": [
+        "text",
+        "integer",
+        "decimal",
+        "boolean",
+        "date",
+        "select",
+        "multi_select",
+        "location",
+        "subject_ref",
+        "narrative"
+      ]
+    },
+    "field": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {"$ref": "#/$defs/name"},
+        "type": {"$ref": "#/$defs/field_type"},
+        "required": {"type": "boolean"},
+        "description": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string"}
+          ]
+        },
+        "display_order": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "integer"}
+          ]
+        },
+        "group": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string"}
+          ]
+        },
+        "deprecated": {"type": "boolean"},
+        "options": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/options"}
+          ]
+        },
+        "validation": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/validation"}
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {"enum": ["select", "multi_select"]}
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["options"],
+            "properties": {
+              "options": {"$ref": "#/$defs/options"}
+            }
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    "options": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "min": {"type": "number"},
+        "max": {"type": "number"},
+        "min_length": {"type": "integer", "minimum": 0},
+        "max_length": {"type": "integer", "minimum": 0},
+        "precision": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "uniqueness": {
+      "type": "object",
+      "required": ["scope"],
+      "properties": {
+        "scope": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/uniqueness_scope_dimension"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "period": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/uniqueness_period"}
+          ]
+        },
+        "device_action": {
+          "enum": ["warn", "confirm", "require_confirmation"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "uniqueness_scope_dimension": {
+      "oneOf": [
+        {"const": "subject_ref"},
+        {"const": "activity_ref"},
+        {
+          "type": "string",
+          "pattern": "^payload\\.[a-z][a-z0-9_]*$"
+        }
+      ]
+    },
+    "uniqueness_period": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["calendar_day", "calendar_week", "calendar_month"]
+        },
+        "timezone": {
+          "oneOf": [
+            {"type": "null"},
+            {"const": "deployment"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "flag_category": {
+      "enum": [
+        "concurrent_state_change",
+        "stale_reference",
+        "identity_conflict",
+        "scope_violation",
+        "temporal_authority_expired",
+        "role_stale",
+        "domain_uniqueness_violation",
+        "transition_violation"
+      ]
+    },
+    "package_shape": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "status",
+        "sensitivity",
+        "fields",
+        "subject_binding",
+        "uniqueness"
+      ],
+      "properties": {
+        "name": {"$ref": "#/$defs/name"},
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {"$ref": "#/$defs/shape_status"},
+        "sensitivity": {"$ref": "#/$defs/sensitivity"},
+        "fields": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {"$ref": "#/$defs/field"}
+        },
+        "subject_binding": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/name"}
+          ]
+        },
+        "uniqueness": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/uniqueness"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "activity": {
+      "type": "object",
+      "required": ["name", "status", "sensitivity", "shapes", "roles", "pattern"],
+      "properties": {
+        "name": {"$ref": "#/$defs/name"},
+        "status": {"$ref": "#/$defs/shape_status"},
+        "sensitivity": {"$ref": "#/$defs/sensitivity"},
+        "shapes": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/shape_ref"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "roles": {
+          "type": "object",
+          "propertyNames": {"$ref": "#/$defs/name"},
+          "additionalProperties": {
+            "type": "array",
+            "items": {"$ref": "#/$defs/action"},
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "pattern": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/activity_pattern"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "activity_pattern": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/pattern_binding"}
+          ]
+        },
+        "event": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/pattern_binding"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "pattern_binding": {
+      "type": "object",
+      "required": ["ref", "composition"],
+      "properties": {
+        "ref": {"$ref": "#/$defs/shape_ref"},
+        "composition": {
+          "enum": ["subject", "event"]
+        },
+        "shape_roles": {"$ref": "#/$defs/shape_role_map"},
+        "activation_roles": {"$ref": "#/$defs/shape_role_map"},
+        "participant_roles": {"$ref": "#/$defs/participant_role_map"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "shape_role_map": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/name"},
+      "additionalProperties": {
+        "type": "array",
+        "items": {"$ref": "#/$defs/shape_ref"},
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    },
+    "participant_role_map": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/name"},
+      "additionalProperties": {
+        "type": "array",
+        "items": {"$ref": "#/$defs/name"},
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    },
+    "expression_rule": {
+      "type": "object",
+      "required": ["field_name", "rule_type", "expression"],
+      "properties": {
+        "field_name": {"$ref": "#/$defs/name"},
+        "rule_type": {
+          "enum": ["show_condition", "default", "warning"]
+        },
+        "expression": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "message": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

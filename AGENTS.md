@@ -51,6 +51,8 @@ Current contract roles:
 - `contracts/sync-protocol.md` describes push/pull protocol intent and invariants. Verify against current server/mobile code when changing sync behavior.
 - `contracts/flag-catalog.md` defines flag categories, default severity, resolvability, detection ordering, and state-exclusion semantics.
 - `contracts/shapes/*.schema.json` defines platform-bundled assignment, identity, and integrity payload shapes. Server runtime bundles these contract schemas for platform payload validation. They are not deployer-authored shape registry rows, not deployer-editable, not packaged as deployer `shapes`, and not activity-bindable as form shapes.
+- `contracts/shape-format.schema.json` defines the deployer-authored form shape DSL stored in the `shapes` table. It is not a platform payload schema.
+- `contracts/config-package.schema.json` defines the server-emitted/mobile-consumed config package wire shape, including the current top-level package keys and tolerated unknown top-level keys for forward compatibility.
 - `contracts/pattern-definition.schema.json` and `contracts/patterns/*.json` define platform-owned workflow pattern definitions. Server runtime loads these as the Pattern Registry source of truth, config packages deliver referenced definitions under `pattern_definitions`, and mobile reads the packaged definitions.
 - `contracts/fixtures/*.json` are shared equivalence fixtures used by server and mobile tests.
 
@@ -58,6 +60,7 @@ Update contracts and tests together when touching:
 
 - envelope fields, envelope `type`, `shape_ref` conventions, or identity reference shape;
 - sync request/response fields, pagination, watermarks, auth-visible sync behavior, or scope filtering;
+- deployer shape DSL fields, field types, uniqueness semantics, or config package wire keys;
 - platform shape payloads;
 - flag categories, resolver semantics, severity/resolvability, or detection ordering;
 - platform pattern refs, state/transition semantics, projection semantics, or pattern definition delivery;
