@@ -6,6 +6,7 @@ import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/config_store.dart';
 import 'package:datarun_mobile/domain/activity_role_actions.dart';
 import 'package:datarun_mobile/domain/event.dart';
+import 'package:datarun_mobile/domain/expression_evaluator.dart';
 import 'package:datarun_mobile/domain/flag_severity.dart';
 
 void main() {
@@ -265,6 +266,286 @@ void main() {
     expect(configStore.getShape('household_visit/v1'), isNotNull);
     expect(configStore.getActivity('monitoring'), isNotNull);
     expect(configStore.getActiveActivities(), contains('monitoring'));
+  });
+
+  test('S23 setup package keeps current usable until promoted', () async {
+    final captureWithReviewDefinition = {
+      'ref': 'capture_with_review/v1',
+      'definition_version': 1,
+      'binding_enabled': true,
+      'allowed_compositions': ['event'],
+      'states': [
+        {
+          'name': 'pending_review',
+          'markers': ['I'],
+        },
+      ],
+      'transitions': [
+        {
+          'id': 'T1',
+          'from': null,
+          'event_type': 'capture',
+          'activation_role': 'on_shapes',
+          'to': 'pending_review',
+          'effect': 'SC*',
+        },
+      ],
+    };
+    final patternV1 = {
+      'subject': null,
+      'event': [
+        {
+          'ref': 'capture_with_review/v1',
+          'composition': 'event',
+          'shape_roles': {
+            'review_decision': ['setup_visit_review/v1'],
+          },
+          'activation_roles': {
+            'on_shapes': ['setup_visit/v1'],
+          },
+          'participant_roles': {
+            'capturer': ['field_worker'],
+            'reviewer': ['supervisor'],
+          },
+          'parameters': {},
+        },
+      ],
+    };
+    final packageV1 = <String, dynamic>{
+      'version': 1,
+      'shapes': {
+        'setup_visit/v1': {
+          'name': 'setup_visit',
+          'version': 1,
+          'status': 'active',
+          'sensitivity': 'elevated',
+          'fields': [
+            {
+              'name': 'site_code',
+              'type': 'text',
+              'required': true,
+              'display_order': 1,
+              'deprecated': false,
+            },
+            {
+              'name': 'risk_level',
+              'type': 'select',
+              'required': true,
+              'display_order': 2,
+              'deprecated': false,
+              'options': ['low', 'medium', 'high'],
+            },
+            {
+              'name': 'needs_review',
+              'type': 'boolean',
+              'required': false,
+              'display_order': 3,
+              'deprecated': false,
+            },
+          ],
+        },
+        'setup_visit_review/v1': {
+          'name': 'setup_visit_review',
+          'version': 1,
+          'status': 'active',
+          'sensitivity': 'standard',
+          'fields': [
+            {
+              'name': 'decision',
+              'type': 'select',
+              'required': true,
+              'display_order': 1,
+              'deprecated': false,
+              'options': ['accepted', 'returned'],
+            },
+          ],
+        },
+      },
+      'activities': {
+        'setup_monitoring': {
+          'name': 'setup_monitoring',
+          'status': 'active',
+          'sensitivity': 'elevated',
+          'shapes': ['setup_visit/v1', 'setup_visit_review/v1'],
+          'roles': {
+            'field_worker': ['capture'],
+            'supervisor': ['review'],
+          },
+          'pattern': patternV1,
+        },
+      },
+      'expressions': {
+        'setup_monitoring.setup_visit/v1': [
+          {
+            'field_name': 'risk_level',
+            'rule_type': 'warning',
+            'expression': {
+              'when': {
+                'eq': ['payload.risk_level', 'high'],
+              },
+            },
+            'message': 'High-risk setup should be reviewed',
+          },
+          {
+            'field_name': 'needs_review',
+            'rule_type': 'default',
+            'expression': {
+              'value': {
+                'eq': ['payload.risk_level', 'high'],
+              },
+            },
+          },
+        ],
+      },
+      'flag_severity_overrides': {'role_stale': 'informational'},
+      'sensitivity_classifications': {
+        'shapes': {'setup_visit/v1': 'elevated'},
+        'activities': {'setup_monitoring': 'elevated'},
+      },
+      'pattern_definitions': {
+        'schema_version': 1,
+        'definitions': {'capture_with_review/v1': captureWithReviewDefinition},
+      },
+    };
+    final packageV2 = cloneConfig(packageV1);
+    packageV2['version'] = 2;
+    final shapesV2 = packageV2['shapes'] as Map<String, dynamic>;
+    (shapesV2['setup_visit/v1'] as Map<String, dynamic>)['status'] =
+        'deprecated';
+    shapesV2['setup_visit/v2'] = {
+      ...Map<String, dynamic>.from(shapesV2['setup_visit/v1'] as Map),
+      'version': 2,
+      'status': 'active',
+      'fields': [
+        ...((shapesV2['setup_visit/v1'] as Map)['fields'] as List),
+        {
+          'name': 'followup_plan',
+          'type': 'narrative',
+          'required': false,
+          'display_order': 4,
+          'deprecated': false,
+        },
+      ],
+    };
+    final activityV2 =
+        (packageV2['activities'] as Map<String, dynamic>)['setup_monitoring']
+            as Map<String, dynamic>;
+    activityV2['shapes'] = ['setup_visit/v2', 'setup_visit_review/v1'];
+    (((activityV2['pattern'] as Map)['event'] as List).first
+        as Map)['activation_roles'] = {
+      'on_shapes': ['setup_visit/v1', 'setup_visit/v2'],
+    };
+    (packageV2['expressions']
+        as Map<String, dynamic>)['setup_monitoring.setup_visit/v2'] = [
+      {
+        'field_name': 'followup_plan',
+        'rule_type': 'show_condition',
+        'expression': {
+          'when': {
+            'eq': ['payload.needs_review', true],
+          },
+        },
+      },
+    ];
+
+    await configStore.applyConfig(packageV1);
+
+    expect(configStore.configVersion, 1);
+    expect(configStore.getActiveActivities(), contains('setup_monitoring'));
+    expect(configStore.getShape('setup_visit/v1'), isNotNull);
+    expect(configStore.getShape('setup_visit/v2'), isNull);
+    expect(
+      configStore.getFlagSeverity('role_stale'),
+      FlagSeverity.informational,
+    );
+    final warning = configStore.getWarningExpression(
+      'setup_monitoring',
+      'setup_visit/v1',
+      'risk_level',
+    );
+    expect(
+      ExpressionEvaluator.evaluateCondition(
+        Map<String, dynamic>.from(warning!['when'] as Map),
+        {'payload.risk_level': 'high'},
+      ),
+      true,
+    );
+    final defaultExpression = configStore.getDefaultExpression(
+      'setup_monitoring',
+      'setup_visit/v1',
+      'needs_review',
+    );
+    expect(
+      ExpressionEvaluator.evaluateValue(
+        Map<String, dynamic>.from(defaultExpression!['value'] as Map),
+        {'payload.risk_level': 'high'},
+      ),
+      true,
+    );
+
+    await configStore.applyConfig(packageV2);
+    expect(configStore.configVersion, 1);
+    expect(configStore.hasPending, true);
+    expect(configStore.getShape('setup_visit/v1'), isNotNull);
+    expect(configStore.getShape('setup_visit/v2'), isNull);
+
+    final reviewWarning = configStore.evaluateActivityAction(
+      activityRef: 'setup_monitoring',
+      action: ActivityAction.review,
+      activeAssignments: [
+        {'role': 'field_worker', 'activity_list': 'setup_monitoring'},
+      ],
+    );
+    expect(reviewWarning.permitted, false);
+    expect(reviewWarning.warning, isNotNull);
+    await eventStore.insert(
+      Event(
+        id: 's23-local-event-1',
+        type: 'review',
+        shapeRef: 'setup_visit_review/v1',
+        activityRef: 'setup_monitoring',
+        subjectRef: {'type': 'subject', 'id': 'subject-1'},
+        actorRef: {'type': 'actor', 'id': 'actor-1'},
+        deviceId: 'device-1',
+        deviceSeq: 1,
+        syncWatermark: null,
+        timestamp: '2026-06-03T10:00:00Z',
+        payload: {'decision': 'accepted'},
+      ),
+    );
+    expect(await eventStore.unpushedCount(), 1);
+
+    await configStore.promotePending();
+
+    expect(configStore.configVersion, 2);
+    expect(configStore.hasPending, false);
+    expect(configStore.getShape('setup_visit/v1')!.status, 'deprecated');
+    expect(configStore.getShape('setup_visit/v2'), isNotNull);
+    expect(
+      configStore
+          .getShapesForActivity('setup_monitoring')
+          .map((shape) => shape.shapeRef),
+      ['setup_visit/v2', 'setup_visit_review/v1'],
+    );
+    expect(
+      (((configStore.getActivityPattern('setup_monitoring')!['event'] as List)
+                  .first
+              as Map)['activation_roles']
+          as Map)['on_shapes'],
+      ['setup_visit/v1', 'setup_visit/v2'],
+    );
+    expect(
+      configStore.getPatternDefinition('capture_with_review/v1'),
+      captureWithReviewDefinition,
+    );
+    expect(
+      configStore.getShowCondition(
+        'setup_monitoring',
+        'setup_visit/v2',
+        'followup_plan',
+      ),
+      isNotNull,
+    );
   });
 
   test('domain uniqueness advisory warns from local events only', () async {

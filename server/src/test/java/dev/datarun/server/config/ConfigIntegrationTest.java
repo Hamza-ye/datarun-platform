@@ -470,6 +470,126 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void s23SetupConfigProbe_validatesPublishesAndEvolvesBoundedActivity() throws Exception {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+
+        ObjectNode visitSchemaV1 = buildSchema(0, null);
+        addField(visitSchemaV1, "site_code", "text", true);
+        addField(visitSchemaV1, "risk_level", "select", true, "low", "medium", "high");
+        addField(visitSchemaV1, "needs_review", "boolean", false);
+        addField(visitSchemaV1, "notes", "narrative", false);
+        assertTrue(ss.createShape("setup_visit", "elevated", visitSchemaV1).isEmpty());
+
+        ObjectNode reviewSchema = buildSchema(0, null);
+        addField(reviewSchema, "decision", "select", true, "accepted", "returned");
+        addField(reviewSchema, "review_note", "narrative", false);
+        assertTrue(ss.createShape("setup_visit_review", "standard", reviewSchema).isEmpty());
+
+        ObjectNode invalidConfig = objectMapper.createObjectNode();
+        invalidConfig.putArray("shapes").add("setup_visit/v1");
+        ObjectNode invalidRoles = invalidConfig.putObject("roles");
+        invalidRoles.putArray("field_worker").add("capture");
+        invalidRoles.putArray("supervisor").add("review");
+        invalidConfig.set("pattern", parse("""
+                {
+                  "subject": null,
+                  "event": [
+                    {
+                      "ref": "capture_with_review/v1",
+                      "composition": "event",
+                      "shape_roles": {"review_decision": ["missing_review/v1"]},
+                      "activation_roles": {"on_shapes": ["setup_visit/v1"]},
+                      "participant_roles": {
+                        "capturer": ["field_worker"],
+                        "reviewer": ["supervisor"]
+                      },
+                      "parameters": {}
+                    }
+                  ]
+                }
+                """));
+
+        List<String> invalidViolations = as.createActivity("bad_setup_activity", "standard", invalidConfig);
+        assertFalse(invalidViolations.isEmpty());
+        assertTrue(invalidViolations.stream().anyMatch(v -> v.contains("missing_review/v1")));
+        assertFalse(activityRepository.exists("bad_setup_activity"));
+        assertEquals(0, configPackager.getLatestVersion());
+
+        ObjectNode activityConfigV1 = setupActivityConfig(
+                List.of("setup_visit/v1", "setup_visit_review/v1"),
+                List.of("setup_visit/v1"));
+        List<String> violations = as.createActivity("setup_monitoring", "elevated", activityConfigV1);
+        assertTrue(violations.isEmpty(), "Got violations: " + violations);
+
+        insertExpression("setup_monitoring", "setup_visit/v1", "risk_level", "warning",
+                "{\"when\":{\"eq\":[\"payload.risk_level\",\"high\"]}}",
+                "High-risk setup should be reviewed");
+        insertExpression("setup_monitoring", "setup_visit/v1", "needs_review", "default",
+                "{\"value\":{\"eq\":[\"payload.risk_level\",\"high\"]}}",
+                null);
+
+        assertTrue(flagSeverityConfigService.updateOverrides(parse("""
+                {"role_stale": "informational"}
+                """), null).isEmpty());
+
+        assertEquals(1, configPackager.publish(null));
+        JsonNode packageV1 = configPackager.getLatest().orElseThrow().packageJson();
+
+        assertEquals(1, packageV1.get("version").asInt());
+        assertTrue(packageV1.get("shapes").has("setup_visit/v1"));
+        assertTrue(packageV1.get("shapes").has("setup_visit_review/v1"));
+        JsonNode activityV1 = packageV1.get("activities").get("setup_monitoring");
+        assertEquals("active", activityV1.get("status").asText());
+        assertEquals("elevated", activityV1.get("sensitivity").asText());
+        assertEquals(activityConfigV1.get("roles"), activityV1.get("roles"));
+        assertEquals(activityConfigV1.get("pattern"), activityV1.get("pattern"));
+        assertTrue(packageV1.get("expressions").has("setup_monitoring.setup_visit/v1"));
+        assertEquals(2, packageV1.get("expressions").get("setup_monitoring.setup_visit/v1").size());
+        assertEquals("informational",
+                packageV1.get("flag_severity_overrides").get("role_stale").asText());
+        JsonNode definitionsV1 = packageV1.get("pattern_definitions").get("definitions");
+        assertTrue(definitionsV1.has("capture_with_review/v1"));
+        assertFalse(definitionsV1.has("transfer_with_acknowledgment/v1"));
+
+        ObjectNode visitSchemaV2 = visitSchemaV1.deepCopy();
+        addField(visitSchemaV2, "followup_plan", "narrative", false);
+        assertTrue(ss.createVersion("setup_visit", "elevated", visitSchemaV2).isEmpty());
+        ss.deprecate("setup_visit", 1);
+
+        ObjectNode activityConfigV2 = setupActivityConfig(
+                List.of("setup_visit/v2", "setup_visit_review/v1"),
+                List.of("setup_visit/v1", "setup_visit/v2"));
+        violations = as.updateActivity("setup_monitoring", "elevated", activityConfigV2);
+        assertTrue(violations.isEmpty(), "Got violations: " + violations);
+        insertExpression("setup_monitoring", "setup_visit/v2", "followup_plan", "show_condition",
+                "{\"when\":{\"eq\":[\"payload.needs_review\",true]}}",
+                null);
+
+        assertEquals(2, configPackager.publish(null));
+        List<Map<String, Object>> packages = jdbcTemplate.queryForList("""
+                SELECT version, package_json::text AS package_json
+                FROM config_packages
+                ORDER BY version
+                """);
+        assertEquals(2, packages.size());
+        JsonNode storedV1 = objectMapper.readTree((String) packages.get(0).get("package_json"));
+        JsonNode storedV2 = objectMapper.readTree((String) packages.get(1).get("package_json"));
+
+        assertFalse(storedV1.get("shapes").has("setup_visit/v2"));
+        assertTrue(storedV2.get("shapes").has("setup_visit/v1"));
+        assertTrue(storedV2.get("shapes").has("setup_visit/v2"));
+        assertEquals("deprecated", storedV2.get("shapes").get("setup_visit/v1").get("status").asText());
+        assertEquals("active", storedV2.get("shapes").get("setup_visit/v2").get("status").asText());
+        assertEquals(activityConfigV2.get("pattern"),
+                storedV2.get("activities").get("setup_monitoring").get("pattern"));
+        assertTrue(storedV2.get("expressions").has("setup_monitoring.setup_visit/v1"));
+        assertTrue(storedV2.get("expressions").has("setup_monitoring.setup_visit/v2"));
+        assertTrue(storedV2.get("pattern_definitions").get("definitions").has("capture_with_review/v1"));
+        assertFalse(storedV2.has("triggers"));
+    }
+
+    @Test
     void createActivity_unknownPatternRefRejected() {
         ShapeService ss = new ShapeService(shapeRepository, objectMapper);
         assertTrue(ss.createShape("facility_observation", "standard", buildSchema(2, null)).isEmpty());
@@ -1159,6 +1279,64 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
     }
 
     // --- Helpers ---
+
+    private ObjectNode setupActivityConfig(List<String> activityShapeRefs, List<String> activationShapeRefs) {
+        ObjectNode config = objectMapper.createObjectNode();
+        ArrayNode shapes = config.putArray("shapes");
+        for (String shapeRef : activityShapeRefs) {
+            shapes.add(shapeRef);
+        }
+        ObjectNode roles = config.putObject("roles");
+        roles.putArray("field_worker").add("capture");
+        roles.putArray("supervisor").add("review");
+
+        ObjectNode pattern = objectMapper.createObjectNode();
+        pattern.putNull("subject");
+        ArrayNode eventBindings = pattern.putArray("event");
+        ObjectNode binding = eventBindings.addObject();
+        binding.put("ref", "capture_with_review/v1");
+        binding.put("composition", "event");
+        ObjectNode shapeRoles = binding.putObject("shape_roles");
+        shapeRoles.putArray("review_decision").add("setup_visit_review/v1");
+        ObjectNode activationRoles = binding.putObject("activation_roles");
+        ArrayNode onShapes = activationRoles.putArray("on_shapes");
+        for (String shapeRef : activationShapeRefs) {
+            onShapes.add(shapeRef);
+        }
+        ObjectNode participantRoles = binding.putObject("participant_roles");
+        participantRoles.putArray("capturer").add("field_worker");
+        participantRoles.putArray("reviewer").add("supervisor");
+        binding.putObject("parameters");
+        config.set("pattern", pattern);
+        return config;
+    }
+
+    private void addField(ObjectNode schema, String name, String type, boolean required, String... options) {
+        ArrayNode fields = (ArrayNode) schema.get("fields");
+        ObjectNode field = objectMapper.createObjectNode();
+        field.put("name", name);
+        field.put("type", type);
+        field.put("required", required);
+        field.put("deprecated", false);
+        field.put("display_order", fields.size() + 1);
+        if (options.length > 0) {
+            ArrayNode optionArray = field.putArray("options");
+            for (String option : options) {
+                optionArray.add(option);
+            }
+        }
+        fields.add(field);
+    }
+
+    private void insertExpression(String activityRef, String shapeRef, String fieldName,
+                                  String ruleType, String expressionJson, String message) {
+        jdbcTemplate.update("""
+                INSERT INTO expression_rules (id, activity_ref, shape_ref, field_name, rule_type, expression, message)
+                VALUES (?::uuid, ?, ?, ?, ?, ?::jsonb, ?)
+                """,
+                UUID.randomUUID().toString(), activityRef, shapeRef, fieldName,
+                ruleType, expressionJson, message);
+    }
 
     private ObjectNode buildSchema(int fieldCount, String shapeName) {
         ObjectNode schema = objectMapper.createObjectNode();

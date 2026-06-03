@@ -90,6 +90,7 @@ public class ConfigPackager {
         for (Activity activity : activityRepository.findActive()) {
             ObjectNode activityEntry = objectMapper.createObjectNode();
             activityEntry.put("name", activity.name());
+            activityEntry.put("status", activity.status());
             activityEntry.put("sensitivity", activity.sensitivity());
             JsonNode config = activity.configJson();
             if (config.has("shapes")) activityEntry.set("shapes", config.get("shapes"));

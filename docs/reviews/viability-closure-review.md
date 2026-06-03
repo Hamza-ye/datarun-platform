@@ -26,7 +26,7 @@ The original viability assessment returned a conditional go. Phase 4 has now com
 | ID | Guarantee | Current closure | Route |
 |---|---|---|---|
 | V1 | Works without connectivity | `runtime_verified_current_baseline` | BAR-003, BAR-004, BAR-008, and BAR-014 are accepted; NW-025/S19 adds stale-offline-authority runtime evidence. |
-| V2 | Set up, not built | `needs_runtime_verification` | BAR-010 and BAR-011 are accepted; S23 is the next-wave runtime route to prove setup/config composition as a product workflow. |
+| V2 | Set up, not built | `runtime_verified_current_baseline` | BAR-010 and BAR-011 are accepted; NW-032/S23 proves bounded setup/config composition as a product workflow without custom development. |
 | V3 | Trustworthy records | `runtime_verified_current_baseline` | BAR-001, BAR-002, BAR-005, BAR-006, and BAR-009 are accepted; NW-026/S00 adds append-only structured-capture runtime evidence. |
 | V4 | One system, not many | `runtime_verified_current_baseline` | BAR-012 through BAR-014 are accepted; NW-029/S21 and NW-030/S27 add scenario-grade composition evidence. |
 | V5 | Grows without breaking | `runtime_verified_current_baseline` | BAR-010, BAR-012, and BAR-014 are accepted for config package atomicity/version coexistence, pattern delivery, and projection equivalence. |
@@ -37,7 +37,7 @@ The original viability assessment returned a conditional go. Phase 4 has now com
 | Tension | Current closure | Route |
 |---|---|---|
 | Offline-first vs real-time reactivity | `closed_architecturally` for delayed server authority; `intentionally_deferred` for general trigger execution | S12 is thickened; do not claim general trigger execution until BAR-101 successor work selects it. |
-| Configuration simplicity vs expressive power | `closed_architecturally` by CDL-038/CDL-043/CDL-044; `runtime_verified_current_baseline` for package delivery | Use routing checklist for every config feature; S23 is the next bounded setup/config runtime probe. |
+| Configuration simplicity vs expressive power | `closed_architecturally` by CDL-038/CDL-043/CDL-044; `runtime_verified_current_baseline` for package delivery and bounded setup/config composition | Use routing checklist for every config feature; expression/function growth still needs successor routing. |
 | Domain-agnosticism vs domain-specific validation | `runtime_verified_current_baseline` for current mechanisms | NW-030 proves non-health transfer pressure; keep domain validation as configuration/content, not platform semantics. |
 | Trustworthy records vs offline correction | `runtime_verified_current_baseline` | BAR-002 and NW-026 prove append-only correction/idempotency; flag lifecycle/projection rows are accepted. |
 | Scale/local retention vs low-end devices | `runtime_verified_current_baseline` for current retention policy; `future_decision` beyond that | BAR-008 and S24 scenario exist; field-level encryption/redaction/purge remains BAR-106 future work. |

@@ -15,7 +15,7 @@ The first-wave probe set recommended by this map has now executed:
 | S21 - supervisor review | NW-029 | `accepted`; runtime probe proves scoped supervisor visibility, `capture_with_review/v1` state, unresolved/non-designated flagged review exclusion, and exact resolver re-inclusion. |
 | S27 - logistics transfer | NW-030 | `accepted`; runtime probe proves non-health `transfer_with_acknowledgment/v1` state, scoped sync, manual discrepancy review, exact resolver handling, and out-of-order accept-and-flag behavior. |
 
-The original map remains useful as pressure/provenance. It should no longer be read as saying S00/S19/S21/S27 are unexecuted or gated. BAR-010 config package delivery is now accepted, so S23 setup/config and S26 reporting are ready-with-constraints next-wave candidates.
+The original map remains useful as pressure/provenance. It should no longer be read as saying S00/S19/S21/S23/S27 are unexecuted or gated. BAR-010 config package delivery and NW-032/S23 setup-config runtime evidence are now accepted; S26 reporting remains a ready-with-constraints later candidate when explicitly selected.
 
 ## 1. Purpose And Method
 
@@ -64,7 +64,7 @@ Pressure labels used below: `accepted_baseline_pressure`, `candidate_baseline_pr
 | S20 - CHV Field Operations | `baseline_composite` | Field capture, subject linkage, supplies, continuous responsibility | BAR-001, BAR-002, BAR-003, BAR-007, BAR-009, BAR-012, BAR-013, BAR-014 | envelope; sync; identity shapes; assignment shapes; transfer/ongoing patterns | BAR-105 if patient/facility lifecycle is promoted | `ready_with_constraints` | medium | `candidate_baseline_pressure`; good domain composite, but S21 gives a sharper review/authority probe and S27 gives cleaner non-health distribution. |
 | S21 - CHV Supervisor Operations | `baseline_composite` | Supervisor assessment, review authority, point-in-time judgment, scoped visibility | BAR-006, BAR-007, BAR-012, BAR-013, BAR-014 | capture_with_review/v1; flag catalog; sync; pattern fixtures | BAR-101 for overdue visit/review automation; BAR-104 for production auth claims | `ready_with_constraints` | high | `candidate_baseline_pressure`, `contract_pressure`, `runtime_probe_candidate`; strong assignment/review probe if it stays human-reviewed and assignment-scoped. |
 | S22 - Coordinated Distribution Campaign Across Grouped Locations | `baseline_composite` | Campaign plus unit-level work, reassignment, supply flow, offline duplicate units | BAR-003, BAR-004, BAR-006, BAR-007, BAR-012, BAR-013, BAR-014 | sync; subject-history; assignment shapes; transfer pattern; flag catalog | BAR-101 for automatic progress follow-up; BAR-105 for newly discovered unit lifecycle | `ready_with_constraints` | high | `accepted_baseline_pressure`, `candidate_baseline_pressure`; high scenario value, but initial probe should constrain discovered units to capture/linkage rather than full registry lifecycle. |
-| S23 - Configure New Operational Activity | `baseline_composite` | Setup without custom development, deploy-time validation, version coexistence, bounded warnings | BAR-010, BAR-011, BAR-012, BAR-014 | config package specs; pattern-definition; patterns; expression fixtures | EH-005 if expression functions are needed; BAR-101 for L3 policy execution | `ready_with_constraints` | high | `accepted_baseline_pressure`, `contract_pressure`; valuable next-wave probe now that config/mobile verification is accepted because setup mistakes must fail before devices depend on them. |
+| S23 - Configure New Operational Activity | `baseline_composite` | Setup without custom development, deploy-time validation, version coexistence, bounded warnings | BAR-010, BAR-011, BAR-012, BAR-014 | config package specs; pattern-definition; patterns; expression fixtures | EH-005 if expression functions are needed; BAR-101 for L3 policy execution | `accepted_runtime_probe` | high | `accepted_baseline_pressure`, `contract_pressure`; NW-032 accepted bounded setup/config runtime evidence because setup mistakes must fail before devices depend on them. |
 | S24 - Long-Running Deployment Data Lifecycle | `baseline_composite` | Sync versus retention, audit reconstruction, scope contraction, local purge | BAR-003, BAR-004, BAR-007, BAR-008, BAR-014; BAR-106 | sync; subject-history; retention/mobile store behavior; fixtures | BAR-106; reporting/audit surfaces beyond normal field sync | `ready_with_constraints` | medium | `candidate_baseline_pressure`, `future_decision_pressure`; selective retention can be probed now, but field-level sensitivity/encryption/redaction needs successor decision. |
 | S25 - Worker Onboarding, Transfer, Leave, and Exit | `baseline_composite` | Assignment changes, stale offline authority, handoff history, exit retention | BAR-003, BAR-004, BAR-006, BAR-007, BAR-008, BAR-014 | sync; subject-history; assignment shapes; flag catalog | BAR-104 for production provider authority; BAR-106 for sensitive exit purge detail | `ready_with_constraints` | high | `accepted_baseline_pressure`, `candidate_baseline_pressure`, `contract_pressure`; strong authority/stale-work probe after S19, provided identity-provider groups/claims are not treated as authority. |
 | S26 - Operational Reporting and Aggregate Oversight | `baseline_composite` | Aggregate freshness, unresolved flag treatment, scoped views, drill-back traceability | BAR-006, BAR-007, BAR-012, BAR-013, BAR-014 | flag catalog; sync/access scopes; projection fixtures | reporting warehouse future seam if separate analytics storage is required | `ready_with_constraints` | medium | `accepted_baseline_pressure`; good reporting probe after projection/integrity verification, with freshness and exclusion semantics visible. |
@@ -414,7 +414,7 @@ Current status: the S00, S19, S21, and S27 runtime-probe recommendations below h
 
 Current execution status:
 
-- The original near-term set is complete: S00, S19, S21, and S27 are accepted in the backlog with runtime evidence.
+- The original near-term set plus S23 setup/config evidence is complete: S00, S19, S21, S23, and S27 are accepted in the backlog with runtime evidence.
 - NW-009 and NW-010 are accepted, so S21/S27 are no longer blocked on projection/mobile evidence.
 - BAR-010 config package delivery is accepted, so all BAR-001 through BAR-015 baseline rows are accepted.
 
@@ -426,7 +426,7 @@ Original call:
 Original NW-009/NW-010 gate (satisfied as of 2026-06-03):
 
 - Anything that claims pattern-state projection, projection equivalence, expression parity, mobile selective retention, or unresolved-flag exclusion as baseline behavior should wait for those verification rows or attach fresh equivalent evidence.
-- S23 setup/config and S26 reporting/aggregate oversight should follow once config, expression, projection, and mobile evidence are current.
+- S23 setup/config has landed as NW-032. S26 reporting/aggregate oversight remains the later ready-with-constraints probe when explicitly selected.
 
 Needs successor decisions:
 
@@ -439,4 +439,4 @@ Needs successor decisions:
 - New envelope fields or event types remain BAR-107 future-decision work.
 - New scope mechanisms remain BAR-108 future-decision work.
 
-Safe recommendation as of 2026-06-03: treat S00/S19/S21/S27 as first-wave scenario evidence, not as pending work. With BAR-010 accepted, the next safe movement is S23 setup/config runtime evidence, followed by S26 reporting/aggregate oversight if S23 does not expose a higher-priority baseline bug. Deferred/future-decision surfaces above remain unpromoted.
+Safe recommendation as of 2026-06-03: treat S00/S19/S21/S23/S27 as accepted scenario evidence, not as pending work. S26 reporting/aggregate oversight remains a later ready-with-constraints movement if explicitly selected. Deferred/future-decision surfaces above remain unpromoted.
