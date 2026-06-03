@@ -40,13 +40,13 @@ Datarun's ambition is to **eliminate that rebuilding**. Instead of bespoke syste
 
 ### Reading guide
 
-An evaluator assessing the architecture should read in this order:
+An evaluator assessing product intent should read the problem-space sources first. An agent assessing current architecture or implementation status should use `AGENTS.md` and `docs/status.md` first; the active post-Phase-4 working surface is `docs/agent-working-surface/README.md`.
 
 1. **Problem definition**: [Constraints](constraints.md) → [Scenarios](scenarios/README.md) → [Access Control](access-control-scenario.md)
 2. **Viability analysis**: [Viability Assessment](viability-assessment.md)
 3. **Design foundations**: [Principles](principles.md) → [Behavioral Patterns](behavioral_patterns.md)
 4. **Architecture description**: [Architecture](architecture/) — the consolidated reference: primitives, contracts, cross-cutting concerns, boundaries
-5. **Architecture decisions**: [ADR-001](adrs/adr-001-offline-data-model.md) → [002](adrs/adr-002-identity-conflict.md) → [003](adrs/adr-003-authorization-sync.md) → [004](adrs/adr-004-configuration-boundary.md) → [005](adrs/adr-005-state-progression.md) *(dependency order — each builds on the last)*
+5. **Architecture decisions**: [Canonical Decision Ledger](architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md) via its [README index](architecture/adrs-decisions-canonical-ledger/README.md). The old ADR files are provenance, not the active agent-facing authority.
 6. **Implementation**: [Implementation plan](implementation/plan.md) — technology stack, module boundaries, phased build order
 7. **Decision reasoning** *(optional)*: [Exploration index](exploration/) — the event storms, stress tests, and coherence audits behind each ADR
 
@@ -62,7 +62,8 @@ An evaluator assessing the architecture should read in this order:
 | [Viability Assessment](viability-assessment.md) | Platform viability analysis — vision vs. use cases gap analysis, GO/NO-GO*(pre dates adrs, and implementation decisions)*  |
 | [Behavioral Patterns](behavioral_patterns.md)   | 12 behavioral patterns extracted from scenarios — the first narrowing step                                                 |
 | [Architecture](architecture/)                   | Consolidated architecture description — 11 primitives, 21 contracts, 8 cross-cutting concerns, 29 boundary classifications |
-| [ADRs](adrs/)                                   | 5 Architecture Decision Records — the decided architecture                                                                 |
+| [Canonical Decision Ledger](architecture/adrs-decisions-canonical-ledger/) | Active architecture decision authority from Phase 4 closure forward |
+| [ADRs](adrs/)                                   | Retired/provenance Architecture Decision Records; use only when routed by current docs or a drift investigation            |
 | [Exploration](exploration/)                     | Decision analyses grouped by ADR — event storms, stress tests, coherence audits                                            |
 | [Experiments](experiments/)                     | Prototypes and scenario walk-throughs                                                                                       |
 | [Implementation](implementation/)               | Technology stack, module boundaries, phased build order, IDRs                                                               |
@@ -72,15 +73,12 @@ An evaluator assessing the architecture should read in this order:
 
 ## Current Status
 
-The project has completed its **initial architecture sequence**:
+The project has completed its initial architecture sequence and Phase 4 implementation. Current implementation standing is tracked by the post-Phase-4 working surface, especially the [Baseline Acceptance Register](agent-working-surface/baseline-acceptance-register.md) and [Platform Next Work Backlog](agent-working-surface/platform-next-work-backlog.md).
 
-1. ✅ Initial scenarios defined — 21 domain-pure, solution-independent scenarios; post-Phase-4 stabilization adds targeted scenario-thickening items in the scenario index
-2. ✅ Cross-cutting concerns identified — offline work, access control
-3. ✅ Architectural constraint decisions — five ADRs decided
-   - **[ADR-001: Offline Data Model](adrs/adr-001-offline-data-model.md)** — immutable events, append-only, client-generated UUIDs (*[Reading Guide](exploration/guide-adr-001.md)*)
-   - **[ADR-002: Identity Model and Conflict Resolution](adrs/adr-002-identity-conflict.md)** — 4 identity types, accept-and-flag, alias merges (*[Reading Guide](exploration/guide-adr-002.md)*)
-   - **[ADR-003: Authorization and Selective Sync](adrs/adr-003-authorization-sync.md)** — assignment-based access, sync=scope, authority-as-projection (*[Reading Guide](exploration/guide-adr-003.md)*)
-   - **[ADR-004: Configuration Paradigm and Boundary](adrs/adr-004-configuration-boundary.md)** — typed shapes, platform-fixed types, four-layer gradient (*[Reading Guide](exploration/guide-adr-004.md)*)
-   - **[ADR-005: State Progression and Workflow](adrs/adr-005-state-progression.md)** — projection-derived state machines, Pattern Registry, composition rules (*[Reading Guide](exploration/guide-adr-005.md)*)
-4. ✅ Architecture Description — consolidated reference in [architecture/](architecture/) (11 primitives, 21 contracts, 8 cross-cutting concerns, 29 boundary classifications)
-5. 🔄 [Implementation](implementation/README.md).
+Current high-level standing:
+
+1. ✅ Initial scenarios defined — 27 scenario entries, including post-Phase-4 thickening scenarios.
+2. ✅ Cross-cutting concerns identified — offline work and access control.
+3. ✅ Architecture authority consolidated — the CDL is the active authority from Phase 4 closure forward.
+4. ✅ Phase 4 complete — workflow/policy implementation landed and first-wave post-Phase-4 runtime probes now cover S00, S19, S21, and S27.
+5. 🔄 Stabilization — BAR-010 config package delivery remains the main baseline candidate before selecting a new product/architecture phase.

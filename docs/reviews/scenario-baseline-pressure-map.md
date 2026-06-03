@@ -4,6 +4,19 @@ Status: review/map for NW-023
 
 Authority: none. This document does not change architecture, contracts, BAR status, or backlog status.
 
+## 2026-06-03 Execution Update
+
+The first-wave probe set recommended by this map has now executed:
+
+| Probe | Backlog row | Current standing |
+|---|---|---|
+| S19 - offline/stale authority | NW-025 | `accepted`; runtime probe proves stale structurally valid work is persisted and flagged while live sync and subject-history remain separate. |
+| S00 - structured capture | NW-026 | `accepted`; runtime probe proves append-only correction, idempotent replay, server-watermark pull ordering, and existing concurrency flag mechanics. |
+| S21 - supervisor review | NW-029 | `accepted`; runtime probe proves scoped supervisor visibility, `capture_with_review/v1` state, unresolved/non-designated flagged review exclusion, and exact resolver re-inclusion. |
+| S27 - logistics transfer | NW-030 | `accepted`; runtime probe proves non-health `transfer_with_acknowledgment/v1` state, scoped sync, manual discrepancy review, exact resolver handling, and out-of-order accept-and-flag behavior. |
+
+The original map remains useful as pressure/provenance. It should no longer be read as saying S00/S19/S21/S27 are unexecuted or gated. BAR-010 config package delivery is the remaining baseline candidate before broader product/phase selection.
+
 ## 1. Purpose And Method
 
 This map triages scenario pressure against the current post-Phase-4 baseline, deferred/future-decision surfaces, implementation-facing contracts, and near-term verification work. Scenarios remain problem-space inputs; they are not implementation specifications and do not prove runtime evidence by themselves.
@@ -383,7 +396,9 @@ These probes deliberately avoid S12/S18 trigger-derived work, S06 entity lifecyc
 | S23 | Configuration requests that need loops, functions, hidden scripts, dynamic queries, or custom code. | CDL-038, CDL-043; EH-005 if repeated measured need appears. | Configuration must stay bounded; expression function growth needs successor platform decision. |
 | S26 | Aggregate reporting that needs a separate reporting warehouse or analytics storage model. | Escape-hatch future extraction seam; no active trigger claimed. | Current probe should use projection/reporting semantics and freshness labels, not create a new analytics subsystem. |
 
-## 6. Test And Backlog Recommendations
+## 6. Original Test And Backlog Recommendations
+
+Current status: the S00, S19, S21, and S27 runtime-probe recommendations below have been executed through NW-026, NW-025, NW-029, and NW-030 respectively. NW-009 and NW-010 are also accepted. The table is retained as the original NW-023 route, not as an open task list.
 
 | Recommendation | Type | Priority | Depends on | Exit condition |
 |---|---|---|---|---|
@@ -397,12 +412,18 @@ These probes deliberately avoid S12/S18 trigger-derived work, S06 entity lifecyc
 
 ## 7. Safe Progress Call
 
-Proceed immediately:
+Current execution status:
+
+- The original near-term set is complete: S00, S19, S21, and S27 are accepted in the backlog with runtime evidence.
+- NW-009 and NW-010 are accepted, so S21/S27 are no longer blocked on projection/mobile evidence.
+- BAR-010 config package delivery is the remaining baseline candidate.
+
+Original call:
 
 - Use S00 and a constrained S19 as first scenario-grade probe designs, because they pressure accepted sync/envelope/authority baseline without requiring deferred capabilities.
 - Prepare S21 and S27 probe designs in parallel with NW-009/NW-010, but run/accept them only after pattern/projection/mobile candidate verification is green enough to avoid confusing baseline gaps with scenario failures.
 
-Wait for NW-009/NW-010:
+Original NW-009/NW-010 gate (satisfied as of 2026-06-03):
 
 - Anything that claims pattern-state projection, projection equivalence, expression parity, mobile selective retention, or unresolved-flag exclusion as baseline behavior should wait for those verification rows or attach fresh equivalent evidence.
 - S23 setup/config and S26 reporting/aggregate oversight should follow once config, expression, projection, and mobile evidence are current.
@@ -418,4 +439,4 @@ Needs successor decisions:
 - New envelope fields or event types remain BAR-107 future-decision work.
 - New scope mechanisms remain BAR-108 future-decision work.
 
-Safe recommendation: select S00, S19, S21, and S27 as the near-term probe set, with S00/S19 first and S21/S27 gated on NW-009/NW-010 evidence. This advances scenario-grade verification without promoting deferred work or changing contracts.
+Safe recommendation as of 2026-06-03: treat S00/S19/S21/S27 as first-wave scenario evidence, not as pending work. Next safe movement is BAR-010 config package delivery verification, followed by deliberate selection of either next-wave probes such as S23/S26 or a new product/architecture phase. Deferred/future-decision surfaces above remain unpromoted.

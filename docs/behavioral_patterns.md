@@ -26,6 +26,8 @@ Validation
 
 **This is the first narrowing step.** Scenarios describe the full operational reality. Patterns extract what that reality requires the platform to support. Principles will then articulate the beliefs that guide how we build support for those patterns. Nothing is decided here except what behaviors are real.
 
+Status note: this remains a Phase 1 pattern catalog, not the current implementation-status surface. Post-Phase-4 scenario additions and runtime-probe standing are tracked in `docs/scenarios/README.md`, `docs/reviews/scenario-baseline-pressure-map.md`, and the agent working-surface BAR/backlog.
+
 ---
 
 ## 2. Core Behavioral Patterns

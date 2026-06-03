@@ -1,6 +1,6 @@
 # Module Interface Baseline
 
-> Current as of the post-Phase-4 FP-010 contract-hygiene slice. This file records implemented module boundaries; it is not a roadmap for new subsystems.
+> Current as of the 2026-06-03 post-Phase-4 stabilization checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
 
 ## Authority role
 
@@ -10,7 +10,7 @@ Use this file to understand module ownership, inputs, outputs, storage, forbidde
 
 Mechanism/instance rule: module boundaries must preserve the CDL mechanism/instance split. Platform-owned mechanisms remain platform-owned; deployer-authored instances remain configuration-package content.
 
-Claim rule: "implemented" in this file means the boundary is recorded as implemented by the current documentation set. Operational proof still requires source-code inspection, test evidence, or scenario execution.
+Claim rule: "implemented" in this file means the boundary is recorded as implemented by the current documentation set. Operational proof still requires source-code inspection, test evidence, or scenario execution. Current acceptance status lives in `docs/agent-working-surface/baseline-acceptance-register.md`.
 
 ## Event Store
 
@@ -18,7 +18,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Inputs**: structurally valid event envelopes plus payload JSON.
 - **Outputs**: stored events, ordered event streams, subject/event lookup rows.
 - **Storage**: `events` table and `events_sync_watermark_seq`.
-- **Forbidden**: hidden workflow state, resolver reassignment, envelope field/type expansion without CDL authority.
+- **Forbidden**: operational event update/delete paths, hidden workflow state, resolver reassignment, envelope field/type expansion without CDL authority.
 - **Guards**: `EnvelopeVocabularyTest`, `EnvelopeSchemaParityTest`, sync/subject/projection integration tests, platform payload backstop validation for platform-owned shape refs.
 
 ## Projection Engine
@@ -54,7 +54,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Inputs**: bearer actor token, assignment event history, subject/location/activity scopes.
 - **Outputs**: active assignment facts and scope containment decisions.
 - **Storage**: assignment authority is event-derived; actor tokens and location tables support lookup only.
-- **Forbidden**: Keycloak/JWT/group/claim authority as Phase 4 authority source.
+- **Forbidden**: Keycloak/JWT/group/claim authority as current authority source unless FP-011 is resolved by successor production-auth work.
 - **Guards**: assignment containment, scope-filtered sync, responsibility-binding, and auth flag tests.
 
 ## Shape Registry
@@ -82,7 +82,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Outputs**: config package JSON with deployer shapes, activities, expressions, severity overrides, and referenced platform pattern definitions.
 - **Storage**: `config_packages` and `deployment_config`.
 - **Forbidden**: packaging platform payload schemas as deployer `shapes`, mutating sync watermarks.
-- **Guards**: `ConfigIntegrationTest`, `DeployTimeValidatorTest`, platform payload boundary tests.
+- **Guards**: `ConfigIntegrationTest`, `DeployTimeValidatorTest`, platform payload boundary tests. BAR-010 remains the active acceptance row for config package delivery.
 
 ## Pattern Registry
 
@@ -106,7 +106,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 
 **Role**: On-device advisory component that warns users about potentially invalid actions. Reduces unnecessary flags by warning users before they submit invalid transitions. Its work is always redundant to the Conflict Detector + Projection Engine. Without it, the system works identically — just with more flags to resolve.
 
-- **Owns**: ux warning users before they submit invalid transitions.
+- **Owns**: UX warnings before users submit potentially invalid transitions.
 - **Depends on**: Projection Engine (current workflow state) and Pattern Registry (valid transitions).
 - **Outputs**: validation warning.
 - **Storage**: none.
