@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.projection.PatternStateProjection;
+import dev.datarun.server.subject.SubjectProjection;
+import dev.datarun.server.subject.SubjectSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,7 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
     @Autowired private ActorTokenRepository actorTokenRepository;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private PatternStateProjection patternStateProjection;
+    @Autowired private SubjectProjection subjectProjection;
 
     private UUID region;
     private UUID districtA;
@@ -418,6 +421,117 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         assertCaptureExcludes(supervisorPull, outsideDispatch);
     }
 
+    @Test
+    void s26ReportingAggregateProbeUsesFreshScopedFlaggedAndTraceableInputs() {
+        configureSupervisorReviewActivity();
+        assignmentService.createAssignment(ADMIN, WORKER_A, "field_worker",
+                districtA, null, List.of(REVIEW_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, SUPERVISOR, "supervisor",
+                districtA, null, List.of(REVIEW_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        UUID acceptedSubject = subjectAt(villageA1);
+        UUID rejectedSubject = subjectAt(villageA2);
+        UUID outsideSubject = subjectAt(villageB1);
+
+        long workerKnowledge = latestWatermark(pullEvents(tokenA, 0, 100, DEVICE_A));
+        UUID acceptedCapture = pushEventWithPayload(WORKER_A, DEVICE_A, acceptedSubject,
+                REVIEW_ACTIVITY, "capture", "chv_visit/v1",
+                Map.of("visit_code", "A1-accepted",
+                        "status", "ready_for_review",
+                        "notes", "input for accepted reporting aggregate"),
+                workerKnowledge).id();
+        UUID rejectedCapture = pushEventWithPayload(WORKER_A, DEVICE_A, rejectedSubject,
+                REVIEW_ACTIVITY, "capture", "chv_visit/v1",
+                Map.of("visit_code", "A2-rejected",
+                        "status", "ready_for_review",
+                        "notes", "input for rejected reporting aggregate"),
+                workerKnowledge).id();
+        UUID outsideCapture = pushEventWithPayload(ADMIN, DEVICE_ADMIN, outsideSubject,
+                REVIEW_ACTIVITY, "capture", "chv_visit/v1",
+                Map.of("visit_code", "B1-outside",
+                        "status", "ready_for_review",
+                        "notes", "outside reporting scope"),
+                0).id();
+
+        ResponseEntity<JsonNode> supervisorInitialPull =
+                pullEvents(supervisorToken, 0, 100, DEVICE_SUPERVISOR);
+        assertCaptureContains(supervisorInitialPull, acceptedCapture, rejectedCapture);
+        assertCaptureExcludes(supervisorInitialPull, outsideCapture);
+        long supervisorInitialWatermark = latestWatermark(supervisorInitialPull);
+        assertThat(supervisorInitialWatermark)
+                .isGreaterThanOrEqualTo(syncWatermark(rejectedCapture));
+
+        long workerReviewKnowledge =
+                latestWatermark(pullEvents(tokenA, workerKnowledge, 100, DEVICE_A));
+        PushedEvent acceptedReview = pushEventWithPayload(WORKER_A, DEVICE_A, acceptedSubject,
+                REVIEW_ACTIVITY, "review", "chv_visit_review/v1",
+                Map.of("source_event_id", acceptedCapture.toString(),
+                        "decision", "accepted",
+                        "notes", "field worker attempted accepted review"),
+                workerReviewKnowledge);
+        PushedEvent rejectedReview = pushEventWithPayload(WORKER_A, DEVICE_A, rejectedSubject,
+                REVIEW_ACTIVITY, "review", "chv_visit_review/v1",
+                Map.of("source_event_id", rejectedCapture.toString(),
+                        "decision", "returned",
+                        "notes", "field worker attempted returned review"),
+                workerReviewKnowledge);
+
+        JsonNode acceptedRoleFlag = findFlagFor(acceptedReview.id(), "role_stale");
+        JsonNode rejectedRoleFlag = findFlagFor(rejectedReview.id(), "role_stale");
+        assertThat(acceptedRoleFlag.at("/payload/designated_resolver/id").asText())
+                .isEqualTo(SUPERVISOR.toString());
+        assertThat(rejectedRoleFlag.at("/payload/designated_resolver/id").asText())
+                .isEqualTo(SUPERVISOR.toString());
+
+        assertThat(aggregateProjectedEventCount(acceptedSubject, rejectedSubject)).isEqualTo(2);
+        assertThat(aggregateUnresolvedFlagCount(acceptedSubject, rejectedSubject)).isEqualTo(2);
+        assertThat(summaryFor(acceptedSubject).latestTimestamp().toInstant())
+                .isEqualTo(eventTimestamp(acceptedCapture).toInstant());
+        assertThat(eventState(acceptedCapture, "capture_with_review/v1")
+                .get("current_state").asText()).isEqualTo("pending_review");
+        assertThat(eventState(rejectedCapture, "capture_with_review/v1")
+                .get("current_state").asText()).isEqualTo("pending_review");
+
+        ResponseEntity<JsonNode> rejectedResolution = resolveFlag(
+                UUID.fromString(rejectedRoleFlag.get("id").asText()), supervisorToken, "rejected");
+        assertThat(rejectedResolution.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(summaryFor(rejectedSubject).eventCount()).isEqualTo(1);
+        assertThat(summaryFor(rejectedSubject).flagCount()).isEqualTo(0);
+        assertThat(eventState(rejectedCapture, "capture_with_review/v1")
+                .get("current_state").asText()).isEqualTo("pending_review");
+
+        ResponseEntity<JsonNode> acceptedResolution = resolveFlag(
+                UUID.fromString(acceptedRoleFlag.get("id").asText()), supervisorToken, "accepted");
+        assertThat(acceptedResolution.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(summaryFor(acceptedSubject).eventCount()).isEqualTo(2);
+        assertThat(summaryFor(acceptedSubject).flagCount()).isEqualTo(0);
+        assertThat(summaryFor(acceptedSubject).latestTimestamp().toInstant())
+                .isEqualTo(eventTimestamp(acceptedReview.id()).toInstant());
+        assertThat(eventState(acceptedCapture, "capture_with_review/v1")
+                .get("current_state").asText()).isEqualTo("accepted");
+
+        ResponseEntity<JsonNode> supervisorDeltaPull =
+                pullEvents(supervisorToken, supervisorInitialWatermark, 100, DEVICE_SUPERVISOR);
+        assertEventContains(supervisorDeltaPull, acceptedReview.id(), rejectedReview.id(),
+                UUID.fromString(acceptedRoleFlag.get("id").asText()),
+                UUID.fromString(rejectedRoleFlag.get("id").asText()),
+                UUID.fromString(acceptedResolution.getBody().get("event_id").asText()),
+                UUID.fromString(rejectedResolution.getBody().get("event_id").asText()));
+        assertEventExcludes(supervisorDeltaPull, outsideCapture);
+        assertThat(supervisorDeltaPull.getBody().get("latest_watermark").asLong())
+                .isGreaterThanOrEqualTo(syncWatermark(
+                        UUID.fromString(acceptedResolution.getBody().get("event_id").asText())));
+
+        assertTimelineContains(acceptedSubject, acceptedCapture, acceptedReview.id(),
+                UUID.fromString(acceptedRoleFlag.get("id").asText()),
+                UUID.fromString(acceptedResolution.getBody().get("event_id").asText()));
+        assertThat(acceptedRoleFlag.at("/payload/source_event_id").asText())
+                .isEqualTo(acceptedReview.id().toString());
+        assertThat(acceptedResolution.getBody().get("event_id").asText()).isNotBlank();
+    }
+
     private void configureCampaignActivity() {
         ObjectNode config = objectMapper.createObjectNode();
         config.putArray("shapes").add("basic_capture/v1").add("basic_review/v1");
@@ -618,6 +732,34 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 .doesNotContain(List.of(eventIds).stream().map(UUID::toString).toArray(String[]::new));
     }
 
+    private void assertEventContains(ResponseEntity<JsonNode> response, UUID... eventIds) {
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(eventIds(response.getBody().get("events")))
+                .contains(List.of(eventIds).stream().map(UUID::toString).toArray(String[]::new));
+    }
+
+    private void assertEventExcludes(ResponseEntity<JsonNode> response, UUID... eventIds) {
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(eventIds(response.getBody().get("events")))
+                .doesNotContain(List.of(eventIds).stream().map(UUID::toString).toArray(String[]::new));
+    }
+
+    private void assertTimelineContains(UUID subjectId, UUID... eventIds) {
+        ResponseEntity<JsonNode> response = rest.getForEntity(
+                "/api/subjects/" + subjectId + "/events", JsonNode.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(eventIds(response.getBody().get("events")))
+                .contains(List.of(eventIds).stream().map(UUID::toString).toArray(String[]::new));
+    }
+
+    private List<String> eventIds(JsonNode events) {
+        List<String> ids = new ArrayList<>();
+        for (JsonNode event : events) {
+            ids.add(event.get("id").asText());
+        }
+        return ids;
+    }
+
     private List<String> captureEventIds(JsonNode events) {
         List<String> ids = new ArrayList<>();
         for (JsonNode event : events) {
@@ -708,6 +850,36 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 "SELECT sync_watermark FROM events WHERE id = ?::uuid",
                 Long.class,
                 eventId.toString());
+    }
+
+    private OffsetDateTime eventTimestamp(UUID eventId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT timestamp FROM events WHERE id = ?::uuid",
+                OffsetDateTime.class,
+                eventId.toString());
+    }
+
+    private SubjectSummary summaryFor(UUID subjectId) {
+        return subjectProjection.listSubjects().stream()
+                .filter(subject -> subject.id().equals(subjectId.toString()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing subject summary for " + subjectId));
+    }
+
+    private int aggregateProjectedEventCount(UUID... subjectIds) {
+        int count = 0;
+        for (UUID subjectId : subjectIds) {
+            count += summaryFor(subjectId).eventCount();
+        }
+        return count;
+    }
+
+    private int aggregateUnresolvedFlagCount(UUID... subjectIds) {
+        int count = 0;
+        for (UUID subjectId : subjectIds) {
+            count += summaryFor(subjectId).flagCount();
+        }
+        return count;
     }
 
     private long deviceWatermark(UUID deviceId) {
