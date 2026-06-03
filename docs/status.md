@@ -13,11 +13,11 @@ Use this section as the low-token bootstrap for new sessions.
 - Phase 4 is complete; the completion audit is green.
 - Post-Phase-4 stabilization now uses `docs/agent-working-surface/README.md` as the active agent working-surface router.
 - Current implementation acceptance status belongs in `docs/agent-working-surface/baseline-acceptance-register.md`; do not treat legacy Phase 4 review drafts as active baseline truth.
-- Current baseline standing: BAR-001 through BAR-015 are accepted except BAR-010, which remains the active config package delivery candidate.
+- Current baseline standing: BAR-001 through BAR-015 are accepted, including BAR-010 config package delivery.
 - Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, and NW-030/S27. Use the backlog rows for exact evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
 - FP-011 remains open only for production Keycloak/OIDC/JWT integration or group/claim authority models. Do not take it unless that work is explicitly in scope.
-- The next product/architecture phase has not been selected. The natural remaining stabilization slice is BAR-010 config package delivery.
+- The next product/architecture phase has not been selected. No baseline acceptance candidate is currently active.
 - Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md`, and the exact contracts/code touched by the task.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
 

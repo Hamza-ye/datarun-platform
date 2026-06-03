@@ -252,6 +252,21 @@ void main() {
     expect(configStore.getPatternDefinition('missing/v1'), isNull);
   });
 
+  test('applyConfig ignores unknown top-level package keys safely', () async {
+    final config = cloneConfig(sampleConfig);
+    config['future_top_level_section'] = {
+      'schema_version': 1,
+      'value': 'not understood by this client',
+    };
+
+    await configStore.applyConfig(config);
+
+    expect(configStore.configVersion, 1);
+    expect(configStore.getShape('household_visit/v1'), isNotNull);
+    expect(configStore.getActivity('monitoring'), isNotNull);
+    expect(configStore.getActiveActivities(), contains('monitoring'));
+  });
+
   test('domain uniqueness advisory warns from local events only', () async {
     final config = cloneConfig(sampleConfig);
     (config['shapes']['household_visit/v1']

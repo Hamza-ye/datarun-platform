@@ -13,6 +13,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -343,6 +344,57 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
 
         JsonNode packaged = response.getBody().get("shapes").get("unique_visit/v1").get("uniqueness");
         assertEquals(uniqueness, packaged);
+    }
+
+    @Test
+    void publishCreatesMonotonicAtomicFullSnapshots() throws Exception {
+        ShapeService ss = new ShapeService(shapeRepository, objectMapper);
+        assertTrue(ss.createShape("baseline_obs", "standard", buildSchema(1, null)).isEmpty());
+
+        ActivityService as = new ActivityService(activityRepository, shapeRepository, objectMapper);
+        ObjectNode firstActivity = objectMapper.createObjectNode();
+        firstActivity.putArray("shapes").add("baseline_obs/v1");
+        firstActivity.putObject("roles").putArray("field_worker").add("capture");
+        assertTrue(as.createActivity("baseline_monitoring", "standard", firstActivity).isEmpty());
+
+        assertEquals(1, configPackager.publish(null));
+
+        assertTrue(ss.createShape("followup_obs", "standard", buildSchema(2, null)).isEmpty());
+        ObjectNode secondActivity = objectMapper.createObjectNode();
+        secondActivity.putArray("shapes").add("followup_obs/v1");
+        secondActivity.putObject("roles").putArray("field_worker").add("capture");
+        assertTrue(as.createActivity("followup_monitoring", "standard", secondActivity).isEmpty());
+
+        assertEquals(2, configPackager.publish(null));
+
+        List<Map<String, Object>> packages = jdbcTemplate.queryForList("""
+                SELECT version, package_json::text AS package_json
+                FROM config_packages
+                ORDER BY version
+                """);
+        assertEquals(2, packages.size());
+
+        JsonNode v1 = objectMapper.readTree((String) packages.get(0).get("package_json"));
+        JsonNode v2 = objectMapper.readTree((String) packages.get(1).get("package_json"));
+
+        assertEquals(1, packages.get(0).get("version"));
+        assertEquals(2, packages.get(1).get("version"));
+        assertEquals(1, v1.get("version").asInt());
+        assertEquals(2, v2.get("version").asInt());
+
+        assertTrue(v1.get("shapes").has("baseline_obs/v1"));
+        assertFalse(v1.get("shapes").has("followup_obs/v1"));
+        assertTrue(v1.get("activities").has("baseline_monitoring"));
+        assertFalse(v1.get("activities").has("followup_monitoring"));
+
+        assertTrue(v2.get("shapes").has("baseline_obs/v1"));
+        assertTrue(v2.get("shapes").has("followup_obs/v1"));
+        assertTrue(v2.get("activities").has("baseline_monitoring"));
+        assertTrue(v2.get("activities").has("followup_monitoring"));
+        assertTrue(v2.has("expressions"));
+        assertTrue(v2.has("flag_severity_overrides"));
+        assertTrue(v2.has("sensitivity_classifications"));
+        assertTrue(v2.has("pattern_definitions"));
     }
 
     @Test
