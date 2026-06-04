@@ -1,6 +1,6 @@
 # Module Interface Baseline
 
-> Current as of the 2026-06-04 NW-038 OIDC/JWKS auth-provider boundary checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
+> Current as of the 2026-06-04 NW-039 production principal-binding administration decision checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
 
 ## Authority role
 
