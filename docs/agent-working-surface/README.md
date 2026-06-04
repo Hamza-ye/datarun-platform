@@ -14,19 +14,22 @@ Use sources in this order:
 2. `docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md`
    - Role: non-authoritative rationale, routing, test-intent, and change-classification companion.
    - CDL wins on decisions.
-3. `docs/agent-working-surface/escape-hatch-register.md`
+3. `docs/agent-working-surface/operational-ux-layering-companion.md`
+   - Role: non-authoritative operational UX/product vocabulary and layering guardrail for UI, reporting, workflow, and product-design slices.
+   - Use it before concrete operational design/code; CDL, BAR, and contracts win on authority and accepted status.
+4. `docs/agent-working-surface/escape-hatch-register.md`
    - Role: active routing source for measured evolution paths.
    - It is not architecture authority and does not authorize implementation by itself.
-4. `docs/README.md`, `docs/constraints.md`, and `docs/scenarios/README.md`
+5. `docs/README.md`, `docs/constraints.md`, and `docs/scenarios/README.md`
    - Role: vision, operational context, and scenario index.
-5. `docs/scenarios/` and `docs/access-control-scenario.md`
+6. `docs/scenarios/` and `docs/access-control-scenario.md`
    - Role: problem-space coverage.
-6. `contracts/`
+7. `contracts/`
    - Role: current implementation-facing contracts: envelope, sync protocol, flag catalog, shapes, patterns, and shared fixtures.
-7. Phase files and IDRs
+8. Phase files and IDRs
    - Role: implementation history, design provenance, and verification leads.
    - Use only when routed by a touched surface, a baseline row, or a drift investigation.
-8. `docs/agent-working-surface/baseline-acceptance-register.md`
+9. `docs/agent-working-surface/baseline-acceptance-register.md`
    - Role: current working status of what is accepted, candidate, deferred, or future-decision.
 
 ## Superseded Review Drafts
@@ -37,7 +40,7 @@ The Phase 4 evidence-pack, backlog, and escape-hatch consolidation drafts have b
 
 Do not infer current truth from document chronology.
 
-For architecture, use the CDL. For rationale and change routing, use the rationale companion. For measured evolution paths, use the escape-hatch register as routing context only. For problem-space pressure, use scenarios and access control. For contracts, use `contracts/`. For current implementation status, use the baseline acceptance register.
+For architecture, use the CDL. For rationale and change routing, use the rationale companion. For operational UX/product vocabulary and layering, use the operational UX companion. For measured evolution paths, use the escape-hatch register as routing context only. For problem-space pressure, use scenarios and access control. For contracts, use `contracts/`. For current implementation status, use the baseline acceptance register.
 
 Historical phase files, IDRs, audits, and review packs are provenance unless the current task is explicitly routed there.
 

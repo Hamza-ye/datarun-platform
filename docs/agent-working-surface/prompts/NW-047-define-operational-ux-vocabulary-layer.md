@@ -21,20 +21,21 @@ Read only this packet by default:
 1. `AGENTS.md`
 2. `docs/status.md` Current Routing section only.
 3. `docs/agent-working-surface/README.md`
-4. `docs/agent-working-surface/platform-next-work-backlog.md`
+4. `docs/behavioral_patterns.md`
+5. `docs/agent-working-surface/platform-next-work-backlog.md`
    - Read NW-041 through NW-047.
-5. `docs/checkpoints/checkpoint-2026-06-04-gap-baseline-assessment.md`
+6. `docs/checkpoints/checkpoint-2026-06-04-gap-baseline-assessment.md`
    - Read the gap table, exploration list, S22 addendum, guardrails, and march orders.
-6. `docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md`
+7. `docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md`
    - Read only the anti-pattern, routing, and change-classification sections relevant to UI/product vocabulary leakage.
-7. `docs/reviews/scenario-baseline-pressure-map-protocol.md`
-8. `docs/scenarios/22-coordinated-distribution-campaign-across-grouped-locations.md`
-9. `docs/scenarios/26-operational-reporting-and-aggregate-oversight.md`
-10. `docs/scenarios/27-logistics-distribution-composite.md`
-11. `docs/walk-throughs/itn-distribution-campaign.md`
-12. `docs/implementation/module-interfaces.md`
+8. `docs/reviews/scenario-baseline-pressure-map-protocol.md`
+9. `docs/scenarios/22-coordinated-distribution-campaign-across-grouped-locations.md`
+10. `docs/scenarios/26-operational-reporting-and-aggregate-oversight.md`
+11. `docs/scenarios/27-logistics-distribution-composite.md`
+12. `docs/walk-throughs/itn-distribution-campaign.md`
+13. `docs/implementation/module-interfaces.md`
     - Read `Event Store`, `Projection Engine`, `Conflict Detector`, `Scope Resolver`, `Config Packager`, `Pattern Registry`, `Trigger Engine`, and `Command Validator`.
-13. Use `scripts/query_cdl.py` only for CDL entries needed to check wording around event truth, accept-and-flag, projections, mechanism/instance split, configuration delivery, mobile advisory authority, flags, scope, and workflow patterns.
+14. Use `scripts/query_cdl.py` only for CDL entries needed to check wording around event truth, accept-and-flag, projections, mechanism/instance split, configuration delivery, mobile advisory authority, flags, scope, and workflow patterns.
 
 Do not read broad architecture/history docs unless a directly read source routes you there.
 
