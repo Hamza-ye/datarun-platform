@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-04 (NW-037 production-auth principal binding foundation accepted; FP-011/BAR-104 remain open)
+**Last updated**: 2026-06-04 (NW-038 OIDC/JWKS auth-provider work routed; FP-011/BAR-104 remain open)
 
 ---
 
@@ -17,9 +17,10 @@ Use this section as the low-token bootstrap for new sessions.
 - Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, and NW-033/S26. Use the backlog rows for exact evidence.
 - Contract hygiene now includes root schemas for deployer-authored shape format and the server-emitted/mobile-consumed config package: `contracts/shape-format.schema.json` and `contracts/config-package.schema.json`.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use IDR-027 for the decision boundary and the NW-037 backlog row for evidence.
+- NW-038 is the next ready implementation slice: add real OIDC/JWKS token validation behind `AuthenticatedActorResolver` while preserving explicit principal binding and group/claim non-authority. Use `docs/agent-working-surface/prompts/NW-038-implement-oidc-jwks-auth-provider-boundary.md`.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
-- FP-011 remains open for live production Keycloak/OIDC/JWKS integration and any group/claim authority model. NW-037 did not make groups, roles, JWT `actor_id`, or IdP claims direct platform authority.
-- No baseline acceptance candidate is currently active. Live production identity-provider integration, entity lifecycle, trigger/reporting expansion, auto-resolution, resolver reassignment, and new scope mechanisms remain future-decision follow-ups; choose one explicitly before drafting implementation work.
+- FP-011 remains open for live production Keycloak/OIDC/JWKS integration, production principal-binding administration, and any group/claim authority model. NW-037 did not make groups, roles, JWT `actor_id`, or IdP claims direct platform authority; NW-038 must not either.
+- No baseline acceptance candidate is currently active. NW-039 tracks the production principal-binding administration decision after NW-038; entity lifecycle, trigger/reporting expansion, auto-resolution, resolver reassignment, and new scope mechanisms remain future-decision follow-ups.
 - Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md`, and the exact contracts/code touched by the task.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
 
@@ -111,7 +112,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 
 ## What's Next
 
-**Post-Phase-4 stabilization** — active. Phase 4 is complete; the active status surfaces are the working-surface BAR/backlog, not old review chronology. BAR-001 through BAR-015 are accepted, including BAR-010 config package delivery. The scenario runtime probe set selected and routed from NW-023 has landed: NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, and NW-033/S26. NW-034 added contract hygiene for deployer shape format and config-package schemas. NW-037 added the IDR-027 production-auth principal binding foundation without resolving FP-011 or accepting BAR-104.
+**Post-Phase-4 stabilization** — active. Phase 4 is complete; the active status surfaces are the working-surface BAR/backlog, not old review chronology. BAR-001 through BAR-015 are accepted, including BAR-010 config package delivery. The scenario runtime probe set selected and routed from NW-023 has landed: NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, and NW-033/S26. NW-034 added contract hygiene for deployer shape format and config-package schemas. NW-037 added the IDR-027 production-auth principal binding foundation without resolving FP-011 or accepting BAR-104. NW-038 is routed as the next ready production-auth implementation slice for real OIDC/JWKS validation, and NW-039 tracks the remaining production principal-binding administration decision.
 
 - IDR-021 (Role-Action Enforcement Model) is active. It builds on FP-001's role timeline check and keeps FP-005 out of role-action scope: live sync stays request-time scoped, subject-history backfill is separate Phase 4 `ongoing_resolution` work, and audit/historical pull is out of Phase 4 live sync unless a successor decision introduces a separate pull class/API.
 - IDR-022 (Flag Severity + Domain Uniqueness) is active. It defines deployment-wide L0 severity overrides through `flag_severity_overrides`, keeps resolvability platform-owned, defines shape-declared `domain_uniqueness_violation`, and keeps FP-005 backfill/audit behavior out of scope.
@@ -122,7 +123,7 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 - IDR-027 (Production Auth Principal-To-Actor Binding) is active. It defines explicit principal binding, forbids group/claim/JWT `actor_id` direct authority, and keeps live production identity-provider integration as a later FP-011/BAR-104 gate.
 - Phase spec: [docs/implementation/phases/phase-4.md](implementation/phases/phase-4.md) (reconciled; tracks landed Phase 4.1 role-action gates, Phase 4.2 severity gates, Phase 4.3 uniqueness gates, Phase 4.4 registry/binding gates, Phase 4.6 transition gates, and P04 scenario-grade Responsibility Binding coverage)
 - Landed implementation slices: Phase 4.1 role-action enforcement from IDR-021/IDR-023, including authoritative server `role_stale` action-authority semantics and mobile advisory role-action gating; Phase 4.2 flag severity defaults and deployment-wide `flag_severity_overrides` from IDR-022; IDR-024 / FP-007 assignment administration hardening; FP-008 assignment command identity binding; Phase 4.3 domain uniqueness schema, detector, and mobile advisory uniqueness from IDR-022; Phase 4.4 platform pattern registry and activity binding validation from IDR-020; IDR-025 pattern definition contract/package delivery; Phase 4.5 rebuildable pattern-state projection for enabled bindings including `ongoing_resolution/v1`; FP-005 subject-history backfill; FP-009 runtime resolver designation and single-writer resolution enforcement; Phase 4.6 transition detection; P04 scenario-grade Responsibility Binding coverage; FP-010 platform payload shape contract parity; and NW-037/IDR-027 production-auth principal binding foundation. These do not implement auto-resolution, resolver reassignment, normal sync backfill, durable workflow-state tables, live Keycloak/OIDC/JWKS integration, or group/claim authority.
-- Recommended next slice: explicitly choose the successor surface before drafting implementation work. Live production identity-provider integration remains the most deployment-facing FP-011/BAR-104 boundary; entity lifecycle, trigger/reporting expansion, auto-resolution, resolver reassignment, and new scope mechanisms remain future-decision work.
+- Recommended next slice: NW-038 OIDC/JWKS auth-provider boundary. Keep it server-side and provider-validation focused; do not add binding administration, mobile OIDC login UX, group/claim authority, new scope mechanisms, resolver reassignment, auto-resolution, or envelope changes. NW-039 follows for production binding administration/provisioning.
 - Coverage gap closed: P04 now has scenario-grade coverage for reassignment plus S19 stale offline authority, S00 structured capture, S21 scoped supervisor review, S23 setup/config, S26 reporting/aggregate oversight, and S27 logistics transfer.
 
 ### Test Debt (carried from Phase 3)
