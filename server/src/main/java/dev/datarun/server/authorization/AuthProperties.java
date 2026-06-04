@@ -21,6 +21,8 @@ public class AuthProperties {
     private final String oidcAudience;
     private final String oidcJwksUri;
     private final boolean allowUnauthenticatedDevPush;
+    private final String principalBindingManifest;
+    private final String principalBindingAppliedBy;
 
     public AuthProperties(
             @Value("${datarun.auth.mode:dev-token}") String mode,
@@ -31,7 +33,10 @@ public class AuthProperties {
             @Value("${datarun.auth.oidc.audience:}") String oidcAudience,
             @Value("${datarun.auth.oidc.jwks-uri:}") String oidcJwksUri,
             @Value("${datarun.auth.dev-token.allow-unauthenticated-push:true}")
-            boolean allowUnauthenticatedDevPush) {
+            boolean allowUnauthenticatedDevPush,
+            @Value("${datarun.auth.principal-bindings.manifest:}") String principalBindingManifest,
+            @Value("${datarun.auth.principal-bindings.applied-by:system:auth-principal-binding-provisioner}")
+            String principalBindingAppliedBy) {
         this.mode = normalize(mode);
         this.jwtIssuer = blankToNull(jwtIssuer);
         this.jwtAudience = blankToNull(jwtAudience);
@@ -40,6 +45,11 @@ public class AuthProperties {
         this.oidcAudience = blankToNull(oidcAudience);
         this.oidcJwksUri = blankToNull(oidcJwksUri);
         this.allowUnauthenticatedDevPush = allowUnauthenticatedDevPush;
+        this.principalBindingManifest = blankToNull(principalBindingManifest);
+        String normalizedAppliedBy = blankToNull(principalBindingAppliedBy);
+        this.principalBindingAppliedBy = normalizedAppliedBy == null
+                ? "system:auth-principal-binding-provisioner"
+                : normalizedAppliedBy;
     }
 
     public String mode() {
@@ -84,6 +94,14 @@ public class AuthProperties {
 
     public String oidcJwksUri() {
         return oidcJwksUri;
+    }
+
+    public String principalBindingManifest() {
+        return principalBindingManifest;
+    }
+
+    public String principalBindingAppliedBy() {
+        return principalBindingAppliedBy;
     }
 
     private String normalize(String value) {

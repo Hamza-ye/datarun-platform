@@ -41,11 +41,12 @@ class LocalJwtAuthCompatibilityIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired private TestRestTemplate rest;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private AuthPrincipalBindingRepository bindingRepository;
+    @Autowired private PrincipalBindingManifestProvisioner provisioner;
     @LocalServerPort private int port;
 
     @BeforeEach
     void cleanDb() {
+        jdbcTemplate.execute("DELETE FROM auth_principal_binding_operations");
         jdbcTemplate.execute("DELETE FROM auth_principal_bindings");
         jdbcTemplate.execute("DELETE FROM actor_tokens");
         jdbcTemplate.execute("DELETE FROM subject_locations");
@@ -56,7 +57,7 @@ class LocalJwtAuthCompatibilityIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void localJwtModeStillResolvesExplicitBinding() throws Exception {
-        bindingRepository.bind(ISSUER, "local-principal", ACTOR);
+        provisionBinding("local-jwt-binding", "local-principal", ACTOR);
 
         ResponseEntity<JsonNode> response = getAuthMe(jwt("local-principal"));
 
@@ -73,6 +74,23 @@ class LocalJwtAuthCompatibilityIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(response.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
         assertThat(storedEventCount()).isZero();
+    }
+
+    private void provisionBinding(String operationId, String subject, UUID actorId) throws Exception {
+        Map<String, Object> operation = new LinkedHashMap<>();
+        operation.put("operation_id", operationId);
+        operation.put("issuer", ISSUER);
+        operation.put("subject", subject);
+        operation.put("actor_id", actorId.toString());
+        operation.put("state", "active");
+        operation.put("reason", "local jwt compatibility binding");
+        Map<String, Object> manifest = new LinkedHashMap<>();
+        manifest.put("manifest_version", "local-jwt-test/v1");
+        manifest.put("source", "test:local-jwt");
+        manifest.put("operations", List.of(operation));
+        provisioner.applyManifestJson(
+                objectMapper.writeValueAsString(manifest),
+                "system:local-jwt-test");
     }
 
     private ResponseEntity<JsonNode> getAuthMe(String token) {

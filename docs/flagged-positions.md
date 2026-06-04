@@ -436,9 +436,10 @@ All of the following must be true:
 
 ## FP-011: Authentication principal-to-actor mapping and group non-authority
 
-**Status**: OPEN
+**Status**: RESOLVED
 **Opened**: 2026-05-24 by authentication/provider planning review
-**Blocks**: production authentication provider integration; any Keycloak/OIDC/JWT slice; any account, user-group, or IdP-claim authority model
+**Resolved**: 2026-06-04 by NW-040 production principal-binding provisioning runtime evidence
+**Blocks**: Resolved for production OIDC/JWT/Keycloak provider integration and principal-binding administration. Any future account, user-group, IdP-claim, or group/role-derived authority model remains blocked until a successor decision defines ordinary Datarun authority facts before access changes.
 **Severity**: B — protects ADR-003 assignment-derived authority and ADR-002 actor authorship
 
 **Context:**
@@ -500,6 +501,22 @@ All of the following must be true:
   This is not an FP-009 blocker because the FP-009 pass can remain provider-neutral
   and actor-bound through the existing bearer context. It blocks production
   Keycloak/OIDC/JWT integration and any group/claim authority model.
+- **2026-06-04**: RESOLVED for production provider integration and
+  principal-binding administration. NW-037/IDR-027 defined explicit
+  `(issuer, subject) -> actor_id` principal binding and provider-neutral
+  authenticated actor context; NW-038 added configured OIDC/JWKS
+  issuer/audience/JWKS validation; NW-039/IDR-028 selected deployment-managed
+  binding provisioning; NW-040 implemented audited manifest provisioning with
+  append-only `auth_principal_binding_operations`, active
+  `auth_principal_bindings` lookup support, create/rotate/deactivate/rebind,
+  idempotency, advisory-lock serialization, and `/api/actors/**` remaining
+  development-token only. Evidence: `./mvnw -Dtest=ProductionAuthIntegrationTest,LocalJwtAuthCompatibilityIntegrationTest test`
+  passed (12 tests), the broader auth/sync/assignment/conflict/subject-history
+  gate passed (71 tests), and full `./mvnw test` passed (312 tests). Tests prove
+  groups, roles, resource claims, JWT `actor_id`, and custom IdP claims do not
+  grant sync visibility, assignment administration, conflict resolution, or
+  binding administration authority. Future group/claim authority or
+  provisioning-input semantics require a separate successor decision.
 
 ---
 

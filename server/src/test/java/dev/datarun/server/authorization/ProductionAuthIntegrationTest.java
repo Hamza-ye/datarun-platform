@@ -36,8 +36,14 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * NW-038 / FP-011 gates for OIDC/JWKS provider validation, explicit
@@ -52,6 +58,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
 
     private static final UUID ACTOR = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID OTHER_ACTOR = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID THIRD_ACTOR = UUID.fromString("55555555-5555-5555-5555-555555555555");
     private static final UUID DEVICE = UUID.fromString("33333333-3333-3333-3333-333333333333");
     private static final UUID OTHER_DEVICE = UUID.fromString("44444444-4444-4444-4444-444444444444");
 
@@ -60,7 +67,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired private TestRestTemplate rest;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private AuthPrincipalBindingRepository bindingRepository;
+    @Autowired private PrincipalBindingManifestProvisioner provisioner;
     @LocalServerPort private int port;
 
     @DynamicPropertySource
@@ -87,6 +94,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void cleanDb() {
+        jdbcTemplate.execute("DELETE FROM auth_principal_binding_operations");
         jdbcTemplate.execute("DELETE FROM auth_principal_bindings");
         jdbcTemplate.execute("DELETE FROM actor_tokens");
         jdbcTemplate.execute("DELETE FROM subject_locations");
@@ -97,7 +105,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void authMeResolvesExplicitPrincipalBindingIgnoringGroupsAndClaims() throws Exception {
-        bindingRepository.bind(ISSUER, "principal-admin", ACTOR);
+        provisionBinding("bootstrap-admin", "principal-admin", ACTOR);
 
         ResponseEntity<JsonNode> response = getAuthMe(oidcJwt("principal-admin", adminClaims()));
 
@@ -108,7 +116,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void groupClaimsDoNotGrantPullOrAssignmentAuthority() throws Exception {
-        bindingRepository.bind(ISSUER, "principal-no-assignment", ACTOR);
+        provisionBinding("bootstrap-no-assignment", "principal-no-assignment", ACTOR);
         insertCaptureEvent(UUID.randomUUID(), OTHER_ACTOR, OTHER_DEVICE, 1);
         String token = oidcJwt("principal-no-assignment", adminClaims());
 
@@ -179,7 +187,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void productionPushEnforcesActorRefBindingAndRejectsClientSystemAuthorship() throws Exception {
-        bindingRepository.bind(ISSUER, "principal-worker", ACTOR);
+        provisionBinding("bootstrap-worker", "principal-worker", ACTOR);
         String token = oidcJwt("principal-worker", Map.of());
 
         ResponseEntity<JsonNode> mismatch = postPush(List.of(
@@ -206,7 +214,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void groupClaimsDoNotGrantCanonicalConflictResolution() throws Exception {
-        bindingRepository.bind(ISSUER, "principal-admin-claim", ACTOR);
+        provisionBinding("bootstrap-admin-claim", "principal-admin-claim", ACTOR);
         String token = oidcJwt("principal-admin-claim", adminClaims());
         UUID subjectId = UUID.randomUUID();
         UUID sourceEventId = insertCaptureEvent(subjectId, OTHER_ACTOR, OTHER_DEVICE, 1);
@@ -220,6 +228,184 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(canonicalResolutionCount(flagId)).isZero();
         assertThat(unauthorizedResolutionFlagCount()).isEqualTo(1);
+    }
+
+    @Test
+    void manifestProvisioningSupportsCreateRotateDeactivateAndRebind() throws Exception {
+        provisionBinding("create-worker", "principal-worker", ACTOR);
+        assertThat(getAuthMe(oidcJwt("principal-worker", Map.of())).getBody()
+                .path("actor_id").asText()).isEqualTo(ACTOR.toString());
+
+        provisionBinding("rotate-worker-new-subject", "principal-worker-rotated", ACTOR);
+        assertThat(getAuthMe(oidcJwt("principal-worker", Map.of())).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
+        assertThat(getAuthMe(oidcJwt("principal-worker-rotated", Map.of())).getBody()
+                .path("actor_id").asText()).isEqualTo(ACTOR.toString());
+
+        applyManifest(List.of(operation(
+                "deactivate-worker-old-subject",
+                "principal-worker",
+                ACTOR,
+                "inactive",
+                "planned provider subject rotation overlap ended")));
+        assertThat(getAuthMe(oidcJwt("principal-worker", Map.of())).getStatusCode())
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(getAuthMe(oidcJwt("principal-worker-rotated", Map.of())).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
+
+        applyManifest(List.of(operation(
+                "rebind-worker-correction",
+                "principal-worker-rotated",
+                OTHER_ACTOR,
+                "active",
+                "correct wrong actor binding from deployment review")));
+
+        ResponseEntity<JsonNode> rebound =
+                getAuthMe(oidcJwt("principal-worker-rotated", Map.of()));
+        assertThat(rebound.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(rebound.getBody().path("actor_id").asText()).isEqualTo(OTHER_ACTOR.toString());
+        assertThat(activeBindingCount("principal-worker-rotated")).isEqualTo(1);
+
+        Map<String, Object> rebindAudit = operationAudit("rebind-worker-correction");
+        assertThat(rebindAudit.get("previous_active_binding_id")).isNotNull();
+        assertThat(rebindAudit.get("previous_actor_id").toString()).isEqualTo(ACTOR.toString());
+        assertThat(rebindAudit.get("target_actor_id").toString()).isEqualTo(OTHER_ACTOR.toString());
+        assertThat(rebindAudit.get("changed")).isEqualTo(true);
+        assertThat(rebindAudit.get("manifest_content_hash").toString()).hasSize(64);
+        assertThat(rebindAudit.get("applied_by").toString())
+                .isEqualTo("system:production-auth-test");
+
+        Map<String, Object> deactivateAudit = operationAudit("deactivate-worker-old-subject");
+        assertThat(deactivateAudit.get("previous_active_binding_id")).isNotNull();
+        assertThat(deactivateAudit.get("previous_actor_id").toString()).isEqualTo(ACTOR.toString());
+        assertThat(deactivateAudit.get("resulting_binding_id")).isNull();
+    }
+
+    @Test
+    void reapplyingSameManifestIsIdempotentWithoutDuplicateAuditOrLookupRows() throws Exception {
+        String manifest = manifest(List.of(operation(
+                "idempotent-create",
+                "principal-idempotent",
+                ACTOR,
+                "active",
+                "bootstrap idempotency proof")));
+
+        PrincipalBindingManifestProvisioner.ProvisioningResult first =
+                provisioner.applyManifestJson(manifest, "system:production-auth-test");
+        PrincipalBindingManifestProvisioner.ProvisioningResult second =
+                provisioner.applyManifestJson(manifest, "system:production-auth-test");
+
+        assertThat(first.appliedOperations()).isEqualTo(1);
+        assertThat(first.changedOperations()).isEqualTo(1);
+        assertThat(second.appliedOperations()).isZero();
+        assertThat(second.skippedOperations()).isEqualTo(1);
+        assertThat(second.changedOperations()).isZero();
+        assertThat(activeBindingCount("principal-idempotent")).isEqualTo(1);
+        assertThat(operationAuditCount("idempotent-create")).isEqualTo(1);
+        assertThat(changedOperationAuditCount()).isEqualTo(1);
+    }
+
+    @Test
+    void invalidManifestRejectsBeforePartialApplication() throws Exception {
+        String invalid = manifest(List.of(
+                operation("valid-before-invalid", "principal-invalid", ACTOR, "active", "valid entry"),
+                operation("bad-duplicate", "principal-invalid", OTHER_ACTOR, "active", "duplicate principal")));
+
+        assertThatThrownBy(() -> provisioner.applyManifestJson(
+                invalid, "system:production-auth-test"))
+                .isInstanceOf(PrincipalBindingProvisioningException.class)
+                .hasMessageContaining("ambiguous operations");
+
+        assertThat(activeBindingCount("principal-invalid")).isZero();
+        assertThat(operationAuditCount("valid-before-invalid")).isZero();
+
+        String malformedActor = manifest(List.of(Map.of(
+                "operation_id", "bad-actor-id",
+                "issuer", ISSUER,
+                "subject", "principal-bad-actor",
+                "actor_id", "not-a-uuid",
+                "state", "active",
+                "reason", "bad actor id")));
+        assertThatThrownBy(() -> provisioner.applyManifestJson(
+                malformedActor, "system:production-auth-test"))
+                .isInstanceOf(PrincipalBindingProvisioningException.class)
+                .hasMessageContaining("malformed actor_id");
+        assertThat(operationAuditCount("bad-actor-id")).isZero();
+
+        Map<String, Object> missingVersion = new LinkedHashMap<>();
+        missingVersion.put("source", "test:production-auth");
+        missingVersion.put("operations", List.of(operation(
+                "missing-version", "principal-missing-version", ACTOR, "active", "missing version")));
+        assertThatThrownBy(() -> provisioner.applyManifestJson(
+                objectMapper.writeValueAsString(missingVersion), "system:production-auth-test"))
+                .isInstanceOf(PrincipalBindingProvisioningException.class)
+                .hasMessageContaining("missing manifest_version");
+        assertThat(operationAuditCount("missing-version")).isZero();
+
+        String missingReason = manifest(List.of(Map.of(
+                "operation_id", "missing-reason",
+                "issuer", ISSUER,
+                "subject", "principal-missing-reason",
+                "actor_id", ACTOR.toString(),
+                "state", "active")));
+        assertThatThrownBy(() -> provisioner.applyManifestJson(
+                missingReason, "system:production-auth-test"))
+                .isInstanceOf(PrincipalBindingProvisioningException.class)
+                .hasMessageContaining("missing operations[0].reason");
+        assertThat(operationAuditCount("missing-reason")).isZero();
+    }
+
+    @Test
+    void concurrentManifestApplicationsAreSerializedWithoutMultipleActiveBindings()
+            throws Exception {
+        provisionBinding("concurrency-bootstrap", "principal-concurrent", ACTOR);
+        String rebindToOther = manifest(List.of(operation(
+                "concurrent-rebind-other",
+                "principal-concurrent",
+                OTHER_ACTOR,
+                "active",
+                "concurrent rebind to other actor")));
+        String rebindToThird = manifest(List.of(operation(
+                "concurrent-rebind-third",
+                "principal-concurrent",
+                THIRD_ACTOR,
+                "active",
+                "concurrent rebind to third actor")));
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch start = new CountDownLatch(1);
+        try {
+            Future<?> first = executor.submit(() -> {
+                await(start);
+                provisioner.applyManifestJson(rebindToOther, "system:production-auth-test");
+            });
+            Future<?> second = executor.submit(() -> {
+                await(start);
+                provisioner.applyManifestJson(rebindToThird, "system:production-auth-test");
+            });
+
+            start.countDown();
+            first.get(10, TimeUnit.SECONDS);
+            second.get(10, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
+
+        assertThat(activeBindingCount("principal-concurrent")).isEqualTo(1);
+        UUID activeActor = activeActor("principal-concurrent");
+        assertThat(activeActor).isIn(OTHER_ACTOR, THIRD_ACTOR);
+        assertThat(operationAuditCount("concurrent-rebind-other")).isEqualTo(1);
+        assertThat(operationAuditCount("concurrent-rebind-third")).isEqualTo(1);
+    }
+
+    @Test
+    void actorTokenAdminRemainsDisabledOutsideDevTokenMode() {
+        ResponseEntity<JsonNode> response = rest.postForEntity(
+                "/api/actors/" + ACTOR + "/tokens", HttpEntity.EMPTY, JsonNode.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody().path("error").asText())
+                .isEqualTo("dev_token_admin_disabled");
     }
 
     private static synchronized void ensureJwksServer() {
@@ -397,6 +583,90 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
         return count == null ? 0 : count;
     }
 
+    private void provisionBinding(String operationId, String subject, UUID actorId) throws Exception {
+        applyManifest(List.of(operation(
+                operationId, subject, actorId, "active", "test production binding provisioning")));
+    }
+
+    private PrincipalBindingManifestProvisioner.ProvisioningResult applyManifest(
+            List<Map<String, Object>> operations) throws Exception {
+        return provisioner.applyManifestJson(manifest(operations), "system:production-auth-test");
+    }
+
+    private String manifest(List<Map<String, Object>> operations) throws Exception {
+        Map<String, Object> manifest = new LinkedHashMap<>();
+        manifest.put("manifest_version", "production-auth-test/v1");
+        manifest.put("source", "test:production-auth");
+        manifest.put("operations", operations);
+        return objectMapper.writeValueAsString(manifest);
+    }
+
+    private Map<String, Object> operation(
+            String operationId, String subject, UUID actorId, String state, String reason) {
+        Map<String, Object> operation = new LinkedHashMap<>();
+        operation.put("operation_id", operationId);
+        operation.put("issuer", ISSUER);
+        operation.put("subject", subject);
+        operation.put("actor_id", actorId.toString());
+        operation.put("state", state);
+        operation.put("reason", reason);
+        return operation;
+    }
+
+    private int activeBindingCount(String subject) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM auth_principal_bindings
+                WHERE issuer = ?
+                  AND subject = ?
+                  AND active = TRUE
+                """, Integer.class, ISSUER, subject);
+        return count == null ? 0 : count;
+    }
+
+    private UUID activeActor(String subject) {
+        return jdbcTemplate.queryForObject("""
+                SELECT actor_id
+                FROM auth_principal_bindings
+                WHERE issuer = ?
+                  AND subject = ?
+                  AND active = TRUE
+                """, UUID.class, ISSUER, subject);
+    }
+
+    private Map<String, Object> operationAudit(String operationId) {
+        return jdbcTemplate.queryForMap("""
+                SELECT operation_id,
+                       manifest_content_hash,
+                       applied_by,
+                       target_actor_id,
+                       previous_active_binding_id,
+                       previous_actor_id,
+                       resulting_binding_id,
+                       changed
+                FROM auth_principal_binding_operations
+                WHERE operation_id = ?
+                """, operationId);
+    }
+
+    private int operationAuditCount(String operationId) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM auth_principal_binding_operations
+                WHERE operation_id = ?
+                """, Integer.class, operationId);
+        return count == null ? 0 : count;
+    }
+
+    private int changedOperationAuditCount() {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM auth_principal_binding_operations
+                WHERE changed = TRUE
+                """, Integer.class);
+        return count == null ? 0 : count;
+    }
+
     private int assignmentCreatedCount() {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
@@ -404,6 +674,15 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
                 WHERE shape_ref = 'assignment_created/v1'
                 """, Integer.class);
         return count == null ? 0 : count;
+    }
+
+    private void await(CountDownLatch latch) {
+        try {
+            latch.await(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
     }
 
     private int canonicalResolutionCount(UUID flagId) {
