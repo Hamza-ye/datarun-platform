@@ -51,10 +51,12 @@ Current modes are:
 |------|------------|------------------|
 | `dev-token` | IDR-016 static bearer token | `actor_tokens.token -> actor_id` |
 | `jwt` | locally validated HS256 JWT for NW-037 testability | `(iss, sub) -> actor_id` through `auth_principal_bindings` |
+| `oidc-jwks` | asymmetric provider JWT validated by configured issuer, audience, and JWKS URI | `(iss, sub) -> actor_id` through `auth_principal_bindings` |
 
 The local HS256 validator exists only to prove the server-side boundary without
-requiring a live Keycloak/JWKS deployment in this slice. A later OIDC/JWKS
-provider can replace the validator behind the same authenticated-actor resolver.
+requiring a live Keycloak/JWKS deployment in the NW-037 slice. NW-038 adds the
+real OIDC/JWKS provider-validation mode behind the same authenticated-actor
+resolver boundary.
 
 ## Binding Rules
 
@@ -103,21 +105,26 @@ with the server-resolved actor so the server-side binding check can reject drift
 
 ## Consequences
 
-- FP-011 is not fully resolved by this foundation because live production
-  Keycloak/OIDC/JWKS integration and operational binding administration remain
-  successor work.
+- FP-011 is not fully resolved by this foundation because operational binding
+  administration/provisioning remains successor work, and any group/claim
+  authority model still requires a separate decision.
 - BAR-104 must remain future-decision until implementation and tests cover the
   chosen production identity-provider deployment path.
 - Dev-token mode remains available for local development and existing tests.
-- Production JWT mode proves that a valid credential is necessary but not
+- Production JWT/OIDC modes prove that a valid credential is necessary but not
   sufficient for access; assignment history still decides visibility and action
   authority.
 
 ## Guards
 
-- `ProductionAuthIntegrationTest` proves mapped principal resolution, group and
-  claim non-authority, authenticated push requirement, actor-ref binding, and
-  resolver non-authority from claims.
+- `ProductionAuthIntegrationTest` proves OIDC/JWKS mapped principal resolution,
+  missing/malformed/bad-signature/unknown-kid/wrong-issuer/wrong-audience/
+  expired/not-yet-valid/unsupported-algorithm rejection before push
+  persistence, group and claim non-authority, authenticated push requirement,
+  actor-ref binding, and resolver non-authority from claims.
+- `LocalJwtAuthCompatibilityIntegrationTest` proves the NW-037 local HS256 JWT
+  mode still resolves explicit principal bindings and rejects unmapped push
+  before persistence.
 - Mobile sync tests prove `/api/auth/me` actor refresh and bearer-authenticated
   push.
 - Event assembler tests prove assembled events use the locally stored server
@@ -129,5 +136,6 @@ with the server-resolved actor so the server-side binding check can reject drift
 - BAR-104: production auth acceptance remains open.
 - NW-035: design/evaluation record.
 - NW-037: bounded implementation slice.
+- NW-038: OIDC/JWKS auth-provider boundary.
 - CDL-006, CDL-018, CDL-030, CDL-031, CDL-032, CDL-034, CDL-035, CDL-055.
 - IDR-016, IDR-024, IDR-026.

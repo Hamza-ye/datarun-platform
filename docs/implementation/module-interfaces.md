@@ -1,6 +1,6 @@
 # Module Interface Baseline
 
-> Current as of the 2026-06-04 NW-037 production-auth foundation checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
+> Current as of the 2026-06-04 NW-038 OIDC/JWKS auth-provider boundary checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
 
 ## Authority role
 
@@ -60,11 +60,11 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 ## Authenticated Actor Resolver
 
 - **Owns**: resolving bearer credentials to one platform `actor_id` before actor-scoped API logic runs.
-- **Inputs**: `Authorization: Bearer <credential>`, auth mode configuration, dev token table, JWT principal claims, explicit `(issuer, subject) -> actor_id` bindings.
+- **Inputs**: `Authorization: Bearer <credential>`, auth mode configuration, dev token table, local JWT principal claims, OIDC/JWKS issuer/audience/JWKS configuration, explicit `(issuer, subject) -> actor_id` bindings.
 - **Outputs**: authenticated actor context for sync, assignment, config, conflict, and `/api/auth/me` endpoints.
-- **Storage**: `actor_tokens` for development mode; `auth_principal_bindings` for production-auth foundation mode.
+- **Storage**: `actor_tokens` for development mode; `auth_principal_bindings` for production-auth modes.
 - **Forbidden**: treating JWT groups, roles, resource claims, or JWT `actor_id` claims as assignment, scope, resolver, or admin authority.
-- **Guards**: `ProductionAuthIntegrationTest`, actor-token integration tests, scope-filtered sync and conflict-resolution tests.
+- **Guards**: `ProductionAuthIntegrationTest`, `LocalJwtAuthCompatibilityIntegrationTest`, actor-token integration tests, scope-filtered sync and conflict-resolution tests.
 
 ## Shape Registry
 

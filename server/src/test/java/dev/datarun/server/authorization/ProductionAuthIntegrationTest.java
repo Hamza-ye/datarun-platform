@@ -2,22 +2,36 @@ package dev.datarun.server.authorization;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.sun.net.httpserver.HttpServer;
 import dev.datarun.server.AbstractIntegrationTest;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -26,31 +40,50 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * NW-037 / FP-011 gates for principal-to-actor mapping and group/claim
- * non-authority. These tests use local HS256 JWTs to prove server-side
- * semantics without requiring a live Keycloak/JWKS deployment.
+ * NW-038 / FP-011 gates for OIDC/JWKS provider validation, explicit
+ * principal-to-actor mapping, and group/claim non-authority.
  */
-@TestPropertySource(properties = {
-        "datarun.auth.mode=jwt",
-        "datarun.auth.jwt.issuer=https://issuer.test/datarun",
-        "datarun.auth.jwt.audience=datarun-mobile",
-        "datarun.auth.jwt.hmac-secret=01234567890123456789012345678901"
-})
 class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
 
     private static final String ISSUER = "https://issuer.test/datarun";
     private static final String AUDIENCE = "datarun-mobile";
-    private static final String SECRET = "01234567890123456789012345678901";
+    private static final String KEY_ID = "datarun-oidc-test-key";
+    private static final ObjectMapper STATIC_OBJECT_MAPPER = new ObjectMapper();
 
     private static final UUID ACTOR = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID OTHER_ACTOR = UUID.fromString("22222222-2222-2222-2222-222222222222");
     private static final UUID DEVICE = UUID.fromString("33333333-3333-3333-3333-333333333333");
     private static final UUID OTHER_DEVICE = UUID.fromString("44444444-4444-4444-4444-444444444444");
 
+    private static HttpServer jwksServer;
+    private static RSAPrivateKey oidcPrivateKey;
+
     @Autowired private TestRestTemplate rest;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private AuthPrincipalBindingRepository bindingRepository;
     @LocalServerPort private int port;
+
+    @DynamicPropertySource
+    static void productionAuthProperties(DynamicPropertyRegistry registry) {
+        ensureJwksServer();
+        registry.add("datarun.auth.mode", () -> "oidc-jwks");
+        registry.add("datarun.auth.oidc.issuer", () -> ISSUER);
+        registry.add("datarun.auth.oidc.audience", () -> AUDIENCE);
+        registry.add("datarun.auth.oidc.jwks-uri", ProductionAuthIntegrationTest::jwksUri);
+    }
+
+    @BeforeAll
+    static void startJwks() {
+        ensureJwksServer();
+    }
+
+    @AfterAll
+    static void stopJwks() {
+        if (jwksServer != null) {
+            jwksServer.stop(0);
+            jwksServer = null;
+        }
+    }
 
     @BeforeEach
     void cleanDb() {
@@ -66,18 +99,18 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
     void authMeResolvesExplicitPrincipalBindingIgnoringGroupsAndClaims() throws Exception {
         bindingRepository.bind(ISSUER, "principal-admin", ACTOR);
 
-        ResponseEntity<JsonNode> response = getAuthMe(jwt("principal-admin", adminClaims()));
+        ResponseEntity<JsonNode> response = getAuthMe(oidcJwt("principal-admin", adminClaims()));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().path("actor_id").asText()).isEqualTo(ACTOR.toString());
-        assertThat(response.getBody().path("auth_source").asText()).isEqualTo("jwt-principal");
+        assertThat(response.getBody().path("auth_source").asText()).isEqualTo("oidc-jwks-principal");
     }
 
     @Test
     void groupClaimsDoNotGrantPullOrAssignmentAuthority() throws Exception {
         bindingRepository.bind(ISSUER, "principal-no-assignment", ACTOR);
         insertCaptureEvent(UUID.randomUUID(), OTHER_ACTOR, OTHER_DEVICE, 1);
-        String token = jwt("principal-no-assignment", adminClaims());
+        String token = oidcJwt("principal-no-assignment", adminClaims());
 
         ResponseEntity<JsonNode> pull = postJson("/api/sync/pull",
                 Map.of("since_watermark", 0, "limit", 100), token);
@@ -116,12 +149,30 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
         assertThat(missing.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
         assertThat(storedEventCount(eventId)).isZero();
 
-        HttpResponse<String> invalid = postPushRaw(List.of(event), "not-a-jwt");
-        assertThat(invalid.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
-        assertThat(storedEventCount(eventId)).isZero();
+        assertAuthFailurePersistsNothing(event, eventId, "not-a-jwt");
+        assertAuthFailurePersistsNothing(event, eventId, badSignatureJwt());
+        assertAuthFailurePersistsNothing(event, eventId, unknownKidJwt());
+        assertAuthFailurePersistsNothing(event, eventId,
+                oidcJwt("principal-worker", ISSUER + "/wrong", AUDIENCE,
+                        KEY_ID, oidcPrivateKey, JWSAlgorithm.RS256,
+                        Instant.now().plusSeconds(3600), null, Map.of()));
+        assertAuthFailurePersistsNothing(event, eventId,
+                oidcJwt("principal-worker", ISSUER, "wrong-audience",
+                        KEY_ID, oidcPrivateKey, JWSAlgorithm.RS256,
+                        Instant.now().plusSeconds(3600), null, Map.of()));
+        assertAuthFailurePersistsNothing(event, eventId,
+                oidcJwt("principal-worker", ISSUER, AUDIENCE,
+                        KEY_ID, oidcPrivateKey, JWSAlgorithm.RS256,
+                        Instant.now().minusSeconds(3600), null, Map.of()));
+        assertAuthFailurePersistsNothing(event, eventId,
+                oidcJwt("principal-worker", ISSUER, AUDIENCE,
+                        KEY_ID, oidcPrivateKey, JWSAlgorithm.RS256,
+                        Instant.now().plusSeconds(3600),
+                        Instant.now().plusSeconds(3600), Map.of()));
+        assertAuthFailurePersistsNothing(event, eventId, unsupportedAlgorithmJwt());
 
         HttpResponse<String> unmapped =
-                postPushRaw(List.of(event), jwt("unmapped-principal", adminClaims()));
+                postPushRaw(List.of(event), oidcJwt("unmapped-principal", adminClaims()));
         assertThat(unmapped.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
         assertThat(storedEventCount(eventId)).isZero();
     }
@@ -129,7 +180,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     void productionPushEnforcesActorRefBindingAndRejectsClientSystemAuthorship() throws Exception {
         bindingRepository.bind(ISSUER, "principal-worker", ACTOR);
-        String token = jwt("principal-worker", Map.of());
+        String token = oidcJwt("principal-worker", Map.of());
 
         ResponseEntity<JsonNode> mismatch = postPush(List.of(
                 buildEvent(UUID.randomUUID(), OTHER_ACTOR, DEVICE, 1)), token);
@@ -156,7 +207,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     void groupClaimsDoNotGrantCanonicalConflictResolution() throws Exception {
         bindingRepository.bind(ISSUER, "principal-admin-claim", ACTOR);
-        String token = jwt("principal-admin-claim", adminClaims());
+        String token = oidcJwt("principal-admin-claim", adminClaims());
         UUID subjectId = UUID.randomUUID();
         UUID sourceEventId = insertCaptureEvent(subjectId, OTHER_ACTOR, OTHER_DEVICE, 1);
         UUID flagId = insertFlagWithResolver(sourceEventId, subjectId, OTHER_ACTOR);
@@ -169,6 +220,45 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(canonicalResolutionCount(flagId)).isZero();
         assertThat(unauthorizedResolutionFlagCount()).isEqualTo(1);
+    }
+
+    private static synchronized void ensureJwksServer() {
+        if (jwksServer != null) {
+            return;
+        }
+        try {
+            KeyPair keyPair = generateRsaKeyPair();
+            oidcPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
+            RSAKey publicJwk = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
+                    .keyID(KEY_ID)
+                    .algorithm(JWSAlgorithm.RS256)
+                    .build()
+                    .toPublicJWK();
+            byte[] jwks = STATIC_OBJECT_MAPPER.writeValueAsBytes(
+                    Map.of("keys", List.of(publicJwk.toJSONObject())));
+
+            jwksServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+            jwksServer.createContext("/jwks", exchange -> {
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, jwks.length);
+                exchange.getResponseBody().write(jwks);
+                exchange.close();
+            });
+            jwksServer.start();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to start test JWKS server", e);
+        }
+    }
+
+    private static KeyPair generateRsaKeyPair() throws Exception {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(2048);
+        return generator.generateKeyPair();
+    }
+
+    private static String jwksUri() {
+        ensureJwksServer();
+        return "http://127.0.0.1:" + jwksServer.getAddress().getPort() + "/jwks";
     }
 
     private ResponseEntity<JsonNode> getAuthMe(String token) {
@@ -208,6 +298,13 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
         HttpRequest httpRequest = builder.build();
         return HttpClient.newHttpClient().send(
                 httpRequest, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private void assertAuthFailurePersistsNothing(
+            Map<String, Object> event, String eventId, String token) throws Exception {
+        HttpResponse<String> response = postPushRaw(List.of(event), token);
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+        assertThat(storedEventCount(eventId)).isZero();
     }
 
     private ResponseEntity<JsonNode> postJson(String path, Map<String, Object> request, String token) {
@@ -340,23 +437,68 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
                 "actor_id", OTHER_ACTOR.toString());
     }
 
-    private String jwt(String subject, Map<String, Object> extraClaims) throws Exception {
-        Map<String, Object> header = Map.of("alg", "HS256", "typ", "JWT");
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("iss", ISSUER);
-        payload.put("sub", subject);
-        payload.put("aud", AUDIENCE);
-        payload.put("exp", Instant.now().plusSeconds(3600).getEpochSecond());
-        payload.putAll(extraClaims);
-
-        String signingInput = encode(objectMapper.writeValueAsBytes(header))
-                + "." + encode(objectMapper.writeValueAsBytes(payload));
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-        return signingInput + "." + encode(mac.doFinal(signingInput.getBytes(StandardCharsets.UTF_8)));
+    private String oidcJwt(String subject, Map<String, Object> extraClaims) throws Exception {
+        return oidcJwt(subject, ISSUER, AUDIENCE, KEY_ID, oidcPrivateKey, JWSAlgorithm.RS256,
+                Instant.now().plusSeconds(3600), null, extraClaims);
     }
 
-    private String encode(byte[] value) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(value);
+    private String oidcJwt(String subject,
+                           String issuer,
+                           String audience,
+                           String keyId,
+                           RSAPrivateKey privateKey,
+                           JWSAlgorithm algorithm,
+                           Instant expiresAt,
+                           Instant notBefore,
+                           Map<String, Object> extraClaims) throws Exception {
+        JWTClaimsSet.Builder claims = new JWTClaimsSet.Builder()
+                .issuer(issuer)
+                .subject(subject)
+                .audience(audience)
+                .expirationTime(Date.from(expiresAt));
+        if (notBefore != null) {
+            claims.notBeforeTime(Date.from(notBefore));
+        }
+        extraClaims.forEach(claims::claim);
+
+        SignedJWT jwt = new SignedJWT(
+                new JWSHeader.Builder(algorithm)
+                        .type(JOSEObjectType.JWT)
+                        .keyID(keyId)
+                        .build(),
+                claims.build());
+        jwt.sign(new RSASSASigner(privateKey));
+        return jwt.serialize();
+    }
+
+    private String badSignatureJwt() throws Exception {
+        KeyPair badKeyPair = generateRsaKeyPair();
+        return oidcJwt("principal-worker", ISSUER, AUDIENCE, KEY_ID,
+                (RSAPrivateKey) badKeyPair.getPrivate(), JWSAlgorithm.RS256,
+                Instant.now().plusSeconds(3600), null, Map.of());
+    }
+
+    private String unknownKidJwt() throws Exception {
+        KeyPair badKeyPair = generateRsaKeyPair();
+        return oidcJwt("principal-worker", ISSUER, AUDIENCE, "unknown-key",
+                (RSAPrivateKey) badKeyPair.getPrivate(), JWSAlgorithm.RS256,
+                Instant.now().plusSeconds(3600), null, Map.of());
+    }
+
+    private String unsupportedAlgorithmJwt() throws Exception {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .issuer(ISSUER)
+                .subject("principal-worker")
+                .audience(AUDIENCE)
+                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                .build();
+        SignedJWT jwt = new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.HS256)
+                        .type(JOSEObjectType.JWT)
+                        .keyID(KEY_ID)
+                        .build(),
+                claims);
+        jwt.sign(new MACSigner("01234567890123456789012345678901"));
+        return jwt.serialize();
     }
 }
