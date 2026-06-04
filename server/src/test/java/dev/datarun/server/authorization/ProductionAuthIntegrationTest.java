@@ -97,6 +97,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
         jdbcTemplate.execute("DELETE FROM auth_principal_binding_operations");
         jdbcTemplate.execute("DELETE FROM auth_principal_bindings");
         jdbcTemplate.execute("DELETE FROM actor_tokens");
+        jdbcTemplate.execute("DELETE FROM deployment_config");
         jdbcTemplate.execute("DELETE FROM subject_locations");
         jdbcTemplate.execute("DELETE FROM events");
         jdbcTemplate.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
@@ -146,6 +147,34 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
         assertThat(assignment.getBody().path("error").asText())
                 .contains("actor has no active assignments");
         assertThat(assignmentCreatedCount()).isZero();
+    }
+
+    @Test
+    void idpClaimsAndJwtActorIdDoNotGrantAssignmentAdminCommandCapability() throws Exception {
+        configureAssignmentAdminCapabilities("""
+                {
+                  "schema_version": 1,
+                  "roles": {
+                    "admin": ["assignment_admin.create", "assignment_admin.end"]
+                  }
+                }
+                """);
+        provisionBinding("bootstrap-claim-non-authority", "principal-claim-non-authority", ACTOR);
+        insertActiveAssignment(ACTOR, "field_worker");
+        insertActiveAssignment(OTHER_ACTOR, "admin");
+        String token = oidcJwt("principal-claim-non-authority", adminClaims());
+
+        ResponseEntity<JsonNode> response = postJson("/api/assignments",
+                Map.of(
+                        "target_actor_id", THIRD_ACTOR.toString(),
+                        "role", "field_worker",
+                        "valid_from", OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toString()),
+                token);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().path("error").asText())
+                .contains("assignment_admin.create");
+        assertThat(assignmentCreatedCountForTarget(THIRD_ACTOR)).isZero();
     }
 
     @Test
@@ -674,6 +703,41 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
                 WHERE shape_ref = 'assignment_created/v1'
                 """, Integer.class);
         return count == null ? 0 : count;
+    }
+
+    private int assignmentCreatedCountForTarget(UUID actorId) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE shape_ref = 'assignment_created/v1'
+                  AND payload->'target_actor'->>'id' = ?
+                """, Integer.class, actorId.toString());
+        return count == null ? 0 : count;
+    }
+
+    private UUID insertActiveAssignment(UUID targetActor, String role) {
+        UUID assignmentId = UUID.randomUUID();
+        UUID eventId = UUID.randomUUID();
+        UUID serverDeviceId = jdbcTemplate.queryForObject(
+                "SELECT device_id FROM server_identity LIMIT 1", UUID.class);
+        long seq = jdbcTemplate.queryForObject(
+                "SELECT nextval('server_device_seq')", Long.class);
+        jdbcTemplate.update("""
+                INSERT INTO events (id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                                    device_id, device_seq, timestamp, payload)
+                VALUES (?::uuid, 'assignment_changed', 'assignment_created/v1', NULL,
+                        ?::jsonb, ?::jsonb, ?::uuid, ?, NOW()::timestamptz, ?::jsonb)
+                """,
+                eventId.toString(),
+                "{\"type\":\"assignment\",\"id\":\"" + assignmentId + "\"}",
+                "{\"type\":\"actor\",\"id\":\"system:production-auth-test\"}",
+                serverDeviceId.toString(),
+                seq,
+                "{\"target_actor\":{\"type\":\"actor\",\"id\":\"" + targetActor + "\"}," +
+                        "\"role\":\"" + role + "\"," +
+                        "\"scope\":{\"geographic\":null,\"subject_list\":null,\"activity\":null}," +
+                        "\"valid_from\":\"2026-06-05T00:00:00Z\",\"valid_to\":null}");
+        return assignmentId;
     }
 
     private void await(CountDownLatch latch) {

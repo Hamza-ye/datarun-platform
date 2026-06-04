@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.datarun.server.config.AssignmentAdminCapabilityPolicy;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.identity.ServerIdentity;
@@ -30,17 +31,20 @@ public class AssignmentService {
     private final EventRepository eventRepository;
     private final ServerIdentity serverIdentity;
     private final ScopeResolver scopeResolver;
+    private final AssignmentAdminCapabilityService assignmentAdminCapabilityService;
     private final LocationRepository locationRepository;
     private final ObjectMapper objectMapper;
 
     public AssignmentService(EventRepository eventRepository,
                              ServerIdentity serverIdentity,
                              ScopeResolver scopeResolver,
+                             AssignmentAdminCapabilityService assignmentAdminCapabilityService,
                              LocationRepository locationRepository,
                              ObjectMapper objectMapper) {
         this.eventRepository = eventRepository;
         this.serverIdentity = serverIdentity;
         this.scopeResolver = scopeResolver;
+        this.assignmentAdminCapabilityService = assignmentAdminCapabilityService;
         this.locationRepository = locationRepository;
         this.objectMapper = objectMapper;
     }
@@ -63,7 +67,7 @@ public class AssignmentService {
                                   UUID geographicId, List<UUID> subjectList, List<String> activityList,
                                   OffsetDateTime validFrom, OffsetDateTime validTo) {
         validateAssignmentScopeInput(subjectList, activityList);
-        validateScopeContainment(creatorActorId, geographicId, subjectList, activityList);
+        validateCreateAuthority(creatorActorId, geographicId, subjectList, activityList);
 
         ObjectNode actorRef = objectMapper.createObjectNode();
         actorRef.put("type", "actor");
@@ -104,13 +108,16 @@ public class AssignmentService {
      * @return the created event
      */
     public Event endAssignment(UUID assignmentId, UUID actorId, String reason) {
+        List<ActiveAssignment> commandCapableAssignments = commandCapableAssignments(
+                actorId, AssignmentAdminCapabilityPolicy.END_COMMAND);
         AssignmentScope targetScope = findAssignmentScope(assignmentId);
         if (assignmentEnded(assignmentId)) {
             throw new IllegalArgumentException("Assignment is already ended: " + assignmentId);
         }
-        validateScopeContainment(actorId, targetScope.geographicId(), targetScope.geographicPath(),
+        validateScopeContainment(commandCapableAssignments,
+                targetScope.geographicId(), targetScope.geographicPath(),
                 targetScope.subjectList(), targetScope.activityList(),
-                "Assignment authority violation: actor cannot end assignment outside their scope");
+                "Assignment authority violation: actor cannot end assignment outside their scope through one active command-capable assignment");
 
         ObjectNode payload = objectMapper.createObjectNode();
         if (reason != null) {
@@ -212,8 +219,10 @@ public class AssignmentService {
         return event;
     }
 
-    private void validateScopeContainment(UUID creatorActorId, UUID newGeoScopeId,
-                                          List<UUID> subjectList, List<String> activityList) {
+    private void validateCreateAuthority(UUID creatorActorId, UUID newGeoScopeId,
+                                         List<UUID> subjectList, List<String> activityList) {
+        List<ActiveAssignment> commandCapableAssignments = commandCapableAssignments(
+                creatorActorId, AssignmentAdminCapabilityPolicy.CREATE_COMMAND);
         String newPath = null;
         if (newGeoScopeId != null) {
             newPath = locationRepository.findPathById(newGeoScopeId);
@@ -222,21 +231,35 @@ public class AssignmentService {
             }
         }
 
-        validateScopeContainment(creatorActorId, newGeoScopeId, newPath, subjectList, activityList,
-                "Scope containment violation: new assignment scope is not within one active creator assignment");
+        validateScopeContainment(commandCapableAssignments, newGeoScopeId, newPath, subjectList, activityList,
+                "Scope containment violation: new assignment scope is not within one active command-capable creator assignment");
     }
 
-    private void validateScopeContainment(UUID actorId, UUID requestedGeoId, String requestedGeoPath,
-                                          List<UUID> requestedSubjects,
-                                          List<String> requestedActivities,
-                                          String violationMessage) {
+    private List<ActiveAssignment> commandCapableAssignments(UUID actorId, String command) {
         List<ActiveAssignment> actorAssignments = scopeResolver.getActiveAssignments(actorId);
         if (actorAssignments.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Assignment authority violation: actor has no active assignments");
+                    "Assignment command authority violation: actor has no active assignments granting " + command);
         }
 
-        boolean contained = actorAssignments.stream()
+        ObjectNode policy = assignmentAdminCapabilityService.getValidatedPolicy();
+        List<ActiveAssignment> commandCapableAssignments = actorAssignments.stream()
+                .filter(assignment -> AssignmentAdminCapabilityPolicy.roleGrants(
+                        policy, assignment.role(), command))
+                .toList();
+        if (commandCapableAssignments.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Assignment command authority violation: actor has no active assignment granting " + command);
+        }
+        return commandCapableAssignments;
+    }
+
+    private void validateScopeContainment(List<ActiveAssignment> candidateAssignments,
+                                          UUID requestedGeoId, String requestedGeoPath,
+                                          List<UUID> requestedSubjects,
+                                          List<String> requestedActivities,
+                                          String violationMessage) {
+        boolean contained = candidateAssignments.stream()
                 .anyMatch(assignment -> containsAssignmentScope(
                         assignment, requestedGeoId, requestedGeoPath,
                         requestedSubjects, requestedActivities));

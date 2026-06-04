@@ -1,5 +1,6 @@
 package dev.datarun.server;
 
+import dev.datarun.server.config.AssignmentAdminCapabilityPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -61,6 +62,36 @@ public abstract class AbstractIntegrationTest {
                 "{\"target_actor\":{\"type\":\"actor\",\"id\":\"" + TEST_ACTOR_ID + "\"}," +
                 "\"role\":\"admin\",\"scope\":{\"geographic\":null,\"subject_list\":null,\"activity\":null}," +
                 "\"valid_from\":\"2026-01-01T00:00:00Z\",\"valid_to\":null}");
+
+        configureDefaultAssignmentAdminCapabilities();
+    }
+
+    protected void configureDefaultAssignmentAdminCapabilities() {
+        configureAssignmentAdminCapabilities("""
+                {
+                  "schema_version": 1,
+                  "roles": {
+                    "admin": ["assignment_admin.create", "assignment_admin.end"],
+                    "coordinator": ["assignment_admin.create", "assignment_admin.end"],
+                    "case_manager": ["assignment_admin.create", "assignment_admin.end"],
+                    "activity_manager": ["assignment_admin.create", "assignment_admin.end"]
+                  }
+                }
+                """);
+    }
+
+    protected void configureAssignmentAdminCapabilities(String policyJson) {
+        jdbcTemplate.update("""
+                INSERT INTO deployment_config (config_key, config_json, updated_by, updated_at)
+                VALUES (?, ?::jsonb, ?::uuid, NOW())
+                ON CONFLICT (config_key) DO UPDATE
+                SET config_json = EXCLUDED.config_json,
+                    updated_by = EXCLUDED.updated_by,
+                    updated_at = NOW()
+                """,
+                AssignmentAdminCapabilityPolicy.CONFIG_KEY,
+                policyJson,
+                TEST_ACTOR_ID.toString());
     }
 
     /**

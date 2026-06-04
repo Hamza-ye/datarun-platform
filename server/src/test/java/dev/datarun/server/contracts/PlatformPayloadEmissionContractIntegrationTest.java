@@ -43,6 +43,8 @@ class PlatformPayloadEmissionContractIntegrationTest extends AbstractIntegration
         jdbcTemplate.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         jdbcTemplate.execute("DELETE FROM device_sync_state");
         jdbcTemplate.execute("DELETE FROM subject_aliases");
+        jdbcTemplate.execute("DELETE FROM deployment_config");
+        configureDefaultAssignmentAdminCapabilities();
     }
 
     @Test

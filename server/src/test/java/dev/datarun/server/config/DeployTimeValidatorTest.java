@@ -847,6 +847,66 @@ class DeployTimeValidatorTest {
     }
 
     @Test
+    void assignmentAdminCapabilities_validPolicy_passes() {
+        JsonNode policy = parse("""
+                {
+                  "schema_version": 1,
+                  "roles": {
+                    "coordinator": ["assignment_admin.create", "assignment_admin.end"],
+                    "handoff_lead": ["assignment_admin.create"]
+                  }
+                }
+                """);
+
+        List<String> violations = DeployTimeValidator.validateAssignmentAdminCapabilities(policy);
+
+        assertTrue(violations.isEmpty(), "Expected no violations, got: " + violations);
+    }
+
+    @Test
+    void assignmentAdminCapabilities_invalidPolicyShape_rejected() {
+        JsonNode unknownCommand = parse("""
+                {
+                  "schema_version": 1,
+                  "roles": {
+                    "coordinator": ["assignment_admin.transfer"]
+                  }
+                }
+                """);
+        JsonNode nonObjectRoles = parse("""
+                {
+                  "schema_version": 1,
+                  "roles": []
+                }
+                """);
+        JsonNode blankRole = parse("""
+                {
+                  "schema_version": 1,
+                  "roles": {
+                    "": ["assignment_admin.create"]
+                  }
+                }
+                """);
+        JsonNode nonArrayCommandList = parse("""
+                {
+                  "schema_version": 1,
+                  "roles": {
+                    "coordinator": "assignment_admin.create"
+                  }
+                }
+                """);
+
+        assertTrue(DeployTimeValidator.validateAssignmentAdminCapabilities(unknownCommand)
+                .stream().anyMatch(v -> v.contains("Unknown assignment-admin command")));
+        assertTrue(DeployTimeValidator.validateAssignmentAdminCapabilities(nonObjectRoles)
+                .stream().anyMatch(v -> v.contains("roles must be an object")));
+        assertTrue(DeployTimeValidator.validateAssignmentAdminCapabilities(blankRole)
+                .stream().anyMatch(v -> v.contains("role name must be non-empty")));
+        assertTrue(DeployTimeValidator.validateAssignmentAdminCapabilities(nonArrayCommandList)
+                .stream().anyMatch(v -> v.contains("must map to a command array")));
+    }
+
+    @Test
     void shapeUniqueness_validDefinition_passes() {
         ObjectNode schema = testShape.schemaJson().deepCopy();
         schema.set("uniqueness", parse("""

@@ -731,6 +731,10 @@ public class DeployTimeValidator {
         return violations;
     }
 
+    public static List<String> validateAssignmentAdminCapabilities(JsonNode policyNode) {
+        return AssignmentAdminCapabilityPolicy.validate(policyNode);
+    }
+
     private static void validateUniquenessScopeDimension(String dimension,
                                                          Map<String, String> fieldTypes,
                                                          List<String> violations) {

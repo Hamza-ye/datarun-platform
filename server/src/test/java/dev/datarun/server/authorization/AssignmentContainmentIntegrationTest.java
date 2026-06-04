@@ -54,7 +54,9 @@ class AssignmentContainmentIntegrationTest extends AbstractIntegrationTest {
         jdbcTemplate.execute("DELETE FROM events");
         jdbcTemplate.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         jdbcTemplate.execute("DELETE FROM device_sync_state");
+        jdbcTemplate.execute("DELETE FROM deployment_config");
         jdbcTemplate.execute("DELETE FROM locations");
+        configureDefaultAssignmentAdminCapabilities();
 
         region = UUID.randomUUID();
         districtX = UUID.randomUUID();
@@ -160,7 +162,7 @@ class AssignmentContainmentIntegrationTest extends AbstractIntegrationTest {
         assertThatThrownBy(() -> assignmentService.createAssignment(CREATOR, TARGET, "field_worker",
                 districtX, List.of(requestedSubject), List.of("vaccination"), past(), null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("one active creator assignment");
+                .hasMessageContaining("one active command-capable creator assignment");
     }
 
     @Test
@@ -169,6 +171,81 @@ class AssignmentContainmentIntegrationTest extends AbstractIntegrationTest {
                 null, null, null, past(), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("actor has no active assignments");
+    }
+
+    @Test
+    void coveringScopeWithoutCreateCapabilityCannotCreateAssignment() {
+        bootstrapAdmin();
+        assignmentService.createAssignment(ADMIN, CREATOR, "field_worker",
+                region, null, null, past(), null);
+
+        assertThatThrownBy(() -> assignmentService.createAssignment(CREATOR, TARGET, "field_worker",
+                districtX, null, null, past(), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("assignment_admin.create");
+        assertThat(assignmentCreatedCountForTarget(TARGET)).isZero();
+    }
+
+    @Test
+    void coveringScopeWithoutEndCapabilityCannotEndAssignment() {
+        configureAssignmentAdminCapabilities("""
+                {
+                  "schema_version": 1,
+                  "roles": {
+                    "admin": ["assignment_admin.create", "assignment_admin.end"],
+                    "handoff_lead": ["assignment_admin.create"]
+                  }
+                }
+                """);
+        bootstrapAdmin();
+        Event targetAssignment = assignmentService.createAssignment(ADMIN, TARGET, "field_worker",
+                districtX, null, null, past(), null);
+        UUID targetAssignmentId = UUID.fromString(targetAssignment.subjectRef().path("id").asText());
+        assignmentService.createAssignment(ADMIN, CREATOR, "handoff_lead",
+                region, null, null, past(), null);
+
+        assertThatThrownBy(() -> assignmentService.endAssignment(
+                targetAssignmentId, CREATOR, "create-only role cannot end"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("assignment_admin.end");
+        assertThat(assignmentEndedCount(targetAssignmentId)).isZero();
+    }
+
+    @Test
+    void endOnlyCapabilityDoesNotGrantCreateCapability() {
+        configureAssignmentAdminCapabilities("""
+                {
+                  "schema_version": 1,
+                  "roles": {
+                    "admin": ["assignment_admin.create", "assignment_admin.end"],
+                    "end_only": ["assignment_admin.end"]
+                  }
+                }
+                """);
+        bootstrapAdmin();
+        assignmentService.createAssignment(ADMIN, CREATOR, "end_only",
+                region, null, null, past(), null);
+
+        assertThatThrownBy(() -> assignmentService.createAssignment(CREATOR, TARGET, "field_worker",
+                districtX, null, null, past(), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("assignment_admin.create");
+        assertThat(assignmentCreatedCountForTarget(TARGET)).isZero();
+    }
+
+    @Test
+    void commandCapabilityAndScopeCannotCombineAcrossAssignments() {
+        bootstrapAdmin();
+        assignmentService.createAssignment(ADMIN, CREATOR, "coordinator",
+                districtY, null, null, past(), null);
+        assignmentService.createAssignment(ADMIN, CREATOR, "field_worker",
+                districtX, null, null, past(), null);
+
+        assertThatThrownBy(() -> assignmentService.createAssignment(CREATOR, TARGET, "field_worker",
+                districtX, null, null, past(), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("one active command-capable creator assignment");
+        assertThat(assignmentCreatedCountForTarget(TARGET)).isZero();
     }
 
     @Test

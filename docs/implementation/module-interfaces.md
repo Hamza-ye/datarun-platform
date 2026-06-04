@@ -1,6 +1,6 @@
 # Module Interface Baseline
 
-> Current as of the 2026-06-04 NW-040 production principal-binding provisioning checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
+> Current as of the 2026-06-05 NW-050 assignment-admin command-capability checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
 
 ## Authority role
 
@@ -56,6 +56,15 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Storage**: assignment authority is event-derived; dev actor tokens, auth principal bindings, and location tables support lookup only.
 - **Forbidden**: group/claim direct authority, JWT `actor_id` direct authority, or identity-provider roles as platform authority unless a later successor decision explicitly promotes that model.
 - **Guards**: assignment containment, scope-filtered sync, responsibility-binding, and auth flag tests.
+
+## Assignment Admin Capability Policy
+
+- **Owns**: server-side deployment-configured `assignment_admin_capabilities` role-to-command policy for platform-owned `assignment_admin.create` and `assignment_admin.end`.
+- **Inputs**: current active assignment role labels, validated policy JSON from `deployment_config`, and the authenticated actor already resolved for the assignment command path.
+- **Outputs**: command-capable active-assignment filtering used by `AssignmentService` before IDR-024 create/end containment checks.
+- **Storage**: `deployment_config` row keyed `assignment_admin_capabilities`; assignment events keep role/scope only and do not store command capability.
+- **Forbidden**: `activities[*].roles`, request-body actor IDs, IdP groups/claims/roles, JWT `actor_id`, UI vocabulary, new scope mechanisms, assignment payload or envelope fields, resolver reassignment, auto-resolution, mobile authoritative rejection, or config-package authority for this policy.
+- **Guards**: `AssignmentContainmentIntegrationTest`, `ProductionAuthIntegrationTest`, `DeployTimeValidatorTest`, responsibility-binding, scope-filtered sync, subject-history backfill, and conflict-resolution regression tests.
 
 ## Authenticated Actor Resolver
 
