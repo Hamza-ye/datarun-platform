@@ -1,6 +1,6 @@
 # Module Interface Baseline
 
-> Current as of the 2026-06-03 post-Phase-4 stabilization checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
+> Current as of the 2026-06-04 NW-037 production-auth foundation checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
 
 ## Authority role
 
@@ -51,11 +51,20 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 ## Scope Resolver
 
 - **Owns**: actor assignment reconstruction and visibility/authority decisions from assignment events.
-- **Inputs**: bearer actor token, assignment event history, subject/location/activity scopes.
+- **Inputs**: authenticated actor context, assignment event history, subject/location/activity scopes.
 - **Outputs**: active assignment facts and scope containment decisions.
-- **Storage**: assignment authority is event-derived; actor tokens and location tables support lookup only.
-- **Forbidden**: Keycloak/JWT/group/claim authority as current authority source unless FP-011 is resolved by successor production-auth work.
+- **Storage**: assignment authority is event-derived; dev actor tokens, auth principal bindings, and location tables support lookup only.
+- **Forbidden**: group/claim direct authority, JWT `actor_id` direct authority, or identity-provider roles as platform authority unless a later FP-011 successor explicitly promotes that model.
 - **Guards**: assignment containment, scope-filtered sync, responsibility-binding, and auth flag tests.
+
+## Authenticated Actor Resolver
+
+- **Owns**: resolving bearer credentials to one platform `actor_id` before actor-scoped API logic runs.
+- **Inputs**: `Authorization: Bearer <credential>`, auth mode configuration, dev token table, JWT principal claims, explicit `(issuer, subject) -> actor_id` bindings.
+- **Outputs**: authenticated actor context for sync, assignment, config, conflict, and `/api/auth/me` endpoints.
+- **Storage**: `actor_tokens` for development mode; `auth_principal_bindings` for production-auth foundation mode.
+- **Forbidden**: treating JWT groups, roles, resource claims, or JWT `actor_id` claims as assignment, scope, resolver, or admin authority.
+- **Guards**: `ProductionAuthIntegrationTest`, actor-token integration tests, scope-filtered sync and conflict-resolution tests.
 
 ## Shape Registry
 

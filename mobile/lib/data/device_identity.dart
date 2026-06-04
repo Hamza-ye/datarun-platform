@@ -40,6 +40,10 @@ class DeviceIdentity {
 
   String? get actorToken => _prefs.getString(_actorTokenKey);
 
+  Future<void> setActorId(String actorId) async {
+    await _prefs.setString(_actorIdKey, actorId);
+  }
+
   Future<void> setActorToken(String token) async {
     await _prefs.setString(_actorTokenKey, token);
   }

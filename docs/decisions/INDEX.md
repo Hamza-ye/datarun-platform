@@ -32,6 +32,7 @@
 | [idr-024](idr-024-multi-axis-assignment-containment.md) | Multi-axis assignment containment | active | 4-prep | decision | authorization, assignment, scope, phase-4 |
 | [idr-025](idr-025-pattern-definition-contract-and-delivery.md) | Pattern definition contract and delivery | active | 4-prep | decision | workflow, pattern-registry, contracts, configuration, phase-4 |
 | [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) | Conflict resolver routing and single-writer resolution | active | 4-prep | decision | conflict, authorization, resolver-routing, phase-4 |
+| [idr-027](idr-027-production-auth-principal-actor-binding.md) | Production auth principal-to-actor binding | active | post-phase-4-stabilization | decision | authorization, authentication, sync, production-auth, fp-011 |
 
 ## By Component
 
@@ -44,6 +45,7 @@
 - [idr-016](idr-016-actor-token-table.md) — Actor token table
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Multi-axis assignment containment in sync/auth helpers
 - [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Conflict resolution API actor binding
+- [idr-027](idr-027-production-auth-principal-actor-binding.md) — Production auth principal binding and push actor binding
 
 ### server/integrity
 - [idr-007](idr-007-concurrency-detection.md) — Concurrency detection
@@ -56,6 +58,7 @@
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Role-action domain boundary
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Null-activity authority semantics
 - [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Resolver routing and canonical resolution enforcement
+- [idr-027](idr-027-production-auth-principal-actor-binding.md) — Group/claim non-authority for resolver checks
 
 ### server/authorization
 - [idr-013](idr-013-assignment-payload.md) — Assignment payload design
@@ -66,6 +69,7 @@
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Assignment administration boundary
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Assignment creation/end containment
 - [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Conflict API bearer-token actor binding
+- [idr-027](idr-027-production-auth-principal-actor-binding.md) — Principal-to-actor binding for production auth foundation
 
 ### server/identity
 - [idr-008](idr-008-server-event-producer.md) — Server event producer
@@ -93,6 +97,7 @@
 - [idr-021](idr-021-role-action-enforcement-model.md) — Role-action config parsing
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Severity and uniqueness config parsing
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Role-action config boundary
+- [idr-027](idr-027-production-auth-principal-actor-binding.md) — `/api/auth/me` actor alignment for event authorship
 
 ### mobile/domain
 - [idr-018](idr-018-expression-grammar.md) — Expression evaluator
@@ -117,6 +122,7 @@
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Assignment scope containment contract
 - [idr-025](idr-025-pattern-definition-contract-and-delivery.md) — Pattern definition schema and canonical files
 - [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Flag resolver routing catalog
+- [idr-027](idr-027-production-auth-principal-actor-binding.md) — Sync push bearer/authorship contract
 
 ### ci
 - [idr-001](idr-001-test-infrastructure.md) — Test infrastructure

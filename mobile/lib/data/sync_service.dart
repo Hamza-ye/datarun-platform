@@ -11,7 +11,11 @@ class SyncResult {
   final int pulledCount;
   final String? error;
 
-  SyncResult({required this.pushedCount, required this.pulledCount, this.error});
+  SyncResult({
+    required this.pushedCount,
+    required this.pulledCount,
+    this.error,
+  });
 }
 
 class SyncService {
@@ -19,13 +23,28 @@ class SyncService {
   final DeviceIdentity _identity;
   final String _baseUrl;
   final ConfigStore _configStore;
+  final http.Client _client;
   static const _watermarkKey = 'sync_watermark';
 
-  SyncService(this._eventStore, this._identity, this._baseUrl, this._configStore);
+  SyncService(
+    this._eventStore,
+    this._identity,
+    this._baseUrl,
+    this._configStore, {
+    http.Client? client,
+  }) : _client = client ?? http.Client();
 
   Future<SyncResult> sync() async {
     int pushed = 0;
     int pulled = 0;
+    final token = _identity.actorToken;
+
+    if (token != null) {
+      final actorResult = await _refreshActorIdentity(token);
+      if (actorResult != null) {
+        return actorResult;
+      }
+    }
 
     // Push phase
     try {
@@ -33,9 +52,15 @@ class SyncService {
       if (unpushed.isNotEmpty) {
         final prefs = await SharedPreferences.getInstance();
         final lastPullWatermark = prefs.getInt(_watermarkKey) ?? 0;
-        final response = await http.post(
+        final pushHeaders = <String, String>{
+          'Content-Type': 'application/json',
+        };
+        if (token != null) {
+          pushHeaders['Authorization'] = 'Bearer $token';
+        }
+        final response = await _client.post(
           Uri.parse('$_baseUrl/api/sync/push'),
-          headers: {'Content-Type': 'application/json'},
+          headers: pushHeaders,
           body: jsonEncode({
             'events': unpushed.map((e) => e.toEnvelope()).toList(),
             'device_id': _identity.deviceId,
@@ -48,14 +73,14 @@ class SyncService {
           await _eventStore.markPushed(unpushed.map((e) => e.id).toList());
         } else {
           return SyncResult(
-              pushedCount: 0,
-              pulledCount: 0,
-              error: 'Push failed: ${response.statusCode}');
+            pushedCount: 0,
+            pulledCount: 0,
+            error: 'Push failed: ${response.statusCode}',
+          );
         }
       }
     } on Exception {
-      return SyncResult(
-          pushedCount: 0, pulledCount: 0, error: 'No connection');
+      return SyncResult(pushedCount: 0, pulledCount: 0, error: 'No connection');
     }
 
     // Pull phase
@@ -65,13 +90,12 @@ class SyncService {
 
       // Build pull headers: include actor token if available (Phase 2b auth)
       final pullHeaders = <String, String>{'Content-Type': 'application/json'};
-      final token = _identity.actorToken;
       if (token != null) {
         pullHeaders['Authorization'] = 'Bearer $token';
       }
 
       while (true) {
-        final response = await http.post(
+        final response = await _client.post(
           Uri.parse('$_baseUrl/api/sync/pull'),
           headers: pullHeaders,
           body: jsonEncode({
@@ -82,9 +106,10 @@ class SyncService {
         );
         if (response.statusCode == 401) {
           return SyncResult(
-              pushedCount: pushed,
-              pulledCount: pulled,
-              error: 'Unauthorized — invalid or missing actor token');
+            pushedCount: pushed,
+            pulledCount: pulled,
+            error: 'Unauthorized — invalid or missing actor token',
+          );
         }
         if (response.statusCode != 200) break;
 
@@ -103,7 +128,11 @@ class SyncService {
             final retiredId = event.payload['retired_id'] as String?;
             final survivingId = event.payload['surviving_id'] as String?;
             if (retiredId != null && survivingId != null) {
-              await _eventStore.upsertAlias(retiredId, survivingId, event.timestamp);
+              await _eventStore.upsertAlias(
+                retiredId,
+                survivingId,
+                event.timestamp,
+              );
             }
           }
           // Process assignment events to maintain local scope knowledge (Phase 2b).
@@ -136,7 +165,7 @@ class SyncService {
       if (currentVersion > 0) {
         configHeaders['If-None-Match'] = '$currentVersion';
       }
-      final configResponse = await http.get(
+      final configResponse = await _client.get(
         Uri.parse('$_baseUrl/api/sync/config'),
         headers: configHeaders,
       );
@@ -160,5 +189,41 @@ class SyncService {
     }
 
     return SyncResult(pushedCount: pushed, pulledCount: pulled);
+  }
+
+  Future<SyncResult?> _refreshActorIdentity(String token) async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$_baseUrl/api/auth/me'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 401) {
+        return SyncResult(
+          pushedCount: 0,
+          pulledCount: 0,
+          error: 'Unauthorized — invalid or missing actor token',
+        );
+      }
+      if (response.statusCode != 200) {
+        return SyncResult(
+          pushedCount: 0,
+          pulledCount: 0,
+          error: 'Actor identity check failed: ${response.statusCode}',
+        );
+      }
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final actorId = body['actor_id'] as String?;
+      if (actorId == null || actorId.isEmpty) {
+        return SyncResult(
+          pushedCount: 0,
+          pulledCount: 0,
+          error: 'Actor identity check failed: missing actor_id',
+        );
+      }
+      await _identity.setActorId(actorId);
+      return null;
+    } on Exception {
+      return SyncResult(pushedCount: 0, pulledCount: 0, error: 'No connection');
+    }
   }
 }

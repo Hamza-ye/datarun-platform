@@ -21,6 +21,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(actorTokenInterceptor)
                 .addPathPatterns(
+                        "/api/auth/me",
+                        "/api/sync/push",
                         "/api/sync/pull",
                         "/api/sync/subject-history",
                         "/api/sync/config",

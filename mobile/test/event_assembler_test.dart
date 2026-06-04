@@ -34,20 +34,22 @@ void main() {
   });
 
   group('EventAssembler activity_ref', () {
-    test('populates activity_ref when form opened from activity context',
-        () async {
-      final event = await assembler.assemble(
-        subjectId: null,
-        shapeRef: 'household_visit/v1',
-        payload: {'name': 'Test'},
-        activityRef: 'household_monitoring',
-      );
+    test(
+      'populates activity_ref when form opened from activity context',
+      () async {
+        final event = await assembler.assemble(
+          subjectId: null,
+          shapeRef: 'household_visit/v1',
+          payload: {'name': 'Test'},
+          activityRef: 'household_monitoring',
+        );
 
-      expect(event.activityRef, 'household_monitoring');
-      // Sanity-check envelope is otherwise well-formed
-      expect(event.shapeRef, 'household_visit/v1');
-      expect(event.subjectRef['type'], 'subject');
-    });
+        expect(event.activityRef, 'household_monitoring');
+        // Sanity-check envelope is otherwise well-formed
+        expect(event.shapeRef, 'household_visit/v1');
+        expect(event.subjectRef['type'], 'subject');
+      },
+    );
 
     test('activity_ref null when form opened outside any activity', () async {
       final event = await assembler.assemble(
@@ -67,10 +69,23 @@ void main() {
         activityRef: 'household_monitoring',
       );
 
-      final stored = (await store.getAll())
-          .firstWhere((e) => e.id == assembled.id);
+      final stored = (await store.getAll()).firstWhere(
+        (e) => e.id == assembled.id,
+      );
 
       expect(stored.activityRef, 'household_monitoring');
+    });
+
+    test('uses the server-resolved actor id for event authorship', () async {
+      await identity.setActorId('11111111-1111-1111-1111-111111111111');
+
+      final event = await assembler.assemble(
+        subjectId: 'subj-42',
+        shapeRef: 'basic_capture/v1',
+        payload: {'name': 'Test'},
+      );
+
+      expect(event.actorRef['id'], '11111111-1111-1111-1111-111111111111');
     });
   });
 }

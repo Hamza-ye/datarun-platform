@@ -76,7 +76,8 @@ public class SyncController {
     }
 
     @PostMapping("/push")
-    public ResponseEntity<?> push(@RequestBody PushRequest request) {
+    public ResponseEntity<?> push(@RequestBody PushRequest request,
+                                  HttpServletRequest httpRequest) {
         if (request.events() == null || request.events().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "empty_batch"));
@@ -98,6 +99,17 @@ public class SyncController {
         if (!validationErrors.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "validation_failed", "details", validationErrors));
+        }
+
+        UUID authenticatedActorId =
+                (UUID) httpRequest.getAttribute(ActorTokenInterceptor.ACTOR_ID_ATTR);
+        if (authenticatedActorId != null) {
+            List<Map<String, Object>> actorErrors =
+                    validateAuthenticatedActorBinding(request.events(), authenticatedActorId);
+            if (!actorErrors.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "actor_binding_failed", "details", actorErrors));
+            }
         }
 
         // Validate payloads against shape definitions (Phase 3a)
@@ -149,7 +161,9 @@ public class SyncController {
 
             // Authorization detection: temporal_authority_expired, scope_violation, role_stale
             // Runs after identity CD in the same pipeline (phase-2.md §8)
-            UUID actorId = extractActorId(acceptedEvents);
+            UUID actorId = authenticatedActorId != null
+                    ? authenticatedActorId
+                    : extractActorId(acceptedEvents);
             if (actorId != null) {
                 try {
                     List<Event> authFlags = conflictDetector.evaluateAuth(
@@ -287,6 +301,40 @@ public class SyncController {
             return persisted;
         });
         return result != null ? result : 0;
+    }
+
+    private List<Map<String, Object>> validateAuthenticatedActorBinding(
+            List<Event> events, UUID authenticatedActorId) {
+        List<Map<String, Object>> errors = new ArrayList<>();
+        for (int i = 0; i < events.size(); i++) {
+            Event event = events.get(i);
+            String actorId = event.actorRef() == null
+                    ? null
+                    : event.actorRef().path("id").asText(null);
+            if (actorId == null || actorId.isBlank()) {
+                errors.add(Map.of("index", i, "error", "missing_actor_ref"));
+                continue;
+            }
+            if (actorId.startsWith("system:")) {
+                errors.add(Map.of("index", i, "error", "client_system_actor"));
+                continue;
+            }
+            UUID eventActorId;
+            try {
+                eventActorId = UUID.fromString(actorId);
+            } catch (IllegalArgumentException e) {
+                errors.add(Map.of("index", i, "error", "invalid_actor_ref"));
+                continue;
+            }
+            if (!authenticatedActorId.equals(eventActorId)) {
+                errors.add(Map.of(
+                        "index", i,
+                        "error", "actor_mismatch",
+                        "actor_id", actorId,
+                        "authenticated_actor_id", authenticatedActorId.toString()));
+            }
+        }
+        return errors;
     }
 
     private List<Event> findAuthorizedPullEvents(long sinceWatermark, int limit,

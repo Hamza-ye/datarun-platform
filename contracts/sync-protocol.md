@@ -15,6 +15,8 @@
 ## Push — `POST /api/sync/push`
 
 Device sends events to server. Server deduplicates by `id`, assigns `sync_watermark` on insert.
+Production-auth mode requires `Authorization: Bearer <credential>`. Development
+`dev-token` mode may allow unauthenticated push for local compatibility only.
 
 ### Request
 
@@ -66,6 +68,7 @@ Device sends events to server. Server deduplicates by `id`, assigns `sync_waterm
 | Ordering | Events may arrive in any order. Server does not require `device_seq` ordering. |
 | Validation | Every event is validated against `envelope.schema.json`. Invalid events → `400 Bad Request` with details. Nothing persisted from the batch if any event is invalid. |
 | Atomicity | All-or-nothing per request. Either all valid events are persisted, or none are (on validation failure). |
+| Authenticated actor binding | When the bearer credential resolves to an actor, every client-pushed event must carry `actor_ref.id` equal to that actor UUID. Client-authored `system:*` actors, missing actor IDs, non-UUID actor IDs, or mismatched actor UUIDs reject the entire batch before persistence. |
 | Concurrency detection | After persisting events (Tx1), the server evaluates each accepted event for concurrency conflicts (Tx2). For each event, `W_effective = min(server-assigned event.sync_watermark, last_pull_watermark)`. If the event's subject has events from other devices with `sync_watermark > W_effective`, a `concurrent_state_change` flag is raised. CD failure does not affect event persistence. |
 
 ### Error Responses
@@ -74,7 +77,11 @@ Device sends events to server. Server deduplicates by `id`, assigns `sync_waterm
 |--------|-----------|------|
 | `400` | One or more events fail schema validation | `{ "error": "validation_failed", "details": [...] }` |
 | `400` | One or more payloads fail shape validation | `{ "error": "shape_validation_failed", "details": [...] }` |
+| `400` | One or more events fail authenticated actor binding | `{ "error": "actor_binding_failed", "details": [...] }` |
 | `400` | Empty events array | `{ "error": "empty_batch" }` |
+| `401` | Missing bearer token in production-auth mode | `{ "error": "missing_token" }` |
+| `401` | Empty bearer token | `{ "error": "empty_token" }` |
+| `401` | Invalid, revoked, or unmapped bearer credential | `{ "error": "invalid_token" }` |
 | `500` | Server error | `{ "error": "internal_error" }` |
 
 ---

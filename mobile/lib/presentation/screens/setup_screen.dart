@@ -1,8 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:datarun_mobile/data/device_identity.dart';
 
-/// First-launch setup screen. Collects server URL + actor token
-/// from the admin dev provision page.
+/// First-launch setup screen. Collects server URL and bearer credential.
 class SetupScreen extends StatefulWidget {
   final DeviceIdentity identity;
   final VoidCallback onSetupComplete;
@@ -38,8 +40,32 @@ class _SetupScreenState extends State<SetupScreen> {
     final url = _urlController.text.trim().replaceAll(RegExp(r'/+$'), '');
     final token = _tokenController.text.trim();
 
-    await widget.identity.setServerUrl(url);
-    await widget.identity.setActorToken(token);
+    try {
+      final response = await http.get(
+        Uri.parse('$url/api/auth/me'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode != 200) {
+        throw Exception('auth/me returned ${response.statusCode}');
+      }
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final actorId = body['actor_id'] as String?;
+      if (actorId == null || actorId.isEmpty) {
+        throw Exception('auth/me missing actor_id');
+      }
+
+      await widget.identity.setServerUrl(url);
+      await widget.identity.setActorToken(token);
+      await widget.identity.setActorId(actorId);
+    } on Exception {
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not verify actor token')),
+        );
+      }
+      return;
+    }
 
     if (mounted) {
       setState(() => _saving = false);
@@ -64,7 +90,7 @@ class _SetupScreenState extends State<SetupScreen> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Get your token from the admin panel:\nServer → Dev Provision → Provision New Actor',
+                'Enter the server URL and actor credential provided by your administrator.',
                 style: TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 24),
@@ -87,8 +113,8 @@ class _SetupScreenState extends State<SetupScreen> {
               TextFormField(
                 controller: _tokenController,
                 decoration: const InputDecoration(
-                  labelText: 'Actor Token',
-                  hintText: 'Paste 64-character hex token',
+                  labelText: 'Actor Credential',
+                  hintText: 'Paste bearer credential',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -106,7 +132,10 @@ class _SetupScreenState extends State<SetupScreen> {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Text('Connect'),
               ),
             ],
