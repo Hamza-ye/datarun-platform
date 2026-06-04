@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-04 (NW-040 production principal-binding provisioning accepted)
+**Last updated**: 2026-06-04 (NW-042 S22 coordinated distribution campaign probe accepted)
 
 ---
 
@@ -14,7 +14,7 @@ Use this section as the low-token bootstrap for new sessions.
 - Post-Phase-4 stabilization now uses `docs/agent-working-surface/README.md` as the active agent working-surface router.
 - Current implementation acceptance status belongs in `docs/agent-working-surface/baseline-acceptance-register.md`; do not treat legacy Phase 4 review drafts as active baseline truth.
 - Current baseline standing: BAR-001 through BAR-015 and BAR-104 are accepted, including BAR-010 config package delivery and BAR-104 production OIDC/JWT/Keycloak authority.
-- Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, and NW-033/S26. Use the backlog rows for exact evidence.
+- Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, NW-033/S26, and NW-042/S22. Use the backlog rows for exact evidence.
 - Contract hygiene now includes root schemas for deployer-authored shape format and the server-emitted/mobile-consumed config package: `contracts/shape-format.schema.json` and `contracts/config-package.schema.json`.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use IDR-027 for the decision boundary and the NW-037 backlog row for evidence.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
@@ -23,7 +23,7 @@ Use this section as the low-token bootstrap for new sessions.
 - NW-040 accepted deployment-managed production principal-binding provisioning selected by IDR-028: append-only operation audit/history, active binding projection/support rows, manifest validation, idempotency, PostgreSQL advisory-lock serialization, create/rotate/deactivate/rebind behavior, optional startup manifest runner, and continued group/claim/JWT `actor_id` non-authority. Use the NW-040 backlog row for evidence.
 - FP-011 is resolved and BAR-104 is baseline-accepted for production OIDC/JWT/Keycloak authority. Future IdP group/claim authority or provisioning-input semantics remain separate future decisions; NW-037 through NW-040 did not make groups, roles, JWT `actor_id`, or IdP claims direct platform authority.
 - NW-041 accepted a 2026-06-04 informal-gap baseline assessment checkpoint. It confirms IDR-023 is correctly scoped: activity role-actions are only `capture`, `review`, `alert`, `task_created`, and `task_completed`; `assignment_changed` remains assignment administration, not an activity-role action.
-- No baseline acceptance candidate is currently active. NW-042 is the next ready runtime-validation option for a constrained S22 coordinated distribution campaign probe; use `docs/agent-working-surface/prompts/NW-042-add-s22-coordinated-distribution-campaign-probe.md` as the bounded handoff. NW-043 through NW-046 are future-decision exploration routes for access exceptions/assignment-admin authority, reporting aggregation/import-export, domain conflict automation/batch resolution, and generic flag cascade/pattern traversal reporting. NW-047 is a ready stewardship/design-control slice for operational UX vocabulary and product layering; it should run before any serious operational UI implementation, but it does not block NW-042 if NW-042 remains runtime-probe-only and avoids UI/product vocabulary decisions. Entity lifecycle, trigger/reporting expansion, auto-resolution, resolver reassignment, online production binding-admin APIs, and new scope mechanisms remain future-decision follow-ups.
+- No baseline acceptance candidate is currently active. NW-042 accepted the constrained S22 coordinated distribution campaign runtime probe without adding new platform primitives; use the NW-042 backlog row for exact evidence. NW-043 through NW-046 are future-decision exploration routes for access exceptions/assignment-admin authority, reporting aggregation/import-export, domain conflict automation/batch resolution, and generic flag cascade/pattern traversal reporting. NW-047 is a ready stewardship/design-control slice for operational UX vocabulary and product layering; it should run before any serious operational UI implementation. Entity lifecycle, trigger/reporting expansion, auto-resolution, resolver reassignment, online production binding-admin APIs, and new scope mechanisms remain future-decision follow-ups.
 - Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md`, and the exact contracts/code touched by the task.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
 

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
+import dev.datarun.server.config.ShapeRepository;
+import dev.datarun.server.config.ShapeService;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.projection.PatternStateProjection;
 import dev.datarun.server.subject.SubjectProjection;
@@ -54,6 +56,7 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
     private static final String INVENTORY_ACTIVITY = "inventory";
     private static final String REVIEW_ACTIVITY = "supervisor_review_activity";
     private static final String LOGISTICS_TRANSFER_ACTIVITY = "logistics_transfer_activity";
+    private static final String UNIT_DISTRIBUTION_SHAPE = "unit_distribution/v1";
 
     @Autowired private TestRestTemplate rest;
     @Autowired private AssignmentService assignmentService;
@@ -62,6 +65,7 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
     @Autowired private ObjectMapper objectMapper;
     @Autowired private PatternStateProjection patternStateProjection;
     @Autowired private SubjectProjection subjectProjection;
+    @Autowired private ShapeRepository shapeRepository;
 
     private UUID region;
     private UUID districtA;
@@ -82,6 +86,11 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         jdbcTemplate.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         jdbcTemplate.execute("DELETE FROM device_sync_state");
         jdbcTemplate.execute("DELETE FROM activities");
+        jdbcTemplate.execute("""
+                DELETE FROM shapes
+                WHERE name NOT IN ('conflict_detected','conflict_resolved',
+                                   'subjects_merged','subject_split')
+                """);
         jdbcTemplate.execute("DELETE FROM locations");
         provisionTestToken();
 
@@ -180,6 +189,211 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         assertThat(flagSources("role_stale")).doesNotContain(a1AfterReassignment.toString());
         assertThat(flagSources("role_stale")).doesNotContain(b1AfterReassignment.toString());
         assertThat(flagSources("role_stale")).doesNotContain(supervisorReview.toString());
+    }
+
+    @Test
+    void s22CoordinatedDistributionCampaignProbeUsesExistingConstructs() {
+        createUniqueUnitDistributionShape();
+        configureLogisticsTransferActivity();
+
+        Event workerAInitial = assignmentService.createAssignment(ADMIN, WORKER_A, "field_worker",
+                villageA1, null, List.of(CAMPAIGN_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, WORKER_B, "field_worker",
+                villageA1, null, List.of(CAMPAIGN_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, SUPERVISOR, "supervisor",
+                districtA, null, List.of(CAMPAIGN_ACTIVITY, LOGISTICS_TRANSFER_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, WORKER_A, "sender",
+                villageA1, null, List.of(LOGISTICS_TRANSFER_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, WORKER_B, "receiver",
+                villageA1, null, List.of(LOGISTICS_TRANSFER_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        assertActivityRoleDoesNotInclude(CAMPAIGN_ACTIVITY, "assignment_changed");
+
+        UUID villageSubject = subjectAt(villageA1);
+        UUID knownUnit = subjectAt(villageA1);
+        UUID discoveredUnit = subjectAt(villageA1);
+        UUID outOfScopeUnit = subjectAt(villageB1);
+        UUID transferBatch = subjectAt(villageA1);
+        UUID returnBatch = subjectAt(villageA1);
+        UUID invalidTransferBatch = subjectAt(villageA1);
+        UUID outsideTransferBatch = subjectAt(villageB1);
+
+        long workerAKnowledge = latestWatermark(pullEvents(tokenA, 0, 200, DEVICE_A));
+        long workerBKnowledge = latestWatermark(pullEvents(tokenB, 0, 200, DEVICE_B));
+        long supervisorKnowledge = latestWatermark(
+                pullEvents(supervisorToken, 0, 200, DEVICE_SUPERVISOR));
+
+        UUID locationStatus = pushEventWithPayload(WORKER_A, DEVICE_A, villageSubject,
+                CAMPAIGN_ACTIVITY, "capture", "location_status/v1",
+                Map.of("status", "in_progress",
+                        "unit_scope", "grouped_location",
+                        "notes", "human-authored location status for read-side aggregation"),
+                workerAKnowledge).id();
+        UUID knownVisit = pushEventWithPayload(WORKER_A, DEVICE_A, knownUnit,
+                CAMPAIGN_ACTIVITY, "capture", "unit_visit/v1",
+                Map.of("unit_code", "known-unit-a1-001",
+                        "parent_location_id", villageA1.toString(),
+                        "visit_outcome", "covered"),
+                workerAKnowledge).id();
+        UUID firstDistribution = pushEventWithPayload(WORKER_A, DEVICE_A, knownUnit,
+                CAMPAIGN_ACTIVITY, "capture", UNIT_DISTRIBUTION_SHAPE,
+                Map.of("unit_code", "known-unit-a1-001",
+                        "items_given", 2,
+                        "distribution_pass", "primary"),
+                workerAKnowledge).id();
+        UUID discoveredVisit = pushEventWithPayload(WORKER_B, DEVICE_B, discoveredUnit,
+                CAMPAIGN_ACTIVITY, "capture", "unit_visit/v1",
+                Map.of("unit_code", "new-unit-a1-009",
+                        "parent_location_id", villageA1.toString(),
+                        "linkage", "discovered_during_visit"),
+                workerBKnowledge).id();
+        UUID outOfScopeDistribution = pushEventWithPayload(ADMIN, DEVICE_ADMIN, outOfScopeUnit,
+                CAMPAIGN_ACTIVITY, "capture", UNIT_DISTRIBUTION_SHAPE,
+                Map.of("unit_code", "outside-unit-b1-001",
+                        "items_given", 1),
+                0).id();
+
+        assertThat(shapeRefsForSubject(discoveredUnit)).containsExactly("unit_visit/v1");
+
+        long workerBCurrentKnowledge =
+                latestWatermark(pullEvents(tokenB, workerBKnowledge, 200, DEVICE_B));
+        PushedEvent duplicateDistribution = pushEventWithPayload(WORKER_B, DEVICE_B, knownUnit,
+                CAMPAIGN_ACTIVITY, "capture", UNIT_DISTRIBUTION_SHAPE,
+                Map.of("unit_code", "known-unit-a1-001",
+                        "items_given", 2,
+                        "distribution_pass", "offline_overlap"),
+                workerBCurrentKnowledge);
+        assertThat(duplicateDistribution.response().getBody().get("accepted").asInt()).isEqualTo(1);
+        assertThat(flagSources("domain_uniqueness_violation"))
+                .contains(duplicateDistribution.id().toString());
+
+        JsonNode duplicateFlag = findFlagFor(
+                duplicateDistribution.id(), "domain_uniqueness_violation");
+        assertThat(duplicateFlag.at("/payload/designated_resolver/id").asText())
+                .isEqualTo(SUPERVISOR.toString());
+        assertThat(summaryFor(knownUnit).eventCount()).isEqualTo(2);
+        assertThat(summaryFor(knownUnit).flagCount()).isEqualTo(1);
+
+        ResponseEntity<JsonNode> nonDesignatedResolution = resolveFlag(
+                UUID.fromString(duplicateFlag.get("id").asText()), tokenA, "accepted");
+        assertThat(nonDesignatedResolution.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(flagSources("scope_violation"))
+                .contains(nonDesignatedResolution.getBody().get("event_id").asText());
+        assertThat(summaryFor(knownUnit).eventCount()).isEqualTo(2);
+        assertThat(summaryFor(knownUnit).flagCount()).isGreaterThanOrEqualTo(1);
+
+        ResponseEntity<JsonNode> exactDuplicateResolution = resolveFlag(
+                UUID.fromString(duplicateFlag.get("id").asText()), supervisorToken, "accepted");
+        assertThat(exactDuplicateResolution.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(summaryFor(knownUnit).eventCount()).isEqualTo(3);
+        assertThat(summaryFor(knownUnit).flagCount()).isGreaterThanOrEqualTo(1);
+
+        UUID workerAInitialId = UUID.fromString(workerAInitial.subjectRef().get("id").asText());
+        assignmentService.endAssignment(workerAInitialId, ADMIN, "S22 campaign handoff");
+        assignmentService.createAssignment(ADMIN, WORKER_A, "field_worker",
+                villageA2, null, List.of(CAMPAIGN_ACTIVITY),
+                OffsetDateTime.now(ZoneOffset.UTC).minusHours(1), null);
+
+        PushedEvent staleOfflineVisit = pushEventWithPayload(WORKER_A, DEVICE_A, knownUnit,
+                CAMPAIGN_ACTIVITY, "capture", "unit_visit/v1",
+                Map.of("unit_code", "known-unit-a1-001",
+                        "visit_outcome", "stale_offline_follow_up"),
+                workerAKnowledge);
+        assertThat(staleOfflineVisit.response().getBody().get("accepted").asInt()).isEqualTo(1);
+        assertThat(flagSources("temporal_authority_expired"))
+                .contains(staleOfflineVisit.id().toString());
+        assertThat(flagSources("role_stale")).contains(staleOfflineVisit.id().toString());
+        assertThat(flagSources("scope_violation")).doesNotContain(staleOfflineVisit.id().toString());
+        assertThat(summaryFor(knownUnit).eventCount()).isEqualTo(3);
+
+        long liveWatermarkBeforeBackfill = deviceWatermark(DEVICE_B);
+        ResponseEntity<JsonNode> handoffBackfill =
+                subjectHistory(tokenB, knownUnit, CAMPAIGN_ACTIVITY, 0, 200);
+        assertThat(handoffBackfill.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertEventContains(handoffBackfill, knownVisit, firstDistribution, duplicateDistribution.id());
+        assertThat(deviceWatermark(DEVICE_B)).isEqualTo(liveWatermarkBeforeBackfill);
+
+        assertAssignmentEventsAreAdministration();
+
+        long senderKnowledge = latestWatermark(pullEvents(tokenA, 0, 300, DEVICE_A));
+        UUID supplyDispatch = pushEventWithPayload(WORKER_A, DEVICE_A, transferBatch,
+                LOGISTICS_TRANSFER_ACTIVITY, "capture", "supply_dispatch/v1",
+                Map.of("transfer_code", "outbound-a1-001",
+                        "item", "configured_distribution_item",
+                        "quantity_dispatched", 200),
+                senderKnowledge).id();
+        UUID outsideDispatch = pushEventWithPayload(ADMIN, DEVICE_ADMIN, outsideTransferBatch,
+                LOGISTICS_TRANSFER_ACTIVITY, "capture", "supply_dispatch/v1",
+                Map.of("transfer_code", "outside-b1-001",
+                        "item", "configured_distribution_item",
+                        "quantity_dispatched", 20),
+                0).id();
+
+        ResponseEntity<JsonNode> receiverPull = pullEvents(tokenB, 0, 300, DEVICE_B);
+        assertCaptureContains(receiverPull, supplyDispatch);
+        assertCaptureExcludes(receiverPull, outsideDispatch);
+        long receiverKnowledge = latestWatermark(receiverPull);
+
+        UUID supplyReceipt = pushEventWithPayload(WORKER_B, DEVICE_B, transferBatch,
+                LOGISTICS_TRANSFER_ACTIVITY, "capture", "supply_receipt/v1",
+                Map.of("quantity_received", 200,
+                        "discrepancies", false),
+                receiverKnowledge).id();
+        assertThat(subjectState(transferBatch, LOGISTICS_TRANSFER_ACTIVITY,
+                "transfer_with_acknowledgment/v1").get("current_state").asText())
+                .isEqualTo("received");
+
+        UUID returnDispatch = pushEventWithPayload(WORKER_B, DEVICE_B, returnBatch,
+                LOGISTICS_TRANSFER_ACTIVITY, "capture", "supply_return_dispatch/v1",
+                Map.of("transfer_code", "return-a1-001",
+                        "item", "configured_distribution_item",
+                        "quantity_dispatched", 13),
+                receiverKnowledge).id();
+        long senderReturnKnowledge =
+                latestWatermark(pullEvents(tokenA, senderKnowledge, 300, DEVICE_A));
+        UUID returnReceipt = pushEventWithPayload(WORKER_A, DEVICE_A, returnBatch,
+                LOGISTICS_TRANSFER_ACTIVITY, "capture", "supply_return_receipt/v1",
+                Map.of("quantity_received", 13,
+                        "discrepancies", false),
+                senderReturnKnowledge).id();
+        assertThat(subjectState(returnBatch, LOGISTICS_TRANSFER_ACTIVITY,
+                "transfer_with_acknowledgment/v1").get("current_state").asText())
+                .isEqualTo("received");
+
+        PushedEvent outOfOrderReceipt = pushEventWithPayload(WORKER_B, DEVICE_B,
+                invalidTransferBatch, LOGISTICS_TRANSFER_ACTIVITY, "capture", "supply_receipt/v1",
+                Map.of("quantity_received", 15,
+                        "discrepancies", false,
+                        "notes", "receipt synced before any dispatch"),
+                receiverKnowledge);
+        assertThat(outOfOrderReceipt.response().getBody().get("accepted").asInt()).isEqualTo(1);
+        assertThat(flagSources("transition_violation"))
+                .contains(outOfOrderReceipt.id().toString());
+        JsonNode transitionFlag = findFlagFor(outOfOrderReceipt.id(), "transition_violation");
+        ResponseEntity<JsonNode> rejectedTransition = resolveFlag(
+                UUID.fromString(transitionFlag.get("id").asText()), supervisorToken, "rejected");
+        assertThat(rejectedTransition.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(subjectStateExists(invalidTransferBatch, LOGISTICS_TRANSFER_ACTIVITY,
+                "transfer_with_acknowledgment/v1")).isFalse();
+
+        ResponseEntity<JsonNode> supervisorScopedPull =
+                pullEvents(supervisorToken, supervisorKnowledge, 500, DEVICE_SUPERVISOR);
+        assertCaptureContains(supervisorScopedPull,
+                locationStatus, knownVisit, firstDistribution, discoveredVisit,
+                duplicateDistribution.id(), supplyDispatch, supplyReceipt, returnDispatch, returnReceipt);
+        assertCaptureExcludes(supervisorScopedPull, outOfScopeDistribution, outsideDispatch);
+
+        CampaignProgress progress = campaignProgress(List.of(knownUnit, discoveredUnit),
+                latestWatermark(supervisorScopedPull));
+        assertThat(progress.unitsWithProjectedEvents()).isEqualTo(2);
+        assertThat(progress.projectedEventCount()).isGreaterThanOrEqualTo(4);
+        assertThat(progress.unresolvedFlagCount()).isGreaterThanOrEqualTo(2);
+        assertThat(progress.freshThroughWatermark()).isGreaterThanOrEqualTo(syncWatermark(returnReceipt));
     }
 
     @Test
@@ -599,8 +813,8 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                       "ref": "transfer_with_acknowledgment/v1",
                       "composition": "subject",
                       "shape_roles": {
-                        "dispatch": ["logistics_dispatch/v1"],
-                        "receipt": ["logistics_receipt/v1"],
+                        "dispatch": ["logistics_dispatch/v1", "supply_dispatch/v1", "supply_return_dispatch/v1"],
+                        "receipt": ["logistics_receipt/v1", "supply_receipt/v1", "supply_return_receipt/v1"],
                         "discrepancy_report": ["logistics_discrepancy_report/v1"],
                         "discrepancy_resolution": ["logistics_discrepancy_resolution/v1"]
                       },
@@ -619,6 +833,34 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 INSERT INTO activities (name, config_json, status, sensitivity)
                 VALUES (?, ?::jsonb, 'active', 'standard')
                 """, LOGISTICS_TRANSFER_ACTIVITY, config);
+    }
+
+    private void createUniqueUnitDistributionShape() {
+        ObjectNode schema = objectMapper.createObjectNode();
+        ArrayNode fields = schema.putArray("fields");
+        addField(fields, "unit_code", "text", true);
+        addField(fields, "items_given", "integer", true);
+        addField(fields, "distribution_pass", "text", false);
+        schema.putNull("subject_binding");
+        schema.set("uniqueness", parse("""
+                {
+                  "scope": ["subject_ref", "activity_ref", "payload.unit_code"],
+                  "period": {"type": "calendar_day", "timezone": "deployment"},
+                  "device_action": "warn"
+                }
+                """));
+
+        ShapeService shapeService = new ShapeService(shapeRepository, objectMapper);
+        assertThat(shapeService.createShape("unit_distribution", "standard", schema)).isEmpty();
+    }
+
+    private void addField(ArrayNode fields, String name, String type, boolean required) {
+        ObjectNode field = objectMapper.createObjectNode();
+        field.put("name", name);
+        field.put("type", type);
+        field.put("required", required);
+        field.put("deprecated", false);
+        fields.add(field);
     }
 
     private UUID subjectAt(UUID locationId) {
@@ -708,6 +950,28 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 JsonNode.class);
     }
 
+    private void assertActivityRoleDoesNotInclude(String activityRef, String action) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM activities a,
+                     jsonb_each(a.config_json->'roles') AS role_actions(role_name, actions),
+                     jsonb_array_elements_text(role_actions.actions) AS action_name(value)
+                WHERE a.name = ?
+                  AND action_name.value = ?
+                """, Integer.class, activityRef, action);
+        assertThat(count).isZero();
+    }
+
+    private void assertAssignmentEventsAreAdministration() {
+        Integer assignmentEventsWithActivity = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE type = 'assignment_changed'
+                  AND activity_ref IS NOT NULL
+                """, Integer.class);
+        assertThat(assignmentEventsWithActivity).isZero();
+    }
+
     private long latestWatermark(ResponseEntity<JsonNode> response) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         return response.getBody().get("latest_watermark").asLong();
@@ -778,6 +1042,20 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                   AND payload->>'flag_category' = ?
                 ORDER BY sync_watermark ASC
                 """, String.class, category);
+    }
+
+    private List<String> shapeRefsForSubject(UUID subjectId) {
+        return jdbcTemplate.queryForList("""
+                SELECT shape_ref
+                FROM events
+                WHERE subject_ref->>'type' = 'subject'
+                  AND subject_ref->>'id' = ?
+                  AND shape_ref NOT LIKE 'conflict_detected/%%'
+                  AND shape_ref NOT LIKE 'conflict_resolved/%%'
+                  AND shape_ref NOT LIKE 'subjects_merged/%%'
+                  AND shape_ref NOT LIKE 'subject_split/%%'
+                ORDER BY sync_watermark ASC
+                """, String.class, subjectId.toString());
     }
 
     private JsonNode findFlagFor(UUID sourceEventId, String category) {
@@ -897,5 +1175,36 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 eventId.toString());
     }
 
+    private CampaignProgress campaignProgress(List<UUID> unitSubjects, long freshThroughWatermark) {
+        int unitsWithProjectedEvents = 0;
+        int projectedEventCount = 0;
+        int unresolvedFlagCount = 0;
+        for (UUID unitSubject : unitSubjects) {
+            SubjectSummary summary = summaryFor(unitSubject);
+            if (summary.eventCount() > 0) {
+                unitsWithProjectedEvents++;
+            }
+            projectedEventCount += summary.eventCount();
+            unresolvedFlagCount += summary.flagCount();
+        }
+        return new CampaignProgress(
+                unitsWithProjectedEvents,
+                projectedEventCount,
+                unresolvedFlagCount,
+                freshThroughWatermark);
+    }
+
+    private JsonNode parse(String json) {
+        try {
+            return objectMapper.readTree(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private record PushedEvent(UUID id, ResponseEntity<JsonNode> response) {}
+    private record CampaignProgress(int unitsWithProjectedEvents,
+                                    int projectedEventCount,
+                                    int unresolvedFlagCount,
+                                    long freshThroughWatermark) {}
 }
