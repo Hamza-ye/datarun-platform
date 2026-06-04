@@ -4,6 +4,8 @@ Status: active working surface
 
 This directory defines the default post-Phase-4 agent input surface. It exists to keep future sessions from reconstructing current truth from document chronology.
 
+Keep this README stable. Change it only when the durable source categories or routing rules change. Put current status, accepted slice evidence, next-work recommendations, and dated baseline standing in `docs/status.md`, `baseline-acceptance-register.md`, and `platform-next-work-backlog.md`.
+
 ## Source Order
 
 Use sources in this order:
@@ -51,7 +53,7 @@ Stop and report instead of implementing when a request would:
 - add or imply new envelope fields or event `type` values;
 - add durable workflow-state authority;
 - rewrite normal sync watermarks or turn live sync into historical pull;
-- promote production OIDC/JWT/group/claim authority without resolving FP-011;
+- promote IdP group/claim authority, online production binding-admin APIs, or other production-auth authority expansions without a successor decision;
 - promote general trigger execution, auto-resolution, resolver reassignment, S06/entity lifecycle, field-level sensitivity, or new scope mechanisms without a successor decision;
 - treat deployer configuration as code, scope logic, or state-machine authoring;
 - claim an escape-hatch trigger without measured evidence and successor-decision routing.
