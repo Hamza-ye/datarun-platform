@@ -33,6 +33,7 @@
 | [idr-025](idr-025-pattern-definition-contract-and-delivery.md) | Pattern definition contract and delivery | active | 4-prep | decision | workflow, pattern-registry, contracts, configuration, phase-4 |
 | [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) | Conflict resolver routing and single-writer resolution | active | 4-prep | decision | conflict, authorization, resolver-routing, phase-4 |
 | [idr-027](idr-027-production-auth-principal-actor-binding.md) | Production auth principal-to-actor binding | active | post-phase-4-stabilization | decision | authorization, authentication, sync, production-auth, fp-011 |
+| [idr-028](idr-028-production-principal-binding-administration.md) | Production principal-binding administration | active | post-phase-4-stabilization | decision | authorization, authentication, production-auth, provisioning, fp-011 |
 
 ## By Component
 
@@ -70,6 +71,7 @@
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Assignment creation/end containment
 - [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Conflict API bearer-token actor binding
 - [idr-027](idr-027-production-auth-principal-actor-binding.md) — Principal-to-actor binding for production auth foundation
+- [idr-028](idr-028-production-principal-binding-administration.md) — Deployment-managed principal binding provisioning and audit
 
 ### server/identity
 - [idr-008](idr-008-server-event-producer.md) — Server event producer
@@ -88,6 +90,7 @@
 ### server/admin
 - [idr-006](idr-006-thymeleaf-admin.md) — Thymeleaf admin
 - [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Development-only flag-resolution boundary
+- [idr-028](idr-028-production-principal-binding-administration.md) — Principal binding administration is deployment-managed, not an online admin API
 
 ### mobile/data
 - [idr-003](idr-003-snake-case-json.md) — snake_case JSON

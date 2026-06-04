@@ -62,7 +62,7 @@ Claim rule: "implemented" in this file means the boundary is recorded as impleme
 - **Owns**: resolving bearer credentials to one platform `actor_id` before actor-scoped API logic runs.
 - **Inputs**: `Authorization: Bearer <credential>`, auth mode configuration, dev token table, local JWT principal claims, OIDC/JWKS issuer/audience/JWKS configuration, explicit `(issuer, subject) -> actor_id` bindings.
 - **Outputs**: authenticated actor context for sync, assignment, config, conflict, and `/api/auth/me` endpoints.
-- **Storage**: `actor_tokens` for development mode; `auth_principal_bindings` for production-auth modes.
+- **Storage**: `actor_tokens` for development mode; `auth_principal_bindings` for production-auth modes. Production binding administration is deployment-managed manifest provisioning with auditable operation history per IDR-028, not an online admin API.
 - **Forbidden**: treating JWT groups, roles, resource claims, or JWT `actor_id` claims as assignment, scope, resolver, or admin authority.
 - **Guards**: `ProductionAuthIntegrationTest`, `LocalJwtAuthCompatibilityIntegrationTest`, actor-token integration tests, scope-filtered sync and conflict-resolution tests.
 
