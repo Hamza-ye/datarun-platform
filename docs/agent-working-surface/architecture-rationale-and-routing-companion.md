@@ -1,8 +1,8 @@
 # Architecture Rationale and Routing Companion
 
-Status: **Non-authoritative architecture companion**
-Authority: `canonical-decision-ledger.md` remains the architecture authority.
-Purpose: preserve scenario-grounded reasoning, routing rules, test intent, and escape-hatch context that were compressed out of the canonical decision surface.
+> **Status**: Accepted **Non-authoritative architecture companion**
+> **Authority**: `canonical-decision-ledger.md` remains the architecture authority.
+> **Purpose**: preserve scenario-grounded reasoning, routing rules, test intent, and escape-hatch context that were compressed out of the canonical decision surface.
 
 ---
 
@@ -35,6 +35,71 @@ If this file conflicts with canonical-decision-ledger.md, the CDL wins.
 If this file conflicts with the Baseline Acceptance Register, the CDL wins on architecture and the register governs current baseline status.
 If this file describes a rationale but no CDL row supports it, treat it as advisory context only.
 ```
+
+### 0.a. Table of Content
+
+- [Architecture Rationale and Routing Companion](#architecture-rationale-and-routing-companion)
+  - [0. Authority and use rule](#0-authority-and-use-rule)
+    - [0.a. Table of Content](#0a-table-of-content)
+  - [1. Source basis](#1-source-basis)
+  - [2. Relationship to implementation status](#2-relationship-to-implementation-status)
+  - [2.1 Working-surface artifact placement](#21-working-surface-artifact-placement)
+  - [3. Professional position](#3-professional-position)
+  - [4. Decision-routing workflow](#4-decision-routing-workflow)
+    - [4.1 Routing template](#41-routing-template)
+    - [4.2 Route definitions](#42-route-definitions)
+    - [4.3 Routing checklist](#43-routing-checklist)
+  - [5. Irreversibility filter](#5-irreversibility-filter)
+    - [5.1 The three tests](#51-the-three-tests)
+    - [5.2 Classification](#52-classification)
+    - [5.3 Common classifications in this platform](#53-common-classifications-in-this-platform)
+  - [6. Configuration anti-pattern guardrails](#6-configuration-anti-pattern-guardrails)
+    - [6.1 Anti-pattern catalog](#61-anti-pattern-catalog)
+    - [6.2 Review questions](#62-review-questions)
+  - [7. Configuration artifact lifecycle model](#7-configuration-artifact-lifecycle-model)
+    - [7.1 Event-coupled lifecycle](#71-event-coupled-lifecycle)
+    - [7.2 Config-package lifecycle](#72-config-package-lifecycle)
+  - [8. Configuration dependency graph and cascade rules](#8-configuration-dependency-graph-and-cascade-rules)
+    - [8.1 Dependency graph](#81-dependency-graph)
+    - [8.2 Uniform cascade rule](#82-uniform-cascade-rule)
+    - [8.3 Architecture tests](#83-architecture-tests)
+  - [9. Device/server evaluation contract](#9-deviceserver-evaluation-contract)
+    - [9.1 Default split](#91-default-split)
+    - [9.2 Rule](#92-rule)
+    - [9.3 Why this matters](#93-why-this-matters)
+  - [10. Rationale cards](#10-rationale-cards)
+    - [ARC-001: Canonical authority closure](#arc-001-canonical-authority-closure)
+    - [ARC-002: Operational truth and derived state](#arc-002-operational-truth-and-derived-state)
+    - [ARC-003: Mechanism/instance split](#arc-003-mechanisminstance-split)
+    - [ARC-004: Envelope-touching change filter](#arc-004-envelope-touching-change-filter)
+    - [ARC-005: Activity attribution and provenance honesty](#arc-005-activity-attribution-and-provenance-honesty)
+    - [ARC-006: Shape version permanence](#arc-006-shape-version-permanence)
+    - [ARC-007: Closed event type vocabulary](#arc-007-closed-event-type-vocabulary)
+    - [ARC-008: Config boundary and expression ceiling](#arc-008-config-boundary-and-expression-ceiling)
+    - [ARC-009: Deploy-time validation over runtime discovery](#arc-009-deploy-time-validation-over-runtime-discovery)
+    - [ARC-010: Server authority for side effects](#arc-010-server-authority-for-side-effects)
+    - [ARC-011: Scope mechanism as security boundary](#arc-011-scope-mechanism-as-security-boundary)
+    - [ARC-012: Domain uniqueness detects; resolution decides elsewhere](#arc-012-domain-uniqueness-detects-resolution-decides-elsewhere)
+    - [ARC-013: Flag lifecycle and detect-before-act](#arc-013-flag-lifecycle-and-detect-before-act)
+    - [ARC-014: Workflow state is derived from platform patterns](#arc-014-workflow-state-is-derived-from-platform-patterns)
+    - [ARC-015: Sensitivity and retention routing](#arc-015-sensitivity-and-retention-routing)
+  - [11. Architecture test seed backlog](#11-architecture-test-seed-backlog)
+    - [11.1 Event/envelope tests](#111-eventenvelope-tests)
+    - [11.2 Projection tests](#112-projection-tests)
+    - [11.3 Identity tests](#113-identity-tests)
+    - [11.4 Assignment/authority/sync tests](#114-assignmentauthoritysync-tests)
+    - [11.5 Configuration package tests](#115-configuration-package-tests)
+    - [11.6 Expression tests](#116-expression-tests)
+    - [11.7 Workflow/policy tests](#117-workflowpolicy-tests)
+  - [12. Escape-hatch and platform-evolution routing table](#12-escape-hatch-and-platform-evolution-routing-table)
+  - [13. “Do not promote” reminders](#13-do-not-promote-reminders)
+  - [14. How to use this in post-Phase-4 work](#14-how-to-use-this-in-post-phase-4-work)
+    - [14.1 For a new feature request](#141-for-a-new-feature-request)
+    - [14.2 For an implementation prompt](#142-for-an-implementation-prompt)
+    - [14.3 For scenario walkthroughs](#143-for-scenario-walkthroughs)
+  - [15. Source-to-card map](#15-source-to-card-map)
+  - [16. Review checklist before accepting this file into docs](#16-review-checklist-before-accepting-this-file-into-docs)
+  - [17. Steward note](#17-steward-note)
 
 ---
 
@@ -125,7 +190,7 @@ Every architecture-sensitive work item should be routed through this sequence be
 11. Decide route: implement, verify baseline candidate, spec clarify, CDL successor decision, or defer.
 ```
 
-### 3.1 Routing template
+### 4.1 Routing template
 
 Use this template for future work items.
 
@@ -160,7 +225,7 @@ route:
   - defer_as_platform_evolution
 ```
 
-### 3.2 Route definitions
+### 4.2 Route definitions
 
 | Route | Use when | Example |
 |---|---|---|
@@ -225,7 +290,7 @@ Acceptance rule: do not move a Baseline Acceptance Register row to `baseline_acc
 
 The irreversibility filter is the main mechanism for preventing accidental architecture change.
 
-### 4.1 The three tests
+### 5.1 The three tests
 
 | Test | Question | If yes |
 |---|---|---|
@@ -233,7 +298,7 @@ The irreversibility filter is the main mechanism for preventing accidental archi
 | Contract-surface impact | Do more than two independent components need to agree on this shape/meaning? | Treat as contract-level. |
 | Wrong-choice recovery | Would recovery require data migration, protocol change, or coordinated mobile/server upgrade? | Do not treat as implementation detail. |
 
-### 4.2 Classification
+### 5.2 Classification
 
 | Classification | Meaning | Route |
 |---|---|---|
@@ -242,7 +307,7 @@ The irreversibility filter is the main mechanism for preventing accidental archi
 | Initial strategy | Evolvable implementation or package strategy. | Implementation/spec, baseline status tracked. |
 | Leaf implementation | Local code/tooling choice. | Implementation issue only. |
 
-### 4.3 Common classifications in this platform
+### 5.3 Common classifications in this platform
 
 | Change | Likely classification | Default route |
 |---|---|---|
@@ -267,7 +332,7 @@ The irreversibility filter is the main mechanism for preventing accidental archi
 
 The configuration boundary exists to support “set up, not built” without creating a second programming platform inside deployment config.
 
-### 5.1 Anti-pattern catalog
+### 6.1 Anti-pattern catalog
 
 | Anti-pattern | Smell | Review response |
 |---|---|---|
@@ -279,7 +344,7 @@ The configuration boundary exists to support “set up, not built” without cre
 | Complexity blind spots | Large shapes/rules/triggers become unreviewable but still deploy. | Enforce budgets and warnings. |
 | Inner-platform effect | Activity or pattern config becomes a deployer-authored processing pipeline. | Stop and route to platform evolution. |
 
-### 5.2 Review questions
+### 6.2 Review questions
 
 ```text
 Does this config feature need a debugger?
@@ -299,7 +364,7 @@ Any “yes” answer means the work must not proceed as ordinary configuration.
 
 The exploration found two lifecycle families. This distinction should stay visible.
 
-### 6.1 Event-coupled lifecycle
+### 7.1 Event-coupled lifecycle
 
 | Artifact | Event reference | Versioning | Change effect |
 |---|---|---|---|
@@ -314,7 +379,7 @@ All referenced versions must remain available.
 Breaking changes require explicit versioning/migration treatment.
 ```
 
-### 6.2 Config-package lifecycle
+### 7.2 Config-package lifecycle
 
 | Artifact | Event reference | Versioning | Change effect |
 |---|---|---|---|
@@ -338,7 +403,7 @@ Historical event meaning is not changed by package mutation.
 
 ## 8. Configuration dependency graph and cascade rules
 
-### 7.1 Dependency graph
+### 8.1 Dependency graph
 
 ```text
 Shape  <- Logic Rule        (references shape fields)
@@ -352,7 +417,7 @@ Activity <- Campaign        (campaign is specialized activity composition)
 
 In the current canonical model, treat “trigger/policy” carefully: general trigger execution and auto-resolution execution may still be deferred depending on current scope. Do not promote deferred execution by copying exploration terms.
 
-### 7.2 Uniform cascade rule
+### 8.2 Uniform cascade rule
 
 All config dependency failures are caught at deploy-time validation.
 
@@ -367,7 +432,7 @@ All config dependency failures are caught at deploy-time validation.
 | Trigger graph cycle | Unbounded side effects. | Reject package. |
 | Trigger graph path > allowed bound | Policy chain too deep. | Reject package. |
 
-### 7.3 Architecture tests
+### 8.3 Architecture tests
 
 Create/keep tests that prove:
 
@@ -386,7 +451,7 @@ Create/keep tests that prove:
 
 ## 9. Device/server evaluation contract
 
-### 8.1 Default split
+### 9.1 Default split
 
 | Capability | Device | Server | Rule |
 |---|---:|---:|---|
@@ -403,14 +468,14 @@ Create/keep tests that prove:
 | Workflow pattern state | Local scoped view | Complete server view | Both derive; server is authoritative for complete dataset. |
 | L3 policy side effects | No by default | Yes | Persistent side effects belong on server unless a successor decision says otherwise. |
 
-### 8.2 Rule
+### 9.2 Rule
 
 ```text
 If a mechanism creates persistent events, changes policy participation, resolves flags, or affects sync visibility, default it to server-side authority.
 Device behavior may be advisory or local projection unless the CDL explicitly makes it authoritative.
 ```
 
-### 8.3 Why this matters
+### 9.3 Why this matters
 
 Device-side policy side effects create three risks:
 
@@ -428,7 +493,7 @@ Each card below is a reusable review unit. Cards do not introduce decisions; the
 
 ---
 
-### ARC-001 — Canonical authority closure
+### ARC-001: Canonical authority closure
 
 ```yaml
 status: active_context
@@ -454,7 +519,7 @@ If yes, stop and route back to the CDL.
 
 ---
 
-### ARC-002 — Operational truth and derived state
+### ARC-002: Operational truth and derived state
 
 ```yaml
 status: active_context
@@ -483,7 +548,7 @@ If yes, reject or reframe as event append plus projection.
 
 ---
 
-### ARC-003 — Mechanism/instance split
+### ARC-003: Mechanism/instance split
 
 ```yaml
 status: active_context
@@ -491,6 +556,7 @@ source:
   - canonical-decision-ledger.md
 cdl_rows:
   - CDL-005
+  - CDL-049
   - CDL-055
   - CDL-056
 purpose: Keep platform-owned semantics separate from deployer-authored instances.
@@ -521,7 +587,7 @@ If yes, route to platform evolution or reject.
 
 ---
 
-### ARC-004 — Envelope-touching change filter
+### ARC-004: Envelope-touching change filter
 
 ```yaml
 status: active_context
@@ -555,7 +621,7 @@ If yes, successor CDL decision plus migration/evidence plan.
 
 ---
 
-### ARC-005 — Activity attribution and provenance honesty
+### ARC-005: Activity attribution and provenance honesty
 
 ```yaml
 status: active_context
@@ -588,7 +654,7 @@ If yes, reject.
 
 ---
 
-### ARC-006 — Shape version permanence
+### ARC-006: Shape version permanence
 
 ```yaml
 status: active_context
@@ -618,7 +684,7 @@ If yes, reject or design explicit migration.
 
 ---
 
-### ARC-007 — Closed event type vocabulary
+### ARC-007: Closed event type vocabulary
 
 ```yaml
 status: active_context
@@ -651,7 +717,7 @@ Before proposing a new event type, prove all five:
 
 ---
 
-### ARC-008 — Config boundary and expression ceiling
+### ARC-008: Config boundary and expression ceiling
 
 ```yaml
 status: active_context
@@ -690,13 +756,14 @@ If yes, it is crossing the boundary.
 
 ---
 
-### ARC-009 — Deploy-time validation over runtime discovery
+### ARC-009: Deploy-time validation over runtime discovery
 
 ```yaml
 status: active_context
 source:
   - 15-adr4-session3-part1-structural-coherence.md
 cdl_rows:
+  - CDL-041
   - CDL-044
 purpose: Prevent broken config from reaching devices.
 routing_rule: Config dependency failures are rejected before package publication.
@@ -719,7 +786,7 @@ If yes, validation is missing.
 
 ---
 
-### ARC-010 — Server authority for side effects
+### ARC-010: Server authority for side effects
 
 ```yaml
 status: active_context
@@ -749,7 +816,7 @@ If yes, reject or route to successor platform design.
 
 ---
 
-### ARC-011 — Scope mechanism as security boundary
+### ARC-011: Scope mechanism as security boundary
 
 ```yaml
 status: active_context
@@ -781,7 +848,7 @@ If yes, the design is unsafe.
 
 ---
 
-### ARC-012 — Domain uniqueness detects; resolution decides elsewhere
+### ARC-012: Domain uniqueness detects; resolution decides elsewhere
 
 ```yaml
 status: active_context
@@ -810,7 +877,7 @@ If yes, split detection from resolution.
 
 ---
 
-### ARC-013 — Flag lifecycle and detect-before-act
+### ARC-013: Flag lifecycle and detect-before-act
 
 ```yaml
 status: active_context
@@ -819,6 +886,7 @@ source:
 cdl_rows:
   - CDL-003
   - CDL-004
+  - CDL-015
   - CDL-028
   - CDL-035
   - CDL-051
@@ -844,7 +912,7 @@ If yes, reject.
 
 ---
 
-### ARC-014 — Workflow state is derived from platform patterns
+### ARC-014: Workflow state is derived from platform patterns
 
 ```yaml
 status: active_context
@@ -876,7 +944,7 @@ If yes, reject.
 
 ---
 
-### ARC-015 — Sensitivity and retention routing
+### ARC-015: Sensitivity and retention routing
 
 ```yaml
 status: active_context
@@ -909,7 +977,7 @@ If yes, reject or route to platform security design.
 
 These are not all implementation tests. They are **boundary tests** that protect the architecture.
 
-### 10.1 Event/envelope tests
+### 11.1 Event/envelope tests
 
 ```text
 - Reject any envelope type outside the six-value set.
@@ -919,7 +987,7 @@ These are not all implementation tests. They are **boundary tests** that protect
 - Verify device_time does not drive conflict or projection ordering.
 ```
 
-### 10.2 Projection tests
+### 11.2 Projection tests
 
 ```text
 - Rebuild projection from events and compare to materialized projection.
@@ -930,7 +998,7 @@ These are not all implementation tests. They are **boundary tests** that protect
 - Downstream source-chain contamination is computed without redundant flag cascade.
 ```
 
-### 10.3 Identity tests
+### 11.3 Identity tests
 
 ```text
 - Merge appends subjects_merged/v1 and does not rewrite old subject_ref values.
@@ -940,7 +1008,7 @@ These are not all implementation tests. They are **boundary tests** that protect
 - Lineage cycles cannot be constructed.
 ```
 
-### 10.4 Assignment/authority/sync tests
+### 11.4 Assignment/authority/sync tests
 
 ```text
 - Actor with no active assignment receives no ordinary scoped data.
@@ -951,7 +1019,7 @@ These are not all implementation tests. They are **boundary tests** that protect
 - Scope contraction purges or retains according to policy without mutating canonical server events.
 ```
 
-### 10.5 Configuration package tests
+### 11.5 Configuration package tests
 
 ```text
 - Broken field reference blocks package publish.
@@ -963,7 +1031,7 @@ These are not all implementation tests. They are **boundary tests** that protect
 - At-most-two-version behavior does not invalidate in-progress old-shape work.
 ```
 
-### 10.6 Expression tests
+### 11.6 Expression tests
 
 ```text
 - Expressions cannot call functions.
@@ -973,7 +1041,7 @@ These are not all implementation tests. They are **boundary tests** that protect
 - Server/mobile evaluator fixtures match exactly.
 ```
 
-### 10.7 Workflow/policy tests
+### 11.7 Workflow/policy tests
 
 ```text
 - Pattern state is derived, not stored in events.
@@ -1028,7 +1096,7 @@ Do not accept implementation assertions into the baseline without acceptance evi
 
 ## 14. How to use this in post-Phase-4 work
 
-### 13.1 For a new feature request
+### 14.1 For a new feature request
 
 1. Map it to a scenario pressure.
 2. Identify whether it is a new mechanism or new configuration instance.
@@ -1038,7 +1106,7 @@ Do not accept implementation assertions into the baseline without acceptance evi
 6. Write boundary tests before implementation.
 7. Update the Baseline Acceptance Register after verification.
 
-### 13.2 For an implementation prompt
+### 14.2 For an implementation prompt
 
 Every agent prompt that modifies architecture-sensitive code should include:
 
@@ -1049,7 +1117,7 @@ Baseline: baseline-acceptance-register.md records current acceptance status.
 Rule: do not promote deferred items; do not introduce envelope/type/config-boundary changes without explicit successor decision.
 ```
 
-### 13.3 For scenario walkthroughs
+### 14.3 For scenario walkthroughs
 
 Scenario walkthroughs should produce:
 
@@ -1086,15 +1154,17 @@ runtime evidence needs
 ## 16. Review checklist before accepting this file into docs
 
 ```text
-[ ] Every card cites only rationale, not new decisions.
-[ ] Every active architectural constraint is backed by a CDL row.
-[ ] No deferred item is described as implemented or active.
-[ ] No phase-file assertion is treated as baseline acceptance without verification.
-[ ] Mechanism/instance distinction is explicit.
-[ ] Device advisory vs server authoritative split is explicit.
-[ ] All architecture-test seeds are framed as boundary checks, not proof of current implementation.
-[ ] The file header states CDL authority clearly.
+[x] Every card cites only rationale, not new decisions.
+[x] Every active architectural constraint is backed by a CDL row.
+[x] No deferred item is described as implemented or active.
+[x] No phase-file assertion is treated as baseline acceptance without verification.
+[x] Mechanism/instance distinction is explicit.
+[x] Device advisory vs server authoritative split is explicit.
+[x] All architecture-test seeds are framed as boundary checks, not proof of current implementation.
+[x] The file header states CDL authority clearly.
 ```
+
+Reviewed 2026-06-05 — all checks passed. Sub-heading numbering aligned to parent sections.
 
 ---
 
