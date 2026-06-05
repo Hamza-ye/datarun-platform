@@ -48,13 +48,32 @@ Read only this packet by default:
 
 ## Expected Output
 
-Either:
+Create:
+
+```text
+docs/agent-working-surface/device-data-expiry-retention-boundary-decision.md
+```
+
+The artifact should decide one of:
 
 - explicit deferral under BAR-106 with rationale;
-- a decision artifact or IDR selecting a bounded retention/security implementation route; or
+- a successor IDR/security-platform decision for a bounded retention/security implementation route;
 - a stop report naming the security/platform decision needed before routing can continue.
 
 Do not add implementation rows until the decision lands.
+
+## Backlog And Status Updates
+
+If the artifact lands:
+
+- Mark NW-054 `accepted`.
+- Update `docs/status.md` Current Routing with the recommendation.
+- Update `docs/agent-working-surface/platform-next-work-backlog.md` with evidence and any successor rows/prompts.
+
+If the route is blocked by a security/platform decision:
+
+- Leave NW-054 `future_decision` or mark it `blocked` with the missing decision named.
+- Do not invent an implementation path.
 
 ## Verification
 
@@ -65,6 +84,14 @@ git diff --check
 ```
 
 Inspect any Markdown tables you add.
+
+## Commit Boundary
+
+Use one commit if the slice lands cleanly:
+
+```text
+docs(retention): decide device data expiry boundary
+```
 
 ## Stop And Report
 

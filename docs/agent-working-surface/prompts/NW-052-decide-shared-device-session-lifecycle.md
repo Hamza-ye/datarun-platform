@@ -49,12 +49,33 @@ Read only this packet by default:
 
 ## Expected Output
 
-Either:
+Create:
 
-- a decision artifact or IDR, if current routing explicitly requires one; or
+```text
+docs/agent-working-surface/shared-device-session-lifecycle-decision.md
+```
+
+The artifact should decide one of:
+
+- explicit deferral;
+- a minimum shared-device session lifecycle model;
+- a successor IDR/platform decision for local partitioning, purge, per-actor watermarks, or offline actor-switch behavior;
 - a stop report naming the product/security choice needed before a decision can be written.
 
 If a successor implementation is selected, add a bounded implementation row and prompt only after the decision lands.
+
+## Backlog And Status Updates
+
+If the artifact lands:
+
+- Mark NW-052 `accepted`.
+- Update `docs/status.md` Current Routing with the recommendation.
+- Update `docs/agent-working-surface/platform-next-work-backlog.md` with evidence and any successor rows/prompts.
+
+If the route is blocked by a product/security decision:
+
+- Leave NW-052 `future_decision` or mark it `blocked` with the missing decision named.
+- Do not invent an implementation path.
 
 ## Verification
 
@@ -65,6 +86,14 @@ git diff --check
 ```
 
 Inspect any Markdown tables you add.
+
+## Commit Boundary
+
+Use one commit if the slice lands cleanly:
+
+```text
+docs(auth): decide shared device sessions
+```
 
 ## Stop And Report
 

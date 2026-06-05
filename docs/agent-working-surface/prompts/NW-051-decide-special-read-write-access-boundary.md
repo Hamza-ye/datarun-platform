@@ -52,12 +52,33 @@ Read only this packet by default:
 
 ## Expected Output
 
-Either:
+Create:
 
-- a decision artifact or IDR, if current routing explicitly requires one; or
+```text
+docs/agent-working-surface/special-read-write-access-boundary-decision.md
+```
+
+The artifact should decide one of:
+
+- explicit deferral;
+- simple current-scope auditor visibility as ordinary assignment/config posture;
+- a successor IDR/platform decision for broad audit/history or emergency/special write access;
 - a stop report naming the product/security decision needed before a decision can be written.
 
-If a successor implementation is chosen, add a new bounded backlog row and prompt. Do not add implementation rows until the decision lands.
+If a successor implementation is chosen, add a new bounded backlog row and prompt only after the decision lands. Do not add implementation rows from this slice before the decision is explicit.
+
+## Backlog And Status Updates
+
+If the artifact lands:
+
+- Mark NW-051 `accepted`.
+- Update `docs/status.md` Current Routing with the recommendation.
+- Update `docs/agent-working-surface/platform-next-work-backlog.md` with evidence and any successor rows/prompts.
+
+If the route is blocked by a product/security decision:
+
+- Leave NW-051 `future_decision` or mark it `blocked` with the missing decision named.
+- Do not invent an implementation path.
 
 ## Verification
 
@@ -68,6 +89,14 @@ git diff --check
 ```
 
 Inspect any Markdown tables you add.
+
+## Commit Boundary
+
+Use one commit if the slice lands cleanly:
+
+```text
+docs(auth): decide special access boundary
+```
 
 ## Stop And Report
 

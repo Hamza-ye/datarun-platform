@@ -49,13 +49,32 @@ Read only this packet by default:
 
 ## Expected Output
 
-Either:
+Create:
+
+```text
+docs/agent-working-surface/subject-query-custom-scope-boundary-decision.md
+```
+
+The artifact should decide one of:
 
 - explicit deferral with rationale that `subject_list` remains sufficient;
-- a decision artifact or IDR selecting a bounded BAR-108 platform-owned scope mechanism route; or
+- a successor IDR/platform decision for a bounded BAR-108 platform-owned scope mechanism route;
 - a stop report naming the product/platform decision needed before routing can continue.
 
 Do not add implementation rows until the decision lands.
+
+## Backlog And Status Updates
+
+If the artifact lands:
+
+- Mark NW-053 `accepted`.
+- Update `docs/status.md` Current Routing with the recommendation.
+- Update `docs/agent-working-surface/platform-next-work-backlog.md` with evidence and any successor rows/prompts.
+
+If the route is blocked by a product/platform decision:
+
+- Leave NW-053 `future_decision` or mark it `blocked` with the missing decision named.
+- Do not invent an implementation path.
 
 ## Verification
 
@@ -66,6 +85,14 @@ git diff --check
 ```
 
 Inspect any Markdown tables you add.
+
+## Commit Boundary
+
+Use one commit if the slice lands cleanly:
+
+```text
+docs(auth): decide subject scope boundary
+```
 
 ## Stop And Report
 
