@@ -49,27 +49,35 @@ def print_full_decision(d):
 
 def main():
     parser = argparse.ArgumentParser(description="Query and slice the Datarun Canonical Decision Ledger.")
-    parser.add_argument("--id", help="Retrieve details for a specific decision ID (e.g. CDL-001)")
+    parser.add_argument("--id", help="Retrieve details for a specific decision ID, or a list of IDs separated by commas/spaces (e.g. CDL-001,CDL-002)")
     parser.add_argument("--tag", help="Filter decisions by tag (e.g. sync, identity, envelope)")
     parser.add_argument("--category", help="Filter decisions by category (e.g. '3. Canonical event envelope')")
     parser.add_argument("--search", help="Search titles, decisions, constraints, and must-not-happen for text")
-    parser.add_argument("--format", choices=["concise", "full", "json"], default="concise", 
-                        help="Output format (default: concise for lists, full for single ID)")
+    parser.add_argument("--format", choices=["concise", "full", "json"], default=None, 
+                        help="Output format (default: concise for lists, full for ID queries)")
 
     args = parser.parse_args()
     decisions = load_decisions()
 
+    # Determine default format
+    fmt = args.format
+    if fmt is None:
+        fmt = "full" if args.id else "concise"
+
     # Query by ID
     if args.id:
-        target_id = args.id.upper().strip()
-        found = [d for d in decisions if d["id"] == target_id]
+        target_ids = [tid.upper().strip() for tid in args.id.replace(",", " ").split() if tid.strip()]
+        found = [d for d in decisions if d["id"] in target_ids]
         if not found:
-            print(f"No decision found with ID: {target_id}", file=sys.stderr)
+            print(f"No decisions found with IDs: {', '.join(target_ids)}", file=sys.stderr)
             sys.exit(1)
-        if args.format == "json":
-            print(json.dumps(found[0], indent=2))
+        if fmt == "json":
+            print(json.dumps(found if len(found) > 1 else found[0], indent=2))
+        elif fmt == "concise":
+            print_concise_table(found)
         else:
-            print_full_decision(found[0])
+            for d in found:
+                print_full_decision(d)
         return
 
     # Filter/Search
@@ -100,9 +108,9 @@ def main():
         results = filtered
 
     # Output results
-    if args.format == "json":
+    if fmt == "json":
         print(json.dumps(results, indent=2))
-    elif args.format == "full":
+    elif fmt == "full":
         for d in results:
             print_full_decision(d)
     else:

@@ -14,7 +14,7 @@ To keep LLM context windows clean, do not read the full 2600+ line ledger for ev
 
 1. **Markdown Ledger (Authority):** [canonical-decision-ledger.md](canonical-decision-ledger.md)
 2. **Structured JSON Index:** [canonical-decision-ledger.json](canonical-decision-ledger.json)
-3. **Query CLI Tool:** Run `python3 scripts/query_cdl.py --help` to search/slice decisions by tags, ID, category, or search term.
+3. **Query CLI Tool:** Run `python3 scripts/query_cdl.py --help` to search/slice decisions by tags, ID(s), category, or search term.
 
 ### Querying Ledger via Command Line
 
@@ -24,8 +24,9 @@ An agent can run queries like:
 # Find all decisions related to identity or merges
 python3 scripts/query_cdl.py --tag identity
 
-# Get details for a specific decision
+# Get details for a specific decision, or multiple decisions (comma/space-separated)
 python3 scripts/query_cdl.py --id CDL-021
+python3 scripts/query_cdl.py --id CDL-001,CDL-002
 
 # Search for decisions containing specific text
 python3 scripts/query_cdl.py --search "watermark"

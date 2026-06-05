@@ -164,11 +164,11 @@ def generate_readme(decisions):
     readme_content.append("### Formats Available\n\n")
     readme_content.append("1. **Markdown Ledger (Authority):** [canonical-decision-ledger.md](canonical-decision-ledger.md)\n")
     readme_content.append("2. **Structured JSON Index:** [canonical-decision-ledger.json](canonical-decision-ledger.json)\n")
-    readme_content.append("3. **Query CLI Tool:** Run `python3 scripts/query_cdl.py --help` to search/slice decisions by tags, ID, category, or search term.\n\n")
+    readme_content.append("3. **Query CLI Tool:** Run `python3 scripts/query_cdl.py --help` to search/slice decisions by tags, ID(s), category, or search term.\n\n")
     
     readme_content.append("### Querying Ledger via Command Line\n\n")
     readme_content.append("An agent can run queries like:\n\n")
-    readme_content.append("```bash\n# Find all decisions related to identity or merges\npython3 scripts/query_cdl.py --tag identity\n\n# Get details for a specific decision\npython3 scripts/query_cdl.py --id CDL-021\n\n# Search for decisions containing specific text\npython3 scripts/query_cdl.py --search \"watermark\"\n```\n\n")
+    readme_content.append("```bash\n# Find all decisions related to identity or merges\npython3 scripts/query_cdl.py --tag identity\n\n# Get details for a specific decision, or multiple decisions (comma/space-separated)\npython3 scripts/query_cdl.py --id CDL-021\npython3 scripts/query_cdl.py --id CDL-001,CDL-002\n\n# Search for decisions containing specific text\npython3 scripts/query_cdl.py --search \"watermark\"\n```\n\n")
 
 
     readme_content.append("## Categorized Decision Catalog\n\n")

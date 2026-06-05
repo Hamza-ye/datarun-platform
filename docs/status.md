@@ -109,8 +109,6 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1–2 persisted four s
 - `docker-compose.test.yml` — test DB with host networking
 - `.github/workflows/server-ci.yml` — GitHub Actions CI
 
-**Repository**: https://github.com/Hamza-ye/datarun-platform.git
-
 ---
 
 ## What's Next

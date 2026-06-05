@@ -10,13 +10,14 @@ Default implementer packet:
 2. The top **Current Routing** section of `docs/status.md`.
 3. The relevant section of `docs/implementation/module-interfaces.md` for the touched module.
 4. The exact `contracts/` files and code paths named by the task or discovered from the touched surface.
+5. the agent working surface `docs/agent-working-surface`.
 
 Open additional docs only when routed:
 
-- `docs/flagged-positions.md` - read the summary table first; open a specific FP section only when its `Blocks` field or topic matches the task, or when adding/updating an FP.
-- ADRs, CDL/IDRs - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision.
+- `docs/flagged-positions.md` - read the summary table first; open a specific FP section only when its `Blocks` field or topic matches the task, or when adding/updating an FP (no new FPs should be added here, it's gonna be drained and retired with what the baseline decide and route later).
+- CDL/IDRs/ - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision.
 - `docs/architecture/`, phase specs, scenarios, and exploration archives - use for architecture-steward planning, drift investigation, or when a task explicitly depends on that context.
-- `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` 
+- `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` (the CDL) the current architecture decision authority
 
 If these sources disagree with each other or with the code, stop and surface the drift before implementing.
 
@@ -26,11 +27,29 @@ When routed, to prevent loading the entire 2600+ line `docs/architecture/adrs-de
 
 - **JSON Catalog:** Refer to `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.json` for a structured, low-token representation of all decisions, constraints, and guardrails.
 - **README Index:** Refer to `docs/architecture/adrs-decisions-canonical-ledger/README.md` for a categorized directory linking direct line numbers to specific decisions.
-- **Query Tool:** Run `python3 scripts/query_cdl.py --tag <tag>`, `--id <CDL-ID>`, or `--search "<term>"` to extract exactly the relevant decisions and constraints for your task.
+- **Query Tool:**
+
+```zsh
+python3 scripts/query_cdl.py --help
+usage: query_cdl.py [-h] [--id ID] [--tag TAG] [--category CATEGORY] [--search SEARCH] [--format {concise,full,json}]
+
+Query and slice the Datarun Canonical Decision Ledger.
+
+options:
+  -h, --help            show this help message and exit
+  --id ID               Retrieve details for a specific decision ID, or a list of IDs separated by commas/spaces (e.g.
+                        CDL-001,CDL-002)
+  --tag TAG             Filter decisions by tag (e.g. sync, identity, envelope)
+  --category CATEGORY   Filter decisions by category (e.g. '3. Canonical event envelope')
+  --search SEARCH       Search titles, decisions, constraints, and must-not-happen for text
+  --format {concise,full,json}
+                        Output format (default: concise for lists, full for ID queries)
+
+```
 
 ## Steward And Implementer Split
 
-- Architecture-steward sessions may read broadly, reconcile status, and produce bounded implementation prompts.
+- Architecture-steward sessions may read broadly, reconcile status, produce bounded implementation prompts, and dispatch working agent.
 - Implementer sessions should read only the bounded task packet plus the default implementer packet above.
 - A task packet should state goal, files to read, authority/guardrails, forbidden work, expected tests, commit boundary, and stop-and-report conditions.
 
@@ -43,8 +62,6 @@ When routed, to prevent loading the entire 2600+ line `docs/architecture/adrs-de
 
 ## Contracts Guidance
 
-Treat `contracts/` as the first place to check when changing data that crosses server/mobile/process boundaries. Do not assume it is a generated-code source or that every schema is runtime-validated everywhere.
-
 Current contract roles:
 
 - `contracts/envelope.schema.json` defines the 11-field event envelope and closed 6-value envelope `type` vocabulary. The server validates against a bundled copy in `server/src/main/resources/envelope.schema.json`; `EnvelopeSchemaParityTest` requires the two copies to match.
@@ -56,21 +73,11 @@ Current contract roles:
 - `contracts/pattern-definition.schema.json` and `contracts/patterns/*.json` define platform-owned workflow pattern definitions. Server runtime loads these as the Pattern Registry source of truth, config packages deliver referenced definitions under `pattern_definitions`, and mobile reads the packaged definitions.
 - `contracts/fixtures/*.json` are shared equivalence fixtures used by server and mobile tests.
 
-Update contracts and tests together when touching:
-
-- envelope fields, envelope `type`, `shape_ref` conventions, or identity reference shape;
-- sync request/response fields, pagination, watermarks, auth-visible sync behavior, or scope filtering;
-- deployer shape DSL fields, field types, uniqueness semantics, or config package wire keys;
-- platform shape payloads;
-- flag categories, resolver semantics, severity/resolvability, or detection ordering;
-- platform pattern refs, state/transition semantics, projection semantics, or pattern definition delivery;
-- server/mobile projection or expression equivalence behavior.
-
-If a contract appears stale, do not silently code around it. Either update it in the same slice or report the drift clearly.
+when changing data that crosses server/mobile/process boundaries, treat `contracts/` as the first place to check. Do not assume it is a generated-code source or that every schema is runtime-validated everywhere.
 
 ## Architectural Guardrails
 
-- No new envelope fields or envelope `type` values without ADR-level authority.
+- No new envelope fields or envelope `type` values without Architecture level authority.
 - Structurally valid state/policy anomalies are accepted and flagged; do not reject them unless the relevant ADR/IDR explicitly says structural validation applies.
 - Authority and state are projections from events unless a documented B-to-C escape hatch has been explicitly activated.
 - Respect the active phase boundaries in `docs/status.md`. Do not implement work listed as blocked or deferred.
@@ -82,19 +89,17 @@ From the repository root:
 
 ```bash
 # Start test database
-docker compose -f docker-compose.test.yml up -d test-db
+cd /home/hamza/datarun-platform && docker compose -f docker-compose.test.yml up -d test-db
 
 # Run all server tests
-(cd server && ./mvnw test)
+(cd /home/hamza/datarun-platform/server && ./mvnw test)
 
 # Run one server test class
-(cd server && ./mvnw test -Dtest=ConfigIntegrationTest)
+(cd /home/hamza/datarun-platform/server && ./mvnw test -Dtest=ConfigIntegrationTest)
 
 # Run all mobile tests
-(cd mobile && flutter test)
+(cd /home/hamza/datarun-platform/mobile && flutter test)
 ```
-
-Use targeted tests for the touched surface first, then broaden when shared detector, sync, config, projection, or contract paths change.
 
 ## Working Practice
 
