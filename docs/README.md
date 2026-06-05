@@ -47,8 +47,9 @@ An evaluator assessing product intent should read the problem-space sources firs
 3. **Design foundations**: [Principles](principles.md) → [Behavioral Patterns](behavioral_patterns.md)
 4. **Architecture description**: [Architecture](architecture/) — the consolidated reference: primitives, contracts, cross-cutting concerns, boundaries
 5. **Architecture decisions**: [Canonical Decision Ledger](architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md) via its [README index](architecture/adrs-decisions-canonical-ledger/README.md). The old ADR files are provenance, not the active agent-facing authority.
-6. **Implementation**: [Implementation plan](implementation/plan.md) — technology stack, module boundaries, phased build order
-7. **Decision reasoning** *(optional)*: [Exploration index](exploration/) — the event storms, stress tests, and coherence audits behind each ADR
+6. **Rationale and routing**: [Architecture Rationale and Routing Companion](milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md) — non-authoritative reasoning, change classification, and test-intent context; the CDL still wins on decisions.
+7. **Implementation**: [Implementation plan](implementation/plan.md) and [Module Interface Baseline](implementation/module-interfaces.md) — technology stack, module boundaries, phased build order, and implemented boundary map
+8. **Decision reasoning** *(optional)*: [Exploration index](exploration/) — the event storms, stress tests, and coherence audits behind each ADR
 
 ### By area
 
@@ -63,6 +64,7 @@ An evaluator assessing product intent should read the problem-space sources firs
 | [Behavioral Patterns](behavioral_patterns.md)   | 12 behavioral patterns extracted from scenarios — the first narrowing step                                                 |
 | [Architecture](architecture/)                   | Consolidated architecture description — 11 primitives, 21 contracts, 8 cross-cutting concerns, 29 boundary classifications |
 | [Canonical Decision Ledger](architecture/adrs-decisions-canonical-ledger/) | Active architecture decision authority from Phase 4 closure forward |
+| [Architecture Rationale and Routing Companion](milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md) | Non-authoritative rationale, routing, escape-hatch, and test-intent companion for steward work |
 | [ADRs](adrs/)                                   | Retired/provenance Architecture Decision Records; use only when routed by current docs or a drift investigation            |
 | [Exploration](exploration/)                     | Decision analyses grouped by ADR — event storms, stress tests, coherence audits                                            |
 | [Experiments](experiments/)                     | Prototypes and scenario walk-throughs                                                                                       |
@@ -73,12 +75,14 @@ An evaluator assessing product intent should read the problem-space sources firs
 
 ## Current Status
 
-The project has completed its initial architecture sequence and Phase 4 implementation. Current implementation standing is tracked by the post-Phase-4 working surface, especially the [Baseline Acceptance Register](agent-working-surface/baseline-acceptance-register.md) and [Platform Next Work Backlog](agent-working-surface/platform-next-work-backlog.md).
+The project has completed its initial architecture sequence and Phase 4 implementation. Current implementation standing is tracked by [docs/status.md](status.md) and the post-Phase-4 working surface, especially the [Baseline Acceptance Register](agent-working-surface/baseline-acceptance-register.md), [Platform Next Work Backlog](agent-working-surface/platform-next-work-backlog.md), and [Module Interface Baseline](implementation/module-interfaces.md).
 
 Current high-level standing:
 
-1. ✅ Initial scenarios defined — 27 scenario entries, including post-Phase-4 thickening scenarios.
-2. ✅ Cross-cutting concerns identified — offline work and access control.
-3. ✅ Architecture authority consolidated — the CDL is the active authority from Phase 4 closure forward.
-4. ✅ Phase 4 complete — workflow/policy implementation landed and first-wave post-Phase-4 runtime probes now cover S00, S19, S21, and S27.
-5. 🔄 Stabilization — BAR-010 config package delivery remains the main baseline candidate before selecting a new product/architecture phase.
+1. Initial scenarios are defined: 27 scenario entries, including post-Phase-4 thickening scenarios.
+2. Architecture authority is consolidated: the CDL is the active authority from Phase 4 closure forward.
+3. Phase 4 is complete: workflow/policy implementation landed and the completion audit is green.
+4. Accepted baseline standing includes BAR-001 through BAR-015 and BAR-104, including config package delivery and production OIDC/JWT/Keycloak authority.
+5. Post-Phase-4 runtime evidence now covers S00, S19, S21, S22, S23, S26, and S27.
+6. Assignment administration has moved beyond containment-only exposure: IDR-029 and NW-050 added server-side `assignment_admin.create` / `assignment_admin.end` command capability before IDR-024 containment.
+7. Remaining production-shaping work should route through `docs/status.md`, the working-surface backlog, the module interface baseline, and the rationale companion rather than legacy phase chronology.

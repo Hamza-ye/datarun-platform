@@ -12,6 +12,8 @@ Mechanism/instance rule: module boundaries must preserve the CDL mechanism/insta
 
 Claim rule: "implemented" in this file means the boundary is recorded as implemented by the current documentation set. Operational proof still requires source-code inspection, test evidence, or scenario execution. Current acceptance status lives in `docs/agent-working-surface/baseline-acceptance-register.md`.
 
+Routing rule: when a task needs rationale, change classification, escape-hatch context, or architecture test intent, use `docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md` as non-authoritative companion context. The CDL wins on decisions; `docs/status.md` and the Baseline Acceptance Register govern current implementation standing.
+
 ## Event Store
 
 - **Owns**: append-only event persistence, idempotent event insert, sync watermark assignment, ordered event reads.
