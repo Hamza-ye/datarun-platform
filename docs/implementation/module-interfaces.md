@@ -1,6 +1,6 @@
 # Module Interface Baseline
 
-> Current as of the 2026-06-05 NW-050 assignment-admin command-capability checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
+> Current as of the 2026-06-05 NW-055 shared-device actor-partition checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
 
 ## Authority role
 
@@ -77,6 +77,15 @@ Routing rule: when a task needs rationale, change classification, escape-hatch c
 - **Forbidden**: treating JWT groups, roles, resource claims, or JWT `actor_id` claims as assignment, scope, resolver, or admin authority.
 - **Guards**: `ProductionAuthIntegrationTest`, `LocalJwtAuthCompatibilityIntegrationTest`, actor-token integration tests, scope-filtered sync and conflict-resolution tests.
 
+## Sync Surfaces
+
+- **Owns**: push/pull exchange, bearer-bound actor authorship checks, scope-filtered pull, actor-scoped pull/config bookkeeping, and subject-history backfill.
+- **Inputs**: structurally valid event envelopes, authenticated actor context, `device_id`, client `last_pull_watermark`, pull `since_watermark`, config version hints, and subject-history page requests.
+- **Outputs**: persisted accepted events, conflict/domain/transition flag events, scope-filtered event pages, config version discovery, and subject-history pages.
+- **Storage**: events append through Event Store; `device_sync_state` is operational bookkeeping keyed by `(device_id, actor_id)` and stores normal pull/config observation only.
+- **Forbidden**: normal live-sync watermark rewrites, using `device_sync_state` as authority, broad audit/history pull, new scope mechanisms, mobile-authored authority, or changing envelope fields/types.
+- **Guards**: `SyncControllerIntegrationTest`, `ScopeFilteredSyncIntegrationTest`, `SubjectHistoryBackfillIntegrationTest`, `ProductionAuthIntegrationTest`, mobile sync tests.
+
 ## Shape Registry
 
 - **Owns**: deployer-authored form shape DSL versions in the `shapes` table.
@@ -103,6 +112,15 @@ Routing rule: when a task needs rationale, change classification, escape-hatch c
 - **Storage**: `config_packages` and `deployment_config`.
 - **Forbidden**: packaging platform payload schemas as deployer `shapes`, mutating sync watermarks.
 - **Guards**: `ConfigIntegrationTest`, `DeployTimeValidatorTest`, `ConfigPackageSchemaContractTest`, platform payload boundary tests. BAR-010 is accepted for config package delivery.
+
+## Mobile Actor Session And Local Store
+
+- **Owns**: one active actor session on device, server-resolved actor id/token storage, per-actor local mutable partitions, event assembly authorship, mobile sync request credentials, and advisory/projection data derived from the active actor partition.
+- **Inputs**: `/api/auth/me` actor context, bearer credentials, active actor selection/resume, locally assembled events, pulled events, and config packages.
+- **Outputs**: actor-authored local events, actor-scoped pending-push batches, local subject/projection/advisory views, active/pending config state, and actor-scoped normal sync progress.
+- **Storage**: shared device id and device-global sequence; actor-local token, watermark, and subject-history cursor keys; per-actor SQLite databases containing events, pending push, local assignments, aliases, projections derived from those rows, and current/pending config package state.
+- **Forbidden**: writable offline sessions for unknown actors, UI-selected actor authority, cross-actor request signing, shared mutable local event/config state, reauthoring pending events, mobile authoritative rejection, expiry/decommission/recovery policy beyond safe sealing, or IdP claim/group authority.
+- **Guards**: `sync_service_test.dart`, `event_assembler_test.dart`, `config_store_test.dart`, `projection_engine_test.dart`, `pattern_projection_test.dart`, `selective_retain_test.dart`, full mobile `flutter test`.
 
 ## Pattern Registry
 

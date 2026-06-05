@@ -37,16 +37,25 @@ class _DatarunAppState extends State<DatarunApp> {
   }
 
   Future<void> _bootstrap() async {
+    final previousAppState = _appState;
+    if (previousAppState != null) {
+      await previousAppState.eventStore.close();
+    }
+
     final identity = widget.identity;
     final serverUrl = identity.serverUrl!;
-    final eventStore = EventStore();
+    final eventStore = EventStore(actorId: identity.actorId);
     final projectionEngine = ProjectionEngine(eventStore);
     final eventAssembler = EventAssembler(identity, eventStore);
     final configStore = ConfigStore(eventStore);
     await configStore.init();
     final contextResolver = ContextResolver(eventStore, projectionEngine);
-    final syncService =
-        SyncService(eventStore, identity, serverUrl, configStore);
+    final syncService = SyncService(
+      eventStore,
+      identity,
+      serverUrl,
+      configStore,
+    );
 
     final appState = AppState(
       eventStore: eventStore,

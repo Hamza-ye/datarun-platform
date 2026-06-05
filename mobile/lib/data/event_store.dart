@@ -12,9 +12,13 @@ class EventStore {
   static const _assignmentTable = 'local_assignments';
 
   final String? _dbPath; // null = default platform path
+  final String? actorId;
+  final String? _dbDirectory;
   Database? _db;
 
-  EventStore({String? dbPath}) : _dbPath = dbPath;
+  EventStore({String? dbPath, this.actorId, String? dbDirectory})
+    : _dbPath = dbPath,
+      _dbDirectory = dbDirectory;
 
   Future<Database> get database async {
     _db ??= await _initDb();
@@ -22,13 +26,23 @@ class EventStore {
   }
 
   Future<Database> _initDb() async {
-    final path = _dbPath ?? join(await getDatabasesPath(), _dbName);
+    final path =
+        _dbPath ??
+        join(
+          _dbDirectory ?? await getDatabasesPath(),
+          actorId == null ? _dbName : _dbNameForActor(actorId!),
+        );
     return openDatabase(
       path,
       version: _dbVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+  }
+
+  static String _dbNameForActor(String actorId) {
+    final safeActorId = actorId.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    return 'datarun_actor_$safeActorId.db';
   }
 
   Future<void> _onCreate(Database db, int version) async {

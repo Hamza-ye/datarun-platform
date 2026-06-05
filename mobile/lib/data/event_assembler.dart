@@ -22,6 +22,11 @@ class EventAssembler {
     required Map<String, dynamic> payload,
     String? activityRef,
   }) async {
+    final actorId = _identity.actorId;
+    if (_eventStore.actorId != null && _eventStore.actorId != actorId) {
+      throw StateError('EventStore actor partition is not active');
+    }
+
     final sid = subjectId ?? _uuid.v4();
     final seq = await _identity.nextSeq();
 
@@ -31,7 +36,7 @@ class EventAssembler {
       shapeRef: shapeRef,
       activityRef: activityRef,
       subjectRef: {'type': 'subject', 'id': sid},
-      actorRef: {'type': 'actor', 'id': _identity.actorId},
+      actorRef: {'type': 'actor', 'id': actorId},
       deviceId: _identity.deviceId,
       deviceSeq: seq,
       syncWatermark: null, // Server-assigned

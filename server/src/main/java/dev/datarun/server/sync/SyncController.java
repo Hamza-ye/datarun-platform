@@ -232,7 +232,7 @@ public class SyncController {
 
         // Update device_sync_state on each pull (bookkeeping)
         if (request.deviceId() != null) {
-            updateDeviceSyncState(request.deviceId(), latestWatermark,
+            updateDeviceSyncState(request.deviceId(), actorId, latestWatermark,
                     request.configVersion());
         }
 
@@ -510,31 +510,32 @@ public class SyncController {
         return null;
     }
 
-    private void updateDeviceSyncState(UUID deviceId, long latestWatermark,
+    private void updateDeviceSyncState(UUID deviceId, UUID actorId, long latestWatermark,
                                        Integer configVersion) {
         try {
             if (configVersion != null && configVersion > 0) {
                 jdbc.update("""
-                    INSERT INTO device_sync_state (device_id, last_pull_watermark, last_pull_at, config_version)
-                    VALUES (?::uuid, ?, NOW(), ?)
-                    ON CONFLICT (device_id) DO UPDATE
+                    INSERT INTO device_sync_state (device_id, actor_id, last_pull_watermark, last_pull_at, config_version)
+                    VALUES (?::uuid, ?::uuid, ?, NOW(), ?)
+                    ON CONFLICT (device_id, actor_id) DO UPDATE
                     SET last_pull_watermark = GREATEST(device_sync_state.last_pull_watermark, EXCLUDED.last_pull_watermark),
                         last_pull_at = NOW(),
                         config_version = GREATEST(device_sync_state.config_version, EXCLUDED.config_version)
                     """,
-                        deviceId.toString(), latestWatermark, configVersion);
+                        deviceId.toString(), actorId.toString(), latestWatermark, configVersion);
             } else {
                 jdbc.update("""
-                    INSERT INTO device_sync_state (device_id, last_pull_watermark, last_pull_at)
-                    VALUES (?::uuid, ?, NOW())
-                    ON CONFLICT (device_id) DO UPDATE
+                    INSERT INTO device_sync_state (device_id, actor_id, last_pull_watermark, last_pull_at)
+                    VALUES (?::uuid, ?::uuid, ?, NOW())
+                    ON CONFLICT (device_id, actor_id) DO UPDATE
                     SET last_pull_watermark = GREATEST(device_sync_state.last_pull_watermark, EXCLUDED.last_pull_watermark),
                         last_pull_at = NOW()
                     """,
-                        deviceId.toString(), latestWatermark);
+                        deviceId.toString(), actorId.toString(), latestWatermark);
             }
         } catch (Exception e) {
-            log.warn("Failed to update device_sync_state for {}: {}", deviceId, e.getMessage());
+            log.warn("Failed to update device_sync_state for {}/{}: {}",
+                    deviceId, actorId, e.getMessage());
         }
     }
 

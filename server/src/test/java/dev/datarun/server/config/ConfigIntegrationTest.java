@@ -1130,9 +1130,12 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         restTemplate.exchange("/api/sync/pull", HttpMethod.POST, entity, JsonNode.class);
 
         // Verify device_sync_state has config_version
-        Integer configVer = jdbcTemplate.queryForObject(
-                "SELECT config_version FROM device_sync_state WHERE device_id = ?::uuid",
-                Integer.class, deviceId.toString());
+        Integer configVer = jdbcTemplate.queryForObject("""
+                SELECT config_version
+                FROM device_sync_state
+                WHERE device_id = ?::uuid
+                  AND actor_id = ?::uuid
+                """, Integer.class, deviceId.toString(), TEST_ACTOR_ID.toString());
         assertEquals(1, configVer.intValue());
     }
 

@@ -46,7 +46,7 @@ Production-auth mode requires `Authorization: Bearer <credential>`. Development
 |-------|------|----------|---------|-------------|
 | `events` | array | yes | — | Events to push. |
 | `device_id` | string (uuid) | no | — | Pushing device's identity. Used for concurrency detection bookkeeping. |
-| `last_pull_watermark` | integer | no | 0 | The highest `sync_watermark` this device received in its most recent pull. Used for concurrency detection. If omitted, defaults to `0` (conservative — treats all existing events as potentially unseen). |
+| `last_pull_watermark` | integer | no | 0 | The highest `sync_watermark` this device actor-partition received in its most recent pull. Used for concurrency detection. If omitted, defaults to `0` (conservative — treats all existing events as potentially unseen). |
 
 ### Response — `200 OK`
 
@@ -105,7 +105,7 @@ Device requests events it hasn't seen. Server returns events after the given wat
 |-------|------|----------|---------|-------------|
 | `since_watermark` | integer | yes | — | Return events with `sync_watermark > since_watermark`. Use `0` for first sync. |
 | `limit` | integer | no | 100 | Max events to return. Server may cap this. |
-| `device_id` | string (uuid) | no | — | Pulling device's identity. When provided, the server records pull progress in `device_sync_state`. |
+| `device_id` | string (uuid) | no | — | Pulling device's identity. When provided, the server records pull progress in `device_sync_state` for `(device_id, authenticated actor_id)`. |
 | `config_version` | integer | no | — | Config version currently known by the device. When provided with `device_id`, stored for sync/config observability. |
 
 ### Response — `200 OK`

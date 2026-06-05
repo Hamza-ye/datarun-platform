@@ -311,12 +311,12 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         assertThat(flagSources("scope_violation")).doesNotContain(staleOfflineVisit.id().toString());
         assertThat(summaryFor(knownUnit).eventCount()).isEqualTo(3);
 
-        long liveWatermarkBeforeBackfill = deviceWatermark(DEVICE_B);
+        long liveWatermarkBeforeBackfill = deviceWatermark(DEVICE_B, WORKER_B);
         ResponseEntity<JsonNode> handoffBackfill =
                 subjectHistory(tokenB, knownUnit, CAMPAIGN_ACTIVITY, 0, 200);
         assertThat(handoffBackfill.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertEventContains(handoffBackfill, knownVisit, firstDistribution, duplicateDistribution.id());
-        assertThat(deviceWatermark(DEVICE_B)).isEqualTo(liveWatermarkBeforeBackfill);
+        assertThat(deviceWatermark(DEVICE_B, WORKER_B)).isEqualTo(liveWatermarkBeforeBackfill);
 
         assertAssignmentEventsAreAdministration();
 
@@ -416,7 +416,7 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         assertThat(workerAKnowledge).isGreaterThan(syncWatermark(historicalB1));
         assertCaptureContains(initialPull, visibleA1);
         assertCaptureExcludes(initialPull, historicalB1);
-        long liveDeviceWatermarkBeforeBackfill = deviceWatermark(DEVICE_A);
+        long liveDeviceWatermarkBeforeBackfill = deviceWatermark(DEVICE_A, WORKER_A);
         assertThat(liveDeviceWatermarkBeforeBackfill).isEqualTo(workerAKnowledge);
 
         assignmentService.endAssignment(workerAInitialId, ADMIN, "S19 stale authority");
@@ -440,7 +440,7 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         assertThat(pullAfterReassignment.getBody().get("latest_watermark").asLong())
                 .isGreaterThanOrEqualTo(workerAKnowledge);
 
-        long liveDeviceWatermarkAfterPull = deviceWatermark(DEVICE_A);
+        long liveDeviceWatermarkAfterPull = deviceWatermark(DEVICE_A, WORKER_A);
         ResponseEntity<JsonNode> oldScopeBackfill =
                 subjectHistory(tokenA, subjectA1, CAMPAIGN_ACTIVITY, 0, 100);
         assertThat(oldScopeBackfill.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -452,7 +452,7 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
                 .contains(historicalB1.toString());
         assertThat(newScopeBackfill.getBody().get("next_cursor").asLong())
                 .isGreaterThanOrEqualTo(syncWatermark(historicalB1));
-        assertThat(deviceWatermark(DEVICE_A)).isEqualTo(liveDeviceWatermarkAfterPull);
+        assertThat(deviceWatermark(DEVICE_A, WORKER_A)).isEqualTo(liveDeviceWatermarkAfterPull);
     }
 
     @Test
@@ -1160,12 +1160,13 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
         return count;
     }
 
-    private long deviceWatermark(UUID deviceId) {
+    private long deviceWatermark(UUID deviceId, UUID actorId) {
         return jdbcTemplate.queryForObject("""
                 SELECT last_pull_watermark
                 FROM device_sync_state
                 WHERE device_id = ?::uuid
-                """, Long.class, deviceId.toString());
+                  AND actor_id = ?::uuid
+                """, Long.class, deviceId.toString(), actorId.toString());
     }
 
     private int eventCount(UUID eventId) {

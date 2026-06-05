@@ -20,9 +20,13 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     identity = await DeviceIdentity.init();
+    await identity.activateActorSession(
+      actorId: '11111111-1111-1111-1111-111111111111',
+      token: 'test-token',
+    );
     dbPath =
         '${Directory.systemTemp.path}/datarun_asm_${DateTime.now().microsecondsSinceEpoch}.db';
-    store = EventStore(dbPath: dbPath);
+    store = EventStore(dbPath: dbPath, actorId: identity.actorId);
     assembler = EventAssembler(identity, store);
   });
 
@@ -77,7 +81,10 @@ void main() {
     });
 
     test('uses the server-resolved actor id for event authorship', () async {
-      await identity.setActorId('11111111-1111-1111-1111-111111111111');
+      await identity.activateActorSession(
+        actorId: '11111111-1111-1111-1111-111111111111',
+        token: 'refreshed-token',
+      );
 
       final event = await assembler.assemble(
         subjectId: 'subj-42',

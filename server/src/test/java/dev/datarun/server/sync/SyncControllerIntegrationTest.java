@@ -30,11 +30,14 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
 
     private static final UUID DEVICE_ID = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static final UUID ACTOR_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
+    private static final UUID OTHER_ACTOR_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+    private static final String OTHER_TOKEN = "test_token_for_other_actor_000000000000000000000000000000000";
 
     @BeforeEach
     void cleanDb() {
         jdbc.execute("DELETE FROM actor_tokens");
         jdbc.execute("DELETE FROM subject_locations");
+        jdbc.execute("DELETE FROM device_sync_state");
         jdbc.execute("DELETE FROM events");
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         provisionTestToken();
@@ -209,6 +212,32 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void pull_tracksDeviceStatePerAuthenticatedActor() {
+        provisionToken(OTHER_TOKEN, OTHER_ACTOR_ID);
+        UUID sharedDeviceId = UUID.randomUUID();
+
+        ResponseEntity<JsonNode> actorPull =
+                pullEventsWithDevice(TEST_TOKEN, sharedDeviceId, 0, 1);
+        ResponseEntity<JsonNode> otherActorPull =
+                pullEventsWithDevice(OTHER_TOKEN, sharedDeviceId, 0, 2);
+
+        assertThat(actorPull.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(otherActorPull.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        Integer rowCount = jdbc.queryForObject("""
+                SELECT COUNT(*)
+                FROM device_sync_state
+                WHERE device_id = ?::uuid
+                """, Integer.class, sharedDeviceId.toString());
+        assertThat(rowCount).isEqualTo(2);
+
+        Integer actorConfig = deviceConfigVersion(sharedDeviceId, ACTOR_ID);
+        Integer otherActorConfig = deviceConfigVersion(sharedDeviceId, OTHER_ACTOR_ID);
+        assertThat(actorConfig).isEqualTo(1);
+        assertThat(otherActorConfig).isEqualTo(2);
+    }
+
+    @Test
     void s00StructuredCaptureCorrectionIsAppendOnlyIdempotentAndFlagsConcurrentAnomaly() {
         UUID subjectId = UUID.randomUUID();
         Map<String, Object> original = buildEvent(subjectId, DEVICE_ID, 1,
@@ -364,6 +393,38 @@ class SyncControllerIntegrationTest extends AbstractIntegrationTest {
         HttpHeaders headers = authHeaders();
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
         return rest.exchange("/api/sync/pull", HttpMethod.POST, entity, JsonNode.class);
+    }
+
+    private ResponseEntity<JsonNode> pullEventsWithDevice(String token, UUID deviceId,
+                                                          long sinceWatermark,
+                                                          int configVersion) {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("since_watermark", sinceWatermark);
+        request.put("limit", 100);
+        request.put("device_id", deviceId.toString());
+        request.put("config_version", configVersion);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+        return rest.exchange("/api/sync/pull", HttpMethod.POST, entity, JsonNode.class);
+    }
+
+    private void provisionToken(String token, UUID actorId) {
+        jdbc.update("""
+                INSERT INTO actor_tokens (token, actor_id, revoked)
+                VALUES (?, ?::uuid, FALSE)
+                ON CONFLICT (token) DO NOTHING
+                """, token, actorId.toString());
+    }
+
+    private Integer deviceConfigVersion(UUID deviceId, UUID actorId) {
+        return jdbc.queryForObject("""
+                SELECT config_version
+                FROM device_sync_state
+                WHERE device_id = ?::uuid
+                  AND actor_id = ?::uuid
+                """, Integer.class, deviceId.toString(), actorId.toString());
     }
 
     private String storedPayload(Map<String, Object> event) {

@@ -101,13 +101,13 @@ class SubjectHistoryBackfillIntegrationTest extends AbstractIntegrationTest {
                 null, List.of(subject), List.of(ACTIVITY),
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
         ResponseEntity<JsonNode> normalPull = pull(token, oldWatermark, 100, BACKFILL_DEVICE);
-        long deviceWatermarkBefore = deviceWatermark(BACKFILL_DEVICE);
+        long deviceWatermarkBefore = deviceWatermark(BACKFILL_DEVICE, ACTOR);
         assertThat(deviceWatermarkBefore).isEqualTo(normalPull.getBody().get("latest_watermark").asLong());
 
         ResponseEntity<JsonNode> backfill = subjectHistory(token, subject, ACTIVITY, 0, 100);
         assertThat(backfill.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        long deviceWatermarkAfter = deviceWatermark(BACKFILL_DEVICE);
+        long deviceWatermarkAfter = deviceWatermark(BACKFILL_DEVICE, ACTOR);
         assertThat(deviceWatermarkAfter).isEqualTo(deviceWatermarkBefore);
     }
 
@@ -342,12 +342,13 @@ class SubjectHistoryBackfillIntegrationTest extends AbstractIntegrationTest {
                 eventId.toString());
     }
 
-    private long deviceWatermark(UUID deviceId) {
+    private long deviceWatermark(UUID deviceId, UUID actorId) {
         return jdbcTemplate.queryForObject("""
                 SELECT last_pull_watermark
                 FROM device_sync_state
                 WHERE device_id = ?::uuid
-                """, Long.class, deviceId.toString());
+                  AND actor_id = ?::uuid
+                """, Long.class, deviceId.toString(), actorId.toString());
     }
 
     private HttpHeaders jsonHeaders() {

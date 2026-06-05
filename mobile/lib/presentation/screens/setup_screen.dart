@@ -54,9 +54,11 @@ class _SetupScreenState extends State<SetupScreen> {
         throw Exception('auth/me missing actor_id');
       }
 
-      await widget.identity.setServerUrl(url);
-      await widget.identity.setActorToken(token);
-      await widget.identity.setActorId(actorId);
+      await widget.identity.activateActorSession(
+        actorId: actorId,
+        token: token,
+        serverUrl: url,
+      );
     } on Exception {
       if (mounted) {
         setState(() => _saving = false);
