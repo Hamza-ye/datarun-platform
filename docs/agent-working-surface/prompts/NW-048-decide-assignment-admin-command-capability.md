@@ -40,7 +40,7 @@ Read only this packet by default:
 3. `docs/agent-working-surface/README.md`
 4. `docs/agent-working-surface/platform-next-work-backlog.md`
    - Read NW-043, NW-048, NW-049, and nearby accepted auth/scope rows only.
-5. `docs/agent-working-surface/assignment-admin-authority-exploration.md`
+5. `docs/agent-working-surface/artifacts/NW-043-assignment-admin-authority-exploration.md`
 6. `docs/agent-working-surface/operational-ux-layering-companion.md`
    - Use only as a guardrail for product-facing words; it is not authority.
 7. IDRs:

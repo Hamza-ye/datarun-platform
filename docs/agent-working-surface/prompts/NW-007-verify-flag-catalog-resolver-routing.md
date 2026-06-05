@@ -23,7 +23,7 @@ Read only this packet by default:
 3. `docs/implementation/module-interfaces.md`
    - Read the `server/integrity` and contracts guard references.
 4. `docs/agent-working-surface/README.md`
-5. `docs/checklists/architecture-routing-checklist.md`
+5. `docs/agent-working-surface/architecture-rationale-and-routing-companion.md`
 6. `docs/agent-working-surface/baseline-acceptance-register.md`
    - Read BAR-006 and related rows BAR-005, BAR-013 only.
 7. `docs/agent-working-surface/platform-next-work-backlog.md`

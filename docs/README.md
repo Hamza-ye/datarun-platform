@@ -47,7 +47,7 @@ An evaluator assessing product intent should read the problem-space sources firs
 3. **Design foundations**: [Principles](principles.md) → [Behavioral Patterns](behavioral_patterns.md)
 4. **Architecture description**: [Architecture](architecture/) — the consolidated reference: primitives, contracts, cross-cutting concerns, boundaries
 5. **Architecture decisions**: [Canonical Decision Ledger](architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md) via its [README index](architecture/adrs-decisions-canonical-ledger/README.md). The old ADR files are provenance, not the active agent-facing authority.
-6. **Rationale and routing**: [Architecture Rationale and Routing Companion](milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md) — non-authoritative reasoning, change classification, and test-intent context; the CDL still wins on decisions.
+6. **Rationale and routing**: [Architecture Rationale and Routing Companion](agent-working-surface/architecture-rationale-and-routing-companion.md) — non-authoritative reasoning, change classification, and test-intent context; the CDL still wins on decisions.
 7. **Implementation**: [Implementation plan](implementation/plan.md) and [Module Interface Baseline](implementation/module-interfaces.md) — technology stack, module boundaries, phased build order, and implemented boundary map
 8. **Decision reasoning** *(optional)*: [Exploration index](exploration/) — the event storms, stress tests, and coherence audits behind each ADR
 
@@ -64,7 +64,7 @@ An evaluator assessing product intent should read the problem-space sources firs
 | [Behavioral Patterns](behavioral_patterns.md)   | 12 behavioral patterns extracted from scenarios — the first narrowing step                                                 |
 | [Architecture](architecture/)                   | Consolidated architecture description — 11 primitives, 21 contracts, 8 cross-cutting concerns, 29 boundary classifications |
 | [Canonical Decision Ledger](architecture/adrs-decisions-canonical-ledger/) | Active architecture decision authority from Phase 4 closure forward |
-| [Architecture Rationale and Routing Companion](milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md) | Non-authoritative rationale, routing, escape-hatch, and test-intent companion for steward work |
+| [Architecture Rationale and Routing Companion](agent-working-surface/architecture-rationale-and-routing-companion.md) | Non-authoritative rationale, routing, escape-hatch, and test-intent companion for steward work |
 | [ADRs](adrs/)                                   | Retired/provenance Architecture Decision Records; use only when routed by current docs or a drift investigation            |
 | [Exploration](exploration/)                     | Decision analyses grouped by ADR — event storms, stress tests, coherence audits                                            |
 | [Experiments](experiments/)                     | Prototypes and scenario walk-throughs                                                                                       |

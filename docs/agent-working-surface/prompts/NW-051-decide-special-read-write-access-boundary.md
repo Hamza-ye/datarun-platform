@@ -20,9 +20,9 @@ Read only this packet by default:
 
 1. `AGENTS.md`
 2. `docs/status.md` Current Routing section only.
-3. `docs/agent-working-surface/access-exceptions-shared-device-scope-exploration.md`
+3. `docs/agent-working-surface/artifacts/NW-049-access-exceptions-shared-device-scope-exploration.md`
 4. `docs/agent-working-surface/platform-next-work-backlog.md` rows NW-049 through NW-054.
-5. `docs/agent-working-surface/assignment-admin-authority-exploration.md`
+5. `docs/agent-working-surface/artifacts/NW-043-assignment-admin-authority-exploration.md`
 6. `docs/decisions/idr-021-role-action-enforcement-model.md`
 7. `docs/decisions/idr-024-multi-axis-assignment-containment.md`
 8. `docs/decisions/idr-026-conflict-resolver-routing-and-single-writer-resolution.md`
@@ -52,24 +52,28 @@ Read only this packet by default:
 
 ## Expected Output
 
-Create:
+If the slice selects binding platform behavior, create an IDR under `docs/decisions/` using the next available IDR number.
+
+If the slice only routes, defers, compares paths, or stops for product/security input, create:
 
 ```text
-docs/agent-working-surface/special-read-write-access-boundary-decision.md
+docs/agent-working-surface/artifacts/NW-051-special-read-write-access-boundary-routing.md
 ```
 
-The artifact should decide one of:
+The output should decide one of:
 
 - explicit deferral;
 - simple current-scope auditor visibility as ordinary assignment/config posture;
 - a successor IDR/platform decision for broad audit/history or emergency/special write access;
-- a stop report naming the product/security decision needed before a decision can be written.
+- a stop report naming the product/security decision needed before a binding decision can be written.
+
+Do not create a non-authoritative file with "decision" in the filename under `docs/agent-working-surface/`.
 
 If a successor implementation is chosen, add a new bounded backlog row and prompt only after the decision lands. Do not add implementation rows from this slice before the decision is explicit.
 
 ## Backlog And Status Updates
 
-If the artifact lands:
+If the output lands:
 
 - Mark NW-051 `accepted`.
 - Update `docs/status.md` Current Routing with the recommendation.

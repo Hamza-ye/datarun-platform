@@ -83,7 +83,7 @@ Do not read broad architecture/history docs unless a directly read source routes
 Create:
 
 ```text
-docs/agent-working-surface/assignment-admin-authority-exploration.md
+docs/agent-working-surface/artifacts/NW-043-assignment-admin-authority-exploration.md
 ```
 
 The artifact should include:

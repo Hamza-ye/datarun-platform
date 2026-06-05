@@ -52,12 +52,12 @@ Read only this packet by default:
 3. `docs/agent-working-surface/README.md`
 4. `docs/agent-working-surface/platform-next-work-backlog.md`
    - Read NW-043, NW-048, NW-049, NW-050, and nearby NW-044 through NW-046 rows.
-5. `docs/agent-working-surface/assignment-admin-authority-exploration.md`
+5. `docs/agent-working-surface/artifacts/NW-043-assignment-admin-authority-exploration.md`
    - Use it to inherit the NW-043 split: assignment-admin command capability is now resolved by NW-048/NW-050; access exceptions remain separate.
 6. `docs/decisions/idr-029-assignment-admin-command-capability.md`
 7. `docs/agent-working-surface/operational-ux-layering-companion.md`
    - Use only as a product/UX vocabulary guardrail; it is not authority.
-8. `docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md`
+8. `docs/agent-working-surface/architecture-rationale-and-routing-companion.md`
    - Read the authority/use rule, routing workflow, irreversibility filter, and configuration anti-pattern guardrails. Do not treat it as decision authority.
 9. `docs/agent-working-surface/baseline-acceptance-register.md`
    - Read BAR-104, BAR-106, BAR-108, and any adjacent deferred/future-decision rows touched by your recommendation.
@@ -118,7 +118,7 @@ Do not read broad architecture/history docs or old archives unless a directly re
 Create:
 
 ```text
-docs/agent-working-surface/access-exceptions-shared-device-scope-exploration.md
+docs/agent-working-surface/artifacts/NW-049-access-exceptions-shared-device-scope-exploration.md
 ```
 
 The artifact should include:

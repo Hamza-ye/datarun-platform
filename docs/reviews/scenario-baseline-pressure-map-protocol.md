@@ -23,7 +23,7 @@ Use the normal working-surface flow:
 
 1. `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md`
    - Use `scripts/query_cdl.py`, the README index, or JSON catalog to slice.
-2. `docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md`
+2. `docs/agent-working-surface/architecture-rationale-and-routing-companion.md`
    - Rationale and change routing only.
 3. `docs/agent-working-surface/escape-hatch-register.md`
    - Measured evolution routes only.

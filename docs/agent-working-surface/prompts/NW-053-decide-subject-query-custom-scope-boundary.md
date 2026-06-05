@@ -20,11 +20,11 @@ Read only this packet by default:
 
 1. `AGENTS.md`
 2. `docs/status.md` Current Routing section only.
-3. `docs/agent-working-surface/access-exceptions-shared-device-scope-exploration.md`
+3. `docs/agent-working-surface/artifacts/NW-049-access-exceptions-shared-device-scope-exploration.md`
 4. `docs/agent-working-surface/platform-next-work-backlog.md` rows NW-049 through NW-054.
 5. `docs/decisions/idr-024-multi-axis-assignment-containment.md`
 6. `docs/decisions/idr-029-assignment-admin-command-capability.md`
-7. `docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md` sections on routing, irreversibility, configuration anti-patterns, and scope routing.
+7. `docs/agent-working-surface/architecture-rationale-and-routing-companion.md` sections on routing, irreversibility, configuration anti-patterns, and scope routing.
 8. `docs/implementation/module-interfaces.md` sections `Scope Resolver`, `Assignment Admin Capability Policy`, `Config Packager`, and sync-related notes.
 9. `contracts/shapes/assignment_created.schema.json`
 10. `contracts/sync-protocol.md`
@@ -49,23 +49,27 @@ Read only this packet by default:
 
 ## Expected Output
 
-Create:
+If the slice selects binding platform behavior, create an IDR under `docs/decisions/` using the next available IDR number.
+
+If the slice only routes, defers, compares paths, or stops for product/platform input, create:
 
 ```text
-docs/agent-working-surface/subject-query-custom-scope-boundary-decision.md
+docs/agent-working-surface/artifacts/NW-053-subject-query-custom-scope-boundary-routing.md
 ```
 
-The artifact should decide one of:
+The output should decide one of:
 
 - explicit deferral with rationale that `subject_list` remains sufficient;
 - a successor IDR/platform decision for a bounded BAR-108 platform-owned scope mechanism route;
 - a stop report naming the product/platform decision needed before routing can continue.
 
+Do not create a non-authoritative file with "decision" in the filename under `docs/agent-working-surface/`.
+
 Do not add implementation rows until the decision lands.
 
 ## Backlog And Status Updates
 
-If the artifact lands:
+If the output lands:
 
 - Mark NW-053 `accepted`.
 - Update `docs/status.md` Current Routing with the recommendation.

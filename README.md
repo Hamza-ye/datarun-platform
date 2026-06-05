@@ -12,7 +12,7 @@ Current status and routing move faster than this README. Use:
 - [docs/status.md](docs/status.md) for current routing and accepted implementation standing.
 - [docs/agent-working-surface/README.md](docs/agent-working-surface/README.md) for post-Phase-4 steward/agent working-surface routing.
 - [docs/implementation/module-interfaces.md](docs/implementation/module-interfaces.md) for implemented module boundaries.
-- [docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md](docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md) for non-authoritative rationale, change routing, and test-intent context.
+- [docs/agent-working-surface/architecture-rationale-and-routing-companion.md](docs/agent-working-surface/architecture-rationale-and-routing-companion.md) for non-authoritative rationale, change routing, and test-intent context.
 
 ## Architecture
 

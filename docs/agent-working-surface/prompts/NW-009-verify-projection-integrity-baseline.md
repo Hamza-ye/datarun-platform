@@ -24,7 +24,7 @@ Read only this packet by default:
 1. `AGENTS.md`
 2. `docs/status.md` Current Routing section only.
 3. `docs/agent-working-surface/README.md`
-4. `docs/checklists/architecture-routing-checklist.md`
+4. `docs/agent-working-surface/architecture-rationale-and-routing-companion.md`
 5. `docs/agent-working-surface/baseline-acceptance-register.md`
    - Read BAR-009, BAR-012, BAR-013, BAR-014, and related accepted rows BAR-003, BAR-004, BAR-006, BAR-007.
 6. `docs/agent-working-surface/platform-next-work-backlog.md`

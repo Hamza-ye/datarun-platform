@@ -13,7 +13,7 @@ Use sources in this order:
 1. [docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md](/docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md)
    - Role: architecture authority.
    - Use the README index, JSON catalog, or `scripts/query_cdl.py` to slice it.
-2. [docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md](/docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md)
+2. [docs/agent-working-surface/architecture-rationale-and-routing-companion.md](/docs/agent-working-surface/architecture-rationale-and-routing-companion.md)
    - Role: non-authoritative rationale, routing, test-intent, and change-classification companion.
    - CDL wins on decisions.
 3. [docs/agent-working-surface/operational-ux-layering-companion.md](/docs/agent-working-surface/operational-ux-layering-companion.md)

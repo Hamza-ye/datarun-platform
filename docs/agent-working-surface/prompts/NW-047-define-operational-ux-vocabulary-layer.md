@@ -26,7 +26,7 @@ Read only this packet by default:
    - Read NW-041 through NW-047.
 6. `docs/checkpoints/checkpoint-2026-06-04-gap-baseline-assessment.md`
    - Read the gap table, exploration list, S22 addendum, guardrails, and march orders.
-7. `docs/milestone-review/phase-4-review/architecture-rationale-and-routing-companion.md`
+7. `docs/agent-working-surface/architecture-rationale-and-routing-companion.md`
    - Read only the anti-pattern, routing, and change-classification sections relevant to UI/product vocabulary leakage.
 8. `docs/reviews/scenario-baseline-pressure-map-protocol.md`
 9. `docs/scenarios/22-coordinated-distribution-campaign-across-grouped-locations.md`

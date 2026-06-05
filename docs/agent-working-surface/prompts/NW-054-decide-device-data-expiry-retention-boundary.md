@@ -20,7 +20,7 @@ Read only this packet by default:
 
 1. `AGENTS.md`
 2. `docs/status.md` Current Routing section only.
-3. `docs/agent-working-surface/access-exceptions-shared-device-scope-exploration.md`
+3. `docs/agent-working-surface/artifacts/NW-049-access-exceptions-shared-device-scope-exploration.md`
 4. `docs/agent-working-surface/platform-next-work-backlog.md` rows NW-049 through NW-054.
 5. `docs/agent-working-surface/baseline-acceptance-register.md` rows BAR-008 and BAR-106.
 6. `docs/implementation/module-interfaces.md` sections `Event Store`, `Projection Engine`, `Scope Resolver`, and sync-related notes.
@@ -48,23 +48,27 @@ Read only this packet by default:
 
 ## Expected Output
 
-Create:
+If the slice selects binding platform behavior, create an IDR under `docs/decisions/` using the next available IDR number.
+
+If the slice only routes, defers, compares paths, or stops for security/platform input, create:
 
 ```text
-docs/agent-working-surface/device-data-expiry-retention-boundary-decision.md
+docs/agent-working-surface/artifacts/NW-054-device-data-expiry-retention-boundary-routing.md
 ```
 
-The artifact should decide one of:
+The output should decide one of:
 
 - explicit deferral under BAR-106 with rationale;
 - a successor IDR/security-platform decision for a bounded retention/security implementation route;
 - a stop report naming the security/platform decision needed before routing can continue.
 
+Do not create a non-authoritative file with "decision" in the filename under `docs/agent-working-surface/`.
+
 Do not add implementation rows until the decision lands.
 
 ## Backlog And Status Updates
 
-If the artifact lands:
+If the output lands:
 
 - Mark NW-054 `accepted`.
 - Update `docs/status.md` Current Routing with the recommendation.

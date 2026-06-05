@@ -20,7 +20,7 @@ Read only this packet by default:
 
 1. `AGENTS.md`
 2. `docs/status.md` Current Routing section only.
-3. `docs/agent-working-surface/access-exceptions-shared-device-scope-exploration.md`
+3. `docs/agent-working-surface/artifacts/NW-049-access-exceptions-shared-device-scope-exploration.md`
 4. `docs/agent-working-surface/platform-next-work-backlog.md` rows NW-049 through NW-054.
 5. `docs/decisions/idr-027-production-auth-principal-actor-binding.md`
 6. `docs/decisions/idr-028-production-principal-binding-administration.md`
@@ -49,24 +49,28 @@ Read only this packet by default:
 
 ## Expected Output
 
-Create:
+If the slice selects binding platform behavior, create an IDR under `docs/decisions/` using the next available IDR number.
+
+If the slice only routes, defers, compares paths, or stops for product/security input, create:
 
 ```text
-docs/agent-working-surface/shared-device-session-lifecycle-decision.md
+docs/agent-working-surface/artifacts/NW-052-shared-device-session-lifecycle-routing.md
 ```
 
-The artifact should decide one of:
+The output should decide one of:
 
 - explicit deferral;
-- a minimum shared-device session lifecycle model;
+- a minimum shared-device session lifecycle route;
 - a successor IDR/platform decision for local partitioning, purge, per-actor watermarks, or offline actor-switch behavior;
-- a stop report naming the product/security choice needed before a decision can be written.
+- a stop report naming the product/security choice needed before a binding decision can be written.
+
+Do not create a non-authoritative file with "decision" in the filename under `docs/agent-working-surface/`.
 
 If a successor implementation is selected, add a bounded implementation row and prompt only after the decision lands.
 
 ## Backlog And Status Updates
 
-If the artifact lands:
+If the output lands:
 
 - Mark NW-052 `accepted`.
 - Update `docs/status.md` Current Routing with the recommendation.
