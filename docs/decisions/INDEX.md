@@ -34,6 +34,8 @@
 | [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) | Conflict resolver routing and single-writer resolution | active | 4-prep | decision | conflict, authorization, resolver-routing, phase-4 |
 | [idr-027](idr-027-production-auth-principal-actor-binding.md) | Production auth principal-to-actor binding | active | post-phase-4-stabilization | decision | authorization, authentication, sync, production-auth, fp-011 |
 | [idr-028](idr-028-production-principal-binding-administration.md) | Production principal-binding administration | active | post-phase-4-stabilization | decision | authorization, authentication, production-auth, provisioning, fp-011 |
+| [idr-029](idr-029-assignment-admin-command-capability.md) | Assignment-admin command capability | active | post-phase-4-stabilization | decision | authorization, assignment, command-capability, configuration |
+| [idr-030](idr-030-shared-device-session-lifecycle.md) | Shared-device session lifecycle | active | post-phase-4-stabilization | decision | authorization, authentication, sync, mobile, retention, shared-device |
 
 ## By Component
 
@@ -47,6 +49,7 @@
 - [idr-024](idr-024-multi-axis-assignment-containment.md) — Multi-axis assignment containment in sync/auth helpers
 - [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Conflict resolution API actor binding
 - [idr-027](idr-027-production-auth-principal-actor-binding.md) — Production auth principal binding and push actor binding
+- [idr-030](idr-030-shared-device-session-lifecycle.md) — Shared-device actor-scoped sync progress and partitioning
 
 ### server/integrity
 - [idr-007](idr-007-concurrency-detection.md) — Concurrency detection
@@ -72,6 +75,8 @@
 - [idr-026](idr-026-conflict-resolver-routing-and-single-writer-resolution.md) — Conflict API bearer-token actor binding
 - [idr-027](idr-027-production-auth-principal-actor-binding.md) — Principal-to-actor binding for production auth foundation
 - [idr-028](idr-028-production-principal-binding-administration.md) — Deployment-managed principal binding provisioning and audit
+- [idr-029](idr-029-assignment-admin-command-capability.md) — Assignment-admin command capability policy
+- [idr-030](idr-030-shared-device-session-lifecycle.md) — Shared-device authenticated actor session boundary
 
 ### server/identity
 - [idr-008](idr-008-server-event-producer.md) — Server event producer
@@ -101,6 +106,8 @@
 - [idr-022](idr-022-flag-severity-and-domain-uniqueness.md) — Severity and uniqueness config parsing
 - [idr-023](idr-023-role-action-domain-boundary-and-assignment-administration.md) — Role-action config boundary
 - [idr-027](idr-027-production-auth-principal-actor-binding.md) — `/api/auth/me` actor alignment for event authorship
+- [idr-029](idr-029-assignment-admin-command-capability.md) — Assignment-admin capability may be advisory-only on mobile
+- [idr-030](idr-030-shared-device-session-lifecycle.md) — Per-actor local partitions and session switching
 
 ### mobile/domain
 - [idr-018](idr-018-expression-grammar.md) — Expression evaluator
