@@ -18,3 +18,4 @@ Current artifacts:
 
 - `NW-043-assignment-admin-authority-exploration.md`
 - `NW-049-access-exceptions-shared-device-scope-exploration.md`
+- `NW-051-special-read-write-access-boundary-routing.md`
