@@ -25,31 +25,31 @@ If these sources disagree with each other or with the code, stop and surface the
 
 When routed, to prevent loading the entire 2600+ line `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` into your context window, use the following resources:
 
-- **JSON Catalog:** Refer to `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.json` for a structured, low-token representation of all decisions, constraints, and guardrails.
 - **README Index:** Refer to `docs/architecture/adrs-decisions-canonical-ledger/README.md` for a categorized directory linking direct line numbers to specific decisions.
 - **Query Tool:**
 
-```zsh
-python3 scripts/query_cdl.py --help
-usage: query_cdl.py [-h] [--id ID] [--tag TAG] [--category CATEGORY] [--search SEARCH] [--format {concise,full,json}]
+```bash
+python3 scripts/query_cdl.py --help                  
+usage: query_cdl.py [-h] [--id ID] [--tag TAG] [--category CATEGORY] [--search SEARCH] [--format {concise,full,json}] [--list-tags]
+                    [--list-categories]
 
 Query and slice the Datarun Canonical Decision Ledger.
 
 options:
   -h, --help            show this help message and exit
-  --id ID               Retrieve details for a specific decision ID, or a list of IDs separated by commas/spaces (e.g.
-                        CDL-001,CDL-002)
-  --tag TAG             Filter decisions by tag (e.g. sync, identity, envelope)
+  --id ID               Retrieve details for a specific decision ID, or a list of IDs separated by commas/spaces (e.g. CDL-001,CDL-002)
+  --tag TAG             Filter decisions by tag(s). Accepts comma- or space-separated lists (e.g. 'sync,identity' or 'sync identity')
   --category CATEGORY   Filter decisions by category (e.g. '3. Canonical event envelope')
   --search SEARCH       Search titles, decisions, constraints, and must-not-happen for text
   --format {concise,full,json}
                         Output format (default: concise for lists, full for ID queries)
-
+  --list-tags           List all tags present in the ledger and exit
+  --list-categories     List all categories present in the ledger and exit
 ```
 
 ## Steward And Implementer Split
 
-- Architecture-steward sessions may read broadly, reconcile status, produce bounded implementation prompts, and dispatch working agent.
+- Architecture-steward sessions may read broadly, reconcile status, produce bounded implementation prompts, and dispatch working agent, or wear different roles hats when asked.
 - Implementer sessions should read only the bounded task packet plus the default implementer packet above.
 - A task packet should state goal, files to read, authority/guardrails, forbidden work, expected tests, commit boundary, and stop-and-report conditions.
 

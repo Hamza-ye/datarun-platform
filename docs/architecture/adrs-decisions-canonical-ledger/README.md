@@ -34,6 +34,12 @@ python3 scripts/query_cdl.py --search "watermark"
 
 ## Categorized Decision Catalog
 
+### General
+
+| ID | Title | Classification | Key Directives / Summary | Line Range |
+| --- | --- | --- | --- | --- |
+| CAT-000000 | **General** | *Index* |  | [LNone-12](canonical-decision-ledger.md#LNone-L12) |
+
 ### 1. Authority
 
 | ID | Title | Classification | Key Directives / Summary | Line Range |
@@ -145,4 +151,22 @@ python3 scripts/query_cdl.py --search "watermark"
 | --- | --- | --- | --- | --- |
 | CDL-055 | **Scope mechanism is platform-fixed; scope instances are configuration** | *Mechanism / config split* | The scope mechanism is platform-fixed. Initial scope types are:  ```text geographic subject_list activity ```  Scope compositio... | [L2476-2523](canonical-decision-ledger.md#L2476-L2523) |
 | CDL-056 | **Activity is deployer configuration; `activity_ref` is a contract** | *Config / contract split* | An activity is a deployer-assembled L0 configuration instance composed from platform-provided components: shapes, patterns, rol... | [L2525-2563](canonical-decision-ledger.md#L2525-L2563) |
+
+### 12. Rejected alternatives index
+
+| ID | Title | Classification | Key Directives / Summary | Line Range |
+| --- | --- | --- | --- | --- |
+| CAT-002565 | **12. Rejected alternatives index** | *Index* |  | [L2565-2599](canonical-decision-ledger.md#L2565-L2599) |
+
+### 13. Must-not-happen index
+
+| ID | Title | Classification | Key Directives / Summary | Line Range |
+| --- | --- | --- | --- | --- |
+| CAT-002600 | **13. Must-not-happen index** | *Index* |  | [L2600-2638](canonical-decision-ledger.md#L2600-L2638) |
+
+### 14. Deferred and platform-evolution boundary
+
+| ID | Title | Classification | Key Directives / Summary | Line Range |
+| --- | --- | --- | --- | --- |
+| CAT-002639 | **14. Deferred and platform-evolution boundary** | *Index* |  | [L2639-2660](canonical-decision-ledger.md#L2639-L2660) |
 

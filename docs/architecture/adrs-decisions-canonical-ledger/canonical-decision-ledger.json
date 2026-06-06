@@ -1,5 +1,20 @@
 [
   {
+    "id": "CAT-000000",
+    "title": "General",
+    "category": "General",
+    "start_line": null,
+    "end_line": 12,
+    "status": "Index",
+    "classification": "Index",
+    "sections": {
+      "Content": "# Canonical Decision Ledger\n\nStatus: **Accepted \u2014 canonical agent-facing decision surface**.\n\nPurpose: provide one settled decision surface for the platform architecture. This file states current decisions directly. Earlier ADRs, extracted ledgers, addenda, and exploration notes are provenance only and are not active agent decision surfaces.\n\nUse rule: agents and implementation/specification prompts should consume this file as the primary architectural decision input.\n\nNormalization rule: this ledger uses **mechanism** for platform-owned semantics and **configuration instance** for deployer-authored objects. The term **primitive** is not used as a broad name for capability areas or modules; when a smaller irreducible construct is needed, it must be named through its actual contract, grammar, protocol, vocabulary, or platform-owned registry.\n\n---"
+    },
+    "tags": [
+      "index"
+    ]
+  },
+  {
     "id": "CDL-000",
     "title": "Canonical surface rule",
     "category": "1. Authority",
@@ -1384,6 +1399,51 @@
     "tags": [
       "activity",
       "config-/-contract-split"
+    ]
+  },
+  {
+    "id": "CAT-002565",
+    "title": "12. Rejected alternatives index",
+    "category": "12. Rejected alternatives index",
+    "start_line": 2565,
+    "end_line": 2599,
+    "status": "Index",
+    "classification": "Index",
+    "sections": {
+      "Content": "The following alternatives are rejected across the canonical model:\n\n| Alternative | Canonical reason |\n| --- | --- |\n| Mutable current-state storage as source of truth | Loses or externalizes traceability. |\n| Mutable state plus separate audit log | Audit can diverge from primary state. |\n| Full snapshots as primary write model | Makes workflow transitions and long-running cases unnatural and duplicative. |\n| Co-primary log and materialized view | Creates two sources of truth. |\n| Server-assigned IDs for offline records | Blocks offline creation. |\n| Preallocated ID pools | Can be exhausted offline and add complexity. |\n| Last-write-wins | Causes silent data loss. |\n| Rejecting state-stale events | Loses offline work. |\n| Extra event `type` values for domain facts | Breaks closed type vocabulary. |\n| `status_changed` structural type | State transition meaning is shape + pattern, not pipeline behavior. |\n| `pattern_ref` in envelope | Pattern membership is configuration-derived. |\n| `authority_context` in envelope | Authority is projection-derived from assignments. |\n| `workflow_state` / `current_state` in events | Creates a second source of truth. |\n| Alias-first conflict detection | Erases raw-reference anomaly context. |\n| Rewriting references on merge | Violates immutability and provenance. |\n| Unmerge operation | Cannot solve post-merge attribution without rewriting or guessing. |\n| Offline merge/split | Risks stale global lineage changes. |\n| Multiple canonical conflict resolutions | No termination rule. |\n| Sync everything and hide unauthorized data | Places unauthorized data on devices. |\n| Device-side authorization as final | Rooted/stale devices cannot be trusted as authority. |\n| Deployer-authored access-control containment | Security-critical logic becomes configurable code. |\n| Device-side L3 triggers | Duplicate firing and stale divergent evaluation. |\n| Function-rich expression language | Turns configuration into programming. |\n| Deployer-authored custom state machines | Violates platform pattern closure. |\n| Automatic downstream flag propagation | Multiplies flags without adding decision value. |\n| Auto-resolution for manual-only flags | Silently dismisses security, identity, or judgment-heavy anomalies. |\n\n---"
+    },
+    "tags": [
+      "index"
+    ]
+  },
+  {
+    "id": "CAT-002600",
+    "title": "13. Must-not-happen index",
+    "category": "13. Must-not-happen index",
+    "start_line": 2600,
+    "end_line": 2638,
+    "status": "Index",
+    "classification": "Index",
+    "sections": {
+      "Content": "| Must not happen                                                                                | Covered by                |\n|------------------------------------------------------------------------------------------------|---------------------------|\n| Agents compare old ADRs, ledgers, and explorations to infer current truth.                     | CDL-000                   |\n| Existing events are overwritten or deleted.                                                    | CDL-001                   |\n| Projections become authoritative over event history.                                           | CDL-002                   |\n| Valid state-stale offline work is rejected.                                                    | CDL-003                   |\n| Unresolved flagged events trigger policy or advance workflow state.                            | CDL-004                   |\n| Platform mechanisms are treated as deployer-authored configuration.                            | CDL-005                   |\n| Envelope grows hidden authority, pattern, state, scope, or sensitivity fields.                 | CDL-006, CDL-012          |\n| Forbidden domain fact names appear as envelope `type` values.                                  | CDL-007, CDL-014          |\n| Historical events are reinterpreted under newer shapes.                                        | CDL-008, CDL-039          |\n| Activity attribution is guessed from timestamp/actor/scope.                                    | CDL-009                   |\n| Wall-clock timestamps drive correctness.                                                       | CDL-011                   |\n| Consumers identify domain facts by `type` alone.                                               | CDL-013                   |\n| Duplicate real-world subjects are silently collapsed.                                          | CDL-022                   |\n| Merge rewrites historical references.                                                          | CDL-023                   |\n| Split reassigns historical events automatically.                                               | CDL-024                   |\n| Unmerge exists as a platform operation.                                                        | CDL-025                   |\n| Identity lineage cycles become constructable.                                                  | CDL-026                   |\n| Offline devices create merge/split operations.                                                 | CDL-027                   |\n| Two resolutions are canonical for one flag.                                                    | CDL-028                   |\n| Retired-ID stale references disappear through alias projection.                                | CDL-029                   |\n| Devices receive unauthorized data as normal sync behavior.                                     | CDL-031                   |\n| Scope contraction deletes canonical event history or hides sensitive retained data only in UI. | CDL-037                   |\n| Device-authored authority claims become canonical.                                             | CDL-032                   |\n| Merge changes authorization scope of historical work.                                          | CDL-033                   |\n| Actor grants scope they do not possess.                                                        | CDL-034                   |\n| Configuration becomes an unbounded programming language.                                       | CDL-038, CDL-043, CDL-044 |\n| L3 triggers fire on both device and server.                                                    | CDL-042                   |\n| Workflow is implemented as mutable status.                                                     | CDL-047                   |\n| Flag cascades create redundant downstream flags.                                               | CDL-051                   |\n| `context.*` becomes a dynamic query language.                                                  | CDL-052                   |\n| Auto-resolution mutates flag state directly.                                                   | CDL-053                   |\n| Manual-only flags become auto-resolvable by deployment configuration.                          | CDL-054                   |\n\n---"
+    },
+    "tags": [
+      "index"
+    ]
+  },
+  {
+    "id": "CAT-002639",
+    "title": "14. Deferred and platform-evolution boundary",
+    "category": "14. Deferred and platform-evolution boundary",
+    "start_line": 2639,
+    "end_line": 2660,
+    "status": "Index",
+    "classification": "Index",
+    "sections": {
+      "Content": "The following are not current canonical decisions and must not be promoted accidentally:\n\n| Boundary | Current treatment |\n| --- | --- |\n| New envelope fields | Architecture-grade platform decision. |\n| New envelope `type` value | Architecture-grade platform decision. |\n| New identity reference type beyond the closed enum | Architecture-grade platform decision. |\n| New scope type | Platform evolution; not deployer configuration. |\n| New pattern mechanism | Platform evolution; not deployer-authored. |\n| Exact production pattern catalog and skeleton details | Platform specification and release process within pattern mechanism. |\n| Field-level sensitivity, encryption, redaction, erasure | Platform evolution / compliance design. |\n| Device-side flag pre-creation | Additive platform evolution, not deployer knob. |\n| Device-side L3 trigger execution | Platform evolution requiring explicit design. |\n| Conflict detector implementation details | Algorithmic implementation, constrained by accept-and-flag and flag representation. |\n| Projection performance strategy | Implementation strategy; event stream remains canonical. |\n| Regulatory erasure, field-level encryption, redaction, or legal de-identification after scope changes | Platform evolution / compliance design. |\n| Human resolver UX | Product/specification. |\n| Auto-resolution authoring UX | Product/specification. |\n| Import tooling details | Implementation/specification; must preserve provenance honesty. |\n| Configuration authoring syntax | Tooling/specification; runtime constraints remain canonical. |"
+    },
+    "tags": [
+      "index"
     ]
   }
 ]

@@ -21,6 +21,8 @@ def parse_ledger():
     current_decision = None
     current_section = None
     section_content = []
+    current_category_start = None
+    current_category_content = []
 
     # Regex patterns
     category_pattern = re.compile(r"^##\s+(\d+\.\s+.*)")
@@ -46,14 +48,46 @@ def parse_ledger():
             decisions.append(current_decision)
             current_decision = None
 
+    def save_current_category(end_line):
+        """If there is non-decision content directly under a category header, save it
+        as a synthetic category entry so it appears in the JSON index."""
+        nonlocal current_category, current_category_content, current_category_start, decisions
+        if current_category and current_category_content:
+            content_str = "".join(current_category_content).strip()
+            if content_str:
+                # Use the category start line to create a stable synthetic id
+                if current_category_start:
+                    cat_num = str(current_category_start).zfill(6)
+                else:
+                    cat_num = "000000"
+                cat_id = f"CAT-{cat_num}"
+                cat_entry = {
+                    "id": cat_id,
+                    "title": current_category,
+                    "category": current_category,
+                    "start_line": current_category_start,
+                    "end_line": end_line,
+                    "status": "Index",
+                    "classification": "Index",
+                    "sections": {"Content": content_str}
+                }
+                decisions.append(cat_entry)
+        # reset category content buffer
+        current_category_content = []
+        current_category_start = None
+
     for i, line in enumerate(lines):
         line_num = i + 1  # 1-indexed
 
         # Check for category change
         cat_match = category_pattern.match(line)
         if cat_match:
+            # Close any open decision and capture any category-level content
             save_current_decision(line_num - 1)
+            save_current_category(line_num - 1)
             current_category = cat_match.group(1).strip()
+            current_category_start = line_num
+            current_category_content = []
             continue
 
         # Check for horizontal rule or end of decision block
@@ -107,9 +141,17 @@ def parse_ledger():
             # Accumulate content for the active section
             if current_section:
                 section_content.append(line)
+        else:
+            # Not inside a decision: accumulate any category-level content so
+            # sections like the index pages (Rejected alternatives, Must-not-happen,
+            # Deferred boundary) are captured.
+            if current_category is not None:
+                current_category_content.append(line)
 
     # Save last decision if exists
     save_current_decision(len(lines))
+    # Save any trailing category content
+    save_current_category(len(lines))
 
     # Add tags based on category & title keywords
     for dec in decisions:

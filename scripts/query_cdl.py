@@ -19,13 +19,22 @@ def print_concise_table(decisions):
     if not decisions:
         print("No matching decisions found.")
         return
+    # Columns: ID, Title, Classification
     print(f"{'ID':<8} | {'Title':<60} | {'Classification':<30}")
     print("-" * 104)
+
+    # Columns: ID, Category, Title, Classification
+    # print(f"{'ID':<8} | {'Category':<30} | {'Title':<60} | {'Classification':<30}")
+    # print("-" * 140)
     for d in decisions:
-        title = d["title"]
+        title = d.get("title", "")
         if len(title) > 60:
             title = title[:57] + "..."
-        print(f"{d['id']:<8} | {title:<60} | {d['classification']:<30}")
+        # category = d.get("category", "")
+        # if len(category) > 30:
+        #     category = category[:27] + "..."
+        # print(f"{d.get('id',''):<8} | {category:<30} | {title:<60} | {d.get('classification',''):<30}")
+        print(f"{d.get('id',''):<10} | {title:<60} | {d.get('classification',''):<30}")
 
 def print_full_decision(d):
     print("=" * 80)
@@ -50,14 +59,36 @@ def print_full_decision(d):
 def main():
     parser = argparse.ArgumentParser(description="Query and slice the Datarun Canonical Decision Ledger.")
     parser.add_argument("--id", help="Retrieve details for a specific decision ID, or a list of IDs separated by commas/spaces (e.g. CDL-001,CDL-002)")
-    parser.add_argument("--tag", help="Filter decisions by tag (e.g. sync, identity, envelope)")
+    parser.add_argument("--tag", help="Filter decisions by tag(s). Accepts comma- or space-separated lists (e.g. 'sync,identity' or 'sync identity')")
     parser.add_argument("--category", help="Filter decisions by category (e.g. '3. Canonical event envelope')")
     parser.add_argument("--search", help="Search titles, decisions, constraints, and must-not-happen for text")
     parser.add_argument("--format", choices=["concise", "full", "json"], default=None, 
                         help="Output format (default: concise for lists, full for ID queries)")
+    parser.add_argument("--list-tags", action="store_true", help="List all tags present in the ledger and exit")
+    parser.add_argument("--list-categories", action="store_true", help="List all categories present in the ledger and exit")
 
     args = parser.parse_args()
     decisions = load_decisions()
+
+    # Support listing metadata for interactive discovery
+    if args.list_tags:
+        tags = set()
+        for d in decisions:
+            for t in d.get("tags", []):
+                tags.add(t)
+        for t in sorted(tags):
+            print(t)
+        return
+
+    if args.list_categories:
+        cats = {}
+        for d in decisions:
+            cat = d.get("category", "Uncategorized")
+            cats.setdefault(cat, 0)
+            cats[cat] += 1
+        for cat in sorted(cats.keys()):
+            print(f"{cat} ({cats[cat]})")
+        return
 
     # Determine default format
     fmt = args.format
@@ -84,8 +115,18 @@ def main():
     results = decisions
     
     if args.tag:
-        tag_query = args.tag.lower().strip()
-        results = [d for d in results if any(tag_query in t.lower() for t in d["tags"])]
+        # Allow comma- or space-separated lists, tolerate extra spaces and trailing commas
+        raw = args.tag.replace(",", " ")
+        requested = [t.lower().strip() for t in raw.split() if t.strip()]
+        if requested:
+            def matches_any_requested(d):
+                tags = [t.lower() for t in d.get("tags", [])]
+                for req in requested:
+                    for t in tags:
+                        if req in t:
+                            return True
+                return False
+            results = [d for d in results if matches_any_requested(d)]
 
     if args.category:
         cat_query = args.category.lower().strip()
