@@ -165,6 +165,8 @@ Why now: the kernel is operator-deployable with constraints, but not turnkey.
 Stop condition: stop if the route tries to use `docker-compose.yml` as
 production hardening or changes runtime contracts.
 
+---
+
 Title: Production web admin authentication and admin-authority model
 
 Type: future_decision
@@ -182,6 +184,8 @@ uses a fixed dev actor and no production admin auth.
 
 Stop condition: stop if IdP groups/roles/claims, request-body actor fields, or
 the fixed dev admin actor are proposed as production authority.
+
+---
 
 Title: Mobile OIDC/Keycloak login and token lifecycle decision
 
@@ -201,6 +205,8 @@ for a raw bearer credential.
 Stop condition: stop if mobile UI, JWT `actor_id`, or provider claims become
 actor/scope authority.
 
+---
+
 Title: Device data expiry, decommissioning, and sealed-partition recovery
 
 Type: future_decision
@@ -219,6 +225,8 @@ promise exit/decommissioning or sensitive local retention behavior yet.
 Stop condition: stop if the route deletes canonical server event history,
 rewrites normal sync watermarks, or lets one actor recover another actor's
 pending work without a security decision.
+
+---
 
 Title: Web admin/config UX productization over accepted config surfaces
 
@@ -240,6 +248,8 @@ Stop condition: stop if UX introduces scripts, deployer-authored state
 machines, new scope logic, new envelope fields/types, or new config-package
 contract sections without routing.
 
+---
+
 Title: Mobile operational vocabulary and navigation polish
 
 Type: product_design_then_implementation
@@ -258,7 +268,9 @@ platform-ish and setup/sync flows are skeletal.
 Stop condition: stop if advisory warnings become authoritative rejection or
 product labels become platform authority.
 
-Title: Reporting aggregation and import/export boundary
+---
+
+Title: Reporting aggregation plus structured import/export boundary.
 
 Type: existing future_decision route
 
@@ -270,11 +282,13 @@ Expected artifact: product/platform decision splitting scoped report views,
 reporting warehouse/export, structured import, and external interoperability.
 
 Why now: S26 proves report inputs and traceability, not a production reporting
-API or export/import product.
+API or export/import product, Domain reality will need reports, exports, and interoperability.
 
 Stop condition: stop if the route adds a reporting warehouse/API, import/export
 contract, new envelope fields/types, or broad audit/history read without
 decision authority.
+
+---
 
 Title: Conflict review queue and batch handling boundary
 
@@ -294,6 +308,8 @@ will need humane review queues and may ask for batch behavior.
 Stop condition: stop if non-designated actors resolve flags, direct flag
 mutation appears, resolver reassignment is assumed, or auto-resolution is
 implemented without route.
+
+---
 
 Title: Subject/query/custom scope pressure checkpoint
 
