@@ -83,6 +83,7 @@ If this file describes a rationale but no CDL row supports it, treat it as advis
     - [ARC-013: Flag lifecycle and detect-before-act](#arc-013-flag-lifecycle-and-detect-before-act)
     - [ARC-014: Workflow state is derived from platform patterns](#arc-014-workflow-state-is-derived-from-platform-patterns)
     - [ARC-015: Sensitivity and retention routing](#arc-015-sensitivity-and-retention-routing)
+    - [ARC-016: Pattern evolution and projection boundary](#arc-016-pattern-evolution-and-projection-boundary)
   - [11. Architecture test seed backlog](#11-architecture-test-seed-backlog)
     - [11.1 Event/envelope tests](#111-eventenvelope-tests)
     - [11.2 Projection tests](#112-projection-tests)
@@ -108,11 +109,16 @@ If this file describes a rationale but no CDL row supports it, treat it as advis
 This companion extracts durable reasoning from:
 
 - `00-exploration-framework.md`
+- `07-adr2-phase2-stress-test-results.md`
+- `09-adr2-phase3-classification-results.md`
 - `13-adr4-session1-scoping.md`
 - `15-adr4-session3-part1-structural-coherence.md`
 - `16-adr4-session3-part2-irreversibility-filter.md`
 - `17-adr4-session3-part3-adversarial-stress-tests.md`
 - `18-adr4-session3-part4-remaining-q-resolution.md`
+- `19-adr5-session1-scoping.md`
+- `21-adr5-session3-part1-structural-coherence.md`
+- `docs/reviews/pattern-core-boundary-assessment.md`
 - `config-boundary-13-18-exploration-README.md`
 - `canonical-decision-ledger.md`
 - phase implementation files only as provenance and verification leads, not authority
@@ -724,6 +730,7 @@ status: active_context
 source:
   - 13-adr4-session1-scoping.md
   - 15-adr4-session3-part1-structural-coherence.md
+  - 21-adr5-session3-part1-structural-coherence.md
 cdl_rows:
   - CDL-038
   - CDL-043
@@ -731,6 +738,10 @@ cdl_rows:
   - CDL-052
 purpose: Prevent expressions from becoming a programming language.
 routing_rule: Expressions compare known fields/context. Computation belongs in projection or platform mechanisms.
+rationale_notes:
+  - context.* is a fixed pre-resolved form-context data scope, not a dynamic lookup or query language
+  - projection-to-form context is read-only and one-directional; forms do not write projection state
+  - adding context properties is platform evolution, not deployer-authored namespace expansion
 route_to_projection_or_platform_when_needed:
   - date math
   - string manipulation
@@ -792,6 +803,7 @@ If yes, validation is missing.
 status: active_context
 source:
   - 15-adr4-session3-part1-structural-coherence.md
+  - 21-adr5-session3-part1-structural-coherence.md
   - canonical-decision-ledger.md
 cdl_rows:
   - CDL-042
@@ -799,6 +811,10 @@ cdl_rows:
   - CDL-054
 purpose: Keep persistent side effects authoritative and replayable.
 routing_rule: Device may advise; server emits authoritative flags, resolutions, and policy output events.
+rationale_notes:
+  - auto-resolution, when active, is a server-side policy that emits ordinary resolution events
+  - pattern-raised transition flags do not authorize a pattern-private resolver or direct flag mutation
+  - device-side transition checks are advisory because local projection knowledge can be stale
 architecture_tests:
   - device does not create canonical conflict flags unless explicitly authorized by successor decision
   - device role-action failure is advisory only
@@ -883,6 +899,8 @@ If yes, split detection from resolution.
 status: active_context
 source:
   - canonical-decision-ledger.md
+  - 07-adr2-phase2-stress-test-results.md
+  - 09-adr2-phase3-classification-results.md
 cdl_rows:
   - CDL-003
   - CDL-004
@@ -893,6 +911,11 @@ cdl_rows:
   - CDL-053
 purpose: Preserve uncertain evidence without producing unsafe downstream effects.
 routing_rule: Unresolved flags are visible but exclude source events from authoritative state and policy participation.
+rationale_notes:
+  - canonical flags are server-authored unless a successor decision defines device-side flag emission and deduplication
+  - exact single-writer resolution prevents recursive meta-conflicts between competing offline/online resolutions
+  - flag grouping, batch resolution, backlog pressure, and auto-resolution are operational pressure routes, not authority to bypass resolver equality
+  - conflict detection must preserve original event references; alias/projection normalization is read-side context, not a rewrite of the flagged fact
 architecture_tests:
   - flagged event remains in timeline
   - flagged event excluded from current-state projection
@@ -919,6 +942,9 @@ status: active_context
 source:
   - canonical-decision-ledger.md
   - 15-adr4-session3-part1-structural-coherence.md
+  - 19-adr5-session1-scoping.md
+  - 21-adr5-session3-part1-structural-coherence.md
+  - docs/reviews/pattern-core-boundary-assessment.md
 cdl_rows:
   - CDL-047
   - CDL-048
@@ -926,6 +952,12 @@ cdl_rows:
   - CDL-050
 purpose: Prevent workflow from becoming mutable status or deployer-authored state machines.
 routing_rule: Pattern mechanisms are platform-owned; deployers bind shapes/roles/parameters.
+rationale_notes:
+  - offline-first append-only constraints force invalid transitions to be accepted and flagged, not rejected
+  - storing workflow state in events creates a second source of truth against rebuildable projection
+  - `status_changed` is unnecessary because state significance comes from shape_ref plus activity pattern binding, not envelope type dispatch
+  - pattern roles consume existing assignment/scope mechanics; they do not create a new assignment or sync mechanism
+  - pattern definitions travel through the atomic config package; event data remains scope-filtered by normal authority
 architecture_tests:
   - no workflow_state/current_state field in events
   - no status_changed event type
@@ -970,6 +1002,44 @@ Is this claiming compliance/security through UI hiding only?
 ```
 
 If yes, reject or route to platform security design.
+
+---
+
+### ARC-016: Pattern evolution and projection boundary
+
+```yaml
+status: active_context
+source:
+  - 19-adr5-session1-scoping.md
+  - 21-adr5-session3-part1-structural-coherence.md
+  - docs/reviews/pattern-core-boundary-assessment.md
+  - canonical-decision-ledger.md
+cdl_rows:
+  - CDL-038
+  - CDL-047
+  - CDL-048
+  - CDL-049
+  - CDL-050
+  - CDL-051
+  - CDL-056
+purpose: Keep pattern extension bounded so it does not harden into accidental core.
+routing_rule: New pattern mechanisms, pattern semantics, generic traversal, and pattern-aware reporting are platform evolution routes; deployer config remains binding-only.
+architecture_tests:
+  - pattern-specific projection fields stay namespaced under pattern state or an explicitly routed report view
+  - server/mobile pattern-specific behavior has shared fixtures or equivalent parity evidence
+  - adding a new pattern semantic reviews whether the contract can express it without ad hoc server/mobile branches
+  - pattern traversal or downstream contamination indicators route through NW-046 unless purely test-local
+  - reporting/export/import surfaces that expose pattern state route through NW-044 before durable API or process-boundary contracts
+  - assignment_changed can be consumed by a pattern projection but cannot become an activity action or pattern-owned authority
+```
+
+Review question:
+
+```text
+Is pattern-specific behavior becoming a generic platform API, report column, scope rule, resolver rule, or deployer-authored state machine?
+```
+
+If yes, stop and route to NW-044, NW-046, or a successor pattern-evolution decision.
 
 ---
 
@@ -1050,6 +1120,8 @@ These are not all implementation tests. They are **boundary tests** that protect
 - Device role-action checks are advisory only.
 - General trigger/auto-resolution execution is not assumed unless explicitly in scope.
 - assignment_changed cannot be authorized through activity role-action mappings.
+- Pattern-specific projection fields remain namespaced and covered by server/mobile parity evidence.
+- Pattern traversal/reporting is not exposed as a durable API without NW-044/NW-046 routing.
 ```
 
 ---
@@ -1067,6 +1139,7 @@ The active escape-hatch register is `docs/agent-working-surface/escape-hatch-reg
 | Need cross-event validation | Add device-only rule | Device advisory + server authoritative accept-and-flag. |
 | Need custom access behavior | Add scope script | New platform-owned scope mechanism decision. |
 | Need case workflow variant | Let deployer write state machine | Add/bind platform pattern or create platform pattern mechanism. |
+| Need pattern-specific report/traversal behavior | Promote pattern_specific fields into generic report/core API | Route through NW-044 for report/export/import or NW-046 for traversal/cascade. |
 | Need sensitive field redaction | Hide field in UI | Platform security/export/retention design. |
 | Need faster projection | Make projection authoritative | Optimize/rebuildable projection; use the register only if the measured trigger is claimed. |
 | Need conflict auto-resolution | Let deployer mark any category auto | Platform resolvability change + policy validation. |
@@ -1088,6 +1161,8 @@ Do not promote field-level sensitivity/encryption/redaction without platform des
 Do not promote device-side flag pre-creation.
 Do not promote device-side L3 trigger execution.
 Do not promote mutable workflow status.
+Do not promote pattern_specific projection fields into generic platform/report vocabulary without a routed decision.
+Do not promote generic pattern traversal or downstream indicators without NW-046/NW-044 routing.
 Do not promote latest-shape reinterpretation of historical events.
 Do not accept implementation assertions into the baseline without acceptance evidence.
 ```
@@ -1141,11 +1216,16 @@ runtime evidence needs
 | Source | Preserved here as |
 |---|---|
 | `00-exploration-framework.md` | Decision-routing workflow; irreversibility and assumption discipline. |
+| `07-adr2-phase2-stress-test-results.md` | Server-authoritative flags; single-writer resolution rationale; flag backlog/batch/auto-resolution pressure as future routing. |
+| `09-adr2-phase3-classification-results.md` | Raw-reference conflict detection before alias projection; identity-lineage constraints; deferred cascade/pending-match boundaries. |
 | `13-adr4-session1-scoping.md` | Anti-pattern guardrails; configuration boundary pressure; prior-art caution. |
 | `15-adr4-session3-part1-structural-coherence.md` | Lifecycle model; dependency graph; device/server split; expression ceiling; deploy-time cascade rule. |
 | `16-adr4-session3-part2-irreversibility-filter.md` | Stored-state / contract-surface / recovery-cost filter; structural vs strategy classification. |
 | `17-adr4-session3-part3-adversarial-stress-tests.md` | `activity_ref` optionality proof; shape versioning proof; event type vocabulary proof. |
 | `18-adr4-session3-part4-remaining-q-resolution.md` | Domain uniqueness vs resolution split; scope extensibility boundary; sensitivity routing. |
+| `19-adr5-session1-scoping.md` | Projection-pattern rationale; no `status_changed`; platform pattern skeleton and deployer parameterization split. |
+| `21-adr5-session3-part1-structural-coherence.md` | ADR-5 coherence with append-only events, accept-and-flag, assignment scope, config package, anti-pattern checks, and zero envelope changes. |
+| `docs/reviews/pattern-core-boundary-assessment.md` | Pattern-core boundary guardrails; NW-044/NW-046 routing pressure; pattern-specific projection coupling watchpoint. |
 | `canonical-decision-ledger.md` | Authority closure; current binding constraints; must-not-happen and deferred boundaries. |
 | `baseline-acceptance-register.md` | Current baseline status and acceptance evidence. |
 
@@ -1160,11 +1240,12 @@ runtime evidence needs
 [x] No phase-file assertion is treated as baseline acceptance without verification.
 [x] Mechanism/instance distinction is explicit.
 [x] Device advisory vs server authoritative split is explicit.
+[x] Pattern-specific guardrails are framed as rationale/routing, not new authority.
 [x] All architecture-test seeds are framed as boundary checks, not proof of current implementation.
 [x] The file header states CDL authority clearly.
 ```
 
-Reviewed 2026-06-05 — all checks passed. Sub-heading numbering aligned to parent sections.
+Reviewed 2026-06-07 — all checks passed after adding ADR-2/ADR-5 rationale and pattern-boundary routing context. Sub-heading numbering aligned to parent sections.
 
 ---
 
