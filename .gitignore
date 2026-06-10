@@ -30,4 +30,6 @@ pgdata/
 # Test
 server/src/test/resources/application-local.properties
 
-.review/
+.review/*.md
+.review/untracked-user-notes
+.review/tasks
