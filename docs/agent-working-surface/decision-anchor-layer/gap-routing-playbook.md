@@ -36,6 +36,7 @@ Use vocabulary as a routing aid, not a new authority surface.
 | `resolver_unassigned` | DEC-CONFLICT-03 | Negative boundary | Explicit no-human-route sentinel, not fallback authority or reassignment. |
 | subject-history backfill | DEC-AUTH-02, DEC-AUTH-05, DEC-PROJECTION-01 | Strategy-protecting service | Separate authorized repair surface with independent cursor and no normal watermark mutation. |
 | shared-device actor session | DEC-AUTH-02, DEC-AUTH-05, DEC-PROJECTION-01 | Strategy-protecting service | Exactly one active server-resolved actor session; mutable local state is actor-partitioned. |
+| `context.*` | DEC-CONFIG-06, DEC-WORKFLOW-05 | Initial strategy / closed platform vocabulary | Current accepted refs are the seven IDR-018 form-context properties. Unknown `context.*` refs are deploy-time invalid; additions require platform evolution and must remain platform-fixed, read-only, pre-resolved, and non-query-like. |
 | auto-resolution execution | DEC-WORKFLOW-07, DEC-CONFLICT-03 | Policy surface | Mechanism class is accepted, but runtime execution is deferred to successor policy/trigger work. |
 
 Term collisions to keep explicit:
@@ -85,6 +86,19 @@ If yes, route to architecture. If no, classify as platform-spec, implementation/
 ### Configuration Guardrails
 
 Allowed configuration work stays inside platform-fixed mechanisms and deployer-authored instances. Reject or escalate config that becomes arbitrary code, access-control logic, resolver authority, state-machine authoring, device-side trigger execution, or unvalidated dependency cascade.
+
+Configuration Anti-pattern catalog:
+The configuration boundary exists to support “set up, not built” without creating a second programming platform inside deployment config.
+
+| Anti-pattern | Smell | Review response |
+|---|---|---|
+| Config-as-code | Deployer config needs loops, functions, scripts, recursion, or custom execution order. | Route to platform mechanism or reject. |
+| Vocabulary creep | Deployer asks for new event types, action types, scope types, or state names as ordinary config. | Keep structural vocabulary platform-owned. |
+| Implicit coupling | One config artifact silently depends on another without declared reference. | Require explicit dependency and deploy-time validation. |
+| Version coupling | Old events become invalid when config changes. | Preserve versioned interpretation or migrate explicitly. |
+| Ghost dependencies | Broken config is discovered on device or at runtime. | Fail deploy-time validation. |
+| Complexity blind spots | Large shapes/rules/triggers become unreviewable but still deploy. | Enforce budgets and warnings. |
+| Inner-platform effect | Activity or pattern config becomes a deployer-authored processing pipeline. | Stop and route to platform evolution. |
 
 ### Device/Server Evaluation Contract
 
@@ -149,7 +163,7 @@ last-reviewed: 2026-06-11
 | GAP-AUTH-03 | Activity role-action table artifact | Accepted baseline for current coarse action model | Reference-only / future finer granularity route | Current model is accepted; only future finer role-action granularity remains a route. |
 | GAP-WORKFLOW-01 | Pattern Registry inventory | Partially accepted | Platform-spec detail gap | Canonical contract and delivery are accepted. Additional platform pattern definitions route as platform-spec/platform-evolution work under Pattern Registry boundaries. |
 | GAP-WORKFLOW-02 | Pattern migration mechanics | Open | Platform-spec detail gap / implementation tooling gap | Specify migration only when concrete compatibility pressure appears; do not create durable workflow-state tables. |
-| GAP-WORKFLOW-03 | Additional `context.*` values | Open | Architecture decision gap or platform-spec detail gap | New values must stay platform-fixed, read-only, pre-resolved, and bounded; architecture review required if expression authority changes. |
+| GAP-WORKFLOW-03 | Additional `context.*` values | Current baseline fixed by NW-057; future additions open | Architecture decision gap or platform-spec detail gap | Current refs are closed to the seven IDR-018 properties and unknown `context.*` refs are deploy-time invalid. New values must stay platform-fixed, read-only, pre-resolved, and bounded; architecture review required if expression authority changes. |
 | GAP-WORKFLOW-04 | Additional auto-resolution policies | Deferred | Architecture decision gap / policy surface | Route through BAR-102/NW-045. Preserve exact designated-resolver equality and avoid direct flag mutation. |
 | GAP-CONFLICT-01 | Flag queue ergonomics | Open | Platform-spec detail gap / implementation tooling gap | UX may improve queue behavior without changing flag semantics, resolver authority, or canonical resolution. |
 | GAP-CONFLICT-02 | Domain conflict automation and batch resolution | Future decision | Architecture decision gap / platform-spec detail gap | Route through NW-045. Batch/automation must emit per-flag resolution events and preserve resolver equality. |
@@ -164,4 +178,4 @@ last-reviewed: 2026-06-11
 | GAP-CONFIG-03 | Complexity budget changes | Open | Platform-spec detail gap / architecture decision gap if guardrails weaken | Adjust only with validation evidence; weakening deploy-time guardrails requires architecture review. |
 | GAP-AUTH-04 | Cross-activity cohort materialization | Open/future decision | Architecture decision gap | Any subject/query/custom scope beyond accepted assignment axes requires formal decision. |
 | GAP-AUTH-05 | Cross-activity subject access for a second actor | Open/future decision | Architecture decision gap | Do not bypass assignment-derived access or create hidden sync scope. |
-| GAP-SCENARIO-01 | Scenario phasing for S23-S27 | Partially accepted as runtime probes | Product/problem evidence gap / platform-spec detail gap | Accepted probes provide evidence but do not add new primitives. Product/spec work should cite exact NW evidence and preserve no-new-primitive constraints. |
+| GAP-SCENARIO-01 | Scenario phasing and product/spec follow-through | S00/S19/S21/S22/S23/S26/S27 accepted as runtime probes | Product/problem evidence gap / platform-spec detail gap | Accepted probes NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, NW-033/S26, and NW-042/S22 provide evidence but do not add new primitives. Product/spec work should cite exact NW evidence and preserve no-new-primitive constraints. |

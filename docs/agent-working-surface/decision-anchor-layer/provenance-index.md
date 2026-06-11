@@ -31,6 +31,14 @@ The `.review` folder preserves extraction chronology, audit findings, correction
 | `015-decision-anchor-correction-patch.md` | First correction patch provenance. |
 | `016-stewardship-layer-assessment.md` | Adoption assessment and catch-up findings. |
 | `017-systematic-catchup-and-alignment-plan.md` | Wave plan for stabilization. |
+| `018-working-surface-promotion-index.md` | Promotion checklist for what became active working-surface material. |
+
+## Direct Promotion Rule
+
+Do not move or copy `.review` files into the active decision-anchor layer.
+Extract only claims that are compatible with the CDL, contracts, BAR/NW
+evidence, and current code standing. Candidate or untracked `.review` material
+is audit input only unless a committed provenance index explicitly keeps it.
 
 ## Retired Companion
 
