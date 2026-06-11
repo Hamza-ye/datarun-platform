@@ -13,26 +13,27 @@ Use sources in this order:
 1. [docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md](/docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md)
    - Role: architecture authority.
    - Use the README index, JSON catalog, or `scripts/query_cdl.py` to slice it.
-2. [docs/agent-working-surface/architecture-rationale-and-routing-companion.md](/docs/agent-working-surface/architecture-rationale-and-routing-companion.md)
-   - Role: non-authoritative rationale, routing, test-intent, and change-classification companion.
-   - CDL wins on decisions.
-3. [docs/agent-working-surface/operational-ux-layering-companion.md](/docs/agent-working-surface/operational-ux-layering-companion.md)
+2. [contracts/](/contracts/)
+   - Role: implementation-facing wire/process contracts: envelope, sync protocol, flag catalog, shapes, patterns, and shared fixtures.
+3. [docs/agent-working-surface/decision-anchor-layer/README.md](decision-anchor-layer/README.md)
+   - Role: active stewardship routing surface for DEC anchors and gap routing.
+   - CDL and contracts win on authority; BAR/NW govern current implementation standing and evidence.
+4. [docs/agent-working-surface/baseline-acceptance-register.md](/docs/agent-working-surface/baseline-acceptance-register.md)
+   - Role: current working status of what is accepted, candidate, deferred, or future-decision.
+5. [docs/agent-working-surface/platform-next-work-backlog.md](platform-next-work-backlog.md)
+   - Role: accepted and future-decision work routing evidence.
+6. [docs/agent-working-surface/operational-ux-layering-companion.md](/docs/agent-working-surface/operational-ux-layering-companion.md)
    - Role: non-authoritative operational UX/product vocabulary and layering guardrail for UI, reporting, workflow, and product-design slices.
    - Use it before concrete operational design/code; CDL, BAR, and contracts win on authority and accepted status.
-4. [docs/agent-working-surface/escape-hatch-register.md](/docs/agent-working-surface/escape-hatch-register.md)
+7. [docs/agent-working-surface/escape-hatch-register.md](/docs/agent-working-surface/escape-hatch-register.md)
    - Role: active routing source for measured evolution paths.
    - It is not architecture authority and does not authorize implementation by itself.
-5. [docs/README.md](/docs/README.md), [docs/constraints.md](/docs/constraints.md), and [docs/scenarios/README.md](/docs/scenarios/README.md)
+8. [docs/README.md](/docs/README.md), [docs/constraints.md](/docs/constraints.md), and [docs/scenarios/README.md](/docs/scenarios/README.md)
    - Role: vision, operational context, and scenario index.
-6. [docs/scenarios/](/docs/scenarios/) and [docs/access-control-scenario.md](/docs/access-control-scenario.md)
+9. [docs/scenarios/](/docs/scenarios/) and [docs/access-control-scenario.md](/docs/access-control-scenario.md)
    - Role: problem-space coverage.
-7. [contracts/](/contracts/)
-   - Role: current implementation-facing contracts: envelope, sync protocol, flag catalog, shapes, patterns, and shared fixtures.
-8. Phase files and IDRs
-   - Role: implementation history, design provenance, and verification leads.
-   - Use only when routed by a touched surface, a baseline row, or a drift investigation.
-9. [docs/agent-working-surface/baseline-acceptance-register.md](/docs/agent-working-surface/baseline-acceptance-register.md)
-   - Role: current working status of what is accepted, candidate, deferred, or future-decision.
+10. Phase files and IDRs
+   - Role: implementation history, design provenance, and verification leads. Future work should route through the decision-anchor layer first; use IDRs only when explicitly routed.
 
 ## Superseded Review Drafts
 
@@ -42,9 +43,9 @@ The Phase 4 evidence-pack, backlog, and escape-hatch consolidation drafts have b
 
 Do not infer current truth from document chronology.
 
-For architecture, use the CDL. For rationale and change routing, use the rationale companion. For operational UX/product vocabulary and layering, use the operational UX companion. For measured evolution paths, use the escape-hatch register as routing context only. For problem-space pressure, use scenarios and access control. For contracts, use [contracts/](/contracts/). For current implementation status, use the baseline acceptance register.
+For architecture, use the CDL. For DEC anchors, gap routing, and future-work classification, use the decision-anchor layer. For operational UX/product vocabulary and layering, use the operational UX companion. For measured evolution paths, use the escape-hatch register as routing context only. For problem-space pressure, use scenarios and access control. For contracts, use [contracts/](/contracts/). For current implementation status, use the baseline acceptance register and platform next-work backlog.
 
-Historical phase files, IDRs, audits, and review packs are provenance unless the current task is explicitly routed there.
+Historical phase files, IDRs, audits, the retired rationale companion, and review packs are provenance unless the current task is explicitly routed there.
 
 ## Stop Conditions
 

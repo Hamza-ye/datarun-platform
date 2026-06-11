@@ -10,11 +10,12 @@ Default implementer packet:
 2. The top **Current Routing** section of `docs/status.md`.
 3. The relevant section of `docs/implementation/module-interfaces.md` for the touched module.
 4. The exact `contracts/` files and code paths named by the task or discovered from the touched surface.
-5. the agent working surface `docs/agent-working-surface`.
+5. the agent working surface `docs/agent-working-surface`, especially `docs/agent-working-surface/decision-anchor-layer/README.md` for architecture-sensitive routing.
 
 Open additional docs only when routed:
 
 - `docs/flagged-positions.md` - read the summary table first; open a specific FP section only when its `Blocks` field or topic matches the task, or when adding/updating an FP (no new FPs should be added here, it's gonna be drained and retired with what the baseline decide and route later).
+- `docs/agent-working-surface/decision-anchor-layer/` - use for DEC anchors, gap routing, and deciding whether future work belongs in architecture, platform spec, implementation, policy, or product/problem evidence.
 - CDL/IDRs/ - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision.
 - `docs/architecture/`, phase specs, scenarios, and exploration archives - use for architecture-steward planning, drift investigation, or when a task explicitly depends on that context.
 - `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` (the CDL) the current architecture decision authority
