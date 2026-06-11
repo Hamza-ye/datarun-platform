@@ -8,7 +8,7 @@ Default implementer packet:
 
 1. This file.
 2. The top **Current Routing** section of `docs/status.md`.
-3. The relevant section of `docs/implementation/module-interfaces.md` for the touched module.
+3. The relevant section of `docs/implementation/module-interfaces.md` only when touching implementation code or module behavior.
 4. The exact `contracts/` files and code paths named by the task or discovered from the touched surface.
 5. the agent working surface `docs/agent-working-surface`, especially `docs/agent-working-surface/decision-anchor-layer/README.md` for architecture-sensitive routing.
 

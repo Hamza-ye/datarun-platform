@@ -12,7 +12,9 @@ Mechanism/instance rule: module boundaries must preserve the CDL mechanism/insta
 
 Claim rule: "implemented" in this file means the boundary is recorded as implemented by the current documentation set. Operational proof still requires source-code inspection, test evidence, or scenario execution. Current acceptance status lives in `docs/agent-working-surface/baseline-acceptance-register.md`.
 
-Routing rule: when a task needs rationale, change classification, gap status, or architecture test intent, use `docs/agent-working-surface/decision-anchor-layer/README.md` as the active stewardship router. Use `docs/agent-working-surface/escape-hatch-register.md` only for measured escape-hatch context. The CDL wins on decisions; contracts win on crossed wire/process boundaries; `docs/status.md`, the Baseline Acceptance Register, and the platform next-work backlog govern current implementation standing and evidence.
+Routing rule: when a task needs rationale, change classification, gap status, future-work routing, or architecture test intent, use `docs/agent-working-surface/decision-anchor-layer/README.md` as the active stewardship router. Use `docs/agent-working-surface/escape-hatch-register.md` only for measured escape-hatch context. The CDL wins on decisions; contracts win on crossed wire/process boundaries; `docs/status.md`, the Baseline Acceptance Register, and the platform next-work backlog govern current implementation standing and evidence.
+
+Non-overlap rule: this file is not a DEC record, gap register, architecture rationale companion, roadmap, or product-readiness map. Keep it as a thin code-boundary index for implementers who are already touching a module. If a future edit starts explaining why a boundary exists or where new work should route, put that in the decision-anchor layer instead and link back only when needed.
 
 ## Event Store
 
