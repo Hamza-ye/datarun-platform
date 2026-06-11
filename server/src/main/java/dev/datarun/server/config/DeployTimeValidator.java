@@ -33,6 +33,14 @@ public class DeployTimeValidator {
     private static final Set<String> SCALAR_PAYLOAD_TYPES = Set.of(
             "text", "integer", "decimal", "boolean", "date", "select",
             "location", "subject_ref", "narrative");
+    private static final Set<String> FORM_CONTEXT_REFERENCES = Set.of(
+            "context.subject_state",
+            "context.subject_pattern",
+            "context.activity_stage",
+            "context.actor.role",
+            "context.actor.scope_name",
+            "context.days_since_last_event",
+            "context.event_count");
     private static final Set<String> PATTERN_SET_KEYS = Set.of("subject", "event");
     private static final Set<String> PATTERN_BINDING_KEYS = Set.of(
             "ref", "composition", "shape_roles", "activation_roles", "participant_roles", "parameters");
@@ -844,9 +852,7 @@ public class DeployTimeValidator {
         JsonNode right = operands.get(1);
 
         validateOperandReference(left, fieldTypes, violations);
-        if (!"in".equals(op)) {
-            validateOperandReference(right, fieldTypes, violations);
-        }
+        validateOperandReference(right, fieldTypes, violations);
 
         // Ordering operator type compatibility
         if (ORDERING_OPS.contains(op)) {
@@ -911,6 +917,8 @@ public class DeployTimeValidator {
             JsonNode refNode = entry.getValue();
             if (!refNode.isTextual()) {
                 violations.add("'ref' value must be a string");
+            } else {
+                validateContextReference(refNode.asText(), violations);
             }
             // ref → matching type check deferred (would need runtime context type info)
             return;
@@ -943,7 +951,14 @@ public class DeployTimeValidator {
                 violations.add("Reference '" + text + "' — field '" + fieldName + "' not found in shape");
             }
         }
-        // entity.*, context.*, event.* — valid namespace references, can't validate further at DtV
+        validateContextReference(text, violations);
+        // entity.* and event.* are valid namespace references but cannot be validated further at DtV.
+    }
+
+    private void validateContextReference(String text, List<String> violations) {
+        if (text.startsWith("context.") && !FORM_CONTEXT_REFERENCES.contains(text)) {
+            violations.add("Unknown context reference '" + text + "'");
+        }
     }
 
     private String resolveFieldType(JsonNode operand, Map<String, String> fieldTypes) {

@@ -1,13 +1,13 @@
 # NW-057 Context Expression Boundary Verification
 
-Status: review / routed verification note
+Status: accepted
 
-Date: 2026-06-07
+Date: 2026-06-11
 
-Authority note: this review does not change CDL authority, IDR status, BAR
-status, contracts, schemas, APIs, runtime behavior, backlog priority, or
-accepted baseline standing. It records a verification finding and routes it to
-the working-surface backlog.
+Authority note: this review records the accepted NW-057 verification outcome.
+It does not change CDL authority, IDR status, contracts, schemas, APIs,
+backlog priority, or the expression grammar ceiling. The accepted evidence is
+recorded in BAR-011 and the NW backlog.
 
 ## Finding
 
@@ -15,7 +15,7 @@ IDR-018 defines `context.*` as one of seven platform-fixed form-context
 properties. The rationale companion correctly preserves the reason: `context.*`
 must remain pre-resolved, read-only, bounded, and non-query-like.
 
-Current baseline behavior mostly honors that boundary:
+Before NW-057, baseline behavior mostly honored that boundary:
 
 - mobile pre-resolves known context properties in `ContextResolver`;
 - evaluators are pure, bounded, side-effect-free, and null-safe;
@@ -24,11 +24,11 @@ Current baseline behavior mostly honors that boundary:
 - no expression surface has dynamic lookups, joins, aggregation, functions, or
   scripts.
 
-The gap is narrower: deploy-time validation currently treats any
-`context.*` reference as namespace-valid and does not enforce the seven-property
-whitelist. Unknown context references then evaluate as missing/null rather than
-failing before publication. Mobile config tests also preserve an example
-unknown context ref (`context.default_visit_type`) as ordinary expression data.
+The gap was narrower: deploy-time validation treated any `context.*` reference
+as namespace-valid and did not enforce the seven-property whitelist. Unknown
+context references then evaluated as missing/null rather than failing before
+publication. Mobile config tests also preserved an example unknown context ref
+as ordinary expression data.
 
 ## Why This Matters
 
@@ -44,28 +44,29 @@ platform needs one explicit position before implementation:
 - intentionally tolerate unknown `context.*` refs as null/missing values and
   document that behavior where agents expect it.
 
-Leaving the ambiguity informal would make the rationale companion carry a
+Leaving the ambiguity informal would have made the rationale companion carry a
 verification note, which is the wrong layer.
 
-## Route
+## Resolution
 
 Owner: config/platform steward.
 
-Trigger: before any NW-044 report-view/API, admin/config UX, or contract work
-depends on context-property closure; otherwise treat as a small P3
-contract-hygiene verification item.
+Decision: unknown `context.*` references are deploy-time invalid.
 
-Recommended backlog row: NW-057, "Verify context expression property
-boundary".
+Implementation:
 
-Exit condition:
+- `DeployTimeValidator` whitelists the seven IDR-018 form-context references
+  for condition operands and default `ref` nodes.
+- Mobile config-store tests use an accepted context reference in packaged
+  expression examples instead of preserving an invalid unknown reference.
+- Runtime evaluators remain null-safe for missing values; the boundary is
+  enforced before config publication.
 
-1. Decide whether unknown `context.*` references are deploy-time invalid or
-   intentionally null-on-unknown.
-2. If invalid, add deploy-time validation and tests for the fixed property
-   whitelist.
-3. If tolerated, update the relevant IDR/module/test documentation so the
-   tolerance is explicit and not rediscovered as drift.
-4. Preserve the existing expression grammar ceiling: no functions, scripts,
-   dynamic queries, aggregation, joins, recursion, or deployer-authored context
-   namespace expansion.
+Evidence:
+
+- `mvn -Dtest=DeployTimeValidatorTest test` passed (52 tests).
+- `flutter test test/config_store_test.dart` passed (35 tests).
+
+Preserved boundary: no functions, scripts, dynamic queries, aggregation, joins,
+recursion, deployer-authored context namespace expansion, config-package
+contract changes, runtime expression side effects, or new context properties.

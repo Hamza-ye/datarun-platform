@@ -172,6 +172,57 @@ class DeployTimeValidatorTest {
     }
 
     @Test
+    void unknownContextReferenceInDefaultRef_violation() {
+        JsonNode expr = parse("""
+                {"value": {"ref": "context.default_visit_type"}}
+                """);
+        ExpressionRule rule = makeRule("name", "default", expr, null);
+
+        List<String> violations = makeValidator().validateRule(rule, testShape);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v ->
+                v.contains("Unknown context reference") && v.contains("context.default_visit_type")));
+    }
+
+    @Test
+    void unknownContextReferenceInCondition_violation() {
+        JsonNode expr = parse("""
+                {"when": {"eq": ["context.default_visit_type", "baseline"]}}
+                """);
+        ExpressionRule rule = makeRule("status", "show_condition", expr, null);
+
+        List<String> violations = makeValidator().validateRule(rule, testShape);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v ->
+                v.contains("Unknown context reference") && v.contains("context.default_visit_type")));
+    }
+
+    @Test
+    void allFixedContextReferences_pass() {
+        List<String> refs = List.of(
+                "context.subject_state",
+                "context.subject_pattern",
+                "context.activity_stage",
+                "context.actor.role",
+                "context.actor.scope_name",
+                "context.days_since_last_event",
+                "context.event_count");
+
+        for (String ref : refs) {
+            JsonNode expr = parse("""
+                    {"when": {"not_null": ["%s"]}}
+                    """.formatted(ref));
+            ExpressionRule rule = makeRule("status", "show_condition", expr, null);
+
+            List<String> violations = makeValidator().validateRule(rule, testShape);
+
+            assertTrue(violations.isEmpty(), "Expected no violations for " + ref + ", got: " + violations);
+        }
+    }
+
+    @Test
     void warningRule_validWithMessage_passes() {
         JsonNode expr = parse("""
                 {"when": {"and": [

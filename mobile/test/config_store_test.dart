@@ -808,7 +808,7 @@ void main() {
           {
             'field_name': 'visit_type',
             'rule_type': 'default',
-            'expression': {'ref': 'context.default_visit_type'},
+            'expression': {'ref': 'context.actor.scope_name'},
             'message': null,
           },
         ],
@@ -873,7 +873,7 @@ void main() {
         'visit_type',
       );
       expect(expr, isNotNull);
-      expect(expr!['ref'], 'context.default_visit_type');
+      expect(expr!['ref'], 'context.actor.scope_name');
     });
 
     test(
