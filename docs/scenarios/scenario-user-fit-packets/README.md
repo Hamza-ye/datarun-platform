@@ -27,6 +27,18 @@ to keep product terms from becoming architecture. The escape hatch register
 adds one more guard: measured triggers can route evolution, but they do not
 authorize implementation.
 
+Operational/persona labels in these packets, including coordinator/setup owner,
+field user, supervisor/reviewer, operator/admin, support role, and auditor,
+describe a person acting in a context. They are not actor identity categories,
+authority primitives, fixed UI modules, product-area names, config namespaces,
+or implementation boundaries. Translate authority as:
+
+```txt
+actor + active assignment + role + scope + time + activity/context
+-> available actions and visible data
+-> projected operational surface
+```
+
 Human-facing review and handoff guidance is captured in
 [scenario-user-fit-packets-standing-review-and-playbook.md](../../reviews/scenario-user-fit-packets-standing-review-and-playbook.md).
 That file is for steward/operator use; it is not default agent routing unless a

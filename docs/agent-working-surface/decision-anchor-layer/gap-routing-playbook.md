@@ -29,6 +29,7 @@ Use vocabulary as a routing aid, not a new authority surface.
 | `assignment_admin.create` / `assignment_admin.end` | DEC-AUTH-04, DEC-CONFIG-08 | Strategy-protecting service | Platform-owned command capabilities outside `activities[*].roles`. |
 | principal binding | DEC-CONFIG-03, DEC-AUTH-03 | Strategy-protecting service | Production auth maps provider principals only through explicit `(issuer, subject) -> actor_id` bindings. |
 | IdP group/claim/JWT `actor_id` authority | DEC-BOUNDARY-01, DEC-AUTH-03 | Negative boundary | Not platform authority without successor decision. |
+| operational/persona labels | DEC-BOUNDARY-01, DEC-AUTH-01, DEC-AUTH-03 | Product/UX vocabulary | Labels such as coordinator/setup owner, field user, supervisor/reviewer, operator/admin, support role, and auditor are acting-context lenses only. They must not become actor identity categories, authority primitives, fixed product modules, config namespaces, or implementation boundaries. Describe authority through actor + active assignment + role + scope + time + activity/context. |
 | platform payload schema | DEC-CONFIG-01, DEC-CONFIG-04 | Structural contract | `contracts/shapes/*.schema.json` are platform payload contracts, not deployer shape rows. |
 | config package schema | DEC-CONFIG-08, DEC-CONFIG-04 | Structural contract | Server-emitted/mobile-consumed wire package contract; unknown top-level keys remain tolerated. |
 | `pattern_definitions` | DEC-WORKFLOW-02, DEC-CONFIG-08 | Configuration artifact | Referenced platform pattern definitions delivered in atomic config packages. |
@@ -43,6 +44,7 @@ Term collisions to keep explicit:
 
 * `assignment`: identity category, authorization grant, assignment timeline, or `assignment_changed` event.
 * `activity`: `activity_ref`, activity definition, activity scope, or activity instance.
+* `role`: assignment role, activity action role, IdP role claim, product job title, or persona label.
 * `type`: envelope type, identity type, field type, or flag category.
 * `state`: projection state, identity lifecycle, pattern state, or rejected stored `current_state`.
 
@@ -153,7 +155,7 @@ When a route changes behavior, prefer tests that pin:
 
 ## Known Gap Register
 
-last-reviewed: 2026-06-11
+last-reviewed: 2026-06-12
 
 | Gap ID | Gap | Status | Classification | Current route |
 |---|---|---|---|---|
@@ -167,6 +169,7 @@ last-reviewed: 2026-06-11
 | GAP-WORKFLOW-04 | Additional auto-resolution policies | Deferred | Architecture decision gap / policy surface | Route through BAR-102/NW-045. Preserve exact designated-resolver equality and avoid direct flag mutation. |
 | GAP-CONFLICT-01 | Flag queue ergonomics | Open | Platform-spec detail gap / implementation tooling gap | UX may improve queue behavior without changing flag semantics, resolver authority, or canonical resolution. |
 | GAP-CONFLICT-02 | Domain conflict automation and batch resolution | Future decision | Architecture decision gap / platform-spec detail gap | Route through NW-045. Batch/automation must emit per-flag resolution events and preserve resolver equality. |
+| GAP-CONFLICT-03 | Resolver-steward eligibility policy | Open; current runtime has role-name fallback heuristic | Platform-spec detail gap; architecture decision gap if a new resolver capability or authority primitive is introduced | IDR-026 accepts nearest eligible human steward and exact resolver equality. Current code first uses configured review action where possible, then falls back to role-name substrings such as admin/supervisor/coordinator/reviewer/manager/lead/resolver. Future conflict/admin UX or production hardening must not treat that fallback as product-ready authority; define explicit steward eligibility or route a successor decision before changing resolver authority. |
 | GAP-CONFIG-01 | Config authoring syntax | Open | Implementation/tooling gap | Tooling format may evolve if it preserves config-package and shape-format contracts. |
 | GAP-CONFIG-02 | Setup lifecycle for new operational activity | Open | Platform-spec detail gap / operational policy gap | Define draft/validate/review/approve/publish workflow under config-package boundaries. |
 | GAP-PROJECTION-02 | Reporting freshness semantics | Open | Platform-spec detail gap | Define freshness, completeness, unresolved-flag handling, and drilldown under access constraints. |
