@@ -4,6 +4,9 @@
 
 This is not a numbered scenario — it's a cross-cutting concern that applies across most operational situations the platform supports.
 
+> [!IMPORTANT]
+> Operational labels (e.g., coordinator, supervisor, auditor) here describe real-world human contexts, not system architecture. They reflect how people work—not user identities, access permissions, UI modules, or code boundaries. Technical definitions and system architecture belong in separate analysis layers.
+
 ---
 
 ## The Reality

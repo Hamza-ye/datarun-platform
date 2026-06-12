@@ -6,6 +6,9 @@ These scenarios describe **real-world situations** that the platform must be abl
 
 Each scenario describes what happens, what results from it, and why it matters — without prescribing how the platform should implement it. This separation is deliberate: the scenarios define the **problem space**, while architecture, domain decomposition, and construct definitions belong in separate analysis layers.
 
+> [!IMPORTANT]
+> Operational labels (e.g., coordinator, supervisor, auditor) in scenarios describe real-world human contexts, not necessarily a system architecture. They reflect how people work—not user identities, access permissions, UI modules, or code boundaries. Technical definitions and system architecture belong in separate analysis layers.
+
 ---
 
 ## Ordering Rationale

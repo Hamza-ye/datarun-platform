@@ -2,11 +2,12 @@
 
 > What the platform must work within — the realities that bound every architectural decision.
 
-This document describes the operational environment the platform will serve. These are boundary markers, not design choices. They constrain the solution space without prescribing what the solution looks like.
-
 ---
 
 ## Who Uses This
+
+> [!IMPORTANT]
+> Operational labels (e.g., coordinator, supervisor, auditor) here describe real-world human contexts, not system architecture. They reflect how people work—not user identities, access permissions, UI modules, or code boundaries. Technical definitions and system architecture belong in separate analysis layers.
 
 The people the platform serves fall into broad tiers based on how they work, not what domain they work in.
 
