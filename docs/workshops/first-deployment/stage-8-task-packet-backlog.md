@@ -141,6 +141,9 @@ Implementation remains blocked until individual packets are written, reviewed
 against this backlog, and explicitly dispatched.
 
 FD-PKT-001 is complete as Option C. FD-PKT-002 through FD-PKT-005 and
-FD-PKT-101 are drafted. The immediate next non-implementation action is review
-and gate acceptance of those packets, with S06 resolved, promoted, split, or
-explicitly excluded before Candidate 1 implementation dispatch.
+FD-PKT-101 are drafted and owner-role gate reviews have been consolidated in
+`docs/workshops/first-deployment/gate-reviews/`. The consolidated status is
+`CONDITIONAL PACKET-DRAFT UNBLOCK`, not implementation authorization. The
+immediate next non-implementation action is `FD-PKT-101A`: minimal S06 honesty
+evidence and Candidate 1 S06 disposition before any implementation packet is
+drafted or dispatched.

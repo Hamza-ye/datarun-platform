@@ -62,6 +62,20 @@ stop and reconcile the drift.
 | FD-PKT-006/007 | Blocked for production/constrained-deployment claims. | Ops runbook and staging rehearsal planning only. |
 | FD-PKT-101 | Drafted as S06 discovery/decision follow-up under BAR-105. | Review [fd-pkt-101-s06-entity-lifecycle-discovery.md](../workshops/first-deployment/task-packets/fd-pkt-101-s06-entity-lifecycle-discovery.md) before Candidate 1 implementation dispatch. |
 
+## Current Gate State
+
+Owner-role gate reviews are recorded at
+`docs/workshops/first-deployment/gate-reviews/`.
+
+Project Shepherd consolidation:
+[`candidate-1-gate-consolidation.md`](../workshops/first-deployment/gate-reviews/candidate-1-gate-consolidation.md).
+
+Consolidated status: `CONDITIONAL PACKET-DRAFT UNBLOCK`.
+
+This status does not authorize implementation. It permits the next
+non-implementation prerequisite: draft `FD-PKT-101A` to record minimal S06
+honesty evidence and a Candidate 1 S06 disposition.
+
 ## FD-PKT-001 Role Flow
 
 Assigned role: **Product Manager + steward accountability**.
@@ -114,18 +128,16 @@ instruction. Each implementation packet must state:
 
 ## Current March-Forward Path
 
-1. Review/accept FD-PKT-002 for Candidate 1 product/spec and UX validation
-   with the FD-PKT-001 Option C dependency marker.
-2. Review/accept FD-PKT-101 as the S06 discovery/decision follow-up before
-   Candidate 1 implementation dispatch.
-3. Review/accept FD-PKT-003 evidence planning to convert claims plus
-   FD-PKT-101 evidence needs into tests, walkthroughs, and release gates.
-4. Review/accept FD-PKT-004 mobile/offline validation.
-5. Review/accept FD-PKT-005 view-model/contract assessment.
-6. Only after the packet gate and S06 dependency are resolved, draft bounded
-   Candidate 1 implementation packets with exact files/contracts/tests and
-   stop conditions.
-7. Keep production-readiness lanes separate: admin/mobile auth,
+1. Draft and review `FD-PKT-101A` for minimal S06 honesty evidence and the
+   Candidate 1 S06 disposition.
+2. If `FD-PKT-101A` excludes, splits, or defers S06 in a way that keeps
+   Candidate 1 honest, draft one bounded Candidate 1 implementation packet.
+3. The implementation packet must name exact files/contracts/tests, accepted
+   constructs reused, manual evidence, excluded successor lanes, forbidden
+   work, stop conditions, and commit boundary.
+4. Keep Candidate 1 implementation blocked until that implementation packet is
+   reviewed and explicitly dispatched.
+5. Keep production-readiness lanes separate: admin/mobile auth,
    retention/security, reporting/import-export, conflict review queues,
    subject/query/custom scope, and ops readiness.
 

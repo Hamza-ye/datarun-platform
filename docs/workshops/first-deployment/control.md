@@ -55,6 +55,17 @@ As of the workshop kickoff snapshot:
   lifecycle, production auth/admin/mobile login, retention/security,
   reporting/import-export, conflict review UX, and ops readiness.
 
+As of the 2026-06-13 Project Shepherd gate consolidation:
+
+- FD-PKT-002 through FD-PKT-005 and FD-PKT-101 are drafted.
+- Owner-role gate reviews are recorded in
+  `docs/workshops/first-deployment/gate-reviews/`.
+- Consolidated gate status is `CONDITIONAL PACKET-DRAFT UNBLOCK`, not
+  implementation authorization.
+- Candidate 1 implementation remains blocked until `FD-PKT-101A` records
+  minimal S06 honesty evidence and a Candidate 1 S06 disposition, then a
+  bounded one-surface implementation packet is written and reviewed.
+
 ## Stage Plan
 
 | Stage | Name | Lead role | Other roles | Entry condition | Exit artifact |

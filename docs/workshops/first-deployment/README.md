@@ -22,6 +22,7 @@ BAR, NW, schemas, APIs, runtime behavior, or implementation authority.
 | [stage-7-delivery-plan.md](stage-7-delivery-plan.md) | Milestone, dependency, owner, and change-control output. |
 | [stage-8-task-packet-backlog.md](stage-8-task-packet-backlog.md) | FD-PKT backlog and packet gate. |
 | [task-packets/](task-packets/) | Prepared FD-PKT packets and decision records. |
+| [gate-reviews/](gate-reviews/) | Owner-role packet gate reviews and Project Shepherd consolidation. |
 
 ## Current Packet State
 
@@ -34,19 +35,31 @@ BAR, NW, schemas, APIs, runtime behavior, or implementation authority.
 | FD-PKT-005 | Drafted: Candidate 1 view-model/contract assessment recommending adapter/view composition by default and routing shared-contract pressure. | [fd-pkt-005-candidate-1-view-model-contract-assessment.md](task-packets/fd-pkt-005-candidate-1-view-model-contract-assessment.md) |
 | FD-PKT-101 | Drafted: S06/entity lifecycle discovery and BAR-105 successor-decision seed. | [fd-pkt-101-s06-entity-lifecycle-discovery.md](task-packets/fd-pkt-101-s06-entity-lifecycle-discovery.md) |
 
+## Current Gate State
+
+Owner-role gate reviews are recorded in [gate-reviews/](gate-reviews/).
+Project Shepherd consolidation is
+[candidate-1-gate-consolidation.md](gate-reviews/candidate-1-gate-consolidation.md).
+
+Consolidated status: `CONDITIONAL PACKET-DRAFT UNBLOCK`.
+
+Candidate 1 implementation remains blocked. The next action is a minimal S06
+honesty prerequisite record, suggested as `FD-PKT-101A`, owned by Product
+Manager + UX owner with steward accountability.
+
 ## Current March-Forward Rule
 
 Candidate 1 implementation remains blocked until bounded task packets are
-written and gated. The immediate planning path is:
+accepted, the minimal S06 honesty prerequisite is recorded, and a one-surface
+implementation packet is written and reviewed. The immediate planning path is:
 
-1. Review/accept the FD-PKT-002 product/spec and UX validation packet.
-2. Review/accept FD-PKT-101 for S06/entity lifecycle discovery before
-   implementation dispatch.
-3. Review/accept FD-PKT-003 evidence planning and FD-PKT-004 mobile/offline
-   validation.
-4. Review/accept FD-PKT-005 view-model/contract assessment.
-5. Keep Candidate 1 implementation blocked until the gated packets and S06
-   dependency are resolved into bounded implementation dispatch packets.
+1. Draft and review `FD-PKT-101A` for minimal S06 honesty evidence.
+2. Accept or route the S06 disposition for Candidate 1: excluded, promoted,
+   split, or deferred with risk signoff.
+3. Only after that, draft a bounded one-surface Candidate 1 implementation
+   packet with exact files/contracts/tests and stop conditions.
+4. Keep Candidate 1 implementation blocked until that implementation packet is
+   reviewed and explicitly dispatched.
 
 Do not collapse Candidate 1 with S06 lifecycle, production auth/admin/mobile
 login, retention/security, reporting/import-export, conflict automation, custom
