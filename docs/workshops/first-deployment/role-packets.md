@@ -50,10 +50,10 @@ Use the smallest relevant subset of this packet for each role:
 - `docs/scenarios/scenario-user-fit-packets/README.md`
 - `docs/scenarios/scenario-user-fit-packets/scenario-user-fit-synthesis-across-s00-s01-s06-s06b-access-control-S19.md`
 - `docs/scenarios/scenario-user-fit-packets/foundational-product-fit-readiness-and-validation-matrix.md`
-- `docs/reviews/pre-workshop-readiness-checklist.md`
+- `docs/workshops/first-deployment/readiness-checklist.md`
 - `docs/reviews/scenario-user-fit-packets-standing-review-and-playbook.md`
-- `docs/reviews/first-deployment-workshop-control.md`
-- `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`
+- `docs/workshops/first-deployment/control.md`
+- `docs/workshops/first-deployment/task-packets/fd-pkt-001-s06-timing-decision.md`
 
 ## Stage 3 UX Architect Packet
 
@@ -64,7 +64,7 @@ Inputs:
 - common role boundary;
 - common inputs;
 - completed Stage 1 and Stage 2 sections in
-  `docs/reviews/first-deployment-workshop-control.md`.
+  `docs/workshops/first-deployment/control.md`.
 
 Output exactly:
 

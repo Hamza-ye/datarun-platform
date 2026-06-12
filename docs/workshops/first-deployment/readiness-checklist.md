@@ -51,7 +51,7 @@ decisions.
       scenario packets are linked as product/problem evidence.
 - [ ] `docs/reviews/scenario-user-fit-packets-standing-review-and-playbook.md`
       is linked for human workshop management.
-- [ ] `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`
+- [ ] `docs/workshops/first-deployment/task-packets/fd-pkt-001-s06-timing-decision.md`
       is linked before Candidate 1 packet freeze.
 
 ### 2. Authority And Routing

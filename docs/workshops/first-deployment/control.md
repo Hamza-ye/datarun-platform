@@ -116,7 +116,7 @@ risks or questions for the steward, but they should not recast themselves as
 the steward.
 
 Detailed reusable role packets live in
-`docs/reviews/first-deployment-workshop-role-packets.md`.
+`docs/workshops/first-deployment/role-packets.md`.
 
 ## Facilitation Protocol
 
@@ -156,7 +156,7 @@ Rules:
 | Lane | Product need | Current standing | Route | Current workshop status |
 |---|---|---|---|---|
 | Candidate 1 basic operational capture | First bounded product/spec slice for configured capture, assignment-scoped access, offline save/sync, optional subject-linked capture, correction basics, freshness, and unresolved issue visibility. | Kernel capabilities accepted across BAR-001..015 and scenario runtime probes; product surface partial. | Candidate 1 platform spec, then validation and bounded task packets. | Ready for Product Manager and UX Architect framing. |
-| S06/entity lifecycle | Known set of things, discovered-unit lifecycle, active/inactive/retired states, merge/split UX, lifecycle vocabulary. | BAR-105 deferred from accepted baseline; near-future product-deployment lane, not hidden as unscheduled work. | FD-PKT-001 timing decision, then BAR-105/S06 successor product/platform decision before implementation if promoted. | Visible lane; needs Product Manager priority and Steward route. |
+| S06/entity lifecycle | Known set of things, discovered-unit lifecycle, active/inactive/retired states, merge/split UX, lifecycle vocabulary. | BAR-105 deferred from accepted baseline; near-future product-deployment lane, not hidden as unscheduled work. | FD-PKT-001 Option C recorded; FD-PKT-101 opens S06 discovery/BAR-105 successor seeding before Candidate 1 implementation dispatch. | Visible lane; Product Manager and Steward keep evidence, route, and decision point explicit. |
 | Production auth/admin/mobile login | Real admin auth, mobile OIDC/Keycloak login, token lifecycle, online binding-admin product needs. | BAR-104 server-side kernel accepted; mobile login UX and production admin auth not productized. | Product/platform decisions for admin auth and mobile OIDC lifecycle; no IdP group/claim authority. | Visible lane; needs PM, Software Architect, Mobile App Builder, ops evidence. |
 | Retention/security/device lifecycle | Expiry, decommissioning, sealed-partition recovery, local encryption, no-local-retention/redaction. | Shared-device partitions accepted; broader retention/security remains BAR-106/NW-054. | NW-054/BAR-106 decision. | Visible lane; needs security/ops evidence before production claims. |
 | Reporting/import-export | Dashboards, report APIs, export/import, aggregates, freshness/drill-back product claims. | S26 proves traceable report inputs only; no production reporting surface. | NW-044 decision before product reporting/API/export implementation. | Visible lane; needs product scope and route decision. |
@@ -199,12 +199,12 @@ Use these labels in every role output and workshop artifact:
 | Surface state | Ready | Repo was clean at kickoff; active standing sources are linked below. |
 | Authority and routing | Ready | CDL/contracts/BAR/NW source order and stop conditions are known. |
 | Product management | Needs role input | Product Manager must confirm first-deployment outcome, target users, non-goals, and validation questions. |
-| UX architecture | Complete as facilitation draft | Stage 3 UX packet exists at `docs/reviews/first-deployment-workshop-stage-3-ux.md`; a future UX Architect may refine it. |
-| Software architecture | Complete | Stage 4 Software Architecture packet exists at `docs/reviews/first-deployment-workshop-stage-4-software-architecture.md`. |
-| Mobile app building | Complete | Stage 5 Mobile packet exists at `docs/reviews/first-deployment-workshop-stage-5-mobile.md`. |
-| QA and evidence | Complete | Stage 6 Pressure Test packet exists at `docs/reviews/first-deployment-workshop-stage-6-pressure-test.md`. |
-| Delivery planning | Complete | Stage 7 Delivery Plan exists at `docs/reviews/first-deployment-workshop-stage-7-delivery-plan.md`. |
-| Task-packet backlog | Complete | Stage 8 Task-Packet Backlog exists at `docs/reviews/first-deployment-workshop-stage-8-task-packet-backlog.md`. |
+| UX architecture | Complete as facilitation draft | Stage 3 UX packet exists at `docs/workshops/first-deployment/stage-3-ux.md`; a future UX Architect may refine it. |
+| Software architecture | Complete | Stage 4 Software Architecture packet exists at `docs/workshops/first-deployment/stage-4-software-architecture.md`. |
+| Mobile app building | Complete | Stage 5 Mobile packet exists at `docs/workshops/first-deployment/stage-5-mobile.md`. |
+| QA and evidence | Complete | Stage 6 Pressure Test packet exists at `docs/workshops/first-deployment/stage-6-pressure-test.md`. |
+| Delivery planning | Complete | Stage 7 Delivery Plan exists at `docs/workshops/first-deployment/stage-7-delivery-plan.md`. |
+| Task-packet backlog | Complete | Stage 8 Task-Packet Backlog exists at `docs/workshops/first-deployment/stage-8-task-packet-backlog.md`. |
 
 ## Completed Stage Outputs
 
@@ -362,7 +362,7 @@ Facilitation hat.
 Reason: the first UX Architect worker dispatch failed due usage limit before
 producing a packet. To keep the workshop moving without unstructured debate,
 Stage 3 was completed as a bounded UX-stage draft and recorded separately at
-`docs/reviews/first-deployment-workshop-stage-3-ux.md`.
+`docs/workshops/first-deployment/stage-3-ux.md`.
 
 Stage 3 decides user journey shape, product vocabulary candidates, state and
 recovery language, UX risks, validation artifacts, and questions for Stage 4
@@ -402,7 +402,7 @@ Owner: Software Architect.
 
 Stage 4 maps Candidate 1 to existing system boundaries and successor routes.
 The full packet is recorded at
-`docs/reviews/first-deployment-workshop-stage-4-software-architecture.md`.
+`docs/workshops/first-deployment/stage-4-software-architecture.md`.
 
 Candidate 1 technical boundary:
 
@@ -456,7 +456,7 @@ Owner: Mobile App Builder.
 
 Stage 5 assesses current Flutter/mobile feasibility and evidence needs. The
 full packet is recorded at
-`docs/reviews/first-deployment-workshop-stage-5-mobile.md`.
+`docs/workshops/first-deployment/stage-5-mobile.md`.
 
 Candidate 1 mobile feasibility:
 
@@ -511,7 +511,7 @@ Owners: Reality Checker and Test Results Analyzer.
 
 Stage 6 classifies claims, evidence, missing evidence, release gates, and
 production wording risk. The full packet is recorded at
-`docs/reviews/first-deployment-workshop-stage-6-pressure-test.md`.
+`docs/workshops/first-deployment/stage-6-pressure-test.md`.
 
 Stage 6 claim summary:
 
@@ -572,7 +572,7 @@ Owner: Project Shepherd.
 Stage 7 defines the milestone roadmap, dependencies, owners, decision calendar,
 change-control rules, and Stage 8 task-packet structure. The full packet is
 recorded at
-`docs/reviews/first-deployment-workshop-stage-7-delivery-plan.md`.
+`docs/workshops/first-deployment/stage-7-delivery-plan.md`.
 
 Milestone roadmap:
 
@@ -606,14 +606,14 @@ Owner: Workshop Lead / Delivery Evidence Facilitator.
 
 Stage 8 converts workshop outputs into bounded future task-packet candidates.
 The full backlog is recorded at
-`docs/reviews/first-deployment-workshop-stage-8-task-packet-backlog.md`.
+`docs/workshops/first-deployment/stage-8-task-packet-backlog.md`.
 
 Immediate packet backlog:
 
 | Packet ID | Lane | Status | Owner role | Purpose |
 |---|---|---|---|---|
-| FD-PKT-001 | S06 timing decision | `needs-decision` | Product Manager + steward accountability | Decide whether Candidate 1 stays first as an S01-compatible slice, moves BAR-105/S06 before Candidate 1 implementation planning, or proceeds with parallel S06 discovery before the implementation gate. |
-| FD-PKT-002 | Candidate 1 product/spec and UX validation | `conditional-go` for spec/validation | Product Manager + UX owner | Produce bounded Candidate 1 product/spec, validation questions, vocabulary tests, journey walkthrough requirements, and explicit exclusions. |
+| FD-PKT-001 | S06 timing decision | `recorded-option-c` | Product Manager + steward accountability | Candidate 1 may proceed to product/spec and UX validation while S06 discovery runs in parallel before implementation dispatch. |
+| FD-PKT-002 | Candidate 1 product/spec and UX validation | `conditional-go` for spec/validation | Product Manager + UX owner | Produce bounded Candidate 1 product/spec, validation questions, vocabulary tests, journey walkthrough requirements, explicit exclusions, and the Option C S06 dependency marker. |
 | FD-PKT-003 | Candidate 1 evidence plan | `conditional-go` for evidence design | Test Results Analyzer | Convert Candidate 1 acceptance criteria into automated tests, scenario probes, manual walkthroughs, ops checks, and release gates. |
 | FD-PKT-004 | Candidate 1 mobile/offline validation packet | `product-surface-partial` | Mobile App Builder | Define mobile UX/spec evidence for setup/connect, offline save, sync failure, shared-device switch, correction, and freshness. |
 | FD-PKT-005 | Candidate 1 view-model/contract assessment | `needs-routing-check` | Software Architect + steward accountability | Decide whether Candidate 1 needs only adapter-level UI composition or a bounded shared view-model contract route before implementation. |
@@ -625,9 +625,11 @@ Stage 8 result:
 - Workshop planning control is complete.
 - Implementation remains blocked until individual packets are written,
   reviewed against the packet gate, and explicitly dispatched.
-- The immediate next non-implementation action is FD-PKT-001: S06 timing
-  decision for Candidate 1 freeze. The prepared packet is
-  `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`.
+- FD-PKT-001 is recorded as Option C in
+  `docs/workshops/first-deployment/task-packets/fd-pkt-001-s06-timing-decision-record.md`.
+- The immediate next non-implementation actions are FD-PKT-002 Candidate 1
+  product/spec and UX validation, and FD-PKT-101 S06/entity lifecycle
+  discovery before Candidate 1 implementation dispatch.
 
 ## Starting Input Packet
 
@@ -648,16 +650,16 @@ Use these as the compact starting packet for the workshop:
 - `docs/scenarios/scenario-user-fit-packets/scenario-user-fit-synthesis-across-s00-s01-s06-s06b-access-control-S19.md`
 - `docs/scenarios/scenario-user-fit-packets/foundational-product-fit-readiness-and-validation-matrix.md`
 - relevant scenario packet for the lane under discussion
-- `docs/reviews/pre-workshop-readiness-checklist.md`
+- `docs/workshops/first-deployment/readiness-checklist.md`
 - `docs/reviews/scenario-user-fit-packets-standing-review-and-playbook.md`
-- `docs/reviews/first-deployment-workshop-role-packets.md`
-- `docs/reviews/first-deployment-workshop-stage-3-ux.md`
-- `docs/reviews/first-deployment-workshop-stage-4-software-architecture.md`
-- `docs/reviews/first-deployment-workshop-stage-5-mobile.md`
-- `docs/reviews/first-deployment-workshop-stage-6-pressure-test.md`
-- `docs/reviews/first-deployment-workshop-stage-7-delivery-plan.md`
-- `docs/reviews/first-deployment-workshop-stage-8-task-packet-backlog.md`
-- `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`
+- `docs/workshops/first-deployment/role-packets.md`
+- `docs/workshops/first-deployment/stage-3-ux.md`
+- `docs/workshops/first-deployment/stage-4-software-architecture.md`
+- `docs/workshops/first-deployment/stage-5-mobile.md`
+- `docs/workshops/first-deployment/stage-6-pressure-test.md`
+- `docs/workshops/first-deployment/stage-7-delivery-plan.md`
+- `docs/workshops/first-deployment/stage-8-task-packet-backlog.md`
+- `docs/workshops/first-deployment/task-packets/fd-pkt-001-s06-timing-decision.md`
 
 ## Role Briefs
 
@@ -826,7 +828,8 @@ Do not produce:
 | D-007 | 2026-06-12 | Stage 5 Mobile is complete and classifies Candidate 1 mobile as feasible over accepted kernel but product-surface-partial. | Mobile App Builder | Stage 5 packet | Stage 6 must pressure-test mobile evidence and production-readiness wording. |
 | D-008 | 2026-06-12 | Stage 6 pressure test is complete; evidence is sufficient for delivery planning but not implementation or production claims. | Reality Checker and Test Results Analyzer | Stage 6 packet | Stage 7 Project Shepherd must plan lanes, gates, owners, dependencies, and S06 timing. |
 | D-009 | 2026-06-12 | Stage 7 delivery planning is complete; Candidate 1 remains conditional-go for product/spec validation and no-go for implementation until Stage 8 packet gates exist. | Project Shepherd | Stage 7 packet | Workshop Lead produces Stage 8 task-packet backlog. |
-| D-010 | 2026-06-12 | Stage 8 task-packet backlog is complete; the immediate next non-implementation action is FD-PKT-001 S06 timing decision. | Workshop Lead | Stage 8 packet | Use the prepared FD-PKT-001 packet; do not dispatch implementation until individual packets are written and gated. |
+| D-010 | 2026-06-12 | Stage 8 task-packet backlog is complete; the immediate next non-implementation action is FD-PKT-001 S06 timing decision. | Workshop Lead | Stage 8 packet | Completed by D-011; do not dispatch implementation until individual packets are written and gated. |
+| D-011 | 2026-06-13 | FD-PKT-001 is recorded as Option C: Candidate 1 product/spec may proceed with an explicit S06 dependency marker while S06 discovery runs in parallel before implementation dispatch. | Product Manager + steward accountability | FD-PKT-001 decision record | Draft FD-PKT-002 and FD-PKT-101 next; keep Candidate 1 implementation blocked until packet gates resolve. |
 
 ### Unresolved Input Register
 
@@ -838,7 +841,8 @@ Do not produce:
 | Mobile feasibility and test targets | Stage 5 | Complete | Mobile App Builder | Feed into Reality Checker and Test Results Analyzer. |
 | Claim/evidence matrix | Stage 6 | Complete | Reality Checker and Test Results Analyzer | Feed into Project Shepherd delivery planning. |
 | Milestone roadmap and decision calendar | Stage 7 | Complete | Project Shepherd | Feed into Stage 8 task-packet backlog. |
-| Task-packet backlog | Stage 8 | Complete | Workshop Lead | Next action is FD-PKT-001 S06 timing decision using `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`. |
+| Task-packet backlog | Stage 8 | Complete | Workshop Lead | FD-PKT-001 is recorded; next actions are FD-PKT-002 and FD-PKT-101. |
+| S06 timing decision | FD-PKT-001 | Complete as Option C | Product Manager + steward accountability | Draft FD-PKT-002 with S06 dependency marker and open FD-PKT-101 before implementation dispatch. |
 
 ## Go / No-Go For Full Workshop
 
@@ -855,24 +859,26 @@ Reason:
 - Stage 6 QA/reality pressure testing is complete.
 - Stage 7 delivery planning is complete.
 - Stage 8 task-packet backlog is complete.
+- FD-PKT-001 S06 timing decision is complete as Option C.
 - Candidate 1 implementation remains blocked until individual packets are
   written, reviewed against the packet gate, and explicitly dispatched.
-- The next correct action is FD-PKT-001 S06 timing decision, not
-  implementation. That decision must classify Candidate 1 as S01-compatible
-  if it remains first and keep S06 visible with route, milestone, owner, and
-  evidence need.
+- The next correct actions are FD-PKT-002 Candidate 1 product/spec and UX
+  validation plus FD-PKT-101 S06 discovery/decision follow-up, not
+  implementation.
 
 The delivery-planning gate is satisfied because Stages 1 through 8 now have
-recorded outputs. The remaining gate is not more workshop protocol; it is the
-FD-PKT-001 product timing decision before Candidate 1 packet freeze.
+recorded outputs. The remaining gate is not more workshop protocol; it is
+bounded packet drafting and S06 discovery before Candidate 1 implementation
+dispatch.
 
 ## Next Action
 
-Remaining workshop lead action:
+Remaining workshop lead actions:
 
-1. Run FD-PKT-001 using
-   `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`
-   and record the chosen timing option before Candidate 1 packet freeze.
+1. Draft FD-PKT-002 for Candidate 1 product/spec and UX validation with the
+   Option C S06 dependency marker.
+2. Draft FD-PKT-101 for S06/entity lifecycle discovery and BAR-105 successor
+   decision seeding before Candidate 1 implementation dispatch.
 
 After each role output, the Workshop Lead updates this control file or a
 successor workshop record with accepted outputs, unresolved inputs, lane

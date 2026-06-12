@@ -72,7 +72,7 @@ Visible successor lanes stay separate:
 | Timing | Decision | Owner |
 |---|---|---|
 | 2026-06-12 | Stage 7 roadmap and change-control packet completed. | Project Shepherd |
-| Before M1 freeze | FD-PKT-001 S06 timing decision: Candidate 1 either stays first as an S01-compatible slice with UX copy/tests preventing lifecycle overclaim, moves S06/BAR-105 before Candidate 1 implementation planning, or proceeds with parallel S06 discovery before the implementation gate. | Product Manager with steward accountability |
+| 2026-06-13 | FD-PKT-001 recorded Option C: Candidate 1 product/spec and UX validation may proceed with S06 discovery in parallel before implementation dispatch. | Product Manager with steward accountability |
 | Before M2 exit | Candidate 1 evidence plan approved. | Test Results Analyzer with Workshop Lead |
 | Before M3 dispatch | Stage 8 packet-gate approval. | Workshop Lead with steward/source-order check |
 | Before M4 starts | Each implementation packet receives explicit go/no-go. | Workshop Lead; steward answers authority questions only |
@@ -161,7 +161,8 @@ Backlog groups stay lane-specific:
 
 ## 9. Advice To Workshop Lead
 
-- Hold FD-PKT-001 before Candidate 1 packet freeze.
+- Use the recorded FD-PKT-001 Option C boundary before Candidate 1 packet
+  freeze.
 - Reject any Stage 8 packet that mixes Candidate 1 with auth, reporting,
   retention/security, S06 lifecycle, conflict automation, or custom scope.
 - Keep the lane register visible in every milestone review, including lanes

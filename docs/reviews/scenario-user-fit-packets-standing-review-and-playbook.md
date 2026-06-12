@@ -111,10 +111,10 @@ Stop and report if:
 
 ## Recommended Way Forward
 
-1. Run FD-PKT-001 before Candidate 1 packet freeze:
-   decide whether Candidate 1 remains first as an S01-compatible slice, whether
-   S06/BAR-105 moves before Candidate 1 implementation planning, or whether S06
-   discovery runs in parallel before the implementation gate.
+1. Use the recorded FD-PKT-001 Option C timing boundary:
+   Candidate 1 product/spec may proceed as an S01-compatible slice with an
+   explicit S06 dependency marker, while S06 discovery runs in parallel before
+   Candidate 1 implementation dispatch.
 2. Produce Candidate 1 as a constrained platform-spec draft, not implementation:
    basic operational capture, optional subject-linked capture, assignment-scoped
    access, offline save/sync, shape version preservation, basic correction,
@@ -255,7 +255,7 @@ pre-work item rather than guessing.
 | Scenario user-fit README, synthesis, readiness matrix, and relevant packet files | Bring product-fit pressure and user vocabulary into planning. |
 | Operational UX layering companion | Keep product terms useful without making them authority. |
 | Escape hatch register | Keep measured evolution paths visible without authorizing implementation. |
-| `docs/reviews/pre-workshop-readiness-checklist.md` | Confirm the surface, role inputs, lane register, and evidence gates are ready before planning begins. |
+| `docs/workshops/first-deployment/readiness-checklist.md` | Confirm the surface, role inputs, lane register, and evidence gates are ready before planning begins. |
 | Current git status and uncommitted diff summary | Prevent planning against a stale or half-applied working surface. |
 | Existing test inventory and recent accepted evidence | Let QA plan from actual tests, not assumed coverage. |
 | Product/SME evidence available outside the repo | Identify what user validation exists and what still needs discovery. |

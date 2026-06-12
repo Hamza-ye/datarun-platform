@@ -213,7 +213,8 @@ Workshop control recommendation:
 - Ask Stage 4 Software Architect to identify which UX states can be backed by
   current code/contracts and which need task-packet caveats or successor
   routes.
-- Require FD-PKT-001 before Candidate 1 packet freeze if the product promise
-  depends on subject-linked or missing-known-thing behavior.
+- Use the recorded FD-PKT-001 Option C boundary before Candidate 1 packet
+  freeze if the product promise depends on subject-linked or
+  missing-known-thing behavior.
 - Keep UX Architect review as a future refinement item if a dedicated UX role
   becomes available again.

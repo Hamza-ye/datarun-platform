@@ -41,7 +41,7 @@ routed decision lane.
 | Reporting/dashboard/API/export readiness | `needs-decision` | S26 proves report inputs only; NW-044 route required before production reporting surfaces. |
 | Retention/security/device lifecycle readiness | `needs-decision` | BAR-106/NW-054 owns expiry, decommissioning, local encryption, redaction, and sealed recovery. |
 | S06/entity lifecycle implementation inside Candidate 1 | `out-of-scope` | Optional S01-compatible subject link is allowed; lifecycle truth, discovered units, active/inactive/retired state remain BAR-105/S06 lane. |
-| S06 timing relative to Candidate 1 | `needs-decision` | FD-PKT-001 must decide whether Candidate 1 stays first as S01-compatible, S06 moves before Candidate 1 implementation planning, or S06 discovery runs in parallel before the implementation gate. |
+| S06 timing relative to Candidate 1 | `recorded-option-c` | FD-PKT-001 selected parallel S06 discovery before Candidate 1 implementation dispatch while allowing Candidate 1 product/spec and UX validation to proceed with an explicit dependency marker. |
 | Conflict review basic semantics exist | `accepted` | Single-flag resolver semantics are accepted; product review queues and batch/automation are not. |
 | Conflict review queue/batch/auto-resolution is ready | `needs-decision` | NW-045/BAR-102/BAR-103 route required. |
 | Subject/query/custom scope can be added through UI filters | `needs-decision` | NW-053/BAR-108 required before any new scope mechanism or query/custom authority. |

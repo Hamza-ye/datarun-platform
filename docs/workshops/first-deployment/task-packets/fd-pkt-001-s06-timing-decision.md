@@ -63,10 +63,10 @@ Read only the cited sections needed to answer the timing decision:
 - `docs/scenarios/scenario-user-fit-packets/scenario-user-fit-synthesis-across-s00-s01-s06-s06b-access-control-S19.md`
 - `docs/scenarios/scenario-user-fit-packets/foundational-product-fit-readiness-and-validation-matrix.md`
 - `docs/reviews/scenario-user-fit-packets-standing-review-and-playbook.md`
-- `docs/reviews/first-deployment-workshop-control.md`
-- `docs/reviews/first-deployment-workshop-stage-6-pressure-test.md`
-- `docs/reviews/first-deployment-workshop-stage-7-delivery-plan.md`
-- `docs/reviews/first-deployment-workshop-stage-8-task-packet-backlog.md`
+- `docs/workshops/first-deployment/control.md`
+- `docs/workshops/first-deployment/stage-6-pressure-test.md`
+- `docs/workshops/first-deployment/stage-7-delivery-plan.md`
+- `docs/workshops/first-deployment/stage-8-task-packet-backlog.md`
 - `.review/untracked-user-notes/exploration/000-consolidated-current-architecture-position-entity-lifecycle-and-related-lanes.md`
 
 ## 4. Decision Questions

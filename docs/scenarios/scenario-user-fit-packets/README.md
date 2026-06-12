@@ -58,8 +58,10 @@ Current standing overlay:
   usable foundations, while full registry lifecycle, discovered-unit lifecycle,
   merge/split UX, and operational lifecycle states should be kept in the
   near-future product-deployment lane and need explicit successor routing
-  before implementation. The next workshop action for this boundary is
-  [FD-PKT-001 S06 timing decision](../../reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md).
+  before implementation. The current workshop boundary is the
+  [FD-PKT-001 Option C timing record](../../workshops/first-deployment/task-packets/fd-pkt-001-s06-timing-decision-record.md):
+  Candidate 1 product/spec may proceed while S06 discovery runs in parallel
+  before implementation dispatch.
 - Reporting, import/export, broad audit/history access, custom/query scope,
   retention/security, mobile OIDC login, production admin auth, batch conflict
   handling, triggers, auto-resolution, resolver reassignment, and IdP

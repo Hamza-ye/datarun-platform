@@ -37,9 +37,9 @@ active BAR/NW standing hard-coding those persona labels.
 | `docs/scenarios/scenario-user-fit-packets/scenario-user-fit-synthesis-across-s00-s01-s06-s06b-access-control-S19.md` | "A coordinator can...", "A field user...", "Supervisors and coordinators..." | Safe as product/problem evidence, but could become hard product areas when converted to Candidate 1 spec. | Platform-spec drift risk. | Convert to "acting as setup owner/field recorder/reviewer" in task packets and require authority backing. |
 | `docs/scenarios/scenario-user-fit-packets/foundational-product-fit-readiness-and-validation-matrix.md` | Product-fit claims refer to setup owners, field workers, supervisors, coordinators, and auditors. | The matrix is already clear that architecture fit is not product validation, but it did not name persona hardening as a separate check. | Wording risk / product evidence gap. | Use validation questions to test the acting context and avoid fixed persona modules. |
 | `docs/scenarios/scenario-user-fit-packets/access-control-focused-user-fit-packet.md` | Concrete exemplar names coordinator, worker, supervisor, and external auditor. | The packet correctly warns that auditor/query access is not baseline-accepted, but concrete role names can look like platform roles. | Operational-policy gap and architecture-decision gap for broad auditor/query access. | Keep ordinary assignment-derived access for simple current-scope visibility; route broad audit/query scope through GAP-AUTH-01/NW-053 style work. |
-| `docs/reviews/first-deployment-workshop-control.md` | Stage 2 originally used target-user rows for coordinator/setup owner, field user, supervisor/reviewer, operator/admin, and support role. | This is the main downstream risk because it feeds Candidate 1 planning. | Platform-spec drift risk. | Recast as operational surface labels and state that authority is projected from actor, assignment, role, scope, time, and activity/context. |
-| `docs/reviews/first-deployment-workshop-stage-3-ux.md` | Journey map uses coordinator, field user, and supervisor labels. | UX labels are appropriate, but task packets need backing constructs before implementation. | Implementation/tooling drift risk if unguarded. | Add UX boundary that persona labels are screen/validation language only. |
-| `docs/reviews/first-deployment-workshop-stage-8-task-packet-backlog.md` | Packet header did not force agents to declare persona labels and backing authority. | Future implementers could receive a "Coordinator setup" or "Supervisor review" packet and infer a module. | Platform-spec drift risk. | Add required header field and stop condition for persona-label hardening. |
+| `docs/workshops/first-deployment/control.md` | Stage 2 originally used target-user rows for coordinator/setup owner, field user, supervisor/reviewer, operator/admin, and support role. | This is the main downstream risk because it feeds Candidate 1 planning. | Platform-spec drift risk. | Recast as operational surface labels and state that authority is projected from actor, assignment, role, scope, time, and activity/context. |
+| `docs/workshops/first-deployment/stage-3-ux.md` | Journey map uses coordinator, field user, and supervisor labels. | UX labels are appropriate, but task packets need backing constructs before implementation. | Implementation/tooling drift risk if unguarded. | Add UX boundary that persona labels are screen/validation language only. |
+| `docs/workshops/first-deployment/stage-8-task-packet-backlog.md` | Packet header did not force agents to declare persona labels and backing authority. | Future implementers could receive a "Coordinator setup" or "Supervisor review" packet and infer a module. | Platform-spec drift risk. | Add required header field and stop condition for persona-label hardening. |
 
 ## 3. Boundary Clarification
 
@@ -175,11 +175,11 @@ This review added or supports guardrail edits in:
 
 - `docs/scenarios/scenario-user-fit-packets/README.md`
 - `docs/agent-working-surface/decision-anchor-layer/gap-routing-playbook.md`
-- `docs/reviews/first-deployment-workshop-role-packets.md`
-- `docs/reviews/first-deployment-workshop-control.md`
-- `docs/reviews/first-deployment-workshop-stage-3-ux.md`
-- `docs/reviews/first-deployment-workshop-stage-7-delivery-plan.md`
-- `docs/reviews/first-deployment-workshop-stage-8-task-packet-backlog.md`
+- `docs/workshops/first-deployment/role-packets.md`
+- `docs/workshops/first-deployment/control.md`
+- `docs/workshops/first-deployment/stage-3-ux.md`
+- `docs/workshops/first-deployment/stage-7-delivery-plan.md`
+- `docs/workshops/first-deployment/stage-8-task-packet-backlog.md`
 - `docs/reviews/operational-surface-labels-risk-review.md`
 
 The next workshop action remains FD-PKT-001, but it now carries an additional

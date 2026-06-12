@@ -35,6 +35,16 @@ Use sources in this order:
 10. Phase files and IDRs
    - Role: implementation history, design provenance, and verification leads. Future work should route through the decision-anchor layer first; use IDRs only when explicitly routed.
 
+## First-Deployment Planning Router
+
+First-deployment product/spec/evidence work routes through
+[first-deployment-task-packet-router.md](first-deployment-task-packet-router.md).
+That file is an active coordination surface, not architecture authority and not
+baseline acceptance. It makes the Stage 8 task-packet backlog and FD-PKT
+decision records visible to new sessions without moving workshop outputs into
+BAR/NW baseline truth. The workshop artifacts themselves live under
+[docs/workshops/first-deployment/](/docs/workshops/first-deployment/README.md).
+
 ## Superseded Review Drafts
 
 The Phase 4 evidence-pack, backlog, and escape-hatch consolidation drafts have been superseded by the active working-surface registers in this directory. Do not recreate those drafts as agent input, and do not use historical review-pack vocabulary as current implementation status.
