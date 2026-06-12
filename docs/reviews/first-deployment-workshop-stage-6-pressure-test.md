@@ -40,7 +40,8 @@ routed decision lane.
 | Deployment is turnkey production-ready | `blocked` | Contradicted by NW-056 and workshop control: ops hardening, admin auth, mobile login, retention/security, reporting, and runbooks are missing. |
 | Reporting/dashboard/API/export readiness | `needs-decision` | S26 proves report inputs only; NW-044 route required before production reporting surfaces. |
 | Retention/security/device lifecycle readiness | `needs-decision` | BAR-106/NW-054 owns expiry, decommissioning, local encryption, redaction, and sealed recovery. |
-| S06/entity lifecycle can be included in Candidate 1 | `out-of-scope` | Optional subject link is allowed; lifecycle truth, discovered units, active/inactive/retired state remain BAR-105/S06 lane. |
+| S06/entity lifecycle implementation inside Candidate 1 | `out-of-scope` | Optional S01-compatible subject link is allowed; lifecycle truth, discovered units, active/inactive/retired state remain BAR-105/S06 lane. |
+| S06 timing relative to Candidate 1 | `needs-decision` | FD-PKT-001 must decide whether Candidate 1 stays first as S01-compatible, S06 moves before Candidate 1 implementation planning, or S06 discovery runs in parallel before the implementation gate. |
 | Conflict review basic semantics exist | `accepted` | Single-flag resolver semantics are accepted; product review queues and batch/automation are not. |
 | Conflict review queue/batch/auto-resolution is ready | `needs-decision` | NW-045/BAR-102/BAR-103 route required. |
 | Subject/query/custom scope can be added through UI filters | `needs-decision` | NW-053/BAR-108 required before any new scope mechanism or query/custom authority. |
@@ -65,7 +66,7 @@ routed decision lane.
 |---|---|---|
 | Candidate 1 basic operational capture | Strong kernel evidence: append-only capture/correction, sync, assignment scope, config, flags, projections, mobile local save. Runtime probes S00/S19/S21/S23 apply. | UX validation, manual end-to-end walkthroughs, staging run, support paths, accessibility/localization if claimed, ops checks, and explicit claim wording. |
 | Mobile/offline/shared-device Candidate 1 | Mobile feasibility is `product-surface-partial`; Flutter evidence exists for sync/config/projection/retention/actor partitions. | Widget/integration tests for setup, offline save, failed sync, unauthorized sync, correction, shared-device switch, pending preservation, and manual device matrix. |
-| S06/entity lifecycle | BAR-105 is deferred; no accepted lifecycle product/kernel evidence. | Product/platform decision, contract/test plan, lifecycle walkthroughs, migration and merge/split UX evidence. |
+| S06/entity lifecycle | BAR-105 is deferred; no accepted lifecycle product/kernel evidence. Product need remains visible. | FD-PKT-001 timing decision, then product/platform decision if promoted; contract/test plan, lifecycle walkthroughs, migration and merge/split UX evidence. |
 | Production auth/admin/mobile login | Server auth kernel accepted; web admin and mobile login are not productized. | Production admin auth decision, mobile OIDC/token lifecycle decision, Keycloak ops profile, end-to-end auth tests, security/ops checks. |
 | Retention/security/device lifecycle | Selective retain and actor partitions accepted. BAR-106/NW-054 remains future decision. | Expiry, decommissioning, sealed recovery, local encryption, token/session retention, redaction/no-local-retention evidence, security review. |
 | Reporting/import-export | S26 proves traceable scoped report inputs only. | NW-044 decision, stable report/API/export model, freshness/drill-back UX, scope/security tests, manual reporting walkthrough. |
@@ -183,10 +184,13 @@ Every milestone must state:
 - decision dependency;
 - stop condition.
 
-For subject-linked or missing-known-thing capture, Stage 7 must either:
+For subject-linked or missing-known-thing capture, Stage 7 and FD-PKT-001 must
+either:
 
-- keep S06 explicitly excluded from Candidate 1 with UX copy and tests that
-  prevent lifecycle overclaim; or
+- keep Candidate 1 first as an S01-compatible slice with UX copy and tests that
+  prevent lifecycle overclaim;
 - schedule an earlier BAR-105/S06 product/platform decision if first deployment
   requires maintained known things, lifecycle states, or discovered-unit
-  stewardship.
+  stewardship; or
+- run S06 discovery in parallel and block implementation packet dispatch until
+  the dependency is resolved.

@@ -22,7 +22,7 @@ have been overread:
 
 | Surface | Correction |
 |---|---|
-| S06 / registry lifecycle | Treat as a near-future product-deployment lane, deferred only from the current accepted baseline while surrounding slices stabilize. Subject-linked capture and bounded history are usable, but full entity lifecycle, discovered-unit lifecycle, canonical active/inactive state, and merge/split UX need a routed BAR-105/S06 successor before implementation. |
+| S06 / registry lifecycle | Treat as a near-future product-deployment lane, deferred only from the current accepted baseline while surrounding slices stabilize. Subject-linked capture and bounded history are usable, but full entity lifecycle, discovered-unit lifecycle, canonical active/inactive state, and merge/split UX need a routed BAR-105/S06 successor before implementation. FD-PKT-001 must decide timing; it must not use protocol wording to hide the product need. |
 | Missing-subject path | Candidate 1 may keep work moving through an unpromoted candidate/capture artifact. It must not silently create canonical registry lifecycle state. |
 | Reporting and aggregates | S26 proves current inputs, not production reporting APIs, dashboards, warehouses, exports, or aggregate access divergence. Use NW-044 before productizing those. |
 | Access and audit | Ordinary scoped auditor visibility can use assignments. Broad audit/history reads, query/custom scope, special writes, and emergency bypasses need successor routing. |
@@ -111,22 +111,26 @@ Stop and report if:
 
 ## Recommended Way Forward
 
-1. Produce Candidate 1 as a constrained platform-spec draft, not implementation:
+1. Run FD-PKT-001 before Candidate 1 packet freeze:
+   decide whether Candidate 1 remains first as an S01-compatible slice, whether
+   S06/BAR-105 moves before Candidate 1 implementation planning, or whether S06
+   discovery runs in parallel before the implementation gate.
+2. Produce Candidate 1 as a constrained platform-spec draft, not implementation:
    basic operational capture, optional subject-linked capture, assignment-scoped
    access, offline save/sync, shape version preservation, basic correction,
    freshness, and unresolved issue visibility.
-2. Run an SME/product validation pass on the Candidate 1 vocabulary:
+3. Run an SME/product validation pass on the Candidate 1 vocabulary:
    record/form/checklist, assigned work, subject/known thing, saved locally,
    waiting to sync, synced, needs review, old version, access ended.
-3. Run the deployment-planning workshop with all near-future lanes visible:
+4. Run the deployment-planning workshop with all near-future lanes visible:
    Candidate 1, S06/BAR-105 entity lifecycle, production admin/mobile auth,
    NW-054 retention/security, NW-044 reporting/import/export, and
    conflict-review UX. Candidate 1 can remain the first implementation slice
    without hiding the rest of the roadmap.
-4. Keep each successor as one bounded prompt with a stop list. Do not combine
+5. Keep each successor as one bounded prompt with a stop list. Do not combine
    entity lifecycle, reporting, retention, and production auth in the same
    implementation slice.
-5. Before any coding task, require the agent to state the active BAR/NW evidence
+6. Before any coding task, require the agent to state the active BAR/NW evidence
    it is relying on and the routed planning lanes it is excluding from that
    slice.
 
@@ -179,8 +183,8 @@ The day-one planning lanes are:
 
 | Lane | Planning stance |
 |---|---|
-| Candidate 1 | Basic operational capture, assignment-scoped access, offline save/sync, optional subject-linked capture, correction basics, freshness, and unresolved issue visibility. |
-| S06/entity lifecycle | Near-future product-deployment lane. It needs BAR-105/S06 successor routing before implementation and must not be hidden behind "later" wording. |
+| Candidate 1 | Basic operational capture, assignment-scoped access, offline save/sync, optional S01-compatible subject-linked capture, correction basics, freshness, and unresolved issue visibility. |
+| S06/entity lifecycle | Near-future product-deployment lane. FD-PKT-001 decides whether it stays after Candidate 1 spec, moves before Candidate 1 implementation planning, or runs as parallel discovery before the implementation gate. It needs BAR-105/S06 successor routing before implementation and must not be hidden behind "later" wording. |
 | Production auth/admin/mobile login | Server OIDC/JWKS kernel is accepted, but admin auth, mobile OIDC UX, token refresh/logout, secure storage, and binding-admin operations are productization lanes. |
 | Retention/security/device lifecycle | Route expiry, decommissioning, sealed partition recovery, local encryption, no-local-retention, and redaction through NW-054/BAR-106. |
 | Reporting/import/export | S26 proves traceable inputs only. Route production dashboards, APIs, warehouses, export/import, and aggregate access through NW-044. |
@@ -278,6 +282,19 @@ pre-work item rather than guessing.
    decision points, and change-control gates.
 9. The group cuts Candidate 1 and near-future lanes without hiding any product
    need in vague "later" language.
+
+### FD-PKT-001 Starting Rule
+
+FD-PKT-001 should start from the entity-lifecycle architecture consolidation:
+the architecture can support lifecycle pressure by splitting it across identity,
+projection, conflict, assignment/access, shape/config, workflow/pattern,
+access/sync, and reporting/freshness lanes. It is not one new primitive and it
+is not implementation-ready by protocol alone.
+
+The Product Manager owns the timing call. The steward accountability owns the
+guardrails and route. A valid outcome may keep Candidate 1 first, but only if
+Candidate 1 is explicitly S01-compatible and S06 remains visible with owner,
+milestone, evidence need, and successor route.
 
 ### Required Workshop Outputs
 

@@ -188,7 +188,8 @@ Stage 4 Software Architect must preserve these UX boundaries:
 
 - UX state language is presentation language, not platform state.
 - Candidate 1 may include optional subject-linked capture, but not canonical
-  entity lifecycle.
+  entity lifecycle unless FD-PKT-001 moves S06/BAR-105 before implementation
+  planning.
 - Missing-subject capture must stay unpromoted/candidate/review-oriented until
   S06/BAR-105 is routed.
 - Freshness and latest synced view must avoid live-truth claims.
@@ -212,5 +213,7 @@ Workshop control recommendation:
 - Ask Stage 4 Software Architect to identify which UX states can be backed by
   current code/contracts and which need task-packet caveats or successor
   routes.
+- Require FD-PKT-001 before Candidate 1 packet freeze if the product promise
+  depends on subject-linked or missing-known-thing behavior.
 - Keep UX Architect review as a future refinement item if a dedicated UX role
   becomes available again.

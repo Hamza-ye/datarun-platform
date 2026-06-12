@@ -36,7 +36,7 @@ Mobile must not:
 | Setup/connect | Feasible today as constrained raw bearer setup. `SetupScreen` verifies `/api/auth/me` and activates the returned actor session. | `product-surface-partial`, not production mobile login. |
 | Work list | Feasible as a subject-centric list with active assignment roles, capture count, flag count, latest timestamp, pending-sync count, and sync entry point. | Product IA still needs assigned-work language. |
 | Capture | Feasible through shape-driven forms, config promotion, defaults/show conditions, field warnings, and activity-action advisory warnings. | Mobile warnings remain advisory. |
-| Optional subject link | Feasible when capturing from subject detail. Standalone capture currently creates a new subject UUID. | Candidate 1 copy/spec must keep standalone capture as unlinked/candidate capture, not S06 lifecycle truth. |
+| Optional subject link | Feasible when capturing from subject detail. Standalone capture currently creates a new subject UUID. | Candidate 1 copy/spec must keep standalone capture as unlinked/candidate capture, not S06 lifecycle truth unless FD-PKT-001 moves S06/BAR-105 before implementation planning. |
 | Offline save | Feasible. Form save writes a local pending event and tells the user it will sync later. | Label as saved locally, not submitted or server received. |
 | Sync | Feasible through actor refresh, push, pull, config fetch, watermarks, pending counts, and error messages. | UX needs clearer waiting/syncing/synced/failed/synced-with-issue states. |
 | Correction | Feasible only as another append-only capture path over the same subject. | Dedicated correction UX is not productized and must not imply in-place editing. |

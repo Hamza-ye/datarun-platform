@@ -65,7 +65,8 @@ turning the matrix into prompts or specs:
   early deployment planning. Subject-linked capture, subject history backfill,
   and lineage evidence do not authorize implementation by themselves, but
   registry lifecycle should stay visible as a near-future product-deployment
-  lane with explicit BAR-105/S06 successor routing.
+  lane with explicit BAR-105/S06 successor routing. FD-PKT-001 is the required
+  timing decision before Candidate 1 packet freeze.
 
 ## 2. Core rule
 
@@ -206,6 +207,12 @@ Candidate 1 may include these as platform-spec behavior:
 * basic freshness marker;
 * surfaced unresolved issue state.
 
+This is an S01-compatible inclusion. It allows linking records to known things
+and carrying an unpromoted missing-known-thing/candidate artifact for review.
+It does not include S06 canonical lifecycle truth, discovered-unit lifecycle,
+or merge/split UX unless FD-PKT-001 moves S06/BAR-105 before Candidate 1
+implementation planning.
+
 If Candidate 1 needs assignment creation/end in its setup path, use the
 NW-050 command-capability boundary as the limit: platform-owned
 `assignment_admin.create`/`assignment_admin.end`, command-plus-containment, and
@@ -251,7 +258,9 @@ keeping them visible for the deployment plan:
 Deferring entity lifecycle from Candidate 1 means "do not implement it inside
 the basic capture slice." It does not mean "exclude it from the first product
 deployment plan." The deployment plan should carry S06/BAR-105 as a named
-near-future lane with acceptance evidence and risk controls.
+near-future lane with acceptance evidence and risk controls. FD-PKT-001 must
+record whether that lane stays near-future, moves earlier, or runs as parallel
+discovery before implementation gates.
 
 ### 6.4 Exclude unless formal architecture decision starts
 
@@ -425,6 +434,8 @@ Candidate 1 may proceed if it states:
 8. Which escape hatches are explicitly inactive.
 9. How S00 simplicity is preserved.
 10. How user language is separated from architecture vocabulary.
+11. The FD-PKT-001 S06 timing decision and the resulting Candidate 1/S06
+    boundary.
 
 Candidate 1 should not proceed if it:
 
@@ -437,6 +448,8 @@ Candidate 1 should not proceed if it:
 * uses architecture terms as primary user terms;
 * activates escape hatches without trigger evidence;
 * crosses negative boundaries.
+* starts without an explicit S06 timing decision when subject-linked or
+  missing-known-thing behavior is part of the first-deployment promise.
 
 ## 9. Initial gap candidates to add or cross-reference
 

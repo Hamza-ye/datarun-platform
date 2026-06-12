@@ -65,7 +65,7 @@ Stage 4 does not:
 
 | Route | Stage 4 placement |
 |---|---|
-| S06/entity lifecycle | BAR-105/NW-021/NW-036 successor lane. Candidate 1 may link to known subjects but must not create active/inactive/retired lifecycle truth or discovered-unit lifecycle. |
+| S06/entity lifecycle | BAR-105/NW-021/NW-036 successor lane. Candidate 1 may link to known subjects as an S01-compatible path, but must not create active/inactive/retired lifecycle truth or discovered-unit lifecycle unless FD-PKT-001 moves S06 before Candidate 1 implementation planning. |
 | Admin/mobile auth | BAR-104 kernel accepted, but production web admin auth, mobile OIDC/Keycloak login, token lifecycle, and online binding-admin API/UI need routed decisions. |
 | Retention/security | BAR-106/NW-054. Local expiry, decommissioning, sealed-partition recovery, encryption, redaction/no-local-retention, and token/session retention are not Candidate 1 kernel behavior. |
 | Reporting/import-export | NW-044. Candidate 1 may show freshness/unresolved issue inputs, but no reporting warehouse/API/export/import or broad audit/history surface. |
@@ -78,6 +78,8 @@ Stage 4 does not:
 1. Candidate 1 should first define a current-kernel product/spec slice: setup,
    assigned work, capture, local save, sync, correction, optional subject link,
    freshness, unresolved issue visibility.
+   FD-PKT-001 must confirm whether that slice stays S01-compatible or whether
+   S06/BAR-105 needs to move earlier.
 2. UX view models should be adapter-level compositions over existing events,
    projections, flags, sync metadata, and assignment scope. If multiple shipped
    components need a new shared shape, route contract work before

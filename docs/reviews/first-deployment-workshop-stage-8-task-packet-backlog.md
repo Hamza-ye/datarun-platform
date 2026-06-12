@@ -49,7 +49,7 @@ not implementation packets.
 
 | Packet ID | Lane | Claim status | Owner role | Purpose | Gate |
 |---|---|---|---|---|---|
-| FD-PKT-001 | S06 timing decision | `needs-decision` | Product Manager + steward accountability | Decide whether Candidate 1 excludes lifecycle with UX copy/tests or moves BAR-105/S06 decision before Candidate 1 implementation planning. | Must complete before Candidate 1 packet freeze. |
+| FD-PKT-001 | S06 timing decision | `needs-decision` | Product Manager + steward accountability | Decide whether Candidate 1 remains first as an S01-compatible slice, moves BAR-105/S06 before Candidate 1 implementation planning, or proceeds with parallel S06 discovery before the implementation gate. | Must complete before Candidate 1 packet freeze. Use [first-deployment-workshop-fd-pkt-001-s06-timing-decision.md](first-deployment-workshop-fd-pkt-001-s06-timing-decision.md). |
 | FD-PKT-002 | Candidate 1 product/spec and UX validation | `conditional-go` for spec/validation | Product Manager + UX owner | Produce bounded Candidate 1 product/spec, validation questions, vocabulary tests, journey walkthrough requirements, and explicit exclusions. | S06 timing decision recorded. |
 | FD-PKT-003 | Candidate 1 evidence plan | `conditional-go` for evidence design | Test Results Analyzer | Convert Candidate 1 acceptance criteria into automated tests, scenario probes, manual walkthroughs, ops checks, and release gates. | FD-PKT-002 draft available. |
 | FD-PKT-004 | Candidate 1 mobile/offline validation packet | `product-surface-partial` | Mobile App Builder | Define mobile UX/spec evidence for setup/connect, offline save, sync failure, shared-device switch, correction, and freshness. | FD-PKT-002 and FD-PKT-003 available. |
@@ -141,4 +141,5 @@ Implementation remains blocked until individual packets are written, reviewed
 against this backlog, and explicitly dispatched.
 
 The immediate next non-implementation action is FD-PKT-001: S06 timing decision
-for Candidate 1 freeze.
+for Candidate 1 freeze. The prepared packet is
+[first-deployment-workshop-fd-pkt-001-s06-timing-decision.md](first-deployment-workshop-fd-pkt-001-s06-timing-decision.md).

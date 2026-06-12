@@ -51,6 +51,8 @@ decisions.
       scenario packets are linked as product/problem evidence.
 - [ ] `docs/reviews/scenario-user-fit-packets-standing-review-and-playbook.md`
       is linked for human workshop management.
+- [ ] `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`
+      is linked before Candidate 1 packet freeze.
 
 ### 2. Authority And Routing
 
@@ -60,6 +62,9 @@ decisions.
       container for every product need.
 - [ ] S06/entity lifecycle is visible as a near-future product-deployment lane,
       not hidden as vague later work.
+- [ ] FD-PKT-001 is scheduled to decide whether Candidate 1 stays first as an
+      S01-compatible slice, S06/BAR-105 moves earlier, or S06 discovery runs in
+      parallel before implementation gates.
 - [ ] Production auth/admin/mobile login, retention/security, reporting/import
       and export, conflict review UX, and ops readiness are all visible routed
       lanes.
@@ -166,6 +171,8 @@ Start the workshop only when these are true:
       drafted.
 - [ ] S06/entity lifecycle and other product-needed gaps are visible in the
       planning lanes.
+- [ ] Candidate 1/S06 timing is treated as a product decision checked by
+      steward guardrails, not as protocol closure.
 - [ ] Evidence taxonomy and release gates are ready.
 - [ ] The group agrees that product terms can guide UX and validation but do
       not become architecture without routed authority.

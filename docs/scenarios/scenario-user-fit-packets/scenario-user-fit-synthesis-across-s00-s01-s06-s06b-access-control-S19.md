@@ -406,6 +406,12 @@ This is the smallest useful deployment surface. It must protect S00 simplicity w
 * production mobile OIDC login, production web admin auth, or online
   principal-binding administration.
 
+**S01/S06 timing note:** Candidate 1 is S01-compatible. It may include
+optional subject-linked capture and unpromoted missing-known-thing handling
+over accepted subject/history constructs. FD-PKT-001 must decide whether S06
+stays as a near-future milestone, moves before Candidate 1 implementation
+planning, or runs as parallel discovery before the implementation gate.
+
 ### Candidate 2 — Registry Entry Lifecycle Spec
 
 **Why second:**
@@ -654,9 +660,11 @@ keeping them visible in the deployment plan:
 * external system integration.
 
 This routing is a scope guard for Candidate 1, not a product roadmap decision.
-The first product-deployment plan should keep S06/BAR-105 entity lifecycle
-visible as a near-future milestone with its own decision, QA evidence,
-acceptance checklist, and change-management route.
+FD-PKT-001 is the timing decision that prevents this scope guard from hiding
+the product need. The first product-deployment plan should keep S06/BAR-105
+entity lifecycle visible as a near-future or earlier milestone, with its own
+decision, QA evidence, acceptance checklist, owner, and change-management
+route.
 
 ## 13. Current synthesis decision
 
@@ -675,6 +683,10 @@ Proceed to:
 ```txt
 Candidate 1 — Basic Operational Capture Setup Spec
 ```
+
+Only proceed after FD-PKT-001 records whether Candidate 1 stays first as an
+S01-compatible slice, whether S06/BAR-105 moves earlier, or whether S06
+discovery runs in parallel before implementation packet dispatch.
 
 Suggested structure:
 

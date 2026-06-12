@@ -156,7 +156,7 @@ Rules:
 | Lane | Product need | Current standing | Route | Current workshop status |
 |---|---|---|---|---|
 | Candidate 1 basic operational capture | First bounded product/spec slice for configured capture, assignment-scoped access, offline save/sync, optional subject-linked capture, correction basics, freshness, and unresolved issue visibility. | Kernel capabilities accepted across BAR-001..015 and scenario runtime probes; product surface partial. | Candidate 1 platform spec, then validation and bounded task packets. | Ready for Product Manager and UX Architect framing. |
-| S06/entity lifecycle | Known set of things, discovered-unit lifecycle, active/inactive/retired states, merge/split UX, lifecycle vocabulary. | BAR-105 deferred from accepted baseline; near-future product-deployment lane, not hidden as unscheduled work. | BAR-105/S06 successor product/platform decision before implementation. | Visible lane; needs Product Manager priority and Steward route. |
+| S06/entity lifecycle | Known set of things, discovered-unit lifecycle, active/inactive/retired states, merge/split UX, lifecycle vocabulary. | BAR-105 deferred from accepted baseline; near-future product-deployment lane, not hidden as unscheduled work. | FD-PKT-001 timing decision, then BAR-105/S06 successor product/platform decision before implementation if promoted. | Visible lane; needs Product Manager priority and Steward route. |
 | Production auth/admin/mobile login | Real admin auth, mobile OIDC/Keycloak login, token lifecycle, online binding-admin product needs. | BAR-104 server-side kernel accepted; mobile login UX and production admin auth not productized. | Product/platform decisions for admin auth and mobile OIDC lifecycle; no IdP group/claim authority. | Visible lane; needs PM, Software Architect, Mobile App Builder, ops evidence. |
 | Retention/security/device lifecycle | Expiry, decommissioning, sealed-partition recovery, local encryption, no-local-retention/redaction. | Shared-device partitions accepted; broader retention/security remains BAR-106/NW-054. | NW-054/BAR-106 decision. | Visible lane; needs security/ops evidence before production claims. |
 | Reporting/import-export | Dashboards, report APIs, export/import, aggregates, freshness/drill-back product claims. | S26 proves traceable report inputs only; no production reporting surface. | NW-044 decision before product reporting/API/export implementation. | Visible lane; needs product scope and route decision. |
@@ -579,7 +579,7 @@ Milestone roadmap:
 | Milestone | Purpose | Exit gate |
 |---|---|---|
 | M0 Workshop delivery baseline | Confirm lane register, owner map, claim labels, and change-control rules. | Workshop Lead accepts Stage 7 packet. |
-| M1 Candidate 1 product/spec and UX validation | Define bounded operational capture over existing kernel. | Product/UX validation artifacts, S06 timing decision, explicit exclusions. |
+| M1 Candidate 1 product/spec and UX validation | Define bounded operational capture over existing kernel. | Product/UX validation artifacts, FD-PKT-001 S06 timing decision, explicit exclusions or dependency marker. |
 | M2 Evidence and packet-gate design | Define automated tests, probes, walkthroughs, ops checks, source files, contracts, and stop conditions. | No implementation packet is missing evidence class, owner, route, or exclusion list. |
 | M3 Stage 8 task-packet approval | Workshop Lead packages narrow agent tasks. | Each packet is one lane only and has authority/routing, files, expected tests, manual evidence, stop conditions, and commit boundary. |
 | M4 Candidate 1 implementation slices | Execute bounded UI/view-model/mobile/server tasks separately, only after M3 approval. | Targeted tests and walkthrough evidence pass for each slice. |
@@ -612,7 +612,7 @@ Immediate packet backlog:
 
 | Packet ID | Lane | Status | Owner role | Purpose |
 |---|---|---|---|---|
-| FD-PKT-001 | S06 timing decision | `needs-decision` | Product Manager + steward accountability | Decide whether Candidate 1 excludes lifecycle with UX copy/tests or moves BAR-105/S06 decision before Candidate 1 implementation planning. |
+| FD-PKT-001 | S06 timing decision | `needs-decision` | Product Manager + steward accountability | Decide whether Candidate 1 stays first as an S01-compatible slice, moves BAR-105/S06 before Candidate 1 implementation planning, or proceeds with parallel S06 discovery before the implementation gate. |
 | FD-PKT-002 | Candidate 1 product/spec and UX validation | `conditional-go` for spec/validation | Product Manager + UX owner | Produce bounded Candidate 1 product/spec, validation questions, vocabulary tests, journey walkthrough requirements, and explicit exclusions. |
 | FD-PKT-003 | Candidate 1 evidence plan | `conditional-go` for evidence design | Test Results Analyzer | Convert Candidate 1 acceptance criteria into automated tests, scenario probes, manual walkthroughs, ops checks, and release gates. |
 | FD-PKT-004 | Candidate 1 mobile/offline validation packet | `product-surface-partial` | Mobile App Builder | Define mobile UX/spec evidence for setup/connect, offline save, sync failure, shared-device switch, correction, and freshness. |
@@ -626,7 +626,8 @@ Stage 8 result:
 - Implementation remains blocked until individual packets are written,
   reviewed against the packet gate, and explicitly dispatched.
 - The immediate next non-implementation action is FD-PKT-001: S06 timing
-  decision for Candidate 1 freeze.
+  decision for Candidate 1 freeze. The prepared packet is
+  `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`.
 
 ## Starting Input Packet
 
@@ -656,6 +657,7 @@ Use these as the compact starting packet for the workshop:
 - `docs/reviews/first-deployment-workshop-stage-6-pressure-test.md`
 - `docs/reviews/first-deployment-workshop-stage-7-delivery-plan.md`
 - `docs/reviews/first-deployment-workshop-stage-8-task-packet-backlog.md`
+- `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`
 
 ## Role Briefs
 
@@ -803,7 +805,7 @@ Do not produce:
 | Lane | Product need | Current standing | Evidence | Risk | Decision needed | Owner role | Milestone | Acceptance gate | Stop condition |
 |---|---|---|---|---|---|---|---|---|---|
 | Candidate 1 | TBD by PM | BAR/NW accepted kernel + partial product surfaces | BAR/NW + scenario probes + UX/SME validation needed | Product overclaim | Candidate 1 spec approval | PM + Steward + Project Shepherd | M1/M2/M3 | Spec, validation, tests | Stop if product terms become architecture. |
-| S06/entity lifecycle | TBD by PM | BAR-105 deferred from baseline, near-future lane | Scenario/user-fit evidence only so far | Hidden product dependency | BAR-105/S06 successor route | PM + Steward | M6 or earlier if deployment requires | Decision + evidence plan | Stop if candidate subject becomes canonical lifecycle state. |
+| S06/entity lifecycle | TBD by PM | BAR-105 deferred from baseline, near-future lane | Scenario/user-fit evidence plus entity-lifecycle architecture-position consolidation | Hidden product dependency | FD-PKT-001 timing decision, then BAR-105/S06 successor route if promoted | PM + Steward | M6, earlier if deployment requires, or parallel discovery before implementation gate | Decision + evidence plan | Stop if candidate subject becomes canonical lifecycle state or if S06 is hidden under vague follow-up wording. |
 | Admin/mobile auth | TBD by PM/Mobile | BAR-104 accepted server kernel; product surfaces partial/not started | BAR-104 + missing UX/ops evidence | Production auth overclaim | Admin auth/mobile OIDC decisions | Software Architect + Mobile App Builder | M4/M5/M6 | Route + tests + runbooks | Stop if IdP claims/groups become authority. |
 | Retention/security | TBD by PM/Ops | NW-054/BAR-106 needed | Current selective retention/actor partitions only | Data/security production overclaim | NW-054/BAR-106 | Software Architect + Reality Checker | M4/M6 | Security/ops decision + tests | Stop if local deletion/redaction is improvised. |
 | Reporting/import-export | TBD by PM | NW-044 needed; S26 inputs only | NW-033/S26 runtime inputs | Aggregate access/export overclaim | NW-044 | PM + Software Architect | M6 | Decision + report model | Stop if dashboard/API/export is built before route. |
@@ -824,7 +826,7 @@ Do not produce:
 | D-007 | 2026-06-12 | Stage 5 Mobile is complete and classifies Candidate 1 mobile as feasible over accepted kernel but product-surface-partial. | Mobile App Builder | Stage 5 packet | Stage 6 must pressure-test mobile evidence and production-readiness wording. |
 | D-008 | 2026-06-12 | Stage 6 pressure test is complete; evidence is sufficient for delivery planning but not implementation or production claims. | Reality Checker and Test Results Analyzer | Stage 6 packet | Stage 7 Project Shepherd must plan lanes, gates, owners, dependencies, and S06 timing. |
 | D-009 | 2026-06-12 | Stage 7 delivery planning is complete; Candidate 1 remains conditional-go for product/spec validation and no-go for implementation until Stage 8 packet gates exist. | Project Shepherd | Stage 7 packet | Workshop Lead produces Stage 8 task-packet backlog. |
-| D-010 | 2026-06-12 | Stage 8 task-packet backlog is complete; the immediate next non-implementation action is FD-PKT-001 S06 timing decision. | Workshop Lead | Stage 8 packet | Do not dispatch implementation until individual packets are written and gated. |
+| D-010 | 2026-06-12 | Stage 8 task-packet backlog is complete; the immediate next non-implementation action is FD-PKT-001 S06 timing decision. | Workshop Lead | Stage 8 packet | Use the prepared FD-PKT-001 packet; do not dispatch implementation until individual packets are written and gated. |
 
 ### Unresolved Input Register
 
@@ -836,7 +838,7 @@ Do not produce:
 | Mobile feasibility and test targets | Stage 5 | Complete | Mobile App Builder | Feed into Reality Checker and Test Results Analyzer. |
 | Claim/evidence matrix | Stage 6 | Complete | Reality Checker and Test Results Analyzer | Feed into Project Shepherd delivery planning. |
 | Milestone roadmap and decision calendar | Stage 7 | Complete | Project Shepherd | Feed into Stage 8 task-packet backlog. |
-| Task-packet backlog | Stage 8 | Complete | Workshop Lead | Next action is FD-PKT-001 S06 timing decision. |
+| Task-packet backlog | Stage 8 | Complete | Workshop Lead | Next action is FD-PKT-001 S06 timing decision using `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`. |
 
 ## Go / No-Go For Full Workshop
 
@@ -856,16 +858,21 @@ Reason:
 - Candidate 1 implementation remains blocked until individual packets are
   written, reviewed against the packet gate, and explicitly dispatched.
 - The next correct action is FD-PKT-001 S06 timing decision, not
-  implementation.
+  implementation. That decision must classify Candidate 1 as S01-compatible
+  if it remains first and keep S06 visible with route, milestone, owner, and
+  evidence need.
 
-The workshop becomes ready for delivery planning only after Stages 1 through 6
-produce their outputs and the lane control table is updated.
+The delivery-planning gate is satisfied because Stages 1 through 8 now have
+recorded outputs. The remaining gate is not more workshop protocol; it is the
+FD-PKT-001 product timing decision before Candidate 1 packet freeze.
 
 ## Next Action
 
 Remaining workshop lead action:
 
-1. Prepare FD-PKT-001 S06 timing decision packet when the user is ready.
+1. Run FD-PKT-001 using
+   `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`
+   and record the chosen timing option before Candidate 1 packet freeze.
 
 After each role output, the Workshop Lead updates this control file or a
 successor workshop record with accepted outputs, unresolved inputs, lane

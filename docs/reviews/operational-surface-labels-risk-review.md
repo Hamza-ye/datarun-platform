@@ -185,3 +185,9 @@ This review added or supports guardrail edits in:
 The next workshop action remains FD-PKT-001, but it now carries an additional
 packet hygiene requirement: any persona label used in the S06 timing decision
 must be stated as an acting context with authority backing.
+
+FD-PKT-001 also carries the S01/S06 boundary requirement: Candidate 1 may stay
+first as S01-compatible subject-linked capture, but S06/entity lifecycle must
+remain visible with owner, milestone, evidence need, and BAR-105/S06 route
+unless Product Manager evidence moves it before Candidate 1 implementation
+planning.

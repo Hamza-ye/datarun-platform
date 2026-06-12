@@ -49,12 +49,17 @@ Current standing overlay:
 - Accepted scenario runtime evidence now includes S00, S19, S21, S22, S23, S26,
   and S27. Treat those as feasibility evidence for current constructs, not as
   proof that these packets are product-validated workflows.
+- Candidate 1 is S01-compatible: it may include optional subject-linked
+  capture and an unpromoted missing-known-thing/candidate path over accepted
+  subject/history constructs. It must not silently create canonical registry
+  lifecycle state.
 - S06/entity lifecycle is deferred from the current baseline, not from early
   deployment planning. Subject-linked capture and bounded subject history are
   usable foundations, while full registry lifecycle, discovered-unit lifecycle,
   merge/split UX, and operational lifecycle states should be kept in the
   near-future product-deployment lane and need explicit successor routing
-  before implementation.
+  before implementation. The next workshop action for this boundary is
+  [FD-PKT-001 S06 timing decision](../../reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md).
 - Reporting, import/export, broad audit/history access, custom/query scope,
   retention/security, mobile OIDC login, production admin auth, batch conflict
   handling, triggers, auto-resolution, resolver reassignment, and IdP

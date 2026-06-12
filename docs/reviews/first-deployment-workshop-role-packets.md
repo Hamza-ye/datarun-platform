@@ -53,6 +53,7 @@ Use the smallest relevant subset of this packet for each role:
 - `docs/reviews/pre-workshop-readiness-checklist.md`
 - `docs/reviews/scenario-user-fit-packets-standing-review-and-playbook.md`
 - `docs/reviews/first-deployment-workshop-control.md`
+- `docs/reviews/first-deployment-workshop-fd-pkt-001-s06-timing-decision.md`
 
 ## Stage 3 UX Architect Packet
 
@@ -88,6 +89,8 @@ Hard boundaries:
 - Do not hide S06/entity lifecycle, auth/admin/mobile login,
   retention/security, reporting/import-export, conflict review, ops readiness,
   or subject/query/custom scope if they affect UX.
+- Treat Candidate 1 as S01-compatible unless FD-PKT-001 moves S06/BAR-105
+  before implementation planning.
 
 ## Stage 4 Software Architect Packet
 
@@ -120,6 +123,8 @@ Hard boundaries:
 - Do not add new envelope fields/types, scope mechanisms, durable workflow
   state, config scripts, query authority, IdP claim authority, or direct flag
   mutation.
+- Do not collapse S01 subject-linked capture and S06/entity lifecycle into the
+  same implementation lane.
 
 ## Stage 5 Mobile App Builder Packet
 
@@ -236,6 +241,8 @@ Hard boundaries:
 - Do not authorize implementation before gates exist.
 - Do not combine unrelated successor lanes into one implementation slice.
 - Do not hide product-needed gaps under vague follow-up wording.
+- Preserve FD-PKT-001 as the S06 timing decision before Candidate 1 packet
+  freeze.
 
 ## Workshop Lead Integration Rule
 
