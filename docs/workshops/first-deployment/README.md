@@ -31,6 +31,7 @@ BAR, NW, schemas, APIs, runtime behavior, or implementation authority.
 | FD-PKT-002 | Drafted: Candidate 1 product/spec and UX validation with an explicit S06 dependency marker. | [fd-pkt-002-candidate-1-product-spec-ux-validation.md](task-packets/fd-pkt-002-candidate-1-product-spec-ux-validation.md) |
 | FD-PKT-003 | Drafted: Candidate 1 evidence plan converting product/S06 claims into tests, walkthroughs, and release gates. | [fd-pkt-003-candidate-1-evidence-plan.md](task-packets/fd-pkt-003-candidate-1-evidence-plan.md) |
 | FD-PKT-004 | Drafted: Candidate 1 mobile/offline validation for setup, capture, sync, correction, freshness, and shared-device evidence. | [fd-pkt-004-candidate-1-mobile-offline-validation.md](task-packets/fd-pkt-004-candidate-1-mobile-offline-validation.md) |
+| FD-PKT-005 | Drafted: Candidate 1 view-model/contract assessment recommending adapter/view composition by default and routing shared-contract pressure. | [fd-pkt-005-candidate-1-view-model-contract-assessment.md](task-packets/fd-pkt-005-candidate-1-view-model-contract-assessment.md) |
 | FD-PKT-101 | Drafted: S06/entity lifecycle discovery and BAR-105 successor-decision seed. | [fd-pkt-101-s06-entity-lifecycle-discovery.md](task-packets/fd-pkt-101-s06-entity-lifecycle-discovery.md) |
 
 ## Current March-Forward Rule
@@ -42,7 +43,10 @@ written and gated. The immediate planning path is:
 2. Review/accept FD-PKT-101 for S06/entity lifecycle discovery before
    implementation dispatch.
 3. Review/accept FD-PKT-003 evidence planning and FD-PKT-004 mobile/offline
-   validation, then draft FD-PKT-005 view-model/contract assessment.
+   validation.
+4. Review/accept FD-PKT-005 view-model/contract assessment.
+5. Keep Candidate 1 implementation blocked until the gated packets and S06
+   dependency are resolved into bounded implementation dispatch packets.
 
 Do not collapse Candidate 1 with S06 lifecycle, production auth/admin/mobile
 login, retention/security, reporting/import-export, conflict automation, custom

@@ -51,9 +51,9 @@ not implementation packets.
 |---|---|---|---|---|---|
 | FD-PKT-001 | S06 timing decision | `recorded-option-c` | Product Manager + steward accountability | Candidate 1 may proceed to product/spec and UX validation while S06 discovery runs in parallel before implementation dispatch. | Complete. Use [task-packets/fd-pkt-001-s06-timing-decision-record.md](task-packets/fd-pkt-001-s06-timing-decision-record.md). |
 | FD-PKT-002 | Candidate 1 product/spec and UX validation | `conditional-go` for spec/validation | Product Manager + UX owner | Produce bounded Candidate 1 product/spec, validation questions, vocabulary tests, journey walkthrough requirements, explicit exclusions, and the Option C S06 dependency marker. | FD-PKT-001 Option C recorded. |
-| FD-PKT-003 | Candidate 1 evidence plan | `conditional-go` for evidence design | Test Results Analyzer | Convert Candidate 1 acceptance criteria into automated tests, scenario probes, manual walkthroughs, ops checks, and release gates. | FD-PKT-002 draft available. |
-| FD-PKT-004 | Candidate 1 mobile/offline validation packet | `product-surface-partial` | Mobile App Builder | Define mobile UX/spec evidence for setup/connect, offline save, sync failure, shared-device switch, correction, and freshness. | FD-PKT-002 and FD-PKT-003 available. |
-| FD-PKT-005 | Candidate 1 view-model/contract assessment | `needs-routing-check` | Software Architect + steward accountability | Decide whether Candidate 1 needs only adapter-level UI composition or a bounded shared view-model contract route before implementation. | Stage 4 question resolved before UI/server implementation packets. |
+| FD-PKT-003 | Candidate 1 evidence plan | `conditional-go` for evidence design | Test Results Analyzer | Convert Candidate 1 acceptance criteria into automated tests, scenario probes, manual walkthroughs, ops checks, and release gates. | Drafted. Use [task-packets/fd-pkt-003-candidate-1-evidence-plan.md](task-packets/fd-pkt-003-candidate-1-evidence-plan.md). |
+| FD-PKT-004 | Candidate 1 mobile/offline validation packet | `product-surface-partial` | Mobile App Builder | Define mobile UX/spec evidence for setup/connect, offline save, sync failure, shared-device switch, correction, and freshness. | Drafted. Use [task-packets/fd-pkt-004-candidate-1-mobile-offline-validation.md](task-packets/fd-pkt-004-candidate-1-mobile-offline-validation.md). |
+| FD-PKT-005 | Candidate 1 view-model/contract assessment | `needs-routing-check` | Software Architect + steward accountability | Decide whether Candidate 1 needs only adapter-level UI composition or a bounded shared view-model contract route before implementation. | Drafted. Use [task-packets/fd-pkt-005-candidate-1-view-model-contract-assessment.md](task-packets/fd-pkt-005-candidate-1-view-model-contract-assessment.md). |
 | FD-PKT-006 | Ops readiness runbook plan | `blocked` for production claims | Project Shepherd + Test Results Analyzer | Define TLS/secrets, backup/restore, migration rollback, monitoring, incident/support, auth manifest, config publish, and assignment bootstrap rehearsal plan. | Required before constrained deployment go/no-go. |
 | FD-PKT-007 | Integrated staging rehearsal plan | `blocked` for constrained deployment | Project Shepherd + QA owner | Define staging scenario tying server, mobile, config publish, auth manifest, assignment bootstrap, offline/sync/correction, unresolved issue visibility, and support paths. | Required before M5 staging rehearsal. |
 
@@ -140,7 +140,7 @@ the Workshop Lead.
 Implementation remains blocked until individual packets are written, reviewed
 against this backlog, and explicitly dispatched.
 
-FD-PKT-001 is complete as Option C. The immediate next non-implementation
-actions are FD-PKT-002 Candidate 1 product/spec and UX validation, and
-FD-PKT-101 S06/entity lifecycle discovery before Candidate 1 implementation
-dispatch.
+FD-PKT-001 is complete as Option C. FD-PKT-002 through FD-PKT-005 and
+FD-PKT-101 are drafted. The immediate next non-implementation action is review
+and gate acceptance of those packets, with S06 resolved, promoted, split, or
+explicitly excluded before Candidate 1 implementation dispatch.
