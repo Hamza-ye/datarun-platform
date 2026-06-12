@@ -55,8 +55,8 @@ stop and reconcile the drift.
 | Packet | Current state | Next use |
 |---|---|---|
 | FD-PKT-001 | Recorded 2026-06-13 as Option C: parallel S06 discovery before Candidate 1 implementation gate. | Use [task-packets/fd-pkt-001-s06-timing-decision-record.md](../workshops/first-deployment/task-packets/fd-pkt-001-s06-timing-decision-record.md). |
-| FD-PKT-002 | Open next for Candidate 1 product/spec and UX validation. | May draft with an explicit S06 dependency marker and no implementation authorization. |
-| FD-PKT-003 | Pending FD-PKT-002 draft. | Convert Candidate 1 and S06 dependency into evidence gates. |
+| FD-PKT-002 | Drafted for Candidate 1 product/spec and UX validation. | Review [fd-pkt-002-candidate-1-product-spec-ux-validation.md](../workshops/first-deployment/task-packets/fd-pkt-002-candidate-1-product-spec-ux-validation.md) before evidence planning. |
+| FD-PKT-003 | Pending FD-PKT-002 review. | Convert Candidate 1 and S06 dependency into evidence gates once FD-PKT-002 acceptance language is stable. |
 | FD-PKT-004 | Pending FD-PKT-002 and FD-PKT-003. | Define mobile/offline validation only after product/spec and evidence gates exist. |
 | FD-PKT-005 | Pending Candidate 1 product/spec questions. | Assess view-model/contract need without creating new contracts unless routed. |
 | FD-PKT-006/007 | Blocked for production/constrained-deployment claims. | Ops runbook and staging rehearsal planning only. |
@@ -114,11 +114,11 @@ instruction. Each implementation packet must state:
 
 ## Current March-Forward Path
 
-1. Draft FD-PKT-002 for Candidate 1 product/spec and UX validation with the
-   FD-PKT-001 Option C dependency marker.
+1. Review/accept FD-PKT-002 for Candidate 1 product/spec and UX validation
+   with the FD-PKT-001 Option C dependency marker.
 2. Open FD-PKT-101 as the S06 discovery/decision follow-up before Candidate 1
    implementation dispatch.
-3. Draft FD-PKT-003 after FD-PKT-002 has enough acceptance language to convert
+3. Draft FD-PKT-003 after FD-PKT-002 has stable acceptance language to convert
    claims into tests, walkthroughs, and release gates.
 4. Keep FD-PKT-004 and FD-PKT-005 narrow: mobile/offline evidence and
    view-model/contract assessment only.
