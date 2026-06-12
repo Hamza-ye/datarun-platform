@@ -10,7 +10,7 @@
 An organization keeps track of a recognized set of real-world things: facilities, equipment, people, locations, areas, households, groups, or organizational units. These things are not static. New ones appear, details change, some become inactive, some are duplicated, and some need periodic verification.
 
 **Why this scenario matters:**
-This scenario tests whether the platform can support persistent operational subjects over time, not just isolated records. Many later scenarios depend on this: recurring reporting, assignment, visits, case follow-up, distribution, coordination, review, and reporting.
+This scenario tests whether the platform can support persistent operational subjects over time, not just isolated records. Many downstream scenarios depend on this: recurring reporting, assignment, visits, case follow-up, distribution, coordination, review, and reporting.
 
 **What this scenario must not decide:**
 This packet does not decide database schema, registry UI, duplicate-matching algorithm, API shape, storage model, exact merge workflow, exact subject type taxonomy, or operational governance policy.
@@ -189,7 +189,7 @@ Over months or years, the registry accumulates additions, corrections, verificat
 * It may understate sensitivity for person/household registries.
 * It may make merge/split look like a routine field action; accepted architecture makes merge/split online-only and server-validated.
 * It may encourage exact duplicate-matching algorithm design too early.
-* It may imply registry UI design, which is not settled here.
+* It may imply registry UI design, which is a routed product/spec lane rather than a decision made here.
 
 ## 7. Platform fit under current accepted architecture
 
@@ -205,13 +205,31 @@ Over months or years, the registry accumulates additions, corrections, verificat
 | Handle stale changes                        | `sync_watermark`, `stale_reference`, accept-and-flag          | Strong fit                               |
 | Restrict who sees or edits registry entries | assignment-based access, sync scope = access scope            | Strong fit, role-action spec open        |
 | Keep registry current without mutable truth | append-only events + projection                               | Strong fit                               |
-| Deactivate without breaking history         | lifecycle event + projection                                  | Good fit, platform-spec details open     |
+| Deactivate without breaking history         | ordinary configured capture if domain-local; platform entity lifecycle otherwise | Near-future route through S06/BAR-105 before implementation |
+
+### 7.1 Current standing caveat
+
+Current platform standing supports subject-linked capture, preserved
+`subject_ref` history, accepted subject-history backfill, and lineage-aware
+identity handling. It does not make generic registry lifecycle a settled
+product surface. S06/entity lifecycle is deferred from the current baseline so
+the platform can stabilize surrounding slices first; it may still be needed for
+early deployments and should stay in the near-future product-deployment lane.
+
+Use this packet to gather product evidence and route a successor decision. Do
+not use it to implement canonical inactive/active lifecycle state,
+discovered-unit lifecycle, registry import/export, merge/split UX, or broad
+audit/history reads without a bounded S06/BAR-105 successor route.
 
 ## 8. Fit assessment
 
 ### 8.1 Strong fit
 
-S06 fits the accepted architecture well. The architecture already distinguishes durable events from derived current views, treats subjects as typed identity references, preserves historical references, and supports lineage through merge and split semantics.
+S06 fits the accepted architecture as product pressure. The architecture
+already distinguishes durable events from derived current views, treats
+subjects as typed identity references, preserves historical references, and
+supports lineage evidence. That support is not the same as an accepted generic
+registry lifecycle product.
 
 ### 8.2 Weak fit
 
@@ -253,10 +271,10 @@ The architecture supports subject identity and lineage, but real organizations m
 **Short name:** Registry lifecycle state vocabulary
 **Classification:** Platform-spec detail gap
 **Baseline-extension category:** Not applicable
-**Current owner or likely decision path:** Platform-spec detailing
+**Current owner or likely decision path:** Product discovery, then S06/BAR-105 successor route before implementation
 **Baseline item affected:** Subject lifecycle projection under accepted subject identity boundaries
-**Why it is still open:** The architecture settles active/archived in lineage contexts, but does not specify ordinary operational lifecycle states such as inactive, closed, moved, pending verification, or duplicate candidate.
-**Closure path:** Platform-spec detailing
+**Why it is still open:** The architecture has identity and lineage support, but ordinary operational lifecycle states such as inactive, closed, moved, pending verification, or duplicate candidate are not accepted baseline behavior.
+**Closure path:** Product/platform decision route, then platform-spec detailing if approved
 **Evidence needed before closure:** Real examples of subject deactivation, reactivation, verification, and closure.
 
 ### Gap 3 — Duplicate review workflow
@@ -264,7 +282,7 @@ The architecture supports subject identity and lineage, but real organizations m
 **Short name:** Duplicate registry entry handling
 **Classification:** Platform-spec detail gap
 **Baseline-extension category:** Not applicable
-**Current owner or likely decision path:** Platform-spec detailing, with operational policy for who may resolve
+**Current owner or likely decision path:** Platform-spec detailing for candidate evidence; S06/BAR-105 successor route before productizing merge/split UX
 **Baseline item affected:** Subject merge/split and conflict resolution boundaries
 **Why it is still open:** Merge/split architecture is settled, but user-facing candidate detection, review, evidence comparison, and resolution workflow are not specified.
 **Closure path:** Platform-spec detailing
@@ -275,7 +293,7 @@ The architecture supports subject identity and lineage, but real organizations m
 **Short name:** Registry edit authority
 **Classification:** Operational policy gap
 **Baseline-extension category:** Not applicable
-**Current owner or likely decision path:** Operational policy definition, with platform-spec support
+**Current owner or likely decision path:** Operational policy definition, with S06/BAR-105 successor routing if the policy requires platform lifecycle behavior
 **Baseline item affected:** Assignment-based access and role-action table
 **Why it is still open:** The architecture supports assignment-based access but does not define which operational roles may create, edit, deactivate, merge, or split registry entries.
 **Closure path:** Operational policy definition
@@ -286,22 +304,27 @@ The architecture supports subject identity and lineage, but real organizations m
 **Short name:** Offline registry creation rules
 **Classification:** Platform-spec detail gap
 **Baseline-extension category:** Not applicable
-**Current owner or likely decision path:** Platform-spec detailing
+**Current owner or likely decision path:** Product discovery and platform-spec detailing only for candidate capture; S06/BAR-105 successor route for canonical subject creation lifecycle
 **Baseline item affected:** Client-generated identity, subject registry, duplicate detection, accept-and-flag
-**Why it is still open:** The architecture permits client-generated IDs and offline creation, but the exact rules for creating candidate subjects and later review are not specified.
-**Closure path:** Platform-spec detailing
+**Why it is still open:** The architecture permits client-generated IDs and offline capture, but the exact rules for creating candidate subjects, promoting them, and governing later review are not specified.
+**Closure path:** Platform-spec detailing for unpromoted candidate capture; successor route for canonical registry lifecycle
 **Evidence needed before closure:** Field workflows where the user cannot find a subject but must continue working.
 
 ## 10. Output decision
 
-**Current packet status:** Needs SME validation first, then platform-spec detailing.
+**Current packet status:** Near-future product-deployment lane; needs SME validation and successor routing before any registry-lifecycle implementation.
 
 **Reason:**
-The architecture fits the scenario, but the real-world registry lifecycle, user vocabulary, authority model, and duplicate-handling practices need validation before freezing platform-spec behavior.
+The architecture supports the scenario pressure, and early deployments may need
+registry lifecycle. Current standing keeps S06/entity lifecycle outside the
+accepted baseline until the surrounding slices are stable and the BAR-105/S06
+route is promoted. Real-world registry lifecycle, user vocabulary, authority
+model, duplicate-handling practices, and promotion rules need validation and
+routed decision work before platform-spec behavior is frozen.
 
 ## 11. Acceptance criteria for downstream platform-spec work
 
-A later S06 platform-spec section should be accepted only if it satisfies:
+A routed S06/BAR-105 platform-spec section should be accepted only if it satisfies:
 
 1. Users can distinguish “current registry view” from preserved history without seeing architecture vocabulary.
 2. A field user can find and update a known subject offline.
@@ -310,7 +333,8 @@ A later S06 platform-spec section should be accepted only if it satisfies:
 5. Old records remain tied to the subject identity originally referenced.
 6. Duplicate candidates can be reviewed without automatic destructive merge.
 7. Merge and split behavior preserves historical references.
-8. Inactive/deactivated subjects do not break historical work.
+8. Inactive/deactivated subjects do not break historical work, after a routed
+   lifecycle decision if the product needs platform lifecycle state.
 9. Registry changes can be scoped by assignment/access rules.
 10. Sensitive registry categories can be handled without field-level sensitivity or envelope authority fields.
 11. The basic S00 capture path is not made harder by adding registry support.

@@ -276,7 +276,20 @@ When I inspect the history, I need to see when work happened and when it became 
 | Show current state after sync                  | projections/read models                            | Strong fit                            |
 | Resolve manual conflicts                       | single-writer resolution, designated resolver      | Strong fit, resolver policy/spec open |
 | Sync only authorized data                      | sync scope equals access scope                     | Strong fit                            |
-| Device loss before sync                        | not settled as architecture guarantee              | Open implementation/operational risk  |
+| Device loss before sync                        | not an architecture guarantee; routed implementation/operational risk | Visible planning lane |
+
+### 7.1 Current standing caveat
+
+S19 has accepted runtime evidence through NW-025, and shared-device
+actor-partition behavior is accepted through NW-055. That does not settle local
+retention after access loss, device decommissioning, sealed-partition recovery,
+token/session retention, local encryption, backup/recovery guarantees, or
+no-local-retention/redacted views. Those route through NW-054/BAR-106 and
+operational policy.
+
+References to deactivated, merged, split, or reassigned subjects are stale
+subject/linkage pressure. They do not authorize a full S06/entity lifecycle
+implementation.
 
 ## 8. Fit assessment
 
@@ -347,7 +360,7 @@ The platform may be architecturally offline-first but still feel unreliable if u
 
 **Short name:** Offline conflict review ergonomics
 **Classification:** Platform-spec detail gap
-**Baseline-extension category:** Expansion of an explicitly open front
+**Baseline-extension category:** Visible routed lane outside current baseline
 **Current owner or likely decision path:** Platform-spec detailing
 **Baseline item affected:** Conflict flag queue and resolver workflow
 **Why it is still open:** Offline work creates duplicate, stale, concurrent, and transition conflicts. The architecture settles detection and resolution boundaries, but not reviewer-facing comparison and queue behavior.
@@ -370,9 +383,9 @@ The platform may be architecturally offline-first but still feel unreliable if u
 **Short name:** Unsynced device loss handling
 **Classification:** Implementation/tooling gap
 **Baseline-extension category:** Not applicable
-**Current owner or likely decision path:** Implementation/tooling design, with operational policy support
+**Current owner or likely decision path:** Implementation/tooling design, with operational policy support; NW-054/BAR-106 if recovery, retention, encryption, or decommissioning guarantees are proposed
 **Baseline item affected:** Local durability and support process, not event envelope
-**Why it is still open:** Events are durable once stored and synced, but unsynced device loss creates practical risk. Exact backup, recovery, transfer, or support behavior is not settled architecture.
+**Why it is still open:** Events are durable once stored and synced, but unsynced device loss creates practical risk. Exact backup, recovery, transfer, or support behavior needs routed implementation, security, and operational planning before implementation.
 **Closure path:** Implementation/tooling design
 **Evidence needed before closure:** Device-loss frequency, sensitivity level, and acceptable recovery guarantees.
 
@@ -381,10 +394,10 @@ The platform may be architecturally offline-first but still feel unreliable if u
 **Short name:** Local retention after access loss
 **Classification:** Platform-spec detail gap
 **Baseline-extension category:** Not applicable
-**Current owner or likely decision path:** Platform-spec detailing, with operational policy support
+**Current owner or likely decision path:** NW-054/BAR-106 for retention/security behavior, with operational policy support
 **Baseline item affected:** Selective-retain on scope contraction
-**Why it is still open:** The architecture names selective-retain, but product behavior, user messaging, retention windows, and sensitive-data handling need specification.
-**Closure path:** Platform-spec detailing
+**Why it is still open:** The architecture separates actor partitions and scope-filtered sync, but product behavior, user messaging, retention windows, expiry, and sensitive-data handling need the NW-054/BAR-106 planning lane.
+**Closure path:** NW-054/BAR-106 decision route, then platform-spec detailing if approved
 **Evidence needed before closure:** Examples of role transfer, offboarding, and sensitive local data.
 
 ### Gap 8 — Offline configuration rollout visibility
@@ -402,7 +415,7 @@ The platform may be architecturally offline-first but still feel unreliable if u
 
 **Short name:** Priority sync behavior
 **Classification:** Implementation/tooling gap
-**Baseline-extension category:** Expansion of an explicitly open front
+**Baseline-extension category:** Visible routed lane outside current baseline
 **Current owner or likely decision path:** Implementation/tooling design
 **Baseline item affected:** Sync transport and delivery mechanics under accepted sync/access boundaries
 **Why it is still open:** Large deployments may need prioritization, pagination, backfill, and retry behavior. These are implementation mechanics unless they change sync/access authority.
@@ -416,20 +429,20 @@ The platform may be architecturally offline-first but still feel unreliable if u
 **Baseline-extension category:** Not applicable
 **Current owner or likely decision path:** Platform-spec detailing
 **Baseline item affected:** Local command validation, accept-and-flag, workflow-state derivation
-**Why it is still open:** Some offline decisions can be accepted and reconciled; others may need warning, review, or downstream gating. Exact user-facing behavior is not settled.
+**Why it is still open:** Some offline decisions can be accepted and reconciled; others may need warning, review, or downstream gating. Exact user-facing behavior needs routed platform-spec and operational-policy work before implementation.
 **Closure path:** Platform-spec detailing
 **Evidence needed before closure:** Examples of offline approvals, referrals, corrections, task completions, and reviews.
 
 ## 10. Output decision
 
-**Current packet status:** Ready to feed six-input synthesis; not ready to freeze platform-spec details.
+**Current packet status:** Ready to feed synthesis; unresolved surfaces remain visible planning lanes before implementation.
 
 **Reason:**
 The architecture supports offline-first work strongly, but user-facing offline confidence, sync freshness, stale-authority review, conflict-review ergonomics, device-loss handling, local retention, and rollout visibility need specification, implementation design, operational policy, or product evidence before becoming platform-spec.
 
 ## 11. Acceptance criteria for downstream platform-spec work
 
-A later Offline-first / S19 platform-spec section should be accepted only if it satisfies:
+A routed Offline-first / S19 platform-spec section should be accepted only if it satisfies:
 
 1. Field users can create and save work without connectivity.
 2. Field users can understand whether work is saved locally, pending sync, synced, failed, or needs review.

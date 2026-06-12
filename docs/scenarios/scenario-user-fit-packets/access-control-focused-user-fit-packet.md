@@ -254,7 +254,7 @@ When I cover for someone or join a campaign, I need temporary access to the rele
 
 * It may imply health-specific roles; the scenario is domain-neutral.
 * It may imply strict hierarchy is always enough; exceptions are common.
-* It may imply auditors are settled in the baseline; auditor/query access remains an open front if it exceeds assignment-derived access.
+* It may imply auditors are settled in the baseline; auditor/query access remains a visible routed lane if it exceeds assignment-derived access.
 * It may imply field-level sensitivity; accepted boundaries keep sensitivity at shape/activity level.
 * It may imply online-only authority; field work must continue offline under last-known access, then reconcile later.
 
@@ -272,10 +272,24 @@ When I cover for someone or join a campaign, I need temporary access to the rele
 | Role changes                                      | assignment timeline and append-only changes                 | Good fit, operational policy open                |
 | Offline stale authority                           | accept-and-flag, authorization flags                        | Strong fit                                       |
 | Hierarchical visibility                           | scoped assignments and role-action rules                    | Good fit, exact role-action table open           |
-| Auditor access                                    | open architecture front if beyond assignment-derived access | Not settled                                      |
-| Aggregate visibility                              | open if aggregate access differs from detail access         | Not settled                                      |
-| Actor-as-subject visibility                       | open architecture front                                     | Not settled                                      |
+| Auditor access                                    | routed decision lane if beyond assignment-derived access    | Not baseline-accepted                            |
+| Aggregate visibility                              | routed decision lane if aggregate access differs from detail access | Not baseline-accepted                    |
+| Actor-as-subject visibility                       | routed decision lane                                        | Not baseline-accepted                            |
 | Per-field sensitive visibility                    | rejected as baseline                                        | Not allowed without formal architecture decision |
+
+### 7.1 Current standing caveat
+
+Accepted standing supports assignment-derived visibility, scope-filtered sync,
+production principal-to-actor binding, assignment-admin create/end command
+capabilities, and shared-device actor partitions. It does not support authority
+from IdP groups/claims, request-body actor IDs, UI-selected actors, or
+activity-role promotion of assignment-admin commands.
+
+Simple current-scope auditor visibility can be modeled as ordinary assignments.
+Broad audit/history reads, cross-axis query access, emergency/special write
+bypasses, custom/query scope, aggregate access beyond detail access, and
+no-local-retention/redacted views remain visible routed lanes that need
+decision, planning, evidence, and change control before implementation.
 
 ## 8. Fit assessment
 
@@ -317,7 +331,7 @@ The architecture may be correct while the product still feels confusing. If user
 **Baseline-extension category:** Not applicable
 **Current owner or likely decision path:** Platform-spec detailing
 **Baseline item affected:** Assignment-based access under platform-fixed access logic
-**Why it is still open:** The architecture settles role-scoped assignment access, but not the exact artifact that defines which actions each role can perform.
+**Why it is still open:** The architecture settles role-scoped assignment access for activity work actions, but not the exact artifact that defines which actions each role can perform. Assignment-admin create/end is a separate platform-owned command-capability boundary under IDR-029/NW-050.
 **Closure path:** Platform-spec detailing
 **Evidence needed before closure:** Early deployment role/action examples from field workers, supervisors, coordinators, and auditors.
 
@@ -358,32 +372,32 @@ The architecture may be correct while the product still feels confusing. If user
 
 **Short name:** Auditor/query access
 **Classification:** Architecture decision gap
-**Baseline-extension category:** Work on a front that is still underexplored or not settled
-**Current owner or likely decision path:** Formal architecture decision with product/problem evidence support
+**Baseline-extension category:** Visible routed lane; not baseline-accepted
+**Current owner or likely decision path:** NW-051/NW-053-style successor decision with product/security evidence support
 **Baseline item affected:** Assignment-based access and sync/access equivalence
 **Why it is still open:** Auditor visibility may cut across normal hierarchy. If it can be represented as assignment-derived access, platform-spec may suffice. If it requires query-scope authority or access beyond assignment-derived data, it needs a formal architecture decision.
-**Closure path:** Formal architecture decision
+**Closure path:** Ordinary time-bounded assignments if sufficient; successor decision if broad audit/history or query scope is needed
 **Evidence needed before closure:** Concrete audit access needs and whether they can be represented by time-bounded scoped assignments.
 
 ### Gap 6 — Aggregate access semantics
 
 **Short name:** Aggregate visibility boundary
 **Classification:** Architecture decision gap if aggregate visibility exceeds event/detail access; otherwise platform-spec detail gap
-**Baseline-extension category:** Work on a front that is still underexplored or not settled
-**Current owner or likely decision path:** Formal architecture decision or platform-spec detailing depending on chosen visibility rule
+**Baseline-extension category:** Visible routed lane; not baseline-accepted
+**Current owner or likely decision path:** NW-044/formal reporting decision or platform-spec detailing depending on chosen visibility rule
 **Baseline item affected:** Reporting projections and sync scope equals access scope
-**Why it is still open:** It is not settled whether a user may see aggregate summaries for data they cannot inspect in detail.
-**Closure path:** Formal architecture decision if aggregate access diverges; platform-spec detailing if it inherits event-level access.
+**Why it is still open:** Aggregate summaries beyond inspectable detail data need explicit product/security evidence and routing before implementation.
+**Closure path:** NW-044/formal decision if aggregate access diverges or needs durable report APIs/export; platform-spec detailing if it inherits event-level access.
 **Evidence needed before closure:** Oversight reporting examples by role and sensitivity level.
 
 ### Gap 7 — Actor-as-subject visibility
 
 **Short name:** Actor-as-subject access
 **Classification:** Architecture decision gap
-**Baseline-extension category:** Work on a front that is still underexplored or not settled
+**Baseline-extension category:** Visible routed lane; not baseline-accepted
 **Current owner or likely decision path:** Formal architecture decision after product/problem evidence
 **Baseline item affected:** Actor/subject separation and assignment-based access
-**Why it is still open:** Some records may be about the actor personally. It is not settled whether being the subject grants delivery/access independent of assignment-derived access.
+**Why it is still open:** Some records may be about the actor personally. Any access grant based on being the subject, rather than assignment-derived access, needs explicit routing before implementation.
 **Closure path:** Formal architecture decision
 **Evidence needed before closure:** Real cases where workers need access to records about themselves.
 
@@ -414,22 +428,22 @@ The architecture may be correct while the product still feels confusing. If user
 **Short name:** Sensitive category operating model
 **Classification:** Platform-spec detail gap, escalating to architecture decision gap if field-level sensitivity is required
 **Baseline-extension category:** Not applicable unless regulatory controls exceed current baseline
-**Current owner or likely decision path:** Platform-spec detailing under shape/activity sensitivity; formal architecture decision only if field-level controls are required
+**Current owner or likely decision path:** Platform-spec detailing under shape/activity sensitivity; NW-054/BAR-106 and formal routing if field-level controls, redaction, encryption, or no-local-retention views are required
 **Baseline item affected:** Shape/activity-level sensitivity classification
 **Why it is still open:** Sensitivity is supported at shape/activity level, but real deployments may require specific operating guidance for standard, elevated, and restricted categories.
-**Closure path:** Platform-spec detailing
+**Closure path:** Platform-spec detailing for shape/activity sensitivity; NW-054/BAR-106 or formal decision for field-level/redaction/retention behavior
 **Evidence needed before closure:** Sensitivity categories and access examples from early deployments.
 
 ## 10. Output decision
 
-**Current packet status:** Ready to feed synthesis; not ready to freeze platform-spec details.
+**Current packet status:** Ready to feed synthesis; unresolved access surfaces remain visible planning lanes before implementation.
 
 **Reason:**
 The access architecture is strongly aligned with the operational need, but role-action artifacts, temporary access lifecycle, stale-authority review, access setup language, auditor access, aggregate visibility, and actor-as-subject delivery need more evidence or formal routing before specification.
 
 ## 11. Acceptance criteria for downstream platform-spec work
 
-A later Access Control and Visibility platform-spec section should be accepted only if it satisfies:
+A routed Access Control and Visibility platform-spec section should be accepted only if it satisfies:
 
 1. A user’s identity is separate from their authority.
 2. Authority is contextual by role, scope, activity, and time.

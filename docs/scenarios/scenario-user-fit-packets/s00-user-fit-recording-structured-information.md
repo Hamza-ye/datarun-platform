@@ -10,7 +10,7 @@
 Someone needs to record a known set of details about something they observed, did, checked, received, or reported. The expected information is known ahead of time. The user fills it in, and the record is kept for later lookup, review, correction, or reporting.
 
 **Why this scenario matters:**
-This is the minimum useful platform behavior. If the platform cannot make this scenario simple, later scenarios will inherit unnecessary complexity.
+This is the minimum useful platform behavior. If the platform cannot make this scenario simple, downstream scenarios will inherit unnecessary complexity.
 
 **What this scenario must not decide:**
 This packet does not decide UI screens, database tables, API design, service boundaries, sync protocol mechanics, exact form-builder syntax, report layout, or operational staffing policy.
@@ -158,7 +158,7 @@ Over time, many records accumulate. Some are created under older information sha
    * visible damage;
    * estimated urgency;
    * free-text note;
-   * optional photo if supported later.
+   * optional photo only if a media lane is explicitly routed and supported.
 4. The worker saves the observation offline.
 5. The supervisor later sees the observation after sync.
 6. If the field worker made a mistake, a correction is recorded without deleting the original.
@@ -167,8 +167,8 @@ Over time, many records accumulate. Some are created under older information sha
 
 * It may make S00 look like infrastructure inspection only; it is not.
 * It may encourage assuming all records are tied to a persistent subject. S00 can be plain structured capture; entity-linked capture belongs more directly to S01.
-* It may encourage workflow assumptions such as automatic repair task creation. That belongs to later scenarios, not S00.
-* It may encourage photo/media handling decisions, which are not settled by S00.
+* It may encourage workflow assumptions such as automatic repair task creation. That belongs to routed workflow planning, not S00.
+* It may encourage photo/media handling decisions. Media should be a visible routed lane if product evidence requires it, not an implied S00 behavior.
 
 ## 7. Platform fit under current accepted architecture
 
@@ -184,6 +184,14 @@ Over time, many records accumulate. Some are created under older information sha
 | Detect duplicates or stale records        | `accept-and-flag`, `detect-before-act`                                   | Good fit, exact UX/spec open                   |
 | Show current view                         | `projection`, `read model`                                               | Strong fit                                     |
 | Keep basic capture simple                 | `S00 simplicity baseline`, `capture_only`                                | Critical guardrail                             |
+
+### 7.1 Current standing caveat
+
+S00 has accepted runtime evidence through NW-026. Use that evidence for basic
+append-only capture, correction-as-new-fact, offline creation, idempotent sync,
+and scoped pull behavior. Do not use S00 to add media attachments, automatic
+repair tasks, production reporting APIs, import/export, deployer-authored event
+types, or mutable record state.
 
 ## 8. Fit assessment
 
@@ -259,14 +267,14 @@ The platform reasoning says S00 is simple, but the actual setup experience may b
 
 ## 10. Output decision
 
-**Current packet status:** Needs SME validation first, then platform-spec detailing.
+**Current packet status:** Visible Candidate 1 input; needs SME validation and platform-spec detailing before implementation.
 
 **Reason:**
 The architecture supports the scenario, but the user-fit evidence is not yet strong enough to specify the setup experience, correction behavior, vocabulary, or duplicate handling with confidence.
 
 ## 11. Acceptance criteria for downstream platform-spec work
 
-A later S00 platform-spec section should be accepted only if it satisfies:
+A routed S00 platform-spec section should be accepted only if it satisfies:
 
 1. A coordinator can define a basic capture activity without custom code.
 2. A field worker can create and save a record offline.

@@ -228,6 +228,14 @@ When I inspect records about a subject, I need to see what happened over time wi
 | Avoid silently resolving ambiguity | manual review for identity conflicts                         | Strong fit                         |
 | Keep simple capture simple         | S00 simplicity baseline                                      | Critical guardrail                 |
 
+### 7.1 Current standing caveat
+
+S01 can feed Candidate 1 as optional subject-linked capture and bounded
+subject-history context. A missing-subject path should remain an unpromoted
+candidate/capture artifact until review. It must not silently create canonical
+registry lifecycle state, discovered-unit lifecycle, or import/export behavior.
+Those surfaces route through S06/BAR-105 or other successor decisions.
+
 ## 8. Fit assessment
 
 ### 8.1 Strong fit
@@ -287,8 +295,8 @@ The architecture may support subject-linked records, but the product may still f
 **Baseline-extension category:** Not applicable
 **Current owner or likely decision path:** Platform-spec detailing
 **Baseline item affected:** Offline event creation, subject identity, duplicate detection, accept-and-flag
-**Why it is still open:** The architecture permits client-generated IDs and accepts offline work, but the exact product behavior when the subject is missing locally is not settled.
-**Closure path:** Platform-spec detailing
+**Why it is still open:** The architecture permits client-generated IDs and accepts offline work, but the exact product behavior when the subject is missing locally needs routed platform-spec and product validation before implementation.
+**Closure path:** Platform-spec detailing for unpromoted candidate capture; S06/BAR-105 successor route before canonical registry lifecycle
 **Evidence needed before closure:** Real workflows where workers cannot find the subject but must continue.
 
 ### Gap 4 — Wrong subject link correction
@@ -337,14 +345,17 @@ The architecture may support subject-linked records, but the product may still f
 
 ## 10. Output decision
 
-**Current packet status:** Ready to feed synthesis; not ready to freeze platform-spec details.
+**Current packet status:** Visible Candidate 1 input; ready to feed synthesis with routed platform-spec details before implementation.
 
 **Reason:**
-S01 has strong architecture fit, but the user-facing subject lookup path, missing-subject behavior, wrong-link correction, duplicate review, and subject-history visibility need validation before becoming platform-spec.
+S01 has strong architecture fit for linked capture, but the user-facing subject
+lookup path, missing-subject behavior, wrong-link correction, duplicate review,
+and subject-history visibility need validation before becoming platform-spec.
+Full registry lifecycle remains outside this packet.
 
 ## 11. Acceptance criteria for downstream platform-spec work
 
-A later S01 platform-spec section should be accepted only if it satisfies:
+A routed S01 platform-spec section should be accepted only if it satisfies:
 
 1. A field user can link a capture record to a known subject without understanding architecture vocabulary.
 2. A field user can continue when the subject is missing or stale locally.

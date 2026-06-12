@@ -18,6 +18,34 @@ Extract the shared user needs, domain-neutral artifacts, recurring product risks
 **Boundary:**
 This synthesis does not create architecture. It does not add event fields, event types, identity categories, access primitives, workflow primitives, storage models, APIs, UI commitments, sync protocols, or operational policies.
 
+### 1.1 Current standing overlay
+
+This synthesis is product/problem evidence. It must be interpreted with the
+current active working surface:
+
+* The accepted runtime probe set now includes S00, S19, S21, S22, S23, S26, and
+  S27. Use that evidence to avoid re-proving current constructs, not to claim
+  product completion.
+* BAR-104/NW-037/NW-038/NW-040 settle production provider-token validation and
+  explicit `(issuer, subject) -> actor_id` binding. They do not settle mobile
+  OIDC login UX, production web admin auth, online binding-admin APIs, or IdP
+  group/claim authority.
+* IDR-029/NW-050 settle assignment-admin create/end command capabilities outside
+  `activities[*].roles`; setup work must not route those commands through
+  activity role-actions.
+* IDR-030/NW-055 settle shared-device actor partitioning. Retention, expiry,
+  decommissioning, sealed-partition recovery, local encryption, and
+  no-local-retention/redacted views remain NW-054/BAR-106.
+* NW-057 settles the fixed `context.*` property boundary for config
+  expressions. New context properties, functions, dynamic queries, and deployer
+  context namespaces remain platform evolution.
+* S06/entity lifecycle is deferred from the current accepted baseline, not from
+  early deployment planning. S01 subject-linked capture may be included in
+  Candidate 1, while full registry lifecycle, discovered-unit lifecycle,
+  operational active/inactive states, and merge/split UX belong in a
+  near-future product-deployment lane with successor routing before
+  implementation.
+
 **Current use:**
 This synthesis is the immediate input to Candidate 1 platform-spec drafting. Candidate 1 should now be reframed around basic usable deployment, not only standalone capture.
 
@@ -28,7 +56,7 @@ The six packets form the minimum product foundation for early usable deployments
 ```txt
 S00  record structured information
 S01  attach records to known things
-S06  maintain the known things over time
+S06  maintain the known things over time, as near-future product pressure
 S06b change what is collected without breaking history
 Access control decide who can see and act
 S19  keep working offline and reconcile later
@@ -216,7 +244,10 @@ plain record
 record about a known thing
 ```
 
-The platform-spec must keep these separable. S01 must not force full registry administration into every simple capture path.
+The platform-spec must keep these separable. S01 must not force full registry
+administration into every simple capture path. A missing-subject path in
+Candidate 1 should create an unpromoted candidate/capture artifact for review;
+it must not silently create canonical registry lifecycle state.
 
 ### 7.6 Shape evolution affects trust early
 
@@ -282,8 +313,8 @@ unresolved conflict
 | Temporary access lifecycle          | Access, S19                   |
 | Stale authority review              | Access, S19                   |
 | Sync freshness semantics            | S19, Reporting                |
-| Local data after scope contraction  | Access, S19                   |
-| Offline decision boundaries         | S19, later workflow scenarios |
+| Local data after scope contraction  | Access, S19; routes through NW-054/BAR-106 for retention/security |
+| Offline decision boundaries         | S19, routed workflow scenarios |
 | Conflict review ergonomics          | S00, S01, S06, S19            |
 | Reporting freshness semantics       | S19, Access, S06b             |
 
@@ -322,6 +353,9 @@ These must not be closed inside Candidate 1 unless a formal decision path is sta
 | Aggregate access semantics                | May expose summaries beyond event/detail access.                           |
 | Actor-as-subject delivery rule            | May grant access because actor is also subject, not because of assignment. |
 | Field-level sensitivity                   | Rejected baseline; shape/activity sensitivity is the accepted boundary.    |
+| Reporting/API/export/import boundary      | S26 proves inputs, not a production reporting warehouse/API/export model.  |
+| Retention/security and no-local views     | IDR-030 partitions actors, but NW-054/BAR-106 owns broader retention.       |
+| Production admin auth / mobile login      | Production auth bindings exist; product login/admin authority is separate. |
 | New event envelope fields                 | Structural contract change.                                                |
 | New event type vocabulary                 | Platform processing contract change.                                       |
 | Device-side triggers                      | Rejected baseline.                                                         |
@@ -346,7 +380,7 @@ This is the smallest useful deployment surface. It must protect S00 simplicity w
 * create a basic capture activity;
 * define a record shape;
 * optionally require subject selection;
-* define who can capture and who can view/review;
+* define who can capture and who can view/review using assignment-derived access;
 * deliver authorized working set to device;
 * save work offline;
 * sync later;
@@ -368,19 +402,27 @@ This is the smallest useful deployment surface. It must protect S00 simplicity w
 * event-triggered actions;
 * recursive triggers;
 * device-side triggers;
-* complex reporting transformations.
+* complex reporting transformations;
+* production mobile OIDC login, production web admin auth, or online
+  principal-binding administration.
 
 ### Candidate 2 — Registry Entry Lifecycle Spec
 
 **Why second:**
-S06 formalizes maintained known things. It should build on Candidate 1’s subject-linked capture, not be forced into Candidate 1.
+S06 formalizes maintained known things. It should build on Candidate 1’s
+subject-linked capture, not be forced into Candidate 1. Current standing keeps
+S06/entity lifecycle out of the accepted baseline until BAR-105/S06 successor
+routing is complete, but early deployments may still need it. Treat this
+candidate as a near-future product-deployment lane, not direct implementation
+authority.
 
 **Primary inputs:** S06, S01
 **Secondary inputs:** Access, S19, S06b
 
 **Scope:**
 
-* create or import known things;
+* decide whether create/import of known things can stay inside current subject
+  identity and capture boundaries or needs entity-lifecycle evolution;
 * update details through append-only records;
 * derive current registry view;
 * support inactive/deactivated lifecycle states;
@@ -389,6 +431,10 @@ S06 formalizes maintained known things. It should build on Candidate 1’s subje
 * preserve original references;
 * handle offline-created candidate subjects;
 * define verification/review states if needed under accepted workflow boundaries.
+
+**Required guardrail:** stop before implementation if the spec needs canonical
+entity lifecycle events, discovered-unit lifecycle, new subject state authority,
+custom scope, import/export pipelines, or broad audit/history reads.
 
 ### Candidate 3 — Shape Evolution and Config Rollout Spec
 
@@ -427,7 +473,8 @@ Access is needed in Candidate 1 but can initially be minimal. A fuller baseline 
 * temporary access;
 * access change communication;
 * stale-authority review;
-* local data after access loss;
+* local data after access loss, after NW-054/BAR-106 where retention/security
+  is implicated;
 * scoped visibility;
 * sensitivity categories at shape/activity level.
 
@@ -573,16 +620,24 @@ Candidate 1 should not be accepted unless it satisfies all of these:
 18. Candidate 1 does not introduce field-level sensitivity.
 19. Candidate 1 does not introduce device-side triggers.
 20. Candidate 1 does not treat projections or reports as source truth.
+21. Candidate 1 does not promote candidate subjects into full registry
+    lifecycle state without a routed S06/BAR-105 successor.
+22. Candidate 1 does not implement production admin auth, mobile OIDC login,
+    reporting/export/import, retention/security, or online principal-binding
+    administration.
 
-## 12. What Candidate 1 should deliberately defer
+## 12. What Candidate 1 Routes Outside Its Slice
 
-Candidate 1 should explicitly defer:
+Candidate 1 should explicitly route these outside the basic capture slice while
+keeping them visible in the deployment plan:
 
 * full registry stewardship workflow;
+* discovered-unit or entity lifecycle implementation;
 * merge/split UX;
 * formal auditor/query access;
 * aggregate access divergence;
 * advanced reporting;
+* reporting API/warehouse/export/import;
 * recurring reporting rhythms;
 * supervisor visit patterns;
 * review chains;
@@ -592,8 +647,16 @@ Candidate 1 should explicitly defer:
 * offline decision policy for complex approvals;
 * peer-to-peer sync;
 * device backup/recovery guarantees;
+* retention/security, no-local-retention, sealed-partition recovery, and local
+  encryption;
+* production admin authentication and mobile OIDC/Keycloak login;
 * media attachments;
 * external system integration.
+
+This routing is a scope guard for Candidate 1, not a product roadmap decision.
+The first product-deployment plan should keep S06/BAR-105 entity lifecycle
+visible as a near-future milestone with its own decision, QA evidence,
+acceptance checklist, and change-management route.
 
 ## 13. Current synthesis decision
 
@@ -625,6 +688,6 @@ Suggested structure:
 8. Shape/version handling
 9. Review/correction basics
 10. Freshness and unresolved issue visibility
-11. Explicit deferrals
+11. Explicit routed lanes outside Candidate 1
 12. Gap routing
 13. Acceptance criteria

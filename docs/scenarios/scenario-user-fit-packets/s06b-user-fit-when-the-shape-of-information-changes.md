@@ -242,12 +242,25 @@ Fields:
 | Keep old records understandable        | historical schema contract, shape registry                | Strong fit                                                               |
 | Add new fields over time               | shape evolution, additive change                          | Strong fit                                                               |
 | Retire fields without deleting history | deprecation-only default                                  | Strong fit                                                               |
-| Continue offline work under old setup  | atomic config delivery, current + previous config version | Strong fit                                                               |
+| Continue offline work under old setup  | atomic config delivery, current/pending package promotion and versioned records | Strong fit                                                   |
 | Prevent broken setup rollout           | config package validation                                 | Strong fit                                                               |
 | Avoid arbitrary scripts                | bounded configuration, L0-L3 gradient, no arbitrary code  | Strong fit                                                               |
 | Compare old/new records in reports     | projection/read model, reporting projection               | Good fit, platform-spec details open                                     |
 | Bulk update safely                     | accept-and-flag, detect-before-act, config validation     | Good fit, spec/tooling details open                                      |
 | Perform complex migration              | breaking change handling                                  | Open; may require formal routing if it changes historical interpretation |
+
+### 7.1 Current standing caveat
+
+BAR-010, NW-032/S23, and NW-034 support config package delivery, schema
+hygiene, shape-format validation, and versioned interpretation. NW-057 fixes
+the accepted `context.*` expression property boundary: unknown context refs are
+deploy-time invalid, and runtime null-safety does not authorize new expression
+vocabulary.
+
+This packet can guide product/spec wording for shape evolution. It does not
+authorize arbitrary migration language, deployer-authored scripts, new context
+namespaces, reporting warehouse/API work, import/export behavior, or field-level
+redaction/sensitivity behavior.
 
 ## 8. Fit assessment
 
@@ -307,8 +320,8 @@ The architecture may handle versioning correctly while the product still fails u
 **Baseline-extension category:** Not applicable
 **Current owner or likely decision path:** Platform-spec detailing
 **Baseline item affected:** Reporting/analytics projections and shape-version interpretation
-**Why it is still open:** Reports must distinguish absent, not collected in this version, deprecated, renamed, and truly missing values. Exact semantics are not settled here.
-**Closure path:** Platform-spec detailing
+**Why it is still open:** Reports must distinguish absent, not collected in this version, deprecated, renamed, and truly missing values. Exact semantics need routed platform-spec/reporting work before implementation.
+**Closure path:** Platform-spec detailing for access-inherited reports; NW-044 before production reporting/API/export expansion
 **Evidence needed before closure:** Reporting examples where old/new fields are compared.
 
 ### Gap 4 — Shape authoring and diff tooling
@@ -328,8 +341,8 @@ The architecture may handle versioning correctly while the product still fails u
 **Classification:** Platform-spec detail gap
 **Baseline-extension category:** Not applicable
 **Current owner or likely decision path:** Platform-spec detailing
-**Baseline item affected:** Atomic config delivery and two-version device coexistence
-**Why it is still open:** The architecture allows current plus previous configuration for in-progress work, but the exact product behavior for drafts, partial records, and started activities is not specified.
+**Baseline item affected:** Atomic config delivery and current/pending package promotion
+**Why it is still open:** The architecture preserves versioned records and atomic package promotion, but the exact product behavior for drafts, partial records, and started activities is not specified.
 **Closure path:** Platform-spec detailing
 **Evidence needed before closure:** Field workflows around drafts, partial capture, and delayed sync.
 
@@ -346,14 +359,14 @@ The architecture may handle versioning correctly while the product still fails u
 
 ## 10. Output decision
 
-**Current packet status:** Needs SME validation first, then platform-spec detailing and implementation/tooling design.
+**Current packet status:** Visible shape-evolution planning lane; needs SME validation, platform-spec detailing, and implementation/tooling design before implementation.
 
 **Reason:**
 The architecture supports S06b strongly, but user-facing shape evolution rules, reporting semantics, approval practice, and authoring/diff tooling need evidence before they should be frozen.
 
 ## 11. Acceptance criteria for downstream platform-spec work
 
-A later S06b platform-spec section should be accepted only if it satisfies:
+A routed S06b platform-spec section should be accepted only if it satisfies:
 
 1. A record is always interpretable under the shape version it was created with.
 2. Old records do not become invalid because a new shape was deployed.
