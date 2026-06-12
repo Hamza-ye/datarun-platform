@@ -60,7 +60,7 @@ stop and reconcile the drift.
 | FD-PKT-004 | Pending FD-PKT-002 and FD-PKT-003. | Define mobile/offline validation only after product/spec and evidence gates exist. |
 | FD-PKT-005 | Pending Candidate 1 product/spec questions. | Assess view-model/contract need without creating new contracts unless routed. |
 | FD-PKT-006/007 | Blocked for production/constrained-deployment claims. | Ops runbook and staging rehearsal planning only. |
-| FD-PKT-101 | Open as S06 discovery/decision follow-up under BAR-105. | Answer product need before Candidate 1 implementation dispatch. |
+| FD-PKT-101 | Drafted as S06 discovery/decision follow-up under BAR-105. | Review [fd-pkt-101-s06-entity-lifecycle-discovery.md](../workshops/first-deployment/task-packets/fd-pkt-101-s06-entity-lifecycle-discovery.md) before Candidate 1 implementation dispatch. |
 
 ## FD-PKT-001 Role Flow
 
@@ -116,10 +116,11 @@ instruction. Each implementation packet must state:
 
 1. Review/accept FD-PKT-002 for Candidate 1 product/spec and UX validation
    with the FD-PKT-001 Option C dependency marker.
-2. Open FD-PKT-101 as the S06 discovery/decision follow-up before Candidate 1
-   implementation dispatch.
+2. Review/accept FD-PKT-101 as the S06 discovery/decision follow-up before
+   Candidate 1 implementation dispatch.
 3. Draft FD-PKT-003 after FD-PKT-002 has stable acceptance language to convert
-   claims into tests, walkthroughs, and release gates.
+   claims plus FD-PKT-101 evidence needs into tests, walkthroughs, and release
+   gates.
 4. Keep FD-PKT-004 and FD-PKT-005 narrow: mobile/offline evidence and
    view-model/contract assessment only.
 5. Keep production-readiness lanes separate: admin/mobile auth,

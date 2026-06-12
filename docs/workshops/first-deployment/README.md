@@ -29,7 +29,7 @@ BAR, NW, schemas, APIs, runtime behavior, or implementation authority.
 |---|---|---|
 | FD-PKT-001 | Complete as Option C: Candidate 1 product/spec may proceed while S06 discovery runs in parallel before implementation dispatch. | [fd-pkt-001-s06-timing-decision-record.md](task-packets/fd-pkt-001-s06-timing-decision-record.md) |
 | FD-PKT-002 | Drafted: Candidate 1 product/spec and UX validation with an explicit S06 dependency marker. | [fd-pkt-002-candidate-1-product-spec-ux-validation.md](task-packets/fd-pkt-002-candidate-1-product-spec-ux-validation.md) |
-| FD-PKT-101 | Next parallel lane: S06/entity lifecycle discovery and BAR-105 successor-decision seed. | Not yet drafted. |
+| FD-PKT-101 | Drafted: S06/entity lifecycle discovery and BAR-105 successor-decision seed. | [fd-pkt-101-s06-entity-lifecycle-discovery.md](task-packets/fd-pkt-101-s06-entity-lifecycle-discovery.md) |
 
 ## Current March-Forward Rule
 
@@ -37,10 +37,10 @@ Candidate 1 implementation remains blocked until bounded task packets are
 written and gated. The immediate planning path is:
 
 1. Review/accept the FD-PKT-002 product/spec and UX validation packet.
-2. Draft FD-PKT-101 for S06/entity lifecycle discovery before implementation
-   dispatch.
+2. Review/accept FD-PKT-101 for S06/entity lifecycle discovery before
+   implementation dispatch.
 3. Draft FD-PKT-003 evidence planning after FD-PKT-002 acceptance language is
-   stable.
+   stable and FD-PKT-101 evidence needs are visible.
 
 Do not collapse Candidate 1 with S06 lifecycle, production auth/admin/mobile
 login, retention/security, reporting/import-export, conflict automation, custom
