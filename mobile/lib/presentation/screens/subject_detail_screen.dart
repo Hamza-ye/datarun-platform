@@ -16,6 +16,8 @@ class SubjectDetailScreen extends StatefulWidget {
 }
 
 class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
+  static const _savedMessage = 'Saved on this device. Waiting to sync.';
+
   List<Event> _events = [];
   Set<String> _flaggedIds = {};
   bool _loading = true;
@@ -32,6 +34,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       widget.subjectId,
     );
     final flaggedIds = await state.projectionEngine.getFlaggedEventIds();
+    if (!mounted) return;
     setState(() {
       _events = events;
       _flaggedIds = flaggedIds;
@@ -65,7 +68,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
         child: FilledButton.icon(
-          onPressed: () => _capture(context),
+          onPressed: _capture,
           icon: const Icon(Icons.add),
           label: const Text('Capture'),
         ),
@@ -73,7 +76,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     );
   }
 
-  void _capture(BuildContext context) {
+  Future<void> _capture() async {
     final state = context.read<AppState>();
     final configStore = state.configStore;
     final activeActivities = configStore.getActiveActivities();
@@ -96,8 +99,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       return;
     }
 
-    void navigateToForm(String shapeRef) {
-      Navigator.push(
+    Future<void> navigateToForm(String shapeRef) async {
+      final result = await Navigator.push<CaptureSaveResult>(
         context,
         MaterialPageRoute(
           builder: (_) => FormScreen(
@@ -106,19 +109,23 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
             activityRef: shapeToActivity[shapeRef],
           ),
         ),
-      ).then((_) {
-        if (!mounted) return;
-        _loadEvents();
-        context.read<AppState>().refresh();
-      });
+      );
+      if (result == null || !mounted) return;
+
+      await _loadEvents();
+      await state.refresh();
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(_savedMessage)));
     }
 
     if (allShapes.length == 1) {
-      navigateToForm(allShapes.first.shapeRef);
+      await navigateToForm(allShapes.first.shapeRef);
       return;
     }
 
-    showDialog<ShapeDefinition>(
+    final selected = await showDialog<ShapeDefinition>(
       context: context,
       builder: (ctx) => SimpleDialog(
         title: const Text('Select form'),
@@ -129,11 +136,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
           );
         }).toList(),
       ),
-    ).then((selected) {
-      if (selected != null) {
-        navigateToForm(selected.shapeRef);
-      }
-    });
+    );
+    if (selected != null && mounted) {
+      await navigateToForm(selected.shapeRef);
+    }
   }
 }
 

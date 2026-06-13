@@ -6,6 +6,13 @@ import 'package:datarun_mobile/domain/shape.dart';
 import 'package:datarun_mobile/domain/expression_evaluator.dart';
 import 'package:datarun_mobile/presentation/widgets/widget_mapper.dart';
 
+class CaptureSaveResult {
+  final String eventId;
+  final String subjectId;
+
+  const CaptureSaveResult({required this.eventId, required this.subjectId});
+}
+
 /// S3: Form — shape-driven event creation.
 class FormScreen extends StatefulWidget {
   final String? subjectId; // null = new subject
@@ -255,7 +262,7 @@ class _FormScreenState extends State<FormScreen> {
     final payload = Map<String, dynamic>.from(_values)
       ..removeWhere((_, v) => v == null);
 
-    await state.eventAssembler.assemble(
+    final event = await state.eventAssembler.assemble(
       subjectId: widget.subjectId,
       shapeRef: widget.shapeRef,
       payload: payload,
@@ -267,10 +274,13 @@ class _FormScreenState extends State<FormScreen> {
         _dirty = false;
         _saving = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Saved. Will sync when online.')),
+      Navigator.pop(
+        context,
+        CaptureSaveResult(
+          eventId: event.id,
+          subjectId: event.subjectRef['id']!,
+        ),
       );
-      Navigator.pop(context);
     }
   }
 

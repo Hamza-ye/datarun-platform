@@ -10,6 +10,8 @@ import 'package:datarun_mobile/domain/shape.dart';
 class WorkListScreen extends StatelessWidget {
   const WorkListScreen({super.key});
 
+  static const _savedMessage = 'Saved on this device. Waiting to sync.';
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
@@ -76,57 +78,71 @@ class WorkListScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: state.subjects.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No subjects yet.\nTap + to create one.',
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: state.subjects.length,
-                  itemBuilder: (context, index) {
-                    final s = state.subjects[index];
-                    return ListTile(
-                      title: Row(
-                        children: [
-                          Expanded(child: Text(s.name ?? 'Unnamed subject')),
-                          if (s.flagCount > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '${s.flagCount} flag${s.flagCount == 1 ? '' : 's'}',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      subtitle: Text(
-                        '${s.captureCount} capture${s.captureCount == 1 ? '' : 's'} · ${_formatTimestamp(s.latestTimestamp)}',
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                SubjectDetailScreen(subjectId: s.subjectId),
-                          ),
-                        );
-                      },
-                    );
-                  },
+          body: Column(
+            children: [
+              if (state.pendingCount > 0)
+                _PendingSyncStatus(
+                  count: state.pendingCount,
+                  onTap: () => _showSyncPanel(context),
                 ),
+              Expanded(
+                child: state.subjects.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No captured work yet.\nTap + to add a record.',
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: state.subjects.length,
+                        itemBuilder: (context, index) {
+                          final s = state.subjects[index];
+                          return ListTile(
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(s.name ?? 'Unnamed subject'),
+                                ),
+                                if (s.flagCount > 0)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      '${s.flagCount} flag${s.flagCount == 1 ? '' : 's'}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              '${s.captureCount} capture${s.captureCount == 1 ? '' : 's'} · ${_formatTimestamp(s.latestTimestamp)}',
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => SubjectDetailScreen(
+                                    subjectId: s.subjectId,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _addNew(context),
             child: const Icon(Icons.add),
@@ -136,7 +152,7 @@ class WorkListScreen extends StatelessWidget {
     );
   }
 
-  void _addNew(BuildContext context) {
+  Future<void> _addNew(BuildContext context) async {
     final state = context.read<AppState>();
     final configStore = state.configStore;
     final activeActivities = configStore.getActiveActivities();
@@ -167,24 +183,15 @@ class WorkListScreen extends StatelessWidget {
     }
 
     if (allShapes.length == 1) {
-      // Single shape — go directly to form
-      Navigator.push(
+      await _openForm(
         context,
-        MaterialPageRoute(
-          builder: (_) => FormScreen(
-            subjectId: null,
-            shapeRef: allShapes.first.shapeRef,
-            activityRef: shapeToActivity[allShapes.first.shapeRef],
-          ),
-        ),
-      ).then((_) {
-        if (context.mounted) context.read<AppState>().refresh();
-      });
+        shapeRef: allShapes.first.shapeRef,
+        activityRef: shapeToActivity[allShapes.first.shapeRef],
+      );
       return;
     }
 
-    // Multiple shapes — show selection dialog
-    showDialog<ShapeDefinition>(
+    final selected = await showDialog<ShapeDefinition>(
       context: context,
       builder: (ctx) => SimpleDialog(
         title: const Text('Select form'),
@@ -195,22 +202,37 @@ class WorkListScreen extends StatelessWidget {
           );
         }).toList(),
       ),
-    ).then((selected) {
-      if (selected != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => FormScreen(
-              subjectId: null,
-              shapeRef: selected.shapeRef,
-              activityRef: shapeToActivity[selected.shapeRef],
-            ),
-          ),
-        ).then((_) {
-          if (context.mounted) context.read<AppState>().refresh();
-        });
-      }
-    });
+    );
+    if (selected == null || !context.mounted) return;
+    await _openForm(
+      context,
+      shapeRef: selected.shapeRef,
+      activityRef: shapeToActivity[selected.shapeRef],
+    );
+  }
+
+  Future<void> _openForm(
+    BuildContext context, {
+    required String shapeRef,
+    required String? activityRef,
+  }) async {
+    final result = await Navigator.push<CaptureSaveResult>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FormScreen(
+          subjectId: null,
+          shapeRef: shapeRef,
+          activityRef: activityRef,
+        ),
+      ),
+    );
+    if (result == null || !context.mounted) return;
+
+    await context.read<AppState>().refresh();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text(_savedMessage)));
   }
 
   void _showSyncPanel(BuildContext context) {
@@ -225,5 +247,29 @@ class WorkListScreen extends StatelessWidget {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     return '${diff.inDays}d ago';
+  }
+}
+
+class _PendingSyncStatus extends StatelessWidget {
+  final int count;
+  final VoidCallback onTap;
+
+  const _PendingSyncStatus({required this.count, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.secondaryContainer,
+      child: ListTile(
+        leading: const Icon(Icons.cloud_upload_outlined),
+        title: Text(
+          '$count record${count == 1 ? '' : 's'} saved on this device',
+        ),
+        subtitle: const Text('Waiting to sync.'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
+      ),
+    );
   }
 }
