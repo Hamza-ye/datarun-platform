@@ -1,6 +1,6 @@
 # First-Deployment Router
 
-Status: second implementation slice dispatched
+Status: second implementation slice accepted
 
 Date: 2026-06-13
 
@@ -11,7 +11,7 @@ The first-deployment workshop is closed. Use:
 1. [summary.md](../workshops/first-deployment/summary.md) for the consolidated
    product outcome, lane standing, S06 disposition, and technical boundary.
 2. [capture-handoff-task.md](../workshops/first-deployment/capture-handoff-task.md)
-   for the active bounded implementation task.
+   for the completed second implementation task and evidence.
 3. [implementation-task.md](../workshops/first-deployment/implementation-task.md)
    for the completed first implementation task and evidence.
 
@@ -21,9 +21,9 @@ slice.
 
 ## Dispatch Standing
 
-NW-060 is dispatched as the offline capture-handoff product slice. It composes
-presentation over the existing form result, projection refresh, pending count,
-and sync panel. It adds no state, authority, contract, or sync behavior.
+NW-060 landed in commit `5dad1c9`. Successful form saves now return to the
+surviving screen, refresh existing projection/pending state, confirm local-save
+status, and keep pending work visible from the work list.
 
 S06/entity lifecycle remains a visible BAR-105 / NW-021 future-decision lane,
 but it does not block this task. NW-060 reuses the existing subject-linked
@@ -41,4 +41,6 @@ state.
 ## Completion
 
 NW-059 is accepted with 13 focused tests, 114 full mobile tests, and clean
-touched-file analysis. NW-060 is the active bounded successor.
+touched-file analysis. NW-060 is accepted with 12 focused tests, 119 full
+mobile tests, and clean touched-file analysis. Select the next bounded product
+slice from the summary without recreating workshop or gate-review process.

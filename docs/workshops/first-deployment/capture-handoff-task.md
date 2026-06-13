@@ -1,6 +1,6 @@
 # Implementation Task: Offline Capture Handoff
 
-Status: ready 2026-06-13
+Status: completed 2026-06-13
 
 ## Goal
 
@@ -74,3 +74,10 @@ One implementation commit: `feat(mobile): surface offline capture handoff`
 Stop and report if the behavior requires a new API/contract, persisted workflow
 state, changed sync semantics, authority beyond existing mobile state, or
 entity-lifecycle truth.
+
+## Evidence
+
+- Commit: `5dad1c9 feat(mobile): surface offline capture handoff`
+- Focused capture-handoff and sync-panel suite: 12 tests passed.
+- Full mobile suite: 119 tests passed.
+- Touched-file `dart analyze`: no issues.
