@@ -20,6 +20,10 @@ documentation.
 
 ## Active Index
 
-No accepted operational documents are indexed here yet. The first routed
-operations analysis should recommend one reference deployment and bounded
-policy, runbook, tooling, and rehearsal successors.
+| Document | Type | Status | Owner | Source |
+|---|---|---|---|---|
+| [First reference deployment policy](policies/first-reference-deployment-policy.md) | Operational policy | `in_review` | Deployment owner (named selection pending) | NW-064 |
+
+No operational document is accepted yet. NW-063 selected the reference
+deployment class; the indexed policy proposal must receive owner selections
+before tooling, runbook, and rehearsal successors can proceed.

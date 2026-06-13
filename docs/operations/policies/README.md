@@ -24,4 +24,4 @@ sequences, claim runtime capability, or modify architecture and contracts.
 
 | Policy | Status | Owner | Source NW | Supersedes |
 |---|---|---|---|---|
-| None yet | - | - | - | - |
+| [First reference deployment policy](first-reference-deployment-policy.md) | `in_review` | Deployment owner (named selection pending) | NW-064 | none |
