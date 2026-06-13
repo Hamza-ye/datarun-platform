@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-13 (NW-062 append-only correction UX accepted)
+**Last updated**: 2026-06-13 (NW-063 production operations analysis selected)
 
 ---
 
@@ -32,6 +32,7 @@ Use this section as the low-token bootstrap for new sessions.
 - NW-060 is accepted in commit `5dad1c9`: successful offline capture returns to the surviving screen, refreshes existing projection/pending state, confirms saved-local/waiting status, and keeps pending work visible from the work list with access to the existing sync panel. Focused tests passed 12 cases, the full mobile suite passed 119 tests, and touched-file analysis is clean. It changed no contracts, persisted state, sync semantics, authority, retention, or S06 entity lifecycle.
 - NW-061 is accepted in commit `1b4ca81`: the work list distinguishes get-work, syncing, retry, missing setup/forms, missing assignment, and ready-to-capture states from existing local config, assignment, and sync state. Existing records and pending-local status remain visible, and configured capture remains advisory rather than locally blocked when assignment state is absent. Focused tests passed 19 cases, the full mobile suite passed 126 tests, and touched-file analysis is clean. It changed no persisted readiness state, contracts, sync semantics, login, authority, retention, or S06 entity lifecycle.
 - NW-062 is accepted in commit `9e8670a`: eligible captures expose a prefilled correction form that appends a distinct same-subject/exact-shape/activity capture while preserving the original event in history. Reverted edits do not append duplicates, and alias-aware history preserves the selected event's subject ref. Focused tests passed 10 cases, the full mobile suite passed 131 tests, and touched-file analysis is clean. It introduced no event mutation, durable correction linkage, envelope/type/payload metadata, shape-version inference, sync/authority semantics, or S06 entity lifecycle.
+- NW-063 is the selected next lane and is `ready`: analyze the production deployment runbook and operations-hardening map before writing production procedures or changing infrastructure. The slice must inventory current assets, compare reference-deployment options, classify policy/spec/tooling/architecture gaps, recommend one first target, and define runbook/rehearsal evidence. Actual runbook, tooling, and rehearsal work must be separate successors; development compose is not production-hardening evidence.
 - S06/entity lifecycle remains visible as BAR-105/NW-021 future-decision work. It did not block NW-060, NW-061, or NW-062 because those slices add no known-set, candidate, lifecycle, duplicate, merge, split, or subject-link authority.
 - Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md` only when touching implementation code or module behavior, and the exact contracts/code touched by the task.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
