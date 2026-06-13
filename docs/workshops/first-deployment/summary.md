@@ -1,6 +1,6 @@
 # First-Deployment Summary
 
-Status: workshop closed; fourth implementation slice dispatched
+Status: workshop closed; fourth implementation slice landed
 
 Date: 2026-06-13
 
@@ -97,10 +97,15 @@ needs work, is syncing, needs retry/setup/assignment attention, or is ready to
 capture. It adds no persisted state, authority, login, contract, or sync
 behavior.
 
-## Active Slice
+## Landed Correction
 
-[correction-ux-task.md](correction-ux-task.md) is dispatched as NW-062. It
+[correction-ux-task.md](correction-ux-task.md) landed as NW-062 in commit
+`9e8670a`. It
 adds a prefilled append-only correction action over the accepted S00 kernel:
 same subject, exact shape, new capture event, original history preserved. It
 adds no mutation, correction linkage, envelope/payload metadata, authority,
 sync semantics, or entity lifecycle.
+
+No first-deployment implementation slice is currently active. Select the next
+bounded route from the lane register; candidate routes become backlog rows only
+when chosen.

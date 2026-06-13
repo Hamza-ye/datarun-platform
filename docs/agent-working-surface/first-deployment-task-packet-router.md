@@ -1,6 +1,6 @@
 # First-Deployment Router
 
-Status: fourth implementation slice dispatched
+Status: fourth implementation slice accepted
 
 Date: 2026-06-13
 
@@ -17,20 +17,21 @@ The first-deployment workshop is closed. Use:
 4. [work-readiness-task.md](../workshops/first-deployment/work-readiness-task.md)
    for the completed third implementation task and evidence.
 5. [correction-ux-task.md](../workshops/first-deployment/correction-ux-task.md)
-   for the active bounded implementation task.
+   for the completed fourth implementation task and evidence.
 
 Do not reconstruct the removed workshop chronology from git history and do not
 draft more FD-PKT, role, stage, prerequisite, or gate-review documents for this
 slice.
 
-## Dispatch Standing
+## Acceptance Standing
 
-NW-062 is dispatched as append-only correction UX. It reuses the accepted S00
-same-subject/same-shape capture semantics, prefills the selected capture, and
-appends a new event without mutating or replacing the original.
+NW-062 landed in commit `9e8670a`. It reuses the accepted S00
+same-subject/exact-shape/activity capture semantics, prefills active fields from
+the selected capture, requires an effective payload change, and appends a new
+event without mutating or replacing the original.
 
 S06/entity lifecycle remains a visible BAR-105 / NW-021 future-decision lane,
-but it did not block NW-060 or NW-061. Those slices add no known-set,
+but it did not block NW-060, NW-061, or NW-062. Those slices add no known-set,
 candidate, lifecycle, duplicate, merge, split, or subject-link authority.
 
 ## Source Order
@@ -47,4 +48,6 @@ NW-059 is accepted with 13 focused tests, 114 full mobile tests, and clean
 touched-file analysis. NW-060 is accepted with 12 focused tests, 119 full
 mobile tests, and clean touched-file analysis. NW-061 is accepted with 19
 focused tests, 126 full mobile tests, and clean touched-file analysis. NW-062
-is the active bounded successor.
+is accepted with 10 focused tests, 131 full mobile tests, and clean
+touched-file analysis. No first-deployment implementation task is currently
+active; select the next bounded route from the summary lane register.

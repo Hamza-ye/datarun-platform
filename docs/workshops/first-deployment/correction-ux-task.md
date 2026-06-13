@@ -1,6 +1,6 @@
 # Implementation Task: Append-Only Correction UX
 
-Status: ready 2026-06-13
+Status: accepted 2026-06-13
 
 ## Goal
 
@@ -78,6 +78,16 @@ dart analyze lib/presentation/screens/form_screen.dart \
   test/correction_flow_test.dart \
   test/capture_handoff_test.dart
 ```
+
+## Implementation Evidence
+
+Landed in commit `9e8670a`.
+
+- Focused correction/capture-handoff suite: 10 tests passed.
+- Full mobile suite: 131 tests passed.
+- Touched-file `dart analyze`: no issues.
+- Unchanged and reverted effective payloads do not append duplicates.
+- Alias-aware history uses the selected event's subject ref.
 
 ## Commit Boundary
 
