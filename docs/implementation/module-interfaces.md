@@ -1,6 +1,6 @@
 # Module Interface Baseline
 
-> Current as of the 2026-06-05 NW-055 shared-device actor-partition checkpoint. This file records implemented module boundaries; it is not a roadmap for new subsystems.
+> Current as of the 2026-06-13 NW-065 production-runtime implementation work. This file records implemented module boundaries; it is not a roadmap for new subsystems.
 
 ## Authority role
 
@@ -78,6 +78,15 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 - **Storage**: `actor_tokens` for development mode; `auth_principal_bindings` for production-auth active lookup support; `auth_principal_binding_operations` for append-only deployment-managed provisioning audit/history. Production binding administration is deployment-managed manifest provisioning with auditable operation history per IDR-028, not an online admin API.
 - **Forbidden**: treating JWT groups, roles, resource claims, or JWT `actor_id` claims as assignment, scope, resolver, or admin authority.
 - **Guards**: `ProductionAuthIntegrationTest`, `LocalJwtAuthCompatibilityIntegrationTest`, actor-token integration tests, scope-filtered sync and conflict-resolution tests.
+
+## Production Runtime Boundary
+
+- **Owns**: production-profile startup validation, graceful shutdown settings, separation of the management listener, bounded health/Prometheus exposure, development-surface hiding, and secret-safe structured request logs.
+- **Inputs**: the active Spring profile plus deployment-supplied database, OIDC/JWKS, principal-binding operator, listener, and shutdown properties.
+- **Outputs**: fail-closed startup errors naming unsafe property keys, liveness/readiness and Prometheus signals, request correlation fields, and `404` responses for development admin/token surfaces in production.
+- **Storage**: none; operational configuration remains external to the application artifact.
+- **Forbidden**: accepting development auth/default credentials in production, exposing secret/header/query/body values in request logs, granting platform authority, or replacing deployment-owned TLS, host/database monitoring, backup, and alert routing.
+- **Guards**: `ProductionRuntimeValidatorTest`, `ProductionDevelopmentSurfaceFilterTest`, `StructuredRequestLoggingFilterTest`, `ObservabilityIntegrationTest`, and `ProductionAuthIntegrationTest`.
 
 ## Sync Surfaces
 
