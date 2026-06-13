@@ -95,17 +95,15 @@ void main() {
     expect(harness.projection.subjectListReads, 1);
   });
 
-  testWidgets('empty work list uses neutral captured-work copy', (
+  testWidgets('empty configured work list shows ready-to-capture copy', (
     tester,
   ) async {
     final harness = _Harness();
 
     await _pump(tester, harness.state, const WorkListScreen());
 
-    expect(
-      find.text('No captured work yet.\nTap + to add a record.'),
-      findsOneWidget,
-    );
+    expect(find.text('Ready to capture'), findsOneWidget);
+    expect(find.text('Tap + to add a record.'), findsOneWidget);
     expect(find.textContaining('No subjects'), findsNothing);
   });
 }
@@ -130,15 +128,20 @@ class _Harness {
     : eventStore = _FakeEventStore(pendingCount),
       projection = _FakeProjectionEngine(initialEvents) {
     assembler = _FakeEventAssembler(eventStore, projection);
-    state = AppState(
-      eventStore: eventStore,
-      projectionEngine: projection,
-      eventAssembler: assembler,
-      configStore: _FakeConfigStore(),
-      contextResolver: _FakeContextResolver(),
-      syncService: _FakeSyncService(),
-      identity: _FakeDeviceIdentity(),
-    )..pendingCount = pendingCount;
+    state =
+        AppState(
+            eventStore: eventStore,
+            projectionEngine: projection,
+            eventAssembler: assembler,
+            configStore: _FakeConfigStore(),
+            contextResolver: _FakeContextResolver(),
+            syncService: _FakeSyncService(),
+            identity: _FakeDeviceIdentity(),
+          )
+          ..pendingCount = pendingCount
+          ..activeAssignments = [
+            {'role': 'field_worker'},
+          ];
   }
 
   final _FakeEventStore eventStore;
@@ -255,6 +258,9 @@ class _FakeConfigStore implements ConfigStore {
       ),
     ],
   );
+
+  @override
+  int get configVersion => 1;
 
   @override
   Future<void> promotePending() async {}

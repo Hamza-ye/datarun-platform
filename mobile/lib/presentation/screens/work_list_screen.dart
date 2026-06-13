@@ -16,6 +16,7 @@ class WorkListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, state, _) {
+        final readiness = _readiness(state);
         return Scaffold(
           appBar: AppBar(
             title: Column(
@@ -85,12 +86,15 @@ class WorkListScreen extends StatelessWidget {
                   count: state.pendingCount,
                   onTap: () => _showSyncPanel(context),
                 ),
+              if (state.subjects.isNotEmpty && !readiness.isReady)
+                _WorkReadinessCard(readiness: readiness, onSync: state.sync),
               Expanded(
                 child: state.subjects.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No captured work yet.\nTap + to add a record.',
-                          textAlign: TextAlign.center,
+                    ? Center(
+                        child: _WorkReadinessCard(
+                          readiness: readiness,
+                          onSync: state.sync,
+                          centered: true,
                         ),
                       )
                     : ListView.builder(
@@ -143,10 +147,12 @@ class WorkListScreen extends StatelessWidget {
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _addNew(context),
-            child: const Icon(Icons.add),
-          ),
+          floatingActionButton: readiness.hasCaptureForms
+              ? FloatingActionButton(
+                  onPressed: () => _addNew(context),
+                  child: const Icon(Icons.add),
+                )
+              : null,
         );
       },
     );
@@ -239,6 +245,95 @@ class WorkListScreen extends StatelessWidget {
     showModalBottomSheet(context: context, builder: (_) => const SyncPanel());
   }
 
+  _WorkReadiness _readiness(AppState state) {
+    final configStore = state.configStore;
+    final hasCaptureForms = configStore.getActiveActivities().any(
+      (activity) => configStore.getShapesForActivity(activity).isNotEmpty,
+    );
+
+    if (!hasCaptureForms) {
+      if (state.isSyncing) {
+        return const _WorkReadiness(
+          kind: _WorkReadinessKind.syncing,
+          title: 'Getting your work',
+          message: 'Downloading current assignments, forms, and updates.',
+          hasCaptureForms: false,
+        );
+      }
+
+      final error = state.lastSyncResult?.error;
+      if (error != null) {
+        return _WorkReadiness(
+          kind: _WorkReadinessKind.failed,
+          title: "Couldn't get work",
+          message: 'Check the connection or account, then try again.',
+          detail: error,
+          actionLabel: 'Try Again',
+          hasCaptureForms: false,
+        );
+      }
+
+      if (configStore.configVersion == 0 && state.lastSyncResult == null) {
+        return const _WorkReadiness(
+          kind: _WorkReadinessKind.needsSync,
+          title: 'Get your work',
+          message:
+              'Sync this device to download current assignments and forms.',
+          actionLabel: 'Get Work',
+          hasCaptureForms: false,
+        );
+      }
+
+      return const _WorkReadiness(
+        kind: _WorkReadinessKind.setupUnavailable,
+        title: 'Work setup unavailable',
+        message:
+            'No active capture forms are available on this device. Sync again or contact your administrator.',
+        actionLabel: 'Sync Again',
+        hasCaptureForms: false,
+      );
+    }
+
+    if (state.activeAssignments.isEmpty) {
+      if (state.isSyncing) {
+        return const _WorkReadiness(
+          kind: _WorkReadinessKind.syncing,
+          title: 'Getting your work',
+          message: 'Checking for current assignments and updates.',
+          hasCaptureForms: true,
+        );
+      }
+
+      final error = state.lastSyncResult?.error;
+      if (error != null) {
+        return _WorkReadiness(
+          kind: _WorkReadinessKind.failed,
+          title: "Couldn't get work",
+          message: 'Check the connection or account, then try again.',
+          detail: error,
+          actionLabel: 'Try Again',
+          hasCaptureForms: true,
+        );
+      }
+
+      return const _WorkReadiness(
+        kind: _WorkReadinessKind.noAssignment,
+        title: 'No assigned work available',
+        message:
+            'Sync to check for current assignments. Configured capture remains available, but records may need review.',
+        actionLabel: 'Check Again',
+        hasCaptureForms: true,
+      );
+    }
+
+    return const _WorkReadiness(
+      kind: _WorkReadinessKind.ready,
+      title: 'Ready to capture',
+      message: 'Tap + to add a record.',
+      hasCaptureForms: true,
+    );
+  }
+
   String _formatTimestamp(String iso) {
     final dt = DateTime.tryParse(iso);
     if (dt == null) return iso;
@@ -247,6 +342,125 @@ class WorkListScreen extends StatelessWidget {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     return '${diff.inDays}d ago';
+  }
+}
+
+enum _WorkReadinessKind {
+  needsSync,
+  syncing,
+  failed,
+  setupUnavailable,
+  noAssignment,
+  ready,
+}
+
+class _WorkReadiness {
+  final _WorkReadinessKind kind;
+  final String title;
+  final String message;
+  final String? detail;
+  final String? actionLabel;
+  final bool hasCaptureForms;
+
+  const _WorkReadiness({
+    required this.kind,
+    required this.title,
+    required this.message,
+    this.detail,
+    this.actionLabel,
+    required this.hasCaptureForms,
+  });
+
+  bool get isReady => kind == _WorkReadinessKind.ready;
+  bool get isSyncing => kind == _WorkReadinessKind.syncing;
+}
+
+class _WorkReadinessCard extends StatelessWidget {
+  final _WorkReadiness readiness;
+  final Future<void> Function() onSync;
+  final bool centered;
+
+  const _WorkReadinessCard({
+    required this.readiness,
+    required this.onSync,
+    this.centered = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: centered
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
+      children: [
+        if (readiness.isSyncing)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: CircularProgressIndicator(),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Icon(
+              _icon,
+              size: 32,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        Text(
+          readiness.title,
+          textAlign: centered ? TextAlign.center : TextAlign.start,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          readiness.message,
+          textAlign: centered ? TextAlign.center : TextAlign.start,
+        ),
+        if (readiness.detail != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            readiness.detail!,
+            textAlign: centered ? TextAlign.center : TextAlign.start,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+        if (readiness.actionLabel != null) ...[
+          const SizedBox(height: 16),
+          FilledButton(
+            onPressed: readiness.isSyncing ? null : onSync,
+            child: Text(readiness.actionLabel!),
+          ),
+        ],
+      ],
+    );
+
+    if (centered) {
+      return Padding(
+        padding: const EdgeInsets.all(32),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: content,
+        ),
+      );
+    }
+
+    return Material(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: Padding(padding: const EdgeInsets.all(20), child: content),
+    );
+  }
+
+  IconData get _icon {
+    return switch (readiness.kind) {
+      _WorkReadinessKind.needsSync => Icons.cloud_download_outlined,
+      _WorkReadinessKind.syncing => Icons.sync,
+      _WorkReadinessKind.failed => Icons.cloud_off_outlined,
+      _WorkReadinessKind.setupUnavailable => Icons.assignment_late_outlined,
+      _WorkReadinessKind.noAssignment => Icons.work_outline,
+      _WorkReadinessKind.ready => Icons.check_circle_outline,
+    };
   }
 }
 
