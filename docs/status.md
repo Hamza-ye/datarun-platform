@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-13 (NW-061 mobile work-readiness slice dispatched)
+**Last updated**: 2026-06-13 (NW-061 mobile work-readiness slice accepted)
 
 ---
 
@@ -29,8 +29,8 @@ Use this section as the low-token bootstrap for new sessions.
 - First-deployment work routes through `docs/agent-working-surface/first-deployment-task-packet-router.md`. The workshop is closed and consolidated into `docs/workshops/first-deployment/summary.md`; removed stage, role, task-planning, and gate-review files remain provenance in git history only.
 - NW-059 is accepted in commit `8692607`: mobile sync presentation now distinguishes saved-local, waiting, syncing, synced, and failed states over existing `AppState`/`SyncResult` state, and failed attempts no longer update the last successful-sync timestamp. Focused tests passed 13 cases, the full mobile suite passed 114 tests, and touched-file analysis is clean.
 - NW-060 is accepted in commit `5dad1c9`: successful offline capture returns to the surviving screen, refreshes existing projection/pending state, confirms saved-local/waiting status, and keeps pending work visible from the work list with access to the existing sync panel. Focused tests passed 12 cases, the full mobile suite passed 119 tests, and touched-file analysis is clean. It changed no contracts, persisted state, sync semantics, authority, retention, or S06 entity lifecycle.
-- NW-061 is ready and dispatched through `docs/workshops/first-deployment/work-readiness-task.md`: the work list will distinguish get-work, syncing, retry, missing setup/forms, missing assignment, and ready-to-capture states from existing local config, assignment, and sync state. It adds no persisted readiness state, contracts, sync semantics, login, authority, retention, or S06 entity lifecycle.
-- S06/entity lifecycle remains visible as BAR-105/NW-021 future-decision work. It does not block NW-060 because the slice only reuses the existing subject-linked capture path and adds no known-set, candidate, lifecycle, duplicate, merge, split, or subject-link authority.
+- NW-061 is accepted in commit `1b4ca81`: the work list distinguishes get-work, syncing, retry, missing setup/forms, missing assignment, and ready-to-capture states from existing local config, assignment, and sync state. Existing records and pending-local status remain visible, and configured capture remains advisory rather than locally blocked when assignment state is absent. Focused tests passed 19 cases, the full mobile suite passed 126 tests, and touched-file analysis is clean. It changed no persisted readiness state, contracts, sync semantics, login, authority, retention, or S06 entity lifecycle.
+- S06/entity lifecycle remains visible as BAR-105/NW-021 future-decision work. It did not block NW-060 or NW-061 because those slices add no known-set, candidate, lifecycle, duplicate, merge, split, or subject-link authority.
 - Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md` only when touching implementation code or module behavior, and the exact contracts/code touched by the task.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
 

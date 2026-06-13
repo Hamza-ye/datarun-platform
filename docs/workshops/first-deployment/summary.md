@@ -1,6 +1,6 @@
 # First-Deployment Summary
 
-Status: workshop closed; third implementation slice dispatched
+Status: workshop closed; third implementation slice landed
 
 Date: 2026-06-13
 
@@ -89,9 +89,10 @@ decision task. No additional workshop or gate document is required.
 refreshes existing projection/pending state, and keeps saved-local work visible
 without adding entity-lifecycle, subject-link authority, or sync semantics.
 
-## Active Slice
+## Landed Work Readiness
 
-[work-readiness-task.md](work-readiness-task.md) is dispatched as NW-061. It
-closes the post-connection gap by explaining whether the device needs work,
-is syncing, needs retry/setup/assignment attention, or is ready to capture.
-It adds no persisted state, authority, login, contract, or sync behavior.
+[work-readiness-task.md](work-readiness-task.md) landed as NW-061 in commit
+`1b4ca81`. It closes the post-connection gap by explaining whether the device
+needs work, is syncing, needs retry/setup/assignment attention, or is ready to
+capture. It adds no persisted state, authority, login, contract, or sync
+behavior.

@@ -1,6 +1,6 @@
 # Implementation Task: Mobile Work Readiness
 
-Status: ready 2026-06-13
+Status: completed 2026-06-13
 
 ## Goal
 
@@ -87,3 +87,11 @@ One implementation commit: `feat(mobile): explain work readiness`
 Stop and report if the UI requires a new API/contract, persisted readiness
 state, changed sync semantics, mobile authority, login/token lifecycle, or
 entity-lifecycle truth.
+
+## Evidence
+
+- Commit: `1b4ca81 feat(mobile): explain work readiness`
+- Focused work-readiness, capture-handoff, and sync-panel suite: 19 tests
+  passed.
+- Full mobile suite: 126 tests passed.
+- Touched-file `dart analyze`: no issues.
