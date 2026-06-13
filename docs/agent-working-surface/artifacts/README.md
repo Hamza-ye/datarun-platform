@@ -12,10 +12,23 @@ Use this directory for:
 - non-binding decision-routing summaries;
 - bounded stewardship notes that should remain available but should not clutter the working-surface root.
 
-Do not use this directory for binding decisions. If a slice selects platform behavior that future implementation must follow, write an IDR under `docs/decisions/` or route a CDL successor when canonical architecture authority is required.
+Do not use this directory for binding decisions, accepted platform
+specifications, final operations procedures, or implementation evidence.
+Exploration artifacts should recommend the correct durable home for accepted
+follow-up work. If a slice selects platform behavior that future implementation
+must follow, write an IDR under `docs/decisions/` or route a CDL successor when
+canonical architecture authority is required.
+
+Use `docs/documentation-organization.md` for the exact durable home of accepted
+product/platform specifications, operational policies, runbooks, rehearsals,
+contracts, and implementation evidence.
 
 Current artifacts:
 
 - `NW-043-assignment-admin-authority-exploration.md`
 - `NW-049-access-exceptions-shared-device-scope-exploration.md`
 - `NW-051-special-read-write-access-boundary-routing.md`
+- `NW-056-product-standing-and-production-readiness-map.md`
+
+Planned artifacts are named by their active backlog row and prompt; do not list
+them here until they land.

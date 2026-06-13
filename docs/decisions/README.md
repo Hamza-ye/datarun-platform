@@ -42,7 +42,15 @@ Added to support the [Reversibility Triage](../implementation/execution-plan.md#
 |------|----------|----------|
 | **CDL** | `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.json` | Architecture constraints (stored data, cross-device contracts) |
 | **IDR** | `docs/decisions/` | Implementation choices (code patterns, tooling, conventions) |
+| **Product Spec** | `docs/specifications/product/` | Accepted user-visible behavior, language, journeys, and product acceptance |
+| **Platform Spec** | `docs/specifications/platform/` | Accepted exact platform behavior within architecture/contracts |
 | **Phase Spec** | `docs/implementation/phases/` | Scope, deliverables, quality gates, milestones |
+| **Operational Policy** | `docs/operations/policies/` | Deployment-owner choices, responsibilities, controls, and escalation |
+| **Runbook** | `docs/operations/runbooks/` | Repeatable executable operational procedure |
+| **Rehearsal** | `docs/operations/rehearsals/` | Exercise plan and dated execution evidence |
 | **Checkpoint** | `docs/checkpoints/` | Periodic project state snapshots |
 
-One concern = one location. No duplication between these.
+One concern = one canonical location. Link related documents instead of
+duplicating normative content. See
+`docs/documentation-organization.md` for the complete routing and traceability
+standard.

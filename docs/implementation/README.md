@@ -15,6 +15,8 @@ The [Architecture Description](../architecture/) defines **what** to build — 1
 | [ux-model.md](ux-model.md) | **How the mobile app works**: screen topology, navigation flow, component contracts, offline patterns, progressive disclosure |
 | [phases/](phases/) | **Phase specs**: scope, sub-phase breakdowns, quality gates, technical specs, acceptance criteria, milestones. One file per phase, created at phase start. |
 | [decisions/](../decisions/) | **Why this way**: Implementation Decision Records (IDRs) — micro-decisions with context, alternatives, consequences, and code traces. Separate from ADRs (architecture-grade). |
+| [specifications/](../specifications/README.md) | **What accepted behavior must do** below architecture/contracts: product-facing and platform-detail specifications |
+| [operations/](../operations/README.md) | **How accepted behavior is operated**: policies, runbooks, and rehearsal evidence |
 
 ---
 
@@ -23,3 +25,8 @@ The [Architecture Description](../architecture/) defines **what** to build — 1
 The architecture intentionally left 15 items at implementation-grade — decisions where multiple valid approaches exist within the decided constraints ([boundary.md § Implementation-Grade Items](../architecture/boundary.md#3-implementation-grade-items)). Those decisions are recorded as [IDRs](../decisions/) when they're made during implementation.
 
 Implementation decisions follow the same discipline as architecture decisions: stated, traced, reversible where possible. The difference: architecture decisions constrain stored data and contracts across offline devices. Implementation decisions constrain code and tooling — they're reversible with engineering effort, not data migration.
+
+Do not use implementation documents as the canonical home for product
+language, deployment-owner policy, reusable operational procedures, or
+rehearsal results. Route new durable documents through
+`docs/documentation-organization.md`.

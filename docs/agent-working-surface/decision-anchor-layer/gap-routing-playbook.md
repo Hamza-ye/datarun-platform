@@ -59,6 +59,38 @@ Term collisions to keep explicit:
 | Implementation/tooling gap | The work concerns storage, APIs, UI, build mechanics, test harnesses, or tooling without changing accepted semantics. | Engineering design, implementation prompt, or spike. |
 | Operational policy gap | The work defines human process, support, retention, governance, rollout, or review policy without changing platform semantics. | Operational policy artifact. |
 
+## Artifact And Closure Trace
+
+The classification determines the durable output. Prompts and NW rows route
+work; they do not replace the output.
+
+| Classification | Durable output | Acceptance trace |
+|---|---|---|
+| Product/problem evidence gap | Scenario, user-fit/research note, validation result, or bounded routing artifact. | NW exit links the evidence and states what remains unvalidated. |
+| Architecture decision gap | CDL successor decision, or an IDR only within delegated architecture bounds. | NW exit links the decision and names contracts/BAR/DEC routes affected. |
+| Platform-spec detail gap | `docs/specifications/platform/`; use `docs/specifications/product/` when the accepted behavior is user-visible. Use `artifacts/` only while the result remains non-binding exploration. | NW exit links the indexed specification, acceptance criteria, and implementation successor if needed. |
+| Implementation/tooling gap | Bounded prompt plus code, tests, contracts, and implementation-boundary updates actually changed by the work. | NW exit records commit/runtime evidence and any residual route. |
+| Operational policy gap | `docs/operations/policies/` for choices, `docs/operations/runbooks/` for procedures, and `docs/operations/rehearsals/` for plans/evidence. Use `artifacts/` only for the non-binding map that selects them. | NW exit links the indexed policy/procedure and rehearsal evidence; stronger readiness claims require executed evidence. |
+
+For every promoted NW item:
+
+```txt
+pressure and authority
+-> backlog row
+-> bounded prompt when non-trivial
+-> correctly classified durable output
+-> verification/evidence
+-> backlog acceptance or explicit deferral
+-> fold-forward update only to the active surfaces materially changed
+```
+
+If analysis selects implementation, create a successor row. Do not mutate an
+exploration row into implementation or leave the recommendation only inside a
+prompt. If the durable output has no established home, the analysis must name
+and justify one before implementation begins. Follow
+`docs/documentation-organization.md` for naming, headers, indexes, lifecycle,
+and supersession.
+
 ## Architecture Escalation Triggers
 
 Escalate to architecture when a proposal:
@@ -138,7 +170,7 @@ Before implementation, the task packet should state:
 * forbidden work;
 * expected boundary;
 * targeted tests;
-* commit boundary;
+* commit role/sequence and acceptance boundary;
 * stop-and-report conditions.
 
 ## Test Seed Backlog
@@ -156,7 +188,7 @@ When a route changes behavior, prefer tests that pin:
 
 ## Known Gap Register
 
-last-reviewed: 2026-06-12
+last-reviewed: 2026-06-13
 
 | Gap ID | Gap | Status | Classification | Current route |
 |---|---|---|---|---|

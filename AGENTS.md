@@ -52,11 +52,15 @@ options:
 
 - Architecture-steward sessions may read broadly, reconcile status, produce bounded implementation prompts, and dispatch working agents. Preserve product-needed lanes, but do not simulate multi-role workshop or gate-review chains as a substitute for product judgment or implementation.
 - Implementer sessions should read only the bounded task packet plus the default implementer packet above.
-- A task packet should state goal, files to read, authority/guardrails, forbidden work, expected tests, commit boundary, and stop-and-report conditions.
+- A task packet should state goal, files to read, authority/guardrails,
+  forbidden work, expected tests, commit role/sequence and acceptance boundary,
+  and stop-and-report conditions.
 
 ## Repository Map
 
 - `docs/` - platform principles, ADRs, IDRs, phase plans, status, quality gates, and flagged positions.
+- `docs/specifications/` - accepted product behavior and platform-detail specifications under architecture/contracts.
+- `docs/operations/` - operational policies, executable runbooks, and rehearsal plans/records.
 - `contracts/` - process-boundary intent: event envelope, sync protocol, flag catalog, platform shape schemas, and shared fixtures.
 - `server/` - Spring Boot backend, event store, sync, configuration, identity, authorization, integrity detection, admin surfaces.
 - `mobile/` - Flutter client, local event store, projection/advisory behavior, sync client, UI.
@@ -106,6 +110,28 @@ cd /home/hamza/datarun-platform && docker compose -f docker-compose.test.yml up 
 
 - Prefer existing patterns and helpers over new abstractions.
 - Keep changes scoped to the active slice.
+- Before creating a new durable documentation output, use
+  `docs/documentation-organization.md` to choose its canonical home, metadata,
+  index, evidence, and supersession route.
 - Update docs/status/checklists only when implementation actually begins or lands.
 - Leave unrelated dirty worktree changes alone.
-- Use conventional commits when committing, with concise scope, for example `feat(integrity): ...`, `fix(sync): ...`, `docs(status): ...`.
+
+## Commit And Progress Flow
+
+`docs/commit-workflow.md` is the durable commit standard. When a task
+authorizes commits:
+
+1. Route selected work separately: `docs(<domain>): route <outcome>`.
+2. Land any required decision/spec/policy before implementation.
+3. Commit implementation with its tests using `feat`, `fix`, `test`, or
+   `refactor`; do not mark the NW accepted in that commit.
+4. After verification, record standing separately with
+   `docs(status): accept <outcome>` when backlog/BAR/status changes.
+5. Create `docs(checkpoint): snapshot <milestone>` only for a real milestone,
+   handoff, or long-pause boundary, never for every NW item.
+
+Use `<type>(<scope>): <imperative outcome>` and add `NW: NW-###` in the commit
+body/trailer for NW-owned work. Stage explicit owned paths, inspect the staged
+diff, keep unrelated worktree changes out, and report the final worktree state.
+Review fixes use their truthful behavior type; documentation-only organization
+uses `docs(hygiene)` only when semantics and accepted standing are unchanged.

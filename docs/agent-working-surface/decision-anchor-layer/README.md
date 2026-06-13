@@ -36,6 +36,11 @@ This layer carries the durable goals from the extraction charter and the steward
 * fold durable IDR/BAR/NW outcomes into stable anchors and freeze IDR-first routing as provenance;
 * avoid maintaining several active routing companions in parallel.
 
+After this layer classifies a gap, use
+`docs/documentation-organization.md` to choose the durable output home and
+trace. Classification belongs here; accepted product/platform specifications,
+operational policies, runbooks, and rehearsal evidence do not.
+
 ## Files
 
 | File | Role |

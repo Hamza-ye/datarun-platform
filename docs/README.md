@@ -42,14 +42,22 @@ Datarun's ambition is to **eliminate that rebuilding**. Instead of bespoke syste
 
 An evaluator assessing product intent should read the problem-space sources first. An agent assessing current architecture or implementation status should use `AGENTS.md` and `docs/status.md` first; the active post-Phase-4 working surface is `docs/agent-working-surface/README.md`.
 
+Before creating a new durable document, use
+[Documentation Organization And Traceability](documentation-organization.md)
+to select one canonical home and required acceptance trace.
+For repository progress and commit boundaries, use
+[Commit And Progress Workflow](commit-workflow.md).
+
 1. **Problem definition**: [Constraints](constraints.md) → [Scenarios](scenarios/README.md) → [Access Control](access-control-scenario.md)
 2. **Viability analysis**: [Viability Assessment](viability-assessment.md)
 3. **Design foundations**: [Principles](principles.md) → [Behavioral Patterns](behavioral_patterns.md)
 4. **Architecture description**: [Architecture](architecture/) — the consolidated reference: primitives, contracts, cross-cutting concerns, boundaries
 5. **Architecture decisions**: [Canonical Decision Ledger](architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md) via its [README index](architecture/adrs-decisions-canonical-ledger/README.md). The old ADR files are provenance, not the active agent-facing authority.
-6. **Rationale and routing**: [Architecture Rationale and Routing Companion](agent-working-surface/architecture-rationale-and-routing-companion.md) — non-authoritative reasoning, change classification, and test-intent context; the CDL still wins on decisions.
-7. **Implementation**: [Implementation plan](implementation/plan.md) and [Module Interface Baseline](implementation/module-interfaces.md) — technology stack, module boundaries, phased build order, and implemented boundary map
-8. **Decision reasoning** *(optional)*: [Exploration index](exploration/) — the event storms, stress tests, and coherence audits behind each ADR
+6. **Rationale and routing**: [Decision Anchor Layer](agent-working-surface/decision-anchor-layer/README.md) — non-authoritative DEC anchors, gap classification, and closure routing; the CDL still wins on decisions.
+7. **Product/platform specifications**: [Specifications](specifications/README.md) — accepted user-visible and exact platform behavior below architecture/contracts.
+8. **Operations**: [Operations](operations/README.md) — policies, executable runbooks, and rehearsal evidence.
+9. **Implementation**: [Implementation plan](implementation/plan.md) and [Module Interface Baseline](implementation/module-interfaces.md) — technology stack, module boundaries, phased build order, and implemented boundary map
+10. **Decision reasoning** *(optional)*: [Exploration index](exploration/) — the event storms, stress tests, and coherence audits behind each ADR
 
 ### By area
 
@@ -64,7 +72,11 @@ An evaluator assessing product intent should read the problem-space sources firs
 | [Behavioral Patterns](behavioral_patterns.md)   | 12 behavioral patterns extracted from scenarios — the first narrowing step                                                 |
 | [Architecture](architecture/)                   | Consolidated architecture description — 11 primitives, 21 contracts, 8 cross-cutting concerns, 29 boundary classifications |
 | [Canonical Decision Ledger](architecture/adrs-decisions-canonical-ledger/) | Active architecture decision authority from Phase 4 closure forward |
-| [Architecture Rationale and Routing Companion](agent-working-surface/architecture-rationale-and-routing-companion.md) | Non-authoritative rationale, routing, escape-hatch, and test-intent companion for steward work |
+| [Decision Anchor Layer](agent-working-surface/decision-anchor-layer/README.md) | Active non-authoritative DEC-anchor and gap-routing surface for steward work |
+| [Specifications](specifications/README.md) | Accepted product behavior and platform-detail specifications under architecture/contracts |
+| [Operations](operations/README.md) | Operational policies, executable runbooks, rehearsal plans, and dated evidence |
+| [Documentation Organization](documentation-organization.md) | Canonical homes, metadata, indexes, lifecycle, and supersession for durable outputs |
+| [Commit Workflow](commit-workflow.md) | Conventional commit taxonomy and route/implement/accept/checkpoint progress flow |
 | [ADRs](adrs/)                                   | Retired/provenance Architecture Decision Records; use only when routed by current docs or a drift investigation            |
 | [Exploration](exploration/)                     | Decision analyses grouped by ADR — event storms, stress tests, coherence audits                                            |
 | [Experiments](experiments/)                     | Prototypes and scenario walk-throughs                                                                                       |
@@ -85,4 +97,6 @@ Current high-level standing:
 4. Accepted baseline standing includes BAR-001 through BAR-015 and BAR-104, including config package delivery and production OIDC/JWT/Keycloak authority.
 5. Post-Phase-4 runtime evidence now covers S00, S19, S21, S22, S23, S26, and S27.
 6. Assignment administration has moved beyond containment-only exposure: IDR-029 and NW-050 added server-side `assignment_admin.create` / `assignment_admin.end` command capability before IDR-024 containment.
-7. Remaining production-shaping work should route through `docs/status.md`, the working-surface backlog, the module interface baseline, and the rationale companion rather than legacy phase chronology.
+7. Remaining production-shaping work should route through `docs/status.md`,
+   the working-surface backlog, the decision-anchor layer, and the canonical
+   specification/operations homes rather than legacy phase chronology.

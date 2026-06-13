@@ -13,6 +13,7 @@ Use this section as the low-token bootstrap for new sessions.
 - Phase 4 is complete; the completion audit is green.
 - Post-Phase-4 stabilization now uses `docs/agent-working-surface/README.md` as the active agent working-surface router.
 - Architecture-sensitive future work now routes through `docs/agent-working-surface/decision-anchor-layer/README.md` for DEC anchors and gap routing. The old architecture rationale companion is retired as an active surface.
+- New durable documentation outputs route through `docs/documentation-organization.md`: accepted product/platform behavior belongs under `docs/specifications/`, while operational policies, runbooks, and rehearsal evidence belong under `docs/operations/`. Prompts and working-surface artifacts remain routing inputs, not final accepted homes.
 - Current implementation acceptance status belongs in `docs/agent-working-surface/baseline-acceptance-register.md`; do not treat legacy Phase 4 review drafts as active baseline truth.
 - Current baseline standing: BAR-001 through BAR-015 and BAR-104 are accepted, including BAR-010 config package delivery and BAR-104 production OIDC/JWT/Keycloak authority.
 - Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, NW-033/S26, and NW-042/S22. Use the backlog rows for exact evidence.

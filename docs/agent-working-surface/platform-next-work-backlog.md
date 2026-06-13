@@ -18,13 +18,46 @@ This backlog orders post-Phase-4 stabilization work. It is not architecture auth
 
 | Status | Meaning |
 |---|---|
-| `ready` | Ready for an implementation or verification agent. |
+| `ready` | Ready for the bounded analysis, implementation, or verification packet named by the row. |
 | `blocked` | Waiting on an explicit dependency or decision. |
 | `in_review` | Being handled in the current stabilization slice or awaiting review. |
 | `accepted` | Exit condition has been met and evidence is attached elsewhere. |
 | `deferred` | Intentionally not active. |
 | `future_decision` | Requires successor architecture/platform decision. |
 | `superseded` | Replaced by newer work. |
+
+## Work Item Trace
+
+Every promoted NW row must leave a usable trace:
+
+1. `Source` names the pressure, authority, and execution prompt when one exists.
+2. The prompt bounds the work; it is not the durable outcome.
+3. The outcome lands in the correct long-lived surface:
+   - CDL successor or IDR for binding decisions;
+   - `contracts/` for process/wire contracts;
+   - `docs/specifications/product/` for accepted user-visible behavior;
+   - `docs/specifications/platform/` for accepted platform-detail behavior;
+   - `docs/implementation/` for implementation design and phase specifications;
+   - `docs/operations/policies/` for operational choices and ownership;
+   - `docs/operations/runbooks/` for executable procedures;
+   - `docs/operations/rehearsals/` for exercise plans and dated evidence;
+   - code and tests for implementation;
+   - `artifacts/` for non-binding exploration, routing, or deferral evidence.
+4. `Exit condition` records the dated result, durable output path, verification,
+   and successor or deferral route.
+5. Accepted outcomes are folded into `docs/status.md`, BAR, DEC anchors, the gap
+   playbook, contracts, or module interfaces only when those surfaces are
+   materially changed.
+6. Route, implementation, acceptance, review, hygiene, and checkpoint commits
+   follow `docs/commit-workflow.md`; a commit tied to the row carries an
+   `NW: NW-###` trailer.
+
+Do not treat a prompt file or an accepted backlog status by itself as the
+result. If an exploration recommends implementation, create a separate
+successor row rather than rewriting the exploration row into implementation.
+Use `docs/documentation-organization.md` for required metadata, naming,
+indexing, lifecycle, and supersession. Use `docs/commit-workflow.md` for commit
+roles and progress-state transitions.
 
 ## Backlog
 
