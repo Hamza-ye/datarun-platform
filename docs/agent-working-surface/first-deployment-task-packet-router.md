@@ -1,6 +1,6 @@
 # First-Deployment Router
 
-Status: third implementation slice accepted
+Status: fourth implementation slice dispatched
 
 Date: 2026-06-13
 
@@ -16,6 +16,8 @@ The first-deployment workshop is closed. Use:
    for the completed first implementation task and evidence.
 4. [work-readiness-task.md](../workshops/first-deployment/work-readiness-task.md)
    for the completed third implementation task and evidence.
+5. [correction-ux-task.md](../workshops/first-deployment/correction-ux-task.md)
+   for the active bounded implementation task.
 
 Do not reconstruct the removed workshop chronology from git history and do not
 draft more FD-PKT, role, stage, prerequisite, or gate-review documents for this
@@ -23,9 +25,9 @@ slice.
 
 ## Dispatch Standing
 
-NW-061 landed in commit `1b4ca81`. The work list now distinguishes get-work,
-syncing, retry, missing setup/forms, missing assignment, and ready-to-capture
-states from existing local config, assignment, and sync state only.
+NW-062 is dispatched as append-only correction UX. It reuses the accepted S00
+same-subject/same-shape capture semantics, prefills the selected capture, and
+appends a new event without mutating or replacing the original.
 
 S06/entity lifecycle remains a visible BAR-105 / NW-021 future-decision lane,
 but it did not block NW-060 or NW-061. Those slices add no known-set,
@@ -44,4 +46,5 @@ state.
 NW-059 is accepted with 13 focused tests, 114 full mobile tests, and clean
 touched-file analysis. NW-060 is accepted with 12 focused tests, 119 full
 mobile tests, and clean touched-file analysis. NW-061 is accepted with 19
-focused tests, 126 full mobile tests, and clean touched-file analysis.
+focused tests, 126 full mobile tests, and clean touched-file analysis. NW-062
+is the active bounded successor.

@@ -1,6 +1,6 @@
 # First-Deployment Summary
 
-Status: workshop closed; third implementation slice landed
+Status: workshop closed; fourth implementation slice dispatched
 
 Date: 2026-06-13
 
@@ -96,3 +96,11 @@ without adding entity-lifecycle, subject-link authority, or sync semantics.
 needs work, is syncing, needs retry/setup/assignment attention, or is ready to
 capture. It adds no persisted state, authority, login, contract, or sync
 behavior.
+
+## Active Slice
+
+[correction-ux-task.md](correction-ux-task.md) is dispatched as NW-062. It
+adds a prefilled append-only correction action over the accepted S00 kernel:
+same subject, exact shape, new capture event, original history preserved. It
+adds no mutation, correction linkage, envelope/payload metadata, authority,
+sync semantics, or entity lifecycle.
