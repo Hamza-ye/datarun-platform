@@ -17,11 +17,13 @@ class AppState extends ChangeNotifier {
   final ContextResolver contextResolver;
   final SyncService syncService;
   final DeviceIdentity identity;
+  final DateTime Function() _now;
 
   List<SubjectSummary> subjects = [];
   List<Map<String, dynamic>> activeAssignments = [];
   int pendingCount = 0;
   DateTime? lastSync;
+  SyncResult? lastSyncResult;
   bool isSyncing = false;
 
   AppState({
@@ -32,7 +34,8 @@ class AppState extends ChangeNotifier {
     required this.contextResolver,
     required this.syncService,
     required this.identity,
-  });
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   Future<void> refresh() async {
     // Promote pending config at safe transition point (IDR-019 two-slot model)
@@ -48,7 +51,10 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     try {
       final result = await syncService.sync();
-      lastSync = DateTime.now();
+      lastSyncResult = result;
+      if (result.error == null) {
+        lastSync = _now();
+      }
       await refresh();
       return result;
     } finally {

@@ -3,20 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:datarun_mobile/presentation/app_state.dart';
 
 /// U1: Sync Panel — modal bottom sheet.
-class SyncPanel extends StatefulWidget {
+class SyncPanel extends StatelessWidget {
   const SyncPanel({super.key});
-
-  @override
-  State<SyncPanel> createState() => _SyncPanelState();
-}
-
-class _SyncPanelState extends State<SyncPanel> {
-  String? _resultMessage;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, state, _) {
+        final result = state.lastSyncResult;
         return Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -26,8 +20,7 @@ class _SyncPanelState extends State<SyncPanel> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Sync',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text('Sync', style: Theme.of(context).textTheme.titleLarge),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
@@ -35,37 +28,30 @@ class _SyncPanelState extends State<SyncPanel> {
                 ],
               ),
               const SizedBox(height: 16),
-              Text('● Push: ${state.pendingCount} event${state.pendingCount == 1 ? '' : 's'} to send'),
-              const Text('○ Pull: checking for updates'),
+              _buildStatus(context, state),
               const SizedBox(height: 16),
-              if (_resultMessage != null) ...[
-                Text(_resultMessage!,
-                    style: TextStyle(
-                        color: _resultMessage!.contains('failed')
-                            ? Colors.red
-                            : Colors.green)),
-                const SizedBox(height: 8),
-              ],
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: state.isSyncing ? null : () => _sync(context),
+                  onPressed: state.isSyncing ? null : state.sync,
                   child: state.isSyncing
                       ? const SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Sync Now'),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(result?.error != null ? 'Try Again' : 'Sync Now'),
                 ),
               ),
               const SizedBox(height: 12),
-              Text(
-                state.lastSync != null
-                    ? 'Last sync: ${_formatTime(state.lastSync!)}'
-                    : 'Never synced',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              if (state.lastSync != null)
+                Text(
+                  'Last successful sync: ${_formatTime(state.lastSync!)}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               Text(
                 'Device ID: ${state.identity.deviceId.substring(0, 8)}...',
                 style: Theme.of(context).textTheme.bodySmall,
@@ -78,19 +64,79 @@ class _SyncPanelState extends State<SyncPanel> {
     );
   }
 
-  Future<void> _sync(BuildContext context) async {
-    final state = context.read<AppState>();
-    final result = await state.sync();
-    if (mounted) {
-      setState(() {
-        if (result.error != null) {
-          _resultMessage = 'Sync failed: ${result.error}';
-        } else {
-          _resultMessage =
-              '● Push: ${result.pushedCount} sent ✓\n○ Pull: ${result.pulledCount} received ✓';
-        }
-      });
+  Widget _buildStatus(BuildContext context, AppState state) {
+    final textTheme = Theme.of(context).textTheme;
+    final result = state.lastSyncResult;
+
+    if (state.isSyncing) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Syncing now', style: textTheme.titleMedium),
+          const Text('Sending saved records and checking for updates.'),
+        ],
+      );
     }
+
+    if (result?.error != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Sync failed',
+            style: textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+          if (state.pendingCount > 0)
+            Text(
+              '${_count(state.pendingCount, 'record')} still saved on this device and waiting to sync.',
+            ),
+          const Text('Try again when the connection or account is available.'),
+          const SizedBox(height: 8),
+          Text(result!.error!, style: textTheme.bodySmall),
+        ],
+      );
+    }
+
+    if (result != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Sync complete', style: textTheme.titleMedium),
+          Text('${_count(result.pushedCount, 'record')} sent.'),
+          Text('${_count(result.pulledCount, 'update')} received.'),
+        ],
+      );
+    }
+
+    if (state.pendingCount > 0) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${_count(state.pendingCount, 'record')} saved on this device',
+            style: textTheme.titleMedium,
+          ),
+          const Text('Waiting to sync.'),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          state.lastSync == null ? 'Not synced yet' : 'Synced',
+          style: textTheme.titleMedium,
+        ),
+        const Text('No records waiting to sync.'),
+      ],
+    );
+  }
+
+  String _count(int count, String noun) {
+    return '$count $noun${count == 1 ? '' : 's'}';
   }
 
   String _formatTime(DateTime dt) {
