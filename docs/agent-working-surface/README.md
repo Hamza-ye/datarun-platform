@@ -35,15 +35,14 @@ Use sources in this order:
 10. Phase files and IDRs
    - Role: implementation history, design provenance, and verification leads. Future work should route through the decision-anchor layer first; use IDRs only when explicitly routed.
 
-## First-Deployment Planning Router
+## First-Deployment Router
 
-First-deployment product/spec/evidence work routes through
+First-deployment work routes through
 [first-deployment-task-packet-router.md](first-deployment-task-packet-router.md).
-That file is an active coordination surface, not architecture authority and not
-baseline acceptance. It makes the Stage 8 task-packet backlog and FD-PKT
-decision records visible to new sessions without moving workshop outputs into
-BAR/NW baseline truth. The workshop artifacts themselves live under
+The workshop has been consolidated into one summary and one implementation
+task under
 [docs/workshops/first-deployment/](/docs/workshops/first-deployment/README.md).
+Do not recreate the removed stage/role/gate packet chain.
 
 ## Superseded Review Drafts
 

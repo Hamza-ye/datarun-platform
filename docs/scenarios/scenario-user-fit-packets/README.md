@@ -39,11 +39,6 @@ actor + active assignment + role + scope + time + activity/context
 -> projected operational surface
 ```
 
-Human-facing review and handoff guidance is captured in
-[scenario-user-fit-packets-standing-review-and-playbook.md](../../reviews/scenario-user-fit-packets-standing-review-and-playbook.md).
-That file is for steward/operator use; it is not default agent routing unless a
-task packet explicitly cites it.
-
 Current standing overlay:
 
 - Accepted scenario runtime evidence now includes S00, S19, S21, S22, S23, S26,
@@ -58,10 +53,10 @@ Current standing overlay:
   usable foundations, while full registry lifecycle, discovered-unit lifecycle,
   merge/split UX, and operational lifecycle states should be kept in the
   near-future product-deployment lane and need explicit successor routing
-  before implementation. The current workshop boundary is the
-  [FD-PKT-001 Option C timing record](../../workshops/first-deployment/task-packets/fd-pkt-001-s06-timing-decision-record.md):
-  Candidate 1 product/spec may proceed while S06 discovery runs in parallel
-  before implementation dispatch.
+  before implementation. The
+  [first-deployment summary](../../workshops/first-deployment/summary.md)
+  retains the parallel S06 discovery direction while allowing lifecycle-neutral
+  Candidate 1 slices, starting with mobile sync-status presentation, to proceed.
 - Reporting, import/export, broad audit/history access, custom/query scope,
   retention/security, mobile OIDC login, production admin auth, batch conflict
   handling, triggers, auto-resolution, resolver reassignment, and IdP

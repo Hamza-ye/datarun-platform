@@ -50,7 +50,7 @@ options:
 
 ## Steward And Implementer Split
 
-- Architecture-steward sessions may read broadly, reconcile status, produce bounded implementation prompts, and dispatch working agent, or wear different roles hats when asked, note for steward: the protocol is a guardrail for product clarity, not a reason to bury product pressure. Reality Checker and Test Results Analyzer should classify risks and evidence, but they and the steward must preserve product-needed lanes as visible work, not reject them into silence.
+- Architecture-steward sessions may read broadly, reconcile status, produce bounded implementation prompts, and dispatch working agents. Preserve product-needed lanes, but do not simulate multi-role workshop or gate-review chains as a substitute for product judgment or implementation.
 - Implementer sessions should read only the bounded task packet plus the default implementer packet above.
 - A task packet should state goal, files to read, authority/guardrails, forbidden work, expected tests, commit boundary, and stop-and-report conditions.
 

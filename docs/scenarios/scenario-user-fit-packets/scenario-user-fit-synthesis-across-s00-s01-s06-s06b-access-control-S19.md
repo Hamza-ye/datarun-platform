@@ -408,9 +408,9 @@ This is the smallest useful deployment surface. It must protect S00 simplicity w
 
 **S01/S06 timing note:** Candidate 1 is S01-compatible. It may include
 optional subject-linked capture and unpromoted missing-known-thing handling
-over accepted subject/history constructs. FD-PKT-001 must decide whether S06
-stays as a near-future milestone, moves before Candidate 1 implementation
-planning, or runs as parallel discovery before the implementation gate.
+over accepted subject/history constructs. The first-deployment summary keeps
+S06 as parallel future-decision work while allowing lifecycle-neutral
+Candidate 1 slices to proceed.
 
 ### Candidate 2 — Registry Entry Lifecycle Spec
 
@@ -660,15 +660,13 @@ keeping them visible in the deployment plan:
 * external system integration.
 
 This routing is a scope guard for Candidate 1, not a product roadmap decision.
-FD-PKT-001 is the timing decision that prevents this scope guard from hiding
-the product need. The first product-deployment plan should keep S06/BAR-105
-entity lifecycle visible as a near-future or earlier milestone, with its own
-decision, QA evidence, acceptance checklist, owner, and change-management
-route.
+The first-deployment summary prevents this scope guard from hiding the product
+need: S06/BAR-105 remains visible as a parallel future-decision lane with its
+own decision and evidence when promoted.
 
 ## 13. Current synthesis decision
 
-**Status:** Ready to feed Candidate 1 drafting.
+**Status:** Ready to feed bounded Candidate 1 implementation slices.
 
 **Meaning:**
 The six packets are sufficient to begin Candidate 1 platform-spec detailing, provided Candidate 1 is framed as basic operational capture under real deployment constraints, not as a pure form-capture feature.
@@ -684,9 +682,9 @@ Proceed to:
 Candidate 1 — Basic Operational Capture Setup Spec
 ```
 
-Only proceed after FD-PKT-001 records whether Candidate 1 stays first as an
-S01-compatible slice, whether S06/BAR-105 moves earlier, or whether S06
-discovery runs in parallel before implementation packet dispatch.
+Proceed under the first-deployment summary's recorded boundary:
+lifecycle-neutral Candidate 1 slices may start, while S06/BAR-105 remains
+separately routed before any lifecycle implementation.
 
 Suggested structure:
 
