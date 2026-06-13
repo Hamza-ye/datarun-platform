@@ -1,6 +1,6 @@
 # First-Deployment Router
 
-Status: first implementation slice accepted
+Status: second implementation slice dispatched
 
 Date: 2026-06-13
 
@@ -10,7 +10,9 @@ The first-deployment workshop is closed. Use:
 
 1. [summary.md](../workshops/first-deployment/summary.md) for the consolidated
    product outcome, lane standing, S06 disposition, and technical boundary.
-2. [implementation-task.md](../workshops/first-deployment/implementation-task.md)
+2. [capture-handoff-task.md](../workshops/first-deployment/capture-handoff-task.md)
+   for the active bounded implementation task.
+3. [implementation-task.md](../workshops/first-deployment/implementation-task.md)
    for the completed first implementation task and evidence.
 
 Do not reconstruct the removed workshop chronology from git history and do not
@@ -19,13 +21,14 @@ slice.
 
 ## Dispatch Standing
 
-The mobile sync-status task landed in commit `8692607`. It composes
-presentation over existing mobile state and fixes the bug where a failed sync
-attempt updated `lastSync`.
+NW-060 is dispatched as the offline capture-handoff product slice. It composes
+presentation over the existing form result, projection refresh, pending count,
+and sync panel. It adds no state, authority, contract, or sync behavior.
 
 S06/entity lifecycle remains a visible BAR-105 / NW-021 future-decision lane,
-but it does not block this task because the task contains no subject-link,
-known-set, candidate, lifecycle, duplicate, merge, or split behavior.
+but it does not block this task. NW-060 reuses the existing subject-linked
+capture path without adding known-set, candidate, lifecycle, duplicate, merge,
+split, or subject-link authority.
 
 ## Source Order
 
@@ -38,5 +41,4 @@ state.
 ## Completion
 
 NW-059 is accepted with 13 focused tests, 114 full mobile tests, and clean
-touched-file analysis. Select the next bounded lane from the summary without
-recreating workshop or gate-review process.
+touched-file analysis. NW-060 is the active bounded successor.

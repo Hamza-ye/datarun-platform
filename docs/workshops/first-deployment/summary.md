@@ -1,6 +1,6 @@
 # First-Deployment Summary
 
-Status: workshop closed; first implementation slice landed
+Status: workshop closed; second implementation slice dispatched
 
 Date: 2026-06-13
 
@@ -81,3 +81,10 @@ states for saved locally, waiting, syncing, synced, and failed sync.
 
 Select any successor from the lane register as one bounded implementation or
 decision task. No additional workshop or gate document is required.
+
+## Active Slice
+
+[capture-handoff-task.md](capture-handoff-task.md) is dispatched as NW-060.
+It carries successful offline capture back to the surviving screen, refreshes
+existing projection/pending state, and keeps saved-local work visible without
+adding entity-lifecycle, subject-link authority, or sync semantics.
