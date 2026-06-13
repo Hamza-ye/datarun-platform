@@ -19,8 +19,12 @@ services:
 
   server:
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: server/Dockerfile
+      args:
+        IMAGE_VERSION: ${DATARUN_IMAGE_VERSION:-dev}
+        IMAGE_REVISION: ${DATARUN_IMAGE_REVISION:-local}
+        IMAGE_CREATED: ${DATARUN_IMAGE_CREATED:-unknown}
     ports:
       - "8080:8080"
     environment:

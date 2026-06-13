@@ -5,11 +5,16 @@ on:
     paths:
       - 'server/**'
       - 'contracts/**'
+      - 'scripts/verify-server-image.sh'
+      - 'docker-compose.yml'
       - '.github/workflows/server-ci.yml'
   pull_request:
     paths:
       - 'server/**'
       - 'contracts/**'
+      - 'scripts/verify-server-image.sh'
+      - 'docker-compose.yml'
+      - '.github/workflows/server-ci.yml'
 
 jobs:
   build-and-test:
@@ -53,3 +58,15 @@ jobs:
         run: |
           test -f contracts/envelope.schema.json || { echo "Missing envelope.schema.json"; exit 1; }
           test -f contracts/sync-protocol.md || { echo "Missing sync-protocol.md"; exit 1; }
+
+      - name: Build and verify release image
+        run: scripts/verify-server-image.sh
+        env:
+          IMAGE_TAG: datarun-server:ci-${{ github.sha }}
+          IMAGE_VERSION: ci-${{ github.run_id }}-${{ github.run_attempt }}
+          IMAGE_REVISION: ${{ github.sha }}
+          IMAGE_SMOKE_DB_HOST: 127.0.0.1
+          IMAGE_SMOKE_DB_PORT: 15432
+          IMAGE_SMOKE_DB_NAME: datarun_test
+          IMAGE_SMOKE_DB_USER: datarun
+          IMAGE_SMOKE_DB_PASSWORD: datarun
