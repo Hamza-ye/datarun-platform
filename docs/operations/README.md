@@ -22,8 +22,8 @@ documentation.
 
 | Document | Type | Status | Owner | Source |
 |---|---|---|---|---|
-| [First reference deployment policy](policies/first-reference-deployment-policy.md) | Operational policy | `in_review` | Deployment owner (named selection pending) | NW-064 |
+| [First reference deployment policy](policies/first-reference-deployment-policy.md) | Operational policy | `accepted` | Hamza | NW-064 |
 
-No operational document is accepted yet. NW-063 selected the reference
-deployment class; the indexed policy proposal must receive owner selections
-before tooling, runbook, and rehearsal successors can proceed.
+NW-063 selected the reference deployment class, and NW-064 now supplies its
+accepted operating policy. NW-065 tooling may proceed; runbook and rehearsal
+successors remain dependent on tested implementation.

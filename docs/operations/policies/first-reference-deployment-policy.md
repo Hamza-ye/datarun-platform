@@ -1,8 +1,8 @@
 # First Reference Deployment Policy
 
-Status: in_review
+Status: accepted
 Document type: operational_policy
-Owner: Deployment owner (named selection pending)
+Owner: Hamza
 Source: NW-064 and
 `docs/agent-working-surface/prompts/NW-064-define-first-reference-deployment-policy.md`
 Authority: operates within NW-063, BAR-001 through BAR-015, BAR-104,
@@ -18,19 +18,16 @@ NW-066), and
 `docs/operations/rehearsals/production-deployment-rehearsal-plan.md` (planned
 by NW-066)
 
-## 1. Proposal Status
+## 1. Acceptance Status
 
-This document proposes the operating choices for the first reference
-deployment. It is not accepted policy yet.
+Hamza accepted this policy on 2026-06-13 for the provider-neutral synthetic
+reference deployment and its repository-owned tooling.
 
-Every value labelled **Recommended default** is a conservative starting point,
-not an approved commitment. Every corresponding selection remains:
-
-> **TBD - owner acceptance required**
-
-The deployment owner must name the responsible people or teams, accept or
-replace every required value in Section 12, and record any approved exception
-before NW-064 can become `accepted`.
+The controls below are accepted as written. Hamza holds all named operational
+roles for the synthetic rehearsal and may use the documented one-person
+approval exception with retained evidence. A real production deployment still
+requires the separate approvals and deployment-specific selections in
+Section 11.
 
 No backup, restore, monitoring, rotation, release, or incident capability is
 proven merely because it is required here. NW-065 must implement the necessary
@@ -84,15 +81,16 @@ incident does not leave ownership ambiguous.
 One person may hold multiple or all roles when staffing requires it. Role
 consolidation does not remove any control, evidence, or escalation duty.
 
-**Recommended default:** use a second authorized person to review production
+Use a second authorized person to review production
 releases, destructive recovery decisions, privileged access grants, and
 principal-binding or configuration changes.
 
-**TBD - owner acceptance required:** name the consolidated role assignments
-and decide whether a one-person self-approval exception is allowed. If allowed,
-each use must record why no second reviewer was available, the exact artifact
-and change, automated verification results, backup/restore readiness, and the
-deployment owner's retrospective review.
+Hamza holds all roles for the synthetic rehearsal. A one-person self-approval
+exception is allowed for that rehearsal. Each use must record why no second
+reviewer was available, the exact artifact and change, automated verification
+results, backup/restore readiness, and Hamza's retrospective review. Real
+production requires a reachable backup/escalation contact and separate
+production approval.
 
 No person may use role consolidation to infer application authority from host,
 database, IdP, or cloud-administrator access. Platform actor, assignment,
@@ -124,7 +122,7 @@ rules.
 
 ## 5. Ownership, Environments, And Access
 
-**Recommended defaults:**
+Accepted controls:
 
 - Name one accountable deployment owner and one operational contact for every
   role in Section 3 before a production environment is created.
@@ -145,17 +143,19 @@ rules.
 - Do not expose the application HTTP port to the public network; public access
   terminates at the TLS reverse proxy.
 
-**TBD - owner acceptance required:** name the environment/account owner,
-application host owner, DNS/TLS owner, database owner, secrets owner, and
-monitoring owner; identify the hosting and PostgreSQL provider or self-operated
-boundary; select the production region and maintenance access path; accept or
-replace the 90-day access review and four-hour removal targets.
+Hamza holds the environment/account, application host, DNS/TLS, database,
+secrets, and monitoring roles for the synthetic rehearsal. The reference
+tooling remains provider neutral and targets external PostgreSQL 16. No
+production hosting provider, region, account, or maintenance-access path is
+selected by this policy; selecting them is part of the separate real-production
+approval in Section 11. The 90-day access review and four-hour normal removal
+targets are accepted.
 
 ## 6. Data Protection And Recovery
 
 ### 6.1 Recovery Objectives
 
-**Recommended defaults:**
+Accepted objectives:
 
 - RPO: no more than 1 hour of committed PostgreSQL history.
 - RTO: restore the minimum usable server service within 8 hours of disaster
@@ -163,12 +163,13 @@ replace the 90-day access review and four-hour removal targets.
 - Measure both objectives during rehearsal and incidents. An unmeasured target
   is not evidence that the target can be met.
 
-**TBD - owner acceptance required:** accept or replace the RPO and RTO, name
-the database restore authority, and name who may declare a disaster.
+The accepted RPO is 1 hour and the accepted RTO is 8 hours. Hamza is the
+database restore authority and disaster-declaration authority for the
+synthetic rehearsal.
 
 ### 6.2 Backup And Restore Controls
 
-**Recommended defaults:**
+Accepted controls:
 
 - Use continuous transaction-log/PITR protection or a provider-equivalent
   capability consistent with the accepted RPO.
@@ -188,10 +189,12 @@ the database restore authority, and name who may declare a disaster.
 - Preserve failed restore evidence. Do not repair schema history by manual
   database edits.
 
-**TBD - owner acceptance required:** select the backup/PITR service, schedules,
-35-day and 12-month retention values, encryption/key owner, off-site boundary,
-quarterly restore cadence, restore operator, restore approver, and any legal
-hold or deletion constraints.
+The backup/PITR implementation must remain provider neutral and meet the
+accepted continuous-PITR-or-equivalent, daily, 35-day, 12-month, encryption,
+off-site, and quarterly-restore controls. Hamza is the encryption/key owner,
+restore operator, and restore approver for the synthetic rehearsal. A concrete
+service, legal-hold rule, and deletion constraint must be selected before real
+production approval.
 
 Database restore is not ordinary application rollback. It may lose history
 newer than the recovery point. The database owner executes it only after the
@@ -201,7 +204,7 @@ reviewed afterward by the deployment owner and data/compliance owner.
 
 ## 7. Secrets And Privileged Configuration
 
-**Recommended defaults:**
+Accepted controls:
 
 - Store database passwords, OIDC/JWKS configuration where confidential,
   private keys, tokens, and other credentials in a deployment-selected secret
@@ -222,16 +225,17 @@ reviewed afterward by the deployment owner and data/compliance owner.
   turning IdP groups, roles, JWT `actor_id`, or other claims into platform
   authority.
 
-**TBD - owner acceptance required:** select the secret manager and key
-boundary; name the secrets owner; accept or replace the 90-day rotation,
-expiry-alert, and annual rehearsal intervals; select the emergency revocation
-contact and maximum response time.
+Secrets must be injected through read-only mounted files populated by an
+external secret-management mechanism; no provider-specific secret manager is
+selected. Hamza is the secrets owner and emergency revocation contact. The
+90-day rotation, expiry-alert, annual rehearsal, and immediate suspected-
+exposure revocation targets are accepted.
 
 ## 8. Monitoring, Capacity, SLO, And Support
 
 ### 8.1 Service And Reliability Targets
 
-**Recommended defaults:**
+Accepted targets:
 
 - Availability SLO: 99.0% per calendar month, measured across all calendar
   time and including planned maintenance so maintenance cost remains visible.
@@ -241,10 +245,11 @@ contact and maximum response time.
 - Do not promise high availability, automatic failover, or zero downtime for
   the single-host reference class.
 
-**TBD - owner acceptance required:** select the availability SLO, service
-hours, support hours, local time zone, holiday calendar, and whether a funded
-24x7 severity-1 response roster exists. Do not advertise 24x7 incident response
-unless named people have accepted the roster.
+The accepted availability SLO is 99.0% per calendar month. Service hours are
+24x7 after real-production approval; staffed support hours are 08:00-18:00
+`Asia/Aden`, Monday through Friday excluding published local holidays. No
+funded 24x7 severity-1 response roster exists, so 24x7 incident response must
+not be advertised.
 
 ### 8.2 Required Signals And Thresholds
 
@@ -252,7 +257,7 @@ NW-065 must provide or integrate signals for application readiness, request
 failure, host and database capacity, database connectivity, backup freshness,
 certificate expiry, and OIDC/JWKS dependency failures.
 
-**Recommended defaults:**
+Accepted thresholds:
 
 - Warn when CPU, memory, disk, or database connection use exceeds 70% of
   provisioned capacity for 15 minutes.
@@ -266,9 +271,11 @@ certificate expiry, and OIDC/JWKS dependency failures.
 - Every alert names an owner, response action, escalation path, and link to the
   applicable runbook. An alert with no responder is not an operational control.
 
-**TBD - owner acceptance required:** accept or replace the thresholds and
-durations, select the monitoring/logging destination, and name the primary and
-backup alert recipients.
+The thresholds and durations above are accepted. NW-065 must expose
+Actuator/Prometheus-compatible health and metrics signals plus structured
+standard-output logs. Hamza is the primary alert recipient for the synthetic
+rehearsal. A backup recipient and final monitoring/logging destination are
+required before real-production approval.
 
 ### 8.3 Incident Severity And Communication
 
@@ -281,13 +288,15 @@ backup alert recipients.
 Authority drift, cross-scope data exposure, secret leakage, event mutation, and
 unsafe migration state are severity 1 even if availability appears healthy.
 
-**TBD - owner acceptance required:** accept or replace severity definitions,
-acknowledgement targets, update cadence, incident commander roster, support
-contact, executive/security escalation, and user communication channel.
+The severity definitions, acknowledgement targets, and update cadence are
+accepted. Hamza is the incident commander, support contact, and escalation
+authority for the synthetic rehearsal. Production-specific security/executive
+escalation and user communication channels must be selected before
+real-production approval.
 
 ## 9. Release, Migration, And Recovery Authority
 
-**Recommended defaults:**
+Accepted controls:
 
 - Deploy only an immutable image identified by digest and source commit after
   required tests, clean image/resource inspection, vulnerability review, and
@@ -311,15 +320,17 @@ contact, executive/security escalation, and user communication channel.
 - Release approval never grants platform actor, assignment, resolver, or
   principal-binding authority.
 
-**TBD - owner acceptance required:** select the maintenance window and notice,
-name the release owner and approver, decide whether the one-person exception is
-allowed, name application rollback authority, name database restore authority,
-name forward-fix authority, and define who decides between restore and forward
-fix during an incident.
+Hamza is release owner, release approver, application rollback authority,
+database restore authority, forward-fix authority, and the decision-maker
+between restore and forward fix for the synthetic rehearsal. The one-person
+exception in Section 3.1 is allowed. Synthetic rehearsal maintenance is
+scheduled by the rehearsal plan; a real deployment must record its recurring
+two-hour weekly window in `Asia/Aden` and retain at least 48 hours notice for
+user-visible maintenance.
 
 ## 10. Evidence And Review
 
-**Recommended defaults:**
+Accepted controls:
 
 - Retain release approvals, image digests, deployment checks, privileged access
   changes, configuration and principal-binding approvals, rehearsal records,
@@ -335,9 +346,11 @@ fix during an incident.
   reclassification, ownership change, or change to the reference deployment
   class.
 
-**TBD - owner acceptance required:** accept or replace the 13-month evidence
-retention and 12-month review cadence; name the evidence repository, evidence
-owner, approved readers, and legal-hold authority.
+The 13-month retention and 12-month review cadence are accepted. Hamza is the
+evidence owner and legal-hold authority. Sanitized summaries may be committed
+to this repository; raw logs, command output, and other detailed evidence must
+remain in access-controlled external storage and must never include secret
+values.
 
 ## 11. Synthetic Rehearsal Versus Real Production Approval
 
@@ -368,47 +381,51 @@ deployment owner and data/compliance owner must separately record:
 Until that approval exists, use synthetic, non-sensitive data and test
 identities only.
 
-**Recommended default:** treat any unknown classification, jurisdiction,
+Treat any unknown classification, jurisdiction,
 retention, user-login, device-security, or breach obligation as a blocker to
 real production, not as an implied acceptance.
 
-**TBD - owner acceptance required:** name the data/compliance owner, intended
-jurisdictions, initial data classification, required organizational reviews,
-and the exact real-production approval authority.
+Hamza is the data/compliance owner and real-production approval authority.
+No production provider, region, jurisdiction, real-data classification, or
+organizational compliance review is selected by this policy. Those omissions
+explicitly block real production but do not block synthetic rehearsal with
+non-sensitive data.
 
 ## 12. Owner Acceptance Register
 
-The deployment owner must complete every row. A replacement value must be at
-least as explicit as the recommended default.
+The deployment owner completed every row below. Future replacement values must
+be at least as explicit as the accepted baseline.
 
-| Selection | Recommended default | Owner selection |
+| Selection | Accepted baseline | Owner selection |
 |---|---|---|
-| Deployment and service owners | Named accountable people; roles may be combined explicitly. | **TBD - owner acceptance required** |
-| Host, DNS/TLS, database, secrets, monitoring owners | One named primary and backup contact for each responsibility. | **TBD - owner acceptance required** |
-| Release, incident, support, data/compliance owners | Named people with reachable escalation paths. | **TBD - owner acceptance required** |
-| Small-team approval model | Second-person review where available; documented owner-reviewed exception otherwise. | **TBD - owner acceptance required** |
-| Hosting, PostgreSQL, region, environment boundaries | Separate production and rehearsal identities, data, DNS, secrets, and monitoring. | **TBD - owner acceptance required** |
-| Access controls | Named MFA accounts, no shared human credentials, encrypted PostgreSQL connections, 90-day review, four-hour normal removal target. | **TBD - owner acceptance required** |
-| RPO and RTO | RPO 1 hour; RTO 8 hours. | **TBD - owner acceptance required** |
-| Backup and restore | Continuous PITR/equivalent, daily backup, 35 daily and 12 monthly points, quarterly restore test. | **TBD - owner acceptance required** |
-| Backup encryption and off-site posture | Encryption in transit/at rest and a protected separate failure/access boundary. | **TBD - owner acceptance required** |
-| Disaster and restore authority | Named declarer, restore approver, and restore operator. | **TBD - owner acceptance required** |
-| Secret storage and rotation | Selected secret manager; 90-day long-lived credential rotation; immediate emergency revocation. | **TBD - owner acceptance required** |
-| SLO and service/support hours | 99.0% monthly; 24x7 service; 08:00-18:00 local weekday support; no implied 24x7 responder. | **TBD - owner acceptance required** |
-| Monitoring and capacity | 70% warning, 85% critical, backup/RPO, readiness, database, certificate, and provider alerts. | **TBD - owner acceptance required** |
-| Incident model | Three severities; severity-1 authority/data events; explicit acknowledgement and communication targets. | **TBD - owner acceptance required** |
-| Release and maintenance | Immutable digest; weekly two-hour window; 48-hour notice; pre-migration recovery point. | **TBD - owner acceptance required** |
-| Rollback, restore, forward-fix decision | App rollback only with proven schema compatibility; otherwise authorized restore or tested forward fix. | **TBD - owner acceptance required** |
-| Evidence retention and policy review | 13 months; annual and event-triggered review. | **TBD - owner acceptance required** |
-| Real-data compliance gate | Unknown classification or legal/security obligation blocks real production. | **TBD - owner acceptance required** |
+| Deployment and service owners | Named accountable people; roles may be combined explicitly. | Hamza holds both roles for synthetic rehearsal. |
+| Host, DNS/TLS, database, secrets, monitoring owners | One named primary and backup contact for each responsibility. | Hamza is primary for all; backup contact required before real production. |
+| Release, incident, support, data/compliance owners | Named people with reachable escalation paths. | Hamza holds all roles for synthetic rehearsal. |
+| Small-team approval model | Second-person review where available; documented owner-reviewed exception otherwise. | One-person evidence-backed exception accepted for synthetic rehearsal. |
+| Hosting, PostgreSQL, region, environment boundaries | Separate production and rehearsal identities, data, DNS, secrets, and monitoring. | Provider-neutral external PostgreSQL 16 reference; production provider/region unselected and blocking real production. |
+| Access controls | Named MFA accounts, no shared human credentials, encrypted PostgreSQL connections, 90-day review, four-hour normal removal target. | Accepted as written. |
+| RPO and RTO | RPO 1 hour; RTO 8 hours. | Accepted as written. |
+| Backup and restore | Continuous PITR/equivalent, daily backup, 35 daily and 12 monthly points, quarterly restore test. | Accepted as provider-neutral requirements. |
+| Backup encryption and off-site posture | Encryption in transit/at rest and a protected separate failure/access boundary. | Accepted as written. |
+| Disaster and restore authority | Named declarer, restore approver, and restore operator. | Hamza holds all three roles for synthetic rehearsal. |
+| Secret storage and rotation | Selected secret manager; 90-day long-lived credential rotation; immediate emergency revocation. | Read-only mounted files from an external secret-management mechanism; cadence accepted. |
+| SLO and service/support hours | 99.0% monthly; 24x7 service; 08:00-18:00 local weekday support; no implied 24x7 responder. | Accepted in `Asia/Aden`; no 24x7 response roster. |
+| Monitoring and capacity | 70% warning, 85% critical, backup/RPO, readiness, database, certificate, and provider alerts. | Accepted; Actuator/Prometheus-compatible signals and structured stdout logs. |
+| Incident model | Three severities; severity-1 authority/data events; explicit acknowledgement and communication targets. | Accepted; Hamza owns synthetic-rehearsal response. |
+| Release and maintenance | Immutable digest; weekly two-hour window; 48-hour notice; pre-migration recovery point. | Accepted; real deployment must record the exact recurring `Asia/Aden` window. |
+| Rollback, restore, forward-fix decision | App rollback only with proven schema compatibility; otherwise authorized restore or tested forward fix. | Accepted; Hamza is the synthetic-rehearsal authority. |
+| Evidence retention and policy review | 13 months; annual and event-triggered review. | Accepted; sanitized repository summaries and access-controlled external raw evidence. |
+| Real-data compliance gate | Unknown classification or legal/security obligation blocks real production. | Accepted; real production remains unapproved. |
 
 Acceptance record:
 
-- Deployment owner name: **TBD - owner acceptance required**
-- Deployment owner decision date: **TBD - owner acceptance required**
-- Data/compliance owner name: **TBD - owner acceptance required**
-- Approved exceptions and rationale: **TBD - owner acceptance required**
-- Next scheduled review: **TBD - owner acceptance required**
+- Deployment owner name: Hamza
+- Deployment owner decision date: 2026-06-13
+- Data/compliance owner name: Hamza
+- Approved exceptions and rationale: one-person approval is allowed for
+  synthetic rehearsal with retained evidence; real production requires its
+  separate Section 11 approval and backup/escalation contact.
+- Next scheduled review: 2027-06-13, or earlier on a Section 10 trigger.
 
 ## 13. Mandatory Guardrails And Exceptions
 
@@ -438,17 +455,10 @@ bounded NW route and, where applicable, architecture or platform authority.
 
 ## 14. Successor And Acceptance Boundary
 
-NW-064 remains `in_review` while any Section 12 selection is unanswered.
-NW-065 remains blocked until this policy is owner-accepted.
-
-After owner acceptance:
-
-1. update this document to `accepted` with the selected values and named roles;
-2. record the NW-064 acceptance separately without claiming implemented
-   operational capability;
-3. route the accepted values into NW-065 tooling and NW-066 procedures;
-4. require NW-067 to measure RPO/RTO and exercise clean install, restore,
-   upgrade/failure, rotation, alert/incident, and operator handoff.
+NW-064 is accepted with the Section 12 selections above. NW-065 may proceed
+within this policy. NW-066 must translate only tested NW-065 tooling into
+procedures. NW-067 must measure RPO/RTO and exercise clean install, restore,
+upgrade/failure, rotation, alert/incident, and operator handoff.
 
 Real production remains separately blocked by Section 11 even after NW-064
 acceptance and a successful synthetic rehearsal.

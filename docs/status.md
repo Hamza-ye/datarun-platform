@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-13 (NW-064 operations policy proposal in review)
+**Last updated**: 2026-06-13 (NW-064 operations policy accepted)
 
 ---
 
@@ -34,7 +34,7 @@ Use this section as the low-token bootstrap for new sessions.
 - NW-062 is accepted in commit `9e8670a`: eligible captures expose a prefilled correction form that appends a distinct same-subject/exact-shape/activity capture while preserving the original event in history. Reverted edits do not append duplicates, and alias-aware history preserves the selected event's subject ref. Focused tests passed 10 cases, the full mobile suite passed 131 tests, and touched-file analysis is clean. It introduced no event mutation, durable correction linkage, envelope/type/payload metadata, shape-version inference, sync/authority semantics, or S06 entity lifecycle.
 - NW-063 is accepted: `docs/agent-working-surface/artifacts/NW-063-production-deployment-ops-hardening-map.md` selects a single Linux application host behind external TLS with durable external PostgreSQL 16 as the first portable reference target. It does not claim the current image or compose file is production ready.
 - NW-063 found a blocking packaging drift: a clean build mirroring the current `server/` Docker context skips root `contracts/` resources, so the JAR omits required workflow pattern definitions and platform payload schemas. NW-056's broad Docker-runnable wording must not be used as clean-image evidence until NW-065 fixes and tests packaging.
-- NW-064 is `in_review`: `docs/operations/policies/first-reference-deployment-policy.md` proposes conservative defaults and leaves named ownership, RPO/RTO, backup/restore, secrets, SLO/alerts, support/incident, release/recovery authority, evidence retention, and real-production compliance selections as `TBD - owner acceptance required`. It distinguishes synthetic rehearsal from real production approval. NW-065 implementation/tooling remains blocked until owner acceptance; NW-066 runbook/plan and NW-067 rehearsal remain blocked in that order.
+- NW-064 is accepted by Hamza: `docs/operations/policies/first-reference-deployment-policy.md` sets provider-neutral synthetic-rehearsal ownership, 1-hour RPO, 8-hour RTO, backup/restore, mounted-secret, SLO/alerts, support/incident, release/recovery, evidence, and `Asia/Aden` controls. Real production remains separately blocked on provider/region, jurisdiction/data classification, backup escalation, communication, login, and organizational review. NW-065 implementation/tooling is now `ready`; NW-066 runbook/plan and NW-067 rehearsal remain blocked in that order.
 - S06/entity lifecycle remains visible as BAR-105/NW-021 future-decision work. It did not block NW-060, NW-061, or NW-062 because those slices add no known-set, candidate, lifecycle, duplicate, merge, split, or subject-link authority.
 - Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md` only when touching implementation code or module behavior, and the exact contracts/code touched by the task.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
