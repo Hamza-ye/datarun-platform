@@ -1,6 +1,6 @@
 # Implementation Task: Mobile Sync Status
 
-Status: ready for implementation
+Status: completed 2026-06-13
 
 ## Goal
 
@@ -77,3 +77,10 @@ One commit: `feat(mobile): clarify offline sync status`
 
 Stop and report only if the UI requires a new API/contract, persisted workflow
 state, changed sync semantics, or authority beyond existing mobile state.
+
+## Evidence
+
+- Commit: `8692607 feat(mobile): clarify offline sync status`
+- Focused: 13 tests passed.
+- Full mobile suite: 114 tests passed.
+- Touched-file `dart analyze`: no issues.

@@ -1,6 +1,6 @@
 # First-Deployment Summary
 
-Status: workshop closed; first implementation slice routed
+Status: workshop closed; first implementation slice landed
 
 Date: 2026-06-13
 
@@ -73,12 +73,11 @@ If a later slice needs maintained known things, active/inactive/retired truth,
 registry stewardship, candidate promotion, or merge/split UX, stop and route
 BAR-105 / NW-021 before implementation.
 
-## Current Dispatch
+## Landed Slice
 
-Implement [implementation-task.md](implementation-task.md). It fixes the
-current false-success timestamp behavior and adds tested presentation states
-for saved locally, waiting, syncing, synced, and failed sync.
+[implementation-task.md](implementation-task.md) landed in commit `8692607`.
+It fixes the false-success timestamp behavior and adds tested presentation
+states for saved locally, waiting, syncing, synced, and failed sync.
 
-Use `AGENTS.md`, `docs/status.md` Current Routing, the mobile section of
-`docs/implementation/module-interfaces.md`, and the exact code/tests named by
-the task. No additional workshop or gate document is required.
+Select any successor from the lane register as one bounded implementation or
+decision task. No additional workshop or gate document is required.
