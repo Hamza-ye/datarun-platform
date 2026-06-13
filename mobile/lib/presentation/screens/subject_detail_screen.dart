@@ -17,6 +17,8 @@ class SubjectDetailScreen extends StatefulWidget {
 
 class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   static const _savedMessage = 'Saved on this device. Waiting to sync.';
+  static const _correctionSavedMessage =
+      'Correction saved on this device. Original record remains in history. Waiting to sync.';
 
   List<Event> _events = [];
   Set<String> _flaggedIds = {};
@@ -58,9 +60,16 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
               itemCount: _events.length,
               itemBuilder: (context, index) {
                 final e = _events[index];
+                final correctionAvailable =
+                    e.type == 'capture' &&
+                    context.read<AppState>().configStore.getShape(e.shapeRef) !=
+                        null;
                 return _EventTile(
                   event: e,
                   isFlagged: _flaggedIds.contains(e.id),
+                  onAddCorrection: correctionAvailable
+                      ? () => _addCorrection(e)
+                      : null,
                 );
               },
             ),
@@ -141,13 +150,42 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       await navigateToForm(selected.shapeRef);
     }
   }
+
+  Future<void> _addCorrection(Event source) async {
+    final state = context.read<AppState>();
+    final result = await Navigator.push<CaptureSaveResult>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FormScreen(
+          subjectId: source.subjectRef['id']!,
+          shapeRef: source.shapeRef,
+          activityRef: source.activityRef,
+          initialValues: source.payload,
+          isCorrection: true,
+        ),
+      ),
+    );
+    if (result == null || !mounted) return;
+
+    await _loadEvents();
+    await state.refresh();
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text(_correctionSavedMessage)));
+  }
 }
 
 class _EventTile extends StatelessWidget {
   final Event event;
   final bool isFlagged;
+  final VoidCallback? onAddCorrection;
 
-  const _EventTile({required this.event, this.isFlagged = false});
+  const _EventTile({
+    required this.event,
+    this.isFlagged = false,
+    this.onAddCorrection,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -188,15 +226,25 @@ class _EventTile extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: event.payload.entries.map((e) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  '${e.key}: ${e.value ?? '—'}',
-                  style: Theme.of(context).textTheme.bodyMedium,
+            children: [
+              ...event.payload.entries.map((e) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '${e.key}: ${e.value ?? '—'}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                );
+              }),
+              if (onAddCorrection != null) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: onAddCorrection,
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Add correction'),
                 ),
-              );
-            }).toList(),
+              ],
+            ],
           ),
         ),
       ],

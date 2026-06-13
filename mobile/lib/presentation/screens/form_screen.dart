@@ -18,12 +18,16 @@ class FormScreen extends StatefulWidget {
   final String? subjectId; // null = new subject
   final String shapeRef;
   final String? activityRef; // null = no expression evaluation
+  final Map<String, dynamic> initialValues;
+  final bool isCorrection;
 
   const FormScreen({
     super.key,
     required this.subjectId,
     required this.shapeRef,
     this.activityRef,
+    this.initialValues = const {},
+    this.isCorrection = false,
   });
 
   @override
@@ -37,6 +41,7 @@ class _FormScreenState extends State<FormScreen> {
   final Map<String, dynamic> _context = {};
   final Set<String> _hiddenFields = {};
   final Map<String, String> _warnings = {};
+  Map<String, dynamic> _correctionBaseline = const {};
   String? _actionWarning;
   bool _loading = true;
   bool _dirty = false;
@@ -59,6 +64,16 @@ class _FormScreenState extends State<FormScreen> {
       activityRef: widget.activityRef,
     );
     final decision = await _currentCaptureDecision(state);
+    _values.clear();
+    if (shape != null) {
+      for (final field in shape.activeFields) {
+        if (!widget.initialValues.containsKey(field.name)) continue;
+        final value = widget.initialValues[field.name];
+        _values[field.name] = field.type == 'multi_select' && value is List
+            ? value.whereType<String>().toList()
+            : value;
+      }
+    }
     _context
       ..clear()
       ..addAll(ctx);
@@ -70,6 +85,9 @@ class _FormScreenState extends State<FormScreen> {
     });
     if (shape != null) {
       _applyDefaults();
+      if (widget.isCorrection) {
+        _correctionBaseline = _effectiveValues(_values);
+      }
       _evaluateExpressions();
     }
   }
@@ -174,7 +192,11 @@ class _FormScreenState extends State<FormScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_shape?.name ?? 'Loading...'),
+          title: Text(
+            widget.isCorrection
+                ? 'Add correction'
+                : (_shape?.name ?? 'Loading...'),
+          ),
           actions: [
             TextButton(
               onPressed: _saving ? null : _save,
@@ -184,7 +206,7 @@ class _FormScreenState extends State<FormScreen> {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save'),
+                  : Text(widget.isCorrection ? 'Save correction' : 'Save'),
             ),
           ],
         ),
@@ -196,6 +218,22 @@ class _FormScreenState extends State<FormScreen> {
                 key: _formKey,
                 child: ListView(
                   children: [
+                    if (widget.isCorrection)
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.history),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Saving creates a new record. The original stays in history.',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     if (_actionWarning != null)
                       Padding(
                         padding: const EdgeInsets.all(16),
@@ -227,7 +265,9 @@ class _FormScreenState extends State<FormScreen> {
                             (value) {
                               setState(() {
                                 _values[field.name] = value;
-                                _dirty = true;
+                                _dirty = widget.isCorrection
+                                    ? _hasCorrectionChanges
+                                    : true;
                                 _evaluateExpressions();
                               });
                             },
@@ -243,6 +283,17 @@ class _FormScreenState extends State<FormScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (widget.isCorrection && !_hasCorrectionChanges) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Change at least one field before saving a correction.',
+          ),
+        ),
+      );
+      return;
+    }
 
     setState(() => _saving = true);
 
@@ -282,6 +333,57 @@ class _FormScreenState extends State<FormScreen> {
         ),
       );
     }
+  }
+
+  bool get _hasCorrectionChanges =>
+      !_sameValues(_effectiveValues(_values), _correctionBaseline);
+
+  Map<String, dynamic> _effectiveValues(Map<String, dynamic> values) {
+    return {
+      for (final entry in values.entries)
+        if (entry.value != null) entry.key: _snapshotValue(entry.value),
+    };
+  }
+
+  dynamic _snapshotValue(dynamic value) {
+    if (value is List) {
+      return value.map(_snapshotValue).toList(growable: false);
+    }
+    if (value is Map) {
+      return {
+        for (final entry in value.entries)
+          entry.key: _snapshotValue(entry.value),
+      };
+    }
+    return value;
+  }
+
+  bool _sameValues(Map<String, dynamic> left, Map<String, dynamic> right) {
+    if (left.length != right.length) return false;
+    for (final entry in left.entries) {
+      if (!right.containsKey(entry.key)) return false;
+      if (!_sameValue(entry.value, right[entry.key])) return false;
+    }
+    return true;
+  }
+
+  bool _sameValue(dynamic left, dynamic right) {
+    if (left is List && right is List) {
+      if (left.length != right.length) return false;
+      for (var i = 0; i < left.length; i++) {
+        if (!_sameValue(left[i], right[i])) return false;
+      }
+      return true;
+    }
+    if (left is Map && right is Map) {
+      if (left.length != right.length) return false;
+      for (final entry in left.entries) {
+        if (!right.containsKey(entry.key)) return false;
+        if (!_sameValue(entry.value, right[entry.key])) return false;
+      }
+      return true;
+    }
+    return left == right;
   }
 
   Future<ActivityActionDecision> _currentCaptureDecision(AppState state) async {
