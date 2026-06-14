@@ -38,4 +38,4 @@ rehearsal record.
 
 | Rehearsal | Type | Status/result | Runbook | Source NW | Date |
 |---|---|---|---|---|---|
-| [Production deployment rehearsal plan](production-deployment-rehearsal-plan.md) | Plan | `in_review` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-066 | Not executed |
+| [Production deployment rehearsal plan](production-deployment-rehearsal-plan.md) | Plan | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-066 | Not executed |

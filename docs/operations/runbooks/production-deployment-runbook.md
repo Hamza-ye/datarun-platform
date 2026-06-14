@@ -1,6 +1,6 @@
 # Production Deployment Runbook
 
-Status: in_review
+Status: accepted
 Document type: runbook
 Owner: Hamza
 Source: NW-066 and

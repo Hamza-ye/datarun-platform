@@ -1,6 +1,6 @@
 # Production Deployment Rehearsal Plan
 
-Status: in_review
+Status: accepted
 Document type: rehearsal_plan
 Owner: Hamza
 Source: NW-066 and
