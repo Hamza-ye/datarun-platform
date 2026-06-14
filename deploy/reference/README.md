@@ -46,6 +46,12 @@ path `/run/datarun/provisioning/principal-bindings.json`. The corresponding
 reviewed manifest must exist in `DATARUN_PROVISIONING_DIR` as
 `principal-bindings.json`.
 
+For deployment-managed principal-binding, reviewed-config, and initial
+assignment commands, see
+[`provisioning-inputs.md`](provisioning-inputs.md). It defines the non-web
+invocation boundary, exact input shapes, and evidence output; it is an
+implementation reference, not the NW-066 production runbook.
+
 The JDBC URL must select PostgreSQL TLS verification with
 `sslmode=verify-full` and
 `sslrootcert=/run/datarun/trust/postgresql-root.crt`; that certificate must

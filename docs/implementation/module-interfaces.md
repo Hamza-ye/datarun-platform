@@ -124,6 +124,15 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 - **Forbidden**: packaging platform payload schemas as deployer `shapes`, mutating sync watermarks.
 - **Guards**: `ConfigIntegrationTest`, `DeployTimeValidatorTest`, `ConfigPackageSchemaContractTest`, platform payload boundary tests. BAR-010 is accepted for config package delivery.
 
+## One-Shot Provisioning
+
+- **Owns**: non-web, file-driven application of reviewed principal-binding manifests, complete deployment-config snapshots, and the single initial assignment bootstrap.
+- **Inputs**: one strict UTF-8 JSON file, a command name, an operator-evidence UUID, and an external evidence identifier.
+- **Outputs**: secret-safe JSON with the command result and exact input SHA-256; principal-binding audit rows, validated authoring/config-package rows, or one bootstrap assignment event through the existing owning services.
+- **Storage**: only the existing principal-binding audit/projection tables, configuration tables/packages, and append-only event store.
+- **Forbidden**: online production admin APIs, direct operator SQL, new authority sources, IdP claim/group authority, general root assignment creation, duplicate package publication for exact reapplication, or rollback semantics.
+- **Guards**: `OneShotProvisioningIntegrationTest`, `ProductionAuthIntegrationTest`, `ConfigIntegrationTest`, `DeployTimeValidatorTest`, and `AssignmentContainmentIntegrationTest`.
+
 ## Mobile Actor Session And Local Store
 
 - **Owns**: one active actor session on device, server-resolved actor id/token storage, per-actor local mutable partitions, event assembly authorship, mobile sync request credentials, and advisory/projection data derived from the active actor partition.

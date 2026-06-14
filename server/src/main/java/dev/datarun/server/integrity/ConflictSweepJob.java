@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
  * Runs every 5 minutes. No tracking tables.
  */
 @Component
+@ConditionalOnExpression("'${datarun.ops.command:}' == ''")
 public class ConflictSweepJob {
 
     private static final Logger log = LoggerFactory.getLogger(ConflictSweepJob.class);

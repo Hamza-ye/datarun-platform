@@ -2,6 +2,7 @@ package dev.datarun.server.authorization;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Component
+@ConditionalOnExpression("'${datarun.ops.command:}' == ''")
 public class PrincipalBindingProvisioningRunner implements ApplicationRunner {
 
     private final AuthProperties authProperties;

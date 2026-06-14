@@ -9,6 +9,7 @@ import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.identity.ServerIdentity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class AssignmentService {
 
     private static final String INITIAL_BOOTSTRAP_ACTOR = "system:assignment_bootstrap/initial";
+    private static final long INITIAL_BOOTSTRAP_LOCK_ID = 0x4441544152554E42L;
 
     private final EventRepository eventRepository;
     private final ServerIdentity serverIdentity;
@@ -97,6 +99,40 @@ public class AssignmentService {
 
         return insertAssignmentCreatedEvent(actorRef, targetActorId, role,
                 geographicId, subjectList, activityList, validFrom, validTo);
+    }
+
+    /**
+     * Establish the one allowed initial assignment, or skip only when the
+     * complete existing assignment state is the exact requested bootstrap.
+     */
+    @Transactional
+    public InitialBootstrapResult ensureInitialBootstrapAssignment(
+            UUID targetActorId, String role, UUID geographicId,
+            List<UUID> subjectList, List<String> activityList,
+            OffsetDateTime validFrom, OffsetDateTime validTo) {
+        validateAssignmentScopeInput(subjectList, activityList);
+        eventRepository.getJdbcTemplate()
+                .queryForList("SELECT pg_advisory_xact_lock(?)", INITIAL_BOOTSTRAP_LOCK_ID);
+
+        List<Map<String, Object>> assignmentEvents = eventRepository.getJdbcTemplate().queryForList("""
+                SELECT id, shape_ref, actor_ref, payload
+                FROM events
+                WHERE type = 'assignment_changed'
+                ORDER BY sync_watermark ASC
+                """);
+        if (assignmentEvents.isEmpty()) {
+            Event event = createInitialBootstrapAssignment(
+                    targetActorId, role, geographicId, subjectList, activityList, validFrom, validTo);
+            return new InitialBootstrapResult(event.id(), true);
+        }
+        if (assignmentEvents.size() != 1
+                || !matchesInitialBootstrap(assignmentEvents.get(0), targetActorId, role,
+                geographicId, subjectList, activityList, validFrom, validTo)) {
+            throw new IllegalArgumentException(
+                    "Bootstrap authority unavailable: existing assignment state differs");
+        }
+        return new InitialBootstrapResult(
+                UUID.fromString(assignmentEvents.get(0).get("id").toString()), false);
     }
 
     /**
@@ -341,6 +377,61 @@ public class AssignmentService {
         return count != null && count > 0;
     }
 
+    private boolean matchesInitialBootstrap(
+            Map<String, Object> row, UUID targetActorId, String role,
+            UUID geographicId, List<UUID> subjectList, List<String> activityList,
+            OffsetDateTime validFrom, OffsetDateTime validTo) {
+        try {
+            if (!"assignment_created/v1".equals(row.get("shape_ref"))) {
+                return false;
+            }
+            JsonNode actorRef = objectMapper.readTree(row.get("actor_ref").toString());
+            JsonNode payload = objectMapper.readTree(row.get("payload").toString());
+            JsonNode scope = payload.path("scope");
+            return INITIAL_BOOTSTRAP_ACTOR.equals(actorRef.path("id").asText())
+                    && targetActorId.toString().equals(
+                    payload.path("target_actor").path("id").asText())
+                    && Objects.equals(role, payload.path("role").asText(null))
+                    && Objects.equals(geographicId, nullableUuid(scope.get("geographic")))
+                    && Objects.equals(subjectList, nullableUuidList(scope.get("subject_list")))
+                    && Objects.equals(activityList, nullableTextList(scope.get("activity")))
+                    && validFrom.isEqual(OffsetDateTime.parse(payload.path("valid_from").asText()))
+                    && equalNullableTime(validTo, payload.get("valid_to"));
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    private UUID nullableUuid(JsonNode node) {
+        return node == null || node.isNull() ? null : UUID.fromString(node.asText());
+    }
+
+    private List<UUID> nullableUuidList(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        List<UUID> values = new ArrayList<>();
+        node.forEach(value -> values.add(UUID.fromString(value.asText())));
+        return values;
+    }
+
+    private List<String> nullableTextList(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        List<String> values = new ArrayList<>();
+        node.forEach(value -> values.add(value.asText()));
+        return values;
+    }
+
+    private boolean equalNullableTime(OffsetDateTime expected, JsonNode actual) {
+        if (expected == null) {
+            return actual == null || actual.isNull();
+        }
+        return actual != null && !actual.isNull()
+                && expected.isEqual(OffsetDateTime.parse(actual.asText()));
+    }
+
     private boolean assignmentEnded(UUID assignmentId) {
         Integer count = eventRepository.getJdbcTemplate().queryForObject("""
                 SELECT COUNT(*)
@@ -419,4 +510,6 @@ public class AssignmentService {
             List<UUID> subjectList,
             List<String> activityList
     ) {}
+
+    public record InitialBootstrapResult(UUID eventId, boolean created) {}
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
@@ -22,6 +23,8 @@ import java.util.Set;
  */
 @Service
 public class ConfigPackager {
+
+    private static final long PUBLICATION_LOCK_ID = 0x4441544152554E43L;
 
     private final ShapeRepository shapeRepository;
     private final ActivityRepository activityRepository;
@@ -54,7 +57,31 @@ public class ConfigPackager {
      * Assemble and store a new config package. Returns the new version number.
      * Fetches all shapes (including deprecated) and active activities.
      */
+    @Transactional
     public int publish(java.util.UUID publishedBy) {
+        lockPublication();
+        return storePackage(buildPackage(), publishedBy);
+    }
+
+    /**
+     * Publish only when the validated package content differs from the latest
+     * immutable package. Metadata fields are excluded from the comparison.
+     */
+    @Transactional
+    public PublicationResult publishIfChanged(java.util.UUID publishedBy) {
+        lockPublication();
+        ObjectNode packageJson = buildPackage();
+        Optional<ConfigPackage> latest = getLatest();
+        if (latest.isPresent() && packageContent(latest.get().packageJson()).equals(packageJson)) {
+            return new PublicationResult(latest.get().version(), false);
+        }
+        return new PublicationResult(storePackage(packageJson, publishedBy), true);
+    }
+
+    /**
+     * Assemble a validated package without assigning publication metadata.
+     */
+    public ObjectNode buildPackage() {
         List<String> violations = deployTimeValidator.validateAll();
         if (!violations.isEmpty()) {
             throw new IllegalStateException("DtV violations: " + String.join("; ", violations));
@@ -147,6 +174,10 @@ public class ConfigPackager {
         sensClassNode.set("activities", actSens);
         packageJson.set("sensitivity_classifications", sensClassNode);
 
+        return packageJson;
+    }
+
+    private int storePackage(ObjectNode packageJson, java.util.UUID publishedBy) {
         // Determine next version
         Integer maxVersion = jdbc.queryForObject(
                 "SELECT COALESCE(MAX(version), 0) FROM config_packages", Integer.class);
@@ -166,6 +197,17 @@ public class ConfigPackager {
                 publishedBy != null ? publishedBy.toString() : null);
 
         return nextVersion;
+    }
+
+    private ObjectNode packageContent(JsonNode packageJson) {
+        ObjectNode content = (ObjectNode) packageJson.deepCopy();
+        content.remove("version");
+        content.remove("published_at");
+        return content;
+    }
+
+    private void lockPublication() {
+        jdbc.queryForList("SELECT pg_advisory_xact_lock(?)", PUBLICATION_LOCK_ID);
     }
 
     /**
@@ -200,6 +242,7 @@ public class ConfigPackager {
     }
 
     public record ConfigPackage(int version, JsonNode packageJson, OffsetDateTime publishedAt) {}
+    public record PublicationResult(int version, boolean published) {}
 
     private void collectPatternRefs(JsonNode patternNode, Set<String> refs) {
         if (patternNode == null || !patternNode.isObject()) {
