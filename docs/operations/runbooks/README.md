@@ -26,4 +26,4 @@ if it exists.
 
 | Runbook | Status | Owner | Source NW | Last rehearsed | Supersedes |
 |---|---|---|---|---|---|
-| None yet | - | - | - | - | - |
+| [Production deployment](production-deployment-runbook.md) | `in_review` | Hamza | NW-066 | Not yet | None |

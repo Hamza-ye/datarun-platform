@@ -23,7 +23,10 @@ documentation.
 | Document | Type | Status | Owner | Source |
 |---|---|---|---|---|
 | [First reference deployment policy](policies/first-reference-deployment-policy.md) | Operational policy | `accepted` | Hamza | NW-064 |
+| [Production deployment runbook](runbooks/production-deployment-runbook.md) | Runbook | `in_review` | Hamza | NW-066 |
+| [Production deployment rehearsal plan](rehearsals/production-deployment-rehearsal-plan.md) | Rehearsal plan | `in_review` | Hamza | NW-066 |
 
-NW-063 selected the reference deployment class, and NW-064 now supplies its
-accepted operating policy. NW-065 tooling may proceed; runbook and rehearsal
-successors remain dependent on tested implementation.
+NW-063 selected the reference deployment class, NW-064 supplies its accepted
+operating policy, and NW-065 supplies tested reference tooling. NW-066 is
+translating those inputs into the in-review runbook and reusable rehearsal
+plan. NW-067 remains blocked until NW-066 is accepted.
