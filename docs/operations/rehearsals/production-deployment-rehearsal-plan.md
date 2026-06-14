@@ -5,6 +5,7 @@ Document type: rehearsal_plan
 Owner: Hamza
 Source: NW-066 and
 `docs/agent-working-surface/prompts/NW-066-write-production-deployment-runbook.md`
+Amended by: NW-067 solo-owner operating-model gate
 Authority: operates within the accepted first reference deployment policy,
 NW-063, accepted NW-065 tooling, and the production deployment runbook
 Last reviewed: 2026-06-14
@@ -21,7 +22,8 @@ reference environment with synthetic data and identities. The result may show
 that the named environment is repeatably deployable and recoverable under the
 accepted policy. It cannot approve real data/users, mobile OAuth/OIDC login,
 production web administration, NW-054 device security, Kubernetes,
-multi-host availability, or managed-provider support.
+multi-host availability, managed-provider support, or independent human
+continuity.
 
 ## 2. Runbook And Candidate Under Test
 
@@ -34,16 +36,17 @@ Before scheduling, record:
 - public synthetic DNS name and external TLS/proxy implementation;
 - exact deployment-owned backup/PITR, restore, monitoring/alert, secret,
   DNS/TLS, OIDC token, and evidence adapters;
-- operator Hamza, approver, second handoff operator, incident contact, and
-  `Asia/Aden` exercise window;
+- operator and approver Hamza, solo-owner risk acknowledgement, incident
+  contact, cold-recovery account/session boundary, and `Asia/Aden` exercise
+  window;
 - source, restored, and upgrade environment identifiers;
 - external raw-evidence location and 13-month retention control.
 
 **Scheduling gate:** NW-066 must be accepted, all adapters must be executable,
 both the previous accepted and candidate images must be available by digest,
 the candidate must pass full preflight, upgrade/rollback compatibility
-evidence must be recorded, and a second authorized handoff operator must be
-available. Otherwise NW-067 remains blocked.
+evidence must be recorded, and the solo cold-recovery session/account boundary
+must be prepared. Otherwise NW-067 remains blocked.
 
 ## 3. Environment And Data
 
@@ -67,12 +70,13 @@ evidence.
 
 Hamza holds deployment, service, host, DNS/TLS, database, secrets, monitoring,
 release, incident, support, data/compliance, evidence, and recovery authority
-for this synthetic rehearsal. Record every use of the accepted one-person
-approval exception.
+for this synthetic rehearsal. Record every use of the accepted solo-owner
+approval model and its required evidence.
 
-A second authorized operator is required for the handoff scenario. This is
-rehearsal evidence, not a second production approver. Shared human credentials
-are forbidden.
+No second operator is required for this solo-owner rehearsal. R12 must use a
+fresh privileged session and only indexed operational state. A separate
+Hamza-owned account may test privilege separation but must not be represented
+as independent human continuity. Shared human credentials remain forbidden.
 
 Abort immediately on:
 
@@ -120,7 +124,7 @@ Execute in order unless a recorded dependency requires a different sequence.
 | R9 | Failed deployment and migration response | Prove invalid config/image stops at preflight, then use the approved network adapter to deny database connectivity during a disposable first start before Flyway can run | Failure before traffic; unchanged/consistent schema history; correct evidence/severity; explicit rollback/restore/forward-fix decision; no manual repair | Fail if safe state/authority cannot be identified |
 | R10 | Database credential, binding, and JWKS rotation | Run Section 15 with two synthetic generations | New generation works; old rejected at intended boundary; binding/authority stable; timing recorded | Revoke all test material; fail on drift, leakage, or unbounded outage |
 | R11 | Alert and incident response | Inject readiness, database/JWKS, backup freshness, certificate, and capacity conditions through approved adapters | Alerts reach owner at accepted thresholds; timeline, triage, evidence, escalation, and recovery decision recorded | Missing/false/unowned alert or leaked telemetry fails scenario |
-| R12 | Operator handoff | Give second operator only indexed docs, approved access, execution record, and evidence index | Operator finds state/evidence, runs smoke, names stop conditions and recovery authority without shared credentials | Undocumented knowledge/shared credentials makes result partial or failed |
+| R12 | Solo cold recovery | Close the active session, start a fresh privileged session, and use only indexed docs, approved access, execution record, and evidence index | Hamza reconstructs current state from retained evidence, runs smoke, identifies the recovery point, and names stop conditions and recovery authority without hidden session state | Undocumented knowledge, inaccessible approved account, hidden prior-session state, or unclear recovery authority makes the result partial or failed |
 
 ## 7. Failure Inject Rules
 
@@ -151,12 +155,12 @@ Overall result is:
 - **pass** only when R1-R12 pass, RPO/RTO are met, no stop condition occurs,
   cleanup succeeds, and evidence is complete;
 - **partial** when completed scenarios are truthful but one or more required
-  scenarios/adapters, including second-operator handoff, are unavailable or
+  scenarios/adapters, including solo cold recovery, are unavailable or
   inconclusive without a safety failure;
 - **fail** when any abort condition or scenario failure occurs.
 
 Clean install, restore, upgrade, failure response, rotation, alert delivery,
-incident triage, and handoff are mandatory. Partial execution cannot
+incident triage, and solo cold recovery are mandatory. Partial execution cannot
 strengthen the production-readiness claim.
 
 ## 9. Cleanup And Record

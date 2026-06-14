@@ -3,7 +3,10 @@
 Status: active rehearsal index
 
 This directory stores exercise plans and dated execution records that test
-runbooks, recovery claims, upgrades, incident handling, and operator handoff.
+runbooks, recovery claims, upgrades, incident handling, and operational
+continuity. For the accepted initial solo-owner model, continuity is exercised
+through a fresh-session cold-recovery scenario; it does not prove independent
+human handoff.
 
 Reusable procedure belongs in a runbook. One-time observed results belong in a
 rehearsal record.
@@ -38,4 +41,4 @@ rehearsal record.
 
 | Rehearsal | Type | Status/result | Runbook | Source NW | Date |
 |---|---|---|---|---|---|
-| [Production deployment rehearsal plan](production-deployment-rehearsal-plan.md) | Plan | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-066 | Not executed |
+| [Production deployment rehearsal plan](production-deployment-rehearsal-plan.md) | Plan | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-066; NW-067 amendment | Not executed |

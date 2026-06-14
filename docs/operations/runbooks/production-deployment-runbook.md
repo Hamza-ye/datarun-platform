@@ -5,6 +5,7 @@ Document type: runbook
 Owner: Hamza
 Source: NW-066 and
 `docs/agent-working-surface/prompts/NW-066-write-production-deployment-runbook.md`
+Amended by: NW-067 solo-owner operating-model gate
 Authority: operates within the accepted first reference deployment policy,
 NW-063, NW-065, BAR-001 through BAR-015, BAR-104, IDR-027, IDR-028,
 IDR-029, and IDR-030
@@ -40,7 +41,8 @@ read-only evidence collection.
 Create an access-controlled execution record before running commands. Record
 the following without secret values:
 
-- change/rehearsal ID, operator, approver, date, `Asia/Aden` window, and target;
+- change/rehearsal ID, operator, approver role, solo-owner mode, date,
+  `Asia/Aden` window, and target;
 - repository commit, full image digest, OCI source, OCI revision, and image
   verification/vulnerability evidence;
 - host, public rehearsal DNS name, loopback application/management ports, and
@@ -62,9 +64,11 @@ the following without secret values:
   only restore or forward fix is allowed;
 - evidence root, retention classification, and incident/communication route.
 
-For synthetic rehearsal Hamza may use the accepted one-person exception, but
-must record why a second reviewer was unavailable, the reviewed artifacts,
-automated results, recovery readiness, and retrospective review.
+Under the accepted solo-owner model Hamza may act as operator and approver.
+Record the reviewed artifacts, automated results, recovery readiness, explicit
+go/no-go decision, retrospective review, and acknowledgement that independent
+human continuity is unproven. A separate Hamza-owned privileged account tests
+access separation only; it is not a second operator.
 
 **Stop:** do not begin NW-067 when any required adapter is absent, generic,
 untested, or inaccessible to its named operator.
@@ -844,7 +848,7 @@ meets policy, and no claim becomes platform authority.
 valid, actor/binding drift, unbounded outage, or leaked value. Invoke incident
 and emergency revocation procedures.
 
-## 16. Incident, Escalation, And Handoff
+## 16. Incident, Escalation, And Solo Cold Recovery
 
 Declare severity using the policy. Authority drift, cross-scope exposure,
 secret leakage, event mutation, or unsafe migration is severity 1 regardless
@@ -857,17 +861,27 @@ of apparent availability.
 3. Contain unsafe access or traffic using the approved network/secret adapter.
 4. Select rollback, restore, or forward fix through Section 14 authority.
 5. Execute the approved communication route at the policy cadence.
-6. Hand the indexed policy, this runbook, execution record, evidence index,
-   current state, next decision, and stop conditions to the next authorized
-   operator.
+6. Update the indexed policy, this runbook, execution record, evidence index,
+   current state, next decision, and stop conditions before ending the active
+   incident session.
 
-For NW-067, a second authorized operator must independently locate state,
-execute smoke checks, find evidence, and explain stop/escalation conditions.
-The one-person approval exception does not prove operator handoff by itself.
+For NW-067, Hamza must close the active working session and begin a fresh
+privileged session using only the indexed documents, approved account access,
+execution record, and evidence index. Without relying on unrecorded shell
+history, scratch notes, or remembered command sequences, locate current state,
+execute smoke checks, identify the latest recovery point, state the applicable
+stop/escalation conditions, and identify rollback/restore/forward-fix
+authority. AI-agent assistance may help navigate the indexed material, but all
+decisions and observations remain attributable to Hamza.
 
-**Stop:** no reachable owner, shared credential required, undocumented
-knowledge required, or unclear recovery authority. Record the scenario as
-partial/failed.
+This cold-recovery scenario proves that the solo owner can recover from the
+documented state after losing active session context. It does not prove
+independent human continuity or availability during the owner's absence.
+
+**Stop:** the fresh session cannot regain approved access, undocumented
+knowledge is required, recovery state or authority is unclear, or the
+procedure depends on the previous session's hidden state. Record the scenario
+as partial/failed.
 
 ## 17. Shutdown, Cleanup, Evidence, And Follow-Up
 
@@ -886,7 +900,7 @@ retention is confirmed.
 
 Retain approvals, digests, sanitized commands/output, timings, schema/config/
 binding/assignment evidence, recovery decisions, alert delivery, incident
-timeline, handoff result, exceptions, and cleanup for 13 months. Keep raw
+timeline, cold-recovery result, exceptions, and cleanup for 13 months. Keep raw
 evidence access-controlled and out of git. Commit only a sanitized dated
 rehearsal record.
 

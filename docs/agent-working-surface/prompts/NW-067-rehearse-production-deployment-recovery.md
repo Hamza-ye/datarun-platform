@@ -6,7 +6,7 @@ You are working in `/home/hamza/datarun-platform`.
 
 Execute the accepted NW-066 runbook in a clean reference environment and retain
 evidence for deployment, restore, upgrade, failure response, rotation, alert,
-and operator handoff.
+incident response, and solo cold recovery.
 
 ## Read
 
@@ -41,8 +41,9 @@ The rehearsal passes only if:
   sync behavior;
 - backup restores into a clean environment within accepted RPO/RTO;
 - upgrade and injected failure paths follow the accepted recovery posture;
-- credential/JWKS rotation, alert delivery, incident triage, and operator
-  handoff succeed;
+- credential/JWKS rotation, alert delivery, incident triage, and solo cold
+  recovery succeed;
+- the record states that independent human continuity remains unproven;
 - secrets and sensitive data are absent from committed evidence.
 
 ## Guardrails

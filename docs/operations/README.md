@@ -22,12 +22,13 @@ documentation.
 
 | Document | Type | Status | Owner | Source |
 |---|---|---|---|---|
-| [First reference deployment policy](policies/first-reference-deployment-policy.md) | Operational policy | `accepted` | Hamza | NW-064 |
-| [Production deployment runbook](runbooks/production-deployment-runbook.md) | Runbook | `accepted` | Hamza | NW-066 |
-| [Production deployment rehearsal plan](rehearsals/production-deployment-rehearsal-plan.md) | Rehearsal plan | `accepted` | Hamza | NW-066 |
+| [First reference deployment policy](policies/first-reference-deployment-policy.md) | Operational policy | `accepted` | Hamza | NW-064; NW-067 amendment |
+| [Production deployment runbook](runbooks/production-deployment-runbook.md) | Runbook | `accepted` | Hamza | NW-066; NW-067 amendment |
+| [Production deployment rehearsal plan](rehearsals/production-deployment-rehearsal-plan.md) | Rehearsal plan | `accepted` | Hamza | NW-066; NW-067 amendment |
 
 NW-063 selected the reference deployment class, NW-064 supplies its accepted
 operating policy, NW-065 supplies tested reference tooling, and NW-066 supplies
 the accepted runbook and reusable rehearsal plan. NW-067 is ready to schedule
-only after its concrete external adapters and second handoff operator satisfy
-the plan's scheduling gate.
+only after its concrete external adapters, image pair, compatibility evidence,
+and solo cold-recovery setup satisfy the plan's scheduling gate. Independent
+human continuity remains explicitly unproven.

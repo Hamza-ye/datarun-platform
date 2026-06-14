@@ -6,6 +6,10 @@ Source: NW-063
 
 Date: 2026-06-13
 
+Amended: 2026-06-14 by the owner-accepted NW-067 solo-owner gate amendment.
+That policy amendment supersedes this artifact's original second-operator
+handoff assumption while preserving all technical and evidence controls.
+
 Authority: non-binding analysis under BAR-001 through BAR-015, BAR-104,
 DEC-EVENT-01, DEC-AUTH-02, DEC-AUTH-03, DEC-AUTH-05, DEC-CONFIG-03,
 DEC-CONFIG-08, DEC-PROJECTION-01, DEC-BOUNDARY-01, IDR-027, IDR-028,
@@ -146,8 +150,8 @@ NW-066 must produce one indexed
     database restore criteria, and forward-fix path.
 15. Database credential, binding manifest, provider signing key/JWKS, and
     application secret rotation.
-16. Incident triage, evidence capture, escalation, communication, and operator
-    handoff.
+16. Incident triage, evidence capture, escalation, communication, and solo
+    cold recovery.
 17. Cleanup, access revocation, evidence retention, and follow-up NW routing.
 
 Every section must state prerequisites, exact procedure, expected observables,
@@ -168,12 +172,12 @@ stop conditions, recovery posture, and retained evidence.
 | Failed deployment/migration | Controlled bad config/image or interrupted migration in disposable environment. Exercise detection and escalation. | Failure is detected before traffic; evidence identifies stage; no manual schema mutation occurs. | Operators cannot identify safe stop state or recovery authority. | Restore disposable DB or rebuild environment. |
 | Credential/JWKS rotation | Two valid credentials/keys and reviewed rotation sequence. Rotate database/app secret or provider signing key without changing platform authority. | New credential/key accepted; old one rejected at intended boundary; binding remains explicit. | Outage exceeds policy, old secret remains active unexpectedly, or claims become authority. | Revoke rehearsal credentials and retain timing/evidence. |
 | Alert and incident triage | Working health/metrics/log pipeline and injected app/database/provider failure. | Alert reaches owner; runbook locates cause, captures evidence, escalates, and records recovery decision. | No alert, false healthy state, secret leakage, or unclear owner. | Remove inject, confirm recovery, close rehearsal incident. |
-| Operator handoff | Second operator receives only indexed policy/runbook and approved access. | Second operator can verify state, execute smoke checks, find evidence, and name stop/escalation conditions. | Undocumented knowledge or shared credentials are required. | Revoke temporary access and record runbook corrections. |
+| Solo cold recovery | Hamza closes the active session and starts a fresh privileged session using only indexed policy/runbook, approved access, execution record, and evidence index. | Hamza reconstructs state from retained evidence, executes smoke checks, identifies the recovery point, and names stop/escalation authority without hidden session state. | Undocumented knowledge, inaccessible approved access, hidden prior-session state, or unclear recovery authority is required. | Close the temporary session, retain evidence, and record runbook corrections. |
 
 NW-067 must create the reusable rehearsal plan plus a dated rehearsal record.
 A pass requires clean install, restore, upgrade, failure response, rotation,
-alert, and handoff evidence. Partial execution cannot strengthen the production
-readiness claim.
+alert, and solo cold-recovery evidence. Partial execution cannot strengthen the
+production readiness claim or prove independent human continuity.
 
 ## 7. Successor Sequence
 

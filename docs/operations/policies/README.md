@@ -24,4 +24,4 @@ sequences, claim runtime capability, or modify architecture and contracts.
 
 | Policy | Status | Owner | Source NW | Supersedes |
 |---|---|---|---|---|
-| [First reference deployment policy](first-reference-deployment-policy.md) | `accepted` | Hamza | NW-064 | none |
+| [First reference deployment policy](first-reference-deployment-policy.md) | `accepted` | Hamza | NW-064; NW-067 amendment | none |

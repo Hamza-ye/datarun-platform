@@ -5,29 +5,31 @@ Document type: operational_policy
 Owner: Hamza
 Source: NW-064 and
 `docs/agent-working-surface/prompts/NW-064-define-first-reference-deployment-policy.md`
+Amended by: NW-067 solo-owner operating-model gate
 Authority: operates within NW-063, BAR-001 through BAR-015, BAR-104,
 DEC-EVENT-01, DEC-AUTH-02, DEC-AUTH-03, DEC-AUTH-05, DEC-CONFIG-03,
 DEC-CONFIG-08, DEC-PROJECTION-01, DEC-BOUNDARY-01, IDR-027, IDR-028,
 IDR-029, and IDR-030
-Last reviewed: 2026-06-13
+Last reviewed: 2026-06-14
 Supersedes: none
 Related:
 `docs/agent-working-surface/artifacts/NW-063-production-deployment-ops-hardening-map.md`,
-`docs/operations/runbooks/production-deployment-runbook.md` (planned by
+`docs/operations/runbooks/production-deployment-runbook.md` (accepted under
 NW-066), and
-`docs/operations/rehearsals/production-deployment-rehearsal-plan.md` (planned
-by NW-066)
+`docs/operations/rehearsals/production-deployment-rehearsal-plan.md` (accepted
+under NW-066)
 
 ## 1. Acceptance Status
 
 Hamza accepted this policy on 2026-06-13 for the provider-neutral synthetic
-reference deployment and its repository-owned tooling.
+reference deployment and its repository-owned tooling, and amended the
+operating model on 2026-06-14 to support evidence-backed solo ownership for
+the rehearsal and initial owner-operated production.
 
-The controls below are accepted as written. Hamza holds all named operational
-roles for the synthetic rehearsal and may use the documented one-person
-approval exception with retained evidence. A real production deployment still
-requires the separate approvals and deployment-specific selections in
-Section 11.
+The controls below are accepted as written. Hamza may hold all named
+operational roles and use the documented solo-owner approval model with
+retained evidence. A real production deployment still requires the separate
+deployment-specific selections and approval in Section 11.
 
 No backup, restore, monitoring, rotation, release, or incident capability is
 proven merely because it is required here. NW-065 must implement the necessary
@@ -81,16 +83,26 @@ incident does not leave ownership ambiguous.
 One person may hold multiple or all roles when staffing requires it. Role
 consolidation does not remove any control, evidence, or escalation duty.
 
-Use a second authorized person to review production
-releases, destructive recovery decisions, privileged access grants, and
-principal-binding or configuration changes.
+The accepted initial operating model is solo owner-operated. Hamza may hold
+deployment, approval, recovery, incident, support, and evidence roles for the
+synthetic rehearsal and initial production. Separate named accounts may be
+used for daily and privileged access, but another account owned by Hamza is
+not an independent operator.
 
-Hamza holds all roles for the synthetic rehearsal. A one-person self-approval
-exception is allowed for that rehearsal. Each use must record why no second
-reviewer was available, the exact artifact and change, automated verification
-results, backup/restore readiness, and Hamza's retrospective review. Real
-production requires a reachable backup/escalation contact and separate
-production approval.
+For every release, destructive recovery decision, privileged access grant,
+principal-binding change, or configuration publication, the solo-owner record
+must identify the exact artifact and change, automated verification, current
+recovery point, rollback/restore/forward-fix posture, explicit go/no-go
+decision, and retrospective review. AI-agent assistance may support execution
+and review, but accountability and operational authority remain with Hamza.
+
+Independent human continuity is explicitly unproven and must not be claimed.
+Introduce a second authorized person when an organization, customer,
+contract, regulator, insurer, or accepted service/support promise requires
+separation or coverage; when Hamza cannot meet the accepted response and
+recovery duties alone; or when another operator is intentionally onboarded.
+Until such a trigger occurs, record the solo-owner bus-factor risk rather than
+manufacturing second-person evidence.
 
 No person may use role consolidation to infer application authority from host,
 database, IdP, or cloud-administrator access. Platform actor, assignment,
@@ -304,8 +316,9 @@ Accepted controls:
 - Use one scheduled two-hour maintenance window per week, with at least 48
   hours notice for user-visible production maintenance. Emergency security or
   recovery work may occur outside the window with incident records.
-- Require release-owner preparation and release-approver authorization. Use a
-  second person where available; Section 3.1 governs any one-person exception.
+- Require release-owner preparation and release-approver authorization. In the
+  accepted solo-owner model, Hamza may hold both roles only with the evidence
+  and retrospective review required by Section 3.1.
 - Before a schema migration, confirm a successful recovery point no older than
   the accepted RPO and confirm that the database owner can access the restore
   procedure.
@@ -322,11 +335,10 @@ Accepted controls:
 
 Hamza is release owner, release approver, application rollback authority,
 database restore authority, forward-fix authority, and the decision-maker
-between restore and forward fix for the synthetic rehearsal. The one-person
-exception in Section 3.1 is allowed. Synthetic rehearsal maintenance is
-scheduled by the rehearsal plan; a real deployment must record its recurring
-two-hour weekly window in `Asia/Aden` and retain at least 48 hours notice for
-user-visible maintenance.
+between restore and forward fix under the solo-owner model. Synthetic
+rehearsal maintenance is scheduled by the rehearsal plan; a real deployment
+must record its recurring two-hour weekly window in `Asia/Aden` and retain at
+least 48 hours notice for user-visible maintenance.
 
 ## 10. Evidence And Review
 
@@ -356,7 +368,8 @@ values.
 
 NW-067 synthetic rehearsal may prove that the selected image, PostgreSQL
 recovery path, provisioning inputs, monitoring, rotation, incident response,
-and operator handoff work with invented data in the reference environment.
+and solo cold-recovery procedure work with invented data in the reference
+environment. It does not prove independent human continuity.
 
 A successful synthetic rehearsal does **not** approve a real production
 deployment. Before real users or real organizational data are introduced, the
@@ -372,6 +385,8 @@ deployment owner and data/compliance owner must separately record:
   connectivity assumptions;
 - accepted identity-provider and token acquisition path for the intended
   users;
+- explicit acceptance of the solo-owner bus-factor risk, or the named second
+  operator and coverage model when a Section 3.1 trigger applies;
 - whether unresolved production web-admin authentication, mobile OAuth/OIDC
   login, or NW-054 device expiry/decommissioning/encryption questions block
   that deployment;
@@ -398,22 +413,22 @@ be at least as explicit as the accepted baseline.
 
 | Selection | Accepted baseline | Owner selection |
 |---|---|---|
-| Deployment and service owners | Named accountable people; roles may be combined explicitly. | Hamza holds both roles for synthetic rehearsal. |
-| Host, DNS/TLS, database, secrets, monitoring owners | One named primary and backup contact for each responsibility. | Hamza is primary for all; backup contact required before real production. |
-| Release, incident, support, data/compliance owners | Named people with reachable escalation paths. | Hamza holds all roles for synthetic rehearsal. |
-| Small-team approval model | Second-person review where available; documented owner-reviewed exception otherwise. | One-person evidence-backed exception accepted for synthetic rehearsal. |
+| Deployment and service owners | Named accountable people; roles may be combined explicitly. | Hamza holds both roles under the solo-owner model. |
+| Host, DNS/TLS, database, secrets, monitoring owners | One named accountable owner for each responsibility; add independent coverage when a Section 3.1 trigger applies. | Hamza holds all roles under the accepted solo-owner model; independent human continuity is unproven. |
+| Release, incident, support, data/compliance owners | Named people with reachable escalation paths. | Hamza holds all roles under the solo-owner model. |
+| Small-team approval model | Evidence-backed solo approval until a concrete separation or coverage trigger applies. | Hamza may self-approve rehearsal and initial owner-operated production with the Section 3.1 record. |
 | Hosting, PostgreSQL, region, environment boundaries | Separate production and rehearsal identities, data, DNS, secrets, and monitoring. | Provider-neutral external PostgreSQL 16 reference; production provider/region unselected and blocking real production. |
 | Access controls | Named MFA accounts, no shared human credentials, encrypted PostgreSQL connections, 90-day review, four-hour normal removal target. | Accepted as written. |
 | RPO and RTO | RPO 1 hour; RTO 8 hours. | Accepted as written. |
 | Backup and restore | Continuous PITR/equivalent, daily backup, 35 daily and 12 monthly points, quarterly restore test. | Accepted as provider-neutral requirements. |
 | Backup encryption and off-site posture | Encryption in transit/at rest and a protected separate failure/access boundary. | Accepted as written. |
-| Disaster and restore authority | Named declarer, restore approver, and restore operator. | Hamza holds all three roles for synthetic rehearsal. |
+| Disaster and restore authority | Named declarer, restore approver, and restore operator. | Hamza holds all three roles under the solo-owner model. |
 | Secret storage and rotation | Selected secret manager; 90-day long-lived credential rotation; immediate emergency revocation. | Read-only mounted files from an external secret-management mechanism; cadence accepted. |
 | SLO and service/support hours | 99.0% monthly; 24x7 service; 08:00-18:00 local weekday support; no implied 24x7 responder. | Accepted in `Asia/Aden`; no 24x7 response roster. |
 | Monitoring and capacity | 70% warning, 85% critical, backup/RPO, readiness, database, certificate, and provider alerts. | Accepted; Actuator/Prometheus-compatible signals and structured stdout logs. |
-| Incident model | Three severities; severity-1 authority/data events; explicit acknowledgement and communication targets. | Accepted; Hamza owns synthetic-rehearsal response. |
+| Incident model | Three severities; severity-1 authority/data events; explicit acknowledgement and communication targets. | Accepted; Hamza owns response under the solo-owner model. |
 | Release and maintenance | Immutable digest; weekly two-hour window; 48-hour notice; pre-migration recovery point. | Accepted; real deployment must record the exact recurring `Asia/Aden` window. |
-| Rollback, restore, forward-fix decision | App rollback only with proven schema compatibility; otherwise authorized restore or tested forward fix. | Accepted; Hamza is the synthetic-rehearsal authority. |
+| Rollback, restore, forward-fix decision | App rollback only with proven schema compatibility; otherwise authorized restore or tested forward fix. | Accepted; Hamza holds this authority under the solo-owner model. |
 | Evidence retention and policy review | 13 months; annual and event-triggered review. | Accepted; sanitized repository summaries and access-controlled external raw evidence. |
 | Real-data compliance gate | Unknown classification or legal/security obligation blocks real production. | Accepted; real production remains unapproved. |
 
@@ -421,10 +436,12 @@ Acceptance record:
 
 - Deployment owner name: Hamza
 - Deployment owner decision date: 2026-06-13
+- Solo-owner amendment decision date: 2026-06-14
 - Data/compliance owner name: Hamza
-- Approved exceptions and rationale: one-person approval is allowed for
-  synthetic rehearsal with retained evidence; real production requires its
-  separate Section 11 approval and backup/escalation contact.
+- Approved operating model and rationale: evidence-backed solo ownership is
+  accepted for rehearsal and initial owner-operated production because no
+  second operator exists. Independent human continuity remains an explicit
+  residual risk and becomes mandatory only on a Section 3.1 trigger.
 - Next scheduled review: 2027-06-13, or earlier on a Section 10 trigger.
 
 ## 13. Mandatory Guardrails And Exceptions
@@ -458,7 +475,7 @@ bounded NW route and, where applicable, architecture or platform authority.
 NW-064 is accepted with the Section 12 selections above. NW-065 may proceed
 within this policy. NW-066 must translate only tested NW-065 tooling into
 procedures. NW-067 must measure RPO/RTO and exercise clean install, restore,
-upgrade/failure, rotation, alert/incident, and operator handoff.
+upgrade/failure, rotation, alert/incident, and solo cold recovery.
 
 Real production remains separately blocked by Section 11 even after NW-064
 acceptance and a successful synthetic rehearsal.
