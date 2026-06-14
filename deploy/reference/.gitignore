@@ -1,0 +1,6 @@
+.env
+.env.*
+runtime-config/
+provisioning/
+trust/
+evidence/

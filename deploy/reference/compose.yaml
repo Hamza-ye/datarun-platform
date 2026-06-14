@@ -1,0 +1,68 @@
+name: datarun-reference
+
+services:
+  server:
+    image: "${DATARUN_IMAGE:?Set DATARUN_IMAGE to an immutable repository@sha256 digest}"
+    init: true
+    restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: "${DATARUN_STOP_GRACE_PERIOD:-45s}"
+    user: "10001:10001"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: "${DATARUN_CPU_LIMIT:-1.0}"
+    mem_limit: "${DATARUN_MEMORY_LIMIT:-1024m}"
+    pids_limit: "${DATARUN_PIDS_LIMIT:-256}"
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8081"
+      MANAGEMENT_SERVER_ADDRESS: "0.0.0.0"
+    labels:
+      dev.datarun.expected-image-source: "${DATARUN_IMAGE_SOURCE:?Set the expected OCI source URL}"
+      dev.datarun.expected-image-revision: "${DATARUN_IMAGE_REVISION:?Set the expected full source commit}"
+    ports:
+      - name: application
+        target: 8080
+        published: "${DATARUN_APP_HOST_PORT:-18080}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+      - name: management
+        target: 8081
+        published: "${DATARUN_MANAGEMENT_HOST_PORT:-18081}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: "${DATARUN_RUNTIME_CONFIG_DIR:?Set the absolute external runtime config directory}"
+        target: /run/datarun/config
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: "${DATARUN_PROVISIONING_DIR:?Set the absolute external provisioning input directory}"
+        target: /run/datarun/provisioning
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: "${DATARUN_TRUST_DIR:?Set the absolute external database trust directory}"
+        target: /run/datarun/trust
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          wget -q -T 3 -O /dev/null
+          http://127.0.0.1:8081/actuator/health/readiness || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
