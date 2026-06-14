@@ -588,48 +588,6 @@ export DATARUN_FREEZE_COMPLETED_AT="$(
 )"
 sha256sum "$DATARUN_PROVISIONING_DIR/principal-bindings.json" \
   > "$DATARUN_EVIDENCE_DIR/frozen-principal-bindings.sha256"
-```
-
-2. Execute the approved recovery-point procedure after the freeze. Wait until
-   the backup adapter reports a latest recoverable timestamp at or after
-   `DATARUN_FREEZE_COMPLETED_AT`.
-3. Record the controlled disaster declaration and set the selected target to
-   that verified latest recoverable timestamp:
-
-```bash
-export DATARUN_DISASTER_DECLARED_AT='<ISO-8601 UTC declaration time>'
-export DATARUN_RECOVERY_TARGET_UTC='<ISO-8601 UTC latest recoverable time>'
-```
-
-4. Confirm the recovery target is not before the completed freeze and the
-   declared time minus latest recoverable time is no more than the 1-hour RPO.
-   This age is the RPO measurement; RPO is not an elapsed timer.
-5. Start the RTO timer at the recorded disaster declaration, inject the
-   approved source-loss condition, and execute the approved restore/PITR
-   procedure into the isolated target.
-6. Before starting an application against the restored target, compare schema,
-   complete event ledger, config, binding audit, and assignment evidence to the
-   captured frozen state.
-7. Point a fresh copy of the reference deployment at the restored target, run
-   full preflight, and start the same image digest with the exact frozen
-   principal-binding manifest.
-8. Verify readiness, `/api/auth/me`, config retrieval, and an authorized pull.
-   Do not rerun config publication, assignment bootstrap, assignment commands,
-   or push fixtures against the restored database. Confirm normal startup did
-   not append or change principal-binding operations.
-9. Stop the RTO timer only after those minimum-service checks pass.
-
-Capture and compare with read-only queries:
-
-```bash
-psql "service=$DATARUN_PGSERVICE" -X --set ON_ERROR_STOP=1 \
-  --set=disaster_declared_at="$DATARUN_DISASTER_DECLARED_AT" \
-  --set=recovery_target_utc="$DATARUN_RECOVERY_TARGET_UTC" \
-  --set=freeze_completed_at="$DATARUN_FREEZE_COMPLETED_AT" \
-  --no-align --tuples-only \
-  --command="SELECT :'freeze_completed_at'::timestamptz AS freeze_completed_at, :'disaster_declared_at'::timestamptz AS disaster_declared_at, :'recovery_target_utc'::timestamptz AS latest_recoverable_at, EXTRACT(EPOCH FROM (:'disaster_declared_at'::timestamptz - :'recovery_target_utc'::timestamptz))::bigint AS recovery_point_age_seconds, :'recovery_target_utc'::timestamptz >= :'freeze_completed_at'::timestamptz AND (:'disaster_declared_at'::timestamptz - :'recovery_target_utc'::timestamptz) BETWEEN interval '0 seconds' AND interval '1 hour' AS rpo_met;" \
-  | tee "$DATARUN_EVIDENCE_DIR/rpo-measurement.txt"
-grep -Eq '\|t$' "$DATARUN_EVIDENCE_DIR/rpo-measurement.txt"
 psql "service=$DATARUN_PGSERVICE" -X --set ON_ERROR_STOP=1 \
   --command='SELECT COUNT(*) AS frozen_event_count, COALESCE(MAX(sync_watermark), 0) AS frozen_max_watermark FROM events;' \
   > "$DATARUN_EVIDENCE_DIR/source-frozen-boundary.txt"
@@ -653,6 +611,49 @@ psql "service=$DATARUN_PGSERVICE" -X --set ON_ERROR_STOP=1 \
   --no-align --tuples-only --field-separator='|' \
   --command='SELECT id, type, shape_ref, activity_ref, subject_ref::text, actor_ref::text, device_id, device_seq, sync_watermark, timestamp, payload::text, received_at FROM events ORDER BY sync_watermark;' \
   > "$DATARUN_EVIDENCE_DIR/source-frozen-event-ledger.txt"
+```
+
+2. Execute the approved recovery-point procedure after the freeze. Wait until
+   the backup adapter reports a latest recoverable timestamp at or after
+   `DATARUN_FREEZE_COMPLETED_AT`.
+3. Record the controlled disaster declaration and set the selected target to
+   that verified latest recoverable timestamp:
+
+```bash
+export DATARUN_DISASTER_DECLARED_AT='<ISO-8601 UTC declaration time>'
+export DATARUN_RECOVERY_TARGET_UTC='<ISO-8601 UTC latest recoverable time>'
+psql "service=$DATARUN_PGSERVICE" -X --set ON_ERROR_STOP=1 \
+  --set=disaster_declared_at="$DATARUN_DISASTER_DECLARED_AT" \
+  --set=recovery_target_utc="$DATARUN_RECOVERY_TARGET_UTC" \
+  --set=freeze_completed_at="$DATARUN_FREEZE_COMPLETED_AT" \
+  --no-align --tuples-only \
+  --command="SELECT :'freeze_completed_at'::timestamptz AS freeze_completed_at, :'disaster_declared_at'::timestamptz AS disaster_declared_at, :'recovery_target_utc'::timestamptz AS latest_recoverable_at, EXTRACT(EPOCH FROM (:'disaster_declared_at'::timestamptz - :'recovery_target_utc'::timestamptz))::bigint AS recovery_point_age_seconds, :'recovery_target_utc'::timestamptz >= :'freeze_completed_at'::timestamptz AND (:'disaster_declared_at'::timestamptz - :'recovery_target_utc'::timestamptz) BETWEEN interval '0 seconds' AND interval '1 hour' AS rpo_met;" \
+  | tee "$DATARUN_EVIDENCE_DIR/rpo-measurement.txt"
+grep -Eq '\|t$' "$DATARUN_EVIDENCE_DIR/rpo-measurement.txt"
+```
+
+4. Confirm the recovery target is not before the completed freeze and the
+   declared time minus latest recoverable time is no more than the 1-hour RPO.
+   This age is the RPO measurement; RPO is not an elapsed timer.
+5. Start the RTO timer at the recorded disaster declaration, inject the
+   approved source-loss condition, and execute the approved restore/PITR
+   procedure into the isolated target.
+6. Before starting an application against the restored target, compare schema,
+   complete event ledger, config, binding audit, and assignment evidence to the
+   captured frozen state.
+7. Point a fresh copy of the reference deployment at the restored target, run
+   full preflight, and start the same image digest with the exact frozen
+   principal-binding manifest.
+8. Verify readiness, `/api/auth/me`, config retrieval, and an authorized pull.
+   Do not rerun config publication, assignment bootstrap, assignment commands,
+   or push fixtures against the restored database. Confirm normal startup did
+   not append or change principal-binding operations.
+9. Stop the RTO timer only after those minimum-service checks pass.
+
+After the restore completes, capture only restored state and compare it with
+the already retained frozen source evidence:
+
+```bash
 psql "service=$DATARUN_RESTORE_PGSERVICE" -X --set ON_ERROR_STOP=1 \
   --command='SELECT clock_timestamp() AS observed_at, COUNT(*) AS event_count, COALESCE(MAX(sync_watermark), 0) AS max_watermark FROM events;'
 psql "service=$DATARUN_RESTORE_PGSERVICE" -X --set ON_ERROR_STOP=1 \
