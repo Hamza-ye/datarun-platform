@@ -94,7 +94,7 @@ Start from this candidate set, revise only if the repo evidence requires it:
 
 - Do not implement UI screens, widgets, mobile flows, backend APIs, schemas, config-package keys, report endpoints, or view-model contracts.
 - Do not edit runtime code or tests unless a narrow documentation test already exists and must be updated.
-- Do not change CDL text, accept BAR rows, or create an IDR unless the analysis concludes a companion is insufficient; if so, route the need instead of writing the IDR in this slice.
+- Do not change CDL text, accept BAR rows, or create a decision artifact unless the analysis concludes a companion is insufficient; if so, route the need instead of writing the decision in this slice.
 - Do not introduce product vocabulary that overrides core terms such as event, scope, resolver, projection, flag category, pattern, or actor.
 - Do not promote entity lifecycle, triggers, auto-resolution, resolver reassignment, new scope mechanisms, reporting warehouse/API, import/export, IdP claims, or mobile authoritative rejection.
 - Do not use ITN/campaign/logistics/domain terms as platform concepts.

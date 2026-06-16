@@ -52,7 +52,9 @@ Read only this packet by default:
 
 ## Expected Output
 
-If the slice selects binding platform behavior, create an IDR under `docs/decisions/` using the next available IDR number.
+If the slice selects binding platform behavior, route it to the correct durable
+surface under `docs/documentation-organization.md`; do not assume an IDR is the
+default home.
 
 If the slice only routes, defers, compares paths, or stops for product/security input, create:
 
@@ -64,7 +66,7 @@ The output should decide one of:
 
 - explicit deferral;
 - simple current-scope auditor visibility as ordinary assignment/config posture;
-- a successor IDR/platform decision for broad audit/history or emergency/special write access;
+- a successor durable decision/spec route for broad audit/history or emergency/special write access;
 - a stop report naming the product/security decision needed before a binding decision can be written.
 
 Do not create a non-authoritative file with "decision" in the filename under `docs/agent-working-surface/`.

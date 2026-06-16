@@ -48,7 +48,9 @@ Read only this packet by default:
 
 ## Expected Output
 
-If the slice selects binding platform behavior, create an IDR under `docs/decisions/` using the next available IDR number.
+If the slice selects binding platform behavior, route it to the correct durable
+surface under `docs/documentation-organization.md`; do not assume an IDR is the
+default home.
 
 If the slice only routes, defers, compares paths, or stops for security/platform input, create:
 
@@ -59,7 +61,7 @@ docs/agent-working-surface/artifacts/NW-054-device-data-expiry-retention-boundar
 The output should decide one of:
 
 - explicit deferral under BAR-106 with rationale;
-- a successor IDR/security-platform decision for a bounded retention/security implementation route;
+- a successor durable decision/spec route for a bounded retention/security implementation route;
 - a stop report naming the security/platform decision needed before routing can continue.
 
 Do not create a non-authoritative file with "decision" in the filename under `docs/agent-working-surface/`.

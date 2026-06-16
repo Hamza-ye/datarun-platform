@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-14 (NW-067 solo-owner rehearsal gate aligned)
+**Last updated**: 2026-06-16 (durable behavior routing and NW-068 route)
 
 ---
 
@@ -18,6 +18,8 @@ Use this section as the low-token bootstrap for new sessions.
 - Current baseline standing: BAR-001 through BAR-015 and BAR-104 are accepted, including BAR-010 config package delivery and BAR-104 production OIDC/JWT/Keycloak authority.
 - Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, NW-033/S26, and NW-042/S22. Use the backlog rows for exact evidence.
 - Contract hygiene now includes root schemas for deployer-authored shape format and the server-emitted/mobile-consumed config package: `contracts/shape-format.schema.json` and `contracts/config-package.schema.json`.
+- The 2026-06-16 durable behavior routing audit is the active working-surface evidence for scattered IDR-era protocol notes: implementation evidence can prove a behavior is load-bearing, but it cannot preserve implemented drift over CDL/exploration/right-position correction. Use `docs/agent-working-surface/artifacts/architecture-classification-drift-audit.md`, `docs/agent-working-surface/artifacts/idr-durable-surface-routing-audit.md`, and the gap-routing playbook classification re-test rule before relying on IDR prose as normative.
+- Recommended next step: NW-068 is ready to extract accepted configuration, expression, and config-package behavior into durable platform/contract surfaces before broader operating-framework or product/API work depends on scattered IDR text.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use IDR-027 for the decision boundary and the NW-037 backlog row for evidence.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.

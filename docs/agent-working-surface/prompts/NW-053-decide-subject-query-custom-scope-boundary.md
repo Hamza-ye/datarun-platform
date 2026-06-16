@@ -49,7 +49,9 @@ Read only this packet by default:
 
 ## Expected Output
 
-If the slice selects binding platform behavior, create an IDR under `docs/decisions/` using the next available IDR number.
+If the slice selects binding platform behavior, route it to the correct durable
+surface under `docs/documentation-organization.md`; do not assume an IDR is the
+default home.
 
 If the slice only routes, defers, compares paths, or stops for product/platform input, create:
 
@@ -60,7 +62,7 @@ docs/agent-working-surface/artifacts/NW-053-subject-query-custom-scope-boundary-
 The output should decide one of:
 
 - explicit deferral with rationale that `subject_list` remains sufficient;
-- a successor IDR/platform decision for a bounded BAR-108 platform-owned scope mechanism route;
+- a successor durable decision/spec route for a bounded BAR-108 platform-owned scope mechanism route;
 - a stop report naming the product/platform decision needed before routing can continue.
 
 Do not create a non-authoritative file with "decision" in the filename under `docs/agent-working-surface/`.

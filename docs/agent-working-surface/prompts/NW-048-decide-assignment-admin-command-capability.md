@@ -4,7 +4,8 @@ You are working in `/home/hamza/datarun-platform`.
 
 ## Goal
 
-Produce an IDR for assignment-admin command authority before any production assignment-admin UI/API expansion.
+Produce a durable decision route for assignment-admin command authority before
+any production assignment-admin UI/API expansion.
 
 Exit target:
 
@@ -12,7 +13,9 @@ Exit target:
 Datarun has a selected assignment-admin command-capability model that keeps assignment create/end outside activity role-actions, preserves IDR-024 containment, and gives a future implementation slice exact server-side authority rules and tests.
 ```
 
-This is a decision/routing slice. It should create an IDR and routing updates only. Do not implement runtime behavior, schemas, APIs, migrations, UI, mobile flows, or tests in this slice.
+This is a decision/routing slice. It should create the correctly routed
+decision artifact and routing updates only. Do not implement runtime behavior,
+schemas, APIs, migrations, UI, mobile flows, or tests in this slice.
 
 ## Steward Recommendation To Start From
 
@@ -20,7 +23,9 @@ Start from this recommended platform direction and reject it only if the current
 
 1. Add a platform-owned assignment-admin command capability vocabulary outside `activities[*].roles`.
    - Initial command names to decide: `assignment_admin.create` and `assignment_admin.end`.
-   - The IDR may choose different final names, but the vocabulary must stay assignment-admin-specific and must not use envelope `type` values as product permissions.
+   - The decision may choose different final names, but the vocabulary must
+     stay assignment-admin-specific and must not use envelope `type` values as
+     product permissions.
 2. Evaluate command capability server-side for the authenticated actor before IDR-024 scope containment.
    - Capability says whether the actor may attempt assignment administration.
    - Containment still decides whether the requested create/end scope is inside one active covering assignment.

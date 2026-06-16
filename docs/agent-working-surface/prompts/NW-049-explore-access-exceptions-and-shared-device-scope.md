@@ -125,7 +125,7 @@ The artifact should include:
 
 1. Executive recommendation:
    - what should stay deferred;
-   - what needs a successor IDR/platform decision;
+   - what needs a successor durable decision/spec route;
    - what may be implemented inside existing boundaries, if anything;
    - what must not be implemented.
 2. Current baseline summary after NW-050:
@@ -198,7 +198,9 @@ Answer these explicitly:
 
 - Do not edit runtime code, tests, schemas, migrations, mobile code, UI, contracts, or config-package fields.
 - Do not implement access exceptions.
-- Do not write an IDR unless the current routing explicitly requires it; prefer successor IDR rows/prompts from this broad exploration.
+- Do not write a decision artifact unless the current routing explicitly
+  requires one; prefer successor rows/prompts that route the selected behavior
+  to the correct durable surface.
 - Do not change CDL text, accept BAR rows, or resolve FPs.
 - Do not mark NW-049 accepted unless the exploration artifact and routing updates are complete.
 - Do not combine NW-049 with NW-044 reporting/import-export, NW-045 conflict automation/batch resolution, or NW-046 flag cascade/pattern traversal reporting.
@@ -225,7 +227,7 @@ If the artifact lands:
 
 If the exploration concludes a successor decision is required before implementation:
 
-- Add a bounded successor IDR/platform-decision row and prompt.
+- Add a bounded successor durable decision/spec row and prompt.
 - Keep implementation rows blocked or absent until the successor decision lands.
 
 If the exploration concludes explicit deferral is best:

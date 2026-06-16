@@ -154,7 +154,7 @@ Answer these explicitly:
 ## Forbidden Work
 
 - Do not edit runtime code, tests, schemas, migrations, mobile code, UI, contracts, or config-package fields.
-- Do not write an IDR, change CDL text, accept BAR rows, or resolve FPs in this slice.
+- Do not write a decision artifact, change CDL text, accept BAR rows, or resolve FPs in this slice.
 - Do not mark NW-043 accepted unless the exploration artifact and routing updates are complete.
 - Do not turn archive material into current authority. Reconcile it against current CDL/IDR/BAR/code and route only the remaining gaps.
 - Do not combine the exploration with implementation for the sake of speed.
