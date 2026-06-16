@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-16 (NW-068 configuration durable behavior accepted)
+**Last updated**: 2026-06-16 (post-NW-068 durable-surface routing candidates)
 
 ---
 
@@ -20,6 +20,7 @@ Use this section as the low-token bootstrap for new sessions.
 - Contract hygiene now includes root schemas for deployer-authored shape format and the server-emitted/mobile-consumed config package: `contracts/shape-format.schema.json` and `contracts/config-package.schema.json`.
 - The 2026-06-16 durable behavior routing audit is the active working-surface evidence for scattered IDR-era protocol notes: implementation evidence can prove a behavior is load-bearing, but it cannot preserve implemented drift over CDL/exploration/right-position correction. Use `docs/agent-working-surface/artifacts/architecture-classification-drift-audit.md`, `docs/agent-working-surface/artifacts/idr-durable-surface-routing-audit.md`, and the gap-routing playbook classification re-test rule before relying on IDR prose as normative.
 - NW-068 is accepted in commit `3b4dfb0`: accepted configuration, expression, and config-package behavior now has durable platform specs at `docs/specifications/platform/expression-language.md` and `docs/specifications/platform/configuration-package-and-shapes.md`; `/api/sync/config` auth/ETag/`If-None-Match` semantics are recorded in `contracts/sync-protocol.md`; no runtime behavior, JSON schemas, fixtures, BAR, CDL, or old IDR text changed. If durable-behavior extraction continues before broader operating-framework or product/API work, the next highest-pressure route from the audit is assignment/auth/security behavior.
+- Post-NW-068 durable-behavior extraction follow-ups are now tracked as triage-visible candidate rows in `docs/agent-working-surface/platform-next-work-backlog.md`: NW-069 assignment/scope/admin, NW-070 production auth/principal binding, NW-071 shared-device local state, NW-072 conflict/flag resolution, NW-073 pattern registry/projection, and NW-074 old-doc/reference cleanup. These rows do not block NW-067; use the backlog trigger map to select one only when it becomes the active bounded work item or a downstream task would otherwise rely on IDR prose as normative.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use IDR-027 for the decision boundary and the NW-037 backlog row for evidence.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
