@@ -16,8 +16,10 @@ Do not use this directory for binding decisions, accepted platform
 specifications, final operations procedures, or implementation evidence.
 Exploration artifacts should recommend the correct durable home for accepted
 follow-up work. If a slice selects platform behavior that future implementation
-must follow, write an IDR under `docs/decisions/` or route a CDL successor when
-canonical architecture authority is required.
+must follow, route it to the correct durable surface: platform specification,
+contract, operation/policy document, implementation evidence, or a CDL
+successor when canonical architecture authority is required. Do not assume an
+IDR is the durable home.
 
 Use `docs/documentation-organization.md` for the exact durable home of accepted
 product/platform specifications, operational policies, runbooks, rehearsals,
@@ -25,6 +27,8 @@ contracts, and implementation evidence.
 
 Current artifacts:
 
+- `architecture-classification-drift-audit.md`
+- `idr-durable-surface-routing-audit.md`
 - `NW-043-assignment-admin-authority-exploration.md`
 - `NW-049-access-exceptions-shared-device-scope-exploration.md`
 - `NW-051-special-read-write-access-boundary-routing.md`

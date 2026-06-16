@@ -67,7 +67,7 @@ work; they do not replace the output.
 | Classification | Durable output | Acceptance trace |
 |---|---|---|
 | Product/problem evidence gap | Scenario, user-fit/research note, validation result, or bounded routing artifact. | NW exit links the evidence and states what remains unvalidated. |
-| Architecture decision gap | CDL successor decision, or an IDR only within delegated architecture bounds. | NW exit links the decision and names contracts/BAR/DEC routes affected. |
+| Architecture decision gap | CDL successor decision or another explicitly routed architecture decision artifact. | NW exit links the decision and names contracts/BAR/DEC routes affected. |
 | Platform-spec detail gap | `docs/specifications/platform/`; use `docs/specifications/product/` when the accepted behavior is user-visible. Use `artifacts/` only while the result remains non-binding exploration. | NW exit links the indexed specification, acceptance criteria, and implementation successor if needed. |
 | Implementation/tooling gap | Bounded prompt plus code, tests, contracts, and implementation-boundary updates actually changed by the work. | NW exit records commit/runtime evidence and any residual route. |
 | Operational policy gap | `docs/operations/policies/` for choices, `docs/operations/runbooks/` for procedures, and `docs/operations/rehearsals/` for plans/evidence. Use `artifacts/` only for the non-binding map that selects them. | NW exit links the indexed policy/procedure and rehearsal evidence; stronger readiness claims require executed evidence. |
@@ -100,6 +100,9 @@ Escalate to architecture when a proposal:
 * adds durable workflow-state authority;
 * changes sync/access scope or creates new scope mechanisms;
 * rewrites normal sync watermarks or turns live sync into historical pull;
+* turns local/offline storage behavior into a migration-sensitive compatibility
+  rule, including actor partitions, sealed partitions, cursor ownership,
+  expiry, selective purge, or cross-actor recovery;
 * moves authority, state, resolver truth, or actor identity into a new durable source;
 * treats IdP groups, claims, roles, or JWT `actor_id` as platform authority;
 * lets deployer config author access logic, containment functions, state machines, arbitrary code, or device-side triggers;
@@ -117,6 +120,28 @@ Ask:
 3. Does this move platform authority into a new source?
 
 If yes, route to architecture. If no, classify as platform-spec, implementation/tooling, operational policy, or product/problem evidence.
+
+### Classification Re-Test Rule
+
+Re-run classification when downstream work changes how a decision is used:
+
+* An `Initial strategy` that becomes mandatory through accepted contracts,
+  shared fixtures, server/mobile agreement, local-store compatibility, BAR
+  evidence, or future decisions is a split/review candidate. Choose one:
+  keep guarded, decompose into load-bearing and evolvable parts, route a
+  platform specification, or route a CDL-successor/reclassification review.
+* A `Strategy-protecting` decision that becomes a wire, stored-state,
+  stored-config, resolver, or local/offline compatibility contract must be
+  treated as contract-level in routing even if the CDL label remains unchanged.
+* Do not promote a whole row only because it is implemented. Promote or split
+  only the part that triggers stored-state impact, contract-surface impact, or
+  wrong-choice recovery.
+* Implementation evidence can prove a behavior has become load-bearing, but it
+  cannot override the right architecture. When implementation conflicts with
+  CDL or exploration findings, route correction of the durable surface and
+  implementation path instead of preserving the implemented drift.
+* Choose the durable home by platform semantics and future safety, not by the
+  current implementation shape or local code convenience.
 
 ### Configuration Guardrails
 
