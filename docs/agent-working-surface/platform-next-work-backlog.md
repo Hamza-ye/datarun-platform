@@ -73,7 +73,8 @@ Trigger map:
 
 - Assignment, scope-filtered access, assignment administration, responsibility
   handoff, subject/query/custom scope implementation, or assignment API/product
-  work: select NW-069 first.
+  work: select NW-069 first for accepted current behavior; NW-053 is still the
+  future-decision route for new subject/query/custom scope mechanisms.
 - Production auth, principal binding, online binding administration, mobile
   OIDC login UX, production admin auth, IdP group/claim pressure, or
   auth-related operating-framework work: select NW-070 first.
@@ -82,11 +83,19 @@ Trigger map:
   token/session retention, no-local-retention, or broader device-retention
   claims: select NW-071 first and coordinate with NW-054 when retention/security
   policy is in scope.
+- Reporting aggregation, broad read APIs, reporting warehouses, structured
+  export/import, or product reporting work: route through NW-044; select NW-069,
+  NW-072, or NW-073 first when the slice relies on accepted access, flag, or
+  pattern behavior as normative.
 - Conflict UI, flag reporting, domain uniqueness behavior, batch resolution,
   auto-resolution, resolver reassignment, flag category, or resolvability
-  changes: select NW-072 first.
+  changes: select NW-072 first for accepted current behavior; NW-045 is still
+  the future-decision route for domain conflict automation, batch resolution, or
+  auto-resolution execution.
 - Pattern traversal/reporting, pattern inventory expansion, workflow projection
-  changes, or pattern API/product work: select NW-073 first.
+  changes, or pattern API/product work: select NW-073 first for accepted current
+  behavior; NW-046 is still the future-decision route for generic cascade
+  indicators or new traversal semantics.
 - Old IDR/reference cleanup after accepted durable specs exist: select NW-074;
   avoid broad cleanup before the owning durable surface is accepted.
 
