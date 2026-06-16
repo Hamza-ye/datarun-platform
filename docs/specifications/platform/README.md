@@ -27,4 +27,5 @@ Each platform specification should include:
 
 | Specification | Status | Owner | Source NW | Supersedes |
 |---|---|---|---|---|
-| None yet | - | - | - | - |
+| [Configuration Package And Shape Lifecycle](configuration-package-and-shapes.md) | accepted | config verifier | NW-068 | none |
+| [Expression Language Behavior](expression-language.md) | accepted | config/mobile verifier | NW-068 | none |

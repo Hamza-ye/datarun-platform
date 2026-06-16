@@ -153,7 +153,83 @@ Device requests events it hasn't seen. Server returns events after the given wat
 | `401` | Missing bearer token | `{ "error": "missing_token" }` |
 | `401` | Empty bearer token | `{ "error": "empty_token" }` |
 | `401` | Invalid or revoked bearer token | `{ "error": "invalid_token" }` |
-| `500` | Server error | `{ "error": "internal_error" }` |
+
+Other server failures use the platform's default server error handling; this
+endpoint does not define a config-specific error body for them.
+
+---
+
+## Config Package Delivery — `GET /api/sync/config`
+
+Device fetches the latest published atomic config package after discovering a
+newer `config_version` in a sync pull response. The package body is governed by
+[config-package.schema.json](config-package.schema.json).
+
+The endpoint requires `Authorization: Bearer <actor_token>`.
+
+### Request Headers
+
+| Header | Required | Description |
+|---|---|---|
+| `Authorization` | yes | Bearer credential resolved by the same actor-auth boundary as sync. |
+| `If-None-Match` | no | Previously received package version ETag. Quoted and unquoted integer version values are accepted. |
+
+No request body is used.
+
+### Response — `200 OK`
+
+Returns the latest published full config package and an `ETag` derived from the
+package version.
+
+```http
+ETag: "12"
+```
+
+```json
+{
+  "version": 12,
+  "published_at": "2026-05-15T08:00:00Z",
+  "shapes": {},
+  "activities": {},
+  "expressions": {},
+  "flag_severity_overrides": {},
+  "sensitivity_classifications": {
+    "shapes": {},
+    "activities": {}
+  },
+  "pattern_definitions": {
+    "schema_version": 1,
+    "definitions": {}
+  }
+}
+```
+
+### Response — `304 Not Modified`
+
+Returned when `If-None-Match` matches the latest package version. The response
+has no package body, and the client keeps its current config.
+
+### Semantics
+
+| Aspect | Behavior |
+|---|---|
+| Discovery | Pull response `config_version` advertises the latest published package. Device fetches this endpoint when local config is absent or older. |
+| Package body | `200 OK` body conforms to `config-package.schema.json`. Known sections are schema-bounded; unknown top-level keys are tolerated for forward compatibility. |
+| Atomicity | The endpoint returns one complete package snapshot, never a diff. |
+| Caching | `ETag` is the package version. `If-None-Match` may be sent quoted or unquoted; matching versions return `304`. |
+| Event isolation | Config delivery contains no events and does not mutate normal pull watermarks. |
+| Version reporting | Device-reported `config_version` is supplied on pull requests for sync/config observability; the package endpoint body is not a per-device authority source. |
+
+### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `401` | Missing bearer token | `{ "error": "missing_token" }` |
+| `401` | Empty bearer token | `{ "error": "empty_token" }` |
+| `401` | Invalid or revoked bearer token | `{ "error": "invalid_token" }` |
+
+Other server failures use the platform's default server error handling; this
+endpoint does not define a config-specific error body for them.
 
 ---
 
