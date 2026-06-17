@@ -27,5 +27,7 @@ Each platform specification should include:
 
 | Specification | Status | Owner | Source NW | Supersedes |
 |---|---|---|---|---|
+| [Assignment Scope And Administration](assignment-scope-and-administration.md) | accepted | authorization/sync verifier | NW-069 | none |
 | [Configuration Package And Shape Lifecycle](configuration-package-and-shapes.md) | accepted | config verifier | NW-068 | none |
 | [Expression Language Behavior](expression-language.md) | accepted | config/mobile verifier | NW-068 | none |
+| [Production Auth Principal Binding](production-auth-principal-binding.md) | accepted | auth/security verifier | NW-070 | none |
