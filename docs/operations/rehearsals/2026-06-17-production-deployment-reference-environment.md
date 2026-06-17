@@ -79,4 +79,12 @@ Cleanup completed after evidence inspection on 2026-06-17:
 - NW-076: add a reviewed two-generation DB credential rotation adapter and evidence procedure.
 - NW-077: add a reviewed Keycloak/JWKS rotation adapter that proves new-key acceptance and old-key/token behavior without unreviewed admin changes.
 - NW-078: install and exercise a monitoring/alert stack with alert delivery to Hamza.
-- Perform R12 from a genuinely fresh privileged session after the missing adapters are ready.
+- Perform R12 from a genuinely fresh privileged session with the accepted
+  successor adapters in place.
+
+## Successor Standing Update
+
+As of 2026-06-17, NW-075, NW-076, NW-077, and NW-078 have accepted successor
+adapter records. This does not change this record's original result: NW-067
+remains partial and not accepted until R12 is executed from a genuinely fresh
+privileged Hamza session.

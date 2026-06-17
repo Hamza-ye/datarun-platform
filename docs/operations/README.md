@@ -30,6 +30,7 @@ NW-063 selected the reference deployment class, NW-064 supplies its accepted
 operating policy, NW-065 supplies tested reference tooling, and NW-066 supplies
 the accepted runbook and reusable rehearsal plan. The 2026-06-17 NW-067 attempt
 is recorded as partial: R1-R9 produced useful reference-environment evidence,
-but backup encryption, credential/JWKS rotation, alert delivery, and fresh
-solo cold recovery remain blocking before any pass claim. Independent human
-continuity remains explicitly unproven.
+and successor adapters NW-075 through NW-078 now cover backup encryption,
+credential/JWKS rotation, and alert delivery, but fresh solo cold recovery R12
+remains blocking before any NW-067 pass claim. Independent human continuity
+remains explicitly unproven.

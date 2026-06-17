@@ -46,3 +46,4 @@ rehearsal record.
 | [2026-06-17 encrypted backup/PITR adapter](2026-06-17-encrypted-backup-pitr-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-075 | 2026-06-17 |
 | [2026-06-17 DB credential rotation adapter](2026-06-17-db-credential-rotation-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-076 | 2026-06-17 |
 | [2026-06-17 Keycloak/JWKS rotation adapter](2026-06-17-keycloak-jwks-rotation-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-077 | 2026-06-17 |
+| [2026-06-17 monitoring alert adapter](2026-06-17-monitoring-alert-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-078 | 2026-06-17 |
