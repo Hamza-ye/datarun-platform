@@ -1,4 +1,4 @@
-Status: partial
+Status: accepted
 Document type: rehearsal_record
 Owner: Hamza
 Source: NW-075; `docs/agent-working-surface/prompts/NW-075-prove-encrypted-backup-pitr-adapter.md`
@@ -11,17 +11,16 @@ Related: `docs/operations/rehearsals/2026-06-17-production-deployment-reference-
 
 ## Result
 
-Final result: `partial`.
+Final result: `accepted`.
 
 NW-075 proved the core backup-encryption gap from the partial NW-067 rehearsal:
 DB1 now writes pgBackRest backups to a fresh MinIO bucket with client-side
 `aes-256-cbc` encryption, and DB2 restored from that encrypted repository with
-matching schema/event/config/binding counts. NW-075 is not accepted yet because
-the restored protected-endpoint smoke is still blocked: after explicit owner
-approval for an orchestrator-mediated synthetic bearer-token transfer,
-`/api/auth/me` on the restored app returned HTTP 401, so `/api/sync/config` and
-authorized pull smoke were not executed. The token transfer path cleaned local
-and app-host bearer-token files immediately after the attempt and did not retain
+matching schema/event/config/binding counts. A disposable restored app against
+DB2 passed readiness, `/api/auth/me`, `/api/sync/config`, and authorized pull
+smoke with the active rotated synthetic worker principal. The protected token
+path used Hamza-approved orchestrator-mediated transfer, cleaned local and
+app-host bearer-token files immediately after the attempt, and did not retain
 the token in evidence.
 
 This record does not accept NW-067, prove monitoring or rotation readiness, or
@@ -47,7 +46,7 @@ Fresh backup bucket: `datarun-nw075-backup`.
 | DB2 clean restore | Pass | DB2 was restored from the encrypted repository and PostgreSQL returned active. |
 | Source/restore count comparison | Pass | `source-db-counts.txt` and `restore-db-counts.txt` both show 10 successful Flyway rows, 8 events, max watermark 9, config version 1, and 4 principal bindings. |
 | Restored app readiness | Pass | A disposable restore-smoke app container against DB2 returned readiness `UP`; see `restore-readiness.json`. |
-| Restored auth/config/pull smoke | Blocked after approved attempt | `restore-auth-smoke-approved-token-result.txt` records owner approval for the synthetic bearer-token transfer and HTTP 401 from `/api/auth/me`; `restore-auth-smoke-401.log` preserves the restored app log tail. Do not infer endpoint-level restored-service proof from readiness alone. |
+| Restored auth/config/pull smoke | Pass after principal correction | `restore-auth-smoke-approved-token-result.txt` records the first approved transfer and HTTP 401 from `/api/auth/me`; DB1/DB2 binding inspection then showed the original `field-worker` subject inactive and the rotated worker subject active. `restore-auth-me-rotated-worker.json`, `restore-config-rotated-worker.json`, `restore-pull-request-rotated-worker.json`, and `restore-pull-rotated-worker.json` record successful restored protected-endpoint smoke with actor `22222222-2222-4222-8222-222222222222`. |
 
 ## Deviations
 
@@ -66,9 +65,12 @@ Fresh backup bucket: `datarun-nw075-backup`.
   owner approval.
 - Hamza then approved an orchestrator-mediated synthetic bearer-token transfer
   for this rehearsal environment. Token acquisition through Keycloak direct
-  grant was available, but the restored app rejected the token at `/api/auth/me`
-  with HTTP 401. The likely remaining adapter problem is an OIDC
-  client/audience/token-helper mismatch, not backup restore.
+  grant was available, but the first restored app attempt used the original
+  `field-worker` principal, whose subject had been rotated out of active
+  principal binding. That token correctly returned HTTP 401. The successful
+  follow-up used `field-worker-rotated`, whose token contains
+  `aud=datarun-server`, issuer `https://keycloak.lab/realms/datarun-lab`, and
+  active subject `53b46770-c03a-4f3f-b25c-3321c1e5af15`.
 
 ## Cleanup State
 
@@ -78,25 +80,20 @@ Fresh backup bucket: `datarun-nw075-backup`.
   residue, and hung `mc` processes were removed before the successful route was
   retried.
 - The disposable restore-smoke app container, compose network, env file, and
-  runtime config directory were removed after readiness and failed-auth
-  evidence.
+  runtime config directory were removed after readiness and protected-endpoint
+  smoke evidence.
 - Temporary bearer-token files on the orchestrator and app host were removed by
   the approved-transfer cleanup path; cleanup was verified again after the
   restored-auth attempt.
 - DB1 and DB2 retain the encrypted pgBackRest configuration and the fresh
-  `datarun-nw075-backup` repository remains for inspection and future restore
-  smoke completion.
+  `datarun-nw075-backup` repository remains for inspection.
 - DB2 currently contains the restored synthetic `datarun` database.
 
 ## Follow-Up Work
 
-- Add or recover a reusable protected OIDC token acquisition adapter that issues
-  a bearer token accepted by the reference app, including the expected
-  issuer/audience/client posture. The next attempt should not rely on repeated
-  ad hoc bearer-token transfer; it should use a reviewed helper or runbook step
-  and then complete restored `/api/auth/me`, `/api/sync/config`, and authorized
-  pull smoke without exposing bearer tokens.
-- Re-run the restored app smoke against DB2 using that adapter.
 - If the encrypted backup adapter becomes the accepted reusable operator path,
   update `docs/operations/runbooks/production-deployment-runbook.md` Section 12
   with the concrete procedure.
+- Keep the active synthetic worker-token helper aligned with the rotated
+  principal-binding state; the original `field-worker` principal is expected
+  rejection evidence, not the current worker smoke principal.
