@@ -43,3 +43,4 @@ rehearsal record.
 |---|---|---|---|---|---|
 | [Production deployment rehearsal plan](production-deployment-rehearsal-plan.md) | Plan | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-066; NW-067 amendment | Not executed |
 | [2026-06-17 production deployment reference environment](2026-06-17-production-deployment-reference-environment.md) | Record | `partial` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-067 | 2026-06-17 |
+| [2026-06-17 encrypted backup/PITR adapter](2026-06-17-encrypted-backup-pitr-adapter.md) | Record | `partial` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-075 | 2026-06-17 |
