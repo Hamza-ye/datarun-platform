@@ -38,8 +38,27 @@ Use sources in this order:
    - Role: vision, operational context, and scenario index.
 11. [docs/scenarios/](/docs/scenarios/) and [docs/access-control-scenario.md](/docs/access-control-scenario.md)
    - Role: problem-space coverage.
-12. Phase files and IDRs
-   - Role: implementation history, design provenance, and verification leads. Future work should route through the decision-anchor layer first; use IDRs only when explicitly routed.
+12. Phase files and existing IDRs
+   - Role: implementation history, design provenance, and verification leads. Future work should route through the decision-anchor layer first; use IDRs only when explicitly routed and do not make new IDRs the default decision home.
+
+## Process Responsibility Index
+
+This table is a routing index, not a second copy of the process rules.
+
+| Responsibility | Canonical home |
+|---|---|
+| Agent startup and minimal reading order | `AGENTS.md` plus `docs/status.md` Current Routing. |
+| Stable working-surface source order | This README. |
+| Architecture authority | The CDL via `docs/architecture/adrs-decisions-canonical-ledger/README.md`. |
+| Architecture-sensitive pressure and gap classification | `decision-anchor-layer/gap-routing-playbook.md`. |
+| DEC anchor mapping and accepted extension inputs | `decision-anchor-layer/architecture-decision-anchors.md`. |
+| Current baseline standing and evidence | `baseline-acceptance-register.md` and `platform-next-work-backlog.md`. |
+| Durable output homes and metadata | `docs/documentation-organization.md`. |
+| Commit and progress transitions | `docs/commit-workflow.md`. |
+| Execution packets | `prompts/README.md` and the selected prompt. |
+| Product/UX vocabulary guardrails | `operational-ux-layering-companion.md`. |
+| Measured evolution paths | `escape-hatch-register.md`. |
+| Historical provenance | `decision-anchor-layer/provenance-index.md`, phase files, IDRs, checkpoints, and review packs only when routed. |
 
 ## First-Deployment Router
 

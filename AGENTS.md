@@ -10,13 +10,14 @@ Default implementer packet:
 2. The top **Current Routing** section of `docs/status.md`.
 3. The relevant section of `docs/implementation/module-interfaces.md` only when touching implementation code or module behavior.
 4. The exact `contracts/` files and code paths named by the task or discovered from the touched surface.
-5. the agent working surface `docs/agent-working-surface`, especially `docs/agent-working-surface/decision-anchor-layer/README.md` for architecture-sensitive routing.
+5. The agent working surface `docs/agent-working-surface`, especially `docs/agent-working-surface/decision-anchor-layer/README.md` for architecture-sensitive pressure and gap routing.
+6. The CDL README index at `docs/architecture/adrs-decisions-canonical-ledger/README.md` only when architecture authority text is needed; slice the relevant CDL rows instead of reading the full ledger.
 
 Open additional docs only when routed:
 
 - `docs/flagged-positions.md` - read the summary table first; open a specific FP section only when its `Blocks` field or topic matches the task, or when adding/updating an FP (no new FPs should be added here, it's gonna be drained and retired with what the baseline decide and route later).
 - `docs/agent-working-surface/decision-anchor-layer/` - use for DEC anchors, gap routing, and deciding whether future work belongs in architecture, platform spec, implementation, policy, or product/problem evidence.
-- CDL/IDRs/ - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision.
+- CDL/existing IDRs - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision. Do not create new IDRs as the default route for future decisions; route through the decision-anchor layer and the CDL-successor path unless an active source explicitly selects another home.
 - `docs/architecture/`, phase specs, scenarios, and exploration archives - use for architecture-steward planning, drift investigation, or when a task explicitly depends on that context.
 - `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` (the CDL) the current architecture decision authority
 
@@ -48,10 +49,11 @@ options:
   --list-categories     List all categories present in the ledger and exit
 ```
 
-## Steward And Implementer Split
+## Steward, Implementer, And Owner Split
 
 - Architecture-steward sessions may read broadly, reconcile status, produce bounded implementation prompts, and dispatch working agents. Preserve product-needed lanes, but do not simulate multi-role workshop or gate-review chains as a substitute for product judgment or implementation.
 - Implementer sessions should read only the bounded task packet plus the default implementer packet above.
+- AI-agent roles are contributor/task lenses for analysis, planning, implementation, verification, review, and documentation hygiene. They are not authority owners; Hamza remains the owner for accepting process or authority changes unless an active repository source already assigns that authority elsewhere.
 - A task packet should state goal, files to read, authority/guardrails,
   forbidden work, expected tests, commit role/sequence and acceptance boundary,
   and stop-and-report conditions.
@@ -82,8 +84,10 @@ when changing data that crosses server/mobile/process boundaries, treat `contrac
 
 ## Architectural Guardrails
 
+- The final Canonical Decision Ledger (CDL) is the only agent-facing architecture decision authority. If any working-surface doc, historical doc, or code comment conflicts with accepted CDL rows, the ledger wins.
+- Architecture-sensitive pressure routes through the [gap routing playbook](/docs/agent-working-surface/decision-anchor-layer/gap-routing-playbook.md#allowed-classifications) before implementation.
 - No new envelope fields or envelope `type` values without Architecture level authority.
-- Structurally valid state/policy anomalies are accepted and flagged; do not reject them unless the relevant ADR/IDR explicitly says structural validation applies.
+- Structurally valid state/policy anomalies are accepted and flagged; do not reject them unless the relevant accepted authority explicitly says structural validation applies.
 - Authority and state are projections from events unless a documented B-to-C escape hatch has been explicitly activated.
 - Respect the active phase boundaries in `docs/status.md`. Do not implement work listed as blocked or deferred.
 - `docs/flagged-positions.md` is append-only. Use its table as the default lookup surface; add a new FP only for a real deferred architectural position with a specific trigger and gate, and only after confirming no existing FP covers it.

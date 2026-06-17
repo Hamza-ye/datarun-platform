@@ -1,12 +1,19 @@
-# Datarun Architecture Description
+# Datarun Architecture Overview
 
-> Consolidated reference for what the Datarun platform architecture IS. Organized by architectural views — not by decision history. ADRs remain the decision authority; when this view and an ADR differ, the newer ADR text wins until this view is reconciled.
+> Subordinate overview of the Datarun platform architecture, organized by
+> architectural views rather than decision history. The Canonical Decision
+> Ledger (CDL) is the current architecture decision authority; when this
+> overview and the CDL differ, the CDL wins until this overview is reconciled.
+> ADR links in this directory are provenance and traceability, not the active
+> agent-facing decision surface.
 
 ---
 
 ## 1. Purpose
 
-This Architecture Description consolidates the decided architectural positions from ADR-001 through ADR-005, with ADR-006 through ADR-009 carrying convergence-era clarifications on flag semantics, envelope type closure, reference fields, and platform-fixed vs. deployer-configured boundaries.
+This architecture overview summarizes the decided platform shape from the
+original ADR-era sequence, now under CDL authority. Use it to understand the
+platform view; use the CDL for binding architecture decisions.
 
 **What it describes:**
 
@@ -22,7 +29,9 @@ This Architecture Description consolidates the decided architectural positions f
 - Protocol sequence diagrams or state transition diagrams
 - Component internals, algorithms, or performance targets
 - Grammar definitions or parser specifications
-- Decision history or exploration reasoning (see [exploration/](../exploration/) for those)
+- Architecture decision authority, decision history, or exploration reasoning
+  (see the CDL for authority and [exploration/](../exploration/) for
+  provenance)
 
 ---
 
@@ -42,7 +51,8 @@ The architecture serves five commitments from the platform vision:
 
 ## 3. Confirmed Principles
 
-Seven working principles, confirmed through ADR-001 through ADR-005 and clarified by ADR-006 through ADR-009:
+Seven working principles, confirmed through the ADR-era sequence and now
+subordinate to the CDL:
 
 | # | Principle | Core expression |
 |---|-----------|-----------------|
@@ -72,7 +82,9 @@ Full detail: [principles.md](../principles.md)
 
 Plus one advisory component (Command Validator) that enforces no invariant of its own.
 
-**21 contracts**: Every inter-primitive interaction is a traced guarantee. 15 decided directly by ADRs, 6 derived from decided positions.
+**21 contracts**: Every inter-primitive interaction is a traced guarantee from
+the original architecture consolidation, subordinate to the CDL and current
+contracts.
 
 **8 cross-cutting concerns**: Event envelope, accept-and-flag lifecycle, detect-before-act pipeline, four-layer configuration gradient, configuration delivery pipeline, sync contract, unified flag catalog, aggregation interface.
 
@@ -115,7 +127,8 @@ Plus one advisory component (Command Validator) that enforces no invariant of it
 
 ## 7. Traceability
 
-Every constraint in this description traces to a source:
+Every constraint in this description traces to a provenance source. These
+traceability links explain origin; they do not replace CDL authority.
 
 | Prefix | Meaning | Example |
 |--------|---------|---------|
@@ -124,6 +137,6 @@ Every constraint in this description traces to a source:
 | **[EX]** | Emergent position from consolidation | [E1] = emergent position 1 |
 | **[CX]** | Inter-primitive contract | [C1] = contract 1 |
 
-**Source ADRs**: [ADR-001](../adrs/adr-001-offline-data-model.md) · [ADR-002](../adrs/adr-002-identity-conflict.md) · [ADR-003](../adrs/adr-003-authorization-sync.md) · [ADR-004](../adrs/adr-004-configuration-boundary.md) · [ADR-005](../adrs/adr-005-state-progression.md) · [ADR-006](../adrs/adr-006-flag-semantics.md) · [ADR-007](../adrs/adr-007-envelope-type-closure.md) · [ADR-008](../adrs/adr-008-envelope-reference-fields.md) · [ADR-009](../adrs/adr-009-platform-fixed-vs-deployer-configured.md)
+**ADR provenance**: [ADR-001](../adrs/adr-001-offline-data-model.md) · [ADR-002](../adrs/adr-002-identity-conflict.md) · [ADR-003](../adrs/adr-003-authorization-sync.md) · [ADR-004](../adrs/adr-004-configuration-boundary.md) · [ADR-005](../adrs/adr-005-state-progression.md) · [ADR-006](../adrs/adr-006-flag-semantics.md) · [ADR-007](../adrs/adr-007-envelope-type-closure.md) · [ADR-008](../adrs/adr-008-envelope-reference-fields.md) · [ADR-009](../adrs/adr-009-platform-fixed-vs-deployer-configured.md)
 
 **Consolidation artifacts**: [Decision Harvest](../exploration/24-decision-harvest.md) · [Boundary Mapping](../exploration/25-boundary-mapping.md) · [Contract Extraction](../exploration/26-contract-extraction.md) · [Gap Identification](../exploration/27-gap-identification.md)
