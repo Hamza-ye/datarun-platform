@@ -28,7 +28,8 @@ documentation.
 
 NW-063 selected the reference deployment class, NW-064 supplies its accepted
 operating policy, NW-065 supplies tested reference tooling, and NW-066 supplies
-the accepted runbook and reusable rehearsal plan. NW-067 is ready to schedule
-only after its concrete external adapters, image pair, compatibility evidence,
-and solo cold-recovery setup satisfy the plan's scheduling gate. Independent
-human continuity remains explicitly unproven.
+the accepted runbook and reusable rehearsal plan. The 2026-06-17 NW-067 attempt
+is recorded as partial: R1-R9 produced useful reference-environment evidence,
+but backup encryption, credential/JWKS rotation, alert delivery, and fresh
+solo cold recovery remain blocking before any pass claim. Independent human
+continuity remains explicitly unproven.

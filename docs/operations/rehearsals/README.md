@@ -42,3 +42,4 @@ rehearsal record.
 | Rehearsal | Type | Status/result | Runbook | Source NW | Date |
 |---|---|---|---|---|---|
 | [Production deployment rehearsal plan](production-deployment-rehearsal-plan.md) | Plan | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-066; NW-067 amendment | Not executed |
+| [2026-06-17 production deployment reference environment](2026-06-17-production-deployment-reference-environment.md) | Record | `partial` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-067 | 2026-06-17 |

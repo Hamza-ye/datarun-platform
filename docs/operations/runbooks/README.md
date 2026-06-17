@@ -26,4 +26,4 @@ if it exists.
 
 | Runbook | Status | Owner | Source NW | Last rehearsed | Supersedes |
 |---|---|---|---|---|---|
-| [Production deployment](production-deployment-runbook.md) | `accepted` | Hamza | NW-066; NW-067 amendment | Not yet | None |
+| [Production deployment](production-deployment-runbook.md) | `accepted` | Hamza | NW-066; NW-067 amendment | [2026-06-17 partial](../rehearsals/2026-06-17-production-deployment-reference-environment.md) | None |
