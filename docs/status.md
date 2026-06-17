@@ -15,6 +15,8 @@ Use this section as the low-token bootstrap for new sessions.
 - Architecture-sensitive future work now routes through `docs/agent-working-surface/decision-anchor-layer/README.md` for DEC anchors and gap routing. The old architecture rationale companion is retired as an active surface.
 - New durable documentation outputs route through `docs/documentation-organization.md`: accepted product/platform behavior belongs under `docs/specifications/`, while operational policies, runbooks, and rehearsal evidence belong under `docs/operations/`. Prompts and working-surface artifacts remain routing inputs, not final accepted homes.
 - Current implementation acceptance status belongs in `docs/agent-working-surface/baseline-acceptance-register.md`; do not treat legacy Phase 4 review drafts as active baseline truth.
+- `docs/flagged-positions.md` is legacy gated-risk provenance, not the current pressure intake path. FP-004's underlying new-envelope-field concern is tracked through BAR-107 and architecture gap classification when concrete pressure appears.
+- Review findings and technical debt are pressure to classify, not automatic architecture work. If the fix stays inside accepted boundaries and changes no contract, durable spec, authority primitive, stored interpretation, or accepted standing, route it as an implementation/tooling gap and track promoted work through the NW backlog, bounded prompt when useful, code/tests, and the commit trace. If the finding exposes missing accepted behavior or boundary ambiguity, route it through the gap playbook first.
 - Current baseline standing: BAR-001 through BAR-015 and BAR-104 are accepted, including BAR-010 config package delivery and BAR-104 production OIDC/JWT/Keycloak authority.
 - Scenario runtime evidence now includes NW-025/S19, NW-026/S00, NW-029/S21, NW-030/S27, NW-032/S23, NW-033/S26, and NW-042/S22. Use the backlog rows for exact evidence.
 - Contract hygiene now includes root schemas for deployer-authored shape format and the server-emitted/mobile-consumed config package: `contracts/shape-format.schema.json` and `contracts/config-package.schema.json`.
@@ -75,16 +77,21 @@ Phase 4.0 (role-action enforcement) was drafted and rolled back. IDR-020 through
 
 A Phase 3d close-out audit (2026-04-21) found that Phases 1-2 persisted four string literals (`conflict_detected`, `conflict_resolved`, `subjects_merged`, `subject_split`) as envelope `type` values, contradicting the closed envelope `type` vocabulary now governed by the CDL. [ADR-007](adrs/adr-007-envelope-type-closure.md) remains retrofit provenance: those four strings are internal **shape** names, not envelope types. Phase 3e landed the code retrofit. New code must not key on those strings as envelope types.
 
-### Flagged positions register (living)
+### Flagged Positions Register (Legacy Provenance)
 
-[`docs/flagged-positions.md`](flagged-positions.md) — deferred verification items and quiet positions that must not be forgotten. State as of 2026-05-25:
+[`docs/flagged-positions.md`](flagged-positions.md) is a legacy gated-risk and
+provenance register. It is not the current source for new routing pressure.
+Route new pressure through the gap playbook, BAR/NW, and the correct durable
+home. Consult FP rows only when a current route names one, the touched surface
+matches an FP topic, or a drift/provenance audit needs the historical gate.
+State as of 2026-06-17:
 
 | FP# | Item | Blocks | Severity | Status |
 |-----|------|--------|:--------:|--------|
 | FP-001 | `role_stale` projection-derived role verification | IDR-021 | A | **RESOLVED** |
 | FP-002 | `subject_lifecycle` table read-discipline audit | Phase 4 | B | **RESOLVED** |
 | FP-003 | Envelope schema parity test | — | C | **RESOLVED** (EnvelopeSchemaParityTest) |
-| FP-004 | `assignment_ref` as potential future envelope field | future assignment-targeting ADR/work | B | **OPEN** |
+| FP-004 | `assignment_ref` as potential future envelope field | BAR-107 / architecture gap route for future assignment-targeting pressure | B | **SUPERSEDED** as active tracker; underlying pressure remains `future_decision` |
 | FP-005 | Scoped pull temporal anchor and subject-history backfill | Phase 4 `ongoing_resolution` | A | **RESOLVED** |
 | FP-006 | `temporal_authority_expired` superseded-assignment false positive | Phase 4 role-action / detection ordering | A | **RESOLVED** |
 | FP-007 | Multi-axis assignment containment and null-activity semantics | Phase 4 assignment-administration hardening | A | **RESOLVED** |
@@ -93,7 +100,8 @@ A Phase 3d close-out audit (2026-04-21) found that Phases 1-2 persisted four str
 | FP-010 | Platform-bundled payload shape contract parity | platform payload shape changes / production contract-hygiene close-out | C | **RESOLVED** |
 | FP-011 | Authentication principal-to-actor mapping and group non-authority | production Keycloak/OIDC/JWT integration; group/claim authority models | B | **RESOLVED** (future group/claim authority requires successor decision) |
 
-**Rule R-4**: before drafting a new IDR or starting a new phase, grep/read the register for items whose `Blocks:` field names the upcoming work. Blocking items must be resolved or explicitly re-deferred.
+FP trigger/gate mechanics are preserved in active surfaces as explicit triggers,
+exit conditions, and evidence links rather than new FP rows.
 
 ### Previous Phases
 

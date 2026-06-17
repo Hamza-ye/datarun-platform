@@ -61,6 +61,19 @@ Use `docs/documentation-organization.md` for required metadata, naming,
 indexing, lifecycle, and supersession. Use `docs/commit-workflow.md` for commit
 roles and progress-state transitions.
 
+## Review Finding Trace
+
+Review findings and technical debt use the same trace rules as other pressure.
+Do not park them in `docs/flagged-positions.md` by default.
+
+If a finding can be fixed inside an already selected slice without changing
+accepted semantics, track it through the implementation commit, tests, and
+touched-file evidence. If it should be deferred, needs a bounded prompt, or must
+be visible for future selection, add or select an NW row with the finding source,
+classification, exit condition, expected tests, and any spec/architecture route.
+Findings that expose missing platform behavior or architecture ambiguity route
+through the gap playbook before implementation.
+
 ## Post-NW-068 Durable-Surface Visibility
 
 NW-069 through NW-074 are candidate durable-surface extraction rows. They do not

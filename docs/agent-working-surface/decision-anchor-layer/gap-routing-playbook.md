@@ -59,6 +59,24 @@ Term collisions to keep explicit:
 | Implementation/tooling gap | The work concerns storage, APIs, UI, build mechanics, test harnesses, or tooling without changing accepted semantics. | Engineering design, implementation prompt, or spike. |
 | Operational policy gap | The work defines human process, support, retention, governance, rollout, or review policy without changing platform semantics. | Operational policy artifact. |
 
+## Review Finding Routing
+
+Treat code-review, audit, and technical-debt findings as pressure to classify.
+They do not belong in `docs/flagged-positions.md` by default.
+
+If the fix stays inside accepted CDL/contract/spec/BAR boundaries and changes no
+authority primitive, stored interpretation, wire/process contract, durable spec,
+or accepted standing, classify it as an implementation/tooling gap. Track it in
+the NW backlog when it is promoted beyond the current task; for a narrow
+same-slice fix, the code, tests, and commit trace are the durable record.
+
+If the finding exposes missing accepted behavior, ambiguous product/platform
+behavior, or scattered IDR-era prose that implementation now relies on, route it
+as a platform-spec detail gap before broad implementation. If the fix would add
+or remove structural authority, event semantics, scope mechanisms, resolver
+truth, deployer configuration authority, or stored compatibility rules, route it
+as an architecture decision gap before code.
+
 ## Artifact And Closure Trace
 
 The classification determines the durable output. Prompts and NW rows route
@@ -213,7 +231,7 @@ When a route changes behavior, prefer tests that pin:
 
 ## Known Gap Register
 
-last-reviewed: 2026-06-13
+last-reviewed: 2026-06-17
 
 | Gap ID | Gap | Status | Classification | Current route |
 |---|---|---|---|---|
@@ -225,6 +243,7 @@ last-reviewed: 2026-06-13
 | GAP-WORKFLOW-02 | Pattern migration mechanics | Open | Platform-spec detail gap / implementation tooling gap | Specify migration only when concrete compatibility pressure appears; do not create durable workflow-state tables. |
 | GAP-WORKFLOW-03 | Additional `context.*` values | Current baseline fixed by NW-057; future additions open | Architecture decision gap or platform-spec detail gap | Current refs are closed to the seven IDR-018 properties and unknown `context.*` refs are deploy-time invalid. New values must stay platform-fixed, read-only, pre-resolved, and bounded; architecture review required if expression authority changes. |
 | GAP-WORKFLOW-04 | Additional auto-resolution policies | Deferred | Architecture decision gap / policy surface | Route through BAR-102/NW-045. Preserve exact designated-resolver equality and avoid direct flag mutation. |
+| GAP-WORKFLOW-05 | Pattern participant vocabulary and role mapping | Open review finding | Implementation/tooling gap if validator code is only aligned with existing pattern metadata; platform-spec or contract gap if participant vocabulary, deployer mapping, or pattern definitions change | Do not hardcode operational/persona labels as generic platform authority. Route concrete pattern-validator cleanup through the NW backlog or the owning pattern/spec extraction row before changing contracts or pattern definitions. |
 | GAP-CONFLICT-01 | Flag queue ergonomics | Open | Platform-spec detail gap / implementation tooling gap | UX may improve queue behavior without changing flag semantics, resolver authority, or canonical resolution. |
 | GAP-CONFLICT-02 | Domain conflict automation and batch resolution | Future decision | Architecture decision gap / platform-spec detail gap | Route through NW-045. Batch/automation must emit per-flag resolution events and preserve resolver equality. |
 | GAP-CONFLICT-03 | Resolver-steward eligibility policy | Open; current runtime has role-name fallback heuristic | Platform-spec detail gap; architecture decision gap if a new resolver capability or authority primitive is introduced | IDR-026 accepts nearest eligible human steward and exact resolver equality. Current code first uses configured review action where possible, then falls back to role-name substrings such as admin/supervisor/coordinator/reviewer/manager/lead/resolver. Future conflict/admin UX or production hardening must not treat that fallback as product-ready authority; define explicit steward eligibility or route a successor decision before changing resolver authority. |

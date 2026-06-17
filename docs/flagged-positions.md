@@ -1,28 +1,46 @@
-# Flagged Positions — Living Register
+# Flagged Positions - Legacy Gated-Risk Register
 
-> Deferred verification items and quiet-decision markers that must not be forgotten.
-> This file is **append-only**. Items move to `RESOLVED` with a resolution log entry — never deleted.
+Status: legacy provenance; closed to default new intake.
+
+> Deferred verification items and quiet-decision markers from the pre-working-surface process.
+> This file remains **append-only** for historical trace. Existing items move to
+> `RESOLVED` or `SUPERSEDED` with a resolution log entry - never deleted.
 >
-> **Default reading rule**: read the summary table first. Open a specific FP section only when its `Blocks` field or topic matches the task, when the task changes that surface, or when adding/updating an FP.
+> **Default reading rule**: read the summary table first. Open a specific FP
+> section only when a current route names the FP, the touched surface matches an
+> FP topic, or a drift/provenance audit needs the old gate.
 >
-> **Architecture-steward reading rule**: before drafting any new IDR, starting any new phase, or running a close-out audit, grep/read this register for items whose `Blocks:` field names the upcoming work.
+> **Current routing rule**: do not add new FP rows by default. Route new pressure
+> through `docs/agent-working-surface/decision-anchor-layer/gap-routing-playbook.md`,
+> then BAR/NW/spec/contract/code as appropriate. Preserve the FP trigger/gate
+> style by putting explicit triggers, exit conditions, and evidence links in the
+> active surface that owns the work.
 
 ---
 
 ## Why This File Exists
 
-Platform work is executed by multiple AI agents across sessions. Agents do not automatically carry context between sessions. When an item is "deferred," the decision to defer it is the easy part — **remembering to pick it up later** is the hard part. The Phase 1/2 envelope-type-vocabulary drift (resolved by [ADR-007](adrs/adr-007-envelope-type-closure.md) on 2026-04-23) is a concrete example of what happens when deferrals slip through:
+Platform work is executed by multiple AI agents across sessions. Agents do not
+automatically carry context between sessions. When an item is "deferred," the
+decision to defer it is the easy part - **remembering to pick it up later** is
+the hard part. The Phase 1/2 envelope-type-vocabulary drift (resolved by
+[ADR-007](adrs/adr-007-envelope-type-closure.md) on 2026-04-23) is a concrete
+example of what happens when deferrals slip through:
 
 - A decision is made at time T.
 - Code is written at time T+N that silently contradicts the decision.
 - No mechanism flags the contradiction until a later audit finds it.
 - Fixing it becomes a retrofit (Phase 3e) rather than a one-line correction.
 
-This register is the counter-mechanism: every deferred verification item, every quiet position that future work might contradict, every architectural precedent that needs defending — all recorded here with an explicit **gate** that must pass before the item is considered closed.
+This register was the counter-mechanism for that phase of the repository. The
+active working surface now owns new intake and routing: the gap playbook
+classifies pressure, BAR records accepted/deferred/future-decision standing, NW
+tracks promoted work, and durable outputs live in their canonical homes. This
+file preserves the historical gates and resolution trace.
 
 ---
 
-## Format (for every entry)
+## Historical Format
 
 ```md
 ## FP-NNN: Short name
@@ -46,7 +64,7 @@ Dated entries as work progresses. When RESOLVED, the final entry cites the commi
 
 ---
 
-## Active Register
+## Register
 
 ---
 
@@ -148,8 +166,9 @@ A JUnit test `EnvelopeSchemaParityTest` exists in the server test suite that rea
 
 ## FP-004: `assignment_ref` as potential future envelope field
 
-**Status**: OPEN
+**Status**: SUPERSEDED
 **Opened**: 2026-04-23 by ADR-008 drafting pass (convergence round 1)
+**Superseded**: 2026-06-17 by BAR-107 / gap-routing route
 **Blocks**: any future ADR/work that introduces an Assignment-targeting emission site distinct from the current `subject_ref.type = "assignment"` channel
 **Severity**: B — architecture-grade question, no current forcing function
 
@@ -165,11 +184,14 @@ Any of the following lifts this item to `BLOCKS`:
 
 1. A proposal or discovery that an event needs to reference a subject *and* an assignment distinctly in the same envelope.
 2. A deployer or platform request to correlate events to assignment lifecycle without collapsing into the subject channel.
-3. Any ADR draft that touches assignment authority, assignment projection, or the assignment shape pair (`assignment_created/v1`, `assignment_ended/v1`) in a way that implies a dedicated ref.
+3. Any architecture decision draft that touches assignment authority, assignment
+   projection, or the assignment shape pair (`assignment_created/v1`,
+   `assignment_ended/v1`) in a way that implies a dedicated ref.
 
 **Gate:**
 
-A successor ADR must exist, and either:
+A successor CDL decision or explicitly routed architecture decision must exist,
+and either:
 
 - **(resolve by decision)** explicitly close the question (parameterize vs. dedicated field) with rationale, **or**
 - **(resolve by subsumption)** demonstrate that the forcing case can be handled under the existing `subject_ref` contract and record that reading as canonical.
@@ -177,6 +199,11 @@ A successor ADR must exist, and either:
 **Resolution log:**
 
 - **2026-04-23**: Opened by ADR-008 §S4 / Alt-4. No current forcing function; filed to prevent silent deferral per R-1.
+- **2026-06-17**: SUPERSEDED as an active tracking item. The underlying
+  `assignment_ref`/new-envelope-field pressure now routes through BAR-107
+  (`New envelope fields or event types`) and the gap playbook's architecture
+  classification before any contract or implementation change. This FP remains
+  provenance for why assignment-targeting pressure needs an explicit gate.
 
 ---
 
@@ -520,36 +547,43 @@ All of the following must be true:
 
 ---
 
-## Standing Register Rules
+## Historical Register Rules
 
-These rules govern how the register is used. They are not items — they are the discipline.
+These rules governed the old register discipline. They remain useful provenance
+for why the current working surface requires explicit classification, gates, and
+evidence, but new pressure now routes through the gap playbook, BAR, NW backlog,
+and the correct durable home.
 
-### Rule R-1: No silent deferral
+### Historical Rule R-1: No Silent Deferral
 
-If an agent, during any phase, observes a position that is "almost certainly right but not verified" or "correct today but could drift under future work," the agent MUST add an FP entry before closing the phase. Not adding an entry and trusting memory is the failure mode that produced Phase 1/2 drift. **Silent deferral is a forbidden pattern.**
+If an agent observes a position that is "almost certainly right but not
+verified" or "correct today but could drift under future work," the agent must
+not trust memory. In the current process, classify the pressure in the gap
+playbook and record the trigger, exit condition, and evidence route in BAR, NW,
+a durable output, or the implementation commit/test trace.
 
-### Rule R-2: Gates are verifiable, not aspirational
+### Historical Rule R-2: Gates Are Verifiable, Not Aspirational
 
 Every gate must be expressible as "X is true" where X can be checked by reading code, running a test, or grepping for a string. "We believe this is fine" is not a gate. "Test FooTest asserts Y" is a gate.
 
-### Rule R-3: Status changes only with evidence
+### Historical Rule R-3: Status Changes Only With Evidence
 
-Moving an item from `OPEN` to `RESOLVED` requires the resolution log to cite a commit SHA, test name, or artifact path that makes the gate pass. The orchestrating agent (not a subagent) is responsible for the status transition.
+Moving an item from `OPEN` to `RESOLVED` required the resolution log to cite a
+commit SHA, test name, or artifact path that makes the gate pass. Current BAR/NW
+acceptance follows the same evidence discipline in its exit condition.
 
-### Rule R-4: Consult before writing an IDR or starting a phase
+### Historical Rule R-4: Consult Before Writing an IDR or Starting a Phase
 
-Before any of the following, the architecture-steward agent MUST grep/read this register for items whose `Blocks:` field names the upcoming work:
+The active equivalent is: before creating new architecture decisions, platform
+specs, implementation prompts, policies, or product/problem artifacts, use the
+gap playbook. Consult this register only when a current route names an FP, the
+touched surface matches an FP topic, or a drift/provenance audit needs the old
+gate.
 
-- Drafting a new IDR
-- Starting a new phase spec
-- Beginning the first commit of a new phase
-- Publishing a close-out audit
+### Historical Rule R-5: `SUPERSEDED` Status for Orphaned Items
 
-Items that block the upcoming work must be resolved (or explicitly re-deferred with justification recorded in the item's log) before proceeding.
-
-### Rule R-5: `SUPERSEDED` status for orphaned items
-
-If an architectural change (a new ADR, an addendum, a phase spec) makes an FP item obsolete, mark it `SUPERSEDED` with a pointer to the artifact that absorbed it. Do not delete. History matters for traceability.
+If a current route absorbs an FP item, mark it `SUPERSEDED` with a pointer to the
+artifact that absorbed it. Do not delete. History matters for traceability.
 
 ---
 
@@ -557,9 +591,12 @@ If an architectural change (a new ADR, an addendum, a phase spec) makes an FP it
 
 This register is referenced from:
 
-- [`CLAUDE.md`](../CLAUDE.md) — Agent onboarding pointer
-- [`docs/status.md`](status.md) — Carried-debt section
-- [`docs/agent-workflow/lessons.md`](agent-workflow/lessons.md) — L-2 (register discipline)
-- Any phase spec that creates an FP entry (e.g., [phase-3e.md](implementation/phases/phase-3e.md) §10)
+- [`AGENTS.md`](../AGENTS.md) - agent onboarding pointer.
+- [`docs/status.md`](status.md) - historical detail and current routing note.
+- [`docs/agent-working-surface/README.md`](agent-working-surface/README.md) -
+  historical gated-risk provenance pointer.
+- Phase specs and prompts that name a specific FP as provenance.
 
-If you add a new FP item, add or update the backlinks above so the register is reachable from every likely entry point.
+Do not add new FP items by default. If a rare current route explicitly selects
+this register as the provenance home, update the backlinks above so the route is
+reachable from every likely entry point.

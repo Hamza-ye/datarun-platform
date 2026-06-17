@@ -53,12 +53,14 @@ This table is a routing index, not a second copy of the process rules.
 | Architecture-sensitive pressure and gap classification | `decision-anchor-layer/gap-routing-playbook.md`. |
 | DEC anchor mapping and accepted extension inputs | `decision-anchor-layer/architecture-decision-anchors.md`. |
 | Current baseline standing and evidence | `baseline-acceptance-register.md` and `platform-next-work-backlog.md`. |
+| Review findings and implementation/refactoring debt | Gap playbook classification first; `platform-next-work-backlog.md` for promoted work; code/tests and commit trace for bounded implementation fixes. |
 | Durable output homes and metadata | `docs/documentation-organization.md`. |
 | Commit and progress transitions | `docs/commit-workflow.md`. |
 | Execution packets | `prompts/README.md` and the selected prompt. |
 | Product/UX vocabulary guardrails | `operational-ux-layering-companion.md`. |
 | Measured evolution paths | `escape-hatch-register.md`. |
-| Historical provenance | `decision-anchor-layer/provenance-index.md`, phase files, IDRs, checkpoints, and review packs only when routed. |
+| Historical gated-risk provenance | `docs/flagged-positions.md` only when a current route names an FP, the touched surface matches an FP topic, or a drift/provenance audit needs the old gate. |
+| Other historical provenance | `decision-anchor-layer/provenance-index.md`, phase files, IDRs, checkpoints, and review packs only when routed. |
 
 ## First-Deployment Router
 
@@ -107,7 +109,9 @@ pressure, use scenarios and access control. For contracts, use
 [contracts/](/contracts/). For current implementation status, use the baseline
 acceptance register and platform next-work backlog.
 
-Historical phase files, IDRs, audits, the retired rationale companion, and review packs are provenance unless the current task is explicitly routed there.
+Historical phase files, IDRs, audits, the retired rationale companion,
+`docs/flagged-positions.md`, and review packs are provenance unless the current
+task is explicitly routed there.
 
 ## Stop Conditions
 

@@ -15,7 +15,7 @@ Default implementer packet:
 
 Open additional docs only when routed:
 
-- `docs/flagged-positions.md` - read the summary table first; open a specific FP section only when its `Blocks` field or topic matches the task, or when adding/updating an FP (no new FPs should be added here, it's gonna be drained and retired with what the baseline decide and route later).
+- `docs/flagged-positions.md` - legacy gated-risk provenance. Read it only when a current route names an FP, the touched surface matches an FP topic, or a drift/provenance audit needs the old gate. Do not add new FP rows by default; route new pressure through the gap playbook, BAR, NW backlog, and the correct durable home.
 - `docs/agent-working-surface/decision-anchor-layer/` - use for DEC anchors, gap routing, and deciding whether future work belongs in architecture, platform spec, implementation, policy, or product/problem evidence.
 - CDL/existing IDRs - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision. Do not create new IDRs as the default route for future decisions; route through the decision-anchor layer and the CDL-successor path unless an active source explicitly selects another home.
 - `docs/architecture/`, phase specs, scenarios, and exploration archives - use for architecture-steward planning, drift investigation, or when a task explicitly depends on that context.
@@ -60,7 +60,7 @@ options:
 
 ## Repository Map
 
-- `docs/` - platform principles, ADRs, IDRs, phase plans, status, quality gates, and flagged positions.
+- `docs/` - platform principles, architecture and implementation history, status, quality gates, specifications, operations, and legacy flagged-position provenance.
 - `docs/specifications/` - accepted product behavior and platform-detail specifications under architecture/contracts.
 - `docs/operations/` - operational policies, executable runbooks, and rehearsal plans/records.
 - `contracts/` - process-boundary intent: event envelope, sync protocol, flag catalog, platform shape schemas, and shared fixtures.
@@ -90,7 +90,7 @@ when changing data that crosses server/mobile/process boundaries, treat `contrac
 - Structurally valid state/policy anomalies are accepted and flagged; do not reject them unless the relevant accepted authority explicitly says structural validation applies.
 - Authority and state are projections from events unless a documented B-to-C escape hatch has been explicitly activated.
 - Respect the active phase boundaries in `docs/status.md`. Do not implement work listed as blocked or deferred.
-- `docs/flagged-positions.md` is append-only. Use its table as the default lookup surface; add a new FP only for a real deferred architectural position with a specific trigger and gate, and only after confirming no existing FP covers it.
+- `docs/flagged-positions.md` is append-only legacy provenance, not the current intake surface. Preserve its trigger/gate lessons by recording triggers, exit conditions, and evidence in the active owning surface: gap playbook, BAR, NW backlog, durable spec/contract, or code/tests.
 
 ## Build And Test
 
