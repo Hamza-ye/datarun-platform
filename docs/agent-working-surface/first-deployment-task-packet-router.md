@@ -1,6 +1,6 @@
 # First-Deployment Router
 
-Status: fourth implementation slice accepted
+Status: closed routing/provenance surface
 
 Date: 2026-06-13
 
@@ -34,7 +34,7 @@ S06/entity lifecycle remains a visible BAR-105 / NW-021 future-decision lane,
 but it did not block NW-060, NW-061, or NW-062. Those slices add no known-set,
 candidate, lifecycle, duplicate, merge, split, or subject-link authority.
 
-## Source Order
+## Closed-Slice Source Order
 
 Use `AGENTS.md`, `docs/status.md` Current Routing, the mobile section of
 `docs/implementation/module-interfaces.md`, and the exact code/tests named by

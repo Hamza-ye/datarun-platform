@@ -6,9 +6,14 @@ This directory defines the default post-Phase-4 agent input surface. It exists t
 
 Keep this README stable. Change it only when the durable source categories or routing rules change. Put current status, accepted slice evidence, next-work recommendations, and dated baseline standing in [docs/status.md](/docs/status.md), [baseline-acceptance-register.md](baseline-acceptance-register.md), and [platform-next-work-backlog.md](platform-next-work-backlog.md).
 
-## Source Order
+## Authority And Routing Source Order
 
-Use sources in this order:
+This is the stable order for resolving authority and routing after a task is
+inside the working surface. It is not the minimal startup packet for every
+implementer session; use `AGENTS.md` plus `docs/status.md` Current Routing for
+startup, then open only the sources the task or touched surface requires.
+
+Use these sources in this order when authority or routing needs to be resolved:
 
 1. [docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md](/docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md)
    - Role: architecture authority.
@@ -48,7 +53,7 @@ This table is a routing index, not a second copy of the process rules.
 | Responsibility | Canonical home |
 |---|---|
 | Agent startup and minimal reading order | `AGENTS.md` plus `docs/status.md` Current Routing. |
-| Stable working-surface source order | This README. |
+| Stable authority and routing source order | This README. |
 | Architecture authority | The CDL via `docs/architecture/adrs-decisions-canonical-ledger/README.md`. |
 | Architecture-sensitive pressure and gap classification | `decision-anchor-layer/gap-routing-playbook.md`. |
 | DEC anchor mapping and accepted extension inputs | `decision-anchor-layer/architecture-decision-anchors.md`. |
@@ -61,6 +66,22 @@ This table is a routing index, not a second copy of the process rules.
 | Measured evolution paths | `escape-hatch-register.md`. |
 | Historical gated-risk provenance | `docs/flagged-positions.md` only when a current route names an FP, the touched surface matches an FP topic, or a drift/provenance audit needs the old gate. |
 | Other historical provenance | `decision-anchor-layer/provenance-index.md`, phase files, IDRs, checkpoints, and review packs only when routed. |
+
+## Common-Process Mapping
+
+The working surface uses repository-specific names, but the process shape is
+ordinary:
+
+| Repository term | Common process role |
+|---|---|
+| CDL | Architecture decision record / decision log. |
+| Contracts | Interface and schema control. |
+| Gap playbook | Intake triage and change classification. |
+| BAR | Acceptance/status register for baseline capability standing. |
+| NW backlog | Work backlog with source, dependency, exit condition, and evidence trace. |
+| Specifications and operations docs | Canonical requirement, policy, procedure, and evidence homes. |
+| Commit workflow | Change-control and traceability convention. |
+| Flagged positions | Historical risk register/provenance, not active intake. |
 
 ## First-Deployment Router
 

@@ -6,9 +6,13 @@ This directory is the cleaned working-surface version of the `.review/001-archit
 
 It exists to make future work traceable without forcing agents to read the extraction chronology.
 
-## Source Order
+## Authority And Routing Source Order
 
-Use sources in this order:
+Use this order when a task has routed into architecture-sensitive pressure,
+gap classification, or decision-anchor review. It is not the default startup
+packet for ordinary implementation work.
+
+Use these sources in this order when resolving authority or classification:
 
 1. `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md`
    - Architecture authority.
