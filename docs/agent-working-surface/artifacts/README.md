@@ -34,6 +34,7 @@ Current artifacts:
 - `NW-051-special-read-write-access-boundary-routing.md`
 - `NW-056-product-standing-and-production-readiness-map.md`
 - `NW-063-production-deployment-ops-hardening-map.md`
+- `solo-ai-agent-operating-framework.md`
 
 Planned artifacts are named by their active backlog row and prompt; do not list
 them here until they land.
