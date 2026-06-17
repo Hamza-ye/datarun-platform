@@ -17,10 +17,12 @@ NW-075 proved the core backup-encryption gap from the partial NW-067 rehearsal:
 DB1 now writes pgBackRest backups to a fresh MinIO bucket with client-side
 `aes-256-cbc` encryption, and DB2 restored from that encrypted repository with
 matching schema/event/config/binding counts. NW-075 is not accepted yet because
-the full restored application smoke was limited to readiness; the protected
-OIDC bearer-token adapter used during NW-067 was not available as a reusable
-secret-safe procedure, so `/api/auth/me`, `/api/sync/config`, and authorized
-pull smoke were not rerun for the NW-075 restore target.
+the restored protected-endpoint smoke is still blocked: after explicit owner
+approval for an orchestrator-mediated synthetic bearer-token transfer,
+`/api/auth/me` on the restored app returned HTTP 401, so `/api/sync/config` and
+authorized pull smoke were not executed. The token transfer path cleaned local
+and app-host bearer-token files immediately after the attempt and did not retain
+the token in evidence.
 
 This record does not accept NW-067, prove monitoring or rotation readiness, or
 approve real production.
@@ -45,7 +47,7 @@ Fresh backup bucket: `datarun-nw075-backup`.
 | DB2 clean restore | Pass | DB2 was restored from the encrypted repository and PostgreSQL returned active. |
 | Source/restore count comparison | Pass | `source-db-counts.txt` and `restore-db-counts.txt` both show 10 successful Flyway rows, 8 events, max watermark 9, config version 1, and 4 principal bindings. |
 | Restored app readiness | Pass | A disposable restore-smoke app container against DB2 returned readiness `UP`; see `restore-readiness.json`. |
-| Restored auth/config/pull smoke | Not executed | No reusable protected bearer-token adapter was available after NW-067 cleanup. Do not infer endpoint-level restored-service proof from readiness alone. |
+| Restored auth/config/pull smoke | Blocked after approved attempt | `restore-auth-smoke-approved-token-result.txt` records owner approval for the synthetic bearer-token transfer and HTTP 401 from `/api/auth/me`; `restore-auth-smoke-401.log` preserves the restored app log tail. Do not infer endpoint-level restored-service proof from readiness alone. |
 
 ## Deviations
 
@@ -62,6 +64,11 @@ Fresh backup bucket: `datarun-nw075-backup`.
   not authorized to SSH into `keycloak.lab`; transferring a live bearer token
   through the orchestrating machine was rejected as too risky without explicit
   owner approval.
+- Hamza then approved an orchestrator-mediated synthetic bearer-token transfer
+  for this rehearsal environment. Token acquisition through Keycloak direct
+  grant was available, but the restored app rejected the token at `/api/auth/me`
+  with HTTP 401. The likely remaining adapter problem is an OIDC
+  client/audience/token-helper mismatch, not backup restore.
 
 ## Cleanup State
 
@@ -71,7 +78,11 @@ Fresh backup bucket: `datarun-nw075-backup`.
   residue, and hung `mc` processes were removed before the successful route was
   retried.
 - The disposable restore-smoke app container, compose network, env file, and
-  runtime config directory were removed after readiness evidence.
+  runtime config directory were removed after readiness and failed-auth
+  evidence.
+- Temporary bearer-token files on the orchestrator and app host were removed by
+  the approved-transfer cleanup path; cleanup was verified again after the
+  restored-auth attempt.
 - DB1 and DB2 retain the encrypted pgBackRest configuration and the fresh
   `datarun-nw075-backup` repository remains for inspection and future restore
   smoke completion.
@@ -79,11 +90,12 @@ Fresh backup bucket: `datarun-nw075-backup`.
 
 ## Follow-Up Work
 
-- Add or recover a reusable protected OIDC token acquisition adapter so NW-075
-  can complete restored `/api/auth/me`, `/api/sync/config`, and authorized pull
-  smoke without exposing bearer tokens. One acceptable route is app-host access
-  to a reviewed token helper; another requires explicit owner approval for any
-  orchestrator-mediated live-token transfer.
+- Add or recover a reusable protected OIDC token acquisition adapter that issues
+  a bearer token accepted by the reference app, including the expected
+  issuer/audience/client posture. The next attempt should not rely on repeated
+  ad hoc bearer-token transfer; it should use a reviewed helper or runbook step
+  and then complete restored `/api/auth/me`, `/api/sync/config`, and authorized
+  pull smoke without exposing bearer tokens.
 - Re-run the restored app smoke against DB2 using that adapter.
 - If the encrypted backup adapter becomes the accepted reusable operator path,
   update `docs/operations/runbooks/production-deployment-runbook.md` Section 12
