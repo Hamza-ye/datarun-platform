@@ -72,6 +72,11 @@ public final class ProductionRuntimeValidator
         requireHttpsUri("datarun.auth.oidc.issuer", violations);
         requirePresent("datarun.auth.oidc.audience", violations);
         requireHttpsUri("datarun.auth.oidc.jwks-uri", violations);
+        requirePresent("datarun.web-admin.oidc.client-id", violations);
+        requirePresent("datarun.web-admin.oidc.client-secret", violations);
+        requireHttpsUri("datarun.web-admin.oidc.authorization-uri", violations);
+        requireHttpsUri("datarun.web-admin.oidc.token-uri", violations);
+        requireHttpsUri("datarun.web-admin.oidc.redirect-uri", violations);
 
         String operator = property("datarun.auth.principal-bindings.applied-by");
         if (operator == null) {

@@ -6,7 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -36,6 +42,7 @@ public class WebAdminSessionService {
     private final AuthProperties authProperties;
     private final WebAdminSessionProperties sessionProperties;
     private final OidcJwksTokenValidator tokenValidator;
+    private final OidcAuthorizationCodeTokenExchanger codeTokenExchanger;
     private final AuthPrincipalBindingRepository bindingRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
@@ -44,21 +51,24 @@ public class WebAdminSessionService {
     public WebAdminSessionService(AuthProperties authProperties,
                                   WebAdminSessionProperties sessionProperties,
                                   OidcJwksTokenValidator tokenValidator,
+                                  OidcAuthorizationCodeTokenExchanger codeTokenExchanger,
                                   AuthPrincipalBindingRepository bindingRepository,
                                   ApplicationEventPublisher eventPublisher) {
-        this(authProperties, sessionProperties, tokenValidator, bindingRepository,
+        this(authProperties, sessionProperties, tokenValidator, codeTokenExchanger, bindingRepository,
                 eventPublisher, Clock.systemUTC());
     }
 
     WebAdminSessionService(AuthProperties authProperties,
                            WebAdminSessionProperties sessionProperties,
                            OidcJwksTokenValidator tokenValidator,
+                           OidcAuthorizationCodeTokenExchanger codeTokenExchanger,
                            AuthPrincipalBindingRepository bindingRepository,
                            ApplicationEventPublisher eventPublisher,
                            Clock clock) {
         this.authProperties = authProperties;
         this.sessionProperties = sessionProperties;
         this.tokenValidator = tokenValidator;
+        this.codeTokenExchanger = codeTokenExchanger;
         this.bindingRepository = bindingRepository;
         this.eventPublisher = eventPublisher;
         this.clock = clock;
@@ -73,16 +83,11 @@ public class WebAdminSessionService {
         session.setAttribute(LOGIN_STATE_EXPIRES_AT_ATTR,
                 clock.instant().plus(sessionProperties.loginStateTtl()));
 
-        String redirectUri = ServletUriComponentsBuilder.fromRequestUri(request)
-                .replacePath("/web-admin/oidc/callback")
-                .replaceQuery(null)
-                .build()
-                .toUriString();
+        String redirectUri = callbackUri(request);
 
         return UriComponentsBuilder
                 .fromUriString(sessionProperties.oidcAuthorizationUri(authProperties.oidcIssuer()))
-                .queryParam("response_type", "id_token")
-                .queryParam("response_mode", "form_post")
+                .queryParam("response_type", "code")
                 .queryParam("scope", "openid")
                 .queryParam("client_id", sessionProperties.oidcClientId())
                 .queryParam("redirect_uri", redirectUri)
@@ -94,22 +99,23 @@ public class WebAdminSessionService {
     }
 
     public WebAdminSessionContext completeLogin(
-            HttpServletRequest request, String state, String idToken) {
+            HttpServletRequest request, String state, String code) {
         HttpSession session = request.getSession(false);
         if (session == null) {
             audit("web_admin_login_failed", null, null, null, null, "missing_login_state");
             throw new WebAdminSessionException("missing_login_state", true);
         }
         validateLoginState(session, state);
-        if (idToken == null || idToken.isBlank()) {
+        if (code == null || code.isBlank()) {
             invalidate(session);
-            audit("web_admin_login_failed", null, null, null, null, "missing_id_token");
-            throw new WebAdminSessionException("missing_id_token", true);
+            audit("web_admin_login_failed", null, null, null, null, "missing_authorization_code");
+            throw new WebAdminSessionException("missing_authorization_code", true);
         }
         String expectedNonce = (String) session.getAttribute(LOGIN_NONCE_ATTR);
 
         JwtPrincipal principal;
         try {
+            String idToken = codeTokenExchanger.exchangeForIdToken(code, callbackUri(request));
             principal = tokenValidator.validateLoginToken(idToken, expectedNonce);
         } catch (AuthResolutionException e) {
             invalidate(session);
@@ -159,6 +165,15 @@ public class WebAdminSessionService {
         audit("web_admin_login_succeeded", actorId, principal.issuer(), principal.subject(),
                 sessionCorrelationId, null);
         return context;
+    }
+
+    private String callbackUri(HttpServletRequest request) {
+        String requestCallbackUri = ServletUriComponentsBuilder.fromRequestUri(request)
+                .replacePath("/web-admin/oidc/callback")
+                .replaceQuery(null)
+                .build()
+                .toUriString();
+        return sessionProperties.oidcRedirectUri(requestCallbackUri);
     }
 
     public WebAdminSessionContext requireContext(HttpServletRequest request) {
@@ -287,4 +302,65 @@ public class WebAdminSessionService {
         LOGGER.info("event={} actor_id={} issuer={} subject={} session_correlation_id={} reason={}",
                 eventType, actorId, issuer, subject, sessionCorrelationId, reason);
     }
+}
+
+interface OidcAuthorizationCodeTokenExchanger {
+    String exchangeForIdToken(String code, String redirectUri);
+}
+
+@Component
+class RestClientOidcAuthorizationCodeTokenExchanger
+        implements OidcAuthorizationCodeTokenExchanger {
+
+    private final AuthProperties authProperties;
+    private final WebAdminSessionProperties sessionProperties;
+    private final RestClient restClient;
+
+    RestClientOidcAuthorizationCodeTokenExchanger(AuthProperties authProperties,
+                                                  WebAdminSessionProperties sessionProperties,
+                                                  RestClient.Builder restClientBuilder) {
+        this.authProperties = authProperties;
+        this.sessionProperties = sessionProperties;
+        this.restClient = restClientBuilder.build();
+    }
+
+    @Override
+    public String exchangeForIdToken(String code, String redirectUri) {
+        String clientSecret = required(
+                sessionProperties.oidcClientSecret(),
+                "oidc_client_secret_not_configured");
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("grant_type", "authorization_code");
+        form.add("code", required(code, "missing_authorization_code"));
+        form.add("redirect_uri", required(redirectUri, "missing_redirect_uri"));
+        form.add("client_id", sessionProperties.oidcClientId());
+        form.add("client_secret", clientSecret);
+
+        try {
+            TokenResponse response = restClient.post()
+                    .uri(sessionProperties.oidcTokenUri(authProperties.oidcIssuer()))
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(form)
+                    .retrieve()
+                    .body(TokenResponse.class);
+            if (response == null || response.id_token() == null || response.id_token().isBlank()) {
+                throw new AuthResolutionException("oidc_code_exchange_missing_id_token");
+            }
+            return response.id_token();
+        } catch (AuthResolutionException e) {
+            throw e;
+        } catch (RestClientException e) {
+            throw new AuthResolutionException("oidc_code_exchange_failed");
+        }
+    }
+
+    private String required(String value, String reason) {
+        if (value == null || value.isBlank()) {
+            throw new AuthResolutionException(reason);
+        }
+        return value.trim();
+    }
+
+    private record TokenResponse(String id_token) {}
 }

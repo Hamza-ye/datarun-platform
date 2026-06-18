@@ -21,6 +21,11 @@ class ProductionRuntimeValidatorTest {
             "datarun.auth.oidc.issuer=https://identity.example.test/realms/datarun",
             "datarun.auth.oidc.audience=datarun-mobile",
             "datarun.auth.oidc.jwks-uri=https://identity.example.test/jwks",
+            "datarun.web-admin.oidc.client-id=datarun-web-admin",
+            "datarun.web-admin.oidc.client-secret=test-only-web-admin-client-secret",
+            "datarun.web-admin.oidc.authorization-uri=https://identity.example.test/auth",
+            "datarun.web-admin.oidc.token-uri=https://identity.example.test/token",
+            "datarun.web-admin.oidc.redirect-uri=https://app.example.test/web-admin/oidc/callback",
             "datarun.auth.principal-bindings.applied-by=operator:release-123",
             "spring.datasource.url=jdbc:postgresql://database.internal/datarun_prod",
             "spring.datasource.username=datarun_runtime",
@@ -30,6 +35,7 @@ class ProductionRuntimeValidatorTest {
     @Test
     void validProductionConfigurationStartsContext() {
         new ApplicationContextRunner()
+                .withInitializer(new ConfigDataApplicationContextInitializer())
                 .withInitializer(context ->
                         context.getEnvironment().setActiveProfiles("production"))
                 .withUserConfiguration(ProductionRuntimeValidator.class)
@@ -52,6 +58,11 @@ class ProductionRuntimeValidatorTest {
                 Map.entry("datarun.auth.oidc.issuer", ""),
                 Map.entry("datarun.auth.oidc.audience", ""),
                 Map.entry("datarun.auth.oidc.jwks-uri", ""),
+                Map.entry("datarun.web-admin.oidc.client-id", ""),
+                Map.entry("datarun.web-admin.oidc.client-secret", ""),
+                Map.entry("datarun.web-admin.oidc.authorization-uri", ""),
+                Map.entry("datarun.web-admin.oidc.token-uri", ""),
+                Map.entry("datarun.web-admin.oidc.redirect-uri", ""),
                 Map.entry(
                         "datarun.auth.principal-bindings.applied-by",
                         ProductionRuntimeValidator.DEFAULT_BINDING_OPERATOR),
@@ -113,6 +124,30 @@ class ProductionRuntimeValidatorTest {
                     assertThat(context.getEnvironment().getProperty(
                             "spring.lifecycle.timeout-per-shutdown-phase"))
                             .isEqualTo("30s");
+                });
+    }
+
+    @Test
+    void productionProfileUsesLaxSecureHttpOnlyWebAdminCookie() {
+        new ApplicationContextRunner()
+                .withInitializer(new ConfigDataApplicationContextInitializer())
+                .withInitializer(context ->
+                        context.getEnvironment().setActiveProfiles("production"))
+                .withPropertyValues(VALID_PROPERTIES)
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context.getEnvironment().getProperty(
+                            "server.servlet.session.cookie.name"))
+                            .isEqualTo("DATARUN_ADMIN_SESSION");
+                    assertThat(context.getEnvironment().getProperty(
+                            "server.servlet.session.cookie.http-only"))
+                            .isEqualTo("true");
+                    assertThat(context.getEnvironment().getProperty(
+                            "server.servlet.session.cookie.secure"))
+                            .isEqualTo("true");
+                    assertThat(context.getEnvironment().getProperty(
+                            "server.servlet.session.cookie.same-site"))
+                            .isEqualTo("lax");
                 });
     }
 

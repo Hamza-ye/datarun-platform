@@ -38,13 +38,12 @@ public class WebAdminSessionController {
                 .build();
     }
 
-    @PostMapping("/oidc/callback")
+    @GetMapping("/oidc/callback")
     public ResponseEntity<String> oidcCallback(HttpServletRequest request,
                                                @RequestParam(required = false) String state,
-                                               @RequestParam(name = "id_token", required = false)
-                                               String idToken) {
+                                               @RequestParam(required = false) String code) {
         try {
-            sessionService.completeLogin(request, state, idToken);
+            sessionService.completeLogin(request, state, code);
             return ResponseEntity.status(HttpStatus.SEE_OTHER)
                     .location(URI.create("/web-admin/shell"))
                     .build();
