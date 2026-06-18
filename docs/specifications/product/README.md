@@ -27,4 +27,4 @@ Each product specification should include:
 
 | Specification | Status | Owner | Source NW | Supersedes |
 |---|---|---|---|---|
-| None yet | - | - | - | - |
+| [Product Candidate 1](product-candidate-1.md) | accepted | product steward | NW-084 | none |

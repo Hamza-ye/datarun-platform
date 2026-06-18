@@ -3,11 +3,11 @@
 Status: non-binding stewardship note
 Document type: routing_artifact
 Owner: project shepherd
-Source: NW-082 accepted non-binding routing artifact and NW-083 orchestration handoff
+Source: NW-082 accepted non-binding routing artifact, NW-083 accepted tenancy routing, and NW-084 accepted product specification
 Authority: none; preserves routing continuity under the CDL, contracts, accepted specifications, BAR, NW backlog, and operations documents
 Last reviewed: 2026-06-18
 Supersedes: none
-Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`; `docs/agent-working-surface/platform-next-work-backlog.md`; `docs/agent-working-surface/prompts/NW-083-decide-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`; `docs/agent-working-surface/artifacts/2026-06-18-multi-tenancy-architecture-analysis.md`; `docs/specifications/platform/production-web-admin-authentication-and-authority.md`
+Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`; `docs/agent-working-surface/artifacts/NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`; `docs/specifications/product/product-candidate-1.md`; `docs/agent-working-surface/platform-next-work-backlog.md`; `docs/agent-working-surface/artifacts/2026-06-18-multi-tenancy-architecture-analysis.md`; `docs/specifications/platform/production-web-admin-authentication-and-authority.md`
 
 ## Current
 
@@ -17,30 +17,33 @@ Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milest
 - NW-083 is accepted for routing only: the reversible PC1 lane is one
   customer-facing Organization mapped to one managed single-tenant Datarun
   deployment with one internal/default Workspace.
-- The next actionable work is NW-084: specify Product Candidate 1 user-visible
-  scope and acceptance criteria under `docs/specifications/product/`.
+- NW-084 is accepted as the Product Candidate 1 product specification at
+  `docs/specifications/product/product-candidate-1.md`.
+- The next actionable work is NW-086: route and run the production web admin
+  login/session boundary as the first PC1 implementation lane.
 - Sidecar agents collected bounded evidence for product vocabulary,
   platform/contracts, and ops/control-plane reversibility. Final decisions
   remained local to the orchestrator.
 
 ## Next
 
-Run:
+Route and run:
 
 ```text
-docs/agent-working-surface/prompts/NW-084-specify-product-candidate-1-user-visible-milestone.md
+NW-086: Implement production web admin login and session boundary
 ```
 
-NW-084 should create and index
-`docs/specifications/product/product-candidate-1.md`. It should use
-Organization as the default top-level customer-facing term, keep Tenant and
-multi-Workspace internals out of product copy, and avoid real-production
-claims.
+NW-086 should use a bounded prompt and implement only browser OIDC/JWKS login,
+server session, CSRF, logout, expiry, principal-binding revalidation, admin
+actor context, login/session audit, and a minimal protected shell. Config UI
+expansion, command policy, assignment administration, mobile login, and real
+production remain separate rows.
 
 ## Blocked Until Routed
 
-- Product Candidate 1 product specification and user-visible copy until
-  NW-084 lands.
+- Admin command policy and scoped shell gates until NW-087 lands.
+- Productized setup/config workflow and assignment admin UX until their
+  implementation rows are selected after NW-087.
 - Tenant-aware auth, membership, storage, sync/config context, admin context,
   and mobile local partitioning.
 - Pooled multi-tenant storage and tenant isolation test harness.
@@ -56,6 +59,6 @@ claims.
 - Do not collapse admin roles into a generic admin.
 - Do not claim real production readiness from synthetic reference-deployment
   evidence.
-- Do not fold mobile OIDC, reporting/export, retention/security, conflict
-  automation, online principal-binding admin, new scopes, or production
-  approval into NW-084.
+- Do not fold config UI expansion, admin command gates, mobile OIDC,
+  reporting/export, retention/security, conflict automation, online
+  principal-binding admin, new scopes, or production approval into NW-086.
