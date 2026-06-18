@@ -4,10 +4,17 @@ You are working in `/home/hamza/datarun-platform`.
 
 ## Current Standing
 
-NW-086 is accepted: `/web-admin` now provides a separate browser login/session
-boundary with OIDC/JWKS validation, server-managed session state, CSRF, logout,
+NW-086 is accepted after auth-code repair commit `b6388c4`: `/web-admin` now
+provides a separate browser login/session boundary with OIDC authorization-code
+login initiation, browser-style GET callback, server-side token exchange,
+OIDC/JWKS id-token validation, server-managed session state, CSRF, logout,
 expiry, principal-binding revalidation, secret-safe audit events, and a minimal
 protected shell.
+
+NW-071 remains a candidate durable-surface extraction for shared-device
+session/local-state behavior. It is not a prerequisite for this server-side
+web-admin command gate unless this slice drifts into mobile login/session,
+tenant-aware mobile partitions, shared-device UX, or retention/security work.
 
 The current Thymeleaf `/admin`, `/admin/config`, and `/admin/dev` lanes remain
 development-only. Do not productionize those controllers or templates.
