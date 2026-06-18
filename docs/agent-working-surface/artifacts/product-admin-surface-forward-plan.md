@@ -24,7 +24,7 @@ being bundled into one unsafe implementation slice.
 
 | Candidate route from NW-056 | Current backlog status | Recommended promotion |
 |---|---|---|
-| Production web admin authentication and admin-authority model | No standalone NW row. It exists as a candidate successor route inside accepted NW-056. | Promote first as a P1 `future_decision` or product/platform decision row. |
+| Production web admin authentication and admin-authority model | Promoted as NW-079 with status `ready`. | Run NW-079 first as the bounded decision/spec brief before production web admin UI implementation. |
 | Web admin/config UX productization over accepted config surfaces | No standalone NW row. It exists as a candidate successor route inside accepted NW-056. | Promote after the admin-auth decision for production implementation. Product design may be routed earlier only with the development-console caveat. |
 | Mobile operational vocabulary and navigation polish | No standalone NW row. It exists as a candidate successor route inside accepted NW-056. | Promote as a P2 product design/implementation row if scoped to vocabulary/navigation over accepted behavior. Select NW-071 first if the slice depends on shared-device session or local-state semantics. |
 
@@ -71,7 +71,9 @@ Existing rows that must not be silently absorbed:
 
 ## Work Item A: Admin Auth Decision
 
-Recommended backlog row:
+Promoted backlog row: NW-079.
+
+Recommended route shape:
 
 | Field | Value |
 |---|---|
