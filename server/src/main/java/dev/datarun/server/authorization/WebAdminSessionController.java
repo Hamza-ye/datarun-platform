@@ -82,6 +82,11 @@ public class WebAdminSessionController {
                 """.formatted(
                 HtmlUtils.htmlEscape(csrf.getParameterName()),
                 HtmlUtils.htmlEscape(csrf.getToken()));
+        String configLink = hasAnyConfigCommand(context)
+                ? """
+                    <p><a href="/web-admin/config">Setup</a></p>
+                    """
+                : "";
         String body = """
                 <!doctype html>
                 <html lang="en">
@@ -96,6 +101,7 @@ public class WebAdminSessionController {
                       <dt>Actor</dt><dd>%s</dd>
                       <dt>Auth source</dt><dd>%s</dd>
                     </dl>
+                    %s
                     <form method="post" action="/web-admin/session/probe">
                       %s
                       <button type="submit">Check session</button>
@@ -110,6 +116,7 @@ public class WebAdminSessionController {
                 """.formatted(
                 HtmlUtils.htmlEscape(context.actorId().toString()),
                 HtmlUtils.htmlEscape(context.authSource()),
+                configLink,
                 csrfInput,
                 csrfInput);
         return ResponseEntity.ok()
@@ -157,5 +164,18 @@ public class WebAdminSessionController {
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body("{\"error\":\"" + HtmlUtils.htmlEscape(reason) + "\"}");
+    }
+
+    private boolean hasAnyConfigCommand(WebAdminSessionContext context) {
+        return adminCommandCapabilityService.actorGrants(
+                context.actorId(), AdminCommandCapabilityPolicy.CONFIG_ADMIN_AUTHOR)
+                || adminCommandCapabilityService.actorGrants(
+                context.actorId(), AdminCommandCapabilityPolicy.CONFIG_ADMIN_VALIDATE)
+                || adminCommandCapabilityService.actorGrants(
+                context.actorId(), AdminCommandCapabilityPolicy.CONFIG_ADMIN_READINESS_REVIEW)
+                || adminCommandCapabilityService.actorGrants(
+                context.actorId(), AdminCommandCapabilityPolicy.CONFIG_ADMIN_APPROVE)
+                || adminCommandCapabilityService.actorGrants(
+                context.actorId(), AdminCommandCapabilityPolicy.CONFIG_ADMIN_PUBLISH);
     }
 }
