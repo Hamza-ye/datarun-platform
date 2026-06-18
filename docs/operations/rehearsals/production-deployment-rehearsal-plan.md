@@ -46,7 +46,8 @@ Before scheduling, record:
 both the previous accepted and candidate images must be available by digest,
 the candidate must pass full preflight, upgrade/rollback compatibility
 evidence must be recorded, and the solo cold-recovery session/account boundary
-must be prepared. Otherwise NW-067 remains blocked.
+must be prepared. Otherwise a new or restarted production-deployment
+rehearsal remains blocked.
 
 ## 3. Environment And Data
 

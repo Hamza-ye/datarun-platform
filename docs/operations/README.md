@@ -28,11 +28,10 @@ documentation.
 
 NW-063 selected the reference deployment class, NW-064 supplies its accepted
 operating policy, NW-065 supplies tested reference tooling, and NW-066 supplies
-the accepted runbook and reusable rehearsal plan. The 2026-06-17 NW-067 attempt
-is recorded as partial: R1-R9 produced useful reference-environment evidence,
-and successor adapters NW-075 through NW-078 now cover backup encryption,
-credential/JWKS rotation, and alert delivery. The 2026-06-18 fresh-session R12
-attempt failed on stale backup/RPO posture and a missing documented
-fresh-session bearer-token path; NW-080 and NW-081 accepted fixes for those
-blockers, but R12 still must be rerun before any NW-067 pass claim.
-Independent human continuity remains explicitly unproven.
+the accepted runbook and reusable rehearsal plan. NW-067 is accepted by
+composite synthetic reference-environment evidence: the 2026-06-17 run produced
+R1-R9 evidence, accepted successor adapters NW-075 through NW-081 covered
+backup encryption, credential/JWKS rotation, alert delivery, stale-backup/RPO,
+and fresh-session token-path gaps, and the later 2026-06-18 fresh-session R12
+rerun passed. Real production and independent human continuity remain
+explicitly unproven.

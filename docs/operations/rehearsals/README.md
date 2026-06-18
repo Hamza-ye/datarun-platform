@@ -42,10 +42,11 @@ rehearsal record.
 | Rehearsal | Type | Status/result | Runbook | Source NW | Date |
 |---|---|---|---|---|---|
 | [Production deployment rehearsal plan](production-deployment-rehearsal-plan.md) | Plan | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-066; NW-067 amendment | Not executed |
-| [2026-06-17 production deployment reference environment](2026-06-17-production-deployment-reference-environment.md) | Record | `partial` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-067 | 2026-06-17 |
+| [2026-06-17 production deployment reference environment](2026-06-17-production-deployment-reference-environment.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-067 | 2026-06-17 |
 | [2026-06-17 encrypted backup/PITR adapter](2026-06-17-encrypted-backup-pitr-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-075 | 2026-06-17 |
 | [2026-06-17 DB credential rotation adapter](2026-06-17-db-credential-rotation-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-076 | 2026-06-17 |
 | [2026-06-17 Keycloak/JWKS rotation adapter](2026-06-17-keycloak-jwks-rotation-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-077 | 2026-06-17 |
 | [2026-06-17 monitoring alert adapter](2026-06-17-monitoring-alert-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-078 | 2026-06-17 |
 | [2026-06-18 encrypted backup recovery-point refresh](2026-06-18-encrypted-backup-recovery-point-refresh.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-080 | 2026-06-18 |
 | [2026-06-18 fresh-session protected-smoke token path](2026-06-18-fresh-session-protected-smoke-token-path.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-081 | 2026-06-18 |
+| [2026-06-18 production deployment R12 fresh-session rerun](2026-06-18-production-deployment-r12-fresh-session-rerun.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-067 | 2026-06-18 |
