@@ -33,21 +33,22 @@ Read only this packet by default:
 6. `docs/agent-working-surface/artifacts/product-admin-surface-forward-plan.md`
 7. `docs/agent-working-surface/artifacts/NW-056-product-standing-and-production-readiness-map.md`
 8. `docs/agent-working-surface/operational-ux-layering-companion.md`
-9. `docs/agent-working-surface/decision-anchor-layer/README.md`
-10. `docs/agent-working-surface/decision-anchor-layer/gap-routing-playbook.md`
-11. `docs/specifications/platform/production-auth-principal-binding.md`
-12. `docs/specifications/platform/assignment-scope-and-administration.md`
-13. `docs/specifications/platform/configuration-package-and-shapes.md`
-14. `docs/specifications/platform/expression-language.md`
-15. `contracts/sync-protocol.md`
-16. `contracts/config-package.schema.json`
-17. `contracts/shape-format.schema.json`
-18. `contracts/flag-catalog.md`
-19. `docs/implementation/module-interfaces.md` sections for Authenticated
+9. `docs/scenarios/23-configure-new-operational-activity.md`
+10. `docs/agent-working-surface/decision-anchor-layer/README.md`
+11. `docs/agent-working-surface/decision-anchor-layer/gap-routing-playbook.md`
+12. `docs/specifications/platform/production-auth-principal-binding.md`
+13. `docs/specifications/platform/assignment-scope-and-administration.md`
+14. `docs/specifications/platform/configuration-package-and-shapes.md`
+15. `docs/specifications/platform/expression-language.md`
+16. `contracts/sync-protocol.md`
+17. `contracts/config-package.schema.json`
+18. `contracts/shape-format.schema.json`
+19. `contracts/flag-catalog.md`
+20. `docs/implementation/module-interfaces.md` sections for Authenticated
     Actor Resolver, Assignment Admin Capability Policy, Config Packager,
     Conflict Resolution, Production Runtime Boundary, and any web/admin
     module notes
-20. Current web/admin and auth implementation evidence:
+21. Current web/admin and auth implementation evidence:
     - `server/src/main/java/dev/datarun/server/authorization/WebConfig.java`
     - `server/src/main/java/dev/datarun/server/admin/AdminController.java`
     - `server/src/main/java/dev/datarun/server/config/ConfigAdminController.java`
@@ -74,21 +75,30 @@ rewrite the whole CDL.
 2. Which admin tasks are in scope first: admin shell access, config edit,
    validation, publish, assignment create/end, location/subject inspection,
    flag inspection/resolution, or development bootstrap containment?
-3. Which browser/session authentication mode should be selected for first
+3. For the S23 setup path, which actions are distinct authority points:
+   authoring a new activity, validating the candidate setup, approving it for
+   field rollout, publishing the atomic package, assigning responsibility, and
+   reviewing whether the setup is ready?
+4. How does the authority model preserve accepted config behavior: invalid
+   setup is caught before field dependency, workers may receive different
+   config versions at different times, in-progress work remains interpretable
+   under the rules that existed when it began, and warning rules do not become
+   scripts or custom processing?
+5. Which browser/session authentication mode should be selected for first
    production web admin:
    - bearer token only;
    - OIDC/JWKS login with server-managed session cookie;
    - reverse-proxy authenticated identity forwarded to the app;
    - development admin remains dev-only and production web admin is deferred?
-4. How does the chosen mode resolve the admin request to the accepted platform
+6. How does the chosen mode resolve the admin request to the accepted platform
    actor context without using IdP claims as platform authority?
-5. Which admin actions are governed by accepted assignment-admin command
+7. Which admin actions are governed by accepted assignment-admin command
    authority, which require explicit web-admin/config-admin command authority,
    and which remain deployment-managed only?
-6. What audit semantics are required for login/session, config changes,
-   config publish, assignment commands, flag resolution, and development
-   surface containment?
-7. Which surfaces remain deferred: online principal-binding administration,
+8. What audit semantics are required for login/session, config authoring,
+   config validation, setup approval, config publish, assignment commands,
+   flag resolution, and development surface containment?
+9. Which surfaces remain deferred: online principal-binding administration,
    mobile OIDC login, reporting/export, retention/security, broad audit reads,
    conflict batch handling, resolver reassignment, auto-resolution, new scope
    mechanisms, and production deployment approval?
@@ -113,6 +123,8 @@ The durable output must include:
 
 - document metadata required by `docs/documentation-organization.md`;
 - admin persona/context and task inventory;
+- S23 setup authority mapping for authoring, validation, approval, publish,
+  responsibility assignment, and readiness review;
 - selected authentication/session mode and rejected alternatives;
 - server-resolved admin actor context semantics;
 - command authority model for each selected admin task;
