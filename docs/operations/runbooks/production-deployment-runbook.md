@@ -353,14 +353,17 @@ curl --config "$DATARUN_AUTH_CURL_CONFIG" --fail --silent --show-error \
   --output "$DATARUN_EVIDENCE_DIR/config-package.json"
 ```
 
-Expected: transactional validation succeeds, both command results have the
-same `input_sha256` and `config_version`, the second has `published=false`,
-one package version is current, and the HTTP response has that package and
-ETag.
+Expected: transactional validation succeeds, reviewed deployment config
+includes `assignment_admin_capabilities` and `admin_command_capabilities`,
+both command results have the same `input_sha256` and `config_version`, the
+second has `published=false`, one package version is current, and the HTTP
+response has that package and ETag. `admin_command_capabilities` is server-side
+deployment config only; it must not appear in the config package.
 
-**Stop:** omitted existing config, validation failure, partial publication,
-unexpected new version on exact reapply, or need for a development admin
-surface. Correct the complete reviewed input; do not patch tables directly.
+**Stop:** omitted existing config, validation failure, invalid admin command
+capability policy, partial publication, unexpected new version on exact
+reapply, or need for a development admin surface. Correct the complete
+reviewed input; do not patch tables directly.
 
 ## 9. Initial Assignment Bootstrap
 

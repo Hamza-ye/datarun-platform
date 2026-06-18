@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.datarun.server.authorization.AdminCommandCapabilityService;
 import dev.datarun.server.authorization.AssignmentAdminCapabilityService;
 import dev.datarun.server.config.Activity;
 import dev.datarun.server.config.ActivityService;
@@ -46,6 +47,7 @@ public class ReviewedConfigProvisioner {
     private final DeployTimeValidator deployTimeValidator;
     private final FlagSeverityConfigService flagSeverityConfigService;
     private final AssignmentAdminCapabilityService assignmentAdminCapabilityService;
+    private final AdminCommandCapabilityService adminCommandCapabilityService;
     private final ConfigPackager configPackager;
 
     public ReviewedConfigProvisioner(
@@ -57,6 +59,7 @@ public class ReviewedConfigProvisioner {
             DeployTimeValidator deployTimeValidator,
             FlagSeverityConfigService flagSeverityConfigService,
             AssignmentAdminCapabilityService assignmentAdminCapabilityService,
+            AdminCommandCapabilityService adminCommandCapabilityService,
             ConfigPackager configPackager) {
         this.objectMapper = objectMapper;
         this.jdbc = jdbc;
@@ -66,6 +69,7 @@ public class ReviewedConfigProvisioner {
         this.deployTimeValidator = deployTimeValidator;
         this.flagSeverityConfigService = flagSeverityConfigService;
         this.assignmentAdminCapabilityService = assignmentAdminCapabilityService;
+        this.adminCommandCapabilityService = adminCommandCapabilityService;
         this.configPackager = configPackager;
     }
 
@@ -116,6 +120,7 @@ public class ReviewedConfigProvisioner {
         requirePresent(manifest.expressions(), "expressions");
         requirePresent(manifest.flagSeverityOverrides(), "flag_severity_overrides");
         requirePresent(manifest.assignmentAdminCapabilities(), "assignment_admin_capabilities");
+        requirePresent(manifest.adminCommandCapabilities(), "admin_command_capabilities");
 
         Set<String> shapeRefs = new HashSet<>();
         Map<String, Set<Integer>> versionsByName = new HashMap<>();
@@ -326,6 +331,13 @@ public class ReviewedConfigProvisioner {
                             manifest.assignmentAdminCapabilities(), operatorId));
             changed++;
         }
+        if (!adminCommandCapabilityService.getValidatedPolicy()
+                .equals(manifest.adminCommandCapabilities())) {
+            requireNoViolations("admin_command_capabilities",
+                    adminCommandCapabilityService.updatePolicy(
+                            manifest.adminCommandCapabilities(), operatorId));
+            changed++;
+        }
         return changed;
     }
 
@@ -391,7 +403,8 @@ public class ReviewedConfigProvisioner {
             List<ReviewedActivity> activities,
             List<ReviewedExpression> expressions,
             @JsonProperty("flag_severity_overrides") JsonNode flagSeverityOverrides,
-            @JsonProperty("assignment_admin_capabilities") JsonNode assignmentAdminCapabilities) {}
+            @JsonProperty("assignment_admin_capabilities") JsonNode assignmentAdminCapabilities,
+            @JsonProperty("admin_command_capabilities") JsonNode adminCommandCapabilities) {}
 
     public record ReviewedShape(
             String name,

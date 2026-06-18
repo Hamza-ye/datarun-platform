@@ -99,17 +99,34 @@ version.
   "assignment_admin_capabilities": {
     "schema_version": 1,
     "roles": {}
+  },
+  "admin_command_capabilities": {
+    "schema_version": 1,
+    "actors": {
+      "11111111-1111-1111-1111-111111111111": [
+        "web_admin.access",
+        "config_admin.author",
+        "config_admin.validate",
+        "config_admin.readiness_review",
+        "config_admin.approve",
+        "config_admin.publish"
+      ]
+    }
   }
 }
 ```
 
-All seven top-level fields are required and unknown fields are rejected.
+All eight top-level fields are required and unknown fields are rejected.
 Shape and activity status is `active` or `deprecated`; sensitivity is
 `standard`, `elevated`, or `restricted`. Expression entries require `id`,
 `activity_ref`, `shape_ref`, `field_name`, `rule_type`, and `expression`;
 `message` is optional. Existing shape, activity, expression, severity, pattern,
-and assignment-admin validators remain authoritative. The command publishes
-only after full deploy-time validation succeeds transactionally.
+assignment-admin, and web/config admin command validators remain authoritative.
+`admin_command_capabilities` seeds only server-side deployment config for
+`/web-admin` and future config-admin handlers. It is not packaged to mobile
+clients and is not IdP claim, assignment-role, request-body, or UI-selected
+authority. The command publishes only after full deploy-time validation
+succeeds transactionally.
 
 ## Initial Assignment Bootstrap
 

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
+import dev.datarun.server.authorization.AdminCommandCapabilityService;
+import dev.datarun.server.config.AdminCommandCapabilityPolicy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ class OneShotProvisioningIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private OneShotProvisioningService provisioningService;
+
+    @Autowired
+    private AdminCommandCapabilityService adminCommandCapabilityService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -114,6 +119,13 @@ class OneShotProvisioningIntegrationTest extends AbstractIntegrationTest {
         assertThat(count("activities")).isEqualTo(1);
         assertThat(count("expression_rules")).isEqualTo(1);
         assertThat(count("config_packages")).isEqualTo(1);
+        assertThat(count("deployment_config")).isEqualTo(2);
+        assertThat(adminCommandCapabilityService.actorGrants(
+                ACTOR, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS)).isTrue();
+        assertThat(adminCommandCapabilityService.actorGrants(
+                ACTOR, AdminCommandCapabilityPolicy.CONFIG_ADMIN_PUBLISH)).isTrue();
+        assertThat(adminCommandCapabilityService.actorGrants(
+                OTHER_ACTOR, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS)).isFalse();
         assertThat(jdbcTemplate.queryForObject("""
                 SELECT published_by
                 FROM config_packages
@@ -134,6 +146,33 @@ class OneShotProvisioningIntegrationTest extends AbstractIntegrationTest {
         assertThat(count("activities")).isZero();
         assertThat(count("expression_rules")).isZero();
         assertThat(count("config_packages")).isZero();
+        assertThat(count("deployment_config")).isZero();
+    }
+
+    @Test
+    void invalidAdminCommandPolicyRollsBackReviewedConfig() throws Exception {
+        ObjectNode invalid = (ObjectNode) objectMapper.readTree(
+                reviewedConfigManifest("capture"));
+        ObjectNode capabilities = objectMapper.createObjectNode();
+        capabilities.put("schema_version", 1);
+        capabilities.putObject("actors")
+                .putArray(ACTOR.toString())
+                .add(AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS)
+                .add("not_supported");
+        invalid.set("admin_command_capabilities", capabilities);
+
+        assertThatThrownBy(() -> provisioningService.execute(
+                "config-publish", objectMapper.writeValueAsString(invalid),
+                OPERATOR, "CHG-003A"))
+                .isInstanceOf(ProvisioningCommandException.class)
+                .hasMessageContaining("admin_command_capabilities is invalid")
+                .hasMessageContaining("Unknown admin command 'not_supported'");
+
+        assertThat(count("shapes")).isZero();
+        assertThat(count("activities")).isZero();
+        assertThat(count("expression_rules")).isZero();
+        assertThat(count("config_packages")).isZero();
+        assertThat(count("deployment_config")).isZero();
     }
 
     @Test
@@ -219,6 +258,17 @@ class OneShotProvisioningIntegrationTest extends AbstractIntegrationTest {
                 .add("assignment_admin.create")
                 .add("assignment_admin.end");
 
+        ObjectNode adminCommandCapabilities = objectMapper.createObjectNode();
+        adminCommandCapabilities.put("schema_version", 1);
+        adminCommandCapabilities.putObject("actors")
+                .putArray(ACTOR.toString())
+                .add(AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS)
+                .add(AdminCommandCapabilityPolicy.CONFIG_ADMIN_AUTHOR)
+                .add(AdminCommandCapabilityPolicy.CONFIG_ADMIN_VALIDATE)
+                .add(AdminCommandCapabilityPolicy.CONFIG_ADMIN_READINESS_REVIEW)
+                .add(AdminCommandCapabilityPolicy.CONFIG_ADMIN_APPROVE)
+                .add(AdminCommandCapabilityPolicy.CONFIG_ADMIN_PUBLISH);
+
         Map<String, Object> manifest = new LinkedHashMap<>();
         manifest.put("schema_version", 1);
         manifest.put("source", "change:config-001");
@@ -242,6 +292,7 @@ class OneShotProvisioningIntegrationTest extends AbstractIntegrationTest {
                 "expression", expression)));
         manifest.put("flag_severity_overrides", objectMapper.createObjectNode());
         manifest.put("assignment_admin_capabilities", capabilities);
+        manifest.put("admin_command_capabilities", adminCommandCapabilities);
         return objectMapper.writeValueAsString(manifest);
     }
 

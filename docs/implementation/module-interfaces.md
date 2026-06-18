@@ -73,11 +73,11 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 ## Web/Config Admin Command Capability Policy
 
 - **Owns**: server-side deployment-configured `admin_command_capabilities` actor-to-command policy for platform-owned `web_admin.access`, `web_admin.read_scoped`, and `config_admin.*` command names.
-- **Inputs**: the server-resolved `WebAdminSessionContext.actorId()`, validated policy JSON from `deployment_config`, and command constants selected by server-side handlers.
+- **Inputs**: the server-resolved `WebAdminSessionContext.actorId()`, policy JSON from `deployment_config` seeded by reviewed one-shot provisioning, and command constants selected by server-side handlers.
 - **Outputs**: command-capability decisions used by the production `/web-admin` shell gate and future web/config admin handlers. Missing, malformed, or unknown-command policy fails closed for command evaluation.
 - **Storage**: `deployment_config` row keyed `admin_command_capabilities`; policy maps explicit actor UUIDs to command arrays and is not packaged to mobile clients.
 - **Forbidden**: assignment roles, `activities[*].roles`, IdP groups/claims/roles, JWT `actor_id`, request-body actor IDs, UI-selected actors, fixed development admin actors, config-package authority, assignment-admin containment bypass, resolver authority, broad data-read authority, config workflow implementation, contracts/schemas/envelopes/migrations/mobile auth changes, or production deployment approval.
-- **Guards**: `AdminCommandCapabilityServiceIntegrationTest`, `WebAdminSessionBoundaryTest`, `WebAdminSecurityFoundationTest`, `ProductionAuthIntegrationTest`, and `ProductionDevelopmentSurfaceFilterTest`.
+- **Guards**: `AdminCommandCapabilityServiceIntegrationTest`, `OneShotProvisioningIntegrationTest`, `WebAdminSessionBoundaryTest`, `WebAdminSecurityFoundationTest`, `ProductionAuthIntegrationTest`, and `ProductionDevelopmentSurfaceFilterTest`.
 
 ## Authenticated Actor Resolver
 
