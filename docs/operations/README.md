@@ -33,5 +33,6 @@ is recorded as partial: R1-R9 produced useful reference-environment evidence,
 and successor adapters NW-075 through NW-078 now cover backup encryption,
 credential/JWKS rotation, and alert delivery. The 2026-06-18 fresh-session R12
 attempt failed on stale backup/RPO posture and a missing documented
-fresh-session bearer-token path; NW-080 and NW-081 route those fixes before any
-NW-067 pass claim. Independent human continuity remains explicitly unproven.
+fresh-session bearer-token path; NW-080 and NW-081 accepted fixes for those
+blockers, but R12 still must be rerun before any NW-067 pass claim.
+Independent human continuity remains explicitly unproven.

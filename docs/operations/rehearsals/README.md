@@ -47,3 +47,5 @@ rehearsal record.
 | [2026-06-17 DB credential rotation adapter](2026-06-17-db-credential-rotation-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-076 | 2026-06-17 |
 | [2026-06-17 Keycloak/JWKS rotation adapter](2026-06-17-keycloak-jwks-rotation-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-077 | 2026-06-17 |
 | [2026-06-17 monitoring alert adapter](2026-06-17-monitoring-alert-adapter.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-078 | 2026-06-17 |
+| [2026-06-18 encrypted backup recovery-point refresh](2026-06-18-encrypted-backup-recovery-point-refresh.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-080 | 2026-06-18 |
+| [2026-06-18 fresh-session protected-smoke token path](2026-06-18-fresh-session-protected-smoke-token-path.md) | Record | `accepted` | [Production deployment](../runbooks/production-deployment-runbook.md) | NW-081 | 2026-06-18 |

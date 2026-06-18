@@ -21,12 +21,14 @@ did not pass R10 credential/JWKS rotation, R11 alert delivery, or R12
 fresh-session solo cold recovery, and its backup adapter reported `cipher:
 none`.
 
-Accepted successor adapters NW-075, NW-076, NW-077, and NW-078 now cover the
+Accepted successor adapters NW-075, NW-076, NW-077, and NW-078 cover the
 backup encryption, DB credential rotation, Keycloak/JWKS rotation, and
-monitoring/alert-delivery gaps for the successor path. NW-067 is still not
-accepted because the 2026-06-18 fresh-session R12 attempt found stale
-backup/recovery posture outside the 1-hour RPO and lacked a documented
-fresh-session bearer-token path for authorized protected smoke.
+monitoring/alert-delivery gaps for the successor path. The 2026-06-18
+fresh-session R12 attempt then found stale backup/recovery posture outside the
+1-hour RPO and lacked a documented fresh-session bearer-token path for
+authorized protected smoke. NW-080 and NW-081 now accept fixes for those two
+R12 blockers, but NW-067 is still not accepted until R12 is rerun from a
+genuinely fresh privileged Hamza session.
 
 This record does not approve real production, real data, mobile OAuth/OIDC
 login UX, independent human continuity, a real production alert recipient, or a
@@ -104,10 +106,8 @@ Cleanup completed after evidence inspection on 2026-06-17:
 - Retain accepted successor adapters NW-075, NW-076, NW-077, and NW-078 as the
   backup encryption, DB credential rotation, Keycloak/JWKS rotation, and
   monitoring/alert-delivery evidence for the successor path.
-- Clear the live `DatarunBackupStale` condition with a fresh accepted encrypted
-  recovery point, preserve the alert/recovery evidence, provide a documented
-  fresh-session synthetic bearer-token path for the active rotated principal,
-  then rerun R12.
+- Rerun R12 from a genuinely fresh privileged Hamza session with accepted
+  successor adapters NW-075 through NW-081 in place.
 
 ## Successor Standing Update
 
@@ -131,3 +131,14 @@ Alertmanager was ready; DB1 had 10 successful Flyway rows, 8 events with max
 watermark 9, config version 1, and 2 active principal bindings. The attempt
 did not pass because the latest recovery point was outside the 1-hour RPO and
 authorized protected smoke lacked a documented fresh-session token path.
+
+Later on 2026-06-18, NW-080 refreshed the accepted encrypted backup recovery
+point with pgBackRest diff backup `20260617-022519F_20260618-131808D`,
+latest recoverable time `2026-06-18T13:18:14Z`, RPO age `66` seconds, and
+resolved `DatarunBackupStale`. NW-081 then proved a fresh-session protected
+smoke token path for the active rotated synthetic principal and reran
+`/api/auth/me`, `/api/sync/config`, and `/api/sync/pull` with HTTP 200 while
+retaining no raw token material. These successor records clear the two R12
+blockers found by the failed 2026-06-18 attempt, but the R12 scenario itself
+still must be rerun from a genuinely fresh privileged Hamza session before
+NW-067 can be accepted.
