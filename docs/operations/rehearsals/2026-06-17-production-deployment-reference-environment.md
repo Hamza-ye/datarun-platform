@@ -3,7 +3,7 @@ Document type: rehearsal_record
 Owner: Hamza
 Source: NW-067; `docs/agent-working-surface/prompts/NW-067-rehearse-production-deployment-recovery.md`
 Authority: operates within `docs/operations/policies/first-reference-deployment-policy.md`, `docs/operations/runbooks/production-deployment-runbook.md`, and `docs/operations/rehearsals/production-deployment-rehearsal-plan.md`
-Last reviewed: 2026-06-17
+Last reviewed: 2026-06-18
 Supersedes: none
 Related: `docs/operations/rehearsals/production-deployment-rehearsal-plan.md`; raw evidence at `/opt/datarun-lab/evidence/NW-067-2026-06-17`
 
@@ -13,9 +13,24 @@ Related: `docs/operations/rehearsals/production-deployment-rehearsal-plan.md`; r
 
 Final result: `partial`.
 
-R1-R9 produced useful synthetic reference-environment evidence, including clean install, corrected clean migration repeatability, auth/TLS negative checks, provisioning idempotency, sync smoke, measured restore, previous-to-candidate upgrade, and contained failed-start response. NW-067 is not accepted because R10 credential/JWKS rotation, R11 alert delivery, and R12 fresh-session solo cold recovery did not pass. The backup adapter also reported `cipher: none`, so backup encryption policy compliance remains unproven even where restore timing passed.
+R1-R9 produced useful synthetic reference-environment evidence, including clean
+install, corrected clean migration repeatability, auth/TLS negative checks,
+provisioning idempotency, sync smoke, measured restore, previous-to-candidate
+upgrade, and contained failed-start response. The original 2026-06-17 attempt
+did not pass R10 credential/JWKS rotation, R11 alert delivery, or R12
+fresh-session solo cold recovery, and its backup adapter reported `cipher:
+none`.
 
-This record does not approve real production, real data, mobile OAuth/OIDC login UX, independent human continuity, or turnkey monitoring/rotation readiness.
+Accepted successor adapters NW-075, NW-076, NW-077, and NW-078 now cover the
+backup encryption, DB credential rotation, Keycloak/JWKS rotation, and
+monitoring/alert-delivery gaps for the successor path. NW-067 is still not
+accepted because the 2026-06-18 fresh-session R12 attempt found stale
+backup/recovery posture outside the 1-hour RPO and lacked a documented
+fresh-session bearer-token path for authorized protected smoke.
+
+This record does not approve real production, real data, mobile OAuth/OIDC
+login UX, independent human continuity, a real production alert recipient, or a
+production token-handling procedure.
 
 ## Environment
 
@@ -42,17 +57,28 @@ Previous image built for R8 from accepted commit `3dc09b5d89c2754e94ed1b538b4036
 | R7 backup and isolated restore | Functional restore pass; policy caveat | RPO/RTO evidence: disaster `2026-06-17T00:37:19+00:00`, minimum service restored `2026-06-17T00:40:53+00:00`, `rto_seconds=214`, latest backup stop `2026-06-17T00:37:15+00:00`, `rpo_seconds=4`. First DB2 restore failed on dirty target/timeline and was retained. Clean timeline-selected restore then passed readiness/auth/config/pull. pgBackRest info reported `cipher: none`; encrypted backup compliance remains unproven. |
 | R8 previous-to-candidate upgrade | Pass after failed DB2 recovery-point attempt | First previous image build used a short OCI revision label and was retained as failed preparation; rebuilt with full revision. DB2 recovery point failed because restored DB2 had `archive_mode` disabled. R8 was rerun on DB1 `datarun_upgrade`; pgBackRest diff `20260616-233201F_20260617-010141D` stopped after freeze. Candidate upgrade kept Flyway V1-V10, one assignment event, config version 1, two bindings, readiness, auth, config, and corrected pull smoke. |
 | R9 failed deployment/migration response | Pass | Invalid image preflight failed on OCI revision mismatch before start. DB-denied first start used `datarun_r9_denied` without a `pg_hba` rule; service stayed not ready, and local DB1 check showed no `public.flyway_schema_history`. Recovery decision selected fix/rerun or leave traffic on previous healthy service; no manual schema repair. |
-| R10 credential, binding, JWKS rotation | Partial / blocked | R4 covers binding rotation evidence only. Database credential and JWKS rotation were not executed because no reviewed two-generation DB secret adapter or Keycloak signing-key rotation adapter was present. |
-| R11 alert and incident response | Blocked | No Prometheus/Alertmanager/Grafana or equivalent alert-recipient adapter was found; only Keycloak was running on the ops VM. Missing alert destination blocks pass. |
-| R12 solo cold recovery | Not executed | Requires closing this active session and starting a fresh privileged Hamza session using only indexed docs, approved access, execution record, and evidence index. |
+| R10 credential, binding, JWKS rotation | Original attempt partial; successor adapters accepted | R4 covers binding rotation evidence only in the original NW-067 run. Database credential rotation is now covered by accepted NW-076, and Keycloak/JWKS rotation is now covered by accepted NW-077. |
+| R11 alert and incident response | Original attempt blocked; successor adapter accepted | No Prometheus/Alertmanager/Grafana or equivalent alert-recipient adapter was found during the original NW-067 run; only Keycloak was running on the ops VM. Monitoring/alert delivery is now covered by accepted NW-078. |
+| R12 solo cold recovery | Executed 2026-06-18; partial / failed | Fresh approved SSH access was restored and the current state was reconstructed from indexed docs plus retained evidence. Live readiness/liveness and monitoring-target checks passed, DB1 read-only state matched the retained baseline shape, and the latest encrypted pgBackRest recovery point was identified. R12 did not pass because Prometheus/Alertmanager showed active critical `DatarunBackupStale` beginning 2026-06-17T16:27:34Z, the latest retained backup-success timestamp was 2026-06-17T15:26:33Z, and no documented fresh-session bearer-token helper or retained token path was available for authorized `/api/auth/me`, `/api/sync/config`, and pull smoke. |
 
 ## Deviations
 
-- The rehearsal began before all scheduling gates were satisfied. Missing R10/R11/R12 adapters make the final standing `partial`.
+- The rehearsal began before all scheduling gates were satisfied. Missing
+  R10/R11/R12 adapters made the original standing `partial`; accepted successor
+  adapters now close R10/R11, but R12 still fails.
 - R2 and early R8 SQL used `PGSERVICE` plus `PGDATABASE`; this did not override the service database as expected. Corrected evidence uses explicit `psql "service=... dbname=..."` connections.
 - R8 DB2 recovery-point attempt failed because DB2 was a restored target with `archive_mode` disabled. R8 was rerun against DB1 to use the live backup adapter.
 - R8 post-upgrade pull first used `last_pull_watermark`; the accepted pull contract uses `since_watermark`. Corrected pull evidence was retained.
 - The Keycloak realm import file and generated password files were lab secrets and must not be committed. The import-on-start JSON was removed during cleanup.
+- The 2026-06-18 R12 fresh-session attempt recovered approved SSH access and
+  current state without hidden shell history, but found recovery posture stale:
+  the encrypted repository still reported only full backup `20260617-022519F`
+  stopped at `2026-06-17 02:26:07+00`, while the monitoring textfile metric
+  recorded last backup success `2026-06-17T15:26:33Z` and Alertmanager had an
+  active critical `DatarunBackupStale` alert. Protected bearer-token smoke
+  could not be rerun because the retained evidence records the expected
+  rotated principal but does not provide a documented fresh-session token
+  acquisition path or retained token.
 
 ## Cleanup State
 
@@ -75,12 +101,13 @@ Cleanup completed after evidence inspection on 2026-06-17:
 
 ## Follow-Up Work
 
-- NW-075: prove an encrypted backup/PITR adapter before any future pass claim.
-- NW-076: add a reviewed two-generation DB credential rotation adapter and evidence procedure.
-- NW-077: add a reviewed Keycloak/JWKS rotation adapter that proves new-key acceptance and old-key/token behavior without unreviewed admin changes.
-- NW-078: install and exercise a monitoring/alert stack with alert delivery to Hamza.
-- Perform R12 from a genuinely fresh privileged session with the accepted
-  successor adapters in place.
+- Retain accepted successor adapters NW-075, NW-076, NW-077, and NW-078 as the
+  backup encryption, DB credential rotation, Keycloak/JWKS rotation, and
+  monitoring/alert-delivery evidence for the successor path.
+- Clear the live `DatarunBackupStale` condition with a fresh accepted encrypted
+  recovery point, preserve the alert/recovery evidence, provide a documented
+  fresh-session synthetic bearer-token path for the active rotated principal,
+  then rerun R12.
 
 ## Successor Standing Update
 
@@ -88,3 +115,19 @@ As of 2026-06-17, NW-075, NW-076, NW-077, and NW-078 have accepted successor
 adapter records. This does not change this record's original result: NW-067
 remains partial and not accepted until R12 is executed from a genuinely fresh
 privileged Hamza session.
+
+On 2026-06-18, a fresh-session R12 attempt reconstructed the current reference
+state from the indexed docs and retained evidence only: app host
+`datarun-app.lab`, DB1 `datarun-db1.lab`, ops/Keycloak host `keycloak.lab`,
+candidate image digest
+`sha256:5f246547e1292092b133540a86efe230fd9f9bacc1f73bccc83e8644e4fb82e2`,
+runtime config `/opt/datarun-lab/runtime-config-nw076-g2`, Prometheus and
+Alertmanager running, Keycloak new RSA provider active with old key passive,
+and active rotated principal subject `53b46770-c03a-4f3f-b25c-3321c1e5af15`
+bound to actor `22222222-2222-4222-8222-222222222222`. Live app readiness and
+liveness were `UP`; unauthenticated protected endpoints returned `401`;
+Prometheus was ready; all configured monitoring targets were `up`;
+Alertmanager was ready; DB1 had 10 successful Flyway rows, 8 events with max
+watermark 9, config version 1, and 2 active principal bindings. The attempt
+did not pass because the latest recovery point was outside the 1-hour RPO and
+authorized protected smoke lacked a documented fresh-session token path.
