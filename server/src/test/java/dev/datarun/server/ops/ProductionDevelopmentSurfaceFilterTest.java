@@ -17,10 +17,14 @@ class ProductionDevelopmentSurfaceFilterTest {
         ProductionDevelopmentSurfaceFilter filter =
                 new ProductionDevelopmentSurfaceFilter(environment);
 
+        MockHttpServletResponse adminRoot = filter(filter, "/admin");
         MockHttpServletResponse admin = filter(filter, "/admin/dev/provision");
+        MockHttpServletResponse config = filter(filter, "/admin/config");
         MockHttpServletResponse tokens = filter(filter, "/api/actors/actor-id/tokens");
 
+        assertThat(adminRoot.getStatus()).isEqualTo(404);
         assertThat(admin.getStatus()).isEqualTo(404);
+        assertThat(config.getStatus()).isEqualTo(404);
         assertThat(tokens.getStatus()).isEqualTo(404);
     }
 

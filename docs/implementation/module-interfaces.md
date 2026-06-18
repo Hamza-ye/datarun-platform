@@ -79,6 +79,15 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 - **Forbidden**: treating JWT groups, roles, resource claims, or JWT `actor_id` claims as assignment, scope, resolver, or admin authority.
 - **Guards**: `ProductionAuthIntegrationTest`, `LocalJwtAuthCompatibilityIntegrationTest`, actor-token integration tests, scope-filtered sync and conflict-resolution tests.
 
+## Web Admin Security Foundation
+
+- **Owns**: Spring Security and OAuth2 client framework presence plus the current pass-through servlet security chain that preserves existing controller/interceptor behavior until production web-admin session work lands.
+- **Inputs**: ordinary HTTP requests after container filters and before MVC handlers.
+- **Outputs**: a security filter chain that disables framework form login, basic auth, OAuth2 login, logout, request cache, CSRF, and security-created sessions for the current application surface, then permits requests to continue to the existing owning filters, interceptors, and controllers.
+- **Storage**: none.
+- **Forbidden**: replacing `ActorTokenInterceptor` as the bearer API actor-resolution owner, creating production web-admin browser login/session behavior, making current Thymeleaf `/admin`, `/admin/config`, or `/admin/dev` development consoles production-ready, granting authority from Spring Security principals, IdP claims/groups/roles, JWT `actor_id`, request bodies, or UI state.
+- **Guards**: `WebAdminSecurityFoundationTest`, `ProductionAuthIntegrationTest`, `ProductionDevelopmentSurfaceFilterTest`, and existing sync/config/admin regression tests.
+
 ## Production Runtime Boundary
 
 - **Owns**: production-profile startup validation, graceful shutdown settings, separation of the management listener, bounded health/Prometheus exposure, development-surface hiding, and secret-safe structured request logs.

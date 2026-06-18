@@ -116,6 +116,16 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void authMeMissingBearerStillFailsThroughActorTokenInterceptor() {
+        ResponseEntity<JsonNode> response = rest.exchange(
+                "/api/auth/me", HttpMethod.GET, HttpEntity.EMPTY, JsonNode.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.WWW_AUTHENTICATE)).isNull();
+        assertThat(response.getBody().path("error").asText()).isEqualTo("missing_token");
+    }
+
+    @Test
     void groupClaimsDoNotGrantPullOrAssignmentAuthority() throws Exception {
         provisionBinding("bootstrap-no-assignment", "principal-no-assignment", ACTOR);
         insertCaptureEvent(UUID.randomUUID(), OTHER_ACTOR, OTHER_DEVICE, 1);
@@ -433,6 +443,7 @@ class ProductionAuthIntegrationTest extends AbstractIntegrationTest {
                 "/api/actors/" + ACTOR + "/tokens", HttpEntity.EMPTY, JsonNode.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.WWW_AUTHENTICATE)).isNull();
         assertThat(response.getBody().path("error").asText())
                 .isEqualTo("dev_token_admin_disabled");
     }
