@@ -309,7 +309,7 @@ public class ConfigAdminController {
     @PostMapping("/publish")
     public String publishConfig(RedirectAttributes redirectAttributes) {
         try {
-            // DtV gating: validate all expression rules before publishing (IDR-019)
+            // DtV gating: validate all expression rules before publishing.
             List<String> violations = deployTimeValidator.validateAll();
             if (!violations.isEmpty()) {
                 redirectAttributes.addFlashAttribute("error",

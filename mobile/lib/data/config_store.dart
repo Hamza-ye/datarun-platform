@@ -4,7 +4,7 @@ import 'package:datarun_mobile/domain/activity_role_actions.dart';
 import 'package:datarun_mobile/domain/flag_severity.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 
-/// Stores and caches the config package (IDR-019).
+/// Stores and caches the accepted config package.
 /// Two-slot model: current (in-memory, used by forms) + pending (awaiting promotion).
 /// Pending is promoted to current at safe transition points (form open, refresh).
 /// At-most-2 invariant: only current + pending exist simultaneously.
@@ -19,11 +19,11 @@ class ConfigStore {
   Map<String, Map<String, dynamic>> _patternDefinitions = {};
   // Key: "{activity_ref}.{shape_ref}" → List of rule maps
   Map<String, List<Map<String, dynamic>>> _expressions = {};
-  // Sensitivity classifications (IDR-019 §sensitivity_classifications)
+  // Sensitivity classifications.
   Map<String, String> _shapeSensitivity = {};
   Map<String, String> _activitySensitivity = {};
 
-  // Pending slot (IDR-019 two-slot model)
+  // Pending slot for the accepted two-slot config model.
   int _pendingVersion = 0;
   Map<String, dynamic>? _pendingJson;
 
@@ -151,7 +151,7 @@ class ConfigStore {
     _patternDefinitions = parsedPatternDefinitions;
     _expressions = parsedExpressions;
 
-    // Sensitivity classifications (IDR-019). Defaults: shape='standard', activity='routine'.
+    // Sensitivity classifications. Defaults: shape='standard', activity='routine'.
     final sensRaw = packageJson['sensitivity_classifications'];
     final parsedShapeSens = <String, String>{};
     final parsedActivitySens = <String, String>{};

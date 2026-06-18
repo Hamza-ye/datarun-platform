@@ -4,7 +4,7 @@ import java.util.UUID;
 
 /**
  * Location in the geographic hierarchy. Static reference data with materialized path
- * for O(log N) containment tests (IDR-014).
+ * for O(log N) containment tests.
  */
 public record Location(
         UUID id,

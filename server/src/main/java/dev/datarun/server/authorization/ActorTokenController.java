@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Actor token admin API. Generate, list, and revoke tokens (IDR-016).
+ * Development actor token admin API. Generate, list, and revoke tokens.
  */
 @RestController
 @RequestMapping("/api/actors")

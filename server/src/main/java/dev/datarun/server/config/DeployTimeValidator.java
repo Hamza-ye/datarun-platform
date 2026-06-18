@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * Deploy-Time Validator (DtV) for expression rules (IDR-018 §DtV).
+ * Deploy-Time Validator (DtV) for accepted expression rules.
  * Validates expression structure, field references, operator-type compatibility,
  * and structural constraints before rules can be published.
  */

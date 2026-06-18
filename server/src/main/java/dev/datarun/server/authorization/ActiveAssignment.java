@@ -33,7 +33,7 @@ public record ActiveAssignment(
 
     /**
      * Check geographic containment: does the given subject path start with this
-     * assignment's geographic scope path? (btree prefix match — IDR-014)
+     * assignment's geographic scope path? (btree prefix match)
      */
     public boolean containsGeographically(String subjectLocationPath) {
         if (geographicPath == null) return true;  // null = no geographic restriction

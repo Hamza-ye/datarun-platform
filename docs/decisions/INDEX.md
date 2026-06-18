@@ -2,6 +2,16 @@
 
 > Regenerate with `scripts/build-idr-index.sh`.
 
+Note: `status: active` in an IDR row means the historical implementation
+decision record remains retained. For accepted NW-068 through NW-070 behavior,
+use the extracted platform specs and contracts as the durable target before
+IDR prose:
+[Expression Language Behavior](../specifications/platform/expression-language.md),
+[Configuration Package And Shape Lifecycle](../specifications/platform/configuration-package-and-shapes.md),
+[Assignment Scope And Administration](../specifications/platform/assignment-scope-and-administration.md),
+[Production Auth Principal Binding](../specifications/platform/production-auth-principal-binding.md),
+and [sync-protocol.md](../../contracts/sync-protocol.md) for `/api/sync/config`.
+
 ## By Phase
 
 | ID | Title | Status | Phase | Type | Tags |

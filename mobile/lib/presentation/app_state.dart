@@ -38,7 +38,7 @@ class AppState extends ChangeNotifier {
   }) : _now = now ?? DateTime.now;
 
   Future<void> refresh() async {
-    // Promote pending config at safe transition point (IDR-019 two-slot model)
+    // Promote pending config at a safe transition point under the accepted two-slot model.
     await configStore.promotePending();
     subjects = await projectionEngine.getSubjectList();
     activeAssignments = await eventStore.getActiveAssignments();

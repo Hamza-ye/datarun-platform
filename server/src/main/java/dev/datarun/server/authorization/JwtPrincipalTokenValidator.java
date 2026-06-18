@@ -12,7 +12,7 @@ import java.time.Instant;
 import java.util.Base64;
 
 /**
- * Minimal local JWT validator for the NW-037 / IDR-027 auth foundation.
+ * Minimal local JWT validator for the accepted principal-binding foundation.
  *
  * This proves principal-to-actor semantics without a live Keycloak/JWKS
  * dependency. OIDC/JWKS provider integration can replace this validator behind

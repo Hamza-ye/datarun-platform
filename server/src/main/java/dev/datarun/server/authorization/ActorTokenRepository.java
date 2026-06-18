@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Actor token management (IDR-016). Simple token table for Phase 2.
+ * Actor token management for development-token compatibility.
  * Token: 32 bytes hex-encoded (64 chars), generated via SecureRandom.
  * Migration path to Keycloak: header convention unchanged, JWT replaces token lookup.
  */

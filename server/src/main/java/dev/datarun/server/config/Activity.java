@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.OffsetDateTime;
 
 /**
- * An activity definition: organizational grouping of shapes with role-action mappings. (IDR-017)
+ * An activity definition: organizational grouping of shapes with role-action mappings.
  * NOT individually versioned — config-package-level versioning.
  */
 public record Activity(

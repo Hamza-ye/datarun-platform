@@ -17,8 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Config Packager: assembles validated configuration into atomic JSON payload (IDR-019).
- * Package format uses the full IDR-019 envelope from day one — empty sections
+ * Config Packager: assembles validated configuration into atomic JSON payload.
+ * Package format uses the accepted full snapshot shape — empty sections
  * for artifacts not yet populated (expressions, triggers).
  */
 @Service
@@ -89,7 +89,7 @@ public class ConfigPackager {
 
         ObjectNode packageJson = objectMapper.createObjectNode();
 
-        // Shapes: all versions, keyed by shape_ref (IDR-019: "all shape versions including deprecated")
+        // Shapes: all versions, keyed by shape_ref, including deprecated versions.
         ObjectNode shapesNode = objectMapper.createObjectNode();
         for (Shape shape : shapeRepository.findAll()) {
             if (ShapeService.isPlatformShapeName(shape.name())) {
@@ -133,7 +133,7 @@ public class ConfigPackager {
         packageJson.set("activities", activitiesNode);
         packageJson.set("pattern_definitions", patternRegistry.packageDefinitions(referencedPatternRefs));
 
-        // Expressions: grouped by "{activity_ref}.{shape_ref}" key (IDR-018/IDR-019)
+        // Expressions: grouped by "{activity_ref}.{shape_ref}" key.
         ObjectNode expressionsNode = objectMapper.createObjectNode();
         List<ExpressionRule> allRules = expressionRepository.findAll();
         Map<String, ArrayNode> groupedRules = new LinkedHashMap<>();

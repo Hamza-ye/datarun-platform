@@ -65,7 +65,7 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 
 - **Owns**: server-side deployment-configured `assignment_admin_capabilities` role-to-command policy for platform-owned `assignment_admin.create` and `assignment_admin.end`.
 - **Inputs**: current active assignment role labels, validated policy JSON from `deployment_config`, and the authenticated actor already resolved for the assignment command path.
-- **Outputs**: command-capable active-assignment filtering used by `AssignmentService` before IDR-024 create/end containment checks.
+- **Outputs**: command-capable active-assignment filtering used by `AssignmentService` before the create/end containment checks described in `docs/specifications/platform/assignment-scope-and-administration.md`.
 - **Storage**: `deployment_config` row keyed `assignment_admin_capabilities`; assignment events keep role/scope only and do not store command capability.
 - **Forbidden**: `activities[*].roles`, request-body actor IDs, IdP groups/claims/roles, JWT `actor_id`, UI vocabulary, new scope mechanisms, assignment payload or envelope fields, resolver reassignment, auto-resolution, mobile authoritative rejection, or config-package authority for this policy.
 - **Guards**: `AssignmentContainmentIntegrationTest`, `ProductionAuthIntegrationTest`, `DeployTimeValidatorTest`, responsibility-binding, scope-filtered sync, subject-history backfill, and conflict-resolution regression tests.
@@ -75,7 +75,7 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 - **Owns**: resolving bearer credentials to one platform `actor_id` before actor-scoped API logic runs.
 - **Inputs**: `Authorization: Bearer <credential>`, auth mode configuration, dev token table, local JWT principal claims, OIDC/JWKS issuer/audience/JWKS configuration, explicit `(issuer, subject) -> actor_id` bindings.
 - **Outputs**: authenticated actor context for sync, assignment, config, conflict, and `/api/auth/me` endpoints.
-- **Storage**: `actor_tokens` for development mode; `auth_principal_bindings` for production-auth active lookup support; `auth_principal_binding_operations` for append-only deployment-managed provisioning audit/history. Production binding administration is deployment-managed manifest provisioning with auditable operation history per IDR-028, not an online admin API.
+- **Storage**: `actor_tokens` for development mode; `auth_principal_bindings` for production-auth active lookup support; `auth_principal_binding_operations` for append-only deployment-managed provisioning audit/history. Production binding administration is deployment-managed manifest provisioning with auditable operation history per `docs/specifications/platform/production-auth-principal-binding.md`, not an online admin API.
 - **Forbidden**: treating JWT groups, roles, resource claims, or JWT `actor_id` claims as assignment, scope, resolver, or admin authority.
 - **Guards**: `ProductionAuthIntegrationTest`, `LocalJwtAuthCompatibilityIntegrationTest`, actor-token integration tests, scope-filtered sync and conflict-resolution tests.
 

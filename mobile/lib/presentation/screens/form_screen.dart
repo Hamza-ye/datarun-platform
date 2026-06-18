@@ -55,10 +55,10 @@ class _FormScreenState extends State<FormScreen> {
 
   void _loadShape() async {
     final state = context.read<AppState>();
-    // Promote pending config at form-open (IDR-019 two-slot model)
+    // Promote pending config at form-open under the accepted two-slot model.
     await state.configStore.promotePending();
     final shape = state.configStore.getShape(widget.shapeRef);
-    // Pre-resolve context.* properties per IDR-018 rule 4
+    // Pre-resolve accepted context.* properties.
     final ctx = await state.contextResolver.resolve(
       subjectId: widget.subjectId,
       activityRef: widget.activityRef,

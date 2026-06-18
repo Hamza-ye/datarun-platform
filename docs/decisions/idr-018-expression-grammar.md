@@ -261,4 +261,9 @@ Max predicates per Condition: 3. Max nesting depth: 1 (logical wrapping comparis
 - Constraint: C5 (PE → EE context resolution), C12 (ShR → EE field definitions), C17 (EE → TE boolean evaluation)
 - Depends on: IDR-017 (expression_rules table, L1/L2 separation)
 - Walk-through: [s01-facility-observation-config-pipeline.md](../walk-throughs/s01-facility-observation-config-pipeline.md) §Stage 3
-- Files: `server/src/main/java/dev/datarun/server/config/ExpressionEvaluator.java`, `mobile/lib/domain/expression_evaluator.dart`, `contracts/expression.schema.json`
+- Files: `server/src/main/java/dev/datarun/server/config/ExpressionEvaluator.java`, `mobile/lib/domain/expression_evaluator.dart`
+- Post-NW-068 trace correction: `contracts/expression.schema.json` was never
+  added. Durable expression behavior lives in
+  `docs/specifications/platform/expression-language.md`, with package wrapper
+  shape in `contracts/config-package.schema.json` and evaluator parity in
+  `contracts/fixtures/expression-evaluation.json`.

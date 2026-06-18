@@ -64,7 +64,7 @@ public class EventRepository {
                     event.timestamp().toString(),
                     toJson(event.payload()));
             if (rows > 0) {
-                // Resolve location_path for subject events (IDR-015)
+                // Resolve location_path for subject events.
                 resolveLocationPath(event);
             }
             return rows > 0;
@@ -75,7 +75,7 @@ public class EventRepository {
     }
 
     /**
-     * Resolve and set location_path on a newly inserted event (IDR-015).
+     * Resolve and set location_path on a newly inserted event.
      * Only subject events get a location_path. Assignment/system events get NULL.
      */
     private void resolveLocationPath(Event event) {
@@ -161,7 +161,7 @@ public class EventRepository {
     }
 
     /**
-     * Scope-filtered pull (IDR-015). Three categories OR'd:
+     * Scope-filtered pull. Three categories OR'd:
      * 1. Subject events matching geographic scope (LIKE prefix)
      * 2. Own assignment events (sync rule E9 — always included)
      * 3. System events in scope

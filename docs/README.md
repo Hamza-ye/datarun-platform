@@ -96,7 +96,7 @@ Current high-level standing:
 3. Phase 4 is complete: workflow/policy implementation landed and the completion audit is green.
 4. Accepted baseline standing includes BAR-001 through BAR-015 and BAR-104, including config package delivery and production OIDC/JWT/Keycloak authority.
 5. Post-Phase-4 runtime evidence now covers S00, S19, S21, S22, S23, S26, and S27.
-6. Assignment administration has moved beyond containment-only exposure: IDR-029 and NW-050 added server-side `assignment_admin.create` / `assignment_admin.end` command capability before IDR-024 containment.
+6. Assignment administration has moved beyond containment-only exposure: accepted behavior is now in [Assignment Scope And Administration](specifications/platform/assignment-scope-and-administration.md), including server-side `assignment_admin.create` / `assignment_admin.end` command capability and same-assignment containment.
 7. Remaining production-shaping work should route through `docs/status.md`,
    the working-surface backlog, the decision-anchor layer, and the canonical
    specification/operations homes rather than legacy phase chronology.

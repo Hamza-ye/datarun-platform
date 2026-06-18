@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Pure-function evaluator for IDR-018 JSON AST expression nodes.
+ * Pure-function evaluator for accepted JSON AST expression nodes.
  * No DB access, no side effects. AST + values → result.
  *
  * Supports comparison operators (eq, neq, gt, gte, lt, lte, in, not_null),

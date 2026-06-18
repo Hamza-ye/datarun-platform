@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.OffsetDateTime;
 
 /**
- * A shape definition: versioned, immutable snapshot. (IDR-017)
+ * A shape definition: versioned, immutable snapshot.
  * Primary key: (name, version). Lookup via shape_ref "{name}/v{version}".
  */
 public record Shape(

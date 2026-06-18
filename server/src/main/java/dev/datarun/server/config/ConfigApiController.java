@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * REST API for config delivery (IDR-019).
+ * REST API for config package delivery.
  * GET /api/sync/config — returns latest config package.
  */
 @RestController
@@ -24,7 +24,7 @@ public class ConfigApiController {
     }
 
     /**
-     * Config endpoint (IDR-019). Returns full package or 304 if client is up-to-date.
+     * Returns the full config package or 304 if the client is up-to-date.
      */
     @GetMapping
     public ResponseEntity<?> getConfig(

@@ -1,4 +1,4 @@
-/// IDR-017 shape field definition.
+/// Accepted shape field definition.
 class ShapeField {
   final String name;
 
@@ -38,7 +38,7 @@ class ShapeField {
   );
 }
 
-/// IDR-017 shape definition.
+/// Accepted shape definition.
 class ShapeDefinition {
   final String shapeRef; // e.g. "household_visit/v1"
   final String name;

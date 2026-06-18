@@ -8,7 +8,7 @@ import java.util.UUID;
 
 /**
  * Subject-to-location mapping. Carries denormalized path from locations table
- * for direct prefix matching without JOIN (IDR-014).
+ * for direct prefix matching without JOIN.
  */
 @Repository
 public class SubjectLocationRepository {

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Location hierarchy admin API. CRUD for static reference data (IDR-014).
+ * Location hierarchy admin API. CRUD for static reference data.
  */
 @RestController
 @RequestMapping("/api/locations")

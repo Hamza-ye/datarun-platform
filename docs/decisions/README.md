@@ -2,6 +2,27 @@
 
 Micro-decisions made during implementation. Each file documents one choice with its context, alternatives, and consequences. Separate from [CDL](../architecture/adrs-decisions-canonical-ledger/README.md) (architecture-grade) and [Phase Specs](../implementation/phases/) (scope, deliverables, milestones).
 
+## Durable Behavior Note
+
+Some historically active IDRs have since been extracted into accepted platform
+specifications or contracts. For NW-068 through NW-070 behavior, use these
+durable targets before IDR prose:
+
+- configuration, expression, and config package behavior:
+  [Expression Language Behavior](../specifications/platform/expression-language.md),
+  [Configuration Package And Shape Lifecycle](../specifications/platform/configuration-package-and-shapes.md),
+  and [sync-protocol.md](../../contracts/sync-protocol.md) for
+  `/api/sync/config`;
+- assignment, scope, role-action, containment, and assignment-administration
+  behavior:
+  [Assignment Scope And Administration](../specifications/platform/assignment-scope-and-administration.md);
+- production auth, OIDC/JWKS, principal binding, and deployment-managed
+  principal-binding provisioning:
+  [Production Auth Principal Binding](../specifications/platform/production-auth-principal-binding.md).
+
+IDRs remain implementation provenance, rationale, and validation inputs unless
+a current route explicitly says otherwise.
+
 ## When to create an IDR
 
 Same triggers as [execution-plan.md §14](../implementation/execution-plan.md#14-implementation-decisions):

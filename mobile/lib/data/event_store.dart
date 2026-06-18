@@ -426,7 +426,7 @@ class EventStore {
     );
   }
 
-  // --- Pending config package (Phase 3c: two-slot model, IDR-019) ---
+  // --- Pending config package (accepted two-slot model) ---
 
   /// Read the pending config package, or null if none.
   Future<Map<String, dynamic>?> getPendingConfigPackage() async {

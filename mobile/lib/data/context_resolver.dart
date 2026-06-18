@@ -1,9 +1,9 @@
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/projection_engine.dart';
 
-/// Resolves `context.*` properties for expression evaluation (ADR-5 S8, IDR-018).
+/// Resolves accepted `context.*` properties for expression evaluation.
 ///
-/// Per IDR-018 rule 4, `context.*` values are pre-resolved at form-open rather
+/// Accepted `context.*` values are pre-resolved at form-open rather
 /// than evaluated lazily. Missing/unresolvable values are emitted as `null`;
 /// expression evaluation tolerates nulls in comparison operators per grammar.
 ///
@@ -73,7 +73,7 @@ class ContextResolver {
       }
     }
 
-    // Phase 4 placeholders — pre-resolved as null per IDR-018 rule 4
+    // Phase 4 placeholders — pre-resolved as null by accepted expression behavior.
     result['context.subject_state'] = null;
     result['context.subject_pattern'] = null;
     result['context.activity_stage'] = null;

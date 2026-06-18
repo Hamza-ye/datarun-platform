@@ -1,4 +1,4 @@
-/// Pure-function expression evaluator for IDR-018 JSON AST expressions.
+/// Pure-function expression evaluator for accepted JSON AST expressions.
 /// Produces IDENTICAL results to the Java server evaluator.
 /// No DB access, no async, no side effects.
 class ExpressionEvaluator {

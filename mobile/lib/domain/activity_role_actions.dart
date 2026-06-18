@@ -1,4 +1,4 @@
-/// Phase 4 activity work actions from IDR-021/IDR-023.
+/// Accepted activity work actions.
 ///
 /// This intentionally excludes `assignment_changed`; assignment lifecycle
 /// authorization is outside activity role-action policy.

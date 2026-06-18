@@ -236,7 +236,7 @@ public class SyncController {
                     request.configVersion());
         }
 
-        // IDR-019: config_version discovery field in pull response
+        // Config-version discovery field in pull response.
         int configVersion = configPackager.getLatestVersion();
 
         return ResponseEntity.ok(Map.of(
