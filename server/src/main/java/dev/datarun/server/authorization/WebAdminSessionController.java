@@ -1,5 +1,6 @@
 package dev.datarun.server.authorization;
 
+import dev.datarun.server.config.AdminCommandCapabilityPolicy;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,9 +22,12 @@ import java.util.Map;
 public class WebAdminSessionController {
 
     private final WebAdminSessionService sessionService;
+    private final AdminCommandCapabilityService adminCommandCapabilityService;
 
-    public WebAdminSessionController(WebAdminSessionService sessionService) {
+    public WebAdminSessionController(WebAdminSessionService sessionService,
+                                     AdminCommandCapabilityService adminCommandCapabilityService) {
         this.sessionService = sessionService;
+        this.adminCommandCapabilityService = adminCommandCapabilityService;
     }
 
     @GetMapping
@@ -65,6 +69,12 @@ public class WebAdminSessionController {
             }
             return denied(e.reason());
         }
+        if (!adminCommandCapabilityService.actorGrants(
+                context.actorId(), AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS)) {
+            sessionService.auditShellAccessDenied(context, "missing_web_admin_access");
+            return forbidden("web_admin_access_denied");
+        }
+        sessionService.auditShellAccessGranted(context);
 
         CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         String csrfInput = csrf == null ? "" : """
@@ -137,6 +147,13 @@ public class WebAdminSessionController {
 
     private ResponseEntity<String> denied(String reason) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"error\":\"" + HtmlUtils.htmlEscape(reason) + "\"}");
+    }
+
+    private ResponseEntity<String> forbidden(String reason) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body("{\"error\":\"" + HtmlUtils.htmlEscape(reason) + "\"}");

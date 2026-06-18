@@ -224,6 +224,16 @@ public class WebAdminSessionService {
         invalidate(session);
     }
 
+    public void auditShellAccessGranted(WebAdminSessionContext context) {
+        audit("web_admin_shell_access_granted", context.actorId(), context.issuer(),
+                context.subject(), context.sessionCorrelationId(), null);
+    }
+
+    public void auditShellAccessDenied(WebAdminSessionContext context, String reason) {
+        audit("web_admin_shell_access_denied", context.actorId(), context.issuer(),
+                context.subject(), context.sessionCorrelationId(), reason);
+    }
+
     private void validateLoginState(HttpSession session, String state) {
         String expectedState = (String) session.getAttribute(LOGIN_STATE_ATTR);
         Instant expiresAt = (Instant) session.getAttribute(LOGIN_STATE_EXPIRES_AT_ATTR);

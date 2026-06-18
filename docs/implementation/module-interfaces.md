@@ -70,6 +70,15 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 - **Forbidden**: `activities[*].roles`, request-body actor IDs, IdP groups/claims/roles, JWT `actor_id`, UI vocabulary, new scope mechanisms, assignment payload or envelope fields, resolver reassignment, auto-resolution, mobile authoritative rejection, or config-package authority for this policy.
 - **Guards**: `AssignmentContainmentIntegrationTest`, `ProductionAuthIntegrationTest`, `DeployTimeValidatorTest`, responsibility-binding, scope-filtered sync, subject-history backfill, and conflict-resolution regression tests.
 
+## Web/Config Admin Command Capability Policy
+
+- **Owns**: server-side deployment-configured `admin_command_capabilities` actor-to-command policy for platform-owned `web_admin.access`, `web_admin.read_scoped`, and `config_admin.*` command names.
+- **Inputs**: the server-resolved `WebAdminSessionContext.actorId()`, validated policy JSON from `deployment_config`, and command constants selected by server-side handlers.
+- **Outputs**: command-capability decisions used by the production `/web-admin` shell gate and future web/config admin handlers. Missing, malformed, or unknown-command policy fails closed for command evaluation.
+- **Storage**: `deployment_config` row keyed `admin_command_capabilities`; policy maps explicit actor UUIDs to command arrays and is not packaged to mobile clients.
+- **Forbidden**: assignment roles, `activities[*].roles`, IdP groups/claims/roles, JWT `actor_id`, request-body actor IDs, UI-selected actors, fixed development admin actors, config-package authority, assignment-admin containment bypass, resolver authority, broad data-read authority, config workflow implementation, contracts/schemas/envelopes/migrations/mobile auth changes, or production deployment approval.
+- **Guards**: `AdminCommandCapabilityServiceIntegrationTest`, `WebAdminSessionBoundaryTest`, `WebAdminSecurityFoundationTest`, `ProductionAuthIntegrationTest`, and `ProductionDevelopmentSurfaceFilterTest`.
+
 ## Authenticated Actor Resolver
 
 - **Owns**: resolving bearer credentials to one platform `actor_id` before actor-scoped API logic runs.
@@ -92,10 +101,10 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 
 - **Owns**: the separate `/web-admin` browser login/session shell for production web-admin entry proof.
 - **Inputs**: OIDC authorization-code callback state/code, configured public callback URI, server-side token exchange output validated through `OidcJwksTokenValidator`, server-stored login state and nonce, explicit active `(issuer, subject) -> actor_id` principal bindings, and Spring Security CSRF tokens for protected state-changing web-admin requests.
-- **Outputs**: server-managed web-admin session context containing actor id, issuer, subject, auth source, login/last-seen/expiry metadata, and secret-safe session correlation; minimal authenticated shell; logout/session invalidation; login/session audit events.
+- **Outputs**: server-managed web-admin session context containing actor id, issuer, subject, auth source, login/last-seen/expiry metadata, and secret-safe session correlation; minimal shell only when `admin_command_capabilities` grants `web_admin.access` to the server-resolved actor; logout/session invalidation; login/session/shell audit events.
 - **Storage**: servlet session only for browser web-admin state; principal bindings stay in `auth_principal_bindings`; login/session audit is published as application events and secret-safe logs, not domain events.
-- **Forbidden**: using `/web-admin` session id as platform authority by itself, accepting actor ids from browser requests, granting command capabilities, config-admin authority, assignment authority, resolver authority, or online principal-binding administration, productionizing current `/admin`, `/admin/config`, or `/admin/dev` lanes, changing contracts/schemas/envelopes/migrations/mobile auth, or treating IdP claims/groups/roles/JWT `actor_id` as platform authority.
-- **Guards**: `WebAdminSessionBoundaryTest`, `ProductionAuthIntegrationTest`, `ProductionDevelopmentSurfaceFilterTest`, `WebAdminSecurityFoundationTest`, and relevant sync/config/admin regression tests.
+- **Forbidden**: using `/web-admin` session id as platform authority by itself, accepting actor ids from browser requests, deriving shell access from assignment roles, IdP claims/groups/roles, JWT `actor_id`, request bodies, UI state, or fixed development actors, granting config-admin authority, assignment authority, resolver authority, broad data-read authority, or online principal-binding administration, productionizing current `/admin`, `/admin/config`, or `/admin/dev` lanes, changing contracts/schemas/envelopes/migrations/mobile auth, or treating IdP claims/groups/roles/JWT `actor_id` as platform authority.
+- **Guards**: `WebAdminSessionBoundaryTest`, `AdminCommandCapabilityServiceIntegrationTest`, `ProductionAuthIntegrationTest`, `ProductionDevelopmentSurfaceFilterTest`, `WebAdminSecurityFoundationTest`, and relevant sync/config/admin regression tests.
 
 ## Production Runtime Boundary
 

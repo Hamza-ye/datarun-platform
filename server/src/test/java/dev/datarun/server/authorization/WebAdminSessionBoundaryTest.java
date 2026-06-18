@@ -1,5 +1,6 @@
 package dev.datarun.server.authorization;
 
+import dev.datarun.server.config.AdminCommandCapabilityPolicy;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 
@@ -68,12 +70,14 @@ class WebAdminSessionBoundaryTest {
     @Autowired private FakeOidcJwksTokenValidator tokenValidator;
     @Autowired private FakeOidcAuthorizationCodeTokenExchanger codeTokenExchanger;
     @Autowired private FakeAuthPrincipalBindingRepository bindingRepository;
+    @Autowired private FakeAdminCommandCapabilityService adminCommandCapabilityService;
 
     @BeforeEach
     void resetFakes() {
         tokenValidator.reset();
         codeTokenExchanger.reset();
         bindingRepository.reset();
+        adminCommandCapabilityService.reset();
     }
 
     @Test
@@ -196,6 +200,7 @@ class WebAdminSessionBoundaryTest {
             throws Exception {
         org.springframework.mock.web.MockHttpSession session =
                 loginSession("valid-code", "valid-token", ACTOR);
+        grantWebAdminAccess(ACTOR);
         assertThat(codeTokenExchanger.redirectUriFor("valid-code"))
                 .isEqualTo("https://app.test/web-admin/oidc/callback");
 
@@ -218,6 +223,39 @@ class WebAdminSessionBoundaryTest {
     }
 
     @Test
+    void authenticatedSessionWithoutWebAdminAccessCannotEnterShell() throws Exception {
+        org.springframework.mock.web.MockHttpSession session =
+                loginSession("no-command-code", "no-command-token", ACTOR);
+
+        mvc.perform(get("/web-admin/shell").session(session))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("web_admin_access_denied"))
+                .andExpect(header().doesNotExist(HttpHeaders.WWW_AUTHENTICATE));
+
+        List<WebAdminSessionAuditEvent> events = applicationEvents
+                .stream(WebAdminSessionAuditEvent.class)
+                .toList();
+        assertThat(events).extracting(WebAdminSessionAuditEvent::eventType)
+                .contains("web_admin_shell_access_denied");
+        assertThat(events).extracting(WebAdminSessionAuditEvent::reason)
+                .contains("missing_web_admin_access");
+    }
+
+    @Test
+    void shellAccessUsesSessionActorNotRequestSelectedActor() throws Exception {
+        org.springframework.mock.web.MockHttpSession session =
+                loginSession("spoof-shell-code", "spoof-shell-token", ACTOR);
+        grantWebAdminAccess(OTHER_ACTOR);
+
+        mvc.perform(get("/web-admin/shell")
+                        .session(session)
+                        .param("actor_id", OTHER_ACTOR.toString())
+                        .param("ui_actor_id", OTHER_ACTOR.toString()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("web_admin_access_denied"));
+    }
+
+    @Test
     void idpClaimsRolesAndJwtActorIdDoNotGrantWebAdminSessionWithoutBinding()
             throws Exception {
         MvcResult login = mvc.perform(get("/web-admin/login")).andReturn();
@@ -235,9 +273,21 @@ class WebAdminSessionBoundaryTest {
     }
 
     @Test
+    void idpClaimsRolesAndJwtActorIdDoNotGrantShellAccessWithoutPolicy()
+            throws Exception {
+        org.springframework.mock.web.MockHttpSession session =
+                loginSession("claims-bound-code", "claims-bound-token", ACTOR);
+
+        mvc.perform(get("/web-admin/shell").session(session))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("web_admin_access_denied"));
+    }
+
+    @Test
     void stateChangingProtectedRequestRequiresCsrf() throws Exception {
         org.springframework.mock.web.MockHttpSession session =
                 loginSession("csrf-code", "csrf-token", ACTOR);
+        grantWebAdminAccess(ACTOR);
 
         mvc.perform(post("/web-admin/session/probe").session(session))
                 .andExpect(status().isForbidden());
@@ -256,6 +306,7 @@ class WebAdminSessionBoundaryTest {
     void logoutInvalidatesSession() throws Exception {
         org.springframework.mock.web.MockHttpSession session =
                 loginSession("logout-code", "logout-token", ACTOR);
+        grantWebAdminAccess(ACTOR);
         MvcResult shell = mvc.perform(get("/web-admin/shell").session(session))
                 .andReturn();
         CsrfToken csrf = csrfToken(shell);
@@ -275,6 +326,7 @@ class WebAdminSessionBoundaryTest {
     void sessionExpiryDeniesBeforeProtectedAction() throws Exception {
         org.springframework.mock.web.MockHttpSession session =
                 loginSession("expiry-code", "expiry-token", ACTOR);
+        grantWebAdminAccess(ACTOR);
         MvcResult shell = mvc.perform(get("/web-admin/shell").session(session))
                 .andReturn();
         CsrfToken csrf = csrfToken(shell);
@@ -293,6 +345,7 @@ class WebAdminSessionBoundaryTest {
             throws Exception {
         org.springframework.mock.web.MockHttpSession session =
                 loginSession("rebind-code", "rebind-token", ACTOR);
+        grantWebAdminAccess(ACTOR);
         MvcResult shell = mvc.perform(get("/web-admin/shell").session(session))
                 .andReturn();
         CsrfToken csrf = csrfToken(shell);
@@ -309,6 +362,7 @@ class WebAdminSessionBoundaryTest {
     void auditEventsAreSecretSafeAndDoNotContainProviderTokens() throws Exception {
         org.springframework.mock.web.MockHttpSession session =
                 loginSession("secret-provider-code", "secret-provider-token", ACTOR);
+        grantWebAdminAccess(ACTOR);
         MvcResult shell = mvc.perform(get("/web-admin/shell").session(session))
                 .andReturn();
         CsrfToken csrf = csrfToken(shell);
@@ -321,7 +375,8 @@ class WebAdminSessionBoundaryTest {
                 .stream(WebAdminSessionAuditEvent.class)
                 .toList();
         assertThat(events).extracting(WebAdminSessionAuditEvent::eventType)
-                .contains("web_admin_login_succeeded", "web_admin_logout");
+                .contains("web_admin_login_succeeded", "web_admin_shell_access_granted",
+                        "web_admin_logout");
         assertThat(events.toString()).doesNotContain("secret-provider-token");
     }
 
@@ -342,6 +397,10 @@ class WebAdminSessionBoundaryTest {
                 .andExpect(status().isSeeOther())
                 .andExpect(redirectedUrl("/web-admin/shell"));
         return session;
+    }
+
+    private void grantWebAdminAccess(UUID actorId) {
+        adminCommandCapabilityService.grant(actorId, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
     }
 
     private String stateFrom(MvcResult login) {
@@ -394,6 +453,38 @@ class WebAdminSessionBoundaryTest {
                     throw new AuthResolutionException("not_used_by_web_admin_session_test");
                 }
             };
+        }
+
+        @Bean
+        @Primary
+        FakeAdminCommandCapabilityService fakeAdminCommandCapabilityService() {
+            return new FakeAdminCommandCapabilityService();
+        }
+    }
+
+    static final class FakeAdminCommandCapabilityService
+            extends AdminCommandCapabilityService {
+
+        private final Map<UUID, Set<String>> commandsByActor = new ConcurrentHashMap<>();
+
+        FakeAdminCommandCapabilityService() {
+            super(null, null);
+        }
+
+        @Override
+        public boolean actorGrants(UUID actorId, String command) {
+            if (!AdminCommandCapabilityPolicy.SUPPORTED_COMMANDS.contains(command)) {
+                throw new IllegalArgumentException("Unknown admin command: " + command);
+            }
+            return commandsByActor.getOrDefault(actorId, Set.of()).contains(command);
+        }
+
+        void grant(UUID actorId, String... commands) {
+            commandsByActor.put(actorId, Set.of(commands));
+        }
+
+        void reset() {
+            commandsByActor.clear();
         }
     }
 
