@@ -7,7 +7,7 @@ Source: NW-082 accepted non-binding routing artifact, NW-083 accepted tenancy ro
 Authority: none; preserves routing continuity under the CDL, contracts, accepted specifications, BAR, NW backlog, and operations documents
 Last reviewed: 2026-06-18
 Supersedes: none
-Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`; `docs/agent-working-surface/artifacts/NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`; `docs/specifications/product/product-candidate-1.md`; `docs/agent-working-surface/platform-next-work-backlog.md`; `docs/agent-working-surface/artifacts/2026-06-18-multi-tenancy-architecture-analysis.md`; `docs/specifications/platform/production-web-admin-authentication-and-authority.md`
+Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`; `docs/agent-working-surface/artifacts/NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`; `docs/specifications/product/product-candidate-1.md`; `docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md`; `docs/agent-working-surface/platform-next-work-backlog.md`; `docs/agent-working-surface/artifacts/2026-06-18-multi-tenancy-architecture-analysis.md`; `docs/specifications/platform/production-web-admin-authentication-and-authority.md`
 
 ## Current
 
@@ -19,25 +19,25 @@ Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milest
   deployment with one internal/default Workspace.
 - NW-084 is accepted as the Product Candidate 1 product specification at
   `docs/specifications/product/product-candidate-1.md`.
-- The next actionable work is NW-086: route and run the production web admin
-  login/session boundary as the first PC1 implementation lane.
+- NW-086 is ready as the production web admin login/session implementation
+  prompt and is the first PC1 implementation lane.
 - Sidecar agents collected bounded evidence for product vocabulary,
   platform/contracts, and ops/control-plane reversibility. Final decisions
   remained local to the orchestrator.
 
 ## Next
 
-Route and run:
+Run:
 
 ```text
-NW-086: Implement production web admin login and session boundary
+docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md
 ```
 
-NW-086 should use a bounded prompt and implement only browser OIDC/JWKS login,
-server session, CSRF, logout, expiry, principal-binding revalidation, admin
-actor context, login/session audit, and a minimal protected shell. Config UI
-expansion, command policy, assignment administration, mobile login, and real
-production remain separate rows.
+NW-086 should implement only browser OIDC/JWKS login, server session, CSRF,
+logout, expiry, principal-binding revalidation, admin actor context,
+login/session audit, and a minimal protected shell. Config UI expansion,
+command policy, assignment administration, mobile login, and real production
+remain separate rows.
 
 ## Blocked Until Routed
 

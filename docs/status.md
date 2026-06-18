@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-18 (NW-084 accepted as Product Candidate 1 product spec)
+**Last updated**: 2026-06-18 (NW-086 routed for production web admin session implementation)
 
 ---
 
@@ -30,6 +30,7 @@ Use this section as the low-token bootstrap for new sessions.
 - NW-082 is accepted as a non-binding Product Candidate 1 routing artifact at `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`. It does not accept product behavior, tenant architecture, contract authority, implementation, or production readiness.
 - NW-083 is accepted for routing only: Product Candidate 1 uses the reversible managed-isolation lane of one customer-facing Organization mapped to one managed single-tenant Datarun deployment with one internal/default Workspace. Tenant-aware auth, workspace-scoped config, tenant sync context, mobile local partition keys, storage backfills, pooled `tenant_id` predicates, and envelope changes remain successor routes. Next actionable work is NW-084, the Product Candidate 1 product specification under `docs/specifications/product/`.
 - NW-084 is accepted as the Product Candidate 1 product specification at `docs/specifications/product/product-candidate-1.md`. Product Candidate 1 is a one-Organization/default-Workspace candidate with accepted user-visible actors, terms, setup/admin/mobile journeys, explicit exclusions, platform/contract/operations guardrails, and product acceptance criteria. It does not accept runtime implementation, tenant-aware internals, mobile OIDC, reporting/export, retention/security, operations evidence, or real-production approval. Next actionable route is NW-086 for production web admin login/session implementation.
+- NW-086 is ready at `docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md`. It is the first Product Candidate 1 implementation slice and is limited to browser OIDC/JWKS login, server-managed session, CSRF, logout, expiry, principal-binding revalidation, admin actor context, login/session audit, and a minimal protected shell. It must not absorb config UI expansion, admin command policy, online binding admin, mobile login, tenant-aware internals, contracts/schemas, or real-production approval.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use `docs/specifications/platform/production-auth-principal-binding.md` for the durable behavior boundary and the NW-037 backlog row for evidence; IDR-027 remains historical provenance.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
