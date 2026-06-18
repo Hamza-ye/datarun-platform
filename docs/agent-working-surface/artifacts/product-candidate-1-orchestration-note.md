@@ -7,7 +7,7 @@ Source: NW-082 accepted non-binding routing artifact, NW-083 accepted tenancy ro
 Authority: none; preserves routing continuity under the CDL, contracts, accepted specifications, BAR, NW backlog, and operations documents
 Last reviewed: 2026-06-18
 Supersedes: none
-Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`; `docs/agent-working-surface/artifacts/NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`; `docs/specifications/product/product-candidate-1.md`; `docs/agent-working-surface/prompts/NW-099-adopt-spring-security-web-admin-foundation.md`; `docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md`; `docs/agent-working-surface/platform-next-work-backlog.md`; `docs/agent-working-surface/artifacts/2026-06-18-multi-tenancy-architecture-analysis.md`; `docs/specifications/platform/production-web-admin-authentication-and-authority.md`
+Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`; `docs/agent-working-surface/artifacts/NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`; `docs/specifications/product/product-candidate-1.md`; `docs/agent-working-surface/prompts/NW-099-adopt-spring-security-web-admin-foundation.md`; `docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md`; `docs/agent-working-surface/prompts/NW-087-implement-admin-command-capability-and-scoped-shell-gate.md`; `docs/agent-working-surface/platform-next-work-backlog.md`; `docs/agent-working-surface/artifacts/2026-06-18-multi-tenancy-architecture-analysis.md`; `docs/specifications/platform/production-web-admin-authentication-and-authority.md`
 
 ## Current
 
@@ -19,12 +19,13 @@ Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milest
   deployment with one internal/default Workspace.
 - NW-084 is accepted as the Product Candidate 1 product specification at
   `docs/specifications/product/product-candidate-1.md`.
-- NW-099 is accepted as the Spring Security web-admin foundation. It adds the
-  framework footing only; existing bearer APIs remain owned by
-  `ActorTokenInterceptor`, and the current HTML `/admin`, `/admin/config`, and
-  `/admin/dev` lanes remain development-only.
-- NW-086 is ready as the next PC1 implementation lane for production web-admin
-  login/session behavior on top of the NW-099 foundation.
+- NW-099 is accepted as the Spring Security web-admin foundation.
+- NW-086 is accepted as the separate `/web-admin` login/session boundary.
+  Existing bearer APIs remain owned by `ActorTokenInterceptor`, and the current
+  HTML `/admin`, `/admin/config`, and `/admin/dev` lanes remain
+  development-only.
+- NW-087 is ready as the next PC1 implementation lane for web-admin command
+  capability and scoped shell entry.
 - Sidecar agents collected bounded evidence for product vocabulary,
   platform/contracts, and ops/control-plane reversibility. Final decisions
   remained local to the orchestrator.
@@ -34,19 +35,17 @@ Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milest
 Run:
 
 ```text
-docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md
+docs/agent-working-surface/prompts/NW-087-implement-admin-command-capability-and-scoped-shell-gate.md
 ```
 
-NW-086 should add browser OIDC/JWKS login, server session, CSRF, logout,
-expiry, principal-binding revalidation, admin actor context, login/session
-audit, and a minimal protected shell. It must not productionize the current
-development HTML console; use a separate production session route. Config UI
-expansion, command policy, assignment administration, mobile login, and real
-production remain separate rows.
+NW-087 should add server-side `web_admin.access`, `web_admin.read_scoped`, and
+`config_admin.*` policy evaluation plus `/web-admin` shell-entry denial
+behavior. It must not productize config workflows, assignment admin UX, mobile
+login, tenant-aware internals, real production, or the current development HTML
+console.
 
 ## Blocked Until Routed
 
-- Admin command policy and scoped shell gates until NW-087 lands.
 - Productized setup/config workflow and assignment admin UX until their
   implementation rows are selected after NW-087.
 - Tenant-aware auth, membership, storage, sync/config context, admin context,
@@ -66,4 +65,4 @@ production remain separate rows.
   evidence.
 - Do not fold config UI expansion, admin command gates, mobile OIDC,
   reporting/export, retention/security, conflict automation, online
-  principal-binding admin, new scopes, or production approval into NW-086.
+  principal-binding admin, new scopes, or production approval into NW-087.
