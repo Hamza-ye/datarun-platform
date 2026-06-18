@@ -19,6 +19,13 @@ docs/agent-working-surface/prompts/NW-099-adopt-spring-security-web-admin-founda
 After NW-099 is accepted, run this prompt for the actual production web-admin
 login/session shell. Do not re-bundle framework adoption into this slice.
 
+The current Thymeleaf HTML `/admin`, `/admin/config`, and `/admin/dev` lanes
+are development-only. NW-086 must not make those existing controllers or
+templates production-ready by adding authentication around them. Keep the
+development console hidden in production; if NW-086 needs a minimal protected
+shell, place it on a separate production session route until a successor proves
+the accepted command-authority and admin-UI requirements.
+
 ## Goal
 
 Implement the first production web admin login/session boundary for Product
