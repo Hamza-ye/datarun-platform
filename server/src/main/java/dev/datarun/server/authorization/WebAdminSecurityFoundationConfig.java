@@ -6,26 +6,35 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * Installs Spring Security without moving existing API actor resolution out of
- * ActorTokenInterceptor. Production web-admin login/session behavior is a
- * successor slice.
+ * ActorTokenInterceptor. Web-admin browser sessions are limited to the
+ * separate /web-admin production shell.
  */
 @Configuration
 public class WebAdminSecurityFoundationConfig {
 
     @Bean
     SecurityFilterChain webAdminSecurityFoundation(HttpSecurity http) throws Exception {
+        HttpSessionCsrfTokenRepository csrfTokenRepository = new HttpSessionCsrfTokenRepository();
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository)
+                        .ignoringRequestMatchers(
+                                new AntPathRequestMatcher("/api/**"),
+                                new AntPathRequestMatcher("/admin"),
+                                new AntPathRequestMatcher("/admin/**"),
+                                new AntPathRequestMatcher("/web-admin/oidc/callback")))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .oauth2Login(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .requestCache(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
         return http.build();
     }

@@ -42,12 +42,41 @@ public class OidcJwksTokenValidator {
 
     public JwtPrincipal validate(String token) {
         try {
-            JWTClaimsSet claims = processor().process(token, null);
-            return new JwtPrincipal(claims.getIssuer(), claims.getSubject());
+            return principalFrom(process(token));
         } catch (AuthResolutionException e) {
             throw e;
         } catch (Exception e) {
             throw new AuthResolutionException("invalid_oidc_jwt");
+        }
+    }
+
+    public JwtPrincipal validateLoginToken(String token, String expectedNonce) {
+        try {
+            JWTClaimsSet claims = process(token);
+            verifyNonce(claims, expectedNonce);
+            return principalFrom(claims);
+        } catch (AuthResolutionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AuthResolutionException("invalid_oidc_jwt");
+        }
+    }
+
+    private JWTClaimsSet process(String token) throws Exception {
+        return processor().process(token, null);
+    }
+
+    private JwtPrincipal principalFrom(JWTClaimsSet claims) {
+        return new JwtPrincipal(claims.getIssuer(), claims.getSubject());
+    }
+
+    private void verifyNonce(JWTClaimsSet claims, String expectedNonce) throws Exception {
+        if (expectedNonce == null || expectedNonce.isBlank()) {
+            throw new AuthResolutionException("missing_oidc_nonce");
+        }
+        String tokenNonce = claims.getStringClaim("nonce");
+        if (!expectedNonce.equals(tokenNonce)) {
+            throw new AuthResolutionException("invalid_oidc_nonce");
         }
     }
 

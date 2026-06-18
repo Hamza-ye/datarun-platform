@@ -81,12 +81,21 @@ Non-overlap rule: this file is not a DEC record, gap register, architecture rati
 
 ## Web Admin Security Foundation
 
-- **Owns**: Spring Security and OAuth2 client framework presence plus the current pass-through servlet security chain that preserves existing controller/interceptor behavior until production web-admin session work lands.
+- **Owns**: Spring Security and OAuth2 client framework presence plus the servlet security chain that preserves existing API controller/interceptor behavior while enabling CSRF/session support for the separate production web-admin shell.
 - **Inputs**: ordinary HTTP requests after container filters and before MVC handlers.
-- **Outputs**: a security filter chain that disables framework form login, basic auth, OAuth2 login, logout, request cache, CSRF, and security-created sessions for the current application surface, then permits requests to continue to the existing owning filters, interceptors, and controllers.
+- **Outputs**: a security filter chain that disables framework form login, basic auth, OAuth2 login, logout, and request cache; ignores CSRF for `/api/**`, current development `/admin/**` lanes, and the OIDC callback; permits requests to continue to the existing owning filters, interceptors, and controllers.
 - **Storage**: none.
-- **Forbidden**: replacing `ActorTokenInterceptor` as the bearer API actor-resolution owner, creating production web-admin browser login/session behavior, making current Thymeleaf `/admin`, `/admin/config`, or `/admin/dev` development consoles production-ready, granting authority from Spring Security principals, IdP claims/groups/roles, JWT `actor_id`, request bodies, or UI state.
+- **Forbidden**: replacing `ActorTokenInterceptor` as the bearer API actor-resolution owner, making current Thymeleaf `/admin`, `/admin/config`, or `/admin/dev` development consoles production-ready, granting authority from Spring Security principals, IdP claims/groups/roles, JWT `actor_id`, request bodies, or UI state.
 - **Guards**: `WebAdminSecurityFoundationTest`, `ProductionAuthIntegrationTest`, `ProductionDevelopmentSurfaceFilterTest`, and existing sync/config/admin regression tests.
+
+## Production Web Admin Session Boundary
+
+- **Owns**: the separate `/web-admin` browser login/session shell for production web-admin entry proof.
+- **Inputs**: OIDC/JWKS login response tokens validated through `OidcJwksTokenValidator`, server-stored login state and nonce, explicit active `(issuer, subject) -> actor_id` principal bindings, and Spring Security CSRF tokens for protected state-changing web-admin requests.
+- **Outputs**: server-managed web-admin session context containing actor id, issuer, subject, auth source, login/last-seen/expiry metadata, and secret-safe session correlation; minimal authenticated shell; logout/session invalidation; login/session audit events.
+- **Storage**: servlet session only for browser web-admin state; principal bindings stay in `auth_principal_bindings`; login/session audit is published as application events and secret-safe logs, not domain events.
+- **Forbidden**: using `/web-admin` session id as platform authority by itself, accepting actor ids from browser requests, granting command capabilities, config-admin authority, assignment authority, resolver authority, or online principal-binding administration, productionizing current `/admin`, `/admin/config`, or `/admin/dev` lanes, changing contracts/schemas/envelopes/migrations/mobile auth, or treating IdP claims/groups/roles/JWT `actor_id` as platform authority.
+- **Guards**: `WebAdminSessionBoundaryTest`, `ProductionAuthIntegrationTest`, `ProductionDevelopmentSurfaceFilterTest`, `WebAdminSecurityFoundationTest`, and relevant sync/config/admin regression tests.
 
 ## Production Runtime Boundary
 
