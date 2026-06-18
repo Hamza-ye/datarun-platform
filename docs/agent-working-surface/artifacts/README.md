@@ -36,6 +36,7 @@ Current artifacts:
 - `NW-056-product-standing-and-production-readiness-map.md`
 - `NW-063-production-deployment-ops-hardening-map.md`
 - `NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`
+- `NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`
 - `product-admin-surface-forward-plan.md`
 - `product-candidate-1-orchestration-note.md`
 - `solo-ai-agent-operating-framework.md`

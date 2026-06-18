@@ -12,33 +12,35 @@ Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milest
 ## Current
 
 - NW-082 is accepted only as a non-binding routing artifact. It does not accept
-  Product Candidate 1 product behavior, tenant/workspace architecture,
+  Product Candidate 1 product behavior, tenant-aware runtime architecture,
   contract authority, implementation, or production readiness.
-- The Product Candidate 1 lane now starts with NW-083: decide
-  tenant/workspace vocabulary and the managed-isolation boundary.
-- `docs/status.md` still contains older first-deployment "recommended next
-  move" language. For Product Candidate 1 orchestration, use the NW backlog,
-  NW-082 artifact, and NW-083 prompt as the current lane route.
-- No subagents were dispatched for the NW-083 handoff; the evidence packet was
-  bounded enough for local orchestration.
+- NW-083 is accepted for routing only: the reversible PC1 lane is one
+  customer-facing Organization mapped to one managed single-tenant Datarun
+  deployment with one internal/default Workspace.
+- The next actionable work is NW-084: specify Product Candidate 1 user-visible
+  scope and acceptance criteria under `docs/specifications/product/`.
+- Sidecar agents collected bounded evidence for product vocabulary,
+  platform/contracts, and ops/control-plane reversibility. Final decisions
+  remained local to the orchestrator.
 
 ## Next
 
 Run:
 
 ```text
-docs/agent-working-surface/prompts/NW-083-decide-tenant-workspace-vocabulary-and-managed-isolation-boundary.md
+docs/agent-working-surface/prompts/NW-084-specify-product-candidate-1-user-visible-milestone.md
 ```
 
-NW-083 should explicitly choose the durable home before accepting anything:
-CDL successor or architecture decision for structural isolation authority,
-platform spec for settled platform-detail behavior, product spec for
-user-visible terminology, operations/control-plane successor for managed
-deployment choices, or a non-binding artifact if owner input remains missing.
+NW-084 should create and index
+`docs/specifications/product/product-candidate-1.md`. It should use
+Organization as the default top-level customer-facing term, keep Tenant and
+multi-Workspace internals out of product copy, and avoid real-production
+claims.
 
 ## Blocked Until Routed
 
-- Product Candidate 1 product specification and user-visible copy.
+- Product Candidate 1 product specification and user-visible copy until
+  NW-084 lands.
 - Tenant-aware auth, membership, storage, sync/config context, admin context,
   and mobile local partitioning.
 - Pooled multi-tenant storage and tenant isolation test harness.
@@ -46,7 +48,8 @@ deployment choices, or a non-binding artifact if owner input remains missing.
 
 ## Must Not Do Yet
 
-- Do not implement code or change schemas/contracts from NW-082 or this note.
+- Do not implement code or change schemas/contracts from NW-082, NW-083, or
+  this note.
 - Do not use locations, org units, assignment scope, UI-selected organization,
   or IdP claims as tenant isolation.
 - Do not add tenant/workspace fields to the event envelope.
@@ -55,4 +58,4 @@ deployment choices, or a non-binding artifact if owner input remains missing.
   evidence.
 - Do not fold mobile OIDC, reporting/export, retention/security, conflict
   automation, online principal-binding admin, new scopes, or production
-  approval into NW-083.
+  approval into NW-084.
