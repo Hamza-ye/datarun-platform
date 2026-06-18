@@ -27,6 +27,7 @@ contracts, and implementation evidence.
 
 Current artifacts:
 
+- `2026-06-18-multi-tenancy-architecture-analysis.md`
 - `architecture-classification-drift-audit.md`
 - `idr-durable-surface-routing-audit.md`
 - `NW-043-assignment-admin-authority-exploration.md`
@@ -34,7 +35,9 @@ Current artifacts:
 - `NW-051-special-read-write-access-boundary-routing.md`
 - `NW-056-product-standing-and-production-readiness-map.md`
 - `NW-063-production-deployment-ops-hardening-map.md`
+- `NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`
 - `product-admin-surface-forward-plan.md`
+- `product-candidate-1-orchestration-note.md`
 - `solo-ai-agent-operating-framework.md`
 
 Planned artifacts are named by their active backlog row and prompt; do not list
