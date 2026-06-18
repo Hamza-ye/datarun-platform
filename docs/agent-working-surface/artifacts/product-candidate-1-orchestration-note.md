@@ -7,7 +7,7 @@ Source: NW-082 accepted non-binding routing artifact, NW-083 accepted tenancy ro
 Authority: none; preserves routing continuity under the CDL, contracts, accepted specifications, BAR, NW backlog, and operations documents
 Last reviewed: 2026-06-18
 Supersedes: none
-Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`; `docs/agent-working-surface/artifacts/NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`; `docs/specifications/product/product-candidate-1.md`; `docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md`; `docs/agent-working-surface/platform-next-work-backlog.md`; `docs/agent-working-surface/artifacts/2026-06-18-multi-tenancy-architecture-analysis.md`; `docs/specifications/platform/production-web-admin-authentication-and-authority.md`
+Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`; `docs/agent-working-surface/artifacts/NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`; `docs/specifications/product/product-candidate-1.md`; `docs/agent-working-surface/prompts/NW-099-adopt-spring-security-web-admin-foundation.md`; `docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md`; `docs/agent-working-surface/platform-next-work-backlog.md`; `docs/agent-working-surface/artifacts/2026-06-18-multi-tenancy-architecture-analysis.md`; `docs/specifications/platform/production-web-admin-authentication-and-authority.md`
 
 ## Current
 
@@ -19,8 +19,11 @@ Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milest
   deployment with one internal/default Workspace.
 - NW-084 is accepted as the Product Candidate 1 product specification at
   `docs/specifications/product/product-candidate-1.md`.
-- NW-086 is ready as the production web admin login/session implementation
-  prompt and is the first PC1 implementation lane.
+- NW-086 was stopped as a monolithic Spring Security/OAuth2 plus web-admin
+  session implementation slice. No code from that attempt was accepted.
+- NW-099 is ready as the next PC1 implementation lane: adopt the Spring
+  Security web-admin foundation without exposing product login/session
+  behavior. NW-086 remains blocked until NW-099 is accepted.
 - Sidecar agents collected bounded evidence for product vocabulary,
   platform/contracts, and ops/control-plane reversibility. Final decisions
   remained local to the orchestrator.
@@ -30,17 +33,19 @@ Related: `docs/agent-working-surface/artifacts/NW-082-product-candidate-1-milest
 Run:
 
 ```text
-docs/agent-working-surface/prompts/NW-086-implement-production-web-admin-login-and-session-boundary.md
+docs/agent-working-surface/prompts/NW-099-adopt-spring-security-web-admin-foundation.md
 ```
 
-NW-086 should implement only browser OIDC/JWKS login, server session, CSRF,
-logout, expiry, principal-binding revalidation, admin actor context,
-login/session audit, and a minimal protected shell. Config UI expansion,
-command policy, assignment administration, mobile login, and real production
-remain separate rows.
+NW-099 should add only the non-user-facing Spring Security/OAuth2 foundation
+and focused regression tests. After NW-099 is accepted, return to NW-086 for
+browser OIDC/JWKS login, server session, CSRF, logout, expiry,
+principal-binding revalidation, admin actor context, login/session audit, and a
+minimal protected shell. Config UI expansion, command policy, assignment
+administration, mobile login, and real production remain separate rows.
 
 ## Blocked Until Routed
 
+- NW-086 production web-admin login/session until NW-099 is accepted.
 - Admin command policy and scoped shell gates until NW-087 lands.
 - Productized setup/config workflow and assignment admin UX until their
   implementation rows are selected after NW-087.

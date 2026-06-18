@@ -2,6 +2,23 @@
 
 You are working in `/home/hamza/datarun-platform`.
 
+## Current Standing
+
+Do not run NW-086 directly as the next implementation slice. A 2026-06-18
+worker attempt to add Spring Security/OAuth2 and the full production web-admin
+login/session boundary in one patch was stopped as too broad; no code from
+that attempt was accepted.
+
+NW-086 is blocked until NW-099 accepts the non-user-facing Spring Security
+web-admin foundation:
+
+```text
+docs/agent-working-surface/prompts/NW-099-adopt-spring-security-web-admin-foundation.md
+```
+
+After NW-099 is accepted, run this prompt for the actual production web-admin
+login/session shell. Do not re-bundle framework adoption into this slice.
+
 ## Goal
 
 Implement the first production web admin login/session boundary for Product
