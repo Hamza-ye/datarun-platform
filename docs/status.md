@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-19 (NW-104 post-audit evidence capture accepted)
+**Last updated**: 2026-06-19 (NW-105 agent instruction split in progress)
 
 ---
 
@@ -11,10 +11,10 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Active implementation gate: post-audit product implementation freeze
-- Active process/control slice: post-audit reset row selection/parking
+- Active process/control slice: NW-105 agent instruction split
 - Last accepted NW: NW-104 post-audit evidence capture
 - Current blocker: product implementation frozen until post-audit reset rows are accepted or explicitly parked
-- Next evidence command: select and accept or explicitly park the post-audit reset rows before product implementation
+- Next evidence command: complete NW-105 agent instruction split, then select and accept or explicitly park the remaining post-audit reset rows before product implementation
 - Do-not-start-next-product-work-until: post-audit reset rows from NW-104 audit evidence are accepted or explicitly parked
 - Gap register review standing: reviewed 2026-06-19; not touched for NW-104
 - Artifact trace standing: trace table current; touched yes for NW-104
