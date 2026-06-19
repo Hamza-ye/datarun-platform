@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-20 (NW-108 role-scoped agent skills accepted)
+**Last updated**: 2026-06-20 (NW-109 mobile CI and analyzer path active)
 
 ---
 
@@ -11,13 +11,13 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Active implementation gate: post-audit product implementation freeze
-- Active process/control slice: remaining post-audit reset row selection/parking for NW-109
+- Active process/control slice: NW-109 mobile CI and analyzer path
 - Last accepted NW: NW-108 role-scoped agent skills/playbooks
 - Current blocker: product implementation frozen until NW-109 is accepted or explicitly parked
-- Next evidence command: select and accept or explicitly park NW-109 before product implementation
+- Next evidence command: complete NW-109 mobile CI and analyzer path before product implementation
 - Do-not-start-next-product-work-until: NW-109 post-audit reset row is accepted or explicitly parked
-- Gap register review standing: reviewed 2026-06-19; not touched for NW-108
-- Artifact trace standing: trace table current; not touched for NW-108
+- Gap register review standing: reviewed 2026-06-19; not touched for NW-109 route
+- Artifact trace standing: trace table current; not touched for NW-109 route
 - Last updated: 2026-06-20
 
 ### Current Routing Detail
@@ -59,6 +59,7 @@ Use this detail when the control panel above is not enough.
 - NW-106 is accepted: `docs/specifications/product/product-candidate-1-pm-handoff.md` is the derived PC1 PM planning surface and `docs/specifications/product/product-candidate-handoff-template.md` is the reusable future-PC handoff template. The handoff records the audit-supported product goal, target deployment boundary, primary users/jobs, in-scope journeys, explicit non-goals, current PC1 standing, scenario-to-PC1 slice map, candidate NW decomposition routes, product-level DoD, owner decisions, and next-product-NW selection rules. Verification: `git status --short`, `git diff --check`, required file checks, required greps, README indexing greps, backlog/status greps, and `wc -l` passed. Gap register touched: no. Artifact trace touched: no. Active control panel updated: yes. No runtime code, contracts, product scope, platform specs, architecture authority, validation matrix/policy, CI, skills/playbooks, mobile CI, PM successor acceptance, real-production approval, BAR, CDL, AGENTS files, or steward guide changed. At NW-106 acceptance, product implementation remained frozen until NW-107 through NW-109 were accepted or explicitly parked.
 - NW-107 is accepted: `docs/agent-working-surface/validation-matrix.md` is the active validation-control surface for touched-surface gates and acceptance evidence format. It records evidence fields, validation levels, required validation by touched surface, command references, current gate standing, acceptance rules, PC1 smoke-gate standing, and immediate candidate-only follow-up routes. Verification: `git status --short`, `git diff --check`, file existence check, targeted greps, pointer greps, backlog/status greps, and `wc -l` passed; validation matrix line count is 151. Gap register touched: no. Artifact trace touched: no. Active control panel updated: yes. Runtime/code/contracts/product behavior changed: no. Product scope changed: no. Architecture authority changed: no. CI/test implementation changed: no. At NW-107 acceptance, product implementation remained frozen until NW-108 and NW-109 were accepted or explicitly parked.
 - NW-108 is accepted: `docs/agent-working-surface/skills/README.md` is the active durable role-playbook index for PM Product Planner, Tester / Validation Auditor, Software Architect Boundary Reviewer, Implementation Agent, Reviewer, and Steward Session Guide routing. Added concise canonical role files under `docs/agent-working-surface/skills/`, Codex-discoverable thin wrappers under `.agents/skills/`, and working-surface README pointers for both. The playbooks are role guidance, not authority. Validation: `git status --short`, `git diff --check`, file existence checks, targeted greps, and `wc -l` passed. Gap register touched: no. Artifact trace touched: no. Active control panel updated: yes. Runtime/code/contracts/product behavior changed: no. Product scope changed: no. Architecture authority changed: no. Validation matrix changed: no. CI/test implementation changed: no. Product implementation remains frozen until NW-109 is accepted or explicitly parked.
+- NW-109 is active: selected validation-tooling row to add mobile CI for green mobile gates and record the known-red analyzer path. Scope may add `.github/workflows/mobile-ci.yml`, mobile validation guidance, validation matrix updates, status/backlog updates, and a concise analyzer known-issues record. It must not start product implementation or change runtime behavior, tests, contracts, product scope, platform specs, architecture decisions, BAR, CDL, gap register, artifact trace, PM handoff scope, role skills, root AGENTS, or steward guide.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use `docs/specifications/platform/production-auth-principal-binding.md` for the durable behavior boundary and the NW-037 backlog row for evidence; IDR-027 remains historical provenance.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
