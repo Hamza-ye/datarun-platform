@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-19 (NW-105 agent instruction split accepted)
+**Last updated**: 2026-06-20 (NW-106 PC1 PM handoff layer accepted)
 
 ---
 
@@ -11,14 +11,14 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Active implementation gate: post-audit product implementation freeze
-- Active process/control slice: remaining post-audit reset row selection/parking
-- Last accepted NW: NW-105 agent instruction split
-- Current blocker: product implementation frozen until NW-106 through NW-109 are accepted or explicitly parked
-- Next evidence command: select and accept or explicitly park NW-106 through NW-109 before product implementation
-- Do-not-start-next-product-work-until: NW-106 through NW-109 post-audit reset rows are accepted or explicitly parked
-- Gap register review standing: reviewed 2026-06-19; not touched for NW-105
-- Artifact trace standing: trace table current; not touched for NW-105
-- Last updated: 2026-06-19
+- Active process/control slice: remaining post-audit reset row selection/parking for NW-107 through NW-109
+- Last accepted NW: NW-106 PC1 PM handoff layer
+- Current blocker: product implementation frozen until NW-107 through NW-109 are accepted or explicitly parked
+- Next evidence command: select and accept or explicitly park NW-107 through NW-109 before product implementation
+- Do-not-start-next-product-work-until: NW-107 through NW-109 post-audit reset rows are accepted or explicitly parked
+- Gap register review standing: reviewed 2026-06-19; not touched for NW-106
+- Artifact trace standing: trace table current; not touched for NW-106
+- Last updated: 2026-06-20
 
 ### Current Routing Detail
 
@@ -55,7 +55,8 @@ Use this detail when the control panel above is not enough.
 - NW-102 is accepted: implementation/control-surface commit `2d9e51e` added the compact status control panel, backlog Active Work Index, gap register maintenance rules, stale gap-row reconciliation for GAP-OPS-01/GAP-PRODUCT-01/GAP-CONFIG-02, artifact trace metadata, and acceptance evidence wording in the commit workflow. Verification: `git diff --check` passed, and targeted greps found the active control panel, Active Work Index, Gap Register Maintenance Rules, artifact trace table, and GAP-OPS-01 row. Gap register touched: yes. Artifact trace touched: yes. Active control panel updated: yes. No runtime code, contracts, schemas, specs, architecture decisions, product/platform behavior, BAR, CDL, or operations evidence changed.
 - NW-103 is accepted: implementation/control-surface commit `d8c989d` added gap progress metadata inside the existing gap register/control plane, kept the five classifications unchanged, and populated initial metadata for current stall-risk rows. Verification: `git diff --check` passed, and targeted greps found Gap Progress Metadata, Evidence gate, and NW-103 status/backlog traces. Gap register touched: yes. Artifact trace touched: no. Active control panel updated: yes. No side document, new taxonomy, runtime code, contracts, schemas, specs, architecture decisions, product/platform behavior, BAR, CDL, artifact trace, or operations evidence changed.
 - NW-104 is accepted: the three independent post-audit reports were copied into `docs/agent-working-surface/artifacts/` and indexed as non-authoritative evidence: `2026-06-19-product-goal-pm-handoff-audit.md`, `2026-06-19-test-ci-validation-strategy-audit.md`, and `2026-06-19-agents-md-instruction-file-audit.md`. Product implementation is frozen until the reset rows identified by these audits are accepted or explicitly parked. This did not rewrite AGENTS.md, create a PM handoff, add CI, or change runtime code, contracts, product scope, platform specs, architecture decisions, BAR, or CDL.
-- NW-105 is accepted: root `AGENTS.md` is now a 77-line product-slice-first implementer router with nested `server/AGENTS.md`, `mobile/AGENTS.md`, and `contracts/AGENTS.md` files plus `docs/agent-working-surface/steward-session-guide.md` for broad steward workflows. Verification: `git diff --check` passed, `wc -l AGENTS.md` returned 77, and targeted greps passed. No runtime code, contract semantics, product scope, platform specs, architecture authority, PM handoff, validation matrix, skills/playbooks, mobile CI, BAR, CDL, gap register, or artifact trace changed. Product implementation remains frozen until NW-106 through NW-109 are accepted or explicitly parked.
+- NW-105 is accepted: root `AGENTS.md` is now a 77-line product-slice-first implementer router with nested `server/AGENTS.md`, `mobile/AGENTS.md`, and `contracts/AGENTS.md` files plus `docs/agent-working-surface/steward-session-guide.md` for broad steward workflows. Verification: `git diff --check` passed, `wc -l AGENTS.md` returned 77, and targeted greps passed. No runtime code, contract semantics, product scope, platform specs, architecture authority, PM handoff, validation matrix, skills/playbooks, mobile CI, BAR, CDL, gap register, or artifact trace changed.
+- NW-106 is accepted: `docs/specifications/product/product-candidate-1-pm-handoff.md` is the derived PC1 PM planning surface and `docs/specifications/product/product-candidate-handoff-template.md` is the reusable future-PC handoff template. The handoff records the audit-supported product goal, target deployment boundary, primary users/jobs, in-scope journeys, explicit non-goals, current PC1 standing, scenario-to-PC1 slice map, candidate NW decomposition routes, product-level DoD, owner decisions, and next-product-NW selection rules. Verification: `git status --short`, `git diff --check`, required file checks, required greps, README indexing greps, backlog/status greps, and `wc -l` passed. Gap register touched: no. Artifact trace touched: no. Active control panel updated: yes. No runtime code, contracts, product scope, platform specs, architecture authority, validation matrix/policy, CI, skills/playbooks, mobile CI, PM successor acceptance, real-production approval, BAR, CDL, AGENTS files, or steward guide changed. Product implementation remains frozen until NW-107 through NW-109 are accepted or explicitly parked.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use `docs/specifications/platform/production-auth-principal-binding.md` for the durable behavior boundary and the NW-037 backlog row for evidence; IDR-027 remains historical provenance.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
