@@ -2,11 +2,25 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-19 (NW-101 mobile login accepted)
+**Last updated**: 2026-06-19 (NW-102 progress-control polish in review)
 
 ---
 
 ## Current Routing
+
+Use this section as the low-token bootstrap for new sessions.
+
+- Active implementation gate: none
+- Active process/control slice: NW-102 progress-control surface polish (`in_review`)
+- Last accepted NW: NW-101 mobile external field-user login
+- Current blocker: none
+- Next evidence command: `git diff --check` plus targeted control-surface grep checks
+- Do-not-start-next-product-work-until: NW-102 accepted
+- Gap register review standing: in progress for GAP-OPS-01, GAP-PRODUCT-01, and GAP-CONFIG-02
+- Artifact trace standing: trace table in progress
+- Last updated: 2026-06-19
+
+### Current Routing Detail
 
 Use this section as the low-token bootstrap for new sessions.
 

@@ -27,19 +27,21 @@ contracts, and implementation evidence.
 
 Current artifacts:
 
-- `2026-06-18-multi-tenancy-architecture-analysis.md`
-- `architecture-classification-drift-audit.md`
-- `idr-durable-surface-routing-audit.md`
-- `NW-043-assignment-admin-authority-exploration.md`
-- `NW-049-access-exceptions-shared-device-scope-exploration.md`
-- `NW-051-special-read-write-access-boundary-routing.md`
-- `NW-056-product-standing-and-production-readiness-map.md`
-- `NW-063-production-deployment-ops-hardening-map.md`
-- `NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md`
-- `NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md`
-- `product-admin-surface-forward-plan.md`
-- `product-candidate-1-orchestration-note.md`
-- `solo-ai-agent-operating-framework.md`
+| artifact | source NW / source pressure | standing | durable successor / canonical home | current use | do-not-use-for |
+|---|---|---|---|---|---|
+| `2026-06-18-multi-tenancy-architecture-analysis.md` | Multi-tenancy architecture analysis pressure | Non-binding routing analysis | NW-094 through NW-098 if managed control-plane or tenant-aware runtime work becomes active | Evidence for control-plane and tenant-aware decision routing | Accepting tenant-aware internals, contracts, storage predicates, sync context, or product behavior |
+| `architecture-classification-drift-audit.md` | 2026-06-16 architecture classification drift audit | Non-binding audit evidence | Gap playbook, DEC anchors, NW backlog, and any selected durable spec/decision route | Classification re-test evidence before relying on historical architecture prose | Architecture authority or accepted behavior by itself |
+| `idr-durable-surface-routing-audit.md` | 2026-06-16 IDR durable-surface routing audit | Non-binding routing audit | Durable specs, contracts, module interfaces, gap playbook, and NW extraction rows | Evidence for routing scattered IDR-era behavior into durable homes | Treating IDR prose as current normative authority without an active route |
+| `NW-043-assignment-admin-authority-exploration.md` | NW-043 assignment-admin authority exploration | Accepted non-binding exploration artifact | `docs/specifications/platform/assignment-scope-and-administration.md` plus accepted NW-048/NW-050 behavior | Historical routing for assignment-admin command-capability work | Broad production assignment-admin exposure or new authority source |
+| `NW-049-access-exceptions-shared-device-scope-exploration.md` | NW-049 access-exceptions/shared-device routing | Accepted non-binding routing artifact | NW-051 through NW-054 and shared-device/local-state platform spec routes | Routing evidence for access exceptions, shared-device scope, and retention/security splits | Implementing special access, retention, or shared-device behavior directly |
+| `NW-051-special-read-write-access-boundary-routing.md` | NW-051 special read/write access boundary | Accepted non-binding routing artifact | NW-053 and NW-054 for successor scope or retention/security decisions | Deferral evidence for broad audit/history, emergency write, and dynamic auditor access | Emergency bypass, broad audit API, or hidden sync scope authority |
+| `NW-056-product-standing-and-production-readiness-map.md` | NW-056 product standing and production-readiness pressure | Non-binding readiness map | NW-063 through NW-067 and NW-075 through NW-081 operations evidence; NW-093 for real production | Historical readiness pressure and split between product standing and operations evidence | Current production-ready claim or clean-image evidence |
+| `NW-063-production-deployment-ops-hardening-map.md` | NW-063 first reference deployment hardening map | Accepted non-binding routing map | NW-064 through NW-067, NW-075 through NW-081, operations policies/runbooks/rehearsals | Routing evidence for reference deployment policy, tooling, runbook, and rehearsal slices | Real-production approval or proof of backup/restore/monitoring by itself |
+| `NW-082-product-candidate-1-milestone-boundary-and-multi-tenancy-routing.md` | NW-082 Product Candidate 1 routing | Accepted non-binding routing artifact | NW-083 managed-isolation route and NW-084 product specification | Milestone boundary and multi-tenancy route provenance | Product behavior, tenant architecture, implementation, or production readiness authority |
+| `NW-083-tenant-workspace-vocabulary-and-managed-isolation-boundary.md` | NW-083 tenant/workspace vocabulary and managed-isolation boundary | Accepted routing-only artifact | NW-084 product specification and NW-094 through NW-098 if tenant/control-plane work is selected | Managed-isolation vocabulary and default Workspace routing | Tenant-aware runtime, storage, sync, auth, mobile partition, or contract acceptance |
+| `product-admin-surface-forward-plan.md` | Product admin surface planning pressure | Non-authoritative forward plan | Accepted specs and implementation rows for web-admin auth, command gates, config, and assignment admin | Planning provenance for product admin sequencing | Current accepted status, authority, or implementation requirement |
+| `product-candidate-1-orchestration-note.md` | Product Candidate 1 orchestration pressure | Non-authoritative coordination note | Selected PC1 NW rows and durable specs/implementation evidence | Planning provenance for PC1 sequencing | Claiming accepted product behavior or bypassing backlog selection |
+| `solo-ai-agent-operating-framework.md` | Solo AI-agent operating-framework pressure | Non-authoritative artifact; not a parallel process authority | Future NW-selected extraction into existing homes only | Source for possible future process-rule extraction | Instructions, agent authority, or progress process outside the accepted working surfaces |
 
 Planned artifacts are named by their active backlog row and prompt; do not list
 them here until they land.

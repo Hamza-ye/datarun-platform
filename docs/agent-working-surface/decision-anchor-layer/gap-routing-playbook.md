@@ -229,9 +229,17 @@ When a route changes behavior, prefer tests that pin:
 * pattern projection and transition-violation behavior;
 * resolver equality and unauthorized-resolution handling.
 
+## Gap Register Maintenance Rules
+
+- Update `last-reviewed` whenever an accepted NW materially changes a known gap.
+- Every accepted NW status commit must state whether the gap register was touched or not touched.
+- A gap row must have a concrete next route or an explicit trigger.
+- Do not leave a gap row saying "ready" or "scheduled" after the owning NW is accepted.
+- Missing evidence should be represented as an evidence gate, not as a new architecture gap.
+
 ## Known Gap Register
 
-last-reviewed: 2026-06-17
+last-reviewed: 2026-06-19
 
 | Gap ID | Gap | Status | Classification | Current route |
 |---|---|---|---|---|
@@ -248,14 +256,14 @@ last-reviewed: 2026-06-17
 | GAP-CONFLICT-02 | Domain conflict automation and batch resolution | Future decision | Architecture decision gap / platform-spec detail gap | Route through NW-045. Batch/automation must emit per-flag resolution events and preserve resolver equality. |
 | GAP-CONFLICT-03 | Resolver-steward eligibility policy | Open; current runtime has role-name fallback heuristic | Platform-spec detail gap; architecture decision gap if a new resolver capability or authority primitive is introduced | IDR-026 accepts nearest eligible human steward and exact resolver equality. Current code first uses configured review action where possible, then falls back to role-name substrings such as admin/supervisor/coordinator/reviewer/manager/lead/resolver. Future conflict/admin UX or production hardening must not treat that fallback as product-ready authority; define explicit steward eligibility or route a successor decision before changing resolver authority. |
 | GAP-CONFIG-01 | Config authoring syntax | Open | Implementation/tooling gap | Tooling format may evolve if it preserves config-package and shape-format contracts. |
-| GAP-CONFIG-02 | Setup lifecycle for new operational activity | Open | Platform-spec detail gap / operational policy gap | Define draft/validate/review/approve/publish workflow under config-package boundaries. |
+| GAP-CONFIG-02 | Setup lifecycle for new operational activity | First production config setup workflow accepted by NW-088; richer structured editing and polish remain future work | Implementation/tooling gap for editor polish; platform-spec detail or operational policy gap only if setup lifecycle semantics change | NW-088 accepted draft/validate/review/approve/publish under production `/web-admin/config` with existing config-package boundaries. Route richer structured editing, candidate ergonomics, or setup polish through a bounded successor row without changing config-package authority. |
 | GAP-PROJECTION-02 | Reporting freshness semantics | Open | Platform-spec detail gap | Define freshness, completeness, unresolved-flag handling, and drilldown under access constraints. |
 | GAP-SYNC-01 | Handoff package contents | Open | Platform-spec detail gap | Define handoff contents under subject-history, sync, projection, and actor-partition constraints. |
 | GAP-RETENTION-01 | Retention windows | Future decision | Operational policy gap / architecture decision gap if event/sync semantics change | Route through NW-054. Do not delete server event history or rewrite normal sync watermarks. |
 | GAP-RETENTION-02 | Worker offboarding / exit procedure | Future decision | Operational policy gap | Route with retention/security policy; preserve assignment-derived access and shared-device sealing rules. |
 | GAP-RETENTION-03 | Regulatory encryption/redaction/erasure | Future decision | Architecture decision gap / operational policy gap | Separate local retention/security from immutable server event truth; deletion/redaction requires formal authority. |
-| GAP-OPS-01 | Production deployment runbook and operations rehearsal | NW-064 through NW-066 accepted; NW-067 ready under amended solo-owner gate | Operational policy gap / platform-spec detail gap / implementation-tooling gap; architecture only if accepted semantics would change | NW-063 selected one application host behind external TLS with durable external PostgreSQL 16. NW-065 fixed and verified clean-image contract-resource packaging; NW-066 accepted the runbook and plan. Execute NW-067 only after its external adapters, image pair, compatibility evidence, and fresh-session solo cold-recovery setup pass the scheduling gate. A passing rehearsal may prove repeatable deployment and recovery for the named solo-operated environment, but not independent human continuity or real-production approval. |
-| GAP-PRODUCT-01 | Multi-tenant naming strategy | Open | Product/problem evidence gap / platform-spec detail gap | Requires concrete deployment archetype pressure before specification. |
+| GAP-OPS-01 | Production deployment runbook and operations rehearsal | Synthetic reference rehearsal accepted; real production remains separately blocked | Operational policy gap / platform-spec detail gap / implementation-tooling gap; architecture only if accepted semantics would change | NW-067 accepted the synthetic reference-environment rehearsal with successor adapters NW-075 through NW-081 and the 2026-06-18 R12 rerun. This proves repeatable synthetic deployment/recovery for the named solo-operated environment only; NW-093 remains the real-production approval route for provider, region, jurisdiction, real users/data, support, compliance/security, continuity, and go/no-go. |
+| GAP-PRODUCT-01 | Multi-tenant naming strategy | Product Candidate 1 managed-isolation route accepted; tenant-aware internals remain future decisions | Product/problem evidence gap / platform-spec detail gap; architecture or contract gap if tenant-aware internals are selected | NW-082 through NW-084 establish the Product Candidate 1 standing: one customer-facing Organization maps to one managed single-tenant Datarun deployment with one internal/default Workspace. Do not claim tenant-aware auth, workspace-scoped config, tenant sync context, local partition keys, storage backfills, pooled `tenant_id` predicates, or envelope changes without selecting NW-094 through NW-098 as applicable. |
 | GAP-CONFIG-03 | Complexity budget changes | Open | Platform-spec detail gap / architecture decision gap if guardrails weaken | Adjust only with validation evidence; weakening deploy-time guardrails requires architecture review. |
 | GAP-AUTH-04 | Cross-activity cohort materialization | Open/future decision | Architecture decision gap | Any subject/query/custom scope beyond accepted assignment axes requires formal decision. |
 | GAP-AUTH-05 | Cross-activity subject access for a second actor | Open/future decision | Architecture decision gap | Do not bypass assignment-derived access or create hidden sync scope. |

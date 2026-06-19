@@ -189,6 +189,13 @@ The acceptance commit should update only the surfaces materially changed:
 - module interfaces when an implemented boundary changed;
 - residual successor or deferral routes.
 
+The acceptance commit must state:
+
+- validation evidence;
+- gap register touched: yes/no;
+- artifact trace touched: yes/no when an artifact was created, retired, or reclassified;
+- active control panel updated: yes/no.
+
 It must cite the implementation/decision commit and exact evidence. It must not
 hide behavior fixes that should have their own `feat`, `fix`, or `test` commit.
 
