@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-19 (NW-102 progress-control polish in review)
+**Last updated**: 2026-06-19 (NW-102 progress-control polish accepted)
 
 ---
 
@@ -11,18 +11,18 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Active implementation gate: none
-- Active process/control slice: NW-102 progress-control surface polish (`in_review`)
-- Last accepted NW: NW-101 mobile external field-user login
+- Active process/control slice: none
+- Last accepted NW: NW-102 progress-control surface polish
 - Current blocker: none
-- Next evidence command: `git diff --check` plus targeted control-surface grep checks
-- Do-not-start-next-product-work-until: NW-102 accepted
-- Gap register review standing: in progress for GAP-OPS-01, GAP-PRODUCT-01, and GAP-CONFIG-02
-- Artifact trace standing: trace table in progress
+- Next evidence command: select the next NW row before implementation
+- Do-not-start-next-product-work-until: none
+- Gap register review standing: reviewed 2026-06-19; touched yes for NW-102
+- Artifact trace standing: trace table current; touched yes for NW-102
 - Last updated: 2026-06-19
 
 ### Current Routing Detail
 
-Use this section as the low-token bootstrap for new sessions.
+Use this detail when the control panel above is not enough.
 
 - Phase 4 is complete; the completion audit is green.
 - Post-Phase-4 stabilization now uses `docs/agent-working-surface/README.md` as the active agent working-surface router.
@@ -52,6 +52,7 @@ Use this section as the low-token bootstrap for new sessions.
 - NW-071 is accepted: shared-device session and local-state behavior now has durable platform authority at `docs/specifications/platform/shared-device-session-and-local-state.md`. The spec records current single-active-actor sessions, drain-or-seal switching, actor-resolved refresh/resume, per-actor mutable local partitions, actor-scoped sync bookkeeping, immutable shared config blobs, sealed pending-work boundaries, product-safe local-state vocabulary, non-goals, and escalation triggers. No runtime code, mobile login/UX polish, tenant-aware runtime/storage/sync partition changes, contract/schema/sync protocol behavior, retention/security promises beyond current actor partitioning, BAR/CDL/operations evidence, old IDR text, phase files, or real-production approval changed. NW-054 remains the route for expiry, decommissioning, sealed recovery, local encryption, token/session retention, no-local-retention, erasure, redaction, or sensitivity claims.
 - NW-085 is accepted: external field-user Product Candidate 1 mobile login and token lifecycle now has durable platform authority at `docs/specifications/platform/mobile-oidc-login-and-token-lifecycle.md`. The selected login shape is mobile system browser/external-user-agent OIDC authorization-code with PKCE, with optional OS/provider native-app broker handoff when available, followed by `/api/auth/me` server actor resolution through explicit active `(issuer, subject) -> actor_id` binding. The spec records rejected alternatives, provider/non-production boundaries, refresh/logout/re-login/expiry expectations, token-placement limits, offline behavior, shared-device login UX vocabulary, successor implementation criteria, guard tests, non-goals, and escalation routes. No runtime code, mobile UI, token-storage implementation, tests, contracts, schemas, BAR, CDL, operations evidence, old IDR text, phase files, tenant-aware internals, retention/security policy, or real-production approval changed. NW-093 remains blocked for provider/region/jurisdiction, real users/data, support, compliance/security, and go/no-go approval; NW-054 remains the route for retention/security claims.
 - NW-101 is accepted: commit `8dddff0` added the mobile external-user-agent OIDC + PKCE handoff, `/api/auth/me` actor activation, refresh/logout/re-login/expiry handling, switch-user/sign-out UI, actor-local session metadata, and Android callback bridge. Focused and full Flutter tests pass; `flutter analyze` still reports only pre-existing unrelated repo issues; and the native Android compile gate now passes with `timeout 900s ./gradlew :app:compileDebugKotlin --console=plain --no-daemon --stacktrace` from `mobile/android` in 3m 2s, including successful `:app:compileDebugKotlin`. The originally documented `mobile/./gradlew` path is absent; the wrapper lives under `mobile/android/gradlew`.
+- NW-102 is accepted: implementation/control-surface commit `2d9e51e` added the compact status control panel, backlog Active Work Index, gap register maintenance rules, stale gap-row reconciliation for GAP-OPS-01/GAP-PRODUCT-01/GAP-CONFIG-02, artifact trace metadata, and acceptance evidence wording in the commit workflow. Verification: `git diff --check` passed, and targeted greps found the active control panel, Active Work Index, Gap Register Maintenance Rules, artifact trace table, and GAP-OPS-01 row. Gap register touched: yes. Artifact trace touched: yes. Active control panel updated: yes. No runtime code, contracts, schemas, specs, architecture decisions, product/platform behavior, BAR, CDL, or operations evidence changed.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use `docs/specifications/platform/production-auth-principal-binding.md` for the durable behavior boundary and the NW-037 backlog row for evidence; IDR-027 remains historical provenance.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
