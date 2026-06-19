@@ -43,3 +43,6 @@ Report the focused server contract/projection tests, focused mobile fixture or
 projection tests, and the broader gates required by the task. If only contract
 text changed, still run `git diff --check` and explain why runtime tests were
 not required.
+
+Use `docs/agent-working-surface/validation-matrix.md` for touched-surface gates
+and acceptance evidence format.

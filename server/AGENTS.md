@@ -53,3 +53,6 @@ Report command, cwd, result, test count/duration when available, and any skipped
 gate rationale. Keep focused tests tied to the touched behavior, then run the
 full gate when server behavior, contracts, auth, sync, admin, or packaging
 surfaces changed.
+
+Use `docs/agent-working-surface/validation-matrix.md` for touched-surface gates
+and acceptance evidence format.

@@ -62,6 +62,7 @@ This table is a routing index, not a second copy of the process rules.
 | Review findings and implementation/refactoring debt | Gap playbook classification first; `platform-next-work-backlog.md` for promoted work; code/tests and commit trace for bounded implementation fixes. |
 | Durable output homes and metadata | `docs/documentation-organization.md`. |
 | Commit and progress transitions | `docs/commit-workflow.md`. |
+| Validation gates and acceptance evidence format | `validation-matrix.md`. |
 | Execution packets | `prompts/README.md` and the selected prompt. |
 | Product/UX vocabulary guardrails | `operational-ux-layering-companion.md`. |
 | Measured evolution paths | `escape-hatch-register.md`. |
@@ -101,6 +102,9 @@ long-lived document, use
 When a task authorizes commits, use
 [docs/commit-workflow.md](/docs/commit-workflow.md) for route, decision/spec,
 implementation, acceptance, review, hygiene, and checkpoint boundaries.
+Use [validation-matrix.md](validation-matrix.md) to map touched surfaces to
+focused, full, CI-backed, local/manual, currently-red, and future validation
+gates before recording acceptance evidence.
 
 The canonical homes for new outputs are:
 

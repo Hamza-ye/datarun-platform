@@ -142,16 +142,18 @@ row at a time.
 
 ## 10 Product-Level Definition Of Done
 
-Future NW-107 should own detailed validation commands and CI/test matrix
-policy. This table is product-level only.
+Use the
+[agent validation matrix](../../agent-working-surface/validation-matrix.md) for
+detailed validation commands and evidence format. This table is product-level
+only.
 
 | Journey | Done when user can | Evidence category | Required guardrail | Detailed validation owner |
 |---|---|---|---|---|
-| Setup/config | Author, validate, review, approve, and publish a basic setup. | Product walkthrough plus existing server tests. | No schema/expression/config-package drift. | Future NW-107 validation matrix. |
-| Web admin access | Sign in, enter shell, and see denial when not authorized. | Existing web-admin auth/command-gate tests plus walkthrough. | No IdP claim/group/root-admin authority. | Future NW-107 validation matrix. |
-| Assignment | Create and end field responsibility inside accepted containment. | Existing assignment workflow tests plus PM scenario proof. | No new scopes or browser-selected command actor. | Future NW-107 validation matrix. |
-| Mobile work loop | Sign in, get assigned work, capture offline/online, correct, and sync. | Flutter tests plus product smoke walkthrough. | No sync protocol, retention, or event-shape changes. | Future NW-107 validation matrix. |
-| Freshness/attention | See latest synced status and unresolved attention without overclaiming reporting. | Scenario proof and scoped UI evidence if selected. | No dashboard/export/broad read API. | Future NW-107 validation matrix. |
+| Setup/config | Author, validate, review, approve, and publish a basic setup. | Product walkthrough plus existing server tests. | No schema/expression/config-package drift. | [Agent validation matrix](../../agent-working-surface/validation-matrix.md). |
+| Web admin access | Sign in, enter shell, and see denial when not authorized. | Existing web-admin auth/command-gate tests plus walkthrough. | No IdP claim/group/root-admin authority. | [Agent validation matrix](../../agent-working-surface/validation-matrix.md). |
+| Assignment | Create and end field responsibility inside accepted containment. | Existing assignment workflow tests plus PM scenario proof. | No new scopes or browser-selected command actor. | [Agent validation matrix](../../agent-working-surface/validation-matrix.md). |
+| Mobile work loop | Sign in, get assigned work, capture offline/online, correct, and sync. | Flutter tests plus product smoke walkthrough. | No sync protocol, retention, or event-shape changes. | [Agent validation matrix](../../agent-working-surface/validation-matrix.md). |
+| Freshness/attention | See latest synced status and unresolved attention without overclaiming reporting. | Scenario proof and scoped UI evidence if selected. | No dashboard/export/broad read API. | [Agent validation matrix](../../agent-working-surface/validation-matrix.md). |
 | Proof target | Demonstrate the selected PC1 proof route end to end. | Synthetic/demo/proof evidence packet. | Real users/data trigger NW-093 first. | Product steward plus future validation owner. |
 
 ## 11 Owner Decisions
