@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-19 (NW-105 agent instruction split in progress)
+**Last updated**: 2026-06-19 (NW-105 agent instruction split accepted)
 
 ---
 
@@ -11,13 +11,13 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Active implementation gate: post-audit product implementation freeze
-- Active process/control slice: NW-105 agent instruction split
-- Last accepted NW: NW-104 post-audit evidence capture
-- Current blocker: product implementation frozen until post-audit reset rows are accepted or explicitly parked
-- Next evidence command: complete NW-105 agent instruction split, then select and accept or explicitly park the remaining post-audit reset rows before product implementation
-- Do-not-start-next-product-work-until: post-audit reset rows from NW-104 audit evidence are accepted or explicitly parked
-- Gap register review standing: reviewed 2026-06-19; not touched for NW-104
-- Artifact trace standing: trace table current; touched yes for NW-104
+- Active process/control slice: remaining post-audit reset row selection/parking
+- Last accepted NW: NW-105 agent instruction split
+- Current blocker: product implementation frozen until NW-106 through NW-109 are accepted or explicitly parked
+- Next evidence command: select and accept or explicitly park NW-106 through NW-109 before product implementation
+- Do-not-start-next-product-work-until: NW-106 through NW-109 post-audit reset rows are accepted or explicitly parked
+- Gap register review standing: reviewed 2026-06-19; not touched for NW-105
+- Artifact trace standing: trace table current; not touched for NW-105
 - Last updated: 2026-06-19
 
 ### Current Routing Detail
@@ -55,6 +55,7 @@ Use this detail when the control panel above is not enough.
 - NW-102 is accepted: implementation/control-surface commit `2d9e51e` added the compact status control panel, backlog Active Work Index, gap register maintenance rules, stale gap-row reconciliation for GAP-OPS-01/GAP-PRODUCT-01/GAP-CONFIG-02, artifact trace metadata, and acceptance evidence wording in the commit workflow. Verification: `git diff --check` passed, and targeted greps found the active control panel, Active Work Index, Gap Register Maintenance Rules, artifact trace table, and GAP-OPS-01 row. Gap register touched: yes. Artifact trace touched: yes. Active control panel updated: yes. No runtime code, contracts, schemas, specs, architecture decisions, product/platform behavior, BAR, CDL, or operations evidence changed.
 - NW-103 is accepted: implementation/control-surface commit `d8c989d` added gap progress metadata inside the existing gap register/control plane, kept the five classifications unchanged, and populated initial metadata for current stall-risk rows. Verification: `git diff --check` passed, and targeted greps found Gap Progress Metadata, Evidence gate, and NW-103 status/backlog traces. Gap register touched: yes. Artifact trace touched: no. Active control panel updated: yes. No side document, new taxonomy, runtime code, contracts, schemas, specs, architecture decisions, product/platform behavior, BAR, CDL, artifact trace, or operations evidence changed.
 - NW-104 is accepted: the three independent post-audit reports were copied into `docs/agent-working-surface/artifacts/` and indexed as non-authoritative evidence: `2026-06-19-product-goal-pm-handoff-audit.md`, `2026-06-19-test-ci-validation-strategy-audit.md`, and `2026-06-19-agents-md-instruction-file-audit.md`. Product implementation is frozen until the reset rows identified by these audits are accepted or explicitly parked. This did not rewrite AGENTS.md, create a PM handoff, add CI, or change runtime code, contracts, product scope, platform specs, architecture decisions, BAR, or CDL.
+- NW-105 is accepted: root `AGENTS.md` is now a 77-line product-slice-first implementer router with nested `server/AGENTS.md`, `mobile/AGENTS.md`, and `contracts/AGENTS.md` files plus `docs/agent-working-surface/steward-session-guide.md` for broad steward workflows. Verification: `git diff --check` passed, `wc -l AGENTS.md` returned 77, and targeted greps passed. No runtime code, contract semantics, product scope, platform specs, architecture authority, PM handoff, validation matrix, skills/playbooks, mobile CI, BAR, CDL, gap register, or artifact trace changed. Product implementation remains frozen until NW-106 through NW-109 are accepted or explicitly parked.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use `docs/specifications/platform/production-auth-principal-binding.md` for the durable behavior boundary and the NW-037 backlog row for evidence; IDR-027 remains historical provenance.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
@@ -82,7 +83,7 @@ Use this detail when the control panel above is not enough.
 - NW-080 is accepted in `docs/operations/rehearsals/2026-06-18-encrypted-backup-recovery-point-refresh.md`: DB1 created encrypted pgBackRest diff backup `20260617-022519F_20260618-131808D` in the accepted `datarun-nw075-backup` repository with `cipher: aes-256-cbc`, latest recoverable time `2026-06-18T13:18:14Z`, RPO age `66` seconds, backup metric provenance from the real stop timestamp, resolved `DatarunBackupStale` webhook evidence, and zero active backup/critical alerts.
 - NW-081 is accepted in `docs/operations/rehearsals/2026-06-18-fresh-session-protected-smoke-token-path.md`: the fresh-session path strips CR/LF from the root-owned synthetic rotated-worker password file into a temporary `/dev/shm` file, obtains a short-lived Keycloak direct-grant token for `datarun-cli`, retains only redacted JWT metadata, and proves `/api/auth/me`, `/api/sync/config`, and `/api/sync/pull` with HTTP 200 while cleaning token material.
 - S06/entity lifecycle remains visible as BAR-105/NW-021 future-decision work. It did not block NW-060, NW-061, or NW-062 because those slices add no known-set, candidate, lifecycle, duplicate, merge, split, or subject-link authority.
-- Default implementer context is `AGENTS.md`, this section, the relevant section of `docs/implementation/module-interfaces.md` only when touching implementation code or module behavior, and the exact contracts/code touched by the task.
+- Default implementer context is `AGENTS.md`, this section, the selected task/NW packet, the exact touched files, and nested `server/AGENTS.md`, `mobile/AGENTS.md`, or `contracts/AGENTS.md` only when those surfaces are in scope.
 - Historical phase detail, active decision text, architecture docs, scenarios, and exploration archives are not default context. Open them only when the task surface, a touched file, or a drift investigation routes you there.
 
 ---
