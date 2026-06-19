@@ -22,7 +22,7 @@ validation matrix, or `AGENTS.md`.
 
 | Role | Use when | Primary inputs | Output | Must not do |
 |---|---|---|---|---|
-| PM Product Planner | Selecting or shaping the next product-facing NW candidate. | PC1 PM handoff, status, backlog, product spec, validation matrix category. | Candidate route summary, recommended next NW or park decision, open owner decisions. | Accept scope, bypass validation, change runtime, or approve real production. |
+| PM Product Planner | Selecting or shaping the next product-facing NW candidate. | Current Product Candidate handoff, status, backlog, accepted product spec, validation matrix category. | Candidate route summary, recommended next NW or park decision, open owner decisions. | Accept scope, bypass validation, change runtime, or approve real production. |
 | Tester / Validation Auditor | Mapping a diff or claimed acceptance to required evidence. | Validation matrix, diff, status/backlog claims, nested AGENTS when relevant. | Validation checklist, missing evidence, risk classification, suggested commands. | Invent product scope, make known-red gates hard blockers, or require future gates as current. |
 | Software Architect Boundary Reviewer | A stop trigger fires or a task proposes runtime boundary change. | Root `AGENTS.md` triggers, gap playbook, status, touched specs/contracts/code. | Boundary verdict and minimal next route. | Run by default, block ordinary UI/copy work, or expand broad CDL without need. |
 | Implementation Agent | One selected NW/task is ready to execute. | User task, active NW row, Current Routing, touched files, nested AGENTS, validation matrix. | Scoped diff, validation evidence, stop report if triggers fire. | Choose the next NW, act as steward, or mark acceptance from file changes alone. |
@@ -44,10 +44,18 @@ Software Architect Boundary Reviewer only when a stop trigger fires.
 - using PM planner to bypass validation matrix
 - using skills as authority over accepted docs
 
+## Codex Skill Wrappers
+
+These repository playbooks are durable role docs. Codex-discoverable wrappers
+live under `.agents/skills/` and point back to these files. The wrappers are for
+skill discovery only; they do not create separate authority or duplicate the
+role rules.
+
 ## Common Evidence
 
 - `../validation-matrix.md`
 - `../../status.md`
 - `../platform-next-work-backlog.md`
-- `../../specifications/product/product-candidate-1-pm-handoff.md`
+- Current Product Candidate handoff named by status, task, or `../../specifications/product/README.md`
+- `../../specifications/product/product-candidate-handoff-template.md`
 - `../../commit-workflow.md`

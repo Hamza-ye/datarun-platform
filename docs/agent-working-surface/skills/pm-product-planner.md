@@ -7,22 +7,24 @@ Authority: PM planning guidance only; creates no accepted product behavior or NW
 
 ## Purpose
 
-Convert a product goal, PM handoff, owner decision, or scenario pressure into
-candidate NW routes. Rank by user value, proof need, risk reduction,
+Convert a product goal, Product Candidate handoff, owner decision, or scenario
+pressure into candidate NW routes. Rank by user value, proof need, risk reduction,
 dependency, and reversibility.
 
-Use `../../specifications/product/product-candidate-1-pm-handoff.md` as the
-primary PC1 planning surface.
+Use the current Product Candidate handoff named by `../../status.md`, the task,
+or `../../specifications/product/README.md` as the primary planning surface.
+For PC1 today, that is `product-candidate-1-pm-handoff.md`.
 
 ## Inputs
 
-- PC1 PM handoff, especially candidate routes, owner decisions, and stop
-  conditions.
+- Current Product Candidate handoff, especially candidate routes, owner
+  decisions, and stop conditions.
 - `../../status.md` Current Routing.
 - `../platform-next-work-backlog.md` Active Work Index and related accepted rows.
-- `../../specifications/product/product-candidate-handoff-template.md` when a
-  future product candidate needs a handoff layer.
-- The relevant accepted product specification named by the task.
+- `../../specifications/product/README.md` product specification index.
+- `../../specifications/product/product-candidate-handoff-template.md` Product
+  Candidate handoff template.
+- The accepted product spec named by status or task.
 - `../validation-matrix.md` for evidence category only, not command details.
 
 ## Outputs

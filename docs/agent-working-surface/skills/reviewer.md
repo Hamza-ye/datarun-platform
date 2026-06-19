@@ -8,7 +8,8 @@ Authority: review guidance only; acceptance still depends on the accepted task a
 ## Purpose
 
 Review a PR or diff from fresh context against the accepted task or NW, the PM
-handoff when product-facing, and the validation matrix.
+handoff or current Product Candidate handoff when product-facing, and the
+validation matrix.
 
 ## Inputs
 
@@ -16,7 +17,8 @@ handoff when product-facing, and the validation matrix.
 - Active NW row or selected task packet.
 - `../../status.md` and `../platform-next-work-backlog.md` acceptance standing.
 - `../validation-matrix.md`.
-- Product handoff for product-facing changes.
+- Current Product Candidate handoff or product handoff for product-facing
+  changes.
 
 ## Outputs
 
