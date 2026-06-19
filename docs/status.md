@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-19 (NW-103 gap progress metadata accepted)
+**Last updated**: 2026-06-19 (NW-104 post-audit evidence capture accepted)
 
 ---
 
@@ -10,14 +10,14 @@
 
 Use this section as the low-token bootstrap for new sessions.
 
-- Active implementation gate: none
-- Active process/control slice: none
-- Last accepted NW: NW-103 gap progress metadata
-- Current blocker: none
-- Next evidence command: select the next NW row before implementation
-- Do-not-start-next-product-work-until: none
-- Gap register review standing: reviewed 2026-06-19; touched yes for NW-103
-- Artifact trace standing: trace table current; not touched for NW-103
+- Active implementation gate: post-audit product implementation freeze
+- Active process/control slice: post-audit reset row selection/parking
+- Last accepted NW: NW-104 post-audit evidence capture
+- Current blocker: product implementation frozen until post-audit reset rows are accepted or explicitly parked
+- Next evidence command: select and accept or explicitly park the post-audit reset rows before product implementation
+- Do-not-start-next-product-work-until: post-audit reset rows from NW-104 audit evidence are accepted or explicitly parked
+- Gap register review standing: reviewed 2026-06-19; not touched for NW-104
+- Artifact trace standing: trace table current; touched yes for NW-104
 - Last updated: 2026-06-19
 
 ### Current Routing Detail
@@ -54,6 +54,7 @@ Use this detail when the control panel above is not enough.
 - NW-101 is accepted: commit `8dddff0` added the mobile external-user-agent OIDC + PKCE handoff, `/api/auth/me` actor activation, refresh/logout/re-login/expiry handling, switch-user/sign-out UI, actor-local session metadata, and Android callback bridge. Focused and full Flutter tests pass; `flutter analyze` still reports only pre-existing unrelated repo issues; and the native Android compile gate now passes with `timeout 900s ./gradlew :app:compileDebugKotlin --console=plain --no-daemon --stacktrace` from `mobile/android` in 3m 2s, including successful `:app:compileDebugKotlin`. The originally documented `mobile/./gradlew` path is absent; the wrapper lives under `mobile/android/gradlew`.
 - NW-102 is accepted: implementation/control-surface commit `2d9e51e` added the compact status control panel, backlog Active Work Index, gap register maintenance rules, stale gap-row reconciliation for GAP-OPS-01/GAP-PRODUCT-01/GAP-CONFIG-02, artifact trace metadata, and acceptance evidence wording in the commit workflow. Verification: `git diff --check` passed, and targeted greps found the active control panel, Active Work Index, Gap Register Maintenance Rules, artifact trace table, and GAP-OPS-01 row. Gap register touched: yes. Artifact trace touched: yes. Active control panel updated: yes. No runtime code, contracts, schemas, specs, architecture decisions, product/platform behavior, BAR, CDL, or operations evidence changed.
 - NW-103 is accepted: implementation/control-surface commit `d8c989d` added gap progress metadata inside the existing gap register/control plane, kept the five classifications unchanged, and populated initial metadata for current stall-risk rows. Verification: `git diff --check` passed, and targeted greps found Gap Progress Metadata, Evidence gate, and NW-103 status/backlog traces. Gap register touched: yes. Artifact trace touched: no. Active control panel updated: yes. No side document, new taxonomy, runtime code, contracts, schemas, specs, architecture decisions, product/platform behavior, BAR, CDL, artifact trace, or operations evidence changed.
+- NW-104 is accepted: the three independent post-audit reports were copied into `docs/agent-working-surface/artifacts/` and indexed as non-authoritative evidence: `2026-06-19-product-goal-pm-handoff-audit.md`, `2026-06-19-test-ci-validation-strategy-audit.md`, and `2026-06-19-agents-md-instruction-file-audit.md`. Product implementation is frozen until the reset rows identified by these audits are accepted or explicitly parked. This did not rewrite AGENTS.md, create a PM handoff, add CI, or change runtime code, contracts, product scope, platform specs, architecture decisions, BAR, or CDL.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use `docs/specifications/platform/production-auth-principal-binding.md` for the durable behavior boundary and the NW-037 backlog row for evidence; IDR-027 remains historical provenance.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
 - FP-010 is resolved; platform payload schemas are runtime contracts, not deployer shape rows.
