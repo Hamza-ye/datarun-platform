@@ -140,6 +140,34 @@ void main() {
       expect(find.text('Existing record'), findsOneWidget);
     },
   );
+
+  testWidgets('session menu exposes switch user and sign out actions', (
+    tester,
+  ) async {
+    final harness = _Harness(
+      configVersion: 1,
+      hasForms: true,
+      assignments: [_assignment()],
+    );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AppState>.value(
+        value: harness.state,
+        child: MaterialApp(
+          home: WorkListScreen(
+            onSwitchUser: (_) async {},
+            onSignOut: (_) async {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('User session'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Switch user'), findsOneWidget);
+    expect(find.text('Sign out'), findsOneWidget);
+  });
 }
 
 Future<void> _pump(WidgetTester tester, AppState state) {
@@ -265,6 +293,9 @@ class _FakeEventStore implements EventStore {
   List<Map<String, dynamic>> assignments;
 
   @override
+  String? get actorId => '11111111-1111-1111-1111-111111111111';
+
+  @override
   Future<List<Map<String, dynamic>>> getActiveAssignments() async =>
       List<Map<String, dynamic>>.from(assignments);
 
@@ -317,8 +348,17 @@ class _FakeEventAssembler implements EventAssembler {
 }
 
 class _FakeDeviceIdentity implements DeviceIdentity {
+  static const _actorId = '11111111-1111-1111-1111-111111111111';
+
   @override
   String get deviceId => 'device-12345678';
+
+  @override
+  String? get activeActorId => _actorId;
+
+  @override
+  ActorSession? get activeSession =>
+      const ActorSession(actorId: _actorId, token: 'test-token');
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

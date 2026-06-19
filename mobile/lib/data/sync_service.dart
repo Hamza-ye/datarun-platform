@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:datarun_mobile/data/auth_service.dart';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/config_store.dart';
 import 'package:datarun_mobile/data/device_identity.dart';
+import 'package:datarun_mobile/data/oidc_config.dart';
 import 'package:datarun_mobile/domain/event.dart';
 
 class SyncResult {
@@ -36,6 +38,8 @@ class SyncService {
   final String _baseUrl;
   final ConfigStore _configStore;
   final http.Client _client;
+  final MobileAuthService? _authService;
+  final DateTime Function() _now;
 
   SyncService(
     this._eventStore,
@@ -43,12 +47,16 @@ class SyncService {
     this._baseUrl,
     this._configStore, {
     http.Client? client,
-  }) : _client = client ?? http.Client();
+    MobileAuthService? authService,
+    DateTime Function()? now,
+  }) : _client = client ?? http.Client(),
+       _authService = authService,
+       _now = now ?? DateTime.now;
 
   Future<SyncResult> sync() async {
     int pushed = 0;
     int pulled = 0;
-    final session = _identity.activeSession;
+    var session = _identity.activeSession;
     if (session == null) {
       return SyncResult(
         pushedCount: 0,
@@ -56,6 +64,15 @@ class SyncService {
         error: 'No active actor session',
       );
     }
+    final refreshResult = await _refreshExpiredCredential(session);
+    if (refreshResult.error != null) {
+      return SyncResult(
+        pushedCount: 0,
+        pulledCount: 0,
+        error: refreshResult.error,
+      );
+    }
+    session = refreshResult.session!;
     final actorResult = await _refreshActorIdentity(session);
     if (actorResult != null) {
       return actorResult;
@@ -228,7 +245,12 @@ class SyncService {
     return SyncResult(pushedCount: pushed, pulledCount: pulled);
   }
 
-  Future<ActorSwitchResult> switchActorSession(String token) async {
+  Future<ActorSwitchResult> switchActorSession(
+    String token, {
+    String? refreshToken,
+    DateTime? tokenExpiresAt,
+    OidcClientConfig? oidcConfig,
+  }) async {
     final priorSession = _identity.activeSession;
     if (priorSession != null) {
       await _drainCurrentActorForSwitch(priorSession);
@@ -236,7 +258,14 @@ class SyncService {
 
     try {
       final actorId = await _resolveActorId(token);
-      await _identity.activateActorSession(actorId: actorId, token: token);
+      await _identity.activateActorSession(
+        actorId: actorId,
+        token: token,
+        serverUrl: _baseUrl,
+        refreshToken: refreshToken,
+        tokenExpiresAt: tokenExpiresAt,
+        oidcConfig: oidcConfig,
+      );
       return ActorSwitchResult.switched(actorId);
     } on _ActorUnauthorizedException {
       return const ActorSwitchResult.failed(
@@ -247,6 +276,18 @@ class SyncService {
     } on Exception {
       return const ActorSwitchResult.failed('No connection');
     }
+  }
+
+  Future<ActorSwitchResult> switchToProviderCredential(
+    ProviderCredential credential, {
+    OidcClientConfig? oidcConfig,
+  }) {
+    return switchActorSession(
+      credential.accessToken,
+      refreshToken: credential.refreshToken,
+      tokenExpiresAt: credential.expiresAt,
+      oidcConfig: oidcConfig,
+    );
   }
 
   Future<void> _drainCurrentActorForSwitch(ActorSession session) async {
@@ -305,6 +346,34 @@ class SyncService {
     }
   }
 
+  Future<_SessionRefreshResult> _refreshExpiredCredential(
+    ActorSession session,
+  ) async {
+    if (!session.isExpired(_now().toUtc())) {
+      return _SessionRefreshResult.success(session);
+    }
+    final authService = _authService;
+    if (authService == null) {
+      return const _SessionRefreshResult.failed('Needs sign-in to sync');
+    }
+    final refresh = await authService.refreshActiveSession(serverUrl: _baseUrl);
+    if (!refresh.success) {
+      return _SessionRefreshResult.failed(
+        refresh.error ?? 'Needs sign-in to sync',
+      );
+    }
+    final refreshedSession = _identity.activeSession;
+    if (refreshedSession == null) {
+      return const _SessionRefreshResult.failed('Needs sign-in to sync');
+    }
+    if (refreshedSession.actorId != session.actorId) {
+      return const _SessionRefreshResult.failed(
+        'Actor identity changed; switch required',
+      );
+    }
+    return _SessionRefreshResult.success(refreshedSession);
+  }
+
   Future<String> _resolveActorId(String token) async {
     final response = await _client.get(
       Uri.parse('$_baseUrl/api/auth/me'),
@@ -348,4 +417,16 @@ class _ActorIdentityException implements Exception {
 
 class _ActorUnauthorizedException implements Exception {
   const _ActorUnauthorizedException();
+}
+
+class _SessionRefreshResult {
+  final ActorSession? session;
+  final String? error;
+
+  const _SessionRefreshResult._({this.session, this.error});
+
+  const _SessionRefreshResult.success(ActorSession session)
+    : this._(session: session);
+
+  const _SessionRefreshResult.failed(String error) : this._(error: error);
 }

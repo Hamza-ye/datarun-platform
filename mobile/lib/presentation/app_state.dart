@@ -38,6 +38,16 @@ class AppState extends ChangeNotifier {
   }) : _now = now ?? DateTime.now;
 
   Future<void> refresh() async {
+    if (identity.activeSession == null ||
+        (eventStore.actorId != null &&
+            eventStore.actorId != identity.activeActorId)) {
+      subjects = [];
+      activeAssignments = [];
+      pendingCount = 0;
+      notifyListeners();
+      return;
+    }
+
     // Promote pending config at a safe transition point under the accepted two-slot model.
     await configStore.promotePending();
     subjects = await projectionEngine.getSubjectList();

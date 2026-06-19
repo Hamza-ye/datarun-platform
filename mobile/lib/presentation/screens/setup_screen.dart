@@ -1,18 +1,30 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:datarun_mobile/data/auth_service.dart';
 import 'package:datarun_mobile/data/device_identity.dart';
+import 'package:datarun_mobile/data/oidc_config.dart';
 
-/// First-launch setup screen. Collects server URL and bearer credential.
+typedef CredentialActivator =
+    Future<AuthSessionResult> Function({
+      required String serverUrl,
+      required ProviderCredential credential,
+      OidcClientConfig? oidcConfig,
+    });
+
+/// Sign-in screen. The primary path is external-user-agent OIDC with PKCE.
 class SetupScreen extends StatefulWidget {
   final DeviceIdentity identity;
   final VoidCallback onSetupComplete;
+  final MobileAuthService? authService;
+  final CredentialActivator? credentialActivator;
+  final String title;
 
   const SetupScreen({
     super.key,
     required this.identity,
     required this.onSetupComplete,
+    this.authService,
+    this.credentialActivator,
+    this.title = 'Sign in',
   });
 
   @override
@@ -20,128 +32,284 @@ class SetupScreen extends StatefulWidget {
 }
 
 class _SetupScreenState extends State<SetupScreen> {
-  final _formKey = GlobalKey<FormState>();
+  static const _defaultRedirectUri = 'dev.datarun.mobile://oauth2redirect';
+
+  final _oidcFormKey = GlobalKey<FormState>();
+  final _devFormKey = GlobalKey<FormState>();
   final _urlController = TextEditingController(text: 'http://10.0.2.2:8080');
+  final _authorizationEndpointController = TextEditingController();
+  final _tokenEndpointController = TextEditingController();
+  final _clientIdController = TextEditingController();
+  final _redirectUriController = TextEditingController(
+    text: _defaultRedirectUri,
+  );
+  final _scopesController = TextEditingController(text: 'openid profile');
   final _tokenController = TextEditingController();
   bool _saving = false;
+
+  MobileAuthService get _authService =>
+      widget.authService ?? MobileAuthService(widget.identity);
 
   @override
   void dispose() {
     _urlController.dispose();
+    _authorizationEndpointController.dispose();
+    _tokenEndpointController.dispose();
+    _clientIdController.dispose();
+    _redirectUriController.dispose();
+    _scopesController.dispose();
     _tokenController.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _signIn() async {
+    if (!_oidcFormKey.currentState!.validate()) return;
 
     setState(() => _saving = true);
 
-    final url = _urlController.text.trim().replaceAll(RegExp(r'/+$'), '');
-    final token = _tokenController.text.trim();
+    final serverUrl = _serverUrl();
+    final oidcConfig = _oidcConfig();
 
+    AuthSessionResult result;
     try {
-      final response = await http.get(
-        Uri.parse('$url/api/auth/me'),
-        headers: {'Authorization': 'Bearer $token'},
+      final credential = await _authService.obtainOidcCredential(oidcConfig);
+      result = await _activateCredential(
+        serverUrl: serverUrl,
+        credential: credential,
+        oidcConfig: oidcConfig,
       );
-      if (response.statusCode != 200) {
-        throw Exception('auth/me returned ${response.statusCode}');
-      }
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      final actorId = body['actor_id'] as String?;
-      if (actorId == null || actorId.isEmpty) {
-        throw Exception('auth/me missing actor_id');
-      }
-
-      await widget.identity.activateActorSession(
-        actorId: actorId,
-        token: token,
-        serverUrl: url,
-      );
+    } on AuthFlowException catch (e) {
+      result = AuthSessionResult.failed(e.message);
     } on Exception {
-      if (mounted) {
-        setState(() => _saving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not verify actor token')),
-        );
-      }
+      result = const AuthSessionResult.failed('Sign in could not be completed');
+    }
+
+    if (!mounted) return;
+    setState(() => _saving = false);
+
+    if (result.success) {
+      widget.onSetupComplete();
+      return;
+    }
+    _showError(result.error ?? 'Sign in could not be completed');
+  }
+
+  Future<void> _saveDevelopmentBearer() async {
+    if (!_devFormKey.currentState!.validate()) return;
+    final serverError = _requiredUri(_urlController.text);
+    if (serverError != null) {
+      _showError('Datarun server URL is required');
       return;
     }
 
-    if (mounted) {
-      setState(() => _saving = false);
+    setState(() => _saving = true);
+
+    final result = await _activateCredential(
+      serverUrl: _serverUrl(),
+      credential: ProviderCredential(accessToken: _tokenController.text.trim()),
+    );
+
+    if (!mounted) return;
+    setState(() => _saving = false);
+
+    if (result.success) {
       widget.onSetupComplete();
+      return;
     }
+    _showError(result.error ?? 'Could not verify development credential');
+  }
+
+  Future<AuthSessionResult> _activateCredential({
+    required String serverUrl,
+    required ProviderCredential credential,
+    OidcClientConfig? oidcConfig,
+  }) {
+    final activator = widget.credentialActivator;
+    if (activator != null) {
+      return activator(
+        serverUrl: serverUrl,
+        credential: credential,
+        oidcConfig: oidcConfig,
+      );
+    }
+    return _authService.activateResolvedCredential(
+      serverUrl: serverUrl,
+      credential: credential,
+      oidcConfig: oidcConfig,
+    );
+  }
+
+  String _serverUrl() =>
+      _urlController.text.trim().replaceAll(RegExp(r'/+$'), '');
+
+  OidcClientConfig _oidcConfig() {
+    return OidcClientConfig(
+      authorizationEndpoint: Uri.parse(
+        _authorizationEndpointController.text.trim(),
+      ),
+      tokenEndpoint: Uri.parse(_tokenEndpointController.text.trim()),
+      clientId: _clientIdController.text.trim(),
+      redirectUri: Uri.parse(_redirectUriController.text.trim()),
+      scopes: _scopesController.text
+          .split(RegExp(r'\s+'))
+          .where((scope) => scope.isNotEmpty)
+          .toList(),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  String? _requiredUri(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Required';
+    final uri = Uri.tryParse(value.trim());
+    if (uri == null || !uri.hasScheme) return 'Invalid URL';
+    return null;
+  }
+
+  String? _requiredText(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Required';
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Device Setup')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Connect to a Datarun server',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      appBar: AppBar(title: Text(widget.title)),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Text(
+              'Sign in with your organization account',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'The app opens your provider sign-in in the system browser, then checks your Datarun actor before work is available.',
+            ),
+            const SizedBox(height: 24),
+            Form(
+              key: _oidcFormKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    controller: _urlController,
+                    decoration: const InputDecoration(
+                      labelText: 'Datarun server URL',
+                      hintText: 'http://10.0.2.2:8080',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.url,
+                    validator: _requiredUri,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _authorizationEndpointController,
+                    decoration: const InputDecoration(
+                      labelText: 'Authorization endpoint',
+                      hintText: 'https://provider.example/auth',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.url,
+                    validator: _requiredUri,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _tokenEndpointController,
+                    decoration: const InputDecoration(
+                      labelText: 'Token endpoint',
+                      hintText: 'https://provider.example/token',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.url,
+                    validator: _requiredUri,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _clientIdController,
+                    decoration: const InputDecoration(
+                      labelText: 'Client ID',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: _requiredText,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _redirectUriController,
+                    decoration: const InputDecoration(
+                      labelText: 'Redirect URI',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.url,
+                    validator: _requiredUri,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _scopesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Scopes',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: _requiredText,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: _saving ? null : _signIn,
+                    icon: _saving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.login),
+                    label: const Text('Sign in'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Enter the server URL and actor credential provided by your administrator.',
-                style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              title: const Text('Development setup'),
+              subtitle: const Text(
+                'Manual bearer credentials are for tests and synthetic demos.',
               ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _urlController,
-                decoration: const InputDecoration(
-                  labelText: 'Server URL',
-                  hintText: 'http://10.0.2.2:8080',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.url,
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Required';
-                  final uri = Uri.tryParse(v.trim());
-                  if (uri == null || !uri.hasScheme) return 'Invalid URL';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _tokenController,
-                decoration: const InputDecoration(
-                  labelText: 'Actor Credential',
-                  hintText: 'Paste bearer credential',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 2,
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Required';
-                  if (v.trim().length < 32) return 'Token too short';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
+              children: [
+                Form(
+                  key: _devFormKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _tokenController,
+                        decoration: const InputDecoration(
+                          labelText: 'Bearer credential (development only)',
+                          border: OutlineInputBorder(),
                         ),
-                      )
-                    : const Text('Connect'),
-              ),
-            ],
-          ),
+                        maxLines: 2,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Required';
+                          if (v.trim().length < 32) return 'Token too short';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: _saving ? null : _saveDevelopmentBearer,
+                        child: const Text('Use development credential'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

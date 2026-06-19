@@ -8,7 +8,10 @@ import 'package:datarun_mobile/domain/shape.dart';
 
 /// S1: Work List — subject-centric entry point.
 class WorkListScreen extends StatelessWidget {
-  const WorkListScreen({super.key});
+  final Future<void> Function(BuildContext context)? onSignOut;
+  final Future<void> Function(BuildContext context)? onSwitchUser;
+
+  const WorkListScreen({super.key, this.onSignOut, this.onSwitchUser});
 
   static const _savedMessage = 'Saved on this device. Waiting to sync.';
 
@@ -77,6 +80,35 @@ class WorkListScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              if (onSignOut != null || onSwitchUser != null)
+                PopupMenuButton<_SessionAction>(
+                  tooltip: 'User session',
+                  onSelected: (action) async {
+                    if (action == _SessionAction.switchUser) {
+                      await onSwitchUser?.call(context);
+                    } else {
+                      await onSignOut?.call(context);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    if (onSwitchUser != null)
+                      const PopupMenuItem(
+                        value: _SessionAction.switchUser,
+                        child: ListTile(
+                          leading: Icon(Icons.switch_account),
+                          title: Text('Switch user'),
+                        ),
+                      ),
+                    if (onSignOut != null)
+                      const PopupMenuItem(
+                        value: _SessionAction.signOut,
+                        child: ListTile(
+                          leading: Icon(Icons.logout),
+                          title: Text('Sign out'),
+                        ),
+                      ),
+                  ],
+                ),
             ],
           ),
           body: Column(
@@ -344,6 +376,8 @@ class WorkListScreen extends StatelessWidget {
     return '${diff.inDays}d ago';
   }
 }
+
+enum _SessionAction { switchUser, signOut }
 
 enum _WorkReadinessKind {
   needsSync,

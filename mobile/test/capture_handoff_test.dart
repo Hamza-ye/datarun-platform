@@ -156,6 +156,9 @@ class _FakeEventStore implements EventStore {
   int pendingCount;
 
   @override
+  String? get actorId => '11111111-1111-1111-1111-111111111111';
+
+  @override
   Future<List<Map<String, dynamic>>> getActiveAssignments() async => [];
 
   @override
@@ -327,8 +330,17 @@ class _FakeSyncService implements SyncService {
 }
 
 class _FakeDeviceIdentity implements DeviceIdentity {
+  static const _actorId = '11111111-1111-1111-1111-111111111111';
+
   @override
   String get deviceId => 'device-12345678';
+
+  @override
+  String? get activeActorId => _actorId;
+
+  @override
+  ActorSession? get activeSession =>
+      const ActorSession(actorId: _actorId, token: 'test-token');
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

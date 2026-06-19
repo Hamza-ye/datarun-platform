@@ -1,11 +1,28 @@
+import 'dart:convert';
+
+import 'package:datarun_mobile/data/oidc_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class ActorSession {
   final String actorId;
   final String token;
+  final String? refreshToken;
+  final DateTime? tokenExpiresAt;
+  final OidcClientConfig? oidcConfig;
 
-  const ActorSession({required this.actorId, required this.token});
+  const ActorSession({
+    required this.actorId,
+    required this.token,
+    this.refreshToken,
+    this.tokenExpiresAt,
+    this.oidcConfig,
+  });
+
+  bool isExpired(DateTime now) {
+    final expiresAt = tokenExpiresAt;
+    return expiresAt != null && !expiresAt.isAfter(now.toUtc());
+  }
 }
 
 class DeviceIdentity {
@@ -64,7 +81,13 @@ class DeviceIdentity {
     if (id == null || id.isEmpty) return null;
     final token = actorTokenFor(id);
     if (token == null || token.isEmpty) return null;
-    return ActorSession(actorId: id, token: token);
+    return ActorSession(
+      actorId: id,
+      token: token,
+      refreshToken: actorRefreshTokenFor(id),
+      tokenExpiresAt: actorTokenExpiresAtFor(id),
+      oidcConfig: actorOidcConfigFor(id),
+    );
   }
 
   List<String> get knownActorIds =>
@@ -72,6 +95,25 @@ class DeviceIdentity {
 
   String? actorTokenFor(String actorId) =>
       _prefs.getString(_actorTokenKey(actorId));
+
+  String? actorRefreshTokenFor(String actorId) =>
+      _prefs.getString(_actorRefreshTokenKey(actorId));
+
+  DateTime? actorTokenExpiresAtFor(String actorId) {
+    final raw = _prefs.getString(_actorTokenExpiresAtKey(actorId));
+    if (raw == null || raw.isEmpty) return null;
+    return DateTime.tryParse(raw)?.toUtc();
+  }
+
+  OidcClientConfig? actorOidcConfigFor(String actorId) {
+    final raw = _prefs.getString(_actorOidcConfigKey(actorId));
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return OidcClientConfig.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } on Exception {
+      return null;
+    }
+  }
 
   bool hasSessionFor(String actorId) => actorTokenFor(actorId) != null;
 
@@ -91,6 +133,9 @@ class DeviceIdentity {
     required String actorId,
     required String token,
     String? serverUrl,
+    String? refreshToken,
+    DateTime? tokenExpiresAt,
+    OidcClientConfig? oidcConfig,
   }) async {
     if (actorId.isEmpty) {
       throw ArgumentError.value(actorId, 'actorId', 'must not be empty');
@@ -107,6 +152,27 @@ class DeviceIdentity {
     // next actor's token, then publish the next active actor as the final step.
     await _prefs.remove(_activeActorIdKey);
     await _prefs.setString(_actorTokenKey(actorId), token);
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      await _prefs.setString(_actorRefreshTokenKey(actorId), refreshToken);
+    } else {
+      await _prefs.remove(_actorRefreshTokenKey(actorId));
+    }
+    if (tokenExpiresAt != null) {
+      await _prefs.setString(
+        _actorTokenExpiresAtKey(actorId),
+        tokenExpiresAt.toUtc().toIso8601String(),
+      );
+    } else {
+      await _prefs.remove(_actorTokenExpiresAtKey(actorId));
+    }
+    if (oidcConfig != null) {
+      await _prefs.setString(
+        _actorOidcConfigKey(actorId),
+        jsonEncode(oidcConfig.toJson()),
+      );
+    } else {
+      await _prefs.remove(_actorOidcConfigKey(actorId));
+    }
     await _rememberActor(actorId);
     await _prefs.setString(_activeActorIdKey, actorId);
     await _prefs.remove(_legacyActorIdKey);
@@ -186,6 +252,15 @@ class DeviceIdentity {
 
   static String _actorTokenKey(String actorId) =>
       '$_actorPrefix.$actorId.token';
+
+  static String _actorRefreshTokenKey(String actorId) =>
+      '$_actorPrefix.$actorId.refresh_token';
+
+  static String _actorTokenExpiresAtKey(String actorId) =>
+      '$_actorPrefix.$actorId.token_expires_at';
+
+  static String _actorOidcConfigKey(String actorId) =>
+      '$_actorPrefix.$actorId.oidc_config';
 
   static String _syncWatermarkKey(String actorId) =>
       '$_actorPrefix.$actorId.sync_watermark';

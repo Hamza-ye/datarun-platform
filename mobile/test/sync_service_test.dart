@@ -120,6 +120,8 @@ void main() {
 
       if (request.url.path == '/api/sync/push') {
         final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(request.body, isNot(contains('production-token')));
+        expect(request.body, isNot(contains('refresh-token')));
         final events = body['events'] as List<dynamic>;
         expect(events, hasLength(1));
         expect((events.first as Map<String, dynamic>)['actor_ref'], {
@@ -208,6 +210,36 @@ void main() {
       expect(paths, ['/api/auth/me']);
     },
   );
+
+  test('known expired credential blocks sync before actor APIs', () async {
+    await identity.activateActorSession(
+      actorId: actorA,
+      token: 'expired-token',
+      tokenExpiresAt: DateTime.utc(2026, 6, 19, 8),
+    );
+    final assembler = EventAssembler(identity, store);
+    await assembler.assemble(
+      subjectId: 'subj-42',
+      shapeRef: 'basic_capture/v1',
+      payload: {'name': 'Test'},
+    );
+
+    final client = MockClient((request) async {
+      fail('Expired credential without refresh must not call actor APIs');
+    });
+
+    final result = await SyncService(
+      store,
+      identity,
+      'http://server.test',
+      configStore,
+      client: client,
+      now: () => DateTime.utc(2026, 6, 19, 9),
+    ).sync();
+
+    expect(result.error, 'Needs sign-in to sync');
+    expect(await store.unpushedCount(), 1);
+  });
 
   test(
     'switchActorSession drains A unpushed events with A credential when possible',
