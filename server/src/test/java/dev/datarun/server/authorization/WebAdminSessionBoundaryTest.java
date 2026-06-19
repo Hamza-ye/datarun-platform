@@ -460,6 +460,17 @@ class WebAdminSessionBoundaryTest {
         FakeAdminCommandCapabilityService fakeAdminCommandCapabilityService() {
             return new FakeAdminCommandCapabilityService();
         }
+
+        @Bean
+        @Primary
+        WebAdminAssignmentAccessService fakeWebAdminAssignmentAccessService() {
+            return new WebAdminAssignmentAccessService(null, null) {
+                @Override
+                public boolean hasAnyAssignmentAdminCommand(UUID actorId) {
+                    return false;
+                }
+            };
+        }
     }
 
     static final class FakeAdminCommandCapabilityService

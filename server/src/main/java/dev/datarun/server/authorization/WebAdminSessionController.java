@@ -23,11 +23,14 @@ public class WebAdminSessionController {
 
     private final WebAdminSessionService sessionService;
     private final AdminCommandCapabilityService adminCommandCapabilityService;
+    private final WebAdminAssignmentAccessService assignmentAccessService;
 
     public WebAdminSessionController(WebAdminSessionService sessionService,
-                                     AdminCommandCapabilityService adminCommandCapabilityService) {
+                                     AdminCommandCapabilityService adminCommandCapabilityService,
+                                     WebAdminAssignmentAccessService assignmentAccessService) {
         this.sessionService = sessionService;
         this.adminCommandCapabilityService = adminCommandCapabilityService;
+        this.assignmentAccessService = assignmentAccessService;
     }
 
     @GetMapping
@@ -87,6 +90,11 @@ public class WebAdminSessionController {
                     <p><a href="/web-admin/config">Setup</a></p>
                     """
                 : "";
+        String assignmentLink = assignmentAccessService.hasAnyAssignmentAdminCommand(context.actorId())
+                ? """
+                    <p><a href="/web-admin/assignments">Assignments</a></p>
+                    """
+                : "";
         String body = """
                 <!doctype html>
                 <html lang="en">
@@ -101,6 +109,7 @@ public class WebAdminSessionController {
                       <dt>Actor</dt><dd>%s</dd>
                       <dt>Auth source</dt><dd>%s</dd>
                     </dl>
+                    %s
                     %s
                     <form method="post" action="/web-admin/session/probe">
                       %s
@@ -117,6 +126,7 @@ public class WebAdminSessionController {
                 HtmlUtils.htmlEscape(context.actorId().toString()),
                 HtmlUtils.htmlEscape(context.authSource()),
                 configLink,
+                assignmentLink,
                 csrfInput,
                 csrfInput);
         return ResponseEntity.ok()
