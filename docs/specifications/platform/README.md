@@ -30,6 +30,7 @@ Each platform specification should include:
 | [Assignment Scope And Administration](assignment-scope-and-administration.md) | accepted | authorization/sync verifier | NW-069 | none |
 | [Configuration Package And Shape Lifecycle](configuration-package-and-shapes.md) | accepted | config verifier | NW-068 | none |
 | [Expression Language Behavior](expression-language.md) | accepted | config/mobile verifier | NW-068 | none |
+| [Mobile OIDC Login And Token Lifecycle](mobile-oidc-login-and-token-lifecycle.md) | accepted | mobile/security verifier | NW-085 | none |
 | [Production Auth Principal Binding](production-auth-principal-binding.md) | accepted | auth/security verifier | NW-070 | none |
 | [Production Web Admin Authentication And Authority](production-web-admin-authentication-and-authority.md) | accepted | platform/security verifier | NW-079 | none |
 | [Shared-Device Session And Local State](shared-device-session-and-local-state.md) | accepted | mobile/sync verifier | NW-071 | none |
