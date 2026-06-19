@@ -77,6 +77,7 @@ These are candidate routes only. Promote at most one bounded row at a time.
 ## Validation Matrix Link
 
 - Detailed validation matrix:
+  [agent validation matrix](../../agent-working-surface/validation-matrix.md).
 - Known red checks:
 - Checks that belong to a future validation/CI reset:
 

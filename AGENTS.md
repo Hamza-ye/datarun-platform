@@ -53,6 +53,9 @@ Use the narrowest relevant focused test first, then the required full gate for
 the touched surface. Report exact command, cwd, result, count/duration when
 available, and skipped-gate rationale.
 
+Use `docs/agent-working-surface/validation-matrix.md` for touched-surface gates
+and evidence format.
+
 - Server: see `server/AGENTS.md`.
 - Mobile: see `mobile/AGENTS.md`.
 - Contracts: see `contracts/AGENTS.md`.

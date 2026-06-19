@@ -49,3 +49,6 @@ surface.
 Report command, cwd, result, test count/duration when available, and any skipped
 gate rationale. Pair focused tests with the full mobile gate for accepted mobile
 behavior changes.
+
+Use `docs/agent-working-surface/validation-matrix.md` for touched-surface gates
+and acceptance evidence format.
