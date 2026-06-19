@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-19 (NW-102 progress-control polish accepted)
+**Last updated**: 2026-06-19 (NW-103 gap progress metadata in review)
 
 ---
 
@@ -11,13 +11,13 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Active implementation gate: none
-- Active process/control slice: none
+- Active process/control slice: NW-103 gap progress metadata (`in_review`)
 - Last accepted NW: NW-102 progress-control surface polish
 - Current blocker: none
-- Next evidence command: select the next NW row before implementation
-- Do-not-start-next-product-work-until: none
-- Gap register review standing: reviewed 2026-06-19; touched yes for NW-102
-- Artifact trace standing: trace table current; touched yes for NW-102
+- Next evidence command: `git diff --check` plus targeted NW-103 metadata grep checks
+- Do-not-start-next-product-work-until: NW-103 accepted
+- Gap register review standing: in progress for NW-103 metadata
+- Artifact trace standing: trace table current; not touched for NW-103
 - Last updated: 2026-06-19
 
 ### Current Routing Detail
