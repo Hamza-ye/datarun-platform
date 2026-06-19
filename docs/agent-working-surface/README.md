@@ -53,6 +53,7 @@ This table is a routing index, not a second copy of the process rules.
 | Responsibility | Canonical home |
 |---|---|
 | Agent startup and minimal reading order | `AGENTS.md` plus `docs/status.md` Current Routing. |
+| Steward broad-reading, dispatch, and reconciliation rules | `steward-session-guide.md`. |
 | Stable authority and routing source order | This README. |
 | Architecture authority | The CDL via `docs/architecture/adrs-decisions-canonical-ledger/README.md`. |
 | Architecture-sensitive pressure and gap classification | `decision-anchor-layer/gap-routing-playbook.md`. |
@@ -111,6 +112,10 @@ The canonical homes for new outputs are:
 
 Prompts and `artifacts/` remain routing surfaces, not the final home for these
 accepted outputs.
+
+Use [steward-session-guide.md](steward-session-guide.md) only for explicit
+steward, audit, routing, reconciliation, checkpoint, or architecture/gap
+classification work.
 
 ## Superseded Review Drafts
 

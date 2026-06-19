@@ -1,141 +1,77 @@
-# Datarun Platform - Agent Onboarding
+# Datarun Platform - Agent Instructions
 
-This file exists to reduce wrong assumptions in fresh AI-agent sessions. It is the repo's context router, not a request to read the whole documentation set.
+Purpose: keep sessions focused on the active product/task slice, protect
+accepted boundaries, and leave verifiable evidence. This is a router, not a
+request to read the whole docs tree.
 
-## Start Here
+## Default Startup Packet
+1. Read the user task and identify the active NW/product slice if named.
+2. Read `docs/status.md` Current Routing.
+3. Read the active NW row or task packet when one is named.
+4. Read only the product spec, code, tests, contracts, or docs needed for the
+   task or touched files.
+5. For user-visible work, anchor to the accepted product spec or PM handoff and
+   explicit non-goals before architecture routing.
+6. If no active slice is selected and implementation is implied, stop and ask
+   for the selected NW/product slice before coding.
 
-Default implementer packet:
+Default role is implementer. Use steward routing only when the task explicitly
+asks for audit, routing, reconciliation, checkpoint, architecture, or gap work,
+or when a stop trigger fires.
 
-1. This file.
-2. The top **Current Routing** section of `docs/status.md`.
-3. The relevant section of `docs/implementation/module-interfaces.md` only when touching implementation code or module behavior.
-4. The exact `contracts/` files and code paths named by the task or discovered from the touched surface.
-5. The agent working surface `docs/agent-working-surface`, especially `docs/agent-working-surface/decision-anchor-layer/README.md` for architecture-sensitive pressure and gap routing.
-6. The CDL README index at `docs/architecture/adrs-decisions-canonical-ledger/README.md` only when architecture authority text is needed; slice the relevant CDL rows instead of reading the full ledger.
+## Task Packet Contract
+A good task packet states: goal, files to read, accepted boundaries, forbidden
+work, expected tests, commit/acceptance boundary, and stop conditions.
 
-Open additional docs only when routed:
+## Product-first Rule
+For ordinary implementation, describe the user/deployment outcome first, then
+the implementation surface. Do not turn product labels into authority,
+identity, scope, contract, or storage primitives.
 
-- `docs/flagged-positions.md` - legacy gated-risk provenance. Read it only when a current route names an FP, the touched surface matches an FP topic, or a drift/provenance audit needs the old gate. Do not add new FP rows by default; route new pressure through the gap playbook, BAR, NW backlog, and the correct durable home.
-- `docs/agent-working-surface/decision-anchor-layer/` - use for DEC anchors, gap routing, and deciding whether future work belongs in architecture, platform spec, implementation, policy, or product/problem evidence.
-- CDL/existing IDRs - open only when `docs/status.md`, the task, a touched contract, or code comments name the decision. Do not create new IDRs as the default route for future decisions; route through the decision-anchor layer and the CDL-successor path unless an active source explicitly selects another home.
-- `docs/architecture/`, phase specs, scenarios, and exploration archives - use for architecture-steward planning, drift investigation, or when a task explicitly depends on that context.
-- `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` (the CDL) the current architecture decision authority
+## Architecture / Gap Routing Triggers
+Stop and route through the gap playbook before implementation if the change
+would affect envelope fields/types, stored event meaning, sync/access scope,
+authority sources, durable workflow state, resolver truth, deployer config
+power, retention/security promises, reporting/audit breadth, tenant/runtime
+partitioning, contract semantics, or any blocked/deferred row in `docs/status.md`.
 
-If these sources disagree with each other or with the code, stop and surface the drift before implementing.
-
-### Slicing Canonical Decisions (the new authority replacement of the now retired `adrs/`)
-
-When routed, to prevent loading the entire 2600+ line `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md` into your context window, use the following resources:
-
-- **README Index:** Refer to `docs/architecture/adrs-decisions-canonical-ledger/README.md` for a categorized directory linking direct line numbers to specific decisions.
-- **Query Tool:**
-
-```bash
-python3 scripts/query_cdl.py --help                  
-usage: query_cdl.py [-h] [--id ID] [--tag TAG] [--category CATEGORY] [--search SEARCH] [--format {concise,full,json}] [--list-tags]
-                    [--list-categories]
-
-Query and slice the Datarun Canonical Decision Ledger.
-
-options:
-  -h, --help            show this help message and exit
-  --id ID               Retrieve details for a specific decision ID, or a list of IDs separated by commas/spaces (e.g. CDL-001,CDL-002)
-  --tag TAG             Filter decisions by tag(s). Accepts comma- or space-separated lists (e.g. 'sync,identity' or 'sync identity')
-  --category CATEGORY   Filter decisions by category (e.g. '3. Canonical event envelope')
-  --search SEARCH       Search titles, decisions, constraints, and must-not-happen for text
-  --format {concise,full,json}
-                        Output format (default: concise for lists, full for ID queries)
-  --list-tags           List all tags present in the ledger and exit
-  --list-categories     List all categories present in the ledger and exit
-```
-
-## Steward, Implementer, And Owner Split
-
-- Architecture-steward sessions may read broadly, reconcile status, produce bounded implementation prompts, and dispatch working agents. Preserve product-needed lanes, but do not simulate multi-role workshop or gate-review chains as a substitute for product judgment or implementation.
-- Implementer sessions should read only the bounded task packet plus the default implementer packet above.
-- AI-agent roles are contributor/task lenses for analysis, planning, implementation, verification, review, and documentation hygiene. They are not authority owners; Hamza remains the owner for accepting process or authority changes unless an active repository source already assigns that authority elsewhere.
-- A task packet should state goal, files to read, authority/guardrails,
-  forbidden work, expected tests, commit role/sequence and acceptance boundary,
-  and stop-and-report conditions.
+Use `docs/agent-working-surface/decision-anchor-layer/gap-routing-playbook.md`
+only when a trigger fires or the task is steward/routing work. Use CDL/IDRs only
+when routed by status, task, code comments, contracts, or gap classification.
 
 ## Repository Map
+- `docs/status.md` - current routing and standing.
+- `docs/specifications/` - accepted product/platform behavior.
+- `docs/agent-working-surface/` - steward routing, backlog, BAR, and prompts.
+- `contracts/` - process/wire contracts and shared fixtures.
+- `server/` - Spring Boot backend.
+- `mobile/` - Flutter client.
+- `docs/operations/` - policies, runbooks, and rehearsal evidence.
 
-- `docs/` - platform principles, architecture and implementation history, status, quality gates, specifications, operations, and legacy flagged-position provenance.
-- `docs/specifications/` - accepted product behavior and platform-detail specifications under architecture/contracts.
-- `docs/operations/` - operational policies, executable runbooks, and rehearsal plans/records.
-- `contracts/` - process-boundary intent: event envelope, sync protocol, flag catalog, platform shape schemas, and shared fixtures.
-- `server/` - Spring Boot backend, event store, sync, configuration, identity, authorization, integrity detection, admin surfaces.
-- `mobile/` - Flutter client, local event store, projection/advisory behavior, sync client, UI.
+## Validation Evidence
+Use the narrowest relevant focused test first, then the required full gate for
+the touched surface. Report exact command, cwd, result, count/duration when
+available, and skipped-gate rationale.
 
-## Contracts Guidance
+- Server: see `server/AGENTS.md`.
+- Mobile: see `mobile/AGENTS.md`.
+- Contracts: see `contracts/AGENTS.md`.
+- Docs-only: run `git diff --check`.
 
-Current contract roles:
+`flutter analyze` is not a hard gate until known issues are fixed or baselined.
+Android compile is required for native/platform/auth/plugin changes.
 
-- `contracts/envelope.schema.json` defines the 11-field event envelope and closed 6-value envelope `type` vocabulary. The server validates against a bundled copy in `server/src/main/resources/envelope.schema.json`; `EnvelopeSchemaParityTest` requires the two copies to match.
-- `contracts/sync-protocol.md` describes push/pull protocol intent and invariants. Verify against current server/mobile code when changing sync behavior.
-- `contracts/flag-catalog.md` defines flag categories, default severity, resolvability, detection ordering, and state-exclusion semantics.
-- `contracts/shapes/*.schema.json` defines platform-bundled assignment, identity, and integrity payload shapes. Server runtime bundles these contract schemas for platform payload validation. They are not deployer-authored shape registry rows, not deployer-editable, not packaged as deployer `shapes`, and not activity-bindable as form shapes.
-- `contracts/shape-format.schema.json` defines the deployer-authored form shape DSL stored in the `shapes` table. It is not a platform payload schema.
-- `contracts/config-package.schema.json` defines the server-emitted/mobile-consumed config package wire shape, including the current top-level package keys and tolerated unknown top-level keys for forward compatibility.
-- `contracts/pattern-definition.schema.json` and `contracts/patterns/*.json` define platform-owned workflow pattern definitions. Server runtime loads these as the Pattern Registry source of truth, config packages deliver referenced definitions under `pattern_definitions`, and mobile reads the packaged definitions.
-- `contracts/fixtures/*.json` are shared equivalence fixtures used by server and mobile tests.
+## Working Rules
+Prefer existing patterns. Keep changes scoped. Leave unrelated dirty work alone.
+Update status/backlog/BAR only when the task authorizes that state change.
+For durable docs, use `docs/documentation-organization.md`.
 
-when changing data that crosses server/mobile/process boundaries, treat `contracts/` as the first place to check. Do not assume it is a generated-code source or that every schema is runtime-validated everywhere.
+## Commit Trace
+Commit only when authorized. Follow `docs/commit-workflow.md`. For NW-owned
+work include `NW: NW-###` and validation evidence. Do not mark work accepted
+just because files changed.
 
-## Architectural Guardrails
-
-- The final Canonical Decision Ledger (CDL) is the only agent-facing architecture decision authority. If any working-surface doc, historical doc, or code comment conflicts with accepted CDL rows, the ledger wins.
-- Architecture-sensitive pressure routes through the [gap routing playbook](/docs/agent-working-surface/decision-anchor-layer/gap-routing-playbook.md#allowed-classifications) before implementation.
-- No new envelope fields or envelope `type` values without Architecture level authority.
-- Structurally valid state/policy anomalies are accepted and flagged; do not reject them unless the relevant accepted authority explicitly says structural validation applies.
-- Authority and state are projections from events unless a documented B-to-C escape hatch has been explicitly activated.
-- Respect the active phase boundaries in `docs/status.md`. Do not implement work listed as blocked or deferred.
-- `docs/flagged-positions.md` is append-only legacy provenance, not the current intake surface. Preserve its trigger/gate lessons by recording triggers, exit conditions, and evidence in the active owning surface: gap playbook, BAR, NW backlog, durable spec/contract, or code/tests.
-
-## Build And Test
-
-From the repository root:
-
-```bash
-# Start test database
-cd /home/hamza/datarun-platform && docker compose -f docker-compose.test.yml up -d test-db
-
-# Run all server tests
-(cd /home/hamza/datarun-platform/server && ./mvnw test)
-
-# Run one server test class
-(cd /home/hamza/datarun-platform/server && ./mvnw test -Dtest=ConfigIntegrationTest)
-
-# Run all mobile tests
-(cd /home/hamza/datarun-platform/mobile && flutter test)
-```
-
-## Working Practice
-
-- Prefer existing patterns and helpers over new abstractions.
-- Keep changes scoped to the active slice.
-- Before creating a new durable documentation output, use
-  `docs/documentation-organization.md` to choose its canonical home, metadata,
-  index, evidence, and supersession route.
-- Update docs/status/checklists only when implementation actually begins or lands.
-- Leave unrelated dirty worktree changes alone.
-
-## Commit And Progress Flow
-
-`docs/commit-workflow.md` is the durable commit standard. When a task
-authorizes commits:
-
-1. Route selected work separately: `docs(<domain>): route <outcome>`.
-2. Land any required decision/spec/policy before implementation.
-3. Commit implementation with its tests using `feat`, `fix`, `test`, or
-   `refactor`; do not mark the NW accepted in that commit.
-4. After verification, record standing separately with
-   `docs(status): accept <outcome>` when backlog/BAR/status changes.
-5. Create `docs(checkpoint): snapshot <milestone>` only for a real milestone,
-   handoff, or long-pause boundary, never for every NW item.
-
-Use `<type>(<scope>): <imperative outcome>` and add `NW: NW-###` in the commit
-body/trailer for NW-owned work. Stage explicit owned paths, inspect the staged
-diff, keep unrelated worktree changes out, and report the final worktree state.
-Review fixes use their truthful behavior type; documentation-only organization
-uses `docs(hygiene)` only when semantics and accepted standing are unchanged.
+## Steward Guidance
+Broad reading, CDL slicing, gap classification, dispatch packets, and
+architecture reconciliation live in
+`docs/agent-working-surface/steward-session-guide.md`.
