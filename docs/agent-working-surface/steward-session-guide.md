@@ -25,8 +25,9 @@ Broad reading is allowed only to resolve routing, authority, or drift. Start wit
 `docs/agent-working-surface/README.md` authority order, then open only the exact
 sources needed for the classification or reconciliation.
 
-Treat artifacts and historical notes as evidence, not authority, unless a
-current route explicitly selects them. Do not read phase history, scenarios,
+Treat artifacts and historical notes as routed evidence, never as authority by
+themselves. Open them only when a current route explicitly selects them or a
+drift/audit task needs their provenance. Do not read phase history, scenarios,
 old IDRs, or the full CDL by default for implementation dispatch.
 
 ## Gap And CDL Routing
