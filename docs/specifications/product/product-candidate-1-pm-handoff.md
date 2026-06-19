@@ -122,23 +122,23 @@ compliance/security review, continuity, and go/no-go ownership.
 These are candidate routes, not accepted backlog rows. Promote only one bounded
 row at a time.
 
-| Candidate route | Why it exists | Stop boundary |
-|---|---|---|
-| PC1 product journey smoke definition | Define the shortest PM-verifiable setup-to-sync walkthrough. | No runtime behavior or validation-policy change. |
-| Product demo script/synthetic walkthrough | Give PM/reviewer a repeatable story over accepted surfaces. | Synthetic proof only; no real-production claim. |
-| First deployment proof target decision | Decide whether the next proof is demo, lab-managed pilot, or real-use preparation. | Real users/data trigger NW-093. |
-| PM backlog view from PC1 handoff | Convert this handoff into a PM-prioritized queue. | Candidate queue only; not accepted NW scope. |
-| Vocabulary validation packet | Test product terms with owner/domain examples. | No platform vocabulary or contract rewrite. |
-| Mobile get-work/readiness/capture/correction polish | Close demo gaps found in the mobile field loop. | No sync, event, authority, retention, or login semantics change. |
-| Setup/config structured-editor polish | Improve config authoring usability if JSON is too rough for proof. | No config package/schema/expression changes. |
-| Assignment admin proof polish | Improve create/end clarity if coordinator proof stalls. | No new scopes, command authorities, or online policy editing. |
-| Minimal scoped operational freshness/attention view | Show supervisors latest synced work and unresolved attention. | No reporting dashboard/export/import/warehouse. |
-| Single-flag review/attention item decision | Decide whether one manual attention path belongs in PC1 proof. | No batch, auto-resolution, resolver reassignment, or flag schema change. |
-| Reporting boundary decision | Decide whether reporting is outside PC1 or a later product candidate. | Route through NW-044 before reporting work. |
-| Retention/offboarding boundary decision | Decide whether proof needs device/offboarding promises. | Route through NW-054 before promises or implementation. |
-| Entity lifecycle future lane decision | Decide whether S06 stays deferred or becomes a later candidate. | Do not modify PC1 capture/setup scope. |
-| Real-production approval package | Prepare go/no-go only when real users/data are concrete. | Must use NW-093; synthetic evidence is insufficient. |
-| Managed-deployment/control-plane decision | Decide only if multi-customer managed operation becomes active. | Use NW-094-NW-098; do not add runtime tenant drift. |
+| Candidate route | Suggested priority | User value / why now | Input sources | Output expected | Acceptance evidence | Stop condition |
+|---|---|---|---|---|---|---|
+| PC1 product journey smoke definition | Candidate P0 | Gives PM the shortest setup-to-sync proof path. | PC1 spec; current standing table; S00/S19/S23. | One bounded smoke route and required user steps. | PM-readable journey checklist or prompt; no accepted runtime claim. | No runtime behavior or validation-policy change. |
+| Product demo script/synthetic walkthrough | Candidate P0 | Lets reviewer and PM see the accepted PC1 story without hunting through docs. | PC1 spec; product audit; accepted web/mobile slices. | Synthetic demo script with setup, assignment, field capture, sync, and freshness beats. | Script/walkthrough reviewed as synthetic evidence only. | Synthetic proof only; no real-production claim. |
+| First deployment proof target decision | Candidate P1 | Decides whether next proof is demo, lab-managed pilot, or real-use preparation. | NW-067 evidence; NW-093 blocker; PC1 boundary. | Chosen proof target and explicit real-use trigger. | Decision note or NW route that names the proof target. | Real users/data trigger NW-093. |
+| PM backlog view from PC1 handoff | Candidate P0 | Turns scattered candidate routes into a PM-prioritized planning queue. | This handoff; owner decisions; scenario map. | Candidate queue with owner priority and dependencies. | PM backlog surface or one promoted bounded NW row. | Candidate queue only; not accepted NW scope. |
+| Vocabulary validation packet | Candidate P1 | Checks whether PC1 language works for real domain examples. | Product audit; NW-047 vocabulary; S22/S27 examples. | Small set of product terms, examples, and rejected platform terms. | Owner/domain review notes or candidate prompt. | No platform vocabulary or contract rewrite. |
+| Mobile get-work/readiness/capture/correction polish | Candidate P1 | Closes field-loop demo gaps if current mobile flow is too rough. | NW-059-NW-062; NW-101; S00/S19. | Bounded polish prompt for touched mobile screens/states. | Focused mobile tests and PM walkthrough evidence. | No sync, event, authority, retention, or login semantics change. |
+| Setup/config structured-editor polish | Candidate P2 | Reduces setup friction if JSON editing blocks PC1 proof. | NW-088; NW-068; S23. | Bounded structured-editor/polish prompt over accepted config. | Focused server/UI tests plus setup walkthrough. | No config package/schema/expression changes. |
+| Assignment admin proof polish | Candidate P2 | Helps coordinators understand create/end responsibility in proof. | NW-090; NW-069; S25. | Bounded assignment UX/copy/polish prompt. | Focused workflow tests plus coordinator walkthrough. | No new scopes, command authorities, or online policy editing. |
+| Minimal scoped operational freshness/attention view | Candidate P1 | Lets supervisors see latest synced work and unresolved attention without reporting scope. | NW-059; S21/S26; PC1 goal. | Decision or prompt for a narrow operational view. | PM proof of latest-synced/freshness/attention wording. | No reporting dashboard/export/import/warehouse. |
+| Single-flag review/attention item decision | Candidate P2 | Decides whether one manual attention path belongs in PC1 proof. | S21 evidence; NW-056; NW-072 candidate. | Decision route before any review UI/product work. | Accepted decision or explicit deferral. | No batch, auto-resolution, resolver reassignment, or flag schema change. |
+| Reporting boundary decision | Future decision | Prevents freshness/attention from drifting into reporting/export. | S26; NW-044; product audit. | Boundary decision: outside PC1 or later product candidate. | Accepted NW-044-style route before reporting work. | Route through NW-044 before reporting work. |
+| Retention/offboarding boundary decision | Future decision | Answers proof-target questions about retained device/server data. | S24/S25; NW-054; NW-071/NW-085 limits. | Retention/offboarding decision or explicit deferral. | Accepted NW-054-style route before promises. | Route through NW-054 before promises or implementation. |
+| Entity lifecycle future lane decision | Future decision | Keeps S06 pressure visible without smuggling lifecycle into PC1. | S06; S01; NW-021; PC1 non-goals. | Decision to defer or promote a later product candidate. | Accepted decision or explicit deferral. | Do not modify PC1 capture/setup scope. |
+| Real-production approval package | Future decision | Prepares go/no-go only when real users/data are concrete. | NW-067; NW-075-NW-081; NW-093. | Real-production approval route with provider/region/support/data decisions. | Accepted NW-093 package before real use. | Must use NW-093; synthetic evidence is insufficient. |
+| Managed-deployment/control-plane decision | Future decision | Separates PC1 managed isolation from SaaS/control-plane work. | NW-083; NW-094-NW-098. | Control-plane or tenant-aware decision route only if triggered. | Accepted NW-094-NW-098 route before implementation. | Use NW-094-NW-098; do not add runtime tenant drift. |
 
 ## 10 Product-Level Definition Of Done
 

@@ -58,9 +58,9 @@ inside the goal.
 
 These are candidate routes only. Promote at most one bounded row at a time.
 
-| Candidate route | Why it exists | Stop boundary |
-|---|---|---|
-|  |  |  |
+| Candidate route | Suggested priority | User value / why now | Input sources | Output expected | Acceptance evidence | Stop condition |
+|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |
 
 ## Product-Level Definition Of Done
 
