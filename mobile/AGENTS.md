@@ -17,12 +17,17 @@ Full mobile test gate from `mobile/`:
 flutter test
 ```
 
+`flutter test` is CI-backed through
+`../.github/workflows/mobile-ci.yml` for matching mobile, contracts, and mobile
+workflow paths.
+
 ## Analyzer
 
 `flutter analyze` is currently known-red from pre-existing issues and is not a
 hard acceptance gate until those issues are fixed or explicitly baselined. Run
 or report it only when the task asks for analyzer work or the local validation
-packet requires current analyzer evidence.
+packet requires current analyzer evidence. Current known issues are tracked in
+`../docs/agent-working-surface/mobile-analyzer-known-issues.md`.
 
 ## Android Compile
 
@@ -35,6 +40,9 @@ timeout 900s ./gradlew :app:compileDebugKotlin --console=plain --no-daemon --sta
 Run this for native Android, platform-channel, auth callback, plugin, Gradle,
 manifest, or mobile build changes. It is also useful evidence for broad mobile
 PRs when runtime cost is acceptable.
+
+Android compile is CI-backed through `../.github/workflows/mobile-ci.yml` for
+matching mobile, contracts, and mobile workflow paths.
 
 ## Test Style
 

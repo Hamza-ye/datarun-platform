@@ -11,9 +11,9 @@ Last reviewed: 2026-06-20
 
 This matrix maps touched surfaces to required validation evidence. It
 distinguishes CI-backed, local-required, manual/ops, currently-red, and future
-gate checks. It does not itself add CI, tests, analyzer baselines, or runtime
-behavior. CI/mobile/analyzer implementation remains NW-109 or later unless a
-separate selected route changes that standing.
+gate checks. It does not itself add tests, analyzer baselines, or runtime
+behavior. NW-109 adds mobile CI for green mobile gates; analyzer cleanup or
+baseline remains a future selected route.
 
 ## 2 Evidence Format
 
@@ -51,13 +51,13 @@ Every NW acceptance must state:
 | server auth/security/admin | Relevant auth/admin/web-admin tests; include denial/no-mutation cases when authority changes | Full server gate | Yes when server/workflow paths trigger server CI | Yes | Focused auth/admin result, full gate or CI link | Do not promote IdP claims, request actors, or generic root admin as authority. |
 | web-admin UI/templates/product vocabulary | Relevant web-admin server tests or template/rendering tests when available; product wording checked against PC1 PM handoff when user-visible copy changes | Server full gate when backend/controller/session/command behavior changes | Server CI only when server/workflow paths trigger it | Yes for user-visible web-admin behavior changes if no focused evidence is supplied; no for choosing Angular/SPA/frontend stack | Focused command/result, wording source, skipped full-gate rationale if docs/copy only | Thymeleaf/server-rendered HTML is current implementation shape, not permanent product strategy. Do not introduce Angular/SPA/frontend build tooling unless a selected NW explicitly routes UI delivery architecture. |
 | server packaging/image/ops | Packaging/release focused tests when available; `scripts/verify-server-image.sh` | Server verify plus image verification | Yes in server CI for matching paths | Yes for packaging/release/ops changes | Command result or CI link; image tag/revision when relevant | Reference deployment rehearsal is manual/ops, not every-PR gate. |
-| contracts/schemas/fixtures | Focused server contract/schema/projection tests plus affected mobile fixture/projection tests | Server full gate; mobile full gate when mobile consumption changes | Server CI for contracts paths; mobile CI is absent | Yes when contract meaning or shared fixtures change | Server/mobile focused commands, full gates, fixture names | Contracts are not generated code; keep server/mobile interpretation in sync. |
-| mobile Dart behavior | Relevant `flutter test test/<file>_test.dart` | `flutter test` | No; mobile CI is absent | Yes for mobile behavior changes | Focused and full mobile results, test count/duration | `flutter analyze` may be reported but is known-red and not blocking. |
-| mobile UI/widget/workflow | Relevant widget/workflow test file | `flutter test` | No; mobile CI is absent | Yes for user-visible mobile behavior changes | Focused widget result plus full mobile result | Prefer typed fakes/shared harnesses over broad `noSuchMethod` fakes. |
-| mobile native/platform/auth/plugin | Relevant Flutter auth/platform tests | `flutter test`; Android compile | No; Android compile is local/manual | Yes for native/platform/auth/plugin changes | Flutter results and Android compile result | Run from `mobile/android`; `mobile/gradlew` is absent. |
-| cross-runtime sync/config/projection | Server sync/config/projection tests and mobile projection/fixture tests | Server full gate plus mobile full gate | Server side only for matching paths; mobile CI is absent | Yes | Both runtime commands, fixture names, skipped side rationale if any | Use shared fixtures when a contract or projection crosses runtimes. |
+| contracts/schemas/fixtures | Focused server contract/schema/projection tests plus affected mobile fixture/projection tests | Server full gate; mobile full gate when mobile consumption changes | Server CI and mobile CI for matching contracts paths | Yes when contract meaning or shared fixtures change | Server/mobile focused commands, full gates, fixture names, CI links when available | Contracts are not generated code; keep server/mobile interpretation in sync. |
+| mobile Dart behavior | Relevant `flutter test test/<file>_test.dart` | `flutter test` | Yes through `.github/workflows/mobile-ci.yml` for matching mobile/contracts/workflow paths | Yes for mobile behavior changes | Focused and full mobile results, test count/duration, CI link when available | `flutter analyze` may be reported but is known-red and not blocking. |
+| mobile UI/widget/workflow | Relevant widget/workflow test file | `flutter test` | Yes through `.github/workflows/mobile-ci.yml` for matching mobile/contracts/workflow paths | Yes for user-visible mobile behavior changes | Focused widget result plus full mobile result, CI link when available | Prefer typed fakes/shared harnesses over broad `noSuchMethod` fakes. |
+| mobile native/platform/auth/plugin | Relevant Flutter auth/platform tests | `flutter test`; Android compile | Yes through `.github/workflows/mobile-ci.yml` for matching mobile/contracts/workflow paths | Yes for native/platform/auth/plugin changes | Flutter results, Android compile result, CI link when available | Run from `mobile/android`; `mobile/gradlew` is absent. |
+| cross-runtime sync/config/projection | Server sync/config/projection tests and mobile projection/fixture tests | Server full gate plus mobile full gate | Server CI and mobile CI for matching paths | Yes | Both runtime commands, fixture names, skipped side rationale if any, CI links when available | Use shared fixtures when a contract or projection crosses runtimes. |
 | operations/rehearsal evidence | Exact runbook/rehearsal checks named by the task | Manual/ops evidence packet | No | Yes only when the NW explicitly scopes ops/rehearsal acceptance | Commands, host/context, result, evidence path | Reference deployment rehearsals are manual/ops gates, not default PR gates. |
-| CI/workflow changes | Inspect workflow path triggers and command names | Relevant local command that mirrors the workflow where possible | The changed workflow is CI-backed only after push/PR | Yes for workflow syntax/intent errors | Local mirror command, PR CI link when available | NW-107 does not change CI. CI implementation belongs to NW-109 or later. |
+| CI/workflow changes | Inspect workflow path triggers and command names | Relevant local command that mirrors the workflow where possible | The changed workflow is CI-backed only after push/PR | Yes for workflow syntax/intent errors | Local mirror command, PR CI link when available | NW-109 adds mobile CI; known-red analyzer remains outside blocking CI until fixed or baselined. |
 
 ## 5 Command Reference
 
@@ -107,11 +107,13 @@ timeout 900s ./gradlew :app:compileDebugKotlin --console=plain --no-daemon --sta
 - Server full test/verify is CI-backed for matching server/contracts/workflow
   paths through `.github/workflows/server-ci.yml`.
 - Server image verification is CI-backed by the server workflow.
-- mobile CI is absent.
-- Mobile full tests are local/manual only until NW-109.
-- flutter analyze is known-red with 7 audit-observed issues and must not be
-  claimed as a hard acceptance gate until fixed or baselined.
-- Android compile is local/manual only until NW-109.
+- Mobile CI is present in `.github/workflows/mobile-ci.yml` for matching
+  mobile/contracts/workflow paths.
+- Mobile full tests are CI-backed by mobile CI for matching paths.
+- `flutter analyze` is known-red with 7 observed issues and must not be claimed
+  as a hard acceptance gate until fixed or baselined. Current standing is in
+  `docs/agent-working-surface/mobile-analyzer-known-issues.md`.
+- Android compile is CI-backed by mobile CI for matching paths.
 - PC1 product journey smoke is a future gate to define from the PM handoff.
 - Ops/reference deployment rehearsals are manual/ops gates, not default PR
   gates.
@@ -139,13 +141,14 @@ only.
 
 ## 9 Immediate Follow-Up Routes
 
-Candidate routes only:
+Candidate routes only after NW-109:
 
-- NW-109 mobile CI/analyzer path;
 - analyzer cleanup or baseline;
 - PC1 product journey smoke definition;
 - server log-volume reduction;
 - mobile fake/harness cleanup;
 - shared fixture/contract parity improvements.
 
-Do not create accepted backlog rows for these beyond NW-107.
+NW-109 is the accepted mobile CI/analyzer path row when this matrix is updated
+with mobile CI standing. Do not create accepted backlog rows for the remaining
+candidate routes without selecting them separately.
