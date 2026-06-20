@@ -17,6 +17,7 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -109,7 +110,7 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
                 SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
         createVisitRecord(SUBJECT_OUT_OF_SCOPE, districtB, "Hidden Site Visit",
                 "assigned_visit");
-        Long visibleWatermark = eventRepository.getSyncWatermark(visible.id());
+        String visibleReceivedAt = receivedAt(visible).toString();
 
         MvcResult result = mvc.perform(get("/web-admin/operational")
                         .session(webAdminSession(REVIEWER)))
@@ -122,11 +123,44 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
                 .contains("Visit Record")
                 .contains("Assigned Visit")
                 .contains(SUBJECT_IN_SCOPE.toString())
-                .contains("Latest visible synced work in Datarun. Freshness marker: "
-                        + visibleWatermark
+                .contains("Latest visible synced work was received by Datarun at "
+                        + visibleReceivedAt
                         + ". This does not prove all devices are current.")
+                .contains("Received at")
+                .doesNotContain("Freshness marker")
+                .doesNotContain("live data")
+                .doesNotContain("reporting freshness")
+                .doesNotContain("SLA")
                 .doesNotContain(SUBJECT_OUT_OF_SCOPE.toString())
                 .doesNotContain("Hidden Site Visit");
+    }
+
+    @Test
+    void scopedSelectionIsNotHiddenByMoreThanTwoHundredNewerOutOfScopeEvents()
+            throws Exception {
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        Event visible = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
+        UUID lastOutOfScopeSubject = null;
+        for (int i = 0; i < 205; i++) {
+            lastOutOfScopeSubject = UUID.randomUUID();
+            createVisitRecord(lastOutOfScopeSubject, districtB,
+                    "Hidden Site Visit " + i, "assigned_visit");
+        }
+
+        MvcResult result = mvc.perform(get("/web-admin/operational")
+                        .session(webAdminSession(REVIEWER)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(result.getResponse().getContentAsString())
+                .contains(SUBJECT_IN_SCOPE.toString())
+                .contains("Latest visible synced work was received by Datarun at "
+                        + receivedAt(visible))
+                .doesNotContain(lastOutOfScopeSubject.toString());
     }
 
     @Test
@@ -358,6 +392,15 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM events", Integer.class);
         return count == null ? 0 : count;
+    }
+
+    private OffsetDateTime receivedAt(Event event) {
+        Timestamp received = jdbcTemplate.queryForObject(
+                "SELECT received_at FROM events WHERE id = ?::uuid",
+                Timestamp.class,
+                event.id().toString());
+        assertThat(received).isNotNull();
+        return received.toInstant().atOffset(ZoneOffset.UTC);
     }
 
     private int countOccurrences(String value, String token) {

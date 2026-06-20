@@ -10,12 +10,12 @@
 
 Use this section as the low-token bootstrap for new sessions.
 
-- Active implementation gate: none; NW-114 is awaiting draft PR review/merge instructions
+- Active implementation gate: none
 - Active process/control slice: none
 - Last accepted NW: NW-114 minimal operational freshness/attention view
 - Current blocker: none
-- Next evidence command: review the NW-114 draft PR and patch only reviewer-requested NW-114 scope if needed
-- Do-not-start-next-product-work-until: do not start successor product work until the NW-114 PR review/merge path exits or is parked
+- Next evidence command: review PC1 synthetic demo standing after NW-114 and select one bounded successor or checkpoint/health-check route
+- Do-not-start-next-product-work-until: a single successor NW is selected with acceptance criteria and validation category, or NW-114 is explicitly parked
 - Gap register review standing: reviewed 2026-06-19; not touched by NW-114
 - Artifact trace standing: touched no for NW-114
 - Last updated: 2026-06-20

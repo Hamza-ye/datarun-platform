@@ -2,6 +2,8 @@ package dev.datarun.server.authorization;
 
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
+import dev.datarun.server.event.EventRepository.OperationalScope;
+import dev.datarun.server.event.EventRepository.OperationalWorkEvent;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,8 +18,6 @@ public class WebAdminOperationalViewService {
     static final String NEEDS_REVIEW_LABEL = "Needs review";
     static final String NEEDS_REVIEW_COPY =
             "One unresolved attention item is attached to this work.";
-
-    private static final int CANDIDATE_SCAN_LIMIT = 200;
 
     private final EventRepository eventRepository;
     private final ScopeResolver scopeResolver;
@@ -34,42 +34,35 @@ public class WebAdminOperationalViewService {
             return OperationalObservation.empty(NO_SCOPED_WORK_FRESHNESS);
         }
 
-        return eventRepository.findRecentSubjectWorkEvents(CANDIDATE_SCAN_LIMIT)
-                .stream()
-                .filter(event -> isVisible(event, assignments))
-                .findFirst()
-                .map(event -> new OperationalObservation(
-                        freshnessText(event),
-                        latestWork(event),
-                        attentionCue(event)))
+        List<OperationalScope> scopes = assignments.stream()
+                .map(assignment -> new OperationalScope(
+                        assignment.geographicPath(),
+                        assignment.subjectList(),
+                        assignment.activityList()))
+                .toList();
+
+        return eventRepository.findLatestVisibleSubjectWorkEvent(scopes)
+                .map(work -> new OperationalObservation(
+                        freshnessText(work),
+                        latestWork(work),
+                        attentionCue(work.event())))
                 .orElseGet(() -> OperationalObservation.empty(NO_SCOPED_WORK_FRESHNESS));
     }
 
-    private boolean isVisible(Event event, List<ActiveAssignment> assignments) {
-        UUID subjectId = subjectId(event);
-        if (subjectId == null) {
-            return false;
-        }
-        String locationPath = eventRepository.getLocationPath(event.id());
-        return assignments.stream().anyMatch(assignment ->
-                assignment.containsGeographically(locationPath)
-                        && assignment.containsSubject(subjectId)
-                        && assignment.containsActivity(event.activityRef()));
-    }
-
-    private LatestWork latestWork(Event event) {
+    private LatestWork latestWork(OperationalWorkEvent work) {
+        Event event = work.event();
         UUID subjectId = subjectId(event);
         return new LatestWork(
                 displayName(event.shapeRef(), "Work Item"),
                 displayName(event.activityRef(), "Assigned Work"),
                 subjectId == null ? "" : subjectId.toString(),
-                event.syncWatermark(),
+                work.receivedAt().toString(),
                 event.timestamp().toString());
     }
 
-    private String freshnessText(Event event) {
-        return "Latest visible synced work in Datarun. Freshness marker: "
-                + event.syncWatermark()
+    private String freshnessText(OperationalWorkEvent work) {
+        return "Latest visible synced work was received by Datarun at "
+                + work.receivedAt()
                 + ". This does not prove all devices are current.";
     }
 
@@ -155,7 +148,7 @@ public class WebAdminOperationalViewService {
             String workType,
             String activity,
             String subjectId,
-            Long syncWatermark,
+            String receivedAt,
             String workTime
     ) {}
 

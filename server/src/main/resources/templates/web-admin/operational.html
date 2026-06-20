@@ -107,8 +107,8 @@
                 <span class="value" th:text="${observation.latestWork().subjectId()}"></span>
             </div>
             <div class="status-item">
-                <span class="label">Freshness marker</span>
-                <span class="value" th:text="${observation.latestWork().syncWatermark()}"></span>
+                <span class="label">Received at</span>
+                <span class="value" th:text="${observation.latestWork().receivedAt()}"></span>
             </div>
             <div class="status-item">
                 <span class="label">Work time</span>

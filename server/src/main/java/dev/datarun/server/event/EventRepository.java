@@ -242,26 +242,97 @@ public class EventRepository {
     }
 
     /**
-     * Recent subject work candidates for scoped operational views. Callers must
-     * apply assignment/scope filtering before displaying any row.
+     * Latest subject work visible to a scoped operational view. Scope predicates
+     * are applied before ordering/limiting so narrow assignments cannot be
+     * hidden by newer out-of-scope work.
      */
-    public List<Event> findRecentSubjectWorkEvents(int limit) {
-        return jdbc.query("""
-                SELECT id, type, shape_ref, activity_ref, subject_ref, actor_ref,
-                       device_id, device_seq, sync_watermark, timestamp, payload
-                FROM events
-                WHERE subject_ref->>'type' = 'subject'
-                  AND type != 'assignment_changed'
-                  AND shape_ref NOT LIKE 'conflict_detected/%'
-                  AND shape_ref NOT LIKE 'conflict_resolved/%'
-                  AND shape_ref NOT LIKE 'subjects_merged/%'
-                  AND shape_ref NOT LIKE 'subject_split/%'
-                ORDER BY sync_watermark DESC
-                LIMIT ?
-                """,
-                eventRowMapper(),
-                limit);
+    public Optional<OperationalWorkEvent> findLatestVisibleSubjectWorkEvent(
+            List<OperationalScope> scopes) {
+        if (scopes == null || scopes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT e.id, e.type, e.shape_ref, e.activity_ref, e.subject_ref, e.actor_ref,
+                       e.device_id, e.device_seq, e.sync_watermark, e.timestamp, e.payload,
+                       e.received_at
+                FROM events e
+                WHERE e.subject_ref->>'type' = 'subject'
+                  AND e.type != 'assignment_changed'
+                  AND e.shape_ref NOT LIKE 'conflict_detected/%'
+                  AND e.shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND e.shape_ref NOT LIKE 'subjects_merged/%'
+                  AND e.shape_ref NOT LIKE 'subject_split/%'
+                  AND (
+                """);
+        List<Object> params = new ArrayList<>();
+        int appendedScopes = 0;
+        for (OperationalScope scope : scopes) {
+            String clause = operationalScopeClause(scope, params);
+            if (clause == null) {
+                continue;
+            }
+            if (appendedScopes > 0) {
+                sql.append(" OR ");
+            }
+            sql.append('(').append(clause).append(')');
+            appendedScopes++;
+        }
+        if (appendedScopes == 0) {
+            return Optional.empty();
+        }
+        sql.append("""
+                  )
+                ORDER BY e.sync_watermark DESC
+                LIMIT 1
+                """);
+
+        List<OperationalWorkEvent> results = jdbc.query(
+                sql.toString(),
+                (rs, rowNum) -> new OperationalWorkEvent(
+                        mapRow(rs),
+                        rs.getTimestamp("received_at").toInstant().atOffset(ZoneOffset.UTC)),
+                params.toArray());
+        return results.stream().findFirst();
     }
+
+    private String operationalScopeClause(OperationalScope scope, List<Object> params) {
+        if (scope == null) {
+            return null;
+        }
+        List<String> clauses = new ArrayList<>();
+        if (scope.geographicPath() != null) {
+            clauses.add("e.location_path LIKE ?");
+            params.add(scope.geographicPath() + "%");
+        }
+        if (scope.subjectIds() != null) {
+            if (scope.subjectIds().isEmpty()) {
+                return "1 = 0";
+            }
+            clauses.add(inClause("e.subject_ref->>'id'", scope.subjectIds(), params));
+        }
+        if (scope.activityRefs() != null) {
+            if (scope.activityRefs().isEmpty()) {
+                return "1 = 0";
+            }
+            clauses.add(inClause("e.activity_ref", scope.activityRefs(), params));
+        }
+        return clauses.isEmpty() ? "1 = 1" : String.join(" AND ", clauses);
+    }
+
+    private String inClause(String expression, List<?> values, List<Object> params) {
+        String placeholders = String.join(",", Collections.nCopies(values.size(), "?"));
+        values.forEach(value -> params.add(value.toString()));
+        return expression + " IN (" + placeholders + ")";
+    }
+
+    public record OperationalScope(
+            String geographicPath,
+            List<UUID> subjectIds,
+            List<String> activityRefs
+    ) {}
+
+    public record OperationalWorkEvent(Event event, OffsetDateTime receivedAt) {}
 
     /**
      * Find all events for a given subject, ordered by sync_watermark.
