@@ -95,6 +95,11 @@ public class WebAdminSessionController {
                     <p><a href="/web-admin/assignments">Assignments</a></p>
                     """
                 : "";
+        String operationalLink = hasScopedRead(context)
+                ? """
+                    <p><a href="/web-admin/operational">Operational View</a></p>
+                    """
+                : "";
         String body = """
                 <!doctype html>
                 <html lang="en">
@@ -109,6 +114,7 @@ public class WebAdminSessionController {
                       <dt>Actor</dt><dd>%s</dd>
                       <dt>Auth source</dt><dd>%s</dd>
                     </dl>
+                    %s
                     %s
                     %s
                     <form method="post" action="/web-admin/session/probe">
@@ -127,6 +133,7 @@ public class WebAdminSessionController {
                 HtmlUtils.htmlEscape(context.authSource()),
                 configLink,
                 assignmentLink,
+                operationalLink,
                 csrfInput,
                 csrfInput);
         return ResponseEntity.ok()
@@ -187,5 +194,10 @@ public class WebAdminSessionController {
                 context.actorId(), AdminCommandCapabilityPolicy.CONFIG_ADMIN_APPROVE)
                 || adminCommandCapabilityService.actorGrants(
                 context.actorId(), AdminCommandCapabilityPolicy.CONFIG_ADMIN_PUBLISH);
+    }
+
+    private boolean hasScopedRead(WebAdminSessionContext context) {
+        return adminCommandCapabilityService.actorGrants(
+                context.actorId(), AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
     }
 }

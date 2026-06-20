@@ -242,6 +242,28 @@ public class EventRepository {
     }
 
     /**
+     * Recent subject work candidates for scoped operational views. Callers must
+     * apply assignment/scope filtering before displaying any row.
+     */
+    public List<Event> findRecentSubjectWorkEvents(int limit) {
+        return jdbc.query("""
+                SELECT id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                       device_id, device_seq, sync_watermark, timestamp, payload
+                FROM events
+                WHERE subject_ref->>'type' = 'subject'
+                  AND type != 'assignment_changed'
+                  AND shape_ref NOT LIKE 'conflict_detected/%'
+                  AND shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND shape_ref NOT LIKE 'subjects_merged/%'
+                  AND shape_ref NOT LIKE 'subject_split/%'
+                ORDER BY sync_watermark DESC
+                LIMIT ?
+                """,
+                eventRowMapper(),
+                limit);
+    }
+
+    /**
      * Find all events for a given subject, ordered by sync_watermark.
      */
     public List<Event> findBySubjectId(UUID subjectId) {
