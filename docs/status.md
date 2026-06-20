@@ -10,8 +10,8 @@
 
 Use this section as the low-token bootstrap for new sessions.
 
-- Active implementation gate: NW-113 Define minimal scoped operational freshness/attention view ready
-- Active process/control slice: none
+- Active implementation gate: none
+- Active process/control slice: NW-113 minimal scoped operational freshness/attention view ready
 - Last accepted NW: NW-112 PC1 demo review and successor selection
 - Current blocker: none
 - Next evidence command: execute or review NW-113 according to its prompt
