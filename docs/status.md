@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-20 (NW-110 next product route selected)
+**Last updated**: 2026-06-20 (NW-110 product journey smoke definition ready)
 
 ---
 
@@ -11,11 +11,11 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Active implementation gate: none
-- Active process/control slice: NW-110 next product NW selection
+- Active process/control slice: NW-110 product journey smoke definition ready
 - Last accepted NW: post-audit control-plane reset checkpoint
 - Current blocker: none
-- Next evidence command: execute or review NW-110 according to its prompt
-- Do-not-start-next-product-work-until: NW-110 is reviewed/selected as the bounded next row
+- Next evidence command: execute NW-110 according to its prompt
+- Do-not-start-next-product-work-until: do not start any other product work until NW-110 exits as accepted or parked
 - Gap register review standing: reviewed 2026-06-19; not touched for checkpoint
 - Artifact trace standing: trace table current; not touched for checkpoint
 - Last updated: 2026-06-20

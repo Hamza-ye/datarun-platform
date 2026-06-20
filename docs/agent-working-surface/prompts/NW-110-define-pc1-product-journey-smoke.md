@@ -44,14 +44,16 @@ internals unless a stop condition fires.
   record NW-110 progress or exit evidence.
 - Update `docs/status.md` only for the active control panel and current routing
   after the smoke definition is complete or stopped.
-- Update an existing artifact or prompt index only if the repository convention
-  requires it.
+- Update `docs/agent-working-surface/artifacts/README.md` only to add the
+  NW-110 artifact trace row when the smoke-definition artifact lands.
 
 ## Forbidden changes
 
 - Runtime code, tests, CI, contracts, schemas, migrations, mobile code, server
   code, product specs, platform specs, PM handoff, validation matrix, skills,
-  AGENTS files, steward guide, BAR, CDL, gap register, or artifact trace.
+  AGENTS files, steward guide, BAR, CDL, or gap register.
+- artifact trace changes except the single NW-110 artifact index row required
+  when the smoke-definition artifact lands.
 - Any product-scope acceptance, real-production approval, real-user/data claim,
   provider/region/jurisdiction/support decision, or managed control-plane work.
 - Reporting dashboards, exports, imports, warehouses, aggregate analytics, broad
@@ -88,6 +90,12 @@ test -f docs/agent-working-surface/artifacts/NW-110-pc1-product-journey-smoke-de
 grep -n "Goal" docs/agent-working-surface/artifacts/NW-110-pc1-product-journey-smoke-definition.md
 grep -n "Acceptance criteria" docs/agent-working-surface/artifacts/NW-110-pc1-product-journey-smoke-definition.md
 grep -n "Stop conditions" docs/agent-working-surface/artifacts/NW-110-pc1-product-journey-smoke-definition.md
+```
+
+When the artifact lands, also validate:
+
+```bash
+grep -n "NW-110-pc1-product-journey-smoke-definition.md" docs/agent-working-surface/artifacts/README.md
 ```
 
 Report skipped runtime-test rationale: this NW is planning/docs-only and does
