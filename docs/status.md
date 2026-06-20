@@ -2,7 +2,7 @@
 
 > Living state tracker. Updated in-place as work progresses.
 
-**Last updated**: 2026-06-20 (NW-110 product journey smoke definition ready)
+**Last updated**: 2026-06-20 (NW-110 product journey smoke definition accepted)
 
 ---
 
@@ -11,13 +11,13 @@
 Use this section as the low-token bootstrap for new sessions.
 
 - Active implementation gate: none
-- Active process/control slice: NW-110 product journey smoke definition ready
-- Last accepted NW: post-audit control-plane reset checkpoint
+- Active process/control slice: none
+- Last accepted NW: NW-110 product journey smoke definition
 - Current blocker: none
-- Next evidence command: execute NW-110 according to its prompt
-- Do-not-start-next-product-work-until: do not start any other product work until NW-110 exits as accepted or parked
-- Gap register review standing: reviewed 2026-06-19; not touched for checkpoint
-- Artifact trace standing: trace table current; not touched for checkpoint
+- Next evidence command: select the next bounded product NW from the NW-110 smoke gaps / PC1 PM handoff
+- Do-not-start-next-product-work-until: a single successor NW is selected with acceptance criteria and validation category
+- Gap register review standing: reviewed 2026-06-19; not touched by NW-110
+- Artifact trace standing: touched yes for NW-110
 - Last updated: 2026-06-20
 
 ### Current Routing Detail
@@ -60,6 +60,7 @@ Use this detail when the control panel above is not enough.
 - NW-107 is accepted: `docs/agent-working-surface/validation-matrix.md` is the active validation-control surface for touched-surface gates and acceptance evidence format. It records evidence fields, validation levels, required validation by touched surface, command references, current gate standing, acceptance rules, PC1 smoke-gate standing, and immediate candidate-only follow-up routes. Verification: `git status --short`, `git diff --check`, file existence check, targeted greps, pointer greps, backlog/status greps, and `wc -l` passed; validation matrix line count is 151. Gap register touched: no. Artifact trace touched: no. Active control panel updated: yes. Runtime/code/contracts/product behavior changed: no. Product scope changed: no. Architecture authority changed: no. CI/test implementation changed: no. At NW-107 acceptance, product implementation remained frozen until NW-108 and NW-109 were accepted or explicitly parked.
 - NW-108 is accepted: `docs/agent-working-surface/skills/README.md` is the active durable role-playbook index for PM Product Planner, Tester / Validation Auditor, Software Architect Boundary Reviewer, Implementation Agent, Reviewer, and Steward Session Guide routing. Added concise canonical role files under `docs/agent-working-surface/skills/`, Codex-discoverable thin wrappers under `.agents/skills/`, and working-surface README pointers for both. The playbooks are role guidance, not authority. Validation: `git status --short`, `git diff --check`, file existence checks, targeted greps, and `wc -l` passed. Gap register touched: no. Artifact trace touched: no. Active control panel updated: yes. Runtime/code/contracts/product behavior changed: no. Product scope changed: no. Architecture authority changed: no. Validation matrix changed: no. CI/test implementation changed: no. Product implementation remains frozen until NW-109 is accepted or explicitly parked.
 - NW-109 is accepted: `.github/workflows/mobile-ci.yml` now runs `flutter test` and Android `:app:compileDebugKotlin` for matching mobile/contracts/workflow paths and manual dispatch. `docs/agent-working-surface/mobile-analyzer-known-issues.md` records `flutter analyze` as known-red with 7 current issues, not a blocking CI gate. `docs/agent-working-surface/validation-matrix.md` and `mobile/AGENTS.md` now route mobile full tests and Android compile as CI-backed while preserving analyzer cleanup/baseline as a future route. Verification: `git diff --check`, workflow file checks, targeted greps, `flutter pub get`, `flutter test` passed 144 tests, `flutter analyze` known-red with 7 issues, and Android compile passed in 1m34s. GitHub Actions Mobile CI run `27854302523` passed on PR head `e3f7cf2`; `flutter-test` and `android-compile` both succeeded. Gap register touched: no. Artifact trace touched: no. Active control panel updated: yes. Runtime/product behavior changed: no. Product scope changed: no. Architecture authority changed: no. Contracts changed: no. Validation matrix changed: yes. CI/test implementation changed: yes. Product implementation is held only for the post-audit reset checkpoint, not because reset rows remain incomplete.
+- NW-110 is accepted: `docs/agent-working-surface/artifacts/NW-110-pc1-product-journey-smoke-definition.md` defines one bounded, domain-neutral PC1 setup-to-sync smoke path for PM/reviewer evaluation. It covers organization entry, web-admin login, setup draft/validate/readiness/approve/publish, assignment, mobile login/get-work/readiness/capture/local-sync/correction/sync, and narrow latest-synced/freshness/attention wording. Verification: docs-only `git diff --check`, artifact file/section checks, artifact trace grep, and status/backlog greps passed. Gap register touched: no. Artifact trace touched: yes. Active control panel updated: yes. Runtime/product behavior changed: no. Product scope changed: no. Validation policy changed: no. Real-production approval changed: no. Domain-specific product direction changed: no. Successor candidates remain candidate-only until separately selected.
 - The post-audit control-plane reset checkpoint is accepted at `docs/checkpoints/checkpoint-2026-06-20-post-audit-control-plane-reset.md`: NW-104 through NW-109 are complete, product implementation is no longer frozen by reset debt, and the next action is to select one bounded product NW through the PC1 PM handoff and PM Product Planner/lane-selector flow. No product scope, runtime behavior, architecture authority, contracts, validation policy, CI behavior, analyzer hard-gate standing, PC1 smoke gate standing, BAR, CDL, gap register, or artifact trace changed.
 - NW-037 accepted the bounded production-auth foundation: explicit `(issuer, subject) -> actor_id` principal binding, authenticated actor context, `/api/auth/me`, production-mode push actor binding, and mobile actor alignment. Use `docs/specifications/platform/production-auth-principal-binding.md` for the durable behavior boundary and the NW-037 backlog row for evidence; IDR-027 remains historical provenance.
 - NW-038 accepted the server-side OIDC/JWKS auth-provider boundary: configured asymmetric JWT validation by issuer, audience, and JWKS URI behind `AuthenticatedActorResolver`, with explicit `(issuer, subject) -> actor_id` binding as the only actor mapping. Use the NW-038 backlog row for evidence.
