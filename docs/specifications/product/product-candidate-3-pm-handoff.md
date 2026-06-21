@@ -7,7 +7,7 @@ Source: NW-127; accepted PC1 and PC2 handoffs; NW-120 PC2 intake; NW-124 PC2 syn
 Authority: derived planning surface only; does not add product behavior, runtime implementation, production approval, architecture authority, validation policy, contracts, schemas, BAR, CDL, or gap-register standing
 Last reviewed: 2026-06-22
 Supersedes: none
-Related: `product-candidate-1.md`; `product-candidate-1-pm-handoff.md`; `product-candidate-2-pm-handoff.md`; `../../agent-working-surface/platform-next-work-backlog.md`; `../../agent-working-surface/prompts/NW-128-specify-pc3-scoped-operational-report-snapshot-boundary.md`
+Related: `product-candidate-1.md`; `product-candidate-1-pm-handoff.md`; `product-candidate-2-pm-handoff.md`; `../platform/scoped-operational-report-snapshot-boundary.md`; `../../agent-working-surface/platform-next-work-backlog.md`; `../../agent-working-surface/prompts/NW-128-specify-pc3-scoped-operational-report-snapshot-boundary.md`
 
 ## Purpose
 
@@ -139,8 +139,8 @@ Promote at most one bounded successor at a time.
 
 | Candidate route | Suggested priority | User value / why now | Input sources | Output expected | Acceptance evidence | Stop condition |
 |---|---|---|---|---|---|---|
-| NW-128 - Specify PC3 scoped operational report snapshot boundary | Selected P1 successor | PC3 is reporting-like and must define freshness, completeness, unresolved-issue treatment, access, and traceability before implementation. | This handoff; NW-033/S26; PC2 handoff and proof; validation matrix; gap playbook. | Durable platform/product boundary for the one scoped snapshot, plus implementation readiness call. | Docs-only validation; platform/product index checks; status/backlog trace. | Stop on export/import, warehouse, broad audit, new scope, pattern dependency requiring NW-073, or production approval. |
-| Implement PC3 scoped operational report snapshot | P1 after NW-128 | Gives the supervisor/operator the selected one-snapshot experience. | Accepted NW-128 boundary; existing web-admin patterns; accepted access/conflict specs. | Bounded server-rendered implementation prompt and tests. | Focused web-admin/reporting tests plus required server gate. | Stop on broad reporting, queue/list review, contracts/schemas/sync, tenant/control-plane, real users/data. |
+| NW-128 - Specify PC3 scoped operational report snapshot boundary | Accepted prerequisite | PC3 is reporting-like and needed freshness, completeness, unresolved-issue treatment, access, traceability, and read-query semantics before implementation. | This handoff; NW-033/S26; PC2 handoff and proof; validation matrix; gap playbook. | Accepted platform boundary at `../platform/scoped-operational-report-snapshot-boundary.md`; implementation readiness call. | Docs-only validation; platform/product index checks; status/backlog trace. | Stop on export/import, warehouse, broad audit, new scope, pattern dependency requiring NW-073, or production approval. |
+| NW-129 - Implement PC3 scoped operational report snapshot | Selected P1 successor | Gives the supervisor/operator the selected one-snapshot experience. | Accepted NW-128 boundary; existing web-admin patterns; accepted access/conflict specs. | One read-only server-rendered `/web-admin/operational/report` snapshot and focused tests. | Focused web-admin/reporting tests plus required server gate. | Stop on broad reporting, queue/list review, contracts/schemas/sync, tenant/control-plane, real users/data. |
 | PC3 synthetic proof packet | P2 after implementation | Lets PM/owner validate the snapshot journey with synthetic evidence. | PC3 handoff; accepted implementation evidence. | Product-validation artifact or proof route. | Docs-only proof or live synthetic proof if environment is selected. | Stop on real users/data or PC2 lab proof debt. |
 | NW-044 broad reporting/import/export boundary | Future | Needed if product asks for exports, imports, warehouses, analytics, broad report APIs, or report catalog. | S26 and reporting pressure. | Broad reporting/product-platform decision route. | Accepted decision before implementation. | Do not fold broad reporting into PC3. |
 | Conflict queue/list/multi-item ergonomics | Future | Needed only if one-item attention handling is insufficient. | PC2 standing; GAP-CONFLICT-01. | Bounded queue/multi-item route. | Accepted route before implementation. | Do not add batch, automation, resolver reassignment, or broad conflict console. |
@@ -151,14 +151,13 @@ Promote at most one bounded successor at a time.
 Exactly one successor route is selected:
 
 ```text
-NW-128 - Specify PC3 scoped operational report snapshot boundary
+NW-129 - Implement PC3 scoped operational report snapshot
 ```
 
-No PC3 implementation successor is ready yet. The selected boundary is
-reporting-like, so implementation must wait until NW-128 defines the
-freshness, completeness, unresolved-issue, scoped-access, traceability, and
-read-model/query boundary and confirms that no NW-044, NW-073, NW-053, NW-054,
-NW-093, or NW-094 through NW-098 prerequisite has been triggered.
+NW-128 accepted the required platform boundary for one current scoped
+operational standing snapshot with limited traceability. It also confirmed
+that no NW-044, NW-073, NW-053, NW-054, NW-093, NW-126, or NW-094 through
+NW-098 prerequisite is selected for the first PC3 implementation.
 
 ## Product-Level Definition Of Done
 
@@ -280,15 +279,19 @@ NW-094 through NW-098 are selected.
 
 ## Implementation Successor Readiness
 
-No implementation successor is selected by this handoff.
+As of accepted NW-128, one implementation successor is ready:
 
-A bounded implementation successor can be prepared only after NW-128 accepts
-the PC3 scoped operational report snapshot boundary. That implementation must
-stay out of broad reporting/export/import/warehouse/analytics, conflict
-queues, batch/automation/reassignment, pattern expansion, S06 lifecycle, new
-scope mechanisms, retention/security promises, tenant/control-plane behavior,
-real users/data, production approval, contracts/schemas/sync changes, BAR, CDL,
-and validation-policy changes.
+```text
+NW-129 - Implement PC3 scoped operational report snapshot
+```
+
+NW-129 must build one read-only, server-rendered
+`/web-admin/operational/report` snapshot from the accepted NW-128 platform
+boundary. It must stay out of broad reporting/export/import/warehouse/analytics,
+conflict queues, batch/automation/reassignment, pattern expansion, S06
+lifecycle, new scope mechanisms, retention/security promises,
+tenant/control-plane behavior, real users/data, production approval,
+contracts/schemas/sync changes, BAR, CDL, and validation-policy changes.
 
 ## Owner Decisions
 
@@ -296,10 +299,11 @@ and validation-policy changes.
   candidate boundary, not a dashboard or reporting suite.
 - Choose the first synthetic example for PC3 proof: S26 operational reporting,
   S22 coordinated campaign, or S27 logistics standing.
-- Decide whether the first snapshot should use current-period language or avoid
-  period/cadence wording until a later reporting route.
-- Confirm unresolved issue treatment wording before implementation: excluded,
-  caveated, counted, linked, or a combination selected by NW-128.
+- Accepted NW-128 decision: the first snapshot avoids current-period, cadence,
+  deadline, overdue, and completion language until a later reporting route.
+- Accepted NW-128 decision: unresolved issue treatment uses clean counts,
+  excluded-unresolved counts, unresolved issue counts, and at most a limited
+  link to accepted one-item attention context.
 - Confirm no real users/data are involved; otherwise stop and select NW-093.
 
 ## Stop Conditions
@@ -323,13 +327,14 @@ Stop and route before implementation if the candidate:
 
 ## Future-PC Closure Checklist
 
-- Accepted product spec linked: PC3 has this PM handoff only; an accepted
-  product behavior spec remains future work if the owner wants one.
+- Accepted product/platform surfaces linked: PC3 has this PM handoff plus the
+  NW-128 platform boundary; an accepted product behavior spec remains future
+  work if the owner wants one or the snapshot expands.
 - Handoff review path: NW-127 PR review/merge is the acceptance gate.
 - Current standing table matches accepted status/backlog rows.
 - Scenario map covers S26, S02, S21, S00, S19, S23, S22/S27, and deferred S06.
 - Candidate routes are candidates only.
-- Exactly one successor route is selected: NW-128.
+- Exactly one successor route is selected: NW-129.
 - Product-level DoD points to the detailed validation owner.
 - Owner decisions are explicit.
 - Stop conditions are present.
