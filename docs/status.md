@@ -14,8 +14,8 @@ Use this section as the low-token bootstrap for new sessions.
 - Active process/control slice: none
 - Last accepted NW: NW-121 PC2 product candidate boundary and PM handoff
 - Current blocker: none
-- Next evidence command: none selected; owner/reviewer review of NW-121 should happen before promoting the prerequisite route
-- Do-not-start-next-product-work-until: owner/reviewer accepts the NW-121 PC2 boundary; then select the PC2-scoped NW-072 prerequisite before PC2 implementation; real users/data require NW-093 first
+- Next evidence command: select/promote the PC2-scoped NW-072 prerequisite for conflict/flag durable behavior and operational attention read-model/query boundary before any PC2 implementation
+- Do-not-start-next-product-work-until: the PC2-scoped NW-072 prerequisite is selected and accepted; PC2 implementation waits behind that prerequisite; real users/data require NW-093 first
 - Gap register review standing: reviewed 2026-06-19; not touched by NW-121
 - Artifact trace standing: not touched by NW-121; product spec index touched
 - Last updated: 2026-06-21

@@ -284,7 +284,7 @@ Stop and route before implementation if the candidate:
 
 - Accepted product spec linked: PC2 has this PM handoff only; an accepted
   product behavior spec remains future work if the owner wants one.
-- Handoff reviewed by product steward: pending NW-121 PR review.
+- Handoff review path: NW-121 PR review/merge is the acceptance gate.
 - Current standing table matches accepted status/backlog rows.
 - Scenario map covers S21, S27, S26, S00, S19, S23, and deferred S06.
 - Candidate routes are candidates only.
