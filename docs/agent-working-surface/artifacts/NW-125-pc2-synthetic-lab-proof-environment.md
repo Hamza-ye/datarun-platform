@@ -24,8 +24,11 @@ web-admin session path, or cleanup state could be verified.
 
 Classification: `NOT_READY`.
 
-Next route: `NW-126 - Reconcile and complete PC2 synthetic lab proof
-environment`.
+Lab-debt route: `NW-126 - Reconcile and complete PC2 synthetic lab proof
+environment`, blocked until lab hostname or fixed-IP SSH access is restored.
+
+Active product route after PR #42 review patch: `NW-127 - Select PC3 product
+candidate boundary and PM handoff`.
 
 ## Lab Hosts Inspected Or Used
 
@@ -150,7 +153,7 @@ ssh: connect to host 192.168.1.217 port 22: Connection timed out
 
 ## Successor Route
 
-Select exactly one next route:
+NW-125 preserved the PC2 lab debt as:
 
 `NW-126 - Reconcile and complete PC2 synthetic lab proof environment`.
 
@@ -162,3 +165,9 @@ synthetic web-admin session/provisioning path before selecting a later live
 browser proof. If image dependency fetching is the actual blocker, NW-126
 should stop and recommend a separate standard implementation-tooling route
 rather than changing build tooling inside the environment route.
+
+PR #42 review patch: NW-126 must not remain the active ready route while the lab
+is disconnected. NW-126 is blocked until lab hostname or fixed-IP SSH access is
+restored enough to inspect R12 before touching retained PC2 state. The active
+ready product route is NW-127, which moves product planning to PC3 without
+claiming PC2 live-lab proof or hiding the blocked PC2 lab debt.
