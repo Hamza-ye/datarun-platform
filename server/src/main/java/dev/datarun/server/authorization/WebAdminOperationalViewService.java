@@ -2,12 +2,16 @@ package dev.datarun.server.authorization;
 
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
+import dev.datarun.server.event.EventRepository.OperationalAttentionItem;
 import dev.datarun.server.event.EventRepository.OperationalScope;
 import dev.datarun.server.event.EventRepository.OperationalWorkEvent;
+import dev.datarun.server.config.FlagSeverityConfigService;
+import dev.datarun.server.integrity.ConflictResolutionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -18,35 +22,80 @@ public class WebAdminOperationalViewService {
     static final String NEEDS_REVIEW_LABEL = "Needs review";
     static final String NEEDS_REVIEW_COPY =
             "One unresolved attention item is attached to this work.";
+    static final String NO_ATTENTION_ITEM =
+            "No unresolved attention item is attached to the current scoped work.";
+    static final String RESOLVER_CURRENT_ACTOR =
+            "You are the assigned reviewer for this item.";
+    static final String RESOLVER_OTHER_ACTOR =
+            "This item is assigned to another reviewer.";
+    static final String RESOLVER_UNASSIGNED =
+            "This item is blocked because no reviewer is currently assigned.";
 
     private final EventRepository eventRepository;
     private final ScopeResolver scopeResolver;
+    private final FlagSeverityConfigService flagSeverityConfigService;
+    private final ConflictResolutionService conflictResolutionService;
 
     public WebAdminOperationalViewService(EventRepository eventRepository,
-                                          ScopeResolver scopeResolver) {
+                                          ScopeResolver scopeResolver,
+                                          FlagSeverityConfigService flagSeverityConfigService,
+                                          ConflictResolutionService conflictResolutionService) {
         this.eventRepository = eventRepository;
         this.scopeResolver = scopeResolver;
+        this.flagSeverityConfigService = flagSeverityConfigService;
+        this.conflictResolutionService = conflictResolutionService;
     }
 
     public OperationalObservation observe(UUID actorId) {
-        List<ActiveAssignment> assignments = scopeResolver.getActiveAssignments(actorId);
-        if (assignments.isEmpty()) {
+        List<OperationalScope> scopes = operationalScopes(actorId);
+        if (scopes.isEmpty()) {
             return OperationalObservation.empty(NO_SCOPED_WORK_FRESHNESS);
         }
-
-        List<OperationalScope> scopes = assignments.stream()
-                .map(assignment -> new OperationalScope(
-                        assignment.geographicPath(),
-                        assignment.subjectList(),
-                        assignment.activityList()))
-                .toList();
 
         return eventRepository.findLatestVisibleSubjectWorkEvent(scopes)
                 .map(work -> new OperationalObservation(
                         freshnessText(work),
                         latestWork(work),
-                        attentionCue(work.event())))
+                        attentionCue(work.event(), actorId, scopes)))
                 .orElseGet(() -> OperationalObservation.empty(NO_SCOPED_WORK_FRESHNESS));
+    }
+
+    public AttentionReview review(UUID actorId) {
+        List<OperationalScope> scopes = operationalScopes(actorId);
+        if (scopes.isEmpty()) {
+            return AttentionReview.empty(NO_SCOPED_WORK_FRESHNESS);
+        }
+        Optional<OperationalWorkEvent> work =
+                eventRepository.findLatestVisibleSubjectWorkEvent(scopes);
+        if (work.isEmpty()) {
+            return AttentionReview.empty(NO_SCOPED_WORK_FRESHNESS);
+        }
+        return eventRepository.findVisibleUnresolvedOperationalAttention(
+                        work.get().event().id(), actorId, scopes)
+                .map(item -> new AttentionReview(null, attentionDetail(item)))
+                .orElseGet(() -> AttentionReview.empty(NO_ATTENTION_ITEM));
+    }
+
+    public void resolveCurrentAttention(UUID actorId, String resolution, String reason) {
+        AttentionReview review = review(actorId);
+        if (!review.hasItem()) {
+            throw new IllegalArgumentException("No unresolved attention item is available.");
+        }
+        AttentionDetail item = review.item();
+        if (!item.canResolve()) {
+            throw new IllegalArgumentException("This attention item is not resolvable by the current reviewer.");
+        }
+        conflictResolutionService.resolve(
+                item.flagId(), resolution, null, actorId, blankToNull(reason));
+    }
+
+    private List<OperationalScope> operationalScopes(UUID actorId) {
+        return scopeResolver.getActiveAssignments(actorId).stream()
+                .map(assignment -> new OperationalScope(
+                        assignment.geographicPath(),
+                        assignment.subjectList(),
+                        assignment.activityList()))
+                .toList();
     }
 
     private LatestWork latestWork(OperationalWorkEvent work) {
@@ -66,26 +115,58 @@ public class WebAdminOperationalViewService {
                 + ". This does not prove all devices are current.";
     }
 
-    private AttentionCue attentionCue(Event event) {
-        List<AttentionCue> cues = eventRepository.getJdbcTemplate().query("""
-                SELECT cd.id
-                FROM events cd
-                WHERE cd.shape_ref LIKE 'conflict_detected/%'
-                  AND cd.payload->>'source_event_id' = ?
-                  AND NOT EXISTS (
-                      SELECT 1
-                      FROM events cr
-                      WHERE cr.shape_ref LIKE 'conflict_resolved/%'
-                        AND cr.payload->>'flag_event_id' = cd.id::text
-                        AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
-                        AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
-                  )
-                ORDER BY cd.sync_watermark DESC
-                LIMIT 1
-                """,
-                (rs, rowNum) -> new AttentionCue(NEEDS_REVIEW_LABEL, NEEDS_REVIEW_COPY),
-                event.id().toString());
-        return cues.isEmpty() ? null : cues.get(0);
+    private AttentionCue attentionCue(Event event, UUID actorId, List<OperationalScope> scopes) {
+        return eventRepository.findVisibleUnresolvedOperationalAttention(
+                        event.id(), actorId, scopes)
+                .map(item -> new AttentionCue(
+                        NEEDS_REVIEW_LABEL,
+                        NEEDS_REVIEW_COPY,
+                        "/web-admin/operational/attention"))
+                .orElse(null);
+    }
+
+    private AttentionDetail attentionDetail(OperationalAttentionItem item) {
+        String category = safeCategoryLabel(item.category());
+        String severity = displayName(
+                flagSeverityConfigService.effectiveSeverity(item.category()),
+                "Attention");
+        return new AttentionDetail(
+                item.flagId(),
+                latestWork(item.sourceWork()),
+                category,
+                severity,
+                item.reason() == null || item.reason().isBlank()
+                        ? "Review requested for this work item."
+                        : item.reason(),
+                item.flaggedAt().toString(),
+                resolverStanding(item),
+                item.assignedToCurrentActor() && !item.resolverUnassigned());
+    }
+
+    private String resolverStanding(OperationalAttentionItem item) {
+        if (item.resolverUnassigned()) {
+            return RESOLVER_UNASSIGNED;
+        }
+        if (item.assignedToCurrentActor()) {
+            return RESOLVER_CURRENT_ACTOR;
+        }
+        return RESOLVER_OTHER_ACTOR;
+    }
+
+    private String safeCategoryLabel(String category) {
+        if (category == null || category.isBlank()) {
+            return "Attention Item";
+        }
+        return switch (category) {
+            case "scope_violation" -> "Scope Review";
+            case "temporal_authority_expired" -> "Timing Review";
+            case "role_stale" -> "Role Review";
+            case "concurrent_state_change" -> "Concurrent Work Review";
+            case "identity_conflict" -> "Identity Review";
+            case "domain_uniqueness_violation" -> "Duplicate Work Review";
+            case "transition_violation" -> "Workflow Transition Review";
+            default -> "Attention Item";
+        };
     }
 
     private UUID subjectId(Event event) {
@@ -126,6 +207,10 @@ public class WebAdminOperationalViewService {
         return label.length() == 0 ? fallback : label.toString();
     }
 
+    private String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     public record OperationalObservation(
             String freshnessText,
             LatestWork latestWork,
@@ -152,5 +237,26 @@ public class WebAdminOperationalViewService {
             String workTime
     ) {}
 
-    public record AttentionCue(String label, String copy) {}
+    public record AttentionCue(String label, String copy, String reviewPath) {}
+
+    public record AttentionReview(String emptyText, AttentionDetail item) {
+        static AttentionReview empty(String emptyText) {
+            return new AttentionReview(emptyText, null);
+        }
+
+        public boolean hasItem() {
+            return item != null;
+        }
+    }
+
+    public record AttentionDetail(
+            UUID flagId,
+            LatestWork sourceWork,
+            String category,
+            String severity,
+            String reason,
+            String flaggedAt,
+            String resolverStanding,
+            boolean canResolve
+    ) {}
 }

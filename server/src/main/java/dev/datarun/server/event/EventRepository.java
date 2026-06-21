@@ -296,6 +296,98 @@ public class EventRepository {
         return results.stream().findFirst();
     }
 
+    /**
+     * One-item operational attention read model for the currently visible work
+     * context. Scope predicates are re-applied to the source work before any
+     * attention detail is returned.
+     */
+    public Optional<OperationalAttentionItem> findVisibleUnresolvedOperationalAttention(
+            UUID sourceEventId, UUID sessionActorId, List<OperationalScope> scopes) {
+        if (sourceEventId == null || scopes == null || scopes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT cd.id AS flag_id,
+                       cd.payload->>'flag_category' AS category,
+                       COALESCE(cd.payload->>'resolvability', '') AS resolvability,
+                       COALESCE(cd.payload->>'reason', '') AS reason,
+                       cd.timestamp AS flagged_at,
+                       cd.payload->'designated_resolver'->>'type' AS resolver_type,
+                       cd.payload->'designated_resolver'->>'id' AS resolver_id,
+                       e.id, e.type, e.shape_ref, e.activity_ref, e.subject_ref, e.actor_ref,
+                       e.device_id, e.device_seq, e.sync_watermark, e.timestamp, e.payload,
+                       e.received_at
+                FROM events e
+                JOIN events cd ON cd.payload->>'source_event_id' = e.id::text
+                WHERE e.id = ?::uuid
+                  AND e.subject_ref->>'type' = 'subject'
+                  AND e.type != 'assignment_changed'
+                  AND e.shape_ref NOT LIKE 'conflict_detected/%'
+                  AND e.shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND e.shape_ref NOT LIKE 'subjects_merged/%'
+                  AND e.shape_ref NOT LIKE 'subject_split/%'
+                  AND cd.shape_ref LIKE 'conflict_detected/%'
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM events cr
+                      WHERE cr.shape_ref LIKE 'conflict_resolved/%'
+                        AND cr.payload->>'flag_event_id' = cd.id::text
+                        AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                        AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
+                  )
+                  AND (
+                """);
+        List<Object> params = new ArrayList<>();
+        params.add(sourceEventId.toString());
+
+        int appendedScopes = 0;
+        for (OperationalScope scope : scopes) {
+            String clause = operationalScopeClause(scope, params);
+            if (clause == null) {
+                continue;
+            }
+            if (appendedScopes > 0) {
+                sql.append(" OR ");
+            }
+            sql.append('(').append(clause).append(')');
+            appendedScopes++;
+        }
+        if (appendedScopes == 0) {
+            return Optional.empty();
+        }
+        sql.append("""
+                  )
+                ORDER BY cd.sync_watermark DESC
+                LIMIT 1
+                """);
+
+        List<OperationalAttentionItem> results = jdbc.query(
+                sql.toString(),
+                (rs, rowNum) -> {
+                    String resolverType = rs.getString("resolver_type");
+                    String resolverId = rs.getString("resolver_id");
+                    boolean assignedToCurrentActor = "actor".equals(resolverType)
+                            && sessionActorId.toString().equals(resolverId);
+                    boolean resolverUnassigned = resolverId != null
+                            && resolverId.startsWith("system:resolver_unassigned/");
+                    return new OperationalAttentionItem(
+                            UUID.fromString(rs.getString("flag_id")),
+                            new OperationalWorkEvent(
+                                    mapRow(rs),
+                                    rs.getTimestamp("received_at").toInstant()
+                                            .atOffset(ZoneOffset.UTC)),
+                            rs.getString("category"),
+                            rs.getString("resolvability"),
+                            rs.getString("reason"),
+                            rs.getTimestamp("flagged_at").toInstant().atOffset(ZoneOffset.UTC),
+                            assignedToCurrentActor,
+                            resolverUnassigned);
+                },
+                params.toArray());
+        return results.stream().findFirst();
+    }
+
     private String operationalScopeClause(OperationalScope scope, List<Object> params) {
         if (scope == null) {
             return null;
@@ -333,6 +425,17 @@ public class EventRepository {
     ) {}
 
     public record OperationalWorkEvent(Event event, OffsetDateTime receivedAt) {}
+
+    public record OperationalAttentionItem(
+            UUID flagId,
+            OperationalWorkEvent sourceWork,
+            String category,
+            String resolvability,
+            String reason,
+            OffsetDateTime flaggedAt,
+            boolean assignedToCurrentActor,
+            boolean resolverUnassigned
+    ) {}
 
     /**
      * Find all events for a given subject, ordered by sync_watermark.
