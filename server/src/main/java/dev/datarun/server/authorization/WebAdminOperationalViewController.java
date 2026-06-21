@@ -2,17 +2,27 @@ package dev.datarun.server.authorization;
 
 import dev.datarun.server.config.AdminCommandCapabilityPolicy;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/web-admin/operational")
 public class WebAdminOperationalViewController {
+
+    static final String ATTENTION_TOKEN_PARAM = "attentionToken";
+    private static final String ATTENTION_TOKEN_ATTR = "webAdminOperationalAttentionToken";
+    private static final String ATTENTION_FLAG_ID_ATTR = "webAdminOperationalAttentionFlagId";
 
     private final WebAdminSessionService sessionService;
     private final AdminCommandCapabilityService adminCommandCapabilityService;
@@ -33,9 +43,81 @@ public class WebAdminOperationalViewController {
         requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
         requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
 
-        model.addAttribute("actorId", context.actorId());
         model.addAttribute("observation", operationalViewService.observe(context.actorId()));
         return "web-admin/operational";
+    }
+
+    @GetMapping("/attention")
+    public String attention(HttpServletRequest request, Model model) {
+        WebAdminSessionContext context = requireContextForPage(request);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+
+        WebAdminOperationalViewService.AttentionReview review =
+                operationalViewService.review(context.actorId());
+        model.addAttribute("review", review);
+        bindAttentionToken(request, model, review);
+        return "web-admin/attention-review";
+    }
+
+    @PostMapping("/attention/resolve")
+    public String resolveAttention(HttpServletRequest request,
+                                   @RequestParam(ATTENTION_TOKEN_PARAM) String attentionToken,
+                                   @RequestParam String resolution,
+                                   @RequestParam(required = false) String reason,
+                                   RedirectAttributes redirectAttributes) {
+        WebAdminSessionContext context = requireContextForPage(request);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+
+        try {
+            UUID flagId = requireAttentionFlagId(request, attentionToken);
+            operationalViewService.resolveAttention(
+                    context.actorId(), flagId, resolution, reason);
+            clearAttentionToken(request);
+            redirectAttributes.addFlashAttribute(
+                    "success", "Review recorded. The item is resolved.");
+            return "redirect:/web-admin/operational";
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+        }
+    }
+
+    private void bindAttentionToken(HttpServletRequest request, Model model,
+                                    WebAdminOperationalViewService.AttentionReview review) {
+        HttpSession session = request.getSession(false);
+        if (session == null || !review.hasItem()) {
+            clearAttentionToken(request);
+            return;
+        }
+        String token = UUID.randomUUID().toString();
+        session.setAttribute(ATTENTION_TOKEN_ATTR, token);
+        session.setAttribute(ATTENTION_FLAG_ID_ATTR, review.item().flagId().toString());
+        model.addAttribute(ATTENTION_TOKEN_PARAM, token);
+    }
+
+    private UUID requireAttentionFlagId(HttpServletRequest request, String attentionToken) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            throw new IllegalArgumentException("No reviewed attention item is bound to this session.");
+        }
+        Object expectedToken = session.getAttribute(ATTENTION_TOKEN_ATTR);
+        Object flagId = session.getAttribute(ATTENTION_FLAG_ID_ATTR);
+        if (!(expectedToken instanceof String expected)
+                || !(flagId instanceof String flag)
+                || attentionToken == null
+                || !expected.equals(attentionToken)) {
+            throw new IllegalArgumentException("No reviewed attention item is bound to this session.");
+        }
+        return UUID.fromString(flag);
+    }
+
+    private void clearAttentionToken(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.removeAttribute(ATTENTION_TOKEN_ATTR);
+            session.removeAttribute(ATTENTION_FLAG_ID_ATTR);
+        }
     }
 
     private WebAdminSessionContext requireContextForPage(HttpServletRequest request) {

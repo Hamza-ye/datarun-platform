@@ -70,6 +70,15 @@
             border-color: #d7a542;
             background: #fff9e8;
         }
+        .message {
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 16px;
+        }
+        .success {
+            border: 1px solid #7bbf88;
+            background: #edf8ef;
+        }
         .link-button {
             border: 1px solid #2f6f9f;
             background: #2f6f9f;
@@ -86,10 +95,12 @@
     <header>
         <div>
             <h1>Operational View</h1>
-            <div>Actor <span th:text="${actorId}"></span></div>
+            <div>Signed in</div>
         </div>
         <a class="link-button" href="/web-admin/shell">Admin Shell</a>
     </header>
+
+    <div class="message success" th:if="${success}" th:text="${success}"></div>
 
     <section>
         <h2>Latest Synced Work</h2>
@@ -128,6 +139,9 @@
     <section class="cue" th:if="${observation.hasAttentionCue()}">
         <h2 th:text="${observation.attentionCue().label()}"></h2>
         <p th:text="${observation.attentionCue().copy()}"></p>
+        <a class="link-button" th:href="${observation.attentionCue().reviewPath()}">
+            Review
+        </a>
     </section>
 </main>
 </body>

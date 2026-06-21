@@ -8,6 +8,7 @@ import dev.datarun.server.config.AdminCommandCapabilityPolicy;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.identity.ServerIdentity;
+import dev.datarun.server.integrity.ConflictResolutionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,7 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private AssignmentService assignmentService;
     @Autowired private EventRepository eventRepository;
+    @Autowired private ConflictResolutionService conflictResolutionService;
     @Autowired private LocationRepository locationRepository;
     @Autowired private SubjectLocationRepository subjectLocationRepository;
     @Autowired private ServerIdentity serverIdentity;
@@ -92,9 +94,13 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
         configureAdminCommands(REVIEWER, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
         mvc.perform(get("/web-admin/operational").session(session))
                 .andExpect(status().isForbidden());
+        mvc.perform(get("/web-admin/operational/attention").session(session))
+                .andExpect(status().isForbidden());
 
         configureAdminCommands(REVIEWER, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
         mvc.perform(get("/web-admin/operational").session(session))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/web-admin/operational/attention").session(session))
                 .andExpect(status().isForbidden());
     }
 
@@ -120,6 +126,7 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
         String body = result.getResponse().getContentAsString();
         assertThat(body)
                 .contains("Operational View")
+                .contains("Signed in")
                 .contains("Visit Record")
                 .contains("Assigned Visit")
                 .contains(SUBJECT_IN_SCOPE.toString())
@@ -131,6 +138,8 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
                 .doesNotContain("live data")
                 .doesNotContain("reporting freshness")
                 .doesNotContain("SLA")
+                .doesNotContain("Actor " + REVIEWER)
+                .doesNotContain(REVIEWER.toString())
                 .doesNotContain(SUBJECT_OUT_OF_SCOPE.toString())
                 .doesNotContain("Hidden Site Visit");
     }
@@ -203,11 +212,326 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
                 .isEqualTo(1);
         assertThat(body)
                 .contains(WebAdminOperationalViewService.NEEDS_REVIEW_COPY)
+                .contains("/web-admin/operational/attention")
                 .doesNotContain(firstFlag.id().toString())
                 .doesNotContain(secondFlag.id().toString())
                 .doesNotContain("scope_violation")
                 .doesNotContain("role_stale")
                 .doesNotContain("<form");
+    }
+
+    @Test
+    void reviewPathRequiresAuthenticatedScopedReadSession() throws Exception {
+        mvc.perform(get("/web-admin/operational/attention"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/web-admin/login"));
+
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
+        mvc.perform(get("/web-admin/operational/attention")
+                        .session(webAdminSession(REVIEWER)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void outOfScopeAttentionItemDoesNotRenderOnReviewPath() throws Exception {
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        createVisitRecord(SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
+        Event hidden = createVisitRecord(
+                SUBJECT_OUT_OF_SCOPE, districtB, "Hidden Site Visit", "assigned_visit");
+        createAttentionFlag(hidden, "scope_violation", REVIEWER);
+
+        MvcResult result = mvc.perform(get("/web-admin/operational/attention")
+                        .session(webAdminSession(REVIEWER)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(result.getResponse().getContentAsString())
+                .contains(WebAdminOperationalViewService.NO_ATTENTION_ITEM)
+                .doesNotContain(SUBJECT_OUT_OF_SCOPE.toString())
+                .doesNotContain("Hidden Site Visit")
+                .doesNotContain("scope_violation")
+                .doesNotContain("<form");
+    }
+
+    @Test
+    void resolvedCanonicalAttentionItemNoLongerAppearsAsReviewable()
+            throws Exception {
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        Event visible = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
+        Event flag = createAttentionFlag(visible, "scope_violation", REVIEWER);
+
+        conflictResolutionService.resolve(
+                flag.id(), "accepted", null, REVIEWER, "Reviewed");
+
+        MvcResult result = mvc.perform(get("/web-admin/operational/attention")
+                        .session(webAdminSession(REVIEWER)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(result.getResponse().getContentAsString())
+                .contains(WebAdminOperationalViewService.NO_ATTENTION_ITEM)
+                .doesNotContain(WebAdminOperationalViewService.RESOLVER_CURRENT_ACTOR)
+                .doesNotContain("<form");
+    }
+
+    @Test
+    void assignedReviewerCanResolveOneCurrentAttentionItem() throws Exception {
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        Event visible = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
+        String rawReason = "assignment_id=" + UUID.randomUUID()
+                + " shape_ref=visit_record/v1 pattern_ref=ongoing_resolution/v1 "
+                + "designated_resolver internal resolver phrase";
+        Event flag = createAttentionFlag(
+                visible, "scope_violation", REVIEWER, rawReason);
+        MockHttpSession session = webAdminSession(REVIEWER);
+
+        MvcResult page = mvc.perform(get("/web-admin/operational/attention")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        String body = page.getResponse().getContentAsString();
+        assertThat(body)
+                .contains("Attention Review")
+                .contains("Signed in")
+                .contains("Scope Review")
+                .contains("Blocking")
+                .contains(WebAdminOperationalViewService.ATTENTION_REVIEW_COPY)
+                .contains(WebAdminOperationalViewService.RESOLVER_CURRENT_ACTOR)
+                .contains("<form")
+                .contains("name=\"attentionToken\"")
+                .doesNotContain(REVIEWER.toString())
+                .doesNotContain(flag.id().toString())
+                .doesNotContain("scope_violation")
+                .doesNotContain("conflict_detected")
+                .doesNotContain("designated_resolver")
+                .doesNotContain("assignment_id")
+                .doesNotContain("shape_ref")
+                .doesNotContain("pattern_ref")
+                .doesNotContain("ongoing_resolution")
+                .doesNotContain("internal resolver phrase")
+                .doesNotContain("Queue")
+                .doesNotContain("Filter")
+                .doesNotContain("Export")
+                .doesNotContain("Import")
+                .doesNotContain("Audit History");
+        CsrfToken csrf = csrfToken(page);
+        String attentionToken = inputValue(body, "attentionToken");
+        int before = eventCount();
+
+        mvc.perform(post("/web-admin/operational/attention/resolve")
+                        .session(session)
+                        .param(csrf.getParameterName(), csrf.getToken())
+                        .param("attentionToken", attentionToken)
+                        .param("resolution", "accepted")
+                        .param("actor_id", ADMIN.toString())
+                        .param("reason", "Looks correct"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/web-admin/operational"));
+
+        assertThat(canonicalResolutionCount(flag.id())).isEqualTo(1);
+        assertThat(eventCount()).isEqualTo(before + 1);
+
+        MvcResult operational = mvc.perform(get("/web-admin/operational")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(operational.getResponse().getContentAsString())
+                .contains("Review recorded. The item is resolved.")
+                .doesNotContain(WebAdminOperationalViewService.NEEDS_REVIEW_LABEL);
+    }
+
+    @Test
+    void postedReviewResolvesOpenedAttentionItemWhenNewerVisibleItemAppears()
+            throws Exception {
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        Event openedWork = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Opened Site Visit", "assigned_visit");
+        Event openedFlag = createAttentionFlag(openedWork, "scope_violation", REVIEWER);
+        MockHttpSession session = webAdminSession(REVIEWER);
+
+        MvcResult page = mvc.perform(get("/web-admin/operational/attention")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        String attentionToken = inputValue(
+                page.getResponse().getContentAsString(), "attentionToken");
+        CsrfToken csrf = csrfToken(page);
+
+        Event newerWork = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Newer Site Visit", "assigned_visit");
+        Event newerFlag = createAttentionFlag(newerWork, "role_stale", REVIEWER);
+        int before = eventCount();
+
+        mvc.perform(post("/web-admin/operational/attention/resolve")
+                        .session(session)
+                        .param(csrf.getParameterName(), csrf.getToken())
+                        .param("attentionToken", attentionToken)
+                        .param("resolution", "accepted")
+                        .param("reason", "Opened item reviewed"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/web-admin/operational"));
+
+        assertThat(canonicalResolutionCount(openedFlag.id())).isEqualTo(1);
+        assertThat(canonicalResolutionCount(newerFlag.id())).isZero();
+        assertThat(eventCount()).isEqualTo(before + 1);
+    }
+
+    @Test
+    void nonDesignatedReviewerCannotResolveWithBodyActorSpoofing()
+            throws Exception {
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        Event visible = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
+        Event flag = createAttentionFlag(visible, "scope_violation", ADMIN);
+        MockHttpSession session = webAdminSession(REVIEWER);
+
+        MvcResult page = mvc.perform(get("/web-admin/operational/attention")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(page.getResponse().getContentAsString())
+                .contains(WebAdminOperationalViewService.RESOLVER_OTHER_ACTOR)
+                .doesNotContain("<form");
+        CsrfToken csrf = csrfToken(page);
+        String attentionToken = boundAttentionToken(session);
+        int before = eventCount();
+
+        mvc.perform(post("/web-admin/operational/attention/resolve")
+                        .session(session)
+                        .param(csrf.getParameterName(), csrf.getToken())
+                        .param("attentionToken", attentionToken)
+                        .param("resolution", "accepted")
+                        .param("actor_id", ADMIN.toString())
+                        .param("reason", "Spoofed reviewer"))
+                .andExpect(status().isForbidden());
+
+        assertThat(canonicalResolutionCount(flag.id())).isZero();
+        assertThat(eventCount()).isEqualTo(before);
+    }
+
+    @Test
+    void tamperedAttentionTokenCannotResolveAndCreatesNoEvent()
+            throws Exception {
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        Event visible = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
+        Event flag = createAttentionFlag(visible, "scope_violation", REVIEWER);
+        MockHttpSession session = webAdminSession(REVIEWER);
+
+        MvcResult page = mvc.perform(get("/web-admin/operational/attention")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        CsrfToken csrf = csrfToken(page);
+        int before = eventCount();
+
+        mvc.perform(post("/web-admin/operational/attention/resolve")
+                        .session(session)
+                        .param(csrf.getParameterName(), csrf.getToken())
+                        .param("attentionToken", UUID.randomUUID().toString())
+                        .param("resolution", "accepted")
+                        .param("reason", "Tampered token"))
+                .andExpect(status().isForbidden());
+
+        assertThat(canonicalResolutionCount(flag.id())).isZero();
+        assertThat(eventCount()).isEqualTo(before);
+    }
+
+    @Test
+    void openedAttentionItemCannotResolveAfterActorScopeNoLongerIncludesSourceWork()
+            throws Exception {
+        Event reviewerAssignment = setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        Event visible = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
+        Event flag = createAttentionFlag(visible, "scope_violation", REVIEWER);
+        MockHttpSession session = webAdminSession(REVIEWER);
+
+        MvcResult page = mvc.perform(get("/web-admin/operational/attention")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        String attentionToken = inputValue(
+                page.getResponse().getContentAsString(), "attentionToken");
+        CsrfToken csrf = csrfToken(page);
+
+        assignmentService.endAssignment(assignmentId(reviewerAssignment), ADMIN, "review route closed");
+        int beforePost = eventCount();
+
+        mvc.perform(post("/web-admin/operational/attention/resolve")
+                        .session(session)
+                        .param(csrf.getParameterName(), csrf.getToken())
+                        .param("attentionToken", attentionToken)
+                        .param("resolution", "accepted")
+                        .param("reason", "Out of scope after open"))
+                .andExpect(status().isForbidden());
+
+        assertThat(canonicalResolutionCount(flag.id())).isZero();
+        assertThat(eventCount()).isEqualTo(beforePost);
+    }
+
+    @Test
+    void resolverUnassignedAttentionItemIsBlockedWithoutFallbackResolution()
+            throws Exception {
+        setupReviewerScope();
+        configureAdminCommands(REVIEWER,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        Event visible = createVisitRecord(
+                SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
+        Event flag = createAttentionFlag(
+                visible,
+                "scope_violation",
+                "system:resolver_unassigned/scope_violation");
+        MockHttpSession session = webAdminSession(REVIEWER);
+
+        MvcResult page = mvc.perform(get("/web-admin/operational/attention")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(page.getResponse().getContentAsString())
+                .contains(WebAdminOperationalViewService.RESOLVER_UNASSIGNED)
+                .doesNotContain("<form")
+                .doesNotContain("root")
+                .doesNotContain("override")
+                .doesNotContain("reassign");
+        CsrfToken csrf = csrfToken(page);
+        String attentionToken = boundAttentionToken(session);
+        int before = eventCount();
+
+        mvc.perform(post("/web-admin/operational/attention/resolve")
+                        .session(session)
+                        .param(csrf.getParameterName(), csrf.getToken())
+                        .param("attentionToken", attentionToken)
+                        .param("resolution", "accepted")
+                        .param("reason", "Fallback attempt"))
+                .andExpect(status().isForbidden());
+
+        assertThat(canonicalResolutionCount(flag.id())).isZero();
+        assertThat(eventCount()).isEqualTo(before);
     }
 
     @Test
@@ -247,10 +571,10 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
                 .contains(WebAdminOperationalViewService.NO_SCOPED_WORK_FRESHNESS);
     }
 
-    private void setupReviewerScope() {
+    private Event setupReviewerScope() {
         assignmentService.createInitialBootstrapAssignment(
                 ADMIN, "admin", null, null, null, past(), null);
-        assignmentService.createAssignment(
+        return assignmentService.createAssignment(
                 ADMIN, REVIEWER, "supervisor", districtA, null,
                 List.of("assigned_visit"), past(), null);
     }
@@ -283,12 +607,30 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
     }
 
     private Event createAttentionFlag(Event source, String category) {
+        return createAttentionFlag(source, category, REVIEWER);
+    }
+
+    private Event createAttentionFlag(Event source, String category, UUID resolverId) {
+        return createAttentionFlag(source, category, resolverId, "Synthetic attention item");
+    }
+
+    private Event createAttentionFlag(Event source, String category, UUID resolverId,
+                                      String reason) {
+        return createAttentionFlag(source, category, resolverId.toString(), reason);
+    }
+
+    private Event createAttentionFlag(Event source, String category, String resolverId) {
+        return createAttentionFlag(source, category, resolverId, "Synthetic attention item");
+    }
+
+    private Event createAttentionFlag(Event source, String category, String resolverId,
+                                      String reason) {
         ObjectNode payload = objectMapper.createObjectNode();
         payload.put("source_event_id", source.id().toString());
         payload.put("flag_category", category);
         payload.put("resolvability", "manual_only");
-        payload.set("designated_resolver", actorRef(REVIEWER));
-        payload.put("reason", "Synthetic attention item");
+        payload.set("designated_resolver", actorRef(resolverId));
+        payload.put("reason", reason);
 
         Event flag = new Event(
                 UUID.randomUUID(),
@@ -313,10 +655,18 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
         return subjectRef;
     }
 
+    private UUID assignmentId(Event assignmentEvent) {
+        return UUID.fromString(assignmentEvent.subjectRef().path("id").asText());
+    }
+
     private ObjectNode actorRef(UUID actorId) {
+        return actorRef(actorId.toString());
+    }
+
+    private ObjectNode actorRef(String actorId) {
         ObjectNode actorRef = objectMapper.createObjectNode();
         actorRef.put("type", "actor");
-        actorRef.put("id", actorId.toString());
+        actorRef.put("id", actorId);
         return actorRef;
     }
 
@@ -394,6 +744,19 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
         return count == null ? 0 : count;
     }
 
+    private int canonicalResolutionCount(UUID flagId) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM events cr
+                JOIN events cd ON cd.id::text = cr.payload->>'flag_event_id'
+                WHERE cr.shape_ref = 'conflict_resolved/v1'
+                  AND cr.payload->>'flag_event_id' = ?
+                  AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                  AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
+                """, Integer.class, flagId.toString());
+        return count == null ? 0 : count;
+    }
+
     private OffsetDateTime receivedAt(Event event) {
         Timestamp received = jdbcTemplate.queryForObject(
                 "SELECT received_at FROM events WHERE id = ?::uuid",
@@ -411,5 +774,23 @@ class WebAdminOperationalViewIntegrationTest extends AbstractIntegrationTest {
             index += token.length();
         }
         return count;
+    }
+
+    private String inputValue(String html, String name) {
+        String marker = "name=\"" + name + "\"";
+        int nameIndex = html.indexOf(marker);
+        assertThat(nameIndex).isGreaterThanOrEqualTo(0);
+        int valueIndex = html.indexOf("value=\"", nameIndex);
+        assertThat(valueIndex).isGreaterThanOrEqualTo(0);
+        int start = valueIndex + "value=\"".length();
+        int end = html.indexOf('"', start);
+        assertThat(end).isGreaterThan(start);
+        return html.substring(start, end);
+    }
+
+    private String boundAttentionToken(MockHttpSession session) {
+        Object token = session.getAttribute("webAdminOperationalAttentionToken");
+        assertThat(token).isInstanceOf(String.class);
+        return (String) token;
     }
 }
