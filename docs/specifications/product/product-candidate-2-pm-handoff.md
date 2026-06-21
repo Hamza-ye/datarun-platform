@@ -104,11 +104,11 @@ actionable while preserving all deferred boundaries.
 |---|---|---|---|---|
 | PC1 proof | Accepted as synthetic-demo-ready, not real-production-ready. | NW-119 | None for PC1 proof; real use routes through NW-093. | PC2 can build on PC1 proof without repeating it. |
 | Minimal attention cue | Accepted as one generic cue attached to latest visible work. | NW-114 | Not a precedent for more operational read surfaces. | PC2 should make the one cue actionable, not broaden reads by drift. |
-| Conflict/flag behavior | Runtime evidence exists, but durable current behavior extraction remains candidate. | NW-029, NW-030, NW-033, NW-072 candidate | Select NW-072 before PC2 implementation. | Product UI must not depend on scattered/current code behavior as normative first. |
-| Resolver equality | Accepted current behavior requires exact designated-resolver resolution. | Conflict/runtime evidence; gap playbook | NW-072 should extract current behavior and resolver eligibility limits. | Product copy must avoid generic supervisor/root-admin authority. |
+| Conflict/flag behavior | Accepted PC2 prerequisite platform spec exists. | NW-029, NW-030, NW-033, NW-072 | Use accepted NW-072 before any PC2 implementation. | Product UI may rely on stored designated-resolver equality, not scattered code behavior. |
+| Resolver equality | Accepted current behavior requires exact designated-resolver resolution. | NW-072; conflict/runtime evidence; gap playbook | Route a successor if resolver eligibility must become a broader product promise. | Product copy must say designated reviewer, not generic supervisor/root-admin authority. |
 | Reporting freshness | S26 proves constrained inputs; reporting semantics remain open. | NW-033; GAP-PROJECTION-02 | NW-044 before reporting/completeness/drilldown. | PC2 is not a reporting candidate. |
-| EventRepository/read-model boundary | NW-114 tolerated one latest-work query only. | NW-114; NW-120 | PC2 prerequisite must route read-model/query boundary. | A second attention read requires deliberate boundary work first. |
-| WebAdminOperationalViewService reach-through | Direct `JdbcTemplate` attention query is known code-boundary debt. | NW-120 | Clean up inside the prerequisite/implementation sequence. | Do not extend reach-through as product precedent. |
+| EventRepository/read-model boundary | NW-072 accepts a bounded operational attention query/read-model boundary. | NW-114; NW-120; NW-072 | PC2 implementation must use that boundary. | A second attention read must not become reporting or broad audit/history. |
+| WebAdminOperationalViewService reach-through | Direct `JdbcTemplate` attention query is known code-boundary debt. | NW-120; NW-072 | Do not extend the reach-through; route implementation through a typed query boundary. | Do not extend reach-through as product precedent. |
 | Mobile analyzer | Known-red, non-blocking. | NW-109; validation matrix | Future analyzer cleanup/baseline. | Not a PC2 selection blocker. |
 | Real production | Blocked. | NW-093 | Select only on real-use trigger. | PC2 planning remains non-production. |
 | Tenant/control-plane | Deferred/trigger-based. | NW-083; NW-094 through NW-098 | Select only on managed control-plane or tenant-aware runtime trigger. | PC2 stays in managed-isolation lane. |
@@ -127,13 +127,14 @@ actionable while preserving all deferred boundaries.
 
 ## Candidate NW Decomposition Routes
 
-These are candidate routes only. Promote at most one bounded row at a time.
+These are candidate routes only unless a later NW marks the route accepted.
+Promote at most one bounded successor at a time.
 
 | Candidate route | Suggested priority | User value / why now | Input sources | Output expected | Acceptance evidence | Stop condition |
 |---|---|---|---|---|---|---|
-| PC2 prerequisite: extract conflict/flag durable behavior for single attention review | P0 | Productizing review depends on current flag/resolution behavior being durable and bounded. | NW-072 candidate; S21/S27/S26 evidence; gap playbook GAP-CONFLICT rows; NW-120 code-boundary assessment. | Durable current-behavior extraction and implementation guardrails for one-item review. | Docs/spec/platform or routed artifact evidence, status/backlog trace, no runtime behavior unless separately selected. | Stop if resolver authority, flag schema, automation, batch, or architecture changes are required. |
-| PC2 prerequisite: operational attention read-model boundary | P0 | PC2 needs a second attention read beyond the NW-114 one-off. | NW-114 boundary note; EventRepository and WebAdminOperationalViewService concerns; NW-120. | Decision whether attention reads live in repository, read model, or bounded query service before UI. | Docs-only boundary evidence or implementation prompt after prerequisite. | Stop before reporting, drilldown, aggregate, export, broad audit, or repository architecture changes. |
-| Implement single work-linked attention review | P1 after prerequisites | Makes PC1 `Needs review` cue actionable. | Accepted prerequisite route; web-admin session/command/access standing; S21/S27 examples. | Bounded implementation prompt for one-item review UI/API using existing exact resolver semantics. | Focused web-admin/conflict tests plus full relevant server gate as required by validation matrix. | Stop on batch, auto-resolution, resolver reassignment, new scopes, reporting, or contract/schema changes. |
+| PC2 prerequisite: extract conflict/flag durable behavior for single attention review | Accepted by NW-072 | Productizing review depends on current flag/resolution behavior being durable and bounded. | NW-072; S21/S27/S26 evidence; gap playbook GAP-CONFLICT rows; NW-120 code-boundary assessment. | Durable current-behavior extraction and implementation guardrails for one-item review. | `docs/specifications/platform/conflict-flag-resolution-and-attention-query-boundary.md`; status/backlog trace; no runtime behavior changed. | Stop if resolver authority, flag schema, automation, batch, or architecture changes are required. |
+| PC2 prerequisite: operational attention read-model boundary | Accepted by NW-072 | PC2 needs a second attention read beyond the NW-114 one-off. | NW-114 boundary note; EventRepository and WebAdminOperationalViewService concerns; NW-120; NW-072. | Bounded operational attention query/read-model boundary before UI. | `docs/specifications/platform/conflict-flag-resolution-and-attention-query-boundary.md`; no implementation selected. | Stop before reporting, drilldown, aggregate, export, broad audit, or repository architecture changes. |
+| Implement single work-linked attention review | P1 after accepted prerequisite | Makes PC1 `Needs review` cue actionable. | Accepted NW-072 prerequisite; web-admin session/command/access standing; S21/S27 examples. | Bounded implementation prompt for one-item review UI/API using existing exact resolver semantics and accepted query boundary. | Focused web-admin/conflict tests plus full relevant server gate as required by validation matrix. | Stop on batch, auto-resolution, resolver reassignment, new scopes, reporting, or contract/schema changes. |
 | PC2 vocabulary and proof example packet | P2 | Helps PM/reviewer validate non-health and supervisor examples before implementation. | S21/S27; operational UX vocabulary companion; PC1/PC2 handoffs. | Synthetic examples and accepted/rejected product terms. | Product review notes or docs-only artifact. | Stop if examples become platform vocabulary or contracts. |
 | Reporting boundary follow-up | Future | Needed only if reviewers ask for lists, dashboards, completeness, drilldown, exports, or aggregate views. | S26; NW-044; GAP-PROJECTION rows. | NW-044-style reporting/import/export boundary route. | Accepted boundary before reporting implementation. | Do not fold into PC2 single attention review. |
 | Conflict automation/batch follow-up | Future | Needed only if one-item manual review proves insufficient. | NW-045; GAP-CONFLICT-02. | Automation/batch/resolver reassignment decision route. | Accepted decision before implementation. | Do not weaken exact resolver equality or mutate flags directly. |
@@ -191,11 +192,12 @@ acceptance, BAR, CDL, or gap-register standing.
 
 ## Architecture / Platform Prerequisites
 
-Before implementing PC2, select the PC2-scoped NW-072 prerequisite to extract
-current conflict/flag behavior and define the read-model/query boundary for
-work-linked attention review.
+NW-072 accepted the PC2-scoped prerequisite at
+`docs/specifications/platform/conflict-flag-resolution-and-attention-query-boundary.md`.
+Before implementing PC2, use that spec for current conflict/flag behavior and
+the read-model/query boundary for work-linked attention review.
 
-The prerequisite must answer:
+The accepted prerequisite answers:
 
 - what current flag/resolution behavior is normative enough for product copy;
 - how exact designated-resolver authority is represented to users;
@@ -229,7 +231,7 @@ NW-094 through NW-098 are selected.
 
 | Not selected by NW-121 | Trigger to select later | Required wording now |
 |---|---|---|
-| PC2 implementation | After NW-072/conflict durable behavior and attention read-model prerequisite is accepted. | Implementation successor is not ready yet. |
+| PC2 implementation | After accepted NW-072 is reviewed with the implementation route. | Implementation successor is still a separate selection. |
 | NW-044 reporting/import/export/aggregate | Reviewer asks for dashboards, lists, aggregates, completeness, exports, imports, drilldown, or warehouse semantics. | PC2 is one-item review, not reporting. |
 | NW-045 conflict automation/batch/resolver reassignment | Product requires batch decisions, pending-match queues, auto-resolution, or resolver reassignment. | Current PC2 is manual exact-resolver review only. |
 | NW-073 pattern registry/projection follow-through | Product needs pattern traversal/reporting, inventory expansion, projection change, or pattern API work. | PC2 consumes existing attention evidence only after prerequisite. |
@@ -242,13 +244,14 @@ NW-094 through NW-098 are selected.
 
 ## Implementation Successor Readiness
 
-No implementation successor is ready now.
+No implementation successor is selected by this handoff or by NW-072.
 
-The prerequisite route must come first: select the PC2-scoped NW-072
-conflict/flag durable-behavior and operational attention read-model boundary
-route before implementing any review UI/API. After that prerequisite is
-accepted, one bounded implementation successor can be prepared for single
-work-linked attention review.
+NW-072 has accepted the PC2-scoped conflict/flag durable-behavior and
+operational attention read-model boundary. A bounded implementation successor
+can be prepared separately for single work-linked attention review, but it must
+use the accepted NW-072 spec and stop before review queues, reporting, batch,
+automation, resolver reassignment, schema/contract/sync changes, real
+users/data, or production approval.
 
 ## Owner Decisions
 
@@ -257,10 +260,11 @@ work-linked attention review.
 - Choose the synthetic proof example: S21 supervisor review, S27 logistics
   discrepancy, or both as examples without widening the product boundary.
 - Decide whether the first review action should expose product words such as
-  `resolve`, `accept`, `reject`, or `mark reviewed` after NW-072 extracts
-  exact current semantics.
-- Decide whether resolver eligibility fallback is acceptable for synthetic PC2
-  proof or requires a separate successor route before implementation.
+  `resolve`, `accept`, `reject`, or `mark reviewed` using accepted NW-072
+  semantics.
+- Treat resolver eligibility fallback as not product-safe for a general
+  authority promise; route a separate successor if PC2 must explain or change
+  eligibility before implementation.
 - Confirm no real users/data are involved; otherwise stop and select NW-093.
 
 ## Stop Conditions
