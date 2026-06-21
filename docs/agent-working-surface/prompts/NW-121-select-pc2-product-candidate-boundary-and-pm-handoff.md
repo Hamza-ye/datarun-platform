@@ -38,17 +38,27 @@ a gap-routing trigger fires.
 
 ## Expected Output
 
-Create one bounded PC2 selection / PM handoff output in the correct durable home
-for the standing selected by the work. If the result is still non-binding
-planning, use:
+Primary output if PC2 is selected:
+
+```text
+docs/specifications/product/product-candidate-2-pm-handoff.md
+```
+
+Use `docs/specifications/product/product-candidate-handoff-template.md` as the
+structure.
+
+This PM handoff is a durable planning surface only. It does not accept product
+behavior, runtime implementation, production approval, architecture authority,
+validation policy, contracts, schemas, BAR, CDL, or gap-register standing.
+
+Use this artifact path only if NW-121 concludes that PC2 is not ready to select
+and instead parks/blocks selection or routes a prerequisite:
 
 ```text
 docs/agent-working-surface/artifacts/NW-121-pc2-product-candidate-boundary-and-pm-handoff.md
 ```
 
-If the work accepts a durable PM handoff surface, route it under
-`docs/specifications/product/` and still record the NW-121 trace in the working
-surfaces.
+In that case, do not claim PC2 has been selected.
 
 The output must include:
 
@@ -113,11 +123,16 @@ non-doc surface:
 cd /home/hamza/datarun-platform
 git diff --check
 rg "NW-121" docs/status.md docs/agent-working-surface/platform-next-work-backlog.md
+
+# If PC2 is selected:
+test -f docs/specifications/product/product-candidate-2-pm-handoff.md
+
+# If PC2 is not selected:
 test -f docs/agent-working-surface/artifacts/NW-121-pc2-product-candidate-boundary-and-pm-handoff.md
 ```
 
-If a different durable output path is selected, replace the file check with the
-actual path and grep/index checks required by the local convention.
+Run the file check that matches the selected outcome and add grep/index checks
+required by the local convention.
 
 Runtime tests should be skipped with rationale for docs-only planning work.
 
