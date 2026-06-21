@@ -303,7 +303,23 @@ public class EventRepository {
      */
     public Optional<OperationalAttentionItem> findVisibleUnresolvedOperationalAttention(
             UUID sourceEventId, UUID sessionActorId, List<OperationalScope> scopes) {
-        if (sourceEventId == null || scopes == null || scopes.isEmpty()) {
+        if (sourceEventId == null) {
+            return Optional.empty();
+        }
+        return findVisibleUnresolvedOperationalAttention(sourceEventId, null, sessionActorId, scopes);
+    }
+
+    public Optional<OperationalAttentionItem> findVisibleUnresolvedOperationalAttentionByFlagId(
+            UUID flagId, UUID sessionActorId, List<OperationalScope> scopes) {
+        if (flagId == null) {
+            return Optional.empty();
+        }
+        return findVisibleUnresolvedOperationalAttention(null, flagId, sessionActorId, scopes);
+    }
+
+    private Optional<OperationalAttentionItem> findVisibleUnresolvedOperationalAttention(
+            UUID sourceEventId, UUID flagId, UUID sessionActorId, List<OperationalScope> scopes) {
+        if (scopes == null || scopes.isEmpty()) {
             return Optional.empty();
         }
 
@@ -320,8 +336,7 @@ public class EventRepository {
                        e.received_at
                 FROM events e
                 JOIN events cd ON cd.payload->>'source_event_id' = e.id::text
-                WHERE e.id = ?::uuid
-                  AND e.subject_ref->>'type' = 'subject'
+                WHERE e.subject_ref->>'type' = 'subject'
                   AND e.type != 'assignment_changed'
                   AND e.shape_ref NOT LIKE 'conflict_detected/%'
                   AND e.shape_ref NOT LIKE 'conflict_resolved/%'
@@ -336,10 +351,17 @@ public class EventRepository {
                         AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
                         AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
                   )
-                  AND (
                 """);
         List<Object> params = new ArrayList<>();
-        params.add(sourceEventId.toString());
+        if (sourceEventId != null) {
+            sql.append("  AND e.id = ?::uuid\n");
+            params.add(sourceEventId.toString());
+        }
+        if (flagId != null) {
+            sql.append("  AND cd.id = ?::uuid\n");
+            params.add(flagId.toString());
+        }
+        sql.append("  AND (\n");
 
         int appendedScopes = 0;
         for (OperationalScope scope : scopes) {

@@ -107,7 +107,7 @@
     <header>
         <div>
             <h1>Attention Review</h1>
-            <div>Actor <span th:text="${actorId}"></span></div>
+            <div>Signed in</div>
         </div>
         <a class="link-button" href="/web-admin/operational">Operational View</a>
     </header>
@@ -166,6 +166,7 @@
             <form method="post" action="/web-admin/operational/attention/resolve"
                   th:if="${review.item().canResolve()}">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="attentionToken" th:value="${attentionToken}">
                 <label for="reason">Decision note</label>
                 <textarea id="reason" name="reason"></textarea>
                 <div class="actions">

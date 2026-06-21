@@ -30,6 +30,8 @@ public class WebAdminOperationalViewService {
             "This item is assigned to another reviewer.";
     static final String RESOLVER_UNASSIGNED =
             "This item is blocked because no reviewer is currently assigned.";
+    static final String ATTENTION_REVIEW_COPY =
+            "This work needs review before it is treated as settled.";
 
     private final EventRepository eventRepository;
     private final ScopeResolver scopeResolver;
@@ -76,12 +78,15 @@ public class WebAdminOperationalViewService {
                 .orElseGet(() -> AttentionReview.empty(NO_ATTENTION_ITEM));
     }
 
-    public void resolveCurrentAttention(UUID actorId, String resolution, String reason) {
-        AttentionReview review = review(actorId);
-        if (!review.hasItem()) {
+    public void resolveAttention(UUID actorId, UUID flagId, String resolution, String reason) {
+        List<OperationalScope> scopes = operationalScopes(actorId);
+        Optional<OperationalAttentionItem> attention =
+                eventRepository.findVisibleUnresolvedOperationalAttentionByFlagId(
+                        flagId, actorId, scopes);
+        if (attention.isEmpty()) {
             throw new IllegalArgumentException("No unresolved attention item is available.");
         }
-        AttentionDetail item = review.item();
+        AttentionDetail item = attentionDetail(attention.get());
         if (!item.canResolve()) {
             throw new IllegalArgumentException("This attention item is not resolvable by the current reviewer.");
         }
@@ -135,9 +140,7 @@ public class WebAdminOperationalViewService {
                 latestWork(item.sourceWork()),
                 category,
                 severity,
-                item.reason() == null || item.reason().isBlank()
-                        ? "Review requested for this work item."
-                        : item.reason(),
+                ATTENTION_REVIEW_COPY,
                 item.flaggedAt().toString(),
                 resolverStanding(item),
                 item.assignedToCurrentActor() && !item.resolverUnassigned());
