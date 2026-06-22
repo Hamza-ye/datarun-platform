@@ -317,6 +317,162 @@ public class EventRepository {
         return findVisibleUnresolvedOperationalAttention(null, flagId, sessionActorId, scopes);
     }
 
+    /**
+     * Current scoped operational report aggregation. Scope and designated
+     * reviewer predicates are applied before counts and latest timestamps.
+     */
+    public List<OperationalReportActivityStanding> findScopedOperationalReportActivityStandings(
+            UUID sessionActorId, List<OperationalScope> scopes) {
+        if (sessionActorId == null) {
+            return List.of();
+        }
+
+        StringBuilder assignmentScope = new StringBuilder();
+        List<Object> assignmentParams = new ArrayList<>();
+        int appendedScopes = 0;
+        if (scopes != null) {
+            for (OperationalScope scope : scopes) {
+                String clause = operationalScopeClause(scope, assignmentParams);
+                if (clause == null) {
+                    continue;
+                }
+                if (appendedScopes > 0) {
+                    assignmentScope.append(" OR ");
+                }
+                assignmentScope.append('(').append(clause).append(')');
+                appendedScopes++;
+            }
+        }
+        String assignmentPredicate = appendedScopes == 0
+                ? "FALSE"
+                : assignmentScope.toString();
+
+        List<Object> params = new ArrayList<>();
+        params.addAll(assignmentParams);
+        params.addAll(assignmentParams);
+        params.add(sessionActorId.toString());
+        params.add(sessionActorId.toString());
+
+        String sql = """
+                WITH visible_work AS (
+                    SELECT e.id,
+                           e.shape_ref,
+                           e.activity_ref,
+                           e.subject_ref,
+                           e.timestamp,
+                           e.received_at,
+                           (%s) AS assignment_visible
+                    FROM events e
+                    WHERE e.subject_ref->>'type' = 'subject'
+                      AND e.type != 'assignment_changed'
+                      AND e.shape_ref NOT LIKE 'conflict_detected/%%'
+                      AND e.shape_ref NOT LIKE 'conflict_resolved/%%'
+                      AND e.shape_ref NOT LIKE 'subjects_merged/%%'
+                      AND e.shape_ref NOT LIKE 'subject_split/%%'
+                      AND (
+                          (%s)
+                          OR EXISTS (
+                              SELECT 1
+                              FROM events cd
+                              WHERE cd.shape_ref LIKE 'conflict_detected/%%'
+                                AND cd.payload->>'source_event_id' = e.id::text
+                                AND cd.payload->'designated_resolver'->>'type' = 'actor'
+                                AND cd.payload->'designated_resolver'->>'id' = ?
+                          )
+                      )
+                ),
+                visible_attention AS (
+                    SELECT vw.id AS source_event_id,
+                           COALESCE(NULLIF(vw.activity_ref, ''), 'unassigned_activity') AS activity_ref,
+                           cd.id AS flag_id,
+                           cd.received_at AS flag_received_at,
+                           EXISTS (
+                               SELECT 1
+                               FROM events cr
+                               WHERE cr.shape_ref LIKE 'conflict_resolved/%%'
+                                 AND cr.payload->>'flag_event_id' = cd.id::text
+                                 AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                                 AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
+                           ) AS has_canonical_resolution,
+                           EXISTS (
+                               SELECT 1
+                               FROM events cr
+                               WHERE cr.shape_ref LIKE 'conflict_resolved/%%'
+                                 AND cr.payload->>'flag_event_id' = cd.id::text
+                                 AND cr.payload->>'resolution' = 'accepted'
+                                 AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                                 AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
+                           ) AS has_accepted_resolution,
+                           (
+                               SELECT MAX(cr.received_at)
+                               FROM events cr
+                               WHERE cr.shape_ref LIKE 'conflict_resolved/%%'
+                                 AND cr.payload->>'flag_event_id' = cd.id::text
+                                 AND cr.actor_ref->>'type' = cd.payload->'designated_resolver'->>'type'
+                                 AND cr.actor_ref->>'id' = cd.payload->'designated_resolver'->>'id'
+                           ) AS latest_resolution_received_at
+                    FROM visible_work vw
+                    JOIN events cd ON cd.payload->>'source_event_id' = vw.id::text
+                    WHERE cd.shape_ref LIKE 'conflict_detected/%%'
+                      AND (
+                          vw.assignment_visible
+                          OR (
+                              cd.payload->'designated_resolver'->>'type' = 'actor'
+                              AND cd.payload->'designated_resolver'->>'id' = ?
+                          )
+                      )
+                ),
+                source_standing AS (
+                    SELECT vw.id,
+                           COALESCE(NULLIF(vw.activity_ref, ''), 'unassigned_activity') AS activity_ref,
+                           vw.timestamp AS source_work_time,
+                           GREATEST(
+                               vw.received_at,
+                               COALESCE((
+                                   SELECT MAX(va.flag_received_at)
+                                   FROM visible_attention va
+                                   WHERE va.source_event_id = vw.id
+                               ), vw.received_at),
+                               COALESCE((
+                                   SELECT MAX(va.latest_resolution_received_at)
+                                   FROM visible_attention va
+                                   WHERE va.source_event_id = vw.id
+                               ), vw.received_at)
+                           ) AS latest_input_at,
+                           EXISTS (
+                               SELECT 1
+                               FROM visible_attention va
+                               WHERE va.source_event_id = vw.id
+                                 AND NOT va.has_accepted_resolution
+                           ) AS excluded_from_clean
+                    FROM visible_work vw
+                )
+                SELECT ss.activity_ref,
+                       COUNT(*) FILTER (WHERE NOT ss.excluded_from_clean) AS clean_source_count,
+                       COUNT(*) FILTER (WHERE ss.excluded_from_clean) AS excluded_unresolved_source_count,
+                       (
+                           SELECT COUNT(*)
+                           FROM visible_attention va
+                           WHERE va.activity_ref = ss.activity_ref
+                             AND NOT va.has_canonical_resolution
+                       ) AS unresolved_issue_count,
+                       MAX(ss.latest_input_at) AS latest_visible_input_at,
+                       MAX(ss.source_work_time) FILTER (WHERE NOT ss.excluded_from_clean) AS latest_clean_source_work_at
+                FROM source_standing ss
+                GROUP BY ss.activity_ref
+                ORDER BY ss.activity_ref
+                """.formatted(assignmentPredicate, assignmentPredicate);
+
+        return jdbc.query(sql, (rs, rowNum) -> new OperationalReportActivityStanding(
+                        rs.getString("activity_ref"),
+                        rs.getLong("clean_source_count"),
+                        rs.getLong("excluded_unresolved_source_count"),
+                        rs.getLong("unresolved_issue_count"),
+                        offsetDateTime(rs.getTimestamp("latest_visible_input_at")),
+                        offsetDateTime(rs.getTimestamp("latest_clean_source_work_at"))),
+                params.toArray());
+    }
+
     private Optional<OperationalAttentionItem> findVisibleUnresolvedOperationalAttention(
             UUID sourceEventId, UUID flagId, UUID sessionActorId, List<OperationalScope> scopes) {
         if (scopes == null || scopes.isEmpty()) {
@@ -440,6 +596,10 @@ public class EventRepository {
         return expression + " IN (" + placeholders + ")";
     }
 
+    private OffsetDateTime offsetDateTime(Timestamp timestamp) {
+        return timestamp == null ? null : timestamp.toInstant().atOffset(ZoneOffset.UTC);
+    }
+
     public record OperationalScope(
             String geographicPath,
             List<UUID> subjectIds,
@@ -457,6 +617,15 @@ public class EventRepository {
             OffsetDateTime flaggedAt,
             boolean assignedToCurrentActor,
             boolean resolverUnassigned
+    ) {}
+
+    public record OperationalReportActivityStanding(
+            String activityRef,
+            long cleanSourceCount,
+            long excludedUnresolvedSourceCount,
+            long unresolvedIssueCount,
+            OffsetDateTime latestVisibleInputAt,
+            OffsetDateTime latestCleanSourceWorkAt
     ) {}
 
     /**

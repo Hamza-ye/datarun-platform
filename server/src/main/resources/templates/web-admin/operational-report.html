@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Scoped Operational Report Snapshot</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            background: #f7f8fa;
+            color: #1f2933;
+        }
+        main {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 28px;
+            margin: 0 0 4px;
+        }
+        h2 {
+            font-size: 18px;
+            margin: 0 0 12px;
+        }
+        section {
+            background: #ffffff;
+            border: 1px solid #d7dde5;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border-bottom: 1px solid #e2e7ee;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            color: #52606d;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+        }
+        .status-item {
+            border: 1px solid #e2e7ee;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fbfcfd;
+        }
+        .label {
+            display: block;
+            color: #52606d;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .value {
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+        .notice {
+            border: 1px solid #e2e7ee;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fbfcfd;
+            color: #52606d;
+        }
+        .link-button {
+            border: 1px solid #2f6f9f;
+            background: #2f6f9f;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <div>
+            <h1>Scoped Operational Report Snapshot</h1>
+            <div>Current scoped standing</div>
+        </div>
+        <a class="link-button" href="/web-admin/shell">Admin Shell</a>
+    </header>
+
+    <section>
+        <h2>Snapshot Header</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="label">snapshot_as_of</span>
+                <span class="value" th:text="${snapshot.snapshotAsOfText()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Freshness state</span>
+                <span class="value" th:text="${snapshot.freshnessState()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Scoped view</span>
+                <span class="value" th:text="${snapshot.scopedViewCaveat()}"></span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Freshness</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="label">Latest visible input</span>
+                <span class="value" th:if="${snapshot.hasLatestVisibleInput()}"
+                      th:text="${snapshot.latestVisibleInputAt()}"></span>
+                <span class="value" th:unless="${snapshot.hasLatestVisibleInput()}">No visible input</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Clean source work</span>
+                <span class="value" th:if="${snapshot.hasLatestCleanSourceWork()}"
+                      th:text="${snapshot.latestCleanSourceWorkAt()}"></span>
+                <span class="value" th:unless="${snapshot.hasLatestCleanSourceWork()}">Freshness unknown</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Coverage</span>
+                <span class="value">Coverage not measured</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Current scoped standing</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="label">Clean source work</span>
+                <span class="value" th:text="${snapshot.visibleCleanSourceCount()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Excluded unresolved source count</span>
+                <span class="value" th:text="${snapshot.excludedUnresolvedSourceCount()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Needs attention</span>
+                <span class="value" th:text="${snapshot.unresolvedIssueCount()}"></span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Activity standing rows</h2>
+        <table th:if="${snapshot.hasActivityRows()}">
+            <thead>
+            <tr>
+                <th>Activity</th>
+                <th>Clean source work</th>
+                <th>Excluded unresolved source count</th>
+                <th>Needs attention</th>
+                <th>Latest visible input</th>
+                <th>Latest clean source work</th>
+                <th>Coverage</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${snapshot.activityRows()}">
+                <td th:text="${row.activity()}"></td>
+                <td th:text="${row.cleanSourceCount()}"></td>
+                <td th:text="${row.excludedUnresolvedSourceCount()}"></td>
+                <td th:text="${row.unresolvedIssueCount()}"></td>
+                <td th:if="${row.hasLatestVisibleInput()}" th:text="${row.latestVisibleInputAtText()}"></td>
+                <td th:unless="${row.hasLatestVisibleInput()}">Freshness unknown</td>
+                <td th:if="${row.hasLatestCleanSourceWork()}" th:text="${row.latestCleanSourceWorkAtText()}"></td>
+                <td th:unless="${row.hasLatestCleanSourceWork()}">Freshness unknown</td>
+                <td th:text="${row.coverageText()}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="notice" th:unless="${snapshot.hasActivityRows()}">
+            No visible input. Current scoped standing has no visible source work.
+        </div>
+    </section>
+
+    <section th:if="${snapshot.hasTraceContext()}">
+        <h2>Trace Context</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="label">Trace</span>
+                <span class="value" th:text="${snapshot.traceContext().label()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Activity</span>
+                <span class="value" th:text="${snapshot.traceContext().activity()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Received at</span>
+                <span class="value" th:text="${snapshot.traceContext().receivedAt()}"></span>
+            </div>
+        </div>
+        <p>
+            <a class="link-button" th:href="${snapshot.traceContext().path()}">
+                Open scoped context
+            </a>
+        </p>
+    </section>
+</main>
+</body>
+</html>
