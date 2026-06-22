@@ -32,6 +32,7 @@ Each platform specification should include:
 | [Conflict Flag Resolution And Attention Query Boundary](conflict-flag-resolution-and-attention-query-boundary.md) | accepted | integrity/platform verifier | NW-072 | none |
 | [Expression Language Behavior](expression-language.md) | accepted | config/mobile verifier | NW-068 | none |
 | [Mobile OIDC Login And Token Lifecycle](mobile-oidc-login-and-token-lifecycle.md) | accepted | mobile/security verifier | NW-085 | none |
+| [Operational Responsibility Handoff Boundary](operational-responsibility-handoff-boundary.md) | accepted | handoff/platform verifier | NW-134 | none |
 | [Production Auth Principal Binding](production-auth-principal-binding.md) | accepted | auth/security verifier | NW-070 | none |
 | [Production Web Admin Authentication And Authority](production-web-admin-authentication-and-authority.md) | accepted | platform/security verifier | NW-079 | none |
 | [Scoped Operational Report Snapshot Boundary](scoped-operational-report-snapshot-boundary.md) | accepted | reporting/platform verifier | NW-128 | none |
