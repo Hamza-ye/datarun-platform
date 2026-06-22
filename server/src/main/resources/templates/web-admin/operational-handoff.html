@@ -63,6 +63,13 @@
             font-weight: 600;
             overflow-wrap: anywhere;
         }
+        .helper {
+            display: block;
+            margin-top: 4px;
+            color: #52606d;
+            font-size: 13px;
+            font-weight: 400;
+        }
         .notice {
             border: 1px solid #e2e7ee;
             border-radius: 6px;
@@ -175,8 +182,9 @@
                         <span class="value" th:text="${item.currentWork().activity()}"></span>
                     </div>
                     <div class="status-item">
-                        <span class="label">Subject</span>
+                        <span class="label">Scoped subject UUID</span>
                         <span class="value" th:text="${item.currentWork().subjectId()}"></span>
+                        <span class="helper">Scoped identifier for this visible handoff context.</span>
                     </div>
                     <div class="status-item">
                         <span class="label">Received at</span>
@@ -199,8 +207,9 @@
                         <span class="value" th:text="${item.priorContext().activity()}"></span>
                     </div>
                     <div class="status-item">
-                        <span class="label">Subject</span>
+                        <span class="label">Scoped subject UUID</span>
                         <span class="value" th:text="${item.priorContext().subjectId()}"></span>
+                        <span class="helper">Scoped identifier for this visible handoff context.</span>
                     </div>
                     <div class="status-item">
                         <span class="label">Received at</span>
@@ -243,10 +252,10 @@
     </section>
 
     <section th:if="${handoff.hasTraceContext()}">
-        <h2>Trace Target</h2>
+        <h2>Scoped Trace Target</h2>
         <div class="status-grid">
             <div class="status-item">
-                <span class="label">Trace</span>
+                <span class="label">Scoped context</span>
                 <span class="value" th:text="${handoff.traceContext().label()}"></span>
             </div>
             <div class="status-item">
@@ -258,9 +267,13 @@
                 <span class="value" th:text="${handoff.traceContext().receivedAt()}"></span>
             </div>
         </div>
+        <div class="notice">
+            Opens existing scoped operational context for this visible work item.
+            It does not open broader history.
+        </div>
         <p>
             <a class="link-button" th:href="${handoff.traceContext().path()}">
-                Open scoped context
+                Open scoped operational context
             </a>
         </p>
     </section>
