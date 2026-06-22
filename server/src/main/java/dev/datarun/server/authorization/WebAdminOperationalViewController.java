@@ -28,16 +28,19 @@ public class WebAdminOperationalViewController {
     private final AdminCommandCapabilityService adminCommandCapabilityService;
     private final WebAdminOperationalViewService operationalViewService;
     private final ScopedOperationalReportSnapshotService reportSnapshotService;
+    private final OperationalResponsibilityHandoffService handoffService;
 
     public WebAdminOperationalViewController(
             WebAdminSessionService sessionService,
             AdminCommandCapabilityService adminCommandCapabilityService,
             WebAdminOperationalViewService operationalViewService,
-            ScopedOperationalReportSnapshotService reportSnapshotService) {
+            ScopedOperationalReportSnapshotService reportSnapshotService,
+            OperationalResponsibilityHandoffService handoffService) {
         this.sessionService = sessionService;
         this.adminCommandCapabilityService = adminCommandCapabilityService;
         this.operationalViewService = operationalViewService;
         this.reportSnapshotService = reportSnapshotService;
+        this.handoffService = handoffService;
     }
 
     @GetMapping
@@ -58,6 +61,16 @@ public class WebAdminOperationalViewController {
 
         model.addAttribute("snapshot", reportSnapshotService.snapshot(context.actorId()));
         return "web-admin/operational-report";
+    }
+
+    @GetMapping("/handoff")
+    public String handoff(HttpServletRequest request, Model model) {
+        WebAdminSessionContext context = requireContextForPage(request);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+
+        model.addAttribute("handoff", handoffService.context(context.actorId()));
+        return "web-admin/operational-handoff";
     }
 
     @GetMapping("/attention")

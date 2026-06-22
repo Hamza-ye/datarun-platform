@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Operational Responsibility Handoff</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            background: #f7f8fa;
+            color: #1f2933;
+        }
+        main {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 28px;
+            margin: 0 0 4px;
+        }
+        h2 {
+            font-size: 18px;
+            margin: 0 0 12px;
+        }
+        h3 {
+            font-size: 16px;
+            margin: 0 0 10px;
+        }
+        section {
+            background: #ffffff;
+            border: 1px solid #d7dde5;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+        }
+        .status-item {
+            border: 1px solid #e2e7ee;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fbfcfd;
+        }
+        .label {
+            display: block;
+            color: #52606d;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .value {
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+        .notice {
+            border: 1px solid #e2e7ee;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fbfcfd;
+            color: #52606d;
+        }
+        .caveat {
+            border-color: #d7a542;
+            background: #fff9e8;
+        }
+        .work-item {
+            border-top: 1px solid #e2e7ee;
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+        .work-item:first-child {
+            border-top: 0;
+            padding-top: 0;
+            margin-top: 0;
+        }
+        .link-button {
+            border: 1px solid #2f6f9f;
+            background: #2f6f9f;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .link-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <div>
+            <h1>Operational Responsibility Handoff</h1>
+            <div>Current assigned work with prior context</div>
+        </div>
+        <div class="link-row">
+            <a class="link-button" href="/web-admin/operational">Operational View</a>
+            <a class="link-button" href="/web-admin/shell">Admin Shell</a>
+        </div>
+    </header>
+
+    <section>
+        <h2>Handoff Context</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="label">Prepared at</span>
+                <span class="value" th:text="${handoff.preparedAtText()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Latest visible input</span>
+                <span class="value" th:if="${handoff.hasLatestVisibleInput()}"
+                      th:text="${handoff.latestVisibleInputAt()}"></span>
+                <span class="value" th:unless="${handoff.hasLatestVisibleInput()}">Freshness unknown</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Scoped context</span>
+                <span class="value" th:text="${handoff.scopedContextCaveat()}"></span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Current Assigned Work</h2>
+        <div class="status-grid" th:if="${handoff.hasAssignedWork()}">
+            <div class="status-item" th:each="work : ${handoff.currentAssignedWork()}">
+                <span class="label">Assigned work</span>
+                <span class="value" th:text="${work}"></span>
+            </div>
+        </div>
+        <div class="notice" th:unless="${handoff.hasAssignedWork()}">
+            No current assigned work is visible for this session.
+        </div>
+    </section>
+
+    <section class="caveat">
+        <h2>Handoff Caveats</h2>
+        <div class="status-grid">
+            <div class="status-item" th:each="caveat : ${handoff.caveats()}">
+                <span class="label" th:text="${caveat.label()}"></span>
+                <span class="value" th:text="${caveat.copy()}"></span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Current Work And Prior Context</h2>
+        <div class="notice" th:unless="${handoff.hasCurrentWork()}">
+            No visible handoff context for the current actor.
+        </div>
+        <div th:if="${handoff.hasCurrentWork()}">
+            <div class="work-item" th:each="item : ${handoff.currentWork()}">
+                <h3>Current assigned work</h3>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="label">Work</span>
+                        <span class="value" th:text="${item.currentWork().workType()}"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Activity</span>
+                        <span class="value" th:text="${item.currentWork().activity()}"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Subject</span>
+                        <span class="value" th:text="${item.currentWork().subjectId()}"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Received at</span>
+                        <span class="value" th:text="${item.currentWork().receivedAtText()}"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Work time</span>
+                        <span class="value" th:text="${item.currentWork().workTimeText()}"></span>
+                    </div>
+                </div>
+
+                <h3>Prior context</h3>
+                <div class="status-grid" th:if="${item.hasPriorContext()}">
+                    <div class="status-item">
+                        <span class="label">Work</span>
+                        <span class="value" th:text="${item.priorContext().workType()}"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Activity</span>
+                        <span class="value" th:text="${item.priorContext().activity()}"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Subject</span>
+                        <span class="value" th:text="${item.priorContext().subjectId()}"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Received at</span>
+                        <span class="value" th:text="${item.priorContext().receivedAtText()}"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Work time</span>
+                        <span class="value" th:text="${item.priorContext().workTimeText()}"></span>
+                    </div>
+                </div>
+                <div class="notice" th:unless="${item.hasPriorContext()}">
+                    Context incomplete; no prior context is visible for this subject and activity.
+                </div>
+
+                <div th:if="${item.hasAttention()}">
+                    <h3>Needs attention</h3>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="label">Reason</span>
+                            <span class="value" th:text="${item.attention().reason()}"></span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Requested at</span>
+                            <span class="value" th:text="${item.attention().flaggedAtText()}"></span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Designated reviewer</span>
+                            <span class="value" th:text="${item.attention().reviewerStanding()}"></span>
+                        </div>
+                    </div>
+                    <div class="status-grid">
+                        <div class="status-item caveat" th:each="caveat : ${item.caveats()}">
+                            <span class="label" th:text="${caveat.label()}"></span>
+                            <span class="value" th:text="${caveat.copy()}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section th:if="${handoff.hasTraceContext()}">
+        <h2>Trace Target</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="label">Trace</span>
+                <span class="value" th:text="${handoff.traceContext().label()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Activity</span>
+                <span class="value" th:text="${handoff.traceContext().activity()}"></span>
+            </div>
+            <div class="status-item">
+                <span class="label">Received at</span>
+                <span class="value" th:text="${handoff.traceContext().receivedAt()}"></span>
+            </div>
+        </div>
+        <p>
+            <a class="link-button" th:href="${handoff.traceContext().path()}">
+                Open scoped context
+            </a>
+        </p>
+    </section>
+</main>
+</body>
+</html>
