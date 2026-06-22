@@ -93,7 +93,7 @@ from one actor to another.
 ## In-Scope Journeys
 
 - Coordinate one responsibility handoff or temporary coverage change inside
-  accepted assignment axes: geography, subject list, activity, time, and actor.
+  accepted assignment scope axes plus target actor and active-time standing.
 - Let the successor actor open Datarun after assignment change and understand
   current assigned work plus bounded prior context needed to continue.
 - Preserve late offline work from the outgoing actor as traceable evidence,
@@ -157,30 +157,37 @@ Promote at most one bounded successor at a time.
 
 | Candidate route | Suggested priority | User value / why now | Input sources | Output expected | Acceptance evidence | Stop condition |
 |---|---|---|---|---|---|---|
-| NW-134 - Specify PC4 operational responsibility handoff boundary | Selected P1 successor | PC4 touches handoff contents, subject-history repair, actor partitions, sync context, stale authority, and product wording; implementation needs an accepted boundary first. | This handoff; S25/S22/S27/S19 evidence; accepted assignment, shared-device, conflict, and PC3 specs; validation matrix; gap playbook. | Platform boundary under `docs/specifications/platform/` defining handoff scope, context contents, caveats, and implementation readiness. | Docs-only validation, platform index check, status/backlog trace, no runtime behavior changed. | Stop on new scope mechanisms, sync protocol changes, retention/security promises, entity lifecycle, broad reporting, pattern changes, tenant/control-plane, real users/data, or architecture authority changes. |
-| Implement PC4 operational responsibility handoff | Future after NW-134 | Gives coordinator/successor/supervisor the selected handoff experience. | Accepted NW-134 boundary; accepted web-admin/mobile/session/sync/assignment surfaces. | Bounded implementation prompt and runtime tests. | Focused server/mobile/web-admin tests plus required full gates from validation matrix. | Do not start before NW-134 acceptance; stop on contract/schema/sync/tenant/retention/reporting drift. |
+| NW-134 - Specify PC4 operational responsibility handoff boundary | Accepted prerequisite | PC4 touches handoff contents, subject-history repair, actor partitions, sync context, stale authority, and product wording; implementation needed an accepted boundary first. | This handoff; S25/S22/S27/S19 evidence; accepted assignment, shared-device, conflict, and PC3 specs; validation matrix; gap playbook. | Platform boundary under `docs/specifications/platform/` defining handoff scope, context contents, caveats, and implementation readiness. | Docs-only validation, platform index check, status/backlog trace, no runtime behavior changed. | Stop on new scope mechanisms, sync protocol changes, retention/security promises, entity lifecycle, broad reporting, pattern changes, tenant/control-plane, real users/data, or architecture authority changes. |
+| NW-135 - Implement PC4 operational responsibility handoff | Selected current implementation successor | Gives coordinator/successor/supervisor the selected handoff experience. | Accepted NW-134 boundary; accepted web-admin/mobile/session/sync/assignment surfaces. | Bounded implementation prompt and runtime tests. | Focused server/mobile/web-admin tests plus required full gates from validation matrix. | Stop on contract/schema/sync/tenant/retention/reporting drift. |
 | PC4 synthetic proof packet | Future after implementation | Lets PM/owner validate the handoff journey with synthetic evidence. | PC4 handoff; accepted implementation evidence. | Product-validation artifact or proof route. | Docs-only proof or selected live synthetic proof. | Stop on real users/data, lab mutation, or production approval. |
 | Handoff vocabulary/example packet | Candidate | Helps explain S25/S22/S27 continuity in product-safe language. | Operational UX companion; scenarios; PC4 handoff. | Product examples or copy guidance. | Product review notes. | Do not turn examples into contracts, scopes, or domain-specific platform concepts. |
 | Retention/offboarding boundary | Future decision | Needed only if owner asks what former workers retain or what must be purged. | S24/S25; shared-device/local-state spec; NW-054. | NW-054 or bounded security/retention route. | Accepted policy/spec before promises. | Do not fold into PC4 continuity. |
-| Subject/query/custom scope boundary | Future decision | Needed only if handoff cannot be represented by accepted assignment axes. | S22/S25/S27; NW-053. | Scope decision route. | Accepted decision before implementation. | Do not add hidden sync scope or query-as-config authority. |
+| Subject/query/custom scope boundary | Future decision | Needed only if handoff cannot be represented by accepted assignment scope and boundary semantics. | S22/S25/S27; NW-053. | Scope decision route. | Accepted decision before implementation. | Do not add hidden sync scope or query-as-config authority. |
 | Broad reporting/import/export boundary | Future decision | Needed only if handoff asks for dashboards, completion, drilldown, exports, or report APIs. | S26; NW-044. | Reporting/import/export boundary route. | Accepted decision before implementation. | Do not fold broad reporting into handoff. |
 | Pattern registry/projection follow-through | Conditional future | Needed only if PC4 depends on pattern traversal/reporting, inventory expansion, projection change, or pattern API work. | S22/S27; NW-073. | Durable pattern behavior extraction. | Accepted NW-073 before dependent work. | Do not select by label alone. |
 
 ## Selected Successor Route
 
-Exactly one successor route is selected:
+NW-133 selected exactly one prerequisite successor:
 
 ```text
 NW-134 - Specify PC4 operational responsibility handoff boundary
 ```
 
-NW-134 must specify the prerequisite product/platform boundary before any PC4
-implementation. It should define the handoff scope, successor-visible context,
-late offline work treatment, unresolved attention/caveat wording, no-leakage
-expectations, and implementation readiness without accepting retention/security
-policy, new scope, entity lifecycle, reporting expansion, pattern changes,
-tenant/control-plane behavior, real users/data, contracts, schemas, sync
-protocol changes, BAR, CDL, or gap-register changes.
+NW-134 has now specified the prerequisite product/platform boundary. The
+current selected implementation successor is:
+
+```text
+NW-135 - Implement PC4 operational responsibility handoff
+```
+
+NW-135 may implement only the bounded handoff context accepted by NW-134:
+successor-visible current work, bounded prior context, late offline work
+caveats, unresolved attention/caveat wording, no-leakage expectations, and
+accepted subject-history/sync/projection/actor-local boundaries. It must not
+accept retention/security policy, new scope, entity lifecycle, reporting
+expansion, pattern changes, tenant/control-plane behavior, real users/data,
+contracts, schemas, sync protocol changes, BAR, CDL, or gap-register changes.
 
 ## Product-Level Definition Of Done
 
@@ -309,9 +316,9 @@ NW-094 through NW-098 are selected.
 
 ## Not Selected Now
 
-| Not selected by NW-133 | Trigger to select later | Required wording now |
+| Not selected by NW-134 | Trigger to select later | Required wording now |
 |---|---|---|
-| PC4 implementation | After NW-134 accepts the bounded handoff behavior and confirms implementation prerequisites. | Implementation successor is separate. |
+| PC4 implementation beyond bounded NW-135 | NW-135 discovers the first handoff context needs another selected product/platform route. | Current implementation successor is one bounded handoff context only. |
 | NW-093 real-production approval | Real users/data/provider/region/jurisdiction/support/compliance/security/go-no-go appears. | Synthetic planning only. |
 | NW-126 PC2 live-lab proof | Lab access restored enough to inspect R12 first under NW-126. | PC4 does not close PC2 lab debt. |
 | NW-044 broad reporting/import/export/aggregate | Product asks for exports, imports, warehouse, broad report APIs, report catalog, analytics, interoperability, drilldown, cadence, completion, or completeness. | PC4 is handoff continuity, not reporting. |
@@ -320,7 +327,7 @@ NW-094 through NW-098 are selected.
 | NW-073 pattern registry/projection follow-through | PC4 boundary or implementation relies on pattern traversal/reporting, inventory expansion, projection change, or pattern API work. | Not selected unless actually needed. |
 | NW-021 S06/entity lifecycle | Product selects maintained known set, discovered-unit lifecycle, deactivation, merge/split UX, or registry stewardship. | PC4 continues work; it does not maintain entity lifecycle. |
 | NW-036 broader future-surface expansion | Product selects a combined lifecycle, trigger execution, reporting, analytics, or other broad deferred package. | PC4 is one handoff continuity candidate, not a bundle. |
-| NW-053 subject/query/custom scope | Handoff needs access not representable by accepted assignment axes. | Do not add hidden sync scope or query-as-config authority. |
+| NW-053 subject/query/custom scope | Handoff needs access not representable by accepted assignment scope and boundary semantics. | Do not add hidden sync scope or query-as-config authority. |
 | NW-054 retention/security/offboarding | Product asks for local expiry, encryption, redaction, erasure, no-local-retention, offboarding, sensitivity, or former-worker retained-data promises. | PC4 is not retention/security policy. |
 | NW-094 through NW-098 tenant/control-plane | Multi-customer control plane, tenant selection, tenant-aware runtime, pooled storage, or isolation-test pressure appears. | Managed-isolation remains current route. |
 | Setup/admin polish | Concrete setup proof friction appears. | Keep config-package authority fixed. |
@@ -328,23 +335,26 @@ NW-094 through NW-098 are selected.
 
 ## Implementation Successor Readiness
 
-No implementation successor is selected by this handoff.
+One implementation successor is ready after accepted NW-134:
 
-NW-134 must land the handoff boundary first. A bounded implementation successor
-can be prepared only after NW-134 confirms that PC4 can be delivered without
-new scope mechanisms, sync protocol changes, retention/security promises,
-entity lifecycle, broad reporting, pattern projection/API changes,
-tenant/control-plane behavior, real users/data, production approval, contracts,
-schemas, BAR, CDL, or gap-register changes.
+```text
+NW-135 - Implement PC4 operational responsibility handoff
+```
+
+NW-134 confirms that PC4 can be delivered as one bounded successor-start
+handoff context without new scope mechanisms, sync protocol changes,
+retention/security promises, entity lifecycle, broad reporting, pattern
+projection/API changes, tenant/control-plane behavior, real users/data,
+production approval, contracts, schemas, BAR, CDL, or gap-register changes.
 
 ## Owner Decisions
 
 - Confirm the PC4 label `Operational Responsibility Handoff` is the desired
   candidate boundary, not generic assignment UI polish or worker offboarding
   policy.
-- Choose the first synthetic proof example: S25 worker transfer, S22 campaign
-  reassignment, S27 logistics handoff, or a paired S25/S27 example without
-  widening the boundary.
+- Preserve the NW-134 proof-example order: S25 worker transfer as primary, S27
+  logistics handoff as domain-neutral cross-check, and S22 campaign
+  reassignment only as secondary continuity evidence.
 - Decide what product-safe handoff words should be used for successor context,
   prior work, late offline work, stale authority, and unresolved attention.
 - Confirm that retention/security/offboarding questions remain out of scope
@@ -374,14 +384,15 @@ Stop and route before implementation if the candidate:
 
 ## Future-PC Closure Checklist
 
-- Accepted product/platform surfaces linked: PC4 has this PM handoff only; the
-  NW-134 platform boundary is selected as the next prerequisite.
-- Handoff review path: NW-133 PR review/merge is the acceptance gate.
+- Accepted product/platform surfaces linked: PC4 has this PM handoff plus the
+  accepted NW-134 platform boundary.
+- Handoff review path: NW-134 PR review/merge is the acceptance gate for the
+  boundary specification.
 - Current standing table matches accepted status/backlog rows.
 - Scenario map covers S25, S22, S27, S19, S03, S26, and deferred S24/S06.
 - Candidate routes are candidates only.
-- Exactly one successor route is selected: NW-134.
+- Exactly one successor route is selected after NW-134: NW-135.
 - Product-level DoD points to the detailed validation owner.
 - Owner decisions are explicit.
 - Stop conditions are present.
-- Status/backlog updated for NW-133 acceptance.
+- Status/backlog updated for NW-134 acceptance.
