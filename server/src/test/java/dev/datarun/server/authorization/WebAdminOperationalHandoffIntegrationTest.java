@@ -125,7 +125,9 @@ class WebAdminOperationalHandoffIntegrationTest extends AbstractIntegrationTest 
                 .contains("Current Work And Prior Context")
                 .contains("Visit Record")
                 .contains("Prior Visit")
+                .contains("Scoped subject UUID")
                 .contains(SUBJECT_IN_SCOPE.toString())
+                .contains("Scoped identifier for this visible handoff context.")
                 .contains(receivedAt(current).toString())
                 .contains(receivedAt(prior).toString())
                 .contains("Context incomplete")
@@ -136,7 +138,11 @@ class WebAdminOperationalHandoffIntegrationTest extends AbstractIntegrationTest 
                 .contains("Stale responsibility")
                 .contains("Timing Review")
                 .contains("You are the designated reviewer for this attention item.")
-                .contains("Open scoped context")
+                .contains("Scoped Trace Target")
+                .contains("Scoped context")
+                .contains("Opens existing scoped operational context for this visible work item.")
+                .contains("It does not open broader history.")
+                .contains("Open scoped operational context")
                 .contains("/web-admin/operational")
                 .doesNotContain(SUBJECT_OUT_OF_SCOPE.toString())
                 .doesNotContain("Hidden Visit")
@@ -175,8 +181,8 @@ class WebAdminOperationalHandoffIntegrationTest extends AbstractIntegrationTest 
                 .doesNotContain("Late synced work")
                 .doesNotContain("Stale responsibility")
                 .doesNotContain("Needs attention")
-                .doesNotContain("Trace Target")
-                .doesNotContain("Open scoped context");
+                .doesNotContain("Scoped Trace Target")
+                .doesNotContain("Open scoped operational context");
     }
 
     @Test
