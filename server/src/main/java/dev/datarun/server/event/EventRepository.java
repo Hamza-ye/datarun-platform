@@ -297,6 +297,106 @@ public class EventRepository {
     }
 
     /**
+     * Bounded handoff current-work read model. Scope predicates are applied
+     * before ordering and limiting so out-of-scope work cannot influence the
+     * visible context, latest input, caveats, or empty state.
+     */
+    public List<OperationalWorkEvent> findOperationalHandoffCurrentWork(
+            List<OperationalScope> scopes, int limit) {
+        if (scopes == null || scopes.isEmpty() || limit <= 0) {
+            return List.of();
+        }
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT e.id, e.type, e.shape_ref, e.activity_ref, e.subject_ref, e.actor_ref,
+                       e.device_id, e.device_seq, e.sync_watermark, e.timestamp, e.payload,
+                       e.received_at
+                FROM events e
+                WHERE e.subject_ref->>'type' = 'subject'
+                  AND e.type != 'assignment_changed'
+                  AND e.shape_ref NOT LIKE 'conflict_detected/%'
+                  AND e.shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND e.shape_ref NOT LIKE 'subjects_merged/%'
+                  AND e.shape_ref NOT LIKE 'subject_split/%'
+                  AND (
+                """);
+        List<Object> params = new ArrayList<>();
+        int appendedScopes = appendOperationalScopes(sql, scopes, params);
+        if (appendedScopes == 0) {
+            return List.of();
+        }
+        sql.append("""
+                  )
+                ORDER BY e.sync_watermark DESC
+                LIMIT ?
+                """);
+        params.add(limit);
+
+        return jdbc.query(
+                sql.toString(),
+                (rs, rowNum) -> new OperationalWorkEvent(
+                        mapRow(rs),
+                        rs.getTimestamp("received_at").toInstant().atOffset(ZoneOffset.UTC)),
+                params.toArray());
+    }
+
+    /**
+     * Bounded prior context for one current handoff item. The same current
+     * assignment scope is re-applied before the previous event is selected.
+     */
+    public Optional<OperationalWorkEvent> findOperationalHandoffPriorContext(
+            UUID subjectId,
+            String activityRef,
+            long beforeWatermark,
+            List<OperationalScope> scopes) {
+        if (subjectId == null || scopes == null || scopes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT e.id, e.type, e.shape_ref, e.activity_ref, e.subject_ref, e.actor_ref,
+                       e.device_id, e.device_seq, e.sync_watermark, e.timestamp, e.payload,
+                       e.received_at
+                FROM events e
+                WHERE e.subject_ref->>'type' = 'subject'
+                  AND e.subject_ref->>'id' = ?
+                  AND e.sync_watermark < ?
+                  AND e.type != 'assignment_changed'
+                  AND e.shape_ref NOT LIKE 'conflict_detected/%'
+                  AND e.shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND e.shape_ref NOT LIKE 'subjects_merged/%'
+                  AND e.shape_ref NOT LIKE 'subject_split/%'
+                """);
+        List<Object> params = new ArrayList<>();
+        params.add(subjectId.toString());
+        params.add(beforeWatermark);
+        if (activityRef == null) {
+            sql.append("  AND e.activity_ref IS NULL\n");
+        } else {
+            sql.append("  AND e.activity_ref = ?\n");
+            params.add(activityRef);
+        }
+        sql.append("  AND (\n");
+        int appendedScopes = appendOperationalScopes(sql, scopes, params);
+        if (appendedScopes == 0) {
+            return Optional.empty();
+        }
+        sql.append("""
+                  )
+                ORDER BY e.sync_watermark DESC
+                LIMIT 1
+                """);
+
+        List<OperationalWorkEvent> results = jdbc.query(
+                sql.toString(),
+                (rs, rowNum) -> new OperationalWorkEvent(
+                        mapRow(rs),
+                        rs.getTimestamp("received_at").toInstant().atOffset(ZoneOffset.UTC)),
+                params.toArray());
+        return results.stream().findFirst();
+    }
+
+    /**
      * One-item operational attention read model for the currently visible work
      * context. Scope predicates are re-applied to the source work before any
      * attention detail is returned.
@@ -564,6 +664,23 @@ public class EventRepository {
                 },
                 params.toArray());
         return results.stream().findFirst();
+    }
+
+    private int appendOperationalScopes(StringBuilder sql, List<OperationalScope> scopes,
+                                        List<Object> params) {
+        int appendedScopes = 0;
+        for (OperationalScope scope : scopes) {
+            String clause = operationalScopeClause(scope, params);
+            if (clause == null) {
+                continue;
+            }
+            if (appendedScopes > 0) {
+                sql.append(" OR ");
+            }
+            sql.append('(').append(clause).append(')');
+            appendedScopes++;
+        }
+        return appendedScopes;
     }
 
     private String operationalScopeClause(OperationalScope scope, List<Object> params) {
