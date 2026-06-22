@@ -97,7 +97,10 @@
             <h1>Operational View</h1>
             <div>Signed in</div>
         </div>
-        <a class="link-button" href="/web-admin/shell">Admin Shell</a>
+        <div>
+            <a class="link-button" href="/web-admin/operational/report">Scoped Operational Report Snapshot</a>
+            <a class="link-button" href="/web-admin/shell">Admin Shell</a>
+        </div>
     </header>
 
     <div class="message success" th:if="${success}" th:text="${success}"></div>

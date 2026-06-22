@@ -27,14 +27,17 @@ public class WebAdminOperationalViewController {
     private final WebAdminSessionService sessionService;
     private final AdminCommandCapabilityService adminCommandCapabilityService;
     private final WebAdminOperationalViewService operationalViewService;
+    private final ScopedOperationalReportSnapshotService reportSnapshotService;
 
     public WebAdminOperationalViewController(
             WebAdminSessionService sessionService,
             AdminCommandCapabilityService adminCommandCapabilityService,
-            WebAdminOperationalViewService operationalViewService) {
+            WebAdminOperationalViewService operationalViewService,
+            ScopedOperationalReportSnapshotService reportSnapshotService) {
         this.sessionService = sessionService;
         this.adminCommandCapabilityService = adminCommandCapabilityService;
         this.operationalViewService = operationalViewService;
+        this.reportSnapshotService = reportSnapshotService;
     }
 
     @GetMapping
@@ -45,6 +48,16 @@ public class WebAdminOperationalViewController {
 
         model.addAttribute("observation", operationalViewService.observe(context.actorId()));
         return "web-admin/operational";
+    }
+
+    @GetMapping("/report")
+    public String report(HttpServletRequest request, Model model) {
+        WebAdminSessionContext context = requireContextForPage(request);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+
+        model.addAttribute("snapshot", reportSnapshotService.snapshot(context.actorId()));
+        return "web-admin/operational-report";
     }
 
     @GetMapping("/attention")

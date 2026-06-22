@@ -98,6 +98,7 @@ public class WebAdminSessionController {
         String operationalLink = hasScopedRead(context)
                 ? """
                     <p><a href="/web-admin/operational">Operational View</a></p>
+                    <p><a href="/web-admin/operational/report">Scoped Operational Report Snapshot</a></p>
                     """
                 : "";
         String body = """
