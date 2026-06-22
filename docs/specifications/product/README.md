@@ -37,6 +37,7 @@ Each product specification should include:
 | [Product Candidate Handoff Template](product-candidate-handoff-template.md) | active template; process structure only | product steward | NW-106 | none |
 | [Product Candidate 2 PM Handoff](product-candidate-2-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-121 | none |
 | [Product Candidate 3 PM Handoff](product-candidate-3-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-127 | none |
+| [Product Candidate 4 PM Handoff](product-candidate-4-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-133 | none |
 
 `product-candidate-1.md` remains the accepted Product Candidate 1 behavior
 specification. `product-candidate-1-pm-handoff.md` is a derived PM planning
@@ -46,3 +47,6 @@ is a derived PM planning surface selecting the PC2 boundary; it does not accept
 product behavior or implementation standing. `product-candidate-3-pm-handoff.md`
 is a derived PM planning surface selecting the PC3 boundary; it does not accept
 product behavior, implementation standing, or production approval.
+`product-candidate-4-pm-handoff.md` is a derived PM planning surface selecting
+the PC4 boundary; it does not accept product behavior, implementation standing,
+architecture authority, retention/security promises, or production approval.
