@@ -11,7 +11,9 @@ import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.UUID;
 
 @Service
@@ -31,12 +33,9 @@ public class ScopedOperationalReportSnapshotService {
 
     public ScopedOperationalReportSnapshot snapshot(UUID actorId) {
         OffsetDateTime snapshotAsOf = OffsetDateTime.now(ZoneOffset.UTC);
-        List<OperationalScope> scopes = operationalScopes(actorId);
-        List<ActivityStandingRow> rows = eventRepository
-                .findScopedOperationalReportActivityStandings(actorId, scopes)
-                .stream()
-                .map(this::activityStandingRow)
-                .toList();
+        List<ActiveAssignment> assignments = scopeResolver.getActiveAssignments(actorId);
+        List<OperationalScope> scopes = operationalScopes(assignments);
+        List<ActivityStandingRow> rows = activityStandingRows(actorId, assignments, scopes);
         Optional<OffsetDateTime> latestVisibleInput = rows.stream()
                 .map(ActivityStandingRow::latestVisibleInputAt)
                 .filter(time -> time != null)
@@ -46,10 +45,10 @@ public class ScopedOperationalReportSnapshotService {
                 .filter(time -> time != null)
                 .max(Comparator.naturalOrder());
         FreshnessState freshnessState;
-        if (rows.isEmpty()) {
-            freshnessState = FreshnessState.no_visible_input;
-        } else if (latestVisibleInput.isPresent()) {
+        if (latestVisibleInput.isPresent()) {
             freshnessState = FreshnessState.known_latest_input;
+        } else if (rows.stream().noneMatch(ActivityStandingRow::hasVisibleSourceWork)) {
+            freshnessState = FreshnessState.no_visible_input;
         } else {
             freshnessState = FreshnessState.unknown_latest_input;
         }
@@ -67,13 +66,45 @@ public class ScopedOperationalReportSnapshotService {
                 traceContext(scopes));
     }
 
-    private List<OperationalScope> operationalScopes(UUID actorId) {
-        return scopeResolver.getActiveAssignments(actorId).stream()
+    private List<OperationalScope> operationalScopes(List<ActiveAssignment> assignments) {
+        return assignments.stream()
                 .map(assignment -> new OperationalScope(
                         assignment.geographicPath(),
                         assignment.subjectList(),
                         assignment.activityList()))
                 .toList();
+    }
+
+    private List<ActivityStandingRow> activityStandingRows(
+            UUID actorId,
+            List<ActiveAssignment> assignments,
+            List<OperationalScope> scopes) {
+        Map<String, OperationalReportActivityStanding> standings = new TreeMap<>();
+        assignments.stream()
+                .map(ActiveAssignment::activityList)
+                .filter(activityRefs -> activityRefs != null)
+                .flatMap(List::stream)
+                .map(this::canonicalActivityRef)
+                .filter(activityRef -> activityRef != null)
+                .forEach(activityRef -> standings.putIfAbsent(
+                        activityRef, zeroActivityStanding(activityRef)));
+
+        eventRepository.findScopedOperationalReportActivityStandings(actorId, scopes)
+                .forEach(standing -> {
+                    String activityRef = canonicalActivityRef(standing.activityRef());
+                    if (activityRef != null) {
+                        standings.put(activityRef, standing);
+                    }
+                });
+
+        return standings.values().stream()
+                .map(this::activityStandingRow)
+                .toList();
+    }
+
+    private OperationalReportActivityStanding zeroActivityStanding(String activityRef) {
+        return new OperationalReportActivityStanding(
+                activityRef, 0, 0, 0, null, null);
     }
 
     private ActivityStandingRow activityStandingRow(
@@ -136,6 +167,17 @@ public class ScopedOperationalReportSnapshotService {
         return label.length() == 0 ? fallback : label.toString();
     }
 
+    private String canonicalActivityRef(String activityRef) {
+        if (activityRef == null) {
+            return null;
+        }
+        String trimmed = activityRef.trim();
+        if (trimmed.isBlank()) {
+            return null;
+        }
+        return trimmed;
+    }
+
     private interface RowCount {
         long value(ActivityStandingRow row);
     }
@@ -196,6 +238,10 @@ public class ScopedOperationalReportSnapshotService {
 
         public boolean hasLatestCleanSourceWork() {
             return latestCleanSourceWorkAt != null;
+        }
+
+        public boolean hasVisibleSourceWork() {
+            return cleanSourceCount > 0 || excludedUnresolvedSourceCount > 0;
         }
     }
 

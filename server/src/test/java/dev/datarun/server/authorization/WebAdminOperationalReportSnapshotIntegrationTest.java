@@ -144,7 +144,7 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     }
 
     @Test
-    void noVisibleInputRendersScopedEmptyState() throws Exception {
+    void assignedActivityWithoutSourceWorkRendersZeroStandingRow() throws Exception {
         setupReviewerScope();
         configureReportCommands(REVIEWER);
 
@@ -156,10 +156,13 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
         assertThat(result.getResponse().getContentAsString())
                 .contains("no_visible_input")
                 .contains("No visible input")
-                .contains("Current scoped standing has no visible source work")
+                .contains("Freshness unknown")
                 .contains("Coverage not measured")
+                .doesNotContain("Current scoped standing has no visible source work")
                 .doesNotContain("complete")
                 .doesNotContain("all clear");
+        assertActivityRow(result.getResponse().getContentAsString(),
+                "Assigned Visit", 0, 0, 0);
     }
 
     @Test
