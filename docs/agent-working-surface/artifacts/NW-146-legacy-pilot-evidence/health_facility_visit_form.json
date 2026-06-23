@@ -1,0 +1,1004 @@
+{
+  "uid": "oHpNldsUOT4",
+  "versionUid": "Jinrnn9sZsK",
+  "versionNumber": 1,
+  "name": "زيارة المرفق الصحي",
+  "description": "Form for reporting health data.",
+  "deleted": false,
+  "label": {
+    "en": "Health Facility Visit",
+    "ar": "زيارة المرفق الصحي"
+  },
+  "fields": [
+    {
+      "parent": "mainSection",
+      "name": "TeamNumber",
+      "path": "mainSection.RLFO31UHpKA",
+      "code": "teamnumber",
+      "description": "Team number.",
+      "order": 1,
+      "label": {
+        "ar": "رقم الفريق",
+        "en": "Team Number"
+      },
+      "rules": [],
+      "id": "RLFO31UHpKA",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "mainSection",
+      "name": "ReportNumber",
+      "path": "mainSection.PyAwmQDavpb",
+      "code": "reportnumber",
+      "description": "Report number.",
+      "order": 0,
+      "label": {
+        "ar": "رقم البلاغ",
+        "en": "Report Number"
+      },
+      "rules": [],
+      "id": "PyAwmQDavpb",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "mainSection",
+      "name": "Visit4Date",
+      "path": "mainSection.oJeyhUeY9NU",
+      "code": "visit4date",
+      "description": "Date of visit.",
+      "order": 3,
+      "label": {
+        "ar": "تاريخ الزيارة",
+        "en": "Visit Date"
+      },
+      "rules": [],
+      "id": "oJeyhUeY9NU",
+      "type": "Date",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "mainSection",
+      "name": "HealthFacilityName",
+      "path": "mainSection.s7tOeuawHvU",
+      "code": "healthfacilityname",
+      "description": "Name of health facility.",
+      "order": 4,
+      "label": {
+        "ar": "ادخل كود المرفق الصحي",
+        "en": "Health Facility Name"
+      },
+      "rules": [],
+      "id": "s7tOeuawHvU",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "casesByHealthFacilityData",
+      "name": "ReportedDisease",
+      "path": "casesByHealthFacilityData.XDrlIuwBuFf",
+      "code": "reporteddisease",
+      "description": "Reported disease.",
+      "order": 0,
+      "label": {
+        "ar": "المرض المبلغ عنه",
+        "en": "Reported Disease"
+      },
+      "rules": [],
+      "id": "XDrlIuwBuFf",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "bofJIQ7b0lc",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TimePeriod",
+      "name": "MCases",
+      "path": "casesByHealthFacilityData.TimePeriod.WQnB7j8xQBd",
+      "code": "mcases",
+      "description": "Malaria cases.",
+      "order": 0,
+      "label": {
+        "ar": "حالات الملاريا",
+        "en": "Cases"
+      },
+      "rules": [
+        {
+          "expression": "#{ReportedDisease} == 'malaria'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease} != 'malaria'",
+          "action": "Hide"
+        }
+      ],
+      "id": "WQnB7j8xQBd",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "nIVawpQy6vh",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TimePeriod",
+      "name": "DCases",
+      "path": "casesByHealthFacilityData.TimePeriod.CJLblaj28cm",
+      "code": "dcases",
+      "description": "dengue cases.",
+      "order": 1,
+      "label": {
+        "ar": "حالات الضنك",
+        "en": "Cases"
+      },
+      "rules": [
+        {
+          "expression": "#{ReportedDisease} == 'dengue'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease} != 'dengue'",
+          "action": "Hide"
+        }
+      ],
+      "id": "CJLblaj28cm",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "DCOXhfrzWe7",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TimePeriod",
+      "name": "Cases",
+      "path": "casesByHealthFacilityData.TimePeriod.HjQeGFduXoV",
+      "code": "cases",
+      "description": "cases.",
+      "order": 2,
+      "label": {
+        "ar": "الحالات",
+        "en": "Cases"
+      },
+      "rules": [
+        {
+          "expression": "#{ReportedDisease} == 'Malaria&dengue'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease} != 'Malaria&dengue'",
+          "action": "Hide"
+        }
+      ],
+      "id": "HjQeGFduXoV",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "yc7qimIkz8f",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TimePeriod",
+      "name": "TotalCases",
+      "path": "casesByHealthFacilityData.TimePeriod.ziJfhIx16NN",
+      "code": "totalcases",
+      "description": "Total cases by gender and age.",
+      "order": 3,
+      "label": {
+        "ar": "إجمالي الحالات",
+        "en": "Total Cases"
+      },
+      "rules": [],
+      "id": "ziJfhIx16NN",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TimePeriod",
+      "name": "Females5YearsAndAbove",
+      "path": "casesByHealthFacilityData.TimePeriod.XcbxyowlF1E",
+      "code": "females5yearsandabove",
+      "description": "Females 5 years and above.",
+      "order": 4,
+      "label": {
+        "ar": "الإناث",
+        "en": "Females 5 Years and Above"
+      },
+      "rules": [],
+      "id": "XcbxyowlF1E",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TimePeriod",
+      "name": "Males5YearsAndAbove",
+      "path": "casesByHealthFacilityData.TimePeriod.bswcjI7dRPr",
+      "code": "males5yearsandabove",
+      "description": "Males 5 years and above.",
+      "order": 5,
+      "label": {
+        "ar": "الذكور",
+        "en": "Males 5 Years and Above"
+      },
+      "rules": [],
+      "id": "bswcjI7dRPr",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TimePeriod",
+      "name": "Under5Years",
+      "path": "casesByHealthFacilityData.TimePeriod.kslyVlmfMP4",
+      "code": "under5years",
+      "description": "under 5 years.",
+      "order": 6,
+      "label": {
+        "ar": "أقل من 5 سنوات",
+        "en": "Under 5 Years"
+      },
+      "rules": [],
+      "id": "kslyVlmfMP4",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TimePeriod",
+      "name": "PregnantWomen",
+      "path": "casesByHealthFacilityData.TimePeriod.XZSGQpXywog",
+      "code": "pregnantwomen",
+      "description": "Pregnant women.",
+      "order": 7,
+      "label": {
+        "ar": "الحوامل",
+        "en": "Pregnant Women"
+      },
+      "rules": [],
+      "id": "XZSGQpXywog",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "WeekTimePeriod",
+      "name": "MCases",
+      "path": "casesByHealthFacilityData.WeekTimePeriod.WQnB7j8xQBd",
+      "code": "mcases",
+      "description": "Malaria cases.",
+      "order": 0,
+      "label": {
+        "ar": "حالات الملاريا",
+        "en": "Cases"
+      },
+      "rules": [
+        {
+          "expression": "#{ReportedDisease} == 'malaria'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease} != 'malaria'",
+          "action": "Hide"
+        }
+      ],
+      "id": "WQnB7j8xQBd",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "nIVawpQy6vh",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "WeekTimePeriod",
+      "name": "DCases",
+      "path": "casesByHealthFacilityData.WeekTimePeriod.CJLblaj28cm",
+      "code": "dcases",
+      "description": "dengue cases.",
+      "order": 1,
+      "label": {
+        "ar": "حالات الضنك",
+        "en": "Cases"
+      },
+      "rules": [
+        {
+          "expression": "#{ReportedDisease} == 'dengue'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease} != 'dengue'",
+          "action": "Hide"
+        }
+      ],
+      "id": "CJLblaj28cm",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "DCOXhfrzWe7",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "WeekTimePeriod",
+      "name": "Cases",
+      "path": "casesByHealthFacilityData.WeekTimePeriod.HjQeGFduXoV",
+      "code": "cases",
+      "description": "cases.",
+      "order": 2,
+      "label": {
+        "ar": "الحالات",
+        "en": "Cases"
+      },
+      "rules": [
+        {
+          "expression": "#{ReportedDisease} == 'Malaria&dengue'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease} != 'Malaria&dengue'",
+          "action": "Hide"
+        }
+      ],
+      "id": "HjQeGFduXoV",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "yc7qimIkz8f",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "WeekTimePeriod",
+      "name": "TotalCases1",
+      "path": "casesByHealthFacilityData.WeekTimePeriod.dZPPEOJ4mTg",
+      "code": "totalcases1",
+      "description": "Total cases by gender and age.",
+      "order": 3,
+      "label": {
+        "ar": "إجمالي الحالات",
+        "en": "Total Cases"
+      },
+      "rules": [],
+      "id": "dZPPEOJ4mTg",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "WeekTimePeriod",
+      "name": "Females5YearsAndAbove1",
+      "path": "casesByHealthFacilityData.WeekTimePeriod.frvkaCYp9PJ",
+      "code": "females5yearsandabove1",
+      "description": "Females 5 years and above.",
+      "order": 4,
+      "label": {
+        "ar": "الإناث",
+        "en": "Females 5 Years and Above"
+      },
+      "rules": [],
+      "id": "frvkaCYp9PJ",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "WeekTimePeriod",
+      "name": "Males5YearsAndAbove1",
+      "path": "casesByHealthFacilityData.WeekTimePeriod.nMcEGi9usnM",
+      "code": "males5yearsandabove1",
+      "description": "Males 5 years and above.",
+      "order": 5,
+      "label": {
+        "ar": "الذكور",
+        "en": "Males 5 Years and Above"
+      },
+      "rules": [],
+      "id": "nMcEGi9usnM",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "WeekTimePeriod",
+      "name": "Under5Years1",
+      "path": "casesByHealthFacilityData.WeekTimePeriod.hzOZADMbPxc",
+      "code": "under5years1",
+      "description": "under 5 years.",
+      "order": 6,
+      "label": {
+        "ar": "أقل من 5 سنوات",
+        "en": "Under 5 Years"
+      },
+      "rules": [],
+      "id": "hzOZADMbPxc",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "WeekTimePeriod",
+      "name": "PregnantWomen1",
+      "path": "casesByHealthFacilityData.WeekTimePeriod.BpbMexZEkzK",
+      "code": "pregnantwomen1",
+      "description": "Pregnant women.",
+      "order": 7,
+      "label": {
+        "ar": "الحوامل",
+        "en": "Pregnant Women"
+      },
+      "rules": [],
+      "id": "BpbMexZEkzK",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "confirmationOfHealthFacilityDataOnVisitDay",
+      "name": "ReportedDisease1",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.hO3e4TCsjH8",
+      "code": "reporteddisease1",
+      "description": "Reported disease.",
+      "order": 0,
+      "label": {
+        "ar": "المرض المبلغ عنه",
+        "en": "Reported Disease"
+      },
+      "rules": [],
+      "id": "hO3e4TCsjH8",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "Yaq5QtZsjGG",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TestsCount",
+      "name": "TestType",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.TestsCount.VOh4Dpx7vWK",
+      "code": "testtype",
+      "description": "Test Type.",
+      "order": 0,
+      "label": {
+        "ar": "نوع الفحص",
+        "en": "Reported Disease"
+      },
+      "rules": [],
+      "id": "VOh4Dpx7vWK",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "qUHILEAkjjp",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TestsCount",
+      "name": "Nigative",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.TestsCount.BWlu8e1OFpz",
+      "code": "nigative",
+      "description": "Nigative",
+      "order": 1,
+      "label": {
+        "ar": "سلبي",
+        "en": "Malaria Tests"
+      },
+      "rules": [],
+      "id": "BWlu8e1OFpz",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TestsCount",
+      "name": "Positivw",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.TestsCount.ngysUQp3hVY",
+      "code": "positivw",
+      "description": "Positive",
+      "order": 2,
+      "label": {
+        "ar": "إيجابي",
+        "en": "Postive Tests"
+      },
+      "rules": [],
+      "id": "ngysUQp3hVY",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TestsCount",
+      "name": "PF",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.TestsCount.wu1xCd31yNB",
+      "code": "pf",
+      "description": "PF",
+      "order": 3,
+      "label": {
+        "ar": "PF",
+        "en": "PF"
+      },
+      "rules": [],
+      "id": "wu1xCd31yNB",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TestsCount",
+      "name": "PV",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.TestsCount.YVEOACIz9cy",
+      "code": "pv",
+      "description": "PV",
+      "order": 4,
+      "label": {
+        "ar": "PV",
+        "en": "PV"
+      },
+      "rules": [],
+      "id": "YVEOACIz9cy",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "TestsCount",
+      "name": "MIXED",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.TestsCount.YL1wSZ0sR6c",
+      "code": "mixed",
+      "description": "MIXED",
+      "order": 5,
+      "label": {
+        "ar": "MIXED",
+        "en": "MIXED"
+      },
+      "rules": [],
+      "id": "YL1wSZ0sR6c",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "DengueTests",
+      "name": "TestTypeD",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.DengueTests.FKYzQSVK2SY",
+      "code": "testtyped",
+      "description": "Test Type.",
+      "order": 0,
+      "label": {
+        "ar": "نوع الفحص",
+        "en": "Reported Disease"
+      },
+      "rules": [],
+      "id": "FKYzQSVK2SY",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "QvEjsaIJmtz",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "DengueTests",
+      "name": "Nigative",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.DengueTests.BWlu8e1OFpz",
+      "code": "nigative",
+      "description": "Nigative",
+      "order": 1,
+      "label": {
+        "ar": "سلبي",
+        "en": "Malaria Tests"
+      },
+      "rules": [],
+      "id": "BWlu8e1OFpz",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "DengueTests",
+      "name": "Positivw",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.DengueTests.ngysUQp3hVY",
+      "code": "positivw",
+      "description": "Positive",
+      "order": 2,
+      "label": {
+        "ar": "إيجابي",
+        "en": "Postive Tests"
+      },
+      "rules": [],
+      "id": "ngysUQp3hVY",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "FirstConclusion",
+      "name": "IsThereAnEpidemic",
+      "path": "FirstConclusion.Exa3tcu3A9e",
+      "code": "isthereanepidemic",
+      "description": "Is there an epidemic?",
+      "order": 0,
+      "label": {
+        "ar": "هل يوجد وباء؟",
+        "en": "Is There An Epidemic"
+      },
+      "rules": [],
+      "id": "Exa3tcu3A9e",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "zK7EdFCwpx9",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "FirstConclusion",
+      "name": "Other1",
+      "path": "FirstConclusion.eswOBMzwcR5",
+      "code": "other1",
+      "description": "Other type of disease.",
+      "order": 1,
+      "label": {
+        "ar": "آخر",
+        "en": "Other"
+      },
+      "rules": [
+        {
+          "expression": "#{IsThereAnEpidemic} == 'no'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{IsThereAnEpidemic} != 'no'",
+          "action": "Hide"
+        }
+      ],
+      "id": "eswOBMzwcR5",
+      "type": "Text",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "FirstConclusion",
+      "name": "DiseaseTypes2",
+      "path": "FirstConclusion.HP5a5DCI3Dz",
+      "code": "diseasetypes2",
+      "description": "Type of disease causing the epidemic.",
+      "order": 2,
+      "label": {
+        "ar": "نوع المرض",
+        "en": "Disease Type"
+      },
+      "rules": [],
+      "id": "HP5a5DCI3Dz",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "Jg5YaL8xKpW",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "FirstConclusion",
+      "name": "Other",
+      "path": "FirstConclusion.scxTYkhsvwp",
+      "code": "other",
+      "description": "Other type of disease.",
+      "order": 3,
+      "label": {
+        "ar": "آخر",
+        "en": "Other"
+      },
+      "rules": [
+        {
+          "expression": "#{DiseaseTypes2} == 'other'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{DiseaseTypes2} != 'other'",
+          "action": "Hide"
+        }
+      ],
+      "id": "scxTYkhsvwp",
+      "type": "Text",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    }
+  ],
+  "sections": [
+    {
+      "name": "mainSection",
+      "path": "mainSection",
+      "description": "Main Section.",
+      "order": 0,
+      "label": {
+        "ar": "البيانات الاساسية",
+        "en": "Main Section"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "mainSection"
+    },
+    {
+      "name": "casesByHealthFacilityData",
+      "path": "casesByHealthFacilityData",
+      "description": "Cases by health facility data.",
+      "order": 1,
+      "label": {
+        "ar": "التقصي عن الحالات بحسب بيانات سجلات المرفق الصحي",
+        "en": "Cases By Health Facility Data"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "casesByHealthFacilityData"
+    },
+    {
+      "parent": "casesByHealthFacilityData",
+      "name": "TimePeriod",
+      "path": "casesByHealthFacilityData.TimePeriod",
+      "description": "Time Period.",
+      "order": 1,
+      "label": {
+        "ar": "بيانات سجلات المرفق (يوم الزيارة)",
+        "en": "Time Period"
+      },
+      "rules": [],
+      "repeatable": true,
+      "id": "TimePeriod"
+    },
+    {
+      "parent": "casesByHealthFacilityData",
+      "name": "WeekTimePeriod",
+      "path": "casesByHealthFacilityData.WeekTimePeriod",
+      "description": "Time Period.",
+      "order": 2,
+      "label": {
+        "ar": "بيانات سجلات المرفق (اسبوع قبل الزيارة)",
+        "en": "Time Period"
+      },
+      "rules": [],
+      "repeatable": true,
+      "id": "WeekTimePeriod"
+    },
+    {
+      "name": "confirmationOfHealthFacilityDataOnVisitDay",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay",
+      "description": "Confirmation of health facility data on the day of visit.",
+      "order": 2,
+      "label": {
+        "ar": "نتائج التقصي للحالات في المرفق الصحي اثناء الزيارة",
+        "en": "Confirmation of Health Facility Data on Visit Day"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "confirmationOfHealthFacilityDataOnVisitDay"
+    },
+    {
+      "parent": "confirmationOfHealthFacilityDataOnVisitDay",
+      "name": "TestsCount",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.TestsCount",
+      "description": "Results of malaria tests.",
+      "order": 1,
+      "label": {
+        "ar": "عدد المفحوصين لمرض الملاريا",
+        "en": "Malaria Tests"
+      },
+      "rules": [
+        {
+          "expression": "#{ReportedDisease1} == 'malaria1'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease1} == 'Malaria&dengue1'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease1} != 'malaria1'",
+          "action": "Hide"
+        }
+      ],
+      "repeatable": true,
+      "id": "TestsCount"
+    },
+    {
+      "parent": "confirmationOfHealthFacilityDataOnVisitDay",
+      "name": "DengueTests",
+      "path": "confirmationOfHealthFacilityDataOnVisitDay.DengueTests",
+      "description": "Results of dengue tests.",
+      "order": 2,
+      "label": {
+        "ar": "عدد المفحوصين لمرض الضنك",
+        "en": "dengue Tests"
+      },
+      "rules": [
+        {
+          "expression": "#{ReportedDisease1} == 'dengue1'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease1} == 'Malaria&dengue1'",
+          "action": "Show"
+        },
+        {
+          "expression": "#{ReportedDisease1} != 'dengue1'",
+          "action": "Hide"
+        }
+      ],
+      "repeatable": true,
+      "id": "DengueTests"
+    },
+    {
+      "name": "FirstConclusion",
+      "path": "FirstConclusion",
+      "description": "First conclusion about the epidemic.",
+      "order": 3,
+      "label": {
+        "ar": "الاستنتاج الأولي للوباء من واقع زيارة المرفق الصحي",
+        "en": "First Conclusion"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "FirstConclusion"
+    }
+  ]
+}

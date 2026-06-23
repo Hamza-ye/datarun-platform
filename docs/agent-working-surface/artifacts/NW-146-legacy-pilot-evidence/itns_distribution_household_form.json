@@ -1,0 +1,782 @@
+{
+  "uid": "Tcf3Ks9ZRpB",
+  "versionUid": "fb2GC7FInSu",
+  "versionNumber": 28,
+  "name": "استمارة توزيع الناموسيات | منازل | فريق ميداني",
+  "description": "استمارة ارسال بيانات توزيع الناموسيات على مستوى المنزل، ترسل من قائد الفريق.",
+  "deleted": false,
+  "label": {
+    "en": "ITNs Household Distribution Form - TL",
+    "ar": "استمارة توزيع الناموسيات | منازل | فريق ميداني"
+  },
+  "fields": [
+    {
+      "parent": "mainSection",
+      "name": "workDay",
+      "path": "mainSection.VQTpnEDHEkF",
+      "code": "workday",
+      "description": "Day of work for the campaign.",
+      "order": 1,
+      "label": {
+        "ar": "اليوم",
+        "en": "Work Day"
+      },
+      "rules": [],
+      "id": "VQTpnEDHEkF",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "LT0LMYKsxhO",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "mainSection",
+      "name": "status",
+      "path": "mainSection.GS3g685QfD3",
+      "code": "status",
+      "description": "Distribution Status",
+      "order": 2,
+      "label": {
+        "ar": "حالة سير عملية التوزيع",
+        "en": "Select status"
+      },
+      "rules": [],
+      "id": "GS3g685QfD3",
+      "type": "Progress",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "completion_details",
+      "name": "completionStatus",
+      "path": "completion_details.DA5O9dchfFi",
+      "code": "completionstatus",
+      "description": "Completion Status",
+      "order": 4,
+      "label": {
+        "ar": "حالة الاكتمال",
+        "en": "Completion Status"
+      },
+      "rules": [],
+      "id": "DA5O9dchfFi",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "Jqv9zYnY4vv",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "completion_details",
+      "name": "completionPercentage",
+      "path": "completion_details.mrtH6dqRjdM",
+      "code": "completionpercentage",
+      "order": 5,
+      "label": {
+        "ar": "% نسبة الاكتمال بالمئة",
+        "en": "Completion Percentage"
+      },
+      "rules": [
+        {
+          "expression": "#{completionStatus} == 'PARTIAL'",
+          "action": "Show"
+        }
+      ],
+      "id": "mrtH6dqRjdM",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": false,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "status_reassigned_details",
+      "name": "targetedByOtherTeamName",
+      "path": "status_reassigned_details.HxpC8NN7zTo",
+      "code": "targetedbyotherteamname",
+      "order": 7,
+      "label": {
+        "ar": "اسم الفريق الذي قام بالتغطية",
+        "en": "Team name targeted by"
+      },
+      "rules": [],
+      "id": "HxpC8NN7zTo",
+      "type": "Text",
+      "mandatory": false,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "status_reassigned_details",
+      "name": "targetedByOtherTeamNum",
+      "path": "status_reassigned_details.GfWuMNoEP0n",
+      "code": "targetedbyotherteamnum",
+      "order": 8,
+      "label": {
+        "ar": "رقم الفريق الذي قام بالتغطية",
+        "en": "Team No. targeted by"
+      },
+      "rules": [],
+      "id": "GfWuMNoEP0n",
+      "type": "Text",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "status_cancelled_details",
+      "name": "notargetingReasons",
+      "path": "status_cancelled_details.wGG1vf3Vq9y",
+      "code": "notargetingreasons",
+      "order": 10,
+      "label": {
+        "ar": "سبب عدم الاستهداف",
+        "en": "no targeting Reason"
+      },
+      "rules": [],
+      "id": "wGG1vf3Vq9y",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "VwE0yGUJHFK",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "status_cancelled_details",
+      "name": "otherReasonForNotargeting",
+      "path": "status_cancelled_details.G3yTtVQBBc6",
+      "code": "otherreasonfornotargeting",
+      "order": 11,
+      "label": {
+        "ar": "اذكر السبب الاخر",
+        "en": "UnTargetting Reason"
+      },
+      "rules": [
+        {
+          "expression": "#{status} == 'CANCELLED' && #{notargetingReasons} == 'OTHER'",
+          "action": "Show"
+        }
+      ],
+      "id": "G3yTtVQBBc6",
+      "type": "Text",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "status_merged_details",
+      "name": "mergedWithOtherVillage",
+      "path": "status_merged_details.s2ucnJ5xmnG",
+      "code": "mergedwithothervillage",
+      "order": 13,
+      "label": {
+        "ar": "اسم القرية الاخرى التي تم دمجها",
+        "en": "Merged with village"
+      },
+      "rules": [],
+      "id": "s2ucnJ5xmnG",
+      "type": "Text",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "status_rescheduled_details",
+      "name": "rescheduledTo",
+      "path": "status_rescheduled_details.k9dX85fxHE3",
+      "code": "rescheduledto",
+      "order": 15,
+      "label": {
+        "ar": "جدولة إلى يوم:",
+        "en": "Rescheduled To"
+      },
+      "rules": [],
+      "id": "k9dX85fxHE3",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "LT0LMYKsxhO",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "households_information",
+      "name": "settlement",
+      "path": "households_information.lS3R4n8ywx9",
+      "code": "settlement",
+      "order": 17,
+      "label": {
+        "ar": "نوع التجمع",
+        "en": "Setllement Type"
+      },
+      "rules": [],
+      "id": "lS3R4n8ywx9",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "nkgnfzZXT6Y",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "householdHeadSerialNumber",
+      "path": "households_information.householdnames.P1D5FiaiHFP",
+      "code": "householdheadserialnumber",
+      "description": "Household number or card number.",
+      "order": 19,
+      "label": {
+        "ar": "رقم المنزل",
+        "en": "Household Number (Card Number)"
+      },
+      "rules": [],
+      "id": "P1D5FiaiHFP",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "inputmethod",
+      "path": "households_information.householdnames.wiCs41PH4H7",
+      "code": "inputmethod",
+      "order": 20,
+      "label": {
+        "ar": "طريقة الادخال",
+        "en": "inputmethod"
+      },
+      "rules": [],
+      "id": "wiCs41PH4H7",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "O4LlcyabRNs",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "householdName",
+      "path": "households_information.householdnames.MMbryffxoh5",
+      "code": "householdname",
+      "description": "Name of the household head.",
+      "order": 21,
+      "label": {
+        "ar": "اسم صاحب المنزل رباعيا",
+        "en": "Household Name"
+      },
+      "rules": [
+        {
+          "expression": "#{inputmethod} == 'addNew'",
+          "action": "Show"
+        }
+      ],
+      "id": "MMbryffxoh5",
+      "type": "FullName",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "householdReference",
+      "path": "households_information.householdnames.ienPUzKOw5O",
+      "code": "householdreference",
+      "description": "Household Reference....",
+      "order": 22,
+      "label": {
+        "ar": "مرجع رب المنزل",
+        "en": "Household Reference"
+      },
+      "rules": [
+        {
+          "expression": "#{inputmethod} == 'fromList'",
+          "action": "Show"
+        }
+      ],
+      "id": "ienPUzKOw5O",
+      "type": "Reference",
+      "mandatory": true,
+      "showInSummary": false,
+      "resourceType": "OrgUnit",
+      "resourceMetadataSchema": "yHRk5tsCEK4",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "population",
+      "path": "households_information.householdnames.FqXaEwOeSpR",
+      "code": "population",
+      "description": "Total population in the household.",
+      "order": 23,
+      "label": {
+        "ar": "عدد السكان",
+        "en": "Total Population"
+      },
+      "rules": [
+        {
+          "expression": "#{population} != #{femalePopulation} + #{malePopulation}",
+          "action": "Error",
+          "message": {
+            "ar": "مجموع الذكور والإناث يجب أن يساوي عدد السكان الكلي.",
+            "en": "Males + Females must equal Total Population."
+          }
+        }
+      ],
+      "id": "FqXaEwOeSpR",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "validationRule": {
+        "expression": "#{population} != #{femalePopulation} + #{malePopulation}",
+        "validationMessage": {
+          "ar": "مجموع الذكور والإناث يجب أن يساوي عدد السكان الكلي.",
+          "en": "Males + Females must equal Total Population.",
+          "default": "#{population} != #{femalePopulation} + #{malePopulation}"
+        }
+      },
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "malePopulation",
+      "path": "households_information.householdnames.uwsavairFrb",
+      "code": "malepopulation",
+      "description": "Number of males in the household.",
+      "order": 24,
+      "label": {
+        "ar": "سكان-ذكور",
+        "en": "Male Population"
+      },
+      "rules": [],
+      "id": "uwsavairFrb",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "femalePopulation",
+      "path": "households_information.householdnames.lWeb8u0G4tj",
+      "code": "femalepopulation",
+      "description": "Number of females in the household.",
+      "order": 25,
+      "label": {
+        "ar": "سكان-إناث",
+        "en": "Female Population"
+      },
+      "rules": [],
+      "id": "lWeb8u0G4tj",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "pregnantWomen",
+      "path": "households_information.householdnames.XZSGQpXywog",
+      "code": "pregnantwomen",
+      "description": "Number of pregnant women in the household.",
+      "order": 26,
+      "label": {
+        "ar": "حوامل",
+        "en": "Pregnant Women"
+      },
+      "rules": [
+        {
+          "expression": "#{pregnantWomen} > #{femalePopulation}",
+          "action": "Error",
+          "message": {
+            "ar": "عدد الحوامل لا يمكن أن يتجاوز عدد الإناث.",
+            "en": "Pregnant women cannot exceed total females."
+          }
+        }
+      ],
+      "id": "XZSGQpXywog",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "validationRule": {
+        "expression": "#{pregnantWomen} > #{femalePopulation}",
+        "validationMessage": {
+          "ar": "عدد الحوامل لا يمكن أن يتجاوز عدد الإناث.",
+          "en": "Pregnant women cannot exceed total females.",
+          "default": "#{pregnantWomen} > #{femalePopulation}"
+        }
+      },
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "childrenMaleCount",
+      "path": "households_information.householdnames.r80KoQG1Hpj",
+      "code": "childrenmalecount",
+      "description": "Number of male children.",
+      "order": 27,
+      "label": {
+        "ar": "أطفال-ذكور",
+        "en": "Children (Male)"
+      },
+      "rules": [
+        {
+          "expression": "#{childrenMaleCount} > #{malePopulation}",
+          "action": "Error",
+          "message": {
+            "ar": "عدد الأطفال الذكور لا يمكن أن يتجاوز عدد الذكور الكلي.",
+            "en": "Male children cannot exceed total males."
+          }
+        }
+      ],
+      "id": "r80KoQG1Hpj",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "validationRule": {
+        "expression": "#{childrenMaleCount} > #{malePopulation}",
+        "validationMessage": {
+          "ar": "عدد الأطفال الذكور لا يمكن أن يتجاوز عدد الذكور الكلي.",
+          "en": "Male children cannot exceed total males.",
+          "default": "#{childrenMaleCount} > #{malePopulation}"
+        }
+      },
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "childrenFemaleCount",
+      "path": "households_information.householdnames.bDByJMzYLy1",
+      "code": "childrenfemalecount",
+      "description": "Number of female children.",
+      "order": 28,
+      "label": {
+        "ar": "أطفال-إناث",
+        "en": "Children (Female)"
+      },
+      "rules": [
+        {
+          "expression": "#{childrenFemaleCount} + #{pregnantWomen} > #{femalePopulation}",
+          "action": "Error",
+          "message": {
+            "ar": "عدد الأطفال الإناث والحوامل يجب أن يكون أصغر من أو يساوي عدد الإناث",
+            "en": "The number of female children and pregnant women must be less than or equal to the female population"
+          }
+        }
+      ],
+      "id": "bDByJMzYLy1",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "validationRule": {
+        "expression": "#{childrenFemaleCount} + #{pregnantWomen} > #{femalePopulation}",
+        "validationMessage": {
+          "ar": "عدد الأطفال الإناث والحوامل يجب أن يكون أصغر من أو يساوي عدد الإناث",
+          "en": "The number of female children and pregnant women must be less than or equal to the female population",
+          "default": "#{childrenFemaleCount} + #{pregnantWomen} > #{femalePopulation}"
+        }
+      },
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "displacedResidentsCount",
+      "path": "households_information.householdnames.MdpCkVH6KpG",
+      "code": "displacedresidentscount",
+      "description": "Number of displaced residents in the household, if any.",
+      "order": 29,
+      "label": {
+        "ar": "النازحين",
+        "en": "Number of Displaced Residents"
+      },
+      "rules": [
+        {
+          "expression": "#{displacedResidentsCount} > #{population}",
+          "action": "Error",
+          "message": {
+            "ar": "عدد النازحين لا يمكن أن يتجاوز عدد السكان الكلي.",
+            "en": "Displaced residents cannot exceed total population."
+          }
+        }
+      ],
+      "id": "MdpCkVH6KpG",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "validationRule": {
+        "expression": "#{displacedResidentsCount} > #{population}",
+        "validationMessage": {
+          "ar": "عدد النازحين لا يمكن أن يتجاوز عدد السكان الكلي.",
+          "en": "Displaced residents cannot exceed total population.",
+          "default": "#{displacedResidentsCount} > #{population}"
+        }
+      },
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "householdnames",
+      "name": "itns",
+      "path": "households_information.householdnames.vZLHmltcf4M",
+      "code": "itns",
+      "description": "Number of mosquito nets received.",
+      "order": 30,
+      "label": {
+        "ar": "الناموسيات",
+        "en": "Received Nets"
+      },
+      "rules": [
+        {
+          "expression": "#{itns} > #{population}",
+          "action": "Error",
+          "message": {
+            "ar": "لايمكن ان يكون عدد الناموسيات اكبر من اجمالي عدد السكان",
+            "en": "The number of mosquito nets received cannot exceed the total population"
+          }
+        },
+        {
+          "expression": "((#{itns} > 0 && #{population} > 0) && (#{itns} <= #{population})) && (#{itns} != ((#{population} + (#{population} % 2)) / 2))",
+          "action": "Warning"
+        }
+      ],
+      "id": "vZLHmltcf4M",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "validationRule": {
+        "expression": "#{itns} > #{population}",
+        "validationMessage": {
+          "ar": "لايمكن ان يكون عدد الناموسيات اكبر من اجمالي عدد السكان",
+          "en": "The number of mosquito nets received cannot exceed the total population",
+          "default": "#{itns} > #{population}"
+        }
+      },
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    }
+  ],
+  "sections": [
+    {
+      "name": "status_merged_details",
+      "path": "status_merged_details",
+      "description": "location Status Details",
+      "order": 12,
+      "label": {
+        "ar": "تفاصيل حالة دمج",
+        "en": "Status"
+      },
+      "rules": [
+        {
+          "expression": "#{status} == 'MERGED'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "status_merged_details"
+    },
+    {
+      "name": "mainSection",
+      "path": "mainSection",
+      "description": "Main Section.",
+      "order": 0,
+      "label": {
+        "ar": "بيانات أساسية",
+        "en": "Work Date and Day"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "mainSection"
+    },
+    {
+      "name": "status_rescheduled_details",
+      "path": "status_rescheduled_details",
+      "description": "status_rescheduled_details",
+      "order": 14,
+      "label": {
+        "ar": "تفاصيل حالة إعادة جدولة",
+        "en": "Status"
+      },
+      "rules": [
+        {
+          "expression": "#{status} == 'RESCHEDULED'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "status_rescheduled_details"
+    },
+    {
+      "name": "households_information",
+      "path": "households_information",
+      "order": 16,
+      "label": {
+        "ar": "معلومات المنازل",
+        "en": "Households Information"
+      },
+      "rules": [
+        {
+          "expression": "#{status} == 'IN_PROGRESS' || #{status} == 'DONE'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "households_information"
+    },
+    {
+      "parent": "households_information",
+      "name": "householdnames",
+      "path": "households_information.householdnames",
+      "description": "Repeatable data for each household.",
+      "order": 18,
+      "label": {
+        "ar": "بيانات المنازل",
+        "en": "Household Data"
+      },
+      "rules": [],
+      "repeatable": true,
+      "id": "householdnames"
+    },
+    {
+      "name": "completion_details",
+      "path": "completion_details",
+      "description": "Status",
+      "order": 3,
+      "label": {
+        "ar": "معلومات اكتمال التوزيع",
+        "en": "Completion Details"
+      },
+      "rules": [
+        {
+          "expression": "#{status} == 'DONE'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "completion_details"
+    },
+    {
+      "name": "status_reassigned_details",
+      "path": "status_reassigned_details",
+      "description": "status_reassigned_details",
+      "order": 6,
+      "label": {
+        "ar": "معلومات إعادة تعيين فريق آخر",
+        "en": "Reassigning Details"
+      },
+      "rules": [
+        {
+          "expression": "#{status} == 'REASSIGNED'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "status_reassigned_details"
+    },
+    {
+      "name": "status_cancelled_details",
+      "path": "status_cancelled_details",
+      "description": "cancelling_details",
+      "order": 9,
+      "label": {
+        "ar": "معلومات إلغاء التوزيع",
+        "en": "Cancelling Details"
+      },
+      "rules": [
+        {
+          "expression": "#{status} == 'CANCELLED'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "status_cancelled_details"
+    }
+  ],
+  "code": "LLINS_DISTRIBUTION_FORM"
+}

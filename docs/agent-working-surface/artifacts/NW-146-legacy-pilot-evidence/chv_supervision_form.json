@@ -1,0 +1,1714 @@
+{
+  "uid": "mpmjpJcMuas",
+  "versionUid": "eQ9tP1Y7gqy",
+  "versionNumber": 23,
+  "name": "iccm_supervision_502",
+  "deleted": false,
+  "label": {
+    "en": "iCCM Supervision II",
+    "ar": "الإشراف على المتطوعات 2"
+  },
+  "fields": [
+    {
+      "parent": "main",
+      "name": "DateAndTime",
+      "path": "main.E0mkcxV1MAU",
+      "code": "DateAndTime",
+      "order": 101,
+      "label": {
+        "ar": "الوقت والتاريخ",
+        "en": "DateAndTime"
+      },
+      "rules": [],
+      "id": "E0mkcxV1MAU",
+      "type": "DateTime",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "iccm_supervision_team_type",
+      "path": "main.kbHsG2u2n8K",
+      "code": "iccm_supervision_team_type",
+      "description": "iccm supervision team type chv",
+      "order": 102,
+      "label": {
+        "ar": "فريق الاشراف",
+        "en": "iccm_supervision_team_type"
+      },
+      "rules": [],
+      "id": "kbHsG2u2n8K",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "UDX20myLcFQ",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "others",
+      "path": "main.irvOz2MYtbZ",
+      "code": "others",
+      "description": "Other",
+      "order": 103,
+      "label": {
+        "ar": "فريق اخر",
+        "en": "other_team_type"
+      },
+      "rules": [
+        {
+          "expression": "#{iccm_supervision_team_type} == 'other_iccm_supervision_team'",
+          "action": "Show"
+        }
+      ],
+      "id": "irvOz2MYtbZ",
+      "type": "Text",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "NotificationNumber",
+      "path": "main.wZIDLQtSHL2",
+      "code": "NotificationNumber",
+      "description": "Indoor entomological surveillance",
+      "order": 104,
+      "label": {
+        "ar": "رقم البلاغ",
+        "en": "NotificationNumber"
+      },
+      "rules": [
+        {
+          "expression": "#{iccm_supervision_team_type} == 'emergency_team'",
+          "action": "Show"
+        }
+      ],
+      "id": "wZIDLQtSHL2",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "chv_name",
+      "path": "main.YZjCBLMSrCe",
+      "code": "chv_name",
+      "order": 108,
+      "label": {
+        "ar": "اسم المتطوعة",
+        "en": "chv_name"
+      },
+      "rules": [],
+      "id": "YZjCBLMSrCe",
+      "type": "FullName",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "chv_id",
+      "path": "main.tl7GFA8JsIT",
+      "code": "chv_id",
+      "order": 109,
+      "label": {
+        "ar": "كود المتطوعة",
+        "en": "chv_id"
+      },
+      "rules": [],
+      "id": "tl7GFA8JsIT",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "chv_phone",
+      "path": "main.QJad4RBGgkM",
+      "code": "chv_phone",
+      "order": 110,
+      "label": {
+        "ar": "رقم الهاتف",
+        "en": "chv_phone"
+      },
+      "rules": [],
+      "id": "QJad4RBGgkM",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "consumption",
+      "name": "month_name_with_visit",
+      "path": "consumption.bKPRrAXqRph",
+      "code": "month_name_with_visit",
+      "description": "chv super 501",
+      "order": 302,
+      "label": {
+        "ar": "الشهر",
+        "en": "month_name_with_visit"
+      },
+      "rules": [],
+      "id": "bKPRrAXqRph",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "Db0Bme8Ujqd",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "matching",
+      "name": "suspected_malaria_cases",
+      "path": "matching.aSXPYhRtPE0",
+      "code": "suspected_malaria_cases",
+      "order": 202,
+      "label": {
+        "ar": "عدد الحالات المشتبهة لمرض الملاريا",
+        "en": "suspected_malaria_cases"
+      },
+      "rules": [],
+      "id": "aSXPYhRtPE0",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "matching",
+      "name": "malaria_tested_cases",
+      "path": "matching.pdyLAC9ABlP",
+      "code": "malaria_tested_cases",
+      "description": "chv super 502",
+      "order": 203,
+      "label": {
+        "ar": "عدد الحالات المفحوصة لمرض الملاريا",
+        "en": "malaria_tested_cases"
+      },
+      "rules": [],
+      "id": "pdyLAC9ABlP",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "matching",
+      "name": "malaria_positive_cases",
+      "path": "matching.VFxd0Xc5GhH",
+      "code": "malaria_positive_cases",
+      "description": "chv super 502",
+      "order": 204,
+      "label": {
+        "ar": "عدد الحالات الإيجابية لمرض الملاريا",
+        "en": "malaria_positive_cases"
+      },
+      "rules": [],
+      "id": "VFxd0Xc5GhH",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "matching",
+      "name": "awareness_sessions",
+      "path": "matching.kVtmOQd8n1A",
+      "code": "awareness_sessions",
+      "description": "chv super 502",
+      "order": 205,
+      "label": {
+        "ar": "عدد جلسات التوعية",
+        "en": "awareness_sessions"
+      },
+      "rules": [],
+      "id": "kVtmOQd8n1A",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "matching",
+      "name": "month_name",
+      "path": "matching.T7QqiTeFdHF",
+      "code": "month_name",
+      "order": 201,
+      "label": {
+        "ar": "الشهر",
+        "en": "month_name"
+      },
+      "rules": [],
+      "id": "T7QqiTeFdHF",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "NN8fDdIJmCn",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "consumption",
+      "name": "available_quantity",
+      "path": "consumption.gFdPiymvk1m",
+      "code": "available_quantity",
+      "order": 303,
+      "label": {
+        "ar": "متوفر",
+        "en": "available_quantity"
+      },
+      "rules": [],
+      "id": "gFdPiymvk1m",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "consumption",
+      "name": "received_quantity",
+      "path": "consumption.MhCDftArY4c",
+      "code": "received_quantity",
+      "order": 304,
+      "label": {
+        "ar": "مستلم",
+        "en": "received_quantity"
+      },
+      "rules": [],
+      "id": "MhCDftArY4c",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "consumption",
+      "name": "expired_quantity",
+      "path": "consumption.c9zG4B2k7LY",
+      "code": "expired_quantity",
+      "order": 305,
+      "label": {
+        "ar": "منتهي",
+        "en": "expired_quantity"
+      },
+      "rules": [],
+      "id": "c9zG4B2k7LY",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "consumption",
+      "name": "consumed_quantity",
+      "path": "consumption.IALEZP4BTGO",
+      "code": "consumed_quantity",
+      "order": 306,
+      "label": {
+        "ar": "مستهلك",
+        "en": "consumed_quantity"
+      },
+      "rules": [],
+      "id": "IALEZP4BTGO",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "consumption",
+      "name": "redistributed_quantity",
+      "path": "consumption.rtntGY93Fpn",
+      "code": "redistributed_quantity",
+      "order": 307,
+      "label": {
+        "ar": "الكمية المعاد توزيعها",
+        "en": "redistributed_quantity"
+      },
+      "rules": [],
+      "id": "rtntGY93Fpn",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "consumption",
+      "name": "stockout_days",
+      "path": "consumption.DFfECZdsEZd",
+      "code": "stockout_days",
+      "order": 308,
+      "label": {
+        "ar": "أيام نفاد المخزون",
+        "en": "stockout_days"
+      },
+      "rules": [],
+      "id": "DFfECZdsEZd",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "gloves_delivered_packet",
+      "path": "supplies.xumAdDFjab3",
+      "code": "gloves_delivered_packet",
+      "description": "chv super 502",
+      "order": 401,
+      "label": {
+        "ar": "الكفوف الطبية",
+        "en": "gloves_delivered_packet"
+      },
+      "rules": [],
+      "id": "xumAdDFjab3",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "daily_case_register_delivered",
+      "path": "supplies.DwmwIJxKDIz",
+      "code": "daily_case_register_delivered",
+      "description": "chv super 502",
+      "order": 402,
+      "label": {
+        "ar": "سجل الحالات (اليومي)",
+        "en": "daily_case_register_delivered"
+      },
+      "rules": [],
+      "id": "DwmwIJxKDIz",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "malaria_posters_delivered",
+      "path": "supplies.JamUyVzmvEj",
+      "code": "malaria_posters_delivered",
+      "description": "chv super 502",
+      "order": 403,
+      "label": {
+        "ar": "ملصقات الملاريا",
+        "en": "malaria_posters_delivered"
+      },
+      "rules": [],
+      "id": "JamUyVzmvEj",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "chv_guide_delivered",
+      "path": "supplies.vXtKlouGgyr",
+      "code": "chv_guide_delivered",
+      "description": "chv super 502",
+      "order": 405,
+      "label": {
+        "ar": "دليل المتطوعة",
+        "en": "chv_guide_delivered"
+      },
+      "rules": [],
+      "id": "vXtKlouGgyr",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "chv_bag",
+      "path": "supplies.vO4MVyAxBrL",
+      "code": "chv_bag",
+      "description": "chv super 502",
+      "order": 406,
+      "label": {
+        "ar": "حقيبة متطوعة صحة المجتمع",
+        "en": "chv_bag"
+      },
+      "rules": [],
+      "id": "vO4MVyAxBrL",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "UXTheTcoCZu",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "chv_stopwatch",
+      "path": "supplies.EGddDk34Wae",
+      "code": "chv_stopwatch",
+      "description": "chv super 502",
+      "order": 407,
+      "label": {
+        "ar": "ساعة توقيت",
+        "en": "chv_stopwatch"
+      },
+      "rules": [],
+      "id": "EGddDk34Wae",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "UXTheTcoCZu",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "chv_sharps_disposal",
+      "path": "supplies.J26a1DFtlQj",
+      "code": "chv_sharps_disposal",
+      "description": "chv super 502",
+      "order": 408,
+      "label": {
+        "ar": "صندوق حفظ الأدوات الحادة",
+        "en": "chv_sharps_disposal"
+      },
+      "rules": [],
+      "id": "J26a1DFtlQj",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "UXTheTcoCZu",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "chv_dose_timing_card",
+      "path": "supplies.o4hqPAye8kO",
+      "code": "chv_dose_timing_card",
+      "description": "chv super 502",
+      "order": 409,
+      "label": {
+        "ar": "كرت تحديد جرعة علاج الملاريا وتحديد أوقات اخذ الجرعات",
+        "en": "chv_dose_timing_card"
+      },
+      "rules": [],
+      "id": "o4hqPAye8kO",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "UXTheTcoCZu",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "chv_drug_keeping_box",
+      "path": "supplies.b3UtCrVruC1",
+      "code": "chv_drug_keeping_box",
+      "description": "chv super 502",
+      "order": 410,
+      "label": {
+        "ar": "صندوق حفظ علاجات الملاريا",
+        "en": "chv_drug_keeping_box"
+      },
+      "rules": [],
+      "id": "b3UtCrVruC1",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "UXTheTcoCZu",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "supplies",
+      "name": "chv_rdt_disposal",
+      "path": "supplies.Flmrrg0xWbL",
+      "code": "chv_rdt_disposal",
+      "description": "chv super 502",
+      "order": 410,
+      "label": {
+        "ar": "اكياس بلاستيكية لحفظ شرائح الفحص RDTs المستخد",
+        "en": "chv_rdt_disposal"
+      },
+      "rules": [],
+      "id": "Flmrrg0xWbL",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "UXTheTcoCZu",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "malaria_transmission_knowledge",
+      "path": "kap.A4SwX11cS0G",
+      "code": "malaria_transmission_knowledge",
+      "description": "chv super 502",
+      "order": 504,
+      "label": {
+        "ar": "طرق انتقال مرض الملاريا",
+        "en": "malaria_transmission_knowledge"
+      },
+      "rules": [],
+      "id": "A4SwX11cS0G",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "itns_usage_knowledge",
+      "path": "kap.xPkJJPauoqD",
+      "code": "itns_usage_knowledge",
+      "description": "chv super 502",
+      "order": 505,
+      "label": {
+        "ar": "الاستخدام الصحيح للناموسيات",
+        "en": "itns_usage_knowledge"
+      },
+      "rules": [],
+      "id": "xPkJJPauoqD",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "malaria_prevention_knowledge",
+      "path": "kap.Bb7emJdFGDb",
+      "code": "malaria_prevention_knowledge",
+      "description": "chv super 502",
+      "order": 507,
+      "label": {
+        "ar": "طرق الوقاية من مرض الملاريا",
+        "en": "malaria_prevention_knowledge"
+      },
+      "rules": [],
+      "id": "Bb7emJdFGDb",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "breeding_sources_knowledge",
+      "path": "kap.kAWnUvSP1Wq",
+      "code": "breeding_sources_knowledge",
+      "description": "chv super 502",
+      "order": 508,
+      "label": {
+        "ar": "بؤر تكاثر وانتشار البعوض",
+        "en": "breeding_sources_knowledge"
+      },
+      "rules": [],
+      "id": "kAWnUvSP1Wq",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "lsm_knowledge",
+      "path": "kap.jiC8Nmm4Wup",
+      "code": "lsm_knowledge",
+      "description": "chv super 502",
+      "order": 509,
+      "label": {
+        "ar": "طرق التخلص من مواقع تكاثر يرقات البعوض",
+        "en": "lsm_knowledge"
+      },
+      "rules": [],
+      "id": "jiC8Nmm4Wup",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "mosquitoes entering prevention_practice",
+      "path": "kap.d3GZ124DS2Z",
+      "code": "mosquitoes entering prevention_practice",
+      "description": "chv super 502",
+      "order": 510,
+      "label": {
+        "ar": "تطبق وسائل منع دخول البعوض الى منزلها",
+        "en": "mosquitoes entering prevention_practice"
+      },
+      "rules": [],
+      "id": "d3GZ124DS2Z",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "owns_itns_practice",
+      "path": "kap.Qfv0AWabTAg",
+      "code": "owns_itns_practice",
+      "description": "chv super 502",
+      "order": 511,
+      "label": {
+        "ar": "تتوفر الناموسيات في منزلها",
+        "en": "owns_itns_practice"
+      },
+      "rules": [],
+      "id": "Qfv0AWabTAg",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "itns_hung_practice",
+      "path": "kap.GgMlIvjQB5g",
+      "code": "itns_hung_practice",
+      "description": "chv super 502",
+      "order": 512,
+      "label": {
+        "ar": "الناموسيات معلقة في منزلها ويتم استخدامها",
+        "en": "itns_hung_practice"
+      },
+      "rules": [],
+      "id": "GgMlIvjQB5g",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "breeding_source_absence_practice",
+      "path": "kap.HnlWd5hTsmh",
+      "code": "breeding_source_absence_practice",
+      "description": "chv super 502",
+      "order": 513,
+      "label": {
+        "ar": "لا يوجد مصادر توالد للبعوض في منزلها",
+        "en": "breeding_source_absence_practice"
+      },
+      "rules": [],
+      "id": "HnlWd5hTsmh",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "unexposed_water_containers_practice",
+      "path": "kap.gcMW7qOTwu6",
+      "code": "unexposed_water_containers_practice",
+      "description": "chv super 502",
+      "order": 514,
+      "label": {
+        "ar": "اوعية وخزانات حفظ المياه في منزلها مغلقة غير مكشوفة",
+        "en": "unexposed_water_containers_practice"
+      },
+      "rules": [],
+      "id": "gcMW7qOTwu6",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "how_malaria_transmitted",
+      "path": "kap.nCTdp3sb1mN",
+      "code": "how_malaria_transmitted",
+      "description": "chv super 502",
+      "order": 515,
+      "label": {
+        "ar": "كيف ينتقل مرض الملاريا",
+        "en": "how_malaria_transmitted"
+      },
+      "rules": [],
+      "id": "nCTdp3sb1mN",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "HD6TEMa4Inh",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "itns_usage_benefit",
+      "path": "kap.fjrBHy6nJfF",
+      "code": "itns_usage_benefit",
+      "description": "chv super 502",
+      "order": 516,
+      "label": {
+        "ar": "ماهي الفائدة من النوم تحت الناموسية",
+        "en": "itns_usage_benefit"
+      },
+      "rules": [],
+      "id": "fjrBHy6nJfF",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "HD6TEMa4Inh",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "family_know_chv",
+      "path": "community.GfADUiCgPYC",
+      "code": "family_know_chv",
+      "description": "chv super 502",
+      "order": 701,
+      "label": {
+        "ar": "هل تعرفت اسرة المنزل على المتطوعة:",
+        "en": "family_know_chv"
+      },
+      "rules": [],
+      "id": "GfADUiCgPYC",
+      "type": "YesNo",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "chv_allowed_to_enter_the_house",
+      "path": "community.xj8MTK4JM1t",
+      "code": "chv_allowed_to_enter_the_house",
+      "description": "chv super 502",
+      "order": 702,
+      "label": {
+        "ar": "هل تم السماح للمتطوعة بالدخول الى المنزل",
+        "en": "chv_allowed_to_enter_the_house"
+      },
+      "rules": [],
+      "id": "xj8MTK4JM1t",
+      "type": "YesNo",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "who_is_chv",
+      "path": "community.gUvULuVPwd6",
+      "code": "who_is_chv",
+      "description": "chv super 502",
+      "order": 718,
+      "label": {
+        "ar": "من هي المتطوعة التي في القرية",
+        "en": "who_is_chv"
+      },
+      "rules": [],
+      "id": "gUvULuVPwd6",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "HD6TEMa4Inh",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "chv_role",
+      "path": "community.dtrltFBdtyt",
+      "code": "chv_role",
+      "description": "chv super 502",
+      "order": 719,
+      "label": {
+        "ar": "ما هو دور المتطوعة والخدمات التي تقدمها",
+        "en": "chv_role"
+      },
+      "rules": [],
+      "id": "dtrltFBdtyt",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "HD6TEMa4Inh",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "name": "iccm_super_notes",
+      "path": "EXkV8IT6xCe",
+      "code": "iccm_super_notes",
+      "description": "chv super 502",
+      "order": 800,
+      "label": {
+        "ar": "ملاحظات خاصة بالمشرف:",
+        "en": "iccm_super_notes"
+      },
+      "rules": [],
+      "id": "EXkV8IT6xCe",
+      "type": "LongText",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "how_malaria_transmitted_household",
+      "path": "community.vQwOBpdETmV",
+      "code": "how_malaria_transmitted_household",
+      "description": "chv super 502",
+      "order": 716,
+      "label": {
+        "ar": "كيف ينتقل مرض الملاريا",
+        "en": "how_malaria_transmitted_household"
+      },
+      "rules": [],
+      "id": "vQwOBpdETmV",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "HD6TEMa4Inh",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "itns_benefits_household",
+      "path": "community.RjJdSIg4cVN",
+      "code": "itns_benefits_household",
+      "description": "chv super 502",
+      "order": 717,
+      "label": {
+        "ar": "ماهي الفائدة من النوم تحت الناموسية",
+        "en": "itns_benefits_household"
+      },
+      "rules": [],
+      "id": "RjJdSIg4cVN",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "HD6TEMa4Inh",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "chv_family_members",
+      "path": "kap.iqpKMkgurCe",
+      "code": "chv_family_members",
+      "description": "chv super 502",
+      "order": 501,
+      "label": {
+        "ar": "عدد افراد الاسرة للمتطوعة",
+        "en": "chv_family_members"
+      },
+      "rules": [],
+      "id": "iqpKMkgurCe",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "chv_itns_have",
+      "path": "kap.p4jDv4iGsll",
+      "code": "chv_itns_have",
+      "description": "chv super 502",
+      "order": 502,
+      "label": {
+        "ar": "عدد الناموسيات المتوفرة في المنزل",
+        "en": "chv_itns_have"
+      },
+      "rules": [],
+      "id": "p4jDv4iGsll",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "kap",
+      "name": "chv_hanged_itns",
+      "path": "kap.hZAW4qS0oNx",
+      "code": "chv_hanged_itns",
+      "description": "chv super 502",
+      "order": 503,
+      "label": {
+        "ar": "عدد الناموسيات المعلقة",
+        "en": "chv_hanged_itns"
+      },
+      "rules": [],
+      "id": "hZAW4qS0oNx",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "volunteering_type",
+      "path": "main.M1583WVokIm",
+      "code": "volunteering_type",
+      "description": "chv super 502",
+      "order": 108,
+      "label": {
+        "ar": "نوع التطوع",
+        "en": "volunteering_type"
+      },
+      "rules": [],
+      "id": "M1583WVokIm",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "cn6FJVcBei2",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "distance_km",
+      "path": "main.I5vk9g0eDbE",
+      "code": "distance_km",
+      "description": "chv super 502",
+      "order": 109,
+      "label": {
+        "ar": "المسافة بين المتطوعة وأقرب مرفق صحي عام",
+        "en": "distance_km"
+      },
+      "rules": [],
+      "id": "I5vk9g0eDbE",
+      "type": "Number",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "visited_house_members",
+      "path": "community.QCKXcI8pdtq",
+      "code": "visited_house_members",
+      "description": "chv super 502",
+      "order": 703,
+      "label": {
+        "ar": "عدد افارد الاسرة في المنزل",
+        "en": "visited_house_members"
+      },
+      "rules": [],
+      "id": "QCKXcI8pdtq",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "itns_available_visited_house",
+      "path": "community.sutfz9ESSIS",
+      "code": "itns_available_visited_house",
+      "description": "chv super 502",
+      "order": 704,
+      "label": {
+        "ar": "عدد الناموسيات المتوفرة في المنزل",
+        "en": "itns_available_visited_house"
+      },
+      "rules": [],
+      "id": "sutfz9ESSIS",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "itns_hanged_visited_house",
+      "path": "community.zGCXqDySbHP",
+      "code": "itns_hanged_visited_house",
+      "description": "chv super 502",
+      "order": 705,
+      "label": {
+        "ar": "عدد الناموسيات المعلقة",
+        "en": "itns_hanged_visited_house"
+      },
+      "rules": [],
+      "id": "zGCXqDySbHP",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "malaria_transmission_knowledge_community",
+      "path": "community.HFqfe3J82oX",
+      "code": "malaria_transmission_knowledge_community",
+      "description": "chv super 502",
+      "order": 706,
+      "label": {
+        "ar": "طرق انتقال مرض الملاريا",
+        "en": "malaria_transmission_knowledge_community"
+      },
+      "rules": [],
+      "id": "HFqfe3J82oX",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "itns_usage_knowledge_community",
+      "path": "community.YoKrFXLuDIy",
+      "code": "itns_usage_knowledge_community",
+      "description": "chv super 502",
+      "order": 707,
+      "label": {
+        "ar": "الاستخدام الصحيح للناموسيات",
+        "en": "itns_usage_knowledge_community"
+      },
+      "rules": [],
+      "id": "YoKrFXLuDIy",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "malaria_prevention_knowledge_community",
+      "path": "community.c5UCmM7U2FC",
+      "code": "malaria_prevention_knowledge_community",
+      "description": "chv super 502",
+      "order": 708,
+      "label": {
+        "ar": "طرق الوقاية من مرض الملاريا",
+        "en": "malaria_prevention_knowledge_community"
+      },
+      "rules": [],
+      "id": "c5UCmM7U2FC",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "breeding_sources_knowledge_community",
+      "path": "community.CsZYVAKXGRI",
+      "code": "breeding_sources_knowledge_community",
+      "description": "chv super 502",
+      "order": 709,
+      "label": {
+        "ar": "بؤر تكاثر وانتشار البعوض",
+        "en": "breeding_sources_knowledge_community"
+      },
+      "rules": [],
+      "id": "CsZYVAKXGRI",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "lsm_knowledge_community",
+      "path": "community.ZCmfsDb4wFp",
+      "code": "lsm_knowledge_community",
+      "description": "chv super 502",
+      "order": 710,
+      "label": {
+        "ar": "طرق التخلص من مواقع تكاثر يرقات البعوض",
+        "en": "lsm_knowledge_community"
+      },
+      "rules": [],
+      "id": "ZCmfsDb4wFp",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "VKMsbXQ3wHH",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "mosquitoes entering prevention_practice_community",
+      "path": "community.j6S3PjSA4Nf",
+      "code": "mosquitoes entering prevention_practice_community",
+      "description": "chv super 502",
+      "order": 711,
+      "label": {
+        "ar": "تطبق وسائل منع دخول البعوض الى المنزل",
+        "en": "mosquitoes entering prevention_practice_community"
+      },
+      "rules": [],
+      "id": "j6S3PjSA4Nf",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "owns_itns_practice_community",
+      "path": "community.LEDhs4ICzGH",
+      "code": "owns_itns_practice_community",
+      "description": "chv super 502",
+      "order": 712,
+      "label": {
+        "ar": "تتوفر الناموسيات في المنزل",
+        "en": "owns_itns_practice_community"
+      },
+      "rules": [],
+      "id": "LEDhs4ICzGH",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "itns_hanged_practice_community",
+      "path": "community.CIJ2bPZE5O8",
+      "code": "itns_hanged_practice_community",
+      "description": "chv super 502",
+      "order": 713,
+      "label": {
+        "ar": "الناموسيات معلقة في المنزل ويتم استخدامها",
+        "en": "itns_hanged_practice_community"
+      },
+      "rules": [],
+      "id": "CIJ2bPZE5O8",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "breeding_source_absence_practice_community",
+      "path": "community.pY8g9XFXgVP",
+      "code": "breeding_source_absence_practice_community",
+      "description": "chv super 502",
+      "order": 714,
+      "label": {
+        "ar": "لا يوجد مصادر توالد للبعوض في المنزل",
+        "en": "breeding_source_absence_practice_community"
+      },
+      "rules": [],
+      "id": "pY8g9XFXgVP",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "community",
+      "name": "unexposed_water_containers_practice_community",
+      "path": "community.plE2q8UIxRl",
+      "code": "unexposed_water_containers_practice_community",
+      "description": "chv super 502",
+      "order": 715,
+      "label": {
+        "ar": "اوعية وخزانات حفظ المياه في المنزل مغلقة غير مكشوفة",
+        "en": "unexposed_water_containers_practice_community"
+      },
+      "rules": [],
+      "id": "plE2q8UIxRl",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "hvoE33sBe97",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "consumption",
+      "name": "amds2iccm",
+      "path": "consumption.kF3ESHsnDLq",
+      "code": "amds2iccm",
+      "order": 301,
+      "label": {
+        "ar": "الصنف",
+        "en": "amds2iccm"
+      },
+      "rules": [],
+      "id": "kF3ESHsnDLq",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "m9mq4De3If2",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "referral_hf_name",
+      "path": "main.U4bTsLGjDRu",
+      "code": "referral_hf_name",
+      "order": 110,
+      "label": {
+        "ar": "اسم المرفق الصحي الخاص بالاحالة",
+        "en": "referral_hf_name"
+      },
+      "rules": [],
+      "id": "U4bTsLGjDRu",
+      "type": "Text",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "chv_village_reached",
+      "path": "main.doOd40MXLZ3",
+      "code": "chv_village_reached",
+      "order": 106,
+      "label": {
+        "ar": "تم الوصول الى قرية المتطوعة",
+        "en": "chv_village_reached"
+      },
+      "rules": [],
+      "id": "doOd40MXLZ3",
+      "type": "YesNo",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "chv_interviewed",
+      "path": "main.unaA4JhJwsq",
+      "code": "chv_interviewed",
+      "order": 107,
+      "label": {
+        "ar": "تم مقابلة المتطوعة",
+        "en": "chv_interviewed"
+      },
+      "rules": [
+        {
+          "expression": "#{chv_village_reached} == true || #{chv_village_reached} =='yes'  || #{chv_village_reached} == 'Yes'",
+          "action": "Show"
+        }
+      ],
+      "id": "unaA4JhJwsq",
+      "type": "YesNo",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "main",
+      "name": "chv_not_interviewed_reasons",
+      "path": "main.IicK5mh871O",
+      "code": "chv_not_interviewed_reasons",
+      "order": 108,
+      "label": {
+        "ar": "سبب عدم مقابلة المتطوعة",
+        "en": "chv_not_interviewed_reasons"
+      },
+      "rules": [
+        {
+          "expression": "#{chv_interviewed} == false|| #{chv_interviewed} == 'no' || #{chv_interviewed} == 'No'",
+          "action": "Show"
+        }
+      ],
+      "id": "IicK5mh871O",
+      "type": "LongText",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    }
+  ],
+  "sections": [
+    {
+      "name": "supplies",
+      "path": "supplies",
+      "order": 400,
+      "label": {
+        "ar": "المستلزمات والأدوات",
+        "en": "supplies"
+      },
+      "rules": [
+        {
+          "expression": "#{chv_interviewed} == true || #{chv_interviewed} == 'yes' || #{chv_interviewed} == 'Yes'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "supplies"
+    },
+    {
+      "name": "kap",
+      "path": "kap",
+      "order": 500,
+      "label": {
+        "ar": "الوعي والممارسات",
+        "en": "kap"
+      },
+      "rules": [
+        {
+          "expression": "#{chv_interviewed} == true || #{chv_interviewed} == 'yes' || #{chv_interviewed} == 'Yes'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "kap"
+    },
+    {
+      "name": "main",
+      "path": "main",
+      "order": 100,
+      "label": {
+        "ar": "عام",
+        "en": "main"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "main"
+    },
+    {
+      "name": "consumption",
+      "path": "consumption",
+      "order": 300,
+      "label": {
+        "ar": "الاستهلاك",
+        "en": "consumption"
+      },
+      "rules": [
+        {
+          "expression": "#{chv_interviewed} == true || #{chv_interviewed} == 'yes' || #{chv_interviewed} == 'Yes'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": true,
+      "id": "consumption"
+    },
+    {
+      "name": "community",
+      "path": "community",
+      "order": 700,
+      "label": {
+        "ar": "تأثير جهود التوعية",
+        "en": "community"
+      },
+      "rules": [
+        {
+          "expression": "#{chv_interviewed} == true || #{chv_interviewed} == 'yes' || #{chv_interviewed} == 'Yes'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": false,
+      "id": "community"
+    },
+    {
+      "name": "matching",
+      "path": "matching",
+      "order": 200,
+      "label": {
+        "ar": "تطابق البيانات",
+        "en": "matching"
+      },
+      "rules": [
+        {
+          "expression": "#{chv_interviewed} == true || #{chv_interviewed} == 'yes' || #{chv_interviewed} == 'Yes'",
+          "action": "Show"
+        }
+      ],
+      "repeatable": true,
+      "id": "matching"
+    }
+  ],
+  "code": "iccm_supervision_502"
+}
