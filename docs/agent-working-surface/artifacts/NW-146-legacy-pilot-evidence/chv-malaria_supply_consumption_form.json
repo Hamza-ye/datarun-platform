@@ -1,0 +1,115 @@
+{
+  "uid": "zglED4TsbTh",
+  "versionUid": "gNno4rMnbiA",
+  "versionNumber": 14,
+  "name": "تسجيل بيانات استخدام أدوية وشرائط الفحص",
+  "description": "Form used by community health volunteers to record monthly data on malaria medicine usage and rapid diagnostic test (RDT) supplies under the ICCM program",
+  "deleted": false,
+  "label": {
+    "en": "Malaria Supply Usage",
+    "ar": "استخدام الأدوية والفحص السريع"
+  },
+  "fields": [
+    {
+      "name": "month",
+      "path": "SRtvqGkBWEd",
+      "code": "month",
+      "description": "Month",
+      "order": 0,
+      "label": {
+        "ar": "الشهر",
+        "en": "Month"
+      },
+      "rules": [],
+      "id": "SRtvqGkBWEd",
+      "type": "Date",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "name": "comment",
+      "path": "cjY0oSUx6YI",
+      "code": "comment",
+      "order": 10,
+      "label": {
+        "ar": "ملاحظات وتعليقات إن وجدت",
+        "en": "Comments"
+      },
+      "rules": [],
+      "id": "cjY0oSUx6YI",
+      "type": "LongText",
+      "mandatory": false,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "movements",
+      "name": "amd_iccm",
+      "path": "movements.IvB892THABE",
+      "code": "amd_iccm",
+      "description": "amd_iccm chv",
+      "order": 3,
+      "label": {
+        "ar": "الصنف",
+        "en": "amd_iccm"
+      },
+      "rules": [],
+      "id": "IvB892THABE",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "xDAaZ6BmjbX",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "movements",
+      "name": "stocktake_quantity",
+      "path": "movements.dHXt6yT0O0t",
+      "code": "stocktake_quantity",
+      "order": 11,
+      "label": {
+        "ar": "الكمية المتوفرة (جرد)",
+        "en": "stocktake_quantity"
+      },
+      "rules": [],
+      "id": "dHXt6yT0O0t",
+      "type": "Number",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    }
+  ],
+  "sections": [
+    {
+      "name": "movements",
+      "path": "movements",
+      "description": "Items Movements",
+      "order": 1,
+      "label": {
+        "ar": "حركة الادوية",
+        "en": "Resources Movements"
+      },
+      "rules": [],
+      "repeatable": true,
+      "id": "movements"
+    }
+  ],
+  "code": "iccm_stock_consumption"
+}

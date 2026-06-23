@@ -1,0 +1,106 @@
+{
+  "uid": "QBVcGxiko2q",
+  "versionUid": "PkYh2eJrQ8w",
+  "versionNumber": 12,
+  "name": "inventory_901",
+  "description": "مستند بيان جرد مخزون",
+  "deleted": false,
+  "label": {
+    "en": "Stocktake",
+    "ar": "جرد مخزني"
+  },
+  "fields": [
+    {
+      "parent": "invoiceDetails",
+      "name": "wh_category",
+      "path": "invoice.invoiceDetails.NIqWvSAvJkJ",
+      "code": "wh_category",
+      "order": 201,
+      "label": {
+        "ar": "الصنف",
+        "en": "wh_category"
+      },
+      "rules": [],
+      "id": "NIqWvSAvJkJ",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "eIkndo6hF4q",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "invoiceDetails",
+      "name": "wh_quantity",
+      "path": "invoice.invoiceDetails.r8XxktPN8Lx",
+      "code": "wh_quantity",
+      "order": 204,
+      "label": {
+        "ar": "الكمية",
+        "en": "wh_quantity"
+      },
+      "rules": [],
+      "id": "r8XxktPN8Lx",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": false,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "invoice",
+      "name": "DateOnly",
+      "path": "invoice.wszolIHTuzW",
+      "code": "DateOnly",
+      "order": 101,
+      "label": {
+        "ar": "تاريخ الحركة",
+        "en": "DateOnly"
+      },
+      "rules": [],
+      "id": "wszolIHTuzW",
+      "type": "Date",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    }
+  ],
+  "sections": [
+    {
+      "name": "invoice",
+      "path": "invoice",
+      "order": 100,
+      "label": {
+        "ar": "بيانات الحركة",
+        "en": "invoice"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "invoice"
+    },
+    {
+      "parent": "invoice",
+      "name": "invoiceDetails",
+      "path": "invoice.invoiceDetails",
+      "order": 200,
+      "label": {
+        "ar": "التفاصيل",
+        "en": "invoiceDetails"
+      },
+      "rules": [],
+      "repeatable": true,
+      "id": "invoiceDetails"
+    }
+  ],
+  "code": "wh_stocktake_901"
+}

@@ -1,0 +1,235 @@
+{
+  "uid": "pBLU5LcKCVF",
+  "versionUid": "MKaiS9mHOkZ",
+  "versionNumber": 1,
+  "name": "مراجعة ومطابقة الكميات المصروفة من الناموسيات",
+  "description": "Form for tracking daily activities of team supervisors during campaigns.",
+  "deleted": false,
+  "label": {
+    "en": "Review and Reconcile Disbursed ITNs Quantities",
+    "ar": "مراجعة ومطابقة الكميات المصروفة من الناموسيات"
+  },
+  "fields": [
+    {
+      "parent": "mainSection",
+      "name": "workDay",
+      "path": "mainSection.VQTpnEDHEkF",
+      "code": "workday",
+      "description": "Day of work for the campaign.",
+      "order": 1,
+      "label": {
+        "ar": "يوم العمل",
+        "en": "Work Day"
+      },
+      "rules": [],
+      "id": "VQTpnEDHEkF",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "LT0LMYKsxhO",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dataReview",
+      "name": "teamNumber",
+      "path": "dataReview.RLFO31UHpKA",
+      "code": "teamnumber",
+      "order": 3,
+      "label": {
+        "ar": "الفريق",
+        "en": "Team Number"
+      },
+      "rules": [],
+      "id": "RLFO31UHpKA",
+      "type": "Team",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dataReview",
+      "name": "itns_dispensed",
+      "path": "dataReview.EFpljoSL9PM",
+      "code": "itns_dispensed",
+      "order": 4,
+      "label": {
+        "ar": "الناموسيات المصروفة",
+        "en": "Nets Issued"
+      },
+      "rules": [],
+      "id": "EFpljoSL9PM",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dataReview",
+      "name": "itns_distributed",
+      "path": "dataReview.NMEVst2msAj",
+      "code": "itns_distributed",
+      "order": 5,
+      "label": {
+        "ar": "الناموسيات الموزعة",
+        "en": "Nets Distributed"
+      },
+      "rules": [],
+      "id": "NMEVst2msAj",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dataReview",
+      "name": "itns_remainingRecords",
+      "path": "dataReview.SRnbh44DpBX",
+      "code": "itns_remainingrecords",
+      "order": 6,
+      "label": {
+        "ar": "متبقي حسب السجلات",
+        "en": "Nets Remaining (Records)"
+      },
+      "rules": [],
+      "id": "SRnbh44DpBX",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dataReview",
+      "name": "itns_remainingActual",
+      "path": "dataReview.lYWjveBaqfg",
+      "code": "itns_remainingactual",
+      "order": 7,
+      "label": {
+        "ar": "متبقي حسب الجرد",
+        "en": "Nets Remaining (Actual)"
+      },
+      "rules": [],
+      "id": "lYWjveBaqfg",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dataReview",
+      "name": "itns_differences",
+      "path": "dataReview.BkfHjyNPsPS",
+      "code": "itns_differences",
+      "order": 8,
+      "label": {
+        "ar": "الفارق",
+        "en": "Nets Differences (Actual)"
+      },
+      "rules": [],
+      "id": "BkfHjyNPsPS",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": false,
+      "showInSummary": true,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dataReview",
+      "name": "recordsCleanliness",
+      "path": "dataReview.WZnrMPpCBHL",
+      "code": "recordscleanliness",
+      "order": 9,
+      "label": {
+        "ar": "نظافة واكتمال البيانات",
+        "en": "Data Cleanliness"
+      },
+      "rules": [],
+      "id": "WZnrMPpCBHL",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "zK7EdFCwpx9",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dataReview",
+      "name": "instructionsCompliance",
+      "path": "dataReview.izyAVIJzs4G",
+      "code": "instructionscompliance",
+      "order": 10,
+      "label": {
+        "ar": "الالتزام بالتعليمات",
+        "en": "Compliance with Instructions"
+      },
+      "rules": [],
+      "id": "izyAVIJzs4G",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "zK7EdFCwpx9",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    }
+  ],
+  "sections": [
+    {
+      "name": "mainSection",
+      "path": "mainSection",
+      "description": "Main details of the supervisor.",
+      "order": 0,
+      "label": {
+        "ar": "تفاصيل أساسية",
+        "en": "Main Details"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "mainSection"
+    },
+    {
+      "name": "dataReview",
+      "path": "dataReview",
+      "description": "Data Review",
+      "order": 2,
+      "label": {
+        "ar": "بيانات المراجعة",
+        "en": "Data Review"
+      },
+      "rules": [],
+      "repeatable": true,
+      "id": "dataReview"
+    }
+  ]
+}

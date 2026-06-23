@@ -1,0 +1,199 @@
+{
+  "uid": "X1xjDJwNDx4",
+  "versionUid": "IMoiKDuaIJC",
+  "versionNumber": 1,
+  "name": "حركة الناموسيات-مشرف المخزن",
+  "deleted": false,
+  "label": {
+    "en": "WH ITNs Issue Form - WH keeper",
+    "ar": "حركة الناموسيات-مشرف المخزن"
+  },
+  "fields": [
+    {
+      "parent": "mainSection",
+      "name": "workday",
+      "path": "mainSection.VQTpnEDHEkF",
+      "code": "workday",
+      "order": 1,
+      "label": {
+        "ar": "اليوم",
+        "en": "workday"
+      },
+      "rules": [],
+      "id": "VQTpnEDHEkF",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "LT0LMYKsxhO",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "mainSection",
+      "name": "transactionDate",
+      "path": "mainSection.QWDjRlFPiJU",
+      "code": "transactiondate",
+      "order": 2,
+      "label": {
+        "ar": "التاريخ",
+        "en": "transaction Date"
+      },
+      "rules": [],
+      "id": "QWDjRlFPiJU",
+      "type": "Date",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dtsitnsledger",
+      "name": "transaction",
+      "path": "dtsitnsledger.nBrTFasTuWS",
+      "code": "transaction",
+      "order": 1,
+      "label": {
+        "ar": "نوع الحركة",
+        "en": "transaction"
+      },
+      "rules": [],
+      "id": "nBrTFasTuWS",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": true,
+      "optionSet": "Oxwc5ctCsOm",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dtsitnsledger",
+      "name": "teamnumber",
+      "path": "dtsitnsledger.RLFO31UHpKA",
+      "code": "teamnumber",
+      "order": 4,
+      "label": {
+        "ar": "رقم الفريق",
+        "en": "teamnumber"
+      },
+      "rules": [
+        {
+          "expression": "#{transaction} == 'dispenseToTeams' || #{transaction} == 'returnFromTeams'",
+          "action": "Show"
+        }
+      ],
+      "id": "RLFO31UHpKA",
+      "type": "IntegerPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dtsitnsledger",
+      "name": "uom",
+      "path": "dtsitnsledger.n1HrKKWrrdI",
+      "code": "uom",
+      "order": 2,
+      "label": {
+        "ar": "وحدة القياس",
+        "en": "uom"
+      },
+      "rules": [],
+      "id": "n1HrKKWrrdI",
+      "type": "SelectOne",
+      "mandatory": true,
+      "showInSummary": false,
+      "optionSet": "zq0f82tw797",
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dtsitnsledger",
+      "name": "Quantity",
+      "path": "dtsitnsledger.Jck63XyG19y",
+      "code": "quantity",
+      "order": 3,
+      "label": {
+        "ar": "الكمية",
+        "en": "Quantity"
+      },
+      "rules": [],
+      "id": "Jck63XyG19y",
+      "type": "IntegerZeroOrPositive",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    },
+    {
+      "parent": "dtsitnsledger",
+      "name": "fromToName",
+      "path": "dtsitnsledger.Lk99LTOMV8r",
+      "code": "fromtoname",
+      "order": 5,
+      "label": {
+        "ar": "اسم المخزن او الشخص",
+        "en": "fromToName"
+      },
+      "rules": [
+        {
+          "expression": "#{transaction} == 'dispenseToOtherWarehouse' || #{transaction} == 'resupply'",
+          "action": "Show"
+        }
+      ],
+      "id": "Lk99LTOMV8r",
+      "type": "Text",
+      "mandatory": true,
+      "showInSummary": false,
+      "valueTypeRendering": "DEFAULT",
+      "aggregationType": "DEFAULT",
+      "isMeasure": true,
+      "isDimension": false,
+      "readOnly": false
+    }
+  ],
+  "sections": [
+    {
+      "name": "mainSection",
+      "path": "mainSection",
+      "order": 1,
+      "label": {
+        "ar": "بيانات الاساسية",
+        "en": "mainSection"
+      },
+      "rules": [],
+      "repeatable": false,
+      "id": "mainSection"
+    },
+    {
+      "name": "dtsitnsledger",
+      "path": "dtsitnsledger",
+      "order": 2,
+      "label": {
+        "ar": "بيانات الحركة",
+        "en": "dtsitnsledger"
+      },
+      "rules": [],
+      "repeatable": true,
+      "id": "dtsitnsledger"
+    }
+  ]
+}

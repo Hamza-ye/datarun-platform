@@ -98,59 +98,92 @@ Distribution teams collect ITNs from temporary storage points before fieldwork. 
 
 ---
 
-## Architecture Walk-Through
+## Product And Compatibility Pressure
 
-This section maps the ITN campaign to the platform's architectural primitives and identifies pressure points.
+This section records hypotheses and pressure to classify. It is not
+architecture authority, does not define platform primitives, and does not prove
+the full campaign is currently executable.
 
-### Primitive Mapping
+### Candidate Mappings To Classify
 
-| Campaign Concept | Primitive(s) | Notes |
+| Campaign Concept | Candidate Datarun lens | Pressure to classify |
 |---|---|---|
-| Household | Subject (type: household) | Entity-linked capture; registry grows during campaign |
-| Village | Subject (type: village) | Parent subject; households are children via `parent_ref` |
-| Household visit | Event (shape: household_visit) | Structured capture with ITN count, demographics |
-| Village assignment | Assignment | Operator ↔ village binding; reassignable |
-| ITN handoff | Event (shape: transfer) | Transfer-with-acknowledgment pattern (S07/S14) |
-| Campaign | Configuration scope | Defines target villages, date window, shapes active |
-| Village progress | L1 Projection | Derived from household-level events within village |
+| Household | Subject-linked capture or entity-lifecycle route | Newly discovered households may trigger NW-021 if maintained registry lifecycle blocks the pilot slice. |
+| Village | Location, subject-linked capture, or reporting lens | Do not assume parent/child subject semantics without a selected lifecycle/scope route. |
+| Household visit | Configured capture activity | Likely compatible when flattened into current shape fields and accepted expression rules. |
+| Village assignment | Assignment-derived responsibility | Must stay inside accepted geography, subject-list, activity, role, and time scope axes unless NW-053 is selected. |
+| ITN handoff | Transfer/distribution workflow context | Current S27 evidence supports bounded transfer pressure; reconciliation/reporting may still trigger NW-044. |
+| Campaign | Deployment plan or configured activity bundle | Must not become a new config scope primitive without a selected platform route. |
+| Village progress | Read-side/projection/reporting view | Use as reporting pressure; route NW-044 if broad aggregation, warehouse/export, or import is required. |
 
 ### Pressure Points
 
 **1. Parent–child subject relationships (village → households)**
 
-Villages and households are both subjects. A household belongs to a village. The architecture handles this via a `parent_ref` field in the subject payload — a convention, not a separate primitive. L1 projection rules can scope queries to "all subjects whose parent_ref = this village." No new construct needed.
+Villages and households may need a relationship, but this walkthrough no longer
+claims that `parent_ref` or a subject hierarchy is accepted platform behavior
+for the campaign. Treat the relationship as entity/scope pressure. If the pilot
+requires maintained household or village lifecycle, route through NW-021 before
+implementation.
 
 **2. Location progress as derived state**
 
-"Is this village done?" depends on aggregating household-level work. Two viable paths:
+"Is this village done?" depends on aggregating household-level work and field
+judgment. Candidate paths remain hypotheses:
 
-* **Path 1 — Projection aggregation**: An L1 rule counts distinct visited households vs. known households under a village and derives a progress state. Pure read-side; no new events needed.
-* **Path 2 — Explicit location events**: Field operators (or the device) emit a `village_status` event when they believe a village is complete. This gives an auditable moment but requires the operator to make a judgment call.
+* **Read-side aggregation**: count visited/covered households and exceptions
+  under the selected scope. This is reporting pressure and may route NW-044.
+* **Field-authored status capture**: a team records its completion,
+  interruption, reassignment, or cancellation judgment as configured capture
+  content. This must not introduce new envelope types or workflow truth without
+  a selected route.
 
-Path 2 is recommended: it preserves the principle that humans make completion judgments, the event is auditable, and the projection can still compute coverage independently for oversight.
+No path is accepted by this walkthrough. A pilot slice must choose the smallest
+safe representation and prove it against current contracts or route a successor.
 
 **3. Concurrent assignment to the same location**
 
-Multiple distribution teams may be assigned to the same village, each working through households independently. Offline, neither team knows which households the other has visited. This maps directly to ADR-002's single-writer assumption: two actors creating events against the same subject_ref produces concurrent writes. The architecture handles this via accept-and-flag — both events are accepted, conflicts detected on sync.
+Multiple distribution teams may work the same village or overlapping household
+set. Offline work can create duplicate visits, double distribution, stale
+authority, and inconsistent observations. Current Datarun evidence supports
+accept-and-flag behavior for scoped offline work, but this walkthrough does not
+claim all ITN duplicate and stock reconciliation cases are solved.
 
-Prevention is an operational concern, not an architectural one. Two approaches within the existing model:
+Candidate controls to classify:
 
-* **Assignment-level partitioning**: Assign non-overlapping subsets of households to each team (e.g., by sub-area or household list). This uses the existing assignment primitive with a narrower scope.
-* **Projection-based visibility**: After sync, L1 projections show "already visited by another actor" status. This doesn't prevent duplicates but surfaces them immediately for supervisor review.
+* **Assignment partitioning**: assign non-overlapping geography, subject lists,
+  or activities when current scope axes are sufficient.
+* **Operational visibility**: surface already-handled, duplicate, stale, or
+  unresolved work after sync using accepted read-side behavior.
+* **Review/reconciliation**: keep manual review bounded; route NW-045 if queue,
+  batch, automation, or resolver reassignment is required.
 
-Two additional deployer levers:
+Additional deployment choices are policy pressure, not architecture decisions:
 
-* **Online-only constraint for shared locations**: If connectivity permits, require operators working the same location to stay online so projections stay current and each sees the other's progress in near-real-time. This trades offline capability for coordination safety — acceptable in some deployments, unacceptable in others.
-* **Configuration-level exclusivity**: A deployment rule such as "only one active assignment per location at a time" prevents the situation structurally. This is an L0 configuration constraint on the assignment primitive — no new mechanism needed.
+* **Online-only constraint for shared locations**: possible operational posture
+  when connectivity permits, not an offline-first platform guarantee.
+* **Exclusive assignment policy**: possible setup/operator rule if expressible
+  inside accepted assignment behavior; otherwise route before implementation.
 
-For ITN distribution specifically, duplicate visits mean double-distribution — a concrete resource waste problem. The architecture handles the data reconciliation; the deployment configuration (how assignments are scoped and whether concurrency is allowed) determines how much duplication actually occurs.
+For ITN distribution specifically, duplicate visits may mean double-distribution
+and stock loss. That makes reconciliation a pilot risk, not proof that the full
+campaign is already modelable.
 
 **4. Campaign-level targets and aggregation**
 
-Campaign-wide metrics (total ITNs distributed, total villages completed) aggregate across all village projections. This is an L2 concern — server-side aggregation over synced data. It lives outside the device boundary, which is correct: campaign dashboards are supervisor/coordinator views, not field-operator views.
+Campaign-wide metrics such as total ITNs distributed, villages completed,
+stock issued, stock returned, and unresolved discrepancies are reporting
+pressure. Current S26/PC3 evidence supports bounded scoped read views, but broad
+reporting, import/export, warehouse/API/catalog, or structured ingestion must
+route through NW-044.
 
-### Verdict
+### Current Verdict
 
-The ITN campaign is fully modelable within the existing architecture. It composes subjects, events, assignments, projections, and transfer-with-acknowledgment without requiring new primitives. The "scoped iteration" pattern (iterate over units within a container) is a composition of existing primitives, not a fifth behavioral pattern.
+The ITN campaign is a strong domain example for a legacy/on-prem pilot, but the
+full campaign is not accepted here as fully modelable or executable. The
+walkthrough is now problem-space evidence for NW-146/NW-093 routing:
 
-Earliest phase where the full campaign is executable: **Phase 4** (workflow patterns: campaign as a coordinated effort with dynamic scope changes). Core data capture (household visits, ITN counts) works from **Phase 0**.
+* flat household or stock capture may be a candidate first slice;
+* repeatable legacy forms, household/facility lifecycle, reconciliation
+  reporting, and review queues may require successor routes;
+* real users, real data, and on-prem operation require NW-093 before use.
