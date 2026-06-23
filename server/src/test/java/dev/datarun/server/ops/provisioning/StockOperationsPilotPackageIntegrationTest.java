@@ -84,6 +84,12 @@ class StockOperationsPilotPackageIntegrationTest extends AbstractIntegrationTest
                 .isEqualTo("web_admin.access");
         assertThat(adminPolicy.at("/actors/" + STOCK_SUPERVISOR).toString())
                 .contains("web_admin.read_scoped");
+        JsonNode assignmentAdminPolicy =
+                deploymentConfig("assignment_admin_capabilities");
+        assertThat(stringValues(assignmentAdminPolicy.at("/roles/pilot_admin")))
+                .containsExactlyInAnyOrder(
+                        "assignment_admin.create",
+                        "assignment_admin.end");
 
         JsonNode principalBindings = provisioningService.execute(
                 "principal-bindings",
@@ -118,6 +124,12 @@ class StockOperationsPilotPackageIntegrationTest extends AbstractIntegrationTest
     private List<String> fieldNames(JsonNode fields) {
         return StreamSupport.stream(fields.spliterator(), false)
                 .map(field -> field.path("name").asText())
+                .toList();
+    }
+
+    private List<String> stringValues(JsonNode values) {
+        return StreamSupport.stream(values.spliterator(), false)
+                .map(JsonNode::asText)
                 .toList();
     }
 

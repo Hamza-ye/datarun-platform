@@ -13,7 +13,7 @@ Related: `../../agent-working-surface/platform-next-work-backlog.md`;
 `../../agent-working-surface/prompts/NW-149-stock-operations-pilot-goal-and-ordered-backlog.md`;
 `../../../server/src/test/java/dev/datarun/server/e2e/SyntheticStockOperationsFirstFlowIntegrationTest.java`;
 `../../agent-working-surface/validation-matrix.md`;
-`../../implementation/module-interfaces.md`; `../../../contracts/patterns/transfer_with_acknowledgment.v1.json`
+`../../implementation/module-interfaces.md`
 
 ## Product Goal
 
@@ -51,6 +51,23 @@ synthetic or separately approved data, and inspected through scoped supervisor
 visibility. It is not complete until mobile capture, local Keycloak/principal
 binding, local operational preflight, and owner go/no-go gates are proven by
 later backlog items.
+
+### Architecture Assumptions
+
+For this pilot handoff, `stocktake_line/v1` is deployer-authored shape
+configuration and `stock_operations` is a deployer activity instance. They are
+pilot configuration, not platform mechanisms, envelope changes, stock ledger
+truth, workflow pattern definitions, or production approval.
+
+The first increment is flat capture plus scoped supervisor visibility.
+Supervisor visibility means scoped read access; it does not select or require
+`event.type = "review"`.
+
+If later stock operations require human review, transfer acknowledgment,
+multi-step approval, or discrepancy resolution, route a later slice explicitly
+through the existing pattern contracts: `capture_with_review/v1`,
+`transfer_with_acknowledgment/v1`, `multi_step_approval/v1`, or
+`ongoing_resolution/v1`.
 
 ## Definition of Done
 
