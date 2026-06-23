@@ -19,11 +19,28 @@ but not enough owner-approved detail to grant a real-production go/no-go. The
 pilot must not start with real users, real organizational data, raw account
 import, submitted-record import, or runtime/form-import implementation.
 
+Owner clarification: the intended pilot is local/on-prem and may run in
+parallel with the legacy system. No cross-border transfer, cloud hosting,
+managed external backup, external monitoring export, or remote support access
+to pilot data is selected by default. Any such transfer/access requires
+explicit owner approval or a later exception route.
+
+For this on-prem pilot, provider/region/residency language means the
+accountable on-prem host/operator, local site/country boundary,
+maintenance-access boundary, backup location, monitoring/log destination, and
+support access path. It does not imply a cloud provider or cross-border data
+transfer.
+
 The narrowest useful next route is not tenant/control-plane work and not a
 runtime importer. It is a compatibility and data-boundary matrix over sanitized
 legacy evidence that selects one first operational flow, classifies the data
 needed for that flow, and decides whether the first proof can stay synthetic or
 redacted before any real-data approval.
+
+The missing approval facts block only real users/data, account import,
+submitted-record import/replay, production cutover, and controlled operational
+use. They do not block NW-147 compatibility/data-boundary planning from
+sanitized evidence.
 
 ## Inputs Read
 
@@ -49,7 +66,7 @@ untracked and must not be committed or used as a seed.
 |---|---|---|
 | Legal organization and site | Concrete first-organization/on-prem pressure exists, but the legal organization, site name, country, jurisdiction, and accountable deployment owner record are not captured in a production approval record. | Blocks real production. |
 | Deployment boundary | One first organization can stay in the accepted managed-isolation lane: one on-prem single-tenant Datarun deployment with one internal/default Workspace. | Does not trigger tenant-aware runtime or SaaS control-plane work. |
-| Provider, region, residency | On-prem intent is visible, but provider/host ownership, region, data residency, and maintenance-access boundary are not selected. | Blocks real production. |
+| Provider, region, residency | On-prem intent is visible. For this pilot, provider/region/residency means on-prem host/operator, local site/country boundary, maintenance-access boundary, backup location, monitoring/log destination, and support access path, not cloud hosting or cross-border transfer. | Blocks only real users/data, account import, submitted-record import/replay, production cutover, and controlled operational use until recorded. |
 | Data/controller responsibility | Hamza remains the recorded data/compliance owner in the reference policy, but the pilot organization's controller/processor responsibility and local compliance obligations are not recorded. | Blocks real production. |
 | Real users/account path | The legacy account export is account/security data and remains untracked. Password hashes, reset/activation columns, login names, email, mobile, team, orgUnit, or language fields must not become Datarun authority. | Blocks account import and real login use. |
 | Initial IdP | Owner context selects self-hosted Keycloak initially. Datarun authority remains explicit active `(issuer, subject) -> actor_id` principal binding only. | Allowed as planning direction, not production approval. |
@@ -167,6 +184,11 @@ Before real users/data or real on-prem use, an accepted owner record must name:
   procedure, mismatch stop criteria, rollback/stop path, and cutover authority;
 - pilot-specific security/privacy/compliance review and explicit go/no-go
   language.
+
+These missing facts do not block NW-147. NW-147 should use sanitized evidence
+and the owner's local/on-prem, no-cross-border premise to choose or park one
+first-flow candidate, then identify which production facts still need owner
+approval after the first-flow/data-boundary matrix.
 
 Synthetic reference deployment evidence can be cited as prior technical
 evidence, but a pilot-specific preflight/rehearsal must prove the chosen

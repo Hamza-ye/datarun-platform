@@ -10,6 +10,23 @@ approval cannot be meaningful until the first pilot flow, data boundary,
 compatibility blockers, parallel-run reconciliation expectations, and proof
 data strategy are explicit.
 
+Owner clarification: the intended pilot is local/on-prem and may run in
+parallel with the legacy system. No cross-border transfer, cloud hosting,
+managed external backup, external monitoring export, or remote support access
+to pilot data is selected by default. Any such transfer/access requires
+explicit owner approval or a later exception route.
+
+For this on-prem pilot, provider/region/residency language means the
+accountable on-prem host/operator, local site/country boundary,
+maintenance-access boundary, backup location, monitoring/log destination, and
+support access path. It does not imply a cloud provider or cross-border data
+transfer.
+
+NW-147 should proceed from sanitized evidence and the owner's on-prem/no
+cross-border premise. Do not demand the final legal/site/support production
+record before selecting a first-flow candidate. Instead, identify which
+production facts are still needed after the first-flow/data-boundary matrix.
+
 ## Inputs
 
 Read:
@@ -47,6 +64,8 @@ Classify:
   or owner-approved redacted data is enough before real-data approval;
 - source of truth during a parallel run, duplicate-entry risk, reconciliation
   owner/procedure, rollback/stop criteria, and expansion evidence;
+- production facts still needed after the first-flow/data-boundary matrix,
+  without blocking the matrix on final legal/site/support approval;
 - whether the selected flow triggers NW-044 reporting/import/export,
   NW-045 queue/batch/automation, NW-053 new scope, NW-054 retention/security,
   NW-021 entity lifecycle, NW-073 pattern extraction, or NW-094 through NW-098
