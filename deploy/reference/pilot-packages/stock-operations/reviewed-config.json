@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "source": "NW-150:stock-operations-pilot-package-skeleton",
+  "shapes": [
+    {
+      "name": "stocktake_line",
+      "version": 1,
+      "status": "active",
+      "sensitivity": "standard",
+      "schema_json": {
+        "fields": [
+          {
+            "name": "stocktake_date",
+            "type": "date",
+            "required": true,
+            "deprecated": false,
+            "display_order": 1
+          },
+          {
+            "name": "stock_category",
+            "type": "select",
+            "required": true,
+            "deprecated": false,
+            "display_order": 2,
+            "options": [
+              "mids_kit",
+              "rapid_test_kit",
+              "itn_bale"
+            ]
+          },
+          {
+            "name": "quantity",
+            "type": "integer",
+            "required": true,
+            "deprecated": false,
+            "display_order": 3,
+            "validation": {
+              "min": 0
+            }
+          }
+        ],
+        "subject_binding": null,
+        "uniqueness": null
+      }
+    }
+  ],
+  "activities": [
+    {
+      "name": "stock_operations",
+      "status": "active",
+      "sensitivity": "standard",
+      "config_json": {
+        "shapes": [
+          "stocktake_line/v1"
+        ],
+        "roles": {
+          "field_worker": [
+            "capture"
+          ]
+        }
+      }
+    }
+  ],
+  "expressions": [],
+  "flag_severity_overrides": {},
+  "assignment_admin_capabilities": {
+    "schema_version": 1,
+    "roles": {
+      "pilot_admin": [
+        "assignment_admin.create",
+        "assignment_admin.end"
+      ]
+    }
+  },
+  "admin_command_capabilities": {
+    "schema_version": 1,
+    "actors": {
+      "15000000-0000-4000-8000-000000000001": [
+        "web_admin.access",
+        "config_admin.author",
+        "config_admin.validate",
+        "config_admin.readiness_review",
+        "config_admin.approve",
+        "config_admin.publish"
+      ],
+      "15000000-0000-4000-8000-000000000003": [
+        "web_admin.access",
+        "web_admin.read_scoped"
+      ]
+    }
+  }
+}

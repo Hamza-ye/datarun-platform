@@ -52,6 +52,16 @@ assignment commands, see
 invocation boundary, exact input shapes, and evidence output; it is an
 implementation reference, not the NW-066 production runbook.
 
+Non-production pilot package skeletons live under
+[`pilot-packages/`](pilot-packages/). The current stock operations skeleton at
+[`pilot-packages/stock-operations/`](pilot-packages/stock-operations/) provides
+reviewed config, synthetic principal-binding, and initial bootstrap input for
+the local/on-prem stocktake-line pilot path. It remains synthetic/non-sensitive
+package material only and does not approve real users, real stock data,
+production cutover, or controlled operational use. Its reviewed config file is
+a complete clean-environment snapshot, not a patch for an already configured
+deployment.
+
 The JDBC URL must select PostgreSQL TLS verification with
 `sslmode=verify-full` and
 `sslrootcert=/run/datarun/trust/postgresql-root.crt`; that certificate must

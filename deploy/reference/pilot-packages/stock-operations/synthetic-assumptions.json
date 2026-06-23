@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "source": "NW-150:stock-operations-pilot-package-skeleton",
+  "boundary": "non-production local/on-prem pilot assumptions only",
+  "issuer": "https://idp.local.example/datarun-stock-pilot",
+  "actors": {
+    "pilot_admin": {
+      "actor_id": "15000000-0000-4000-8000-000000000001",
+      "principal_subject": "stock-pilot-admin",
+      "assignment_role": "pilot_admin"
+    },
+    "field_stock_worker": {
+      "actor_id": "15000000-0000-4000-8000-000000000002",
+      "principal_subject": "stock-pilot-worker",
+      "assignment_role": "field_worker"
+    },
+    "stock_supervisor": {
+      "actor_id": "15000000-0000-4000-8000-000000000003",
+      "principal_subject": "stock-pilot-supervisor",
+      "assignment_role": "supervisor"
+    }
+  },
+  "expected_assignments": [
+    {
+      "target_actor_id": "15000000-0000-4000-8000-000000000002",
+      "role": "field_worker",
+      "geographic_id": "<selected-pilot-warehouse-geography-uuid>",
+      "subject_list": null,
+      "activity_list": [
+        "stock_operations"
+      ],
+      "valid_from": "2026-06-23T00:00:00Z",
+      "valid_to": null
+    },
+    {
+      "target_actor_id": "15000000-0000-4000-8000-000000000003",
+      "role": "supervisor",
+      "geographic_id": "<selected-pilot-warehouse-geography-uuid>",
+      "subject_list": null,
+      "activity_list": [
+        "stock_operations"
+      ],
+      "valid_from": "2026-06-23T00:00:00Z",
+      "valid_to": null
+    }
+  ],
+  "non_goals": [
+    "real users",
+    "real stock records",
+    "account import",
+    "submitted record import or replay",
+    "legacy form importer",
+    "repeatable-section platform support",
+    "production approval",
+    "stock ledger correctness",
+    "production stock truth",
+    "controlled operational use"
+  ]
+}
