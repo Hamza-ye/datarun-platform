@@ -38,6 +38,7 @@ Each product specification should include:
 | [Product Candidate 2 PM Handoff](product-candidate-2-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-121 | none |
 | [Product Candidate 3 PM Handoff](product-candidate-3-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-127 | none |
 | [Product Candidate 4 PM Handoff](product-candidate-4-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-133 | none |
+| [Stock Operations Pilot PM Handoff](stock-operations-pilot-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-149 | none |
 
 `product-candidate-1.md` remains the accepted Product Candidate 1 behavior
 specification. `product-candidate-1-pm-handoff.md` is a derived PM planning
@@ -50,3 +51,7 @@ product behavior, implementation standing, or production approval.
 `product-candidate-4-pm-handoff.md` is a derived PM planning surface selecting
 the PC4 boundary; it does not accept product behavior, implementation standing,
 architecture authority, retention/security promises, or production approval.
+`stock-operations-pilot-pm-handoff.md` is a derived PM planning surface for the
+local/on-prem stock operations pilot; it keeps stocktake line first, carries
+PR #58 / NW-148 proof evidence forward, and selects NW-150 as the only next
+implementation route without approving real users/data or production use.
