@@ -45,8 +45,12 @@ Patch the PM handoff and package wording so it says:
 - `stock_operations` is deployer activity configuration;
 - `subject_binding = null`, so subject stamping comes from
   capture/session/operator context;
-- the first pilot anchor is a provisioned pilot stock-scope subject
+- the first pilot anchor is a pre-established pilot stock-scope subject
   representing the counted stock-holding location or storage point;
+- pre-established means stable subject UUID plus `subject_locations` mapping
+  under selected pilot geography plus worker/supervisor assignments covering
+  that geography/activity plus capture/session/operator context that can stamp
+  it into `subject_ref`;
 - this is not warehouse lifecycle, stock ledger, item catalog, stocktake
   session lifecycle, production stock truth, `process` subject emission, or a
   new platform mechanism.
@@ -92,8 +96,8 @@ next route:
 NW-152 - Mobile stocktake capture smoke
 ```
 
-NW-152 must prove mobile can select or stamp the pilot stock-scope subject, or
-stop with the exact missing mobile surface.
+NW-152 must prove mobile can select or stamp the pre-established pilot
+stock-scope subject, or stop with the exact missing mobile surface.
 
 ## Validation
 

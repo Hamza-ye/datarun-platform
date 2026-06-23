@@ -65,20 +65,24 @@ envelope field. The stock pilot mapping does not turn warehouse, item, catalog,
 stocktake session, or ledger concepts into platform primitives.
 
 For the current pilot proof, `stocktake_line/v1` events must reference a
-provisioned pilot stock-scope subject through `event.subject_ref`. That subject
-is the scoped operational anchor used by existing Datarun assignment,
-location-path, sync, and scoped-report mechanics. In the first pilot mapping,
-the intended real-world anchor is the physical stock-holding location or
-storage point being counted, but this does not define a warehouse entity
-lifecycle, inventory ledger, catalog/item model, stocktake session model,
-process-ref subject, production stock truth, or new platform mechanism.
+pre-established pilot stock-scope subject through `event.subject_ref`. That
+subject is the scoped operational anchor used by existing Datarun assignment,
+location-path, sync, and scoped-report mechanics. Pre-established means a
+stable subject UUID, a `subject_locations` mapping under the selected pilot
+geography, worker/supervisor assignments covering that geography and activity
+`stock_operations`, and capture/session/operator context that can stamp that
+subject into `subject_ref`. In the first pilot mapping, the intended
+real-world anchor is the physical stock-holding location or storage point being
+counted, but this does not define a warehouse entity lifecycle, inventory
+ledger, catalog/item model, stocktake session model, process-ref subject,
+production stock truth, or new platform mechanism.
 
 The package shape has `subject_binding = null`, so the subject reference must
 come from capture, session, or operator context rather than from a
 `stocktake_line/v1` payload field. If the current mobile/runtime path cannot
-safely select or stamp that pilot stock-scope subject, the mobile stocktake
-capture route must stop and identify the missing subject-selection surface
-before mobile capture is accepted.
+safely select or stamp that pre-established pilot stock-scope subject, the
+mobile stocktake capture route must stop and identify the missing
+subject-selection surface before mobile capture is accepted.
 
 The first increment is flat capture plus scoped supervisor visibility.
 Supervisor visibility means scoped read access; it does not select or require
@@ -110,8 +114,9 @@ For each pilot slice, done means:
    stocktake proof. Accepted by NW-150.
 2. Stock operations subject-anchor boundary and proof-oracle hardening. Make
    the `stocktake_line/v1` subject anchor explicit, keep it bounded to a
-   provisioned pilot stock-scope subject, and harden the server proof so it
-   does not rely on supervisor review authority. Accepted by NW-151.
+   pre-established pilot stock-scope subject, and harden the server proof so it
+   does not rely on supervisor review authority. Accepted by PR #60
+   review-hardening commit.
 3. Mobile stocktake capture smoke. Prove field-user mobile
    capture/offline/sync for `stocktake_line/v1`, or identify the exact missing
    mobile surface.
@@ -173,7 +178,7 @@ Exactly one next implementation route is selected:
 NW-152 - Mobile stocktake capture smoke
 ```
 
-NW-152 should prove mobile can select or stamp the provisioned pilot
+NW-152 should prove mobile can select or stamp the pre-established pilot
 stock-scope subject, capture a flat `stocktake_line/v1` item, retain it
 offline or before sync, and push it through the existing authenticated sync
 path. It must not decide a full stock domain model, reopen legacy migration,

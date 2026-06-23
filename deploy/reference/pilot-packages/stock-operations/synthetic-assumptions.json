@@ -21,11 +21,13 @@
     }
   },
   "subject_anchor": {
+    "shape_ref": "stocktake_line/v1",
     "event_subject_ref_type": "subject",
-    "pilot_subject_id": "<provisioned-pilot-stock-scope-subject-uuid>",
+    "pilot_subject_id": "<pre-established-pilot-stock-scope-subject-uuid>",
     "represents": "stock-holding location or storage point being counted",
+    "definition": "pre-established pilot stock-scope subject = stable subject UUID plus subject_locations mapping under selected pilot geography plus worker/supervisor assignments covering that geography/activity plus capture/session/operator context can stamp it into subject_ref",
     "location_boundary": "subject must have a location path under <selected-pilot-warehouse-geography-uuid>",
-    "stamped_by": "capture/session/operator context because stocktake_line/v1 subject_binding is null",
+    "stamped_by": "capture/session/operator context can stamp it into subject_ref because stocktake_line/v1 subject_binding is null",
     "non_goals": [
       "warehouse lifecycle",
       "stock ledger",

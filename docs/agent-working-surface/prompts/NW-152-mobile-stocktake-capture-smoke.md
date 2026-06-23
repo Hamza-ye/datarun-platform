@@ -42,7 +42,11 @@ Use the NW-150 package shape/activity:
 Use the NW-151 subject-anchor boundary:
 
 - every stocktake event must carry `subject_ref.type = "subject"`;
-- `subject_ref.id` must be a provisioned pilot stock-scope subject;
+- `subject_ref.id` must be a pre-established pilot stock-scope subject;
+- pre-established means stable subject UUID plus `subject_locations` mapping
+  under selected pilot geography plus worker/supervisor assignments covering
+  that geography/activity plus capture/session/operator context that can stamp
+  it into `subject_ref`;
 - the pilot subject represents the counted stock-holding location or storage
   point for this pilot mapping only;
 - `stocktake_line/v1` has `subject_binding = null`, so mobile capture must
@@ -53,7 +57,7 @@ Prove, with the narrowest existing mobile test surface that fits the app, that a
 field worker can:
 
 - receive or use a config containing the packaged stocktake-line shape;
-- safely select or stamp the pilot stock-scope subject;
+- safely select or stamp the pre-established pilot stock-scope subject;
 - capture a stocktake-line item while offline or before sync;
 - retain the pending work in the actor-local mobile store;
 - sync the work through the existing authenticated sync path; and

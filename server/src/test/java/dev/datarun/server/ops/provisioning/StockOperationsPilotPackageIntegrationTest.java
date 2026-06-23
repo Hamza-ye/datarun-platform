@@ -79,6 +79,21 @@ class StockOperationsPilotPackageIntegrationTest extends AbstractIntegrationTest
         assertThat(stockOperationsRoles.has("supervisor")).isFalse();
         assertThat(stockOperationsRoles.toString()).doesNotContain("review");
 
+        JsonNode syntheticAssumptions =
+                objectMapper.readTree(packageFile("synthetic-assumptions.json"));
+        JsonNode subjectAnchor = syntheticAssumptions.path("subject_anchor");
+        assertThat(subjectAnchor.path("event_subject_ref_type").asText())
+                .isEqualTo("subject");
+        assertThat(subjectAnchor.toString())
+                .contains("stocktake_line/v1")
+                .contains("stock-scope subject");
+        assertThat(subjectAnchor.path("stamped_by").asText())
+                .contains("subject_binding is null");
+        assertThat(stringValues(subjectAnchor.path("non_goals")))
+                .contains("stock ledger",
+                        "process subject emission",
+                        "new platform scope mechanism");
+
         JsonNode adminPolicy = deploymentConfig("admin_command_capabilities");
         assertThat(adminPolicy.at("/actors/" + PILOT_ADMIN + "/0").asText())
                 .isEqualTo("web_admin.access");
