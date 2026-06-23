@@ -69,7 +69,8 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
 
     private UUID region;
     private UUID warehouseDistrict;
-    private UUID stocktakeSubject;
+    private UUID pilotStockScopeSubjectId;
+    private String warehouseDistrictPath;
     private String workerToken;
 
     @BeforeEach
@@ -94,10 +95,10 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
         locationRepository.insert(region, "Synthetic stock region", null, "region");
         locationRepository.insert(warehouseDistrict, "Synthetic warehouse lane",
                 region, "district");
-        stocktakeSubject = UUID.randomUUID();
+        warehouseDistrictPath = locationRepository.findPathById(warehouseDistrict);
+        pilotStockScopeSubjectId = UUID.randomUUID();
         subjectLocationRepository.upsert(
-                stocktakeSubject, warehouseDistrict,
-                locationRepository.findPathById(warehouseDistrict));
+                pilotStockScopeSubjectId, warehouseDistrict, warehouseDistrictPath);
 
         workerToken = actorTokenRepository.createToken(STOCK_WORKER);
     }
@@ -118,6 +119,12 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
         assertThat(configResponse.getBody().path("activities").has(STOCK_ACTIVITY)).isTrue();
         assertThat(configResponse.getBody().at("/shapes/stocktake_line~1v1/fields").size())
                 .isEqualTo(3);
+        JsonNode stockOperationRoles =
+                configResponse.getBody().at("/activities/stock_operations/roles");
+        assertThat(stockOperationRoles.path("field_worker").path(0).asText())
+                .isEqualTo("capture");
+        assertThat(stockOperationRoles.has("supervisor")).isFalse();
+        assertThat(stockOperationRoles.toString()).doesNotContain("review");
 
         long workerKnowledge = latestWatermark(pullEvents(workerToken, 0, 100));
         List<Map<String, Object>> stocktakeRows = List.of(
@@ -134,6 +141,14 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
         assertThat(storedStocktakeLineCount()).isEqualTo(2);
         assertThat(storedStocktakeCategories())
                 .containsExactlyInAnyOrder("mids_kit", "rapid_test_kit");
+        assertThat(storedStocktakeSubjectRows())
+                .hasSize(2)
+                .allSatisfy(row -> {
+                    assertThat(row.get("subject_type")).isEqualTo("subject");
+                    assertThat(row.get("subject_id"))
+                            .isEqualTo(pilotStockScopeSubjectId.toString());
+                    assertThat(row.get("location_path")).isEqualTo(warehouseDistrictPath);
+                });
 
         configureReportCommands(STOCK_SUPERVISOR);
         String report = mvc.perform(get("/web-admin/operational/report")
@@ -168,7 +183,6 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
         activityConfig.putArray("shapes").add(STOCK_SHAPE);
         ObjectNode roles = activityConfig.putObject("roles");
         roles.putArray("field_worker").add("capture");
-        roles.putArray("supervisor").add("review");
         assertThat(activityService.createActivity(
                 STOCK_ACTIVITY, "standard", activityConfig)).isEmpty();
         assertThat(configPackager.publish(null)).isEqualTo(1);
@@ -191,7 +205,9 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
         event.put("type", "capture");
         event.put("shape_ref", STOCK_SHAPE);
         event.put("activity_ref", STOCK_ACTIVITY);
-        event.put("subject_ref", Map.of("type", "subject", "id", stocktakeSubject.toString()));
+        event.put("subject_ref", Map.of(
+                "type", "subject",
+                "id", pilotStockScopeSubjectId.toString()));
         event.put("actor_ref", Map.of("type", "actor", "id", STOCK_WORKER.toString()));
         event.put("device_id", STOCK_DEVICE.toString());
         event.put("device_seq", deviceSeq);
@@ -286,6 +302,17 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
                 WHERE shape_ref = 'stocktake_line/v1'
                 ORDER BY device_seq
                 """, String.class);
+    }
+
+    private List<Map<String, Object>> storedStocktakeSubjectRows() {
+        return jdbcTemplate.queryForList("""
+                SELECT subject_ref->>'type' AS subject_type,
+                       subject_ref->>'id' AS subject_id,
+                       location_path
+                FROM events
+                WHERE shape_ref = 'stocktake_line/v1'
+                ORDER BY device_seq
+                """);
     }
 
     private void configureReportCommands(UUID actorId) throws Exception {

@@ -1,4 +1,4 @@
-# NW-151 - Mobile Stocktake Capture Smoke
+# NW-152 - Mobile Stocktake Capture Smoke
 
 ## Goal
 
@@ -7,8 +7,9 @@ capture/offline/sync of one flat `stocktake_line/v1` work item, or stop with
 the exact missing mobile surface.
 
 This is a bounded mobile/product-validation implementation slice. It must use
-the NW-150 package skeleton and existing Datarun config, auth, assignment,
-local-state, and sync mechanisms. It is not a real pilot launch.
+the NW-150 package skeleton, the NW-151 subject-anchor boundary, and existing
+Datarun config, auth, assignment, local-state, and sync mechanisms. It is not a
+real pilot launch.
 
 ## Inputs
 
@@ -16,10 +17,12 @@ Read:
 
 - `docs/status.md` Current Routing.
 - `docs/agent-working-surface/platform-next-work-backlog.md` rows NW-148
-  through NW-151.
+  through NW-152.
 - `docs/specifications/product/stock-operations-pilot-pm-handoff.md`.
 - `deploy/reference/pilot-packages/stock-operations/README.md`.
 - `deploy/reference/pilot-packages/stock-operations/reviewed-config.json`.
+- `deploy/reference/pilot-packages/stock-operations/synthetic-assumptions.json`.
+- `docs/agent-working-surface/prompts/NW-151-bind-stock-operations-subject-anchor-boundary-and-harden-proof-oracle.md`.
 - `server/src/test/java/dev/datarun/server/ops/provisioning/StockOperationsPilotPackageIntegrationTest.java`.
 - `server/src/test/java/dev/datarun/server/e2e/SyntheticStockOperationsFirstFlowIntegrationTest.java`.
 - `docs/agent-working-surface/validation-matrix.md`.
@@ -36,10 +39,21 @@ Use the NW-150 package shape/activity:
 - activity: `stock_operations`;
 - ordinary field-worker capture only.
 
+Use the NW-151 subject-anchor boundary:
+
+- every stocktake event must carry `subject_ref.type = "subject"`;
+- `subject_ref.id` must be a provisioned pilot stock-scope subject;
+- the pilot subject represents the counted stock-holding location or storage
+  point for this pilot mapping only;
+- `stocktake_line/v1` has `subject_binding = null`, so mobile capture must
+  select or stamp the subject from capture/session/operator context, not from a
+  payload field.
+
 Prove, with the narrowest existing mobile test surface that fits the app, that a
 field worker can:
 
 - receive or use a config containing the packaged stocktake-line shape;
+- safely select or stamp the pilot stock-scope subject;
 - capture a stocktake-line item while offline or before sync;
 - retain the pending work in the actor-local mobile store;
 - sync the work through the existing authenticated sync path; and
@@ -51,7 +65,7 @@ successor needed.
 
 ## Product Boundary
 
-NW-151 may claim only a mobile stocktake capture smoke for synthetic or
+NW-152 may claim only a mobile stocktake capture smoke for synthetic or
 separately approved data. It must not claim full pilot provisioning or
 controlled operational use.
 
@@ -99,11 +113,11 @@ On success, update status/backlog acceptance evidence and select exactly one
 next route:
 
 ```text
-NW-152 - Supervisor stock operations view
+NW-153 - Supervisor stock operations view
 ```
 
 If a real blocker is found, stop and name the blocker instead of selecting
-NW-152 by default.
+NW-153 by default.
 
 ## Validation
 

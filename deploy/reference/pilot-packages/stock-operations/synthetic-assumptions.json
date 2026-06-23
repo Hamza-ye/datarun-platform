@@ -20,6 +20,22 @@
       "assignment_role": "supervisor"
     }
   },
+  "subject_anchor": {
+    "event_subject_ref_type": "subject",
+    "pilot_subject_id": "<provisioned-pilot-stock-scope-subject-uuid>",
+    "represents": "stock-holding location or storage point being counted",
+    "location_boundary": "subject must have a location path under <selected-pilot-warehouse-geography-uuid>",
+    "stamped_by": "capture/session/operator context because stocktake_line/v1 subject_binding is null",
+    "non_goals": [
+      "warehouse lifecycle",
+      "stock ledger",
+      "item or catalog model",
+      "stocktake session lifecycle",
+      "production stock truth",
+      "process subject emission",
+      "new platform scope mechanism"
+    ]
+  },
   "expected_assignments": [
     {
       "target_actor_id": "15000000-0000-4000-8000-000000000002",

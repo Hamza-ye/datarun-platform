@@ -59,6 +59,11 @@ synthetic `pilot_admin` actor:
 - assign `15000000-0000-4000-8000-000000000003` role `supervisor` for the same
   selected warehouse geography and activity `stock_operations`.
 
+The selected stock-scope subject used by stocktake events must be provisioned
+with a location path under that assigned geography before events are captured
+or synced. Scoped worker/supervisor visibility depends on the event
+`subject_ref` resolving to that subject's write-time location path.
+
 `reviewed-config.json` grants assignment-admin create/end capability to
 `pilot_admin`. It also grants `web_admin.access` and `web_admin.read_scoped` to
 the synthetic supervisor actor so scoped operational standing can be inspected
@@ -79,6 +84,15 @@ Fields:
 - `stocktake_date`
 - `stock_category`
 - `quantity`
+
+The shape has `subject_binding = null`. Because the envelope requires
+`subject_ref`, capture/session/operator context must stamp the stocktake event
+with a provisioned pilot stock-scope subject. For the first pilot mapping, that
+subject represents the stock-holding location or storage point being counted.
+This is package context only; it does not define warehouse lifecycle, stock
+ledger correctness, item/catalog authority, stocktake session lifecycle,
+production stock truth, `process` subject emission, or a new platform scope
+mechanism.
 
 The shape is standard-sensitivity synthetic/non-sensitive pilot material. Keep
 real categories, real quantities, legacy submitted records, and imported
