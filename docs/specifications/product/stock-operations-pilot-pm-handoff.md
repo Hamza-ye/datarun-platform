@@ -12,7 +12,8 @@ Supersedes: none
 Related: `../../agent-working-surface/platform-next-work-backlog.md`;
 `../../agent-working-surface/prompts/NW-149-stock-operations-pilot-goal-and-ordered-backlog.md`;
 `../../../server/src/test/java/dev/datarun/server/e2e/SyntheticStockOperationsFirstFlowIntegrationTest.java`;
-`../../agent-working-surface/validation-matrix.md`
+`../../agent-working-surface/validation-matrix.md`;
+`../../implementation/module-interfaces.md`; `../../../contracts/patterns/transfer_with_acknowledgment.v1.json`
 
 ## Product Goal
 

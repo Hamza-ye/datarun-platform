@@ -16,6 +16,7 @@ Read:
 - `docs/status.md` Current Routing.
 - `docs/agent-working-surface/platform-next-work-backlog.md` rows NW-148,
   NW-149, and NW-150.
+- `docs/implementation/module-interfaces.md`
 - `docs/specifications/product/stock-operations-pilot-pm-handoff.md`.
 - `server/src/test/java/dev/datarun/server/e2e/SyntheticStockOperationsFirstFlowIntegrationTest.java`.
 - Existing config/provisioning/package patterns as needed, especially:
@@ -55,6 +56,31 @@ Prefer existing reviewed provisioning/config package mechanisms over inventing
 a new package runner. Keep reusable package material separate from real pilot
 data. If a small runtime or test helper is needed to make the package loadable,
 keep it directly tied to this stocktake-line skeleton.
+
+## Architecture Binding
+
+`stocktake_line/v1` is deployer-authored shape configuration. It is not a
+platform payload contract, stock ledger model, or new event type.
+
+`stock_operations` is a deployer activity instance. It is not a platform
+mechanism, processing pipeline, tenant boundary, stock truth source, or workflow
+pattern.
+
+Use the existing reviewed config/provisioning mechanisms as platform mechanisms.
+The NW-150 output must be package/provisioning material only.
+
+Do not emit or introduce `event.type='review'` in this slice. Supervisor standing
+in NW-150 is read-only scoped visibility through existing operational/report
+surfaces, not a review workflow.
+
+No workflow pattern is selected for NW-150. If later stock operations need human
+review, transfer acknowledgment, multi-step approval, or discrepancy resolution,
+route a successor that explicitly maps to the existing pattern contracts:
+`capture_with_review/v1`, `transfer_with_acknowledgment/v1`,
+`multi_step_approval/v1`, or `ongoing_resolution/v1`.
+
+Treat `SyntheticStockOperationsFirstFlowIntegrationTest` as implementation
+evidence, not architecture authority.
 
 ## Product Boundary
 
