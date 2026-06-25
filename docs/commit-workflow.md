@@ -189,6 +189,26 @@ The acceptance commit should update only the surfaces materially changed:
 - module interfaces when an implemented boundary changed;
 - residual successor or deferral routes.
 
+### Post-merge Closure Checklist
+
+Before marking an NW/PR accepted after merge, run this post-merge closure
+check:
+
+- `docs/status.md` Current Routing reflects the final standing.
+- The Active Work Index does not list merged or accepted work as active.
+- The accepted NW/PR standing is recorded in backlog history.
+- Successor standing is exactly one selected route, explicit owner decision
+  pending, or no successor selected.
+- Draft, paused, requires-rework, or must-not-merge wording is removed from
+  active standing unless it is clearly historical.
+- Artifact, specification, and index files were touched only when materially
+  needed.
+- Validation evidence and skipped-gate rationale are recorded.
+- Gap register, CDL, BAR, contract, and spec touch status is explicit.
+- PR body final standing matches status and backlog.
+- PR title names the final bounded outcome, not only the NW number or a
+  temporary draft/rework state.
+
 The acceptance commit must state:
 
 - validation evidence;
