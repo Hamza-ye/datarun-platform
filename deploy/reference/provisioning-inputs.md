@@ -48,7 +48,7 @@ operation content fails.
       "subject": "provider-subject",
       "actor_id": "11111111-1111-1111-1111-111111111111",
       "state": "active",
-      "reason": "approved initial binding"
+      "reason": "owner-selected initial binding"
     }
   ]
 }

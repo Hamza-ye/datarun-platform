@@ -5,12 +5,13 @@ Document type: operational_policy
 Owner: Hamza
 Source: NW-064 and
 `docs/agent-working-surface/prompts/NW-064-define-first-reference-deployment-policy.md`
-Amended by: NW-067 solo-owner operating-model gate
+Amended by: NW-067 solo-owner operating-model gate; NW-163 local/on-prem
+owner-operated production posture
 Authority: operates within NW-063, BAR-001 through BAR-015, BAR-104,
 DEC-EVENT-01, DEC-AUTH-02, DEC-AUTH-03, DEC-AUTH-05, DEC-CONFIG-03,
 DEC-CONFIG-08, DEC-PROJECTION-01, DEC-BOUNDARY-01, IDR-027, IDR-028,
 IDR-029, and IDR-030
-Last reviewed: 2026-06-14
+Last reviewed: 2026-06-26
 Supersedes: none
 Related:
 `docs/agent-working-surface/artifacts/NW-063-production-deployment-ops-hardening-map.md`,
@@ -22,19 +23,42 @@ under NW-066)
 ## 1. Acceptance Status
 
 Hamza accepted this policy on 2026-06-13 for the provider-neutral synthetic
-reference deployment and its repository-owned tooling, and amended the
-operating model on 2026-06-14 to support evidence-backed solo ownership for
-the rehearsal and initial owner-operated production.
+reference deployment and its repository-owned tooling, amended the operating
+model on 2026-06-14 to support evidence-backed solo ownership for the
+rehearsal and initial owner-operated production, and amended it through
+NW-163 on 2026-06-26 to record that the SSH-operated lab server is the
+selected pilot and initial owner-operated production host.
 
-The controls below are accepted as written. Hamza may hold all named
-operational roles and use the documented solo-owner approval model with
-retained evidence. A real production deployment still requires the separate
-deployment-specific selections and approval in Section 11.
+This policy distinguishes mandatory technical safety invariants, current
+owner-selected facts, and provisional internal reliability targets. Mandatory
+technical invariants include secret-safe handling, explicit principal binding,
+TLS/network containment, immutable release evidence where a release is made,
+and the Section 13 authority guardrails. Current owner-selected facts include
+Hamza's solo-owner authority, the SSH-operated lab server as the selected
+pilot and initial owner-operated production host, local VM/service separation,
+and acknowledged same-host recovery risk.
+
+The numerical operational values in this policy are internal reference targets
+unless Hamza later selects them for a specific deployment promise or a concrete
+external obligation requires them. They guide rehearsal and operational
+improvement, but they do not create contractual SLA, fixed support hours,
+24x7 response, retention, rotation, maintenance, backup, or cutover
+prerequisites. They do not block feature work, authentication, pilot use, or
+owner-approved initial production. Provider/region paperwork, an external
+review body, a separate legal/compliance department, separate physical
+infrastructure, or off-host backup is not a generic blocker. A blocker must
+name the exact impossible action, the missing capability/input/access/dependency
+or concrete external obligation, and the evidence.
 
 No backup, restore, monitoring, rotation, release, or incident capability is
 proven merely because it is required here. NW-065 must implement the necessary
 tooling, NW-066 must describe the executable procedure, and NW-067 must
 rehearse it.
+
+CDL is architecture authority. Contracts control their declared technical
+interfaces subject to CDL. Specifications, BAR, status, artifacts, code, and
+tests are evidence of accepted standing or behavior; they cannot independently
+create new architecture authority, prohibitions, or production blockers.
 
 ## 2. Scope And Deployment Class
 
@@ -45,16 +69,22 @@ NW-063:
 - one immutable Datarun server container;
 - an external TLS reverse proxy, with the application port not publicly
   exposed;
-- one durable external PostgreSQL 16 service outside the application
-  container lifecycle.
+- one durable PostgreSQL 16 service outside the application container
+  lifecycle.
 
-The PostgreSQL service may be managed or self-operated if it meets the same
-access, backup, restore, monitoring, and evidence requirements.
+The SSH-operated lab server is selected for pilot and initial owner-operated
+production. Logical separation can be satisfied by local VMs, containers, or
+isolated services on that server when the named checks for the affected step
+pass. The PostgreSQL service may be self-operated on that host or a local VM
+if it meets the same access, backup, restore, monitoring, and evidence
+requirements for the selected step.
 
 This policy does not select Kubernetes, multi-host failover, zero-downtime
-deployment, a cloud provider, production web administration, or mobile
-OAuth/OIDC login. It does not claim that the current Dockerfile or compose
-files are production ready.
+deployment, a cloud provider, managed identity, externally managed database,
+or multi-customer control plane. Production web administration and mobile
+OIDC login remain governed by their accepted platform/auth surfaces and the
+selected NW-164 implementation route. This policy does not claim that the
+current Dockerfile or compose files are production ready.
 
 ## 3. Plain-Language Roles
 
@@ -98,8 +128,8 @@ and review, but accountability and operational authority remain with Hamza.
 
 Independent human continuity is explicitly unproven and must not be claimed.
 Introduce a second authorized person when an organization, customer,
-contract, regulator, insurer, or accepted service/support promise requires
-separation or coverage; when Hamza cannot meet the accepted response and
+contract, regulator, insurer, or selected service/support promise requires
+separation or coverage; when Hamza cannot meet the selected response and
 recovery duties alone; or when another operator is intentionally onboarded.
 Until such a trigger occurs, record the solo-owner bus-factor risk rather than
 manufacturing second-person evidence.
@@ -117,9 +147,9 @@ rules.
 | Synthetic rehearsal | A disposable or isolated exercise using invented, non-sensitive data and test identities to prove procedures. It is technical evidence, not permission to process real data. |
 | RPO | Recovery point objective: the maximum amount of recent durable database history the owner is prepared to lose after a disaster, measured as time. |
 | RTO | Recovery time objective: the maximum target time from disaster declaration until the service is restored to its agreed minimum usable state. |
-| Backup | A recoverable copy or provider recovery point kept separately from the live application host. A Docker volume alone is not a disaster backup. |
+| Backup | A recoverable copy or recovery point. For initial owner-operated local production, same-host recovery copies are accepted with the explicit limitation that they do not protect against total physical-host loss. A Docker volume alone is not a backup. |
 | Point-in-time recovery (PITR) | Restoring the database to a selected time using a base backup plus transaction logs or a provider-equivalent feature. |
-| Off-site | Stored outside the failure and access boundary of the live application host and primary database. Prefer a separate account or protected backup boundary. |
+| Off-site | Stored outside the failure and access boundary of the live application host and primary database. It is a prioritized reliability improvement and may become required for a named disaster-recovery claim or external obligation, but it is not a generic feature, auth, pilot, or owner-operated production blocker. |
 | SLO | Service level objective: the internal reliability target used to judge whether service quality is acceptable. It is not a contractual guarantee unless separately agreed. |
 | Service hours | The hours during which users are told the service is intended to be available. |
 | Support hours | The hours during which a person is committed to receive and respond to reports. These may be narrower than service hours. |
@@ -134,13 +164,15 @@ rules.
 
 ## 5. Ownership, Environments, And Access
 
-Accepted controls:
+Current owner-selected facts and technical safety invariants:
 
-- Name one accountable deployment owner and one operational contact for every
-  role in Section 3 before a production environment is created.
+- Record Hamza as accountable deployment owner and operational contact for
+  the initial owner-operated production environment unless a later concrete
+  obligation requires another named party.
 - Keep production separate from development and synthetic rehearsal by
-  account or project, database, credentials, DNS name, secret namespace, and
-  monitoring destination.
+  database, credentials, DNS name, secret namespace, monitoring destination,
+  and local VM/container/service boundary where needed. A separate physical
+  server is not required for this separation by default.
 - Use a staging or rehearsal environment that matches the production
   deployment class but contains no real production data.
 - Permit administrative access only to named individual accounts protected by
@@ -148,65 +180,83 @@ Accepted controls:
 - Give workloads separate least-privilege database and secret identities.
 - Require encrypted PostgreSQL connections with certificate verification
   appropriate to the selected provider or self-operated service.
-- Log privileged access and changes. Review active human and workload access
-  every 90 days and immediately after role changes or an incident.
-- Disable access within four hours of an approved removal request and
-  immediately for a suspected compromise.
+- Log privileged access and changes. The 90-day access-review cadence and
+  four-hour normal removal target are internal reference targets, not
+  owner-selected service commitments or blockers. Disable access immediately
+  for a suspected compromise.
 - Do not expose the application HTTP port to the public network; public access
   terminates at the TLS reverse proxy.
 
 Hamza holds the environment/account, application host, DNS/TLS, database,
-secrets, and monitoring roles for the synthetic rehearsal. The reference
-tooling remains provider neutral and targets external PostgreSQL 16. No
-production hosting provider, region, account, or maintenance-access path is
-selected by this policy; selecting them is part of the separate real-production
-approval in Section 11. The 90-day access review and four-hour normal removal
-targets are accepted.
+secrets, monitoring, support, release, incident, and owner-decision roles for
+the synthetic rehearsal and selected initial owner-operated production. The
+reference tooling remains provider neutral and targets PostgreSQL 16 outside
+the application container. The selected host is the SSH-operated lab server;
+local VMs/services can satisfy logical separation. Provider/region wording
+means the local host/operator, site/country boundary, maintenance-access
+boundary, backup location, monitoring/log destination, and support access
+path, not an unselected cloud provider. The 90-day access-review and four-hour
+normal removal values remain internal reference targets.
 
 ## 6. Data Protection And Recovery
 
 ### 6.1 Recovery Objectives
 
-Accepted objectives:
+Provisional internal recovery targets:
 
-- RPO: no more than 1 hour of committed PostgreSQL history.
-- RTO: restore the minimum usable server service within 8 hours of disaster
-  declaration.
+- RPO reference target: no more than 1 hour of committed PostgreSQL history.
+- RTO reference target: restore the minimum usable server service within 8
+  hours of disaster declaration.
 - Measure both objectives during rehearsal and incidents. An unmeasured target
   is not evidence that the target can be met.
 
-The accepted RPO is 1 hour and the accepted RTO is 8 hours. Hamza is the
-database restore authority and disaster-declaration authority for the
-synthetic rehearsal.
+The 1-hour RPO and 8-hour RTO are provisional internal reliability targets.
+They do not block feature work, authentication, pilot use, or owner-approved
+initial production unless Hamza selects a specific recovery promise or a
+concrete external obligation requires it. Hamza is the database restore
+authority and disaster-declaration authority for the synthetic rehearsal and
+initial owner-operated production.
 
 ### 6.2 Backup And Restore Controls
 
-Accepted controls:
+Technical safety invariants and internal recovery targets:
 
-- Use continuous transaction-log/PITR protection or a provider-equivalent
-  capability consistent with the accepted RPO.
-- Create at least one daily recoverable base backup or provider snapshot.
+- Use transaction-log/PITR protection or a provider-equivalent capability when
+  claiming the reference RPO.
+- Create at least one recoverable base backup or provider snapshot when
+  claiming restore readiness. A daily cadence is an internal reference target.
 - Retain daily recovery points for 35 days and monthly recovery points for 12
-  months, subject to the data/compliance owner's real-data decision.
+  months only as internal reference targets unless Hamza selects a deployment
+  promise or an identified obligation requires another retention rule.
 - Encrypt backups in transit and at rest with keys outside the application
   container and ordinary operator credentials.
-- Keep at least one protected off-site or separate-account copy that a
-  compromise of the application host cannot delete.
+- For initial owner-operated local production, keep at least one recoverable
+  same-host copy or recovery point and record that this does not protect
+  against total physical-host loss. Add an off-host or protected separate
+  failure/access boundary as a prioritized reliability improvement, and treat
+  it as required only for a named disaster-recovery claim, external obligation,
+  or selected higher-reliability route.
 - Monitor backup completion and recovery-point freshness. A missed backup or
   stale recovery point is at least a severity-2 incident until corrected.
 - Restore into an isolated clean environment at least quarterly and before
-  first production approval. Verify schema history, event history,
+  first owner-operated production use when that use claims restore readiness.
+  Verify schema history, event history,
   configuration packages, principal-binding audit/history, assignments, and
   representative auth/config/sync paths.
 - Preserve failed restore evidence. Do not repair schema history by manual
   database edits.
 
-The backup/PITR implementation must remain provider neutral and meet the
-accepted continuous-PITR-or-equivalent, daily, 35-day, 12-month, encryption,
-off-site, and quarterly-restore controls. Hamza is the encryption/key owner,
-restore operator, and restore approver for the synthetic rehearsal. A concrete
-service, legal-hold rule, and deletion constraint must be selected before real
-production approval.
+Backup and PITR implementation should remain provider neutral. Encryption and
+secret separation are technical safety invariants; the PITR, daily, 35-day,
+12-month, and restore-test values are internal reference targets unless a
+specific deployment claim or obligation requires them. Hamza is the
+encryption/key owner, restore operator, and restore approver for the synthetic
+rehearsal and initial owner-operated production. Same-host recovery is accepted
+initially with total-host-loss risk acknowledged; it is not disaster recovery.
+Off-host backup and separate physical infrastructure remain prioritized
+reliability improvements, not feature, auth, pilot, or initial
+owner-operated-production blockers unless a named claim or obligation requires
+them.
 
 Database restore is not ordinary application rollback. It may lose history
 newer than the recovery point. The database owner executes it only after the
@@ -216,20 +266,23 @@ reviewed afterward by the deployment owner and data/compliance owner.
 
 ## 7. Secrets And Privileged Configuration
 
-Accepted controls:
+Technical safety invariants and internal rotation targets:
 
 - Store database passwords, OIDC/JWKS configuration where confidential,
   private keys, tokens, and other credentials in a deployment-selected secret
   manager. Do not commit them, bake them into images, or retain them in
   compose files, shell history, screenshots, tickets, or rehearsal evidence.
 - Grant secret access to named workloads and the minimum named operators.
-- Rotate long-lived application and database credentials every 90 days,
-  certificates before expiry, and any credential immediately after suspected
-  exposure or owner departure.
+- Rotate long-lived application and database credentials on an owner-selected
+  cadence. A 90-day cadence is an internal reference target. Certificates must
+  be renewed before expiry, and any credential must be revoked or rotated
+  immediately after suspected exposure or owner departure.
 - Alert at 30, 14, and 7 days before certificate or time-bounded credential
   expiry.
 - Test rotation in the synthetic reference environment before first
-  production approval and at least annually thereafter.
+  owner-operated production use that depends on those credentials when that
+  use claims rotation readiness. Annual rehearsal is an internal reference
+  target.
 - Record secret identifiers, owners, creation/rotation dates, and verification
   results, but never secret values.
 - Treat principal-binding manifests and deployment configuration as reviewed
@@ -237,31 +290,36 @@ Accepted controls:
   turning IdP groups, roles, JWT `actor_id`, or other claims into platform
   authority.
 
-Secrets must be injected through read-only mounted files populated by an
-external secret-management mechanism; no provider-specific secret manager is
-selected. Hamza is the secrets owner and emergency revocation contact. The
-90-day rotation, expiry-alert, annual rehearsal, and immediate suspected-
-exposure revocation targets are accepted.
+Secrets must stay outside source control, outside the application image, and
+out of logs/evidence. They may be injected through restrictive host-mounted
+files or another local mechanism that satisfies those constraints; no external,
+paid, cloud, or provider-specific secret manager is required. Hamza is the
+secrets owner and emergency revocation contact. The 90-day rotation,
+expiry-alert, and annual rehearsal values are internal reference targets.
+Immediate suspected-exposure revocation remains a safety invariant.
 
 ## 8. Monitoring, Capacity, SLO, And Support
 
 ### 8.1 Service And Reliability Targets
 
-Accepted targets:
+Provisional internal reliability targets:
 
-- Availability SLO: 99.0% per calendar month, measured across all calendar
-  time and including planned maintenance so maintenance cost remains visible.
-- Service hours: 24 hours a day once real production approval is granted.
-- Staffed support hours: 08:00-18:00 in the deployment's local time, Monday
-  through Friday excluding published holidays.
+- Availability reference target: 99.0% per calendar month, measured across all
+  calendar time and including planned maintenance so maintenance cost remains
+  visible.
+- Service-hours reference target: 24 hours a day once Hamza selects
+  owner-operated production use for the affected deployment.
+- Staffed-support reference target: 08:00-18:00 in the deployment's local time,
+  Monday through Friday excluding published holidays.
 - Do not promise high availability, automatic failover, or zero downtime for
   the single-host reference class.
 
-The accepted availability SLO is 99.0% per calendar month. Service hours are
-24x7 after real-production approval; staffed support hours are 08:00-18:00
-`Asia/Aden`, Monday through Friday excluding published local holidays. No
-funded 24x7 severity-1 response roster exists, so 24x7 incident response must
-not be advertised.
+No contractual SLA, guaranteed availability, fixed support hours, or 24x7
+response commitment is selected. The 99.0% availability, 24x7 service-hour,
+and 08:00-18:00 `Asia/Aden` staffed-support values are internal reference
+targets until Hamza explicitly selects a service promise for a concrete
+deployment. No funded 24x7 severity-1 response roster exists, so 24x7 incident
+response must not be advertised.
 
 ### 8.2 Required Signals And Thresholds
 
@@ -269,25 +327,27 @@ NW-065 must provide or integrate signals for application readiness, request
 failure, host and database capacity, database connectivity, backup freshness,
 certificate expiry, and OIDC/JWKS dependency failures.
 
-Accepted thresholds:
+Internal monitoring and capacity targets:
 
 - Warn when CPU, memory, disk, or database connection use exceeds 70% of
   provisioned capacity for 15 minutes.
 - Page or escalate when use exceeds 85% for 10 minutes, disk is projected to
   fill within 24 hours, the application is not ready for 5 minutes, repeated
   server errors materially affect users, the database is unavailable, backup
-  freshness exceeds the accepted RPO, or a certificate has less than 7 days
-  remaining.
+  freshness exceeds the selected or reference recovery target, or a certificate
+  has less than 7 days remaining.
 - Review capacity monthly and before a material user, data-volume, or
   configuration expansion.
 - Every alert names an owner, response action, escalation path, and link to the
   applicable runbook. An alert with no responder is not an operational control.
 
-The thresholds and durations above are accepted. NW-065 must expose
-Actuator/Prometheus-compatible health and metrics signals plus structured
-standard-output logs. Hamza is the primary alert recipient for the synthetic
-rehearsal. A backup recipient and final monitoring/logging destination are
-required before real-production approval.
+The thresholds and durations above are internal reference targets. NW-065 may
+expose Actuator/Prometheus-compatible health and metrics signals plus
+structured standard-output logs. Hamza is the primary alert recipient for the
+synthetic rehearsal and initial owner-operated production. A backup recipient
+and final monitoring/logging destination are reliability improvements unless a
+concrete support promise or external obligation makes them necessary for a
+named action.
 
 ### 8.3 Incident Severity And Communication
 
@@ -300,28 +360,31 @@ required before real-production approval.
 Authority drift, cross-scope data exposure, secret leakage, event mutation, and
 unsafe migration state are severity 1 even if availability appears healthy.
 
-The severity definitions, acknowledgement targets, and update cadence are
-accepted. Hamza is the incident commander, support contact, and escalation
-authority for the synthetic rehearsal. Production-specific security/executive
-escalation and user communication channels must be selected before
-real-production approval.
+The severity definitions are an internal triage model. The acknowledgement and
+update timings are internal reference targets, not an external support
+commitment. Hamza is the incident commander, support contact, and escalation
+authority for the synthetic rehearsal and initial owner-operated production.
+Production-specific security/executive escalation and user communication
+channels must be selected only when the affected deployment or external
+obligation needs them.
 
 ## 9. Release, Migration, And Recovery Authority
 
-Accepted controls:
+Technical safety invariants and maintenance targets:
 
 - Deploy only an immutable image identified by digest and source commit after
   required tests, clean image/resource inspection, vulnerability review, and
   environment preflight pass.
-- Use one scheduled two-hour maintenance window per week, with at least 48
-  hours notice for user-visible production maintenance. Emergency security or
-  recovery work may occur outside the window with incident records.
+- Keep a two-hour maintenance window available when needed. This is not a
+  requirement to perform weekly maintenance. Give at least 48 hours notice only
+  when actual users will be affected and the work is not emergency security or
+  recovery work.
 - Require release-owner preparation and release-approver authorization. In the
   accepted solo-owner model, Hamza may hold both roles only with the evidence
   and retrospective review required by Section 3.1.
-- Before a schema migration, confirm a successful recovery point no older than
-  the accepted RPO and confirm that the database owner can access the restore
-  procedure.
+- Before a schema migration, confirm a successful recovery point consistent
+  with the selected or reference recovery target and confirm that the database
+  owner can access the restore procedure.
 - Let Flyway perform only the supported forward migration path. Do not invent
   down migrations, edit Flyway history, or use undocumented manual SQL.
 - Roll back only the application image, and only when tests or an explicit
@@ -337,50 +400,69 @@ Hamza is release owner, release approver, application rollback authority,
 database restore authority, forward-fix authority, and the decision-maker
 between restore and forward fix under the solo-owner model. Synthetic
 rehearsal maintenance is scheduled by the rehearsal plan; a real deployment
-must record its recurring two-hour weekly window in `Asia/Aden` and retain at
-least 48 hours notice for user-visible maintenance.
+may record an available two-hour window in `Asia/Aden` when planned
+maintenance is needed. Notice applies only when actual users will be affected.
 
 ## 10. Evidence And Review
 
-Accepted controls:
+Evidence safety invariants and internal retention targets:
 
 - Retain release approvals, image digests, deployment checks, privileged access
   changes, configuration and principal-binding approvals, rehearsal records,
-  incident timelines, recovery decisions, and post-incident actions for 13
-  months.
+  incident timelines, recovery decisions, and post-incident actions. A
+  13-month retention period is an internal reference target unless Hamza
+  selects another deployment retention rule or an identified obligation
+  requires one.
 - Retain security incident and legal-hold evidence longer when directed by the
   data/compliance owner.
 - Keep evidence access-controlled, tamper-resistant where the selected
   platform supports it, and free of secret values and unnecessary personal or
   production record contents.
-- Review this policy every 12 months and after a severity-1 incident, failed
-  restore, missed RPO/RTO, provider or region change, material data
-  reclassification, ownership change, or change to the reference deployment
-  class.
+- Review this policy every 12 months as an internal target and after a
+  severity-1 incident, failed restore, missed selected recovery target,
+  provider or region change, material data reclassification, ownership change,
+  or change to the reference deployment class.
 
-The 13-month retention and 12-month review cadence are accepted. Hamza is the
-evidence owner and legal-hold authority. Sanitized summaries may be committed
-to this repository; raw logs, command output, and other detailed evidence must
-remain in access-controlled external storage and must never include secret
-values.
+The 13-month retention period and 12-month review cadence are internal
+reference targets. Hamza is the evidence owner and legal-hold authority.
+Sanitized summaries may be committed to this repository; raw logs, command
+output, and other detailed evidence must remain outside the repository,
+secret-safe, and access-controlled. That storage may be local; no cloud or
+paid external evidence store is required.
 
-## 11. Synthetic Rehearsal Versus Real Production Approval
+## 11. Synthetic Rehearsal And Owner-Operated Production Selection
 
 NW-067 synthetic rehearsal may prove that the selected image, PostgreSQL
 recovery path, provisioning inputs, monitoring, rotation, incident response,
 and solo cold-recovery procedure work with invented data in the reference
 environment. It does not prove independent human continuity.
 
-A successful synthetic rehearsal does **not** approve a real production
-deployment. Before real users or real organizational data are introduced, the
-deployment owner and data/compliance owner must separately record:
+NW-163 selects the SSH-operated lab server for pilot and initial
+owner-operated production. Hamza is the deployment owner, data/compliance
+owner, approval authority, operational authority, support contact, and
+decision-maker for that initial deployment. A written Hamza decision is enough
+owner approval unless a specific applicable external obligation is identified.
+
+Local VMs, containers, and isolated services on the selected server satisfy
+logical separation for the initial deployment when the affected step's checks
+pass. Same-host recovery copies are accepted initially with the explicit
+limitation that total physical-host loss can still lose both service and
+backup copies. Off-host backup and separate physical infrastructure remain
+prioritized reliability improvements, not feature, auth, pilot, or initial
+owner-operated production blockers.
+
+Before real users or real organizational data are introduced, Hamza records
+only the facts needed for that affected action:
 
 - named legal organization and accountable deployment owner;
-- deployment jurisdiction, region, and data residency constraints;
+- deployment jurisdiction, local site/country boundary, maintenance-access
+  boundary, backup location, monitoring/log destination, and support access
+  path when relevant to the selected flow;
 - data classification, including personal, sensitive, regulated, or
   organization-confidential categories;
-- required retention, deletion, legal hold, breach notification, audit, and
-  contractual controls;
+- required retention, deletion, legal hold, breach notification, audit,
+  contractual, regulator, customer, or other external obligations when one has
+  been identified and shown to apply;
 - user population, service/support promise, expected capacity, and field
   connectivity assumptions;
 - accepted identity-provider and token acquisition path for the intended
@@ -389,48 +471,53 @@ deployment owner and data/compliance owner must separately record:
   operator and coverage model when a Section 3.1 trigger applies;
 - whether unresolved production web-admin authentication, mobile OAuth/OIDC
   login, or NW-054 device expiry/decommissioning/encryption questions block
-  that deployment;
-- completed security, privacy, and compliance review required by the owning
-  organization.
+  a named action in that deployment;
+- any security, privacy, or compliance review required by the owning
+  organization or another identified external obligation.
 
-Until that approval exists, use synthetic, non-sensitive data and test
-identities only.
+Missing provider/region paperwork, external review, separate departments, or
+incomplete documentation does not block technical preparation, fresh local
+OIDC login, principal binding, pilot feature work, or other independent
+implementation. It blocks only the exact action that cannot proceed, and only
+when the missing fact, capability, input, access, dependency, or obligation is
+named with evidence.
 
-Treat any unknown classification, jurisdiction,
-retention, user-login, device-security, or breach obligation as a blocker to
-real production, not as an implied acceptance.
+Treat an unknown classification, jurisdiction, retention, user-login,
+device-security, or breach obligation as a blocker only to the specific
+real-data or cutover action that depends on it. Do not convert unknowns into a
+global production prohibition or a reason to stop unrelated implementation.
 
-Hamza is the data/compliance owner and real-production approval authority.
-No production provider, region, jurisdiction, real-data classification, or
-organizational compliance review is selected by this policy. Those omissions
-explicitly block real production but do not block synthetic rehearsal with
-non-sensitive data.
+Provider/region language is local/on-prem language for this route. It does
+not require an unselected cloud provider, managed identity provider, managed
+database, external monitoring destination, remote support provider, or
+cross-border transfer. Any such option must be selected by a later owner
+decision and must not become a default blocker.
 
 ## 12. Owner Acceptance Register
 
 The deployment owner completed every row below. Future replacement values must
-be at least as explicit as the accepted baseline.
+be at least as explicit as the baseline interpretation.
 
-| Selection | Accepted baseline | Owner selection |
+| Selection | Baseline interpretation | Owner selection |
 |---|---|---|
-| Deployment and service owners | Named accountable people; roles may be combined explicitly. | Hamza holds both roles under the solo-owner model. |
-| Host, DNS/TLS, database, secrets, monitoring owners | One named accountable owner for each responsibility; add independent coverage when a Section 3.1 trigger applies. | Hamza holds all roles under the accepted solo-owner model; independent human continuity is unproven. |
-| Release, incident, support, data/compliance owners | Named people with reachable escalation paths. | Hamza holds all roles under the solo-owner model. |
-| Small-team approval model | Evidence-backed solo approval until a concrete separation or coverage trigger applies. | Hamza may self-approve rehearsal and initial owner-operated production with the Section 3.1 record. |
-| Hosting, PostgreSQL, region, environment boundaries | Separate production and rehearsal identities, data, DNS, secrets, and monitoring. | Provider-neutral external PostgreSQL 16 reference; production provider/region unselected and blocking real production. |
-| Access controls | Named MFA accounts, no shared human credentials, encrypted PostgreSQL connections, 90-day review, four-hour normal removal target. | Accepted as written. |
-| RPO and RTO | RPO 1 hour; RTO 8 hours. | Accepted as written. |
-| Backup and restore | Continuous PITR/equivalent, daily backup, 35 daily and 12 monthly points, quarterly restore test. | Accepted as provider-neutral requirements. |
-| Backup encryption and off-site posture | Encryption in transit/at rest and a protected separate failure/access boundary. | Accepted as written. |
+| Deployment and service owners | Technical safety invariant: named accountability; roles may be combined explicitly. | Hamza holds both roles under the solo-owner model. |
+| Host, DNS/TLS, database, secrets, monitoring owners | Technical safety invariant: one named accountable owner for each responsibility; add independent coverage when a Section 3.1 trigger applies. | Hamza holds all roles under the accepted solo-owner model; independent human continuity is unproven. |
+| Release, incident, support, data/compliance owners | Technical safety invariant: named accountable owner for each function. | Hamza holds all roles under the solo-owner model. |
+| Small-team approval model | Evidence-backed solo approval until a concrete separation or coverage trigger applies. | Hamza may self-approve rehearsal, pilot, and initial owner-operated production with the Section 3.1 record. |
+| Hosting, PostgreSQL, region, environment boundaries | Current owner-selected fact: separate production and rehearsal identities, data, DNS, secrets, monitoring, and local service boundaries can be local/on-prem. | The SSH-operated lab server is selected as the pilot and initial owner-operated production host. Local VMs/services can satisfy logical separation. Provider/region means local host/operator and site boundary, not unselected cloud paperwork. |
+| Access controls | Technical safety invariant: named individual accounts, no shared human credentials for privileged operations, encrypted PostgreSQL connections where used. Cadence/removal timings are internal reference targets. | Hamza owns access control under the solo-owner model; 90-day review and four-hour normal removal remain targets only. |
+| RPO and RTO | Provisional internal reliability targets: RPO 1 hour and RTO 8 hours. | Not a contractual commitment, cutover gate, or feature/auth/pilot blocker unless Hamza selects that recovery promise or an external obligation requires it. |
+| Backup and restore | Technical safety invariant: recoverable copy for claimed restore readiness and no secret exposure. PITR, daily copy, 35 daily/12 monthly points, and restore-test cadence are internal reference targets. | Same-host recovery copies are initially accepted with total-host-loss risk acknowledged; provider-neutral improvements remain prioritized, not blockers. |
+| Backup encryption and off-site posture | Technical safety invariant: protect backup secrets/keys. Same-host recovery copies are accepted initially with total-host-loss risk acknowledged; off-host/separate-boundary copies are prioritized reliability improvements. | Current owner-selected risk posture after NW-163. |
 | Disaster and restore authority | Named declarer, restore approver, and restore operator. | Hamza holds all three roles under the solo-owner model. |
-| Secret storage and rotation | Selected secret manager; 90-day long-lived credential rotation; immediate emergency revocation. | Read-only mounted files from an external secret-management mechanism; cadence accepted. |
-| SLO and service/support hours | 99.0% monthly; 24x7 service; 08:00-18:00 local weekday support; no implied 24x7 responder. | Accepted in `Asia/Aden`; no 24x7 response roster. |
-| Monitoring and capacity | 70% warning, 85% critical, backup/RPO, readiness, database, certificate, and provider alerts. | Accepted; Actuator/Prometheus-compatible signals and structured stdout logs. |
-| Incident model | Three severities; severity-1 authority/data events; explicit acknowledgement and communication targets. | Accepted; Hamza owns response under the solo-owner model. |
-| Release and maintenance | Immutable digest; weekly two-hour window; 48-hour notice; pre-migration recovery point. | Accepted; real deployment must record the exact recurring `Asia/Aden` window. |
-| Rollback, restore, forward-fix decision | App rollback only with proven schema compatibility; otherwise authorized restore or tested forward fix. | Accepted; Hamza holds this authority under the solo-owner model. |
-| Evidence retention and policy review | 13 months; annual and event-triggered review. | Accepted; sanitized repository summaries and access-controlled external raw evidence. |
-| Real-data compliance gate | Unknown classification or legal/security obligation blocks real production. | Accepted; real production remains unapproved. |
+| Secret storage and rotation | Technical safety invariant: no secrets in source control, images, logs, or evidence; immediate revocation after suspected exposure. Rotation cadence is an internal reference target. | Restrictive host-mounted files or another local mechanism outside source control and the application image is enough; no external or paid secret manager is required. |
+| SLO and service/support hours | Provisional internal targets only: 99.0% monthly, 24x7 service-hours target, 08:00-18:00 local weekday support target. | No contractual SLA, guaranteed availability, fixed support hours, or 24x7 response commitment is selected. |
+| Monitoring and capacity | Internal reference targets: 70% warning, 85% critical, backup/RPO, readiness, database, certificate, and provider alerts. | Signals are useful evidence; they do not block feature work, authentication, pilot use, or owner-approved initial production by themselves. |
+| Incident model | Internal triage model: three severities and reference acknowledgement/update timings. | Hamza owns response under the solo-owner model; no external response commitment is selected. |
+| Release and maintenance | Technical safety invariant: immutable digest and safe migration/rollback/restore authority. Maintenance windows and 48-hour notice are conditional targets. | A weekly window is available when needed, not required weekly. Notice applies only when actual users will be affected. |
+| Rollback, restore, forward-fix decision | App rollback only with proven schema compatibility; otherwise authorized restore or tested forward fix. | Hamza holds this authority under the solo-owner model. |
+| Evidence retention and policy review | Technical safety invariant: evidence must be secret-safe and outside the repository when raw. Retention and review cadence are internal reference targets. | A 13-month retention period and annual review are targets only. Raw evidence storage may be access-controlled local storage; no cloud storage is required. |
+| Real-data compliance gate | Unknown classification or a specific legal/security obligation blocks only the affected real-data or cutover action. | Unselected real-data/cutover work remains unselected, while independent implementation may continue. |
 
 Acceptance record:
 
@@ -442,7 +529,7 @@ Acceptance record:
   accepted for rehearsal and initial owner-operated production because no
   second operator exists. Independent human continuity remains an explicit
   residual risk and becomes mandatory only on a Section 3.1 trigger.
-- Next scheduled review: 2027-06-13, or earlier on a Section 10 trigger.
+- Next scheduled review target: 2027-06-13, or earlier on a Section 10 trigger.
 
 ## 13. Mandatory Guardrails And Exceptions
 
@@ -466,16 +553,20 @@ This policy cannot:
 
 An operational exception must name its owner, scope, reason, start and expiry
 dates, compensating controls, evidence, and review authority. No exception may
-waive the guardrails above or silently lower an accepted RPO/RTO, security,
-authority, or real-data approval boundary. Such a request requires a new
-bounded NW route and, where applicable, architecture or platform authority.
+waive the guardrails above or silently lower a mandatory safety invariant,
+selected recovery promise, security, authority, or real-data approval boundary.
+Such a request requires a new bounded NW route and, where applicable,
+architecture or platform authority.
 
 ## 14. Successor And Acceptance Boundary
 
-NW-064 is accepted with the Section 12 selections above. NW-065 may proceed
+NW-064 is accepted with the Section 12 distinctions above. NW-065 may proceed
 within this policy. NW-066 must translate only tested NW-065 tooling into
-procedures. NW-067 must measure RPO/RTO and exercise clean install, restore,
-upgrade/failure, rotation, alert/incident, and solo cold recovery.
+procedures. NW-067 may measure provisional recovery targets and exercise clean
+install, restore, upgrade/failure, rotation, alert/incident, and solo cold
+recovery without turning those reference targets into cutover gates.
 
-Real production remains separately blocked by Section 11 even after NW-064
-acceptance and a successful synthetic rehearsal.
+Section 11 no longer creates a global production blocker. It requires the
+specific owner facts and evidence needed for the affected real-data or cutover
+action while allowing independent feature, auth, pilot, and local deployment
+preparation to proceed.
