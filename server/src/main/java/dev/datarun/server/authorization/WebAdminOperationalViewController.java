@@ -21,8 +21,11 @@ import java.util.UUID;
 public class WebAdminOperationalViewController {
 
     static final String ATTENTION_TOKEN_PARAM = "attentionToken";
+    static final String WORK_EVIDENCE_TOKEN_PARAM = "workToken";
     private static final String ATTENTION_TOKEN_ATTR = "webAdminOperationalAttentionToken";
     private static final String ATTENTION_FLAG_ID_ATTR = "webAdminOperationalAttentionFlagId";
+    private static final String WORK_EVIDENCE_TOKEN_ATTR = "webAdminConfiguredWorkEvidenceToken";
+    private static final String WORK_EVIDENCE_EVENT_ID_ATTR = "webAdminConfiguredWorkEvidenceEventId";
 
     private final WebAdminSessionService sessionService;
     private final AdminCommandCapabilityService adminCommandCapabilityService;
@@ -59,8 +62,33 @@ public class WebAdminOperationalViewController {
         requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
         requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
 
-        model.addAttribute("snapshot", reportSnapshotService.snapshot(context.actorId()));
+        ScopedOperationalReportSnapshotService.ScopedOperationalReportSnapshot snapshot =
+                reportSnapshotService.snapshot(context.actorId());
+        model.addAttribute("snapshot", snapshot);
+        bindWorkEvidenceToken(request, model, snapshot);
         return "web-admin/operational-report";
+    }
+
+    @GetMapping("/evidence")
+    public String configuredWorkEvidence(
+            HttpServletRequest request,
+            @RequestParam(name = WORK_EVIDENCE_TOKEN_PARAM, required = false)
+            String workToken,
+            Model model) {
+        WebAdminSessionContext context = requireContextForPage(request);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
+        requireCommand(context, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+
+        model.addAttribute(
+                "evidence",
+                readWorkEvidenceEventId(request, workToken)
+                        .map(eventId -> reportSnapshotService.configuredWorkEvidence(
+                                context.actorId(), eventId))
+                        .orElseGet(() ->
+                                ScopedOperationalReportSnapshotService.ConfiguredWorkEvidence
+                                        .notVisible(ScopedOperationalReportSnapshotService
+                                                .NO_VISIBLE_CONFIGURED_WORK_EVIDENCE)));
+        return "web-admin/configured-work-evidence";
     }
 
     @GetMapping("/handoff")
@@ -122,6 +150,24 @@ public class WebAdminOperationalViewController {
         model.addAttribute(ATTENTION_TOKEN_PARAM, token);
     }
 
+    private void bindWorkEvidenceToken(
+            HttpServletRequest request,
+            Model model,
+            ScopedOperationalReportSnapshotService.ScopedOperationalReportSnapshot snapshot) {
+        HttpSession session = request.getSession(false);
+        if (session == null || !snapshot.hasConfiguredWorkEvidenceTarget()) {
+            clearWorkEvidenceToken(request);
+            return;
+        }
+        String token = UUID.randomUUID().toString();
+        session.setAttribute(WORK_EVIDENCE_TOKEN_ATTR, token);
+        session.setAttribute(WORK_EVIDENCE_EVENT_ID_ATTR,
+                snapshot.traceContext().eventId().toString());
+        model.addAttribute("configuredWorkEvidencePath",
+                "/web-admin/operational/evidence?"
+                        + WORK_EVIDENCE_TOKEN_PARAM + "=" + token);
+    }
+
     private UUID requireAttentionFlagId(HttpServletRequest request, String attentionToken) {
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -143,6 +189,34 @@ public class WebAdminOperationalViewController {
         if (session != null) {
             session.removeAttribute(ATTENTION_TOKEN_ATTR);
             session.removeAttribute(ATTENTION_FLAG_ID_ATTR);
+        }
+    }
+
+    private java.util.Optional<UUID> readWorkEvidenceEventId(
+            HttpServletRequest request, String workToken) {
+        HttpSession session = request.getSession(false);
+        if (session == null || workToken == null || workToken.isBlank()) {
+            return java.util.Optional.empty();
+        }
+        Object expectedToken = session.getAttribute(WORK_EVIDENCE_TOKEN_ATTR);
+        Object eventId = session.getAttribute(WORK_EVIDENCE_EVENT_ID_ATTR);
+        if (!(expectedToken instanceof String expected)
+                || !(eventId instanceof String event)
+                || !expected.equals(workToken)) {
+            return java.util.Optional.empty();
+        }
+        try {
+            return java.util.Optional.of(UUID.fromString(event));
+        } catch (RuntimeException e) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    private void clearWorkEvidenceToken(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.removeAttribute(WORK_EVIDENCE_TOKEN_ATTR);
+            session.removeAttribute(WORK_EVIDENCE_EVENT_ID_ATTR);
         }
     }
 

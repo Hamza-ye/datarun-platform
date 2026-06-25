@@ -297,11 +297,60 @@ public class EventRepository {
     }
 
     /**
+     * One selected configured-work evidence read model. Scope predicates are
+     * re-applied before payload data is returned.
+     */
+    public Optional<OperationalWorkEvent> findScopedVisibleWorkEvent(
+            UUID eventId, List<OperationalScope> scopes) {
+        if (eventId == null || scopes == null || scopes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT e.id, e.type, e.shape_ref, e.activity_ref, e.subject_ref, e.actor_ref,
+                       e.device_id, e.device_seq, e.sync_watermark, e.timestamp, e.payload,
+                       e.received_at
+                FROM events e
+                WHERE e.id = ?::uuid
+                  AND e.subject_ref->>'type' = 'subject'
+                  AND e.type != 'assignment_changed'
+                  AND e.shape_ref NOT LIKE 'conflict_detected/%'
+                  AND e.shape_ref NOT LIKE 'conflict_resolved/%'
+                  AND e.shape_ref NOT LIKE 'subjects_merged/%'
+                  AND e.shape_ref NOT LIKE 'subject_split/%'
+                  AND (
+                """);
+        List<Object> params = new ArrayList<>();
+        params.add(eventId.toString());
+        int appendedScopes = appendOperationalScopes(sql, scopes, params);
+        if (appendedScopes == 0) {
+            return Optional.empty();
+        }
+        sql.append("""
+                  )
+                LIMIT 1
+                """);
+
+        List<OperationalWorkEvent> results = jdbc.query(
+                sql.toString(),
+                (rs, rowNum) -> new OperationalWorkEvent(
+                        mapRow(rs),
+                        rs.getTimestamp("received_at").toInstant().atOffset(ZoneOffset.UTC)),
+                params.toArray());
+        return results.stream().findFirst();
+    }
+
+    /**
      * Bounded handoff current-work read model. Scope predicates are applied
      * before ordering and limiting so out-of-scope work cannot influence the
      * visible context, latest input, caveats, or empty state.
      */
     public List<OperationalWorkEvent> findOperationalHandoffCurrentWork(
+            List<OperationalScope> scopes, int limit) {
+        return findScopedSubjectWorkEvents(scopes, limit);
+    }
+
+    private List<OperationalWorkEvent> findScopedSubjectWorkEvents(
             List<OperationalScope> scopes, int limit) {
         if (scopes == null || scopes.isEmpty() || limit <= 0) {
             return List.of();
