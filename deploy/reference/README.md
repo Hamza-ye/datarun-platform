@@ -4,10 +4,14 @@ These assets implement the NW-063/NW-064 deployment class: one immutable
 Datarun server container on one Linux host, a TLS reverse proxy, and a durable
 PostgreSQL 16 service deployed outside the app container. For the local/on-prem
 pilot, those companion services can run on Hamza's SSH-operated lab server as
-isolated services or VMs when capacity and security checks pass; that server is
-the intended production host for the selected deployment, not a separate
-test-only environment. These assets do not bundle a proxy, database, backup
-system, provider adapter, or production cutover.
+isolated services or VMs; that server is the intended production host for the
+selected deployment, not a separate test-only environment. Before starting a
+specific service, check only the affected step: ports and network exposure,
+TLS boundary, credentials/secrets placement, available CPU/memory/disk,
+service health, and the required login smoke for auth services. A failed check
+blocks only that deployment step and must name the evidence. These assets do
+not bundle a proxy, database, backup system, provider adapter, or production
+cutover.
 
 ## Inputs
 

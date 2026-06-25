@@ -1,15 +1,33 @@
 # NW-093 - Real Production Approval Package
 
-Status: accepted blocked approval package
+Status: accepted historical approval package; superseded for current routing
+by NW-163
 Document type: product_planning / operational_policy_gap artifact
 Authority: non-authoritative approval map; does not approve production, real
 users/data, raw-data import, runtime implementation, contracts, schemas,
 sync/access behavior, BAR, CDL, validation policy, or gap-register standing
 Date: 2026-06-23
 
+## Supersession Notice
+
+NW-163 and `docs/operations/policies/first-reference-deployment-policy.md`
+now control current local/on-prem owner-operated production routing. The broad
+NW-093 conclusion that "real production remains blocked" is historical
+evidence from 2026-06-23. It does not block fresh local OIDC/Keycloak work,
+explicit principal binding, pilot feature implementation, lab-host deployment
+preparation, or initial owner-operated production preparation.
+
+NW-093 remains useful for legacy account import, submitted-record
+import/replay, raw real-data cutover, first-flow data classification,
+parallel-run source-of-truth, reconciliation, rollback/stop, and cutover
+questions. Any remaining blocker must name the exact affected action and the
+missing capability, input, access, dependency, or concrete external obligation.
+
 ## Decision
 
-Real-production approval remains blocked.
+At NW-093 acceptance on 2026-06-23, real-production approval remained blocked.
+That broad conclusion is historical and superseded for current routing by
+NW-163 and the active first reference deployment policy.
 
 Selected next NW: **NW-147 - Legacy first-flow compatibility and data-boundary
 matrix**.

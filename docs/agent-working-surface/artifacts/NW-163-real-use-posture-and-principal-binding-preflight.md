@@ -25,7 +25,7 @@ roles such as worker, supervisor, and reviewer do not imply separate employees.
 | `docs/status.md` Recommended next move | Replaced the NW-163 docs-only successor with NW-164 as the selected bounded implementation route for fresh local OIDC/Keycloak user access and explicit principal binding. |
 | `docs/agent-working-surface/platform-next-work-backlog.md` status definition | Tightened `blocked` so it applies only when a specific technical capability is absent, Hamza stopped the work, or a concrete external obligation applies. |
 | `docs/agent-working-surface/platform-next-work-backlog.md` Active Work Index and backlog rows | Marked NW-163 accepted and added NW-164 as the next selected implementation route. NW-159 remains a candidate only for future blocked-by-default wording recurrence. |
-| `deploy/reference/README.md` | Clarified that companion services can run locally/on-prem on Hamza's existing server as isolated services or VMs when validated, and that optional external/cloud/provider topology is not a prerequisite. |
+| `deploy/reference/README.md` | Clarified that companion services can run locally/on-prem on Hamza's existing server as isolated services or VMs after named step checks for ports/network exposure, TLS, secrets, resources, health, and login smoke; optional external/cloud/provider topology is not a prerequisite. |
 | `deploy/reference/provisioning-inputs.md` | Changed the example binding reason from approval ceremony language to owner-selected binding language. |
 | `deploy/reference/pilot-packages/stock-operations/README.md` | Replaced "separately approved" local Keycloak wording with "selected" route wording, and changed package language from approving real use to not selecting it. |
 
@@ -97,16 +97,17 @@ Fresh local OIDC provisioning can enable users without legacy account import:
 
 ## Missing Concrete Implementation
 
-The missing next implementation is not the auth mechanism. It is a concrete
-local Keycloak/fresh-user preflight package:
+The missing next implementation is not the auth mechanism. It is live
+local Keycloak/fresh-user login proof:
 
-- local Keycloak realm/client/user setup material or equivalent self-hosted
-  OIDC setup;
+- deployed local Keycloak realm/client/user setup or equivalent self-hosted
+  OIDC setup on the selected host or local VM/service;
 - Datarun runtime and web-admin/mobile settings for that local issuer;
 - reviewed principal-binding manifest using the local issuer and real local
   subject values for fresh users;
-- a focused preflight/smoke proving a bound fresh local principal resolves to
-  the expected actor through accepted auth paths.
+- an actual web-admin login and authenticated actor-resolution smoke proving
+  a bound fresh local principal resolves to the expected actor;
+- mobile PKCE path preparation/proof as far as current mobile support allows.
 
 No code/test evidence shows that legacy account import, submitted-record
 import/replay, cloud hosting, cross-border transfer, managed identity, separate
@@ -126,7 +127,7 @@ NW-164 unless Hamza selects that feature in a separate route.
 | Real users/data | Not selected by NW-163. A later Hamza decision can select a narrow first use directly; if an external obligation is identified, name it and the affected action. |
 | Production cutover | Not selected by NW-163 or NW-164. Technical preparation and local auth preflight can proceed independently. |
 | Same-host backups | Allowed for initial use with the limitation recorded: they do not protect against total physical-host loss. |
-| Separate infrastructure | Future reliability improvement, not a prerequisite unless capacity, security, recovery, or incompatibility evidence shows the existing server/local VM cannot satisfy a named operation. |
+| Separate infrastructure | Future reliability improvement, not a prerequisite unless a named executable check shows the existing server/local VM cannot satisfy a specific operation. |
 | Managed/cloud identity | Optional future route. Do not make it a blocker for local Keycloak/fresh-user preparation. |
 | Cross-border transfer | Not selected. Local/on-prem deployment remains the default. |
 | Gap register/future decisions | Routable when triggered, not forbidden by default. |
