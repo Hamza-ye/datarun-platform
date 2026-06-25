@@ -1,9 +1,12 @@
 # Provider-Neutral Reference Deployment Assets
 
 These assets implement the NW-063/NW-064 deployment class: one immutable
-Datarun server container on one Linux host, an external TLS reverse proxy, and
-an external durable PostgreSQL 16 service. They do not bundle a proxy,
-database, backup system, provider adapter, or production approval.
+Datarun server container on one Linux host, a TLS reverse proxy, and a durable
+PostgreSQL 16 service deployed outside the app container. For the local/on-prem
+pilot, those companion services can run on Hamza's existing server as isolated
+services or VMs when capacity and security checks pass. These assets do not
+bundle a proxy, database, backup system, provider adapter, or production
+cutover.
 
 ## Inputs
 
@@ -25,7 +28,8 @@ Optional non-secret limits are `DATARUN_APP_HOST_PORT` (default `18080`),
 `DATARUN_STOP_GRACE_PERIOD` (`45s`). The stop grace period must exceed the
 application's default 30-second graceful shutdown phase.
 
-The runtime directory is a Spring config tree. It must contain one scalar per
+The runtime directory is a Spring config tree populated by the selected local
+or host-supplied configuration mechanism. It must contain one scalar per
 file under these exact filenames:
 
 ```text
@@ -69,9 +73,9 @@ exist in `DATARUN_TRUST_DIR`. Keep the username and password in their separate
 config-tree files, not in the URL.
 
 No secret files or value templates belong in this directory or in Compose
-environment variables. The external population mechanism must make every
-mounted file readable by container UID/GID `10001:10001` without granting
-unnecessary host access.
+environment variables. The config population mechanism must make every mounted
+file readable by container UID/GID `10001:10001` without granting unnecessary
+host access.
 
 ## Boundary And Output
 
@@ -80,12 +84,12 @@ with a read-only root filesystem, a bounded temporary filesystem, all Linux
 capabilities dropped, `no-new-privileges`, explicit CPU/memory/PID limits,
 restart behavior, and a graceful SIGTERM window.
 
-Both container listeners are published only on host `127.0.0.1`. The external
-TLS proxy may forward public HTTPS traffic to the application host port. It
-must not forward the management port. Host firewalling must still reject
-direct public access, and the proxy remains responsible for certificates,
-request policy, and forwarding only the intended application traffic.
-Monitoring on the host may scrape the loopback management port.
+Both container listeners are published only on host `127.0.0.1`. The TLS proxy
+may forward public HTTPS traffic to the application host port. It must not
+forward the management port. Host firewalling must still reject direct public
+access, and the proxy remains responsible for certificates, request policy,
+and forwarding only the intended application traffic. Monitoring on the host
+may scrape the loopback management port.
 
 ## Validation
 
@@ -108,9 +112,10 @@ identified by digest and matching source labels, a required mounted file is
 missing or unreadable, PostgreSQL TLS verification is absent, either host
 listener is not loopback-only, or development/default credentials are needed.
 
-Also stop if the deployment requires a bundled database/proxy, provider
-adapter, Kubernetes, manual database mutation, development admin surfaces,
-new authority semantics, or a claim that backup, restore, monitoring,
-rotation, login, or real-production approval has already been proven. Those
-are outside these implementation assets and remain subject to NW-066/NW-067
-or separately routed work.
+Also stop if the deployment requires manual database mutation, development
+admin surfaces, new authority semantics, or a claim that backup, restore,
+monitoring, rotation, login, or production cutover has already been proven.
+A bundled local database/proxy or provider adapter is not selected by these
+assets, but locally deployable companion services are not forbidden when a
+later route selects and validates them. Remaining operational procedures are
+outside these implementation assets and stay separately routed work.

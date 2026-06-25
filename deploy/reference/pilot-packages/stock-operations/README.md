@@ -7,7 +7,7 @@ principal-binding, and initial assignment bootstrap paths
 
 This package turns the NW-148 synthetic stocktake-line proof into reusable
 non-production/pilot material for a local/on-prem stock operations lane. It
-does not approve real users, real stock records, account import, submitted
+does not select real users, real stock records, account import, submitted
 record import/replay, production cutover, controlled operational use, stock
 ledger correctness, stock truth, cloud hosting, cross-border transfer, managed
 external backup, external monitoring export, or remote support access.
@@ -43,7 +43,7 @@ stock operations skeleton.
 
 The package assumes a local/on-prem IdP issuer of
 `https://idp.local.example/datarun-stock-pilot` for synthetic proof. Replace
-that issuer and the provider subject values during a separately approved local
+that issuer and the provider subject values during a selected local
 Keycloak/principal-binding route; IdP groups, claims, imported accounts, and
 JWT `actor_id` claims remain non-authoritative.
 
@@ -100,4 +100,5 @@ mechanism.
 
 The shape is standard-sensitivity synthetic/non-sensitive pilot material. Keep
 real categories, real quantities, legacy submitted records, and imported
-accounts out of this package unless a later route explicitly approves them.
+accounts out of this package unless a later route explicitly selects them with
+Hamza's owner approval.
