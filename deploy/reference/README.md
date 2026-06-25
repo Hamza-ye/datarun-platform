@@ -71,6 +71,12 @@ production cutover, or controlled operational use. Its reviewed config file is
 a complete clean-environment snapshot, not a patch for an already configured
 deployment.
 
+The secret-free local Keycloak overlay proven by NW-164 lives under
+[`local-keycloak/`](local-keycloak/). It records stable runtime names, lab
+hosts/ports, OIDC issuer/client values, and the explicit pilot principal
+binding without committing passwords, client secrets, tokens, cookies,
+authorization codes, or private keys.
+
 The JDBC URL must select PostgreSQL TLS verification with
 `sslmode=verify-full` and
 `sslrootcert=/run/datarun/trust/postgresql-root.crt`; that certificate must
