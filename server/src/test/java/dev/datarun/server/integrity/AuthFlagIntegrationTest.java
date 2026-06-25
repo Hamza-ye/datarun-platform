@@ -228,8 +228,11 @@ class AuthFlagIntegrationTest extends AbstractIntegrationTest {
         pushCaptureEvent(outOfScopeSubject, WORKER, DEVICE_W, "Out of scope");
 
         // Verify out-of-scope subject has no state (flagged event excluded from projection)
-        ResponseEntity<JsonNode> outResponse = rest.getForEntity(
-                "/api/subjects/{id}", JsonNode.class, outOfScopeSubject.toString());
+        ResponseEntity<JsonNode> outResponse = getWithAuth(
+                rest,
+                "/api/subjects/{id}",
+                JsonNode.class,
+                outOfScopeSubject.toString());
         // Should be 404 or empty state — flagged event excluded
         assertThat(outResponse.getStatusCode()).isIn(HttpStatus.NOT_FOUND, HttpStatus.OK);
         if (outResponse.getStatusCode() == HttpStatus.OK) {

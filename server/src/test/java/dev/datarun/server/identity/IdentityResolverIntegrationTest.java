@@ -61,7 +61,7 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         pushEvents(List.of(buildEvent(subjectB, DEVICE_B, 1)), DEVICE_B);
 
         // Before merge: 2 subjects
-        var beforeMerge = rest.getForEntity("/api/subjects", JsonNode.class);
+        var beforeMerge = getWithAuth(rest, "/api/subjects", JsonNode.class);
         assertThat(beforeMerge.getBody().get("subjects").size()).isEqualTo(2);
 
         // Merge B into A
@@ -70,7 +70,7 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(mergeResponse.getBody().get("surviving_id").asText()).isEqualTo(subjectA.toString());
 
         // After merge: 1 unified subject with events from both
-        var afterMerge = rest.getForEntity("/api/subjects", JsonNode.class);
+        var afterMerge = getWithAuth(rest, "/api/subjects", JsonNode.class);
         JsonNode subjects = afterMerge.getBody().get("subjects");
         assertThat(subjects.size()).isEqualTo(1);
         assertThat(subjects.get(0).get("id").asText()).isEqualTo(subjectA.toString());
@@ -78,7 +78,8 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(subjects.get(0).get("event_count").asInt()).isEqualTo(3);
 
         // GET events for surviving ID includes events from both
-        var eventsResponse = rest.getForEntity("/api/subjects/" + subjectA + "/events", JsonNode.class);
+        var eventsResponse = getWithAuth(
+                rest, "/api/subjects/" + subjectA + "/events", JsonNode.class);
         assertThat(eventsResponse.getBody().get("events").size()).isGreaterThanOrEqualTo(3);
     }
 
@@ -114,7 +115,7 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(bTarget).isEqualTo(subjectC.toString()); // Direct: B→C
 
         // Unified subject list shows only C with all 3 events
-        var subjectsResponse = rest.getForEntity("/api/subjects", JsonNode.class);
+        var subjectsResponse = getWithAuth(rest, "/api/subjects", JsonNode.class);
         JsonNode subjects = subjectsResponse.getBody().get("subjects");
         assertThat(subjects.size()).isEqualTo(1);
         assertThat(subjects.get(0).get("id").asText()).isEqualTo(subjectC.toString());
@@ -147,7 +148,7 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(aliasRows()).isEqualTo(originalRows);
 
-        var subjectsResponse = rest.getForEntity("/api/subjects", JsonNode.class);
+        var subjectsResponse = getWithAuth(rest, "/api/subjects", JsonNode.class);
         JsonNode subjects = subjectsResponse.getBody().get("subjects");
         assertThat(subjects.size()).isEqualTo(1);
         assertThat(subjects.get(0).get("id").asText()).isEqualTo(subjectC.toString());
@@ -174,7 +175,8 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(lifecycleProjection.stateOf(sourceId)).isEqualTo("archived");
 
         // Historical events still belong to source
-        var sourceEvents = rest.getForEntity("/api/subjects/" + sourceId + "/events", JsonNode.class);
+        var sourceEvents = getWithAuth(
+                rest, "/api/subjects/" + sourceId + "/events", JsonNode.class);
         int domainEventCount = 0;
         for (JsonNode e : sourceEvents.getBody().get("events")) {
             // Domain captures — excludes system-authored identity lifecycle (subject_split/v1 etc.).
@@ -183,11 +185,12 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(domainEventCount).isEqualTo(2);
 
         // Successor has no events yet (it's a new subject)
-        var successorEvents = rest.getForEntity("/api/subjects/" + successorId + "/events", JsonNode.class);
+        var successorEvents = getWithAuth(
+                rest, "/api/subjects/" + successorId + "/events", JsonNode.class);
         assertThat(successorEvents.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
         // Archived source is not listed as an active subject.
-        var subjectsResponse = rest.getForEntity("/api/subjects", JsonNode.class);
+        var subjectsResponse = getWithAuth(rest, "/api/subjects", JsonNode.class);
         for (JsonNode subject : subjectsResponse.getBody().get("subjects")) {
             assertThat(subject.get("id").asText()).isNotEqualTo(sourceId.toString());
         }
@@ -363,14 +366,14 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         pushEvents(List.of(buildEvent(subjectB, DEVICE_B, 1)), DEVICE_B);
 
         // Before merge: A has 2 events, B has 1
-        var subjectsBefore = rest.getForEntity("/api/subjects", JsonNode.class);
+        var subjectsBefore = getWithAuth(rest, "/api/subjects", JsonNode.class);
         assertThat(subjectsBefore.getBody().get("subjects").size()).isEqualTo(2);
 
         // Merge A into B
         merge(subjectA, subjectB);
 
         // After merge: PE re-attributes A's events to B
-        var subjectsAfter = rest.getForEntity("/api/subjects", JsonNode.class);
+        var subjectsAfter = getWithAuth(rest, "/api/subjects", JsonNode.class);
         JsonNode subjects = subjectsAfter.getBody().get("subjects");
         assertThat(subjects.size()).isEqualTo(1);
         // B now has 3 events (2 from A + 1 from B)
@@ -378,7 +381,8 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(subjects.get(0).get("event_count").asInt()).isEqualTo(3);
 
         // GET events by canonical ID returns all events from alias chain
-        var eventsResponse = rest.getForEntity("/api/subjects/" + subjectB + "/events", JsonNode.class);
+        var eventsResponse = getWithAuth(
+                rest, "/api/subjects/" + subjectB + "/events", JsonNode.class);
         int domainEvents = 0;
         for (JsonNode e : eventsResponse.getBody().get("events")) {
             // Domain captures — excludes system-authored subjects_merged/v1.
@@ -420,7 +424,7 @@ class IdentityResolverIntegrationTest extends AbstractIntegrationTest {
         assertThat(flags).isGreaterThan(0);
 
         // The projection still shows B as a unified subject with all events
-        var subjects = rest.getForEntity("/api/subjects", JsonNode.class);
+        var subjects = getWithAuth(rest, "/api/subjects", JsonNode.class);
         // Should have 1 subject (B, the canonical). A's events are re-attributed.
         // The stale event for retired A should also appear under B's alias chain.
         boolean foundCanonical = false;

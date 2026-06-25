@@ -1009,8 +1009,8 @@ class ResponsibilityBindingScenarioIntegrationTest extends AbstractIntegrationTe
     }
 
     private void assertTimelineContains(UUID subjectId, UUID... eventIds) {
-        ResponseEntity<JsonNode> response = rest.getForEntity(
-                "/api/subjects/" + subjectId + "/events", JsonNode.class);
+        ResponseEntity<JsonNode> response = getWithAuth(
+                rest, "/api/subjects/" + subjectId + "/events", JsonNode.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(eventIds(response.getBody().get("events")))
                 .contains(List.of(eventIds).stream().map(UUID::toString).toArray(String[]::new));

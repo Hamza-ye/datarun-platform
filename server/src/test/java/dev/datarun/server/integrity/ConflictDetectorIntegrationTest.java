@@ -101,14 +101,14 @@ class ConflictDetectorIntegrationTest extends AbstractIntegrationTest {
         pushEventsWithMeta(List.of(eventB1), DEVICE_B, 0);
 
         // Subject list (projected state) — should exclude flagged event from count
-        var subjectResponse = rest.getForEntity("/api/subjects", JsonNode.class);
+        var subjectResponse = getWithAuth(rest, "/api/subjects", JsonNode.class);
         JsonNode subjects = subjectResponse.getBody().get("subjects");
         assertThat(subjects.size()).isEqualTo(1);
         int projectedCount = subjects.get(0).get("event_count").asInt();
 
         // Timeline shows all events (including flagged + flag event)
-        var timelineResponse = rest.getForEntity(
-                "/api/subjects/" + SUBJECT_X + "/events", JsonNode.class);
+        var timelineResponse = getWithAuth(
+                rest, "/api/subjects/" + SUBJECT_X + "/events", JsonNode.class);
         int timelineCount = timelineResponse.getBody().get("events").size();
 
         // Timeline has more events than projection count (flagged event excluded from projection,

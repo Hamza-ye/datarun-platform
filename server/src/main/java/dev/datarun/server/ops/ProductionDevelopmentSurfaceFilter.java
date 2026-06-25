@@ -33,7 +33,9 @@ public final class ProductionDevelopmentSurfaceFilter extends OncePerRequestFilt
         return !(path.equals("/admin")
                 || path.startsWith("/admin/")
                 || path.equals("/api/actors")
-                || path.startsWith("/api/actors/"));
+                || path.startsWith("/api/actors/")
+                || path.equals("/api/subjects")
+                || path.startsWith("/api/subjects/"));
     }
 
     @Override

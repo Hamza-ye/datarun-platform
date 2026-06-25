@@ -514,7 +514,7 @@ class ConflictResolutionIntegrationTest extends AbstractIntegrationTest {
     }
 
     private int getProjectedEventCount(UUID subjectId) {
-        var response = rest.getForEntity("/api/subjects", JsonNode.class);
+        var response = getWithAuth(rest, "/api/subjects", JsonNode.class);
         JsonNode subjects = response.getBody().get("subjects");
         for (JsonNode s : subjects) {
             if (subjectId.toString().equals(s.get("id").asText())) {

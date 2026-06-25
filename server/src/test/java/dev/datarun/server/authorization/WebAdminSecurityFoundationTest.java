@@ -70,6 +70,12 @@ class WebAdminSecurityFoundationTest {
         mvc.perform(post("/api/actors/{actorId}/tokens", UUID.randomUUID()))
                 .andExpect(status().isNotFound())
                 .andExpect(header().doesNotExist("WWW-Authenticate"));
+        mvc.perform(get("/api/subjects"))
+                .andExpect(status().isNotFound())
+                .andExpect(header().doesNotExist("WWW-Authenticate"));
+        mvc.perform(get("/api/subjects/{subjectId}/events", UUID.randomUUID()))
+                .andExpect(status().isNotFound())
+                .andExpect(header().doesNotExist("WWW-Authenticate"));
     }
 
     @Controller
@@ -97,6 +103,18 @@ class WebAdminSecurityFoundationTest {
         @ResponseBody
         String actorTokens(@PathVariable UUID actorId) {
             return actorId.toString();
+        }
+
+        @GetMapping("/api/subjects")
+        @ResponseBody
+        String subjects() {
+            return "{\"subjects\":[]}";
+        }
+
+        @GetMapping("/api/subjects/{subjectId}/events")
+        @ResponseBody
+        String subjectEvents(@PathVariable UUID subjectId) {
+            return "{\"subject_id\":\"" + subjectId + "\",\"events\":[]}";
         }
     }
 }
