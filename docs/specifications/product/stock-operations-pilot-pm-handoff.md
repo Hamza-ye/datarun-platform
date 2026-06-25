@@ -3,17 +3,18 @@
 Status: active PM handoff surface
 Document type: product_handoff
 Owner: product steward
-Source: NW-149; PR #58 / NW-148 synthetic stock operations first-flow proof
+Source: NW-149; PR #58 / NW-148 synthetic stock operations first-flow proof;
+NW-150 stock operations pilot package skeleton; NW-151 subject-anchor hardening
 Authority: derived planning surface only; does not add product behavior,
 runtime implementation, production approval, architecture authority,
 validation policy, contracts, schemas, BAR, CDL, or gap-register standing
-Last reviewed: 2026-06-23
+Last reviewed: 2026-06-24
 Supersedes: none
 Related: `../../agent-working-surface/platform-next-work-backlog.md`;
 `../../agent-working-surface/prompts/NW-149-stock-operations-pilot-goal-and-ordered-backlog.md`;
 `../../../server/src/test/java/dev/datarun/server/e2e/SyntheticStockOperationsFirstFlowIntegrationTest.java`;
 `../../agent-working-surface/validation-matrix.md`;
-`../../implementation/module-interfaces.md`; `../../../contracts/patterns/transfer_with_acknowledgment.v1.json`
+`../../implementation/module-interfaces.md`
 
 ## Product Goal
 
@@ -52,6 +53,47 @@ visibility. It is not complete until mobile capture, local Keycloak/principal
 binding, local operational preflight, and owner go/no-go gates are proven by
 later backlog items.
 
+### Architecture Assumptions
+
+For this pilot handoff, `stocktake_line/v1` is deployer-authored shape
+configuration and `stock_operations` is a deployer activity instance. They are
+pilot configuration, not platform mechanisms, envelope changes, stock ledger
+truth, workflow pattern definitions, or production approval.
+
+Every Datarun event still requires the architecture-owned `subject_ref`
+envelope field. The stock pilot mapping does not turn warehouse, item, catalog,
+stocktake session, or ledger concepts into platform primitives.
+
+For the current pilot proof, `stocktake_line/v1` events must reference a
+pre-established pilot stock-scope subject through `event.subject_ref`. That
+subject is the scoped operational anchor used by existing Datarun assignment,
+location-path, sync, and scoped-report mechanics. Pre-established means a
+stable subject UUID, a `subject_locations` mapping under the selected pilot
+geography, worker/supervisor assignments covering that geography and activity
+`stock_operations`, and capture/session/operator context that can stamp that
+subject into `subject_ref`. In the first pilot mapping, the intended
+real-world anchor is the physical stock-holding location or storage point being
+counted, but this does not define a warehouse entity lifecycle, inventory
+ledger, catalog/item model, stocktake session model, process-ref subject,
+production stock truth, or new platform mechanism.
+
+The package shape has `subject_binding = null`, so the subject reference must
+come from capture, session, or operator context rather than from a
+`stocktake_line/v1` payload field. If the current mobile/runtime path cannot
+safely select or stamp that pre-established pilot stock-scope subject, the
+mobile stocktake capture route must stop and identify the missing
+subject-selection surface before mobile capture is accepted.
+
+The first increment is flat capture plus scoped supervisor visibility.
+Supervisor visibility means scoped read access; it does not select or require
+`event.type = "review"`.
+
+If later stock operations require human review, transfer acknowledgment,
+multi-step approval, or discrepancy resolution, route a later slice explicitly
+through the existing pattern contracts: `capture_with_review/v1`,
+`transfer_with_acknowledgment/v1`, `multi_step_approval/v1`, or
+`ongoing_resolution/v1`.
+
 ## Definition of Done
 
 For each pilot slice, done means:
@@ -69,17 +111,22 @@ For each pilot slice, done means:
 
 1. Stock operations pilot package skeleton. Create a reusable
    non-production/pilot config/provisioning package from the test-only
-   stocktake proof.
-2. Mobile stocktake capture smoke. Prove field-user mobile
+   stocktake proof. Accepted by NW-150.
+2. Stock operations subject-anchor boundary and proof-oracle hardening. Make
+   the `stocktake_line/v1` subject anchor explicit, keep it bounded to a
+   pre-established pilot stock-scope subject, and harden the server proof so it
+   does not rely on supervisor review authority. Accepted by PR #60
+   review-hardening commit.
+3. Mobile stocktake capture smoke. Prove field-user mobile
    capture/offline/sync for `stocktake_line/v1`, or identify the exact missing
    mobile surface.
-3. Supervisor stock operations view. Show stocktake line details, not only
+4. Supervisor stock operations view. Show stocktake line details, not only
    aggregate counts, using scoped authority.
-4. Local Keycloak/principal-binding pilot path. Prove self-hosted Keycloak plus
+5. Local Keycloak/principal-binding pilot path. Prove self-hosted Keycloak plus
    explicit Datarun principal bindings for pilot worker/supervisor users.
-5. Local on-prem operational preflight. Prove backup/restore, monitoring,
+6. Local on-prem operational preflight. Prove backup/restore, monitoring,
    secrets, support path, and smoke evidence for the selected host.
-6. Owner go/no-go for limited pilot. Select limited controlled use only after
+7. Owner go/no-go for limited pilot. Select limited controlled use only after
    the evidence above exists.
 
 ## Security And Reliability Gates
@@ -128,10 +175,12 @@ stock truth, or production readiness.
 Exactly one next implementation route is selected:
 
 ```text
-NW-150 - Stock operations pilot package skeleton
+NW-152 - Mobile stocktake capture smoke
 ```
 
-NW-150 should create the reusable non-production/pilot config/provisioning
-package from the NW-148 test-only stocktake proof. It must not reopen legacy
-migration, repeatable sections, form importer, account import, real-data
-approval, or tenant/control-plane work.
+NW-152 should prove mobile can select or stamp the pre-established pilot
+stock-scope subject, capture a flat `stocktake_line/v1` item, retain it
+offline or before sync, and push it through the existing authenticated sync
+path. It must not decide a full stock domain model, reopen legacy migration,
+repeatable sections, form importer, account import, real-data approval, review
+workflow, stock ledger, or tenant/control-plane work.

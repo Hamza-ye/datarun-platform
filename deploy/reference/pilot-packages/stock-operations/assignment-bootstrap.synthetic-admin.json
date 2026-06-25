@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "NW-150:stock-operations-pilot-package-skeleton",
+  "target_actor_id": "15000000-0000-4000-8000-000000000001",
+  "role": "pilot_admin",
+  "geographic_id": null,
+  "subject_list": null,
+  "activity_list": null,
+  "valid_from": "2026-06-23T00:00:00Z",
+  "valid_to": null
+}

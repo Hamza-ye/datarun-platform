@@ -1,0 +1,30 @@
+{
+  "manifest_version": "deployment-bindings/v1",
+  "source": "NW-150:stock-operations-pilot-package-skeleton",
+  "operations": [
+    {
+      "operation_id": "stock-pilot-bind-admin",
+      "issuer": "https://idp.local.example/datarun-stock-pilot",
+      "subject": "stock-pilot-admin",
+      "actor_id": "15000000-0000-4000-8000-000000000001",
+      "state": "active",
+      "reason": "NW-150 synthetic local stock operations pilot admin binding"
+    },
+    {
+      "operation_id": "stock-pilot-bind-worker",
+      "issuer": "https://idp.local.example/datarun-stock-pilot",
+      "subject": "stock-pilot-worker",
+      "actor_id": "15000000-0000-4000-8000-000000000002",
+      "state": "active",
+      "reason": "NW-150 synthetic local stock operations pilot worker binding"
+    },
+    {
+      "operation_id": "stock-pilot-bind-supervisor",
+      "issuer": "https://idp.local.example/datarun-stock-pilot",
+      "subject": "stock-pilot-supervisor",
+      "actor_id": "15000000-0000-4000-8000-000000000003",
+      "state": "active",
+      "reason": "NW-150 synthetic local stock operations pilot supervisor binding"
+    }
+  ]
+}
