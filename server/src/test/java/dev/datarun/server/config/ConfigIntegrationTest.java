@@ -1243,11 +1243,8 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, pushResponse.getBody().get("accepted").asInt());
 
         // 7. Projection engine projects the subject
-        ResponseEntity<JsonNode> subjectsResponse = restTemplate.exchange(
-                "/api/subjects",
-                HttpMethod.GET,
-                new HttpEntity<>(new HttpHeaders()),
-                JsonNode.class);
+        ResponseEntity<JsonNode> subjectsResponse =
+                getWithAuth(restTemplate, "/api/subjects", JsonNode.class);
 
         assertEquals(200, subjectsResponse.getStatusCode().value());
         JsonNode subjectsWrapper = subjectsResponse.getBody();
@@ -1266,11 +1263,8 @@ class ConfigIntegrationTest extends AbstractIntegrationTest {
         assertTrue(found, "Subject " + subjectId + " not found in projection");
 
         // 8. Subject events visible via detail endpoint
-        ResponseEntity<JsonNode> detailResponse = restTemplate.exchange(
-                "/api/subjects/" + subjectId + "/events",
-                HttpMethod.GET,
-                new HttpEntity<>(new HttpHeaders()),
-                JsonNode.class);
+        ResponseEntity<JsonNode> detailResponse = getWithAuth(
+                restTemplate, "/api/subjects/" + subjectId + "/events", JsonNode.class);
 
         assertEquals(200, detailResponse.getStatusCode().value());
         JsonNode detailWrapper = detailResponse.getBody();

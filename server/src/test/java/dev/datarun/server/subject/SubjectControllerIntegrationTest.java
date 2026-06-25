@@ -44,7 +44,7 @@ class SubjectControllerIntegrationTest extends AbstractIntegrationTest {
         pushEvent(SUBJECT_1, 2, "capture");
         pushEvent(SUBJECT_2, 3, "capture");
 
-        ResponseEntity<JsonNode> response = rest.getForEntity("/api/subjects", JsonNode.class);
+        ResponseEntity<JsonNode> response = getWithAuth("/api/subjects");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode subjects = response.getBody().get("subjects");
@@ -67,8 +67,8 @@ class SubjectControllerIntegrationTest extends AbstractIntegrationTest {
         pushEvent(SUBJECT_1, 1, "capture");
         pushEvent(SUBJECT_1, 2, "capture");
 
-        ResponseEntity<JsonNode> response = rest.getForEntity(
-                "/api/subjects/" + SUBJECT_1 + "/events", JsonNode.class);
+        ResponseEntity<JsonNode> response = getWithAuth(
+                "/api/subjects/" + SUBJECT_1 + "/events");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode events = response.getBody().get("events");
@@ -81,11 +81,33 @@ class SubjectControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void getSubjectEvents_unknownSubject_returns404() {
-        ResponseEntity<JsonNode> response = rest.getForEntity(
-                "/api/subjects/" + UUID.randomUUID() + "/events", JsonNode.class);
+        ResponseEntity<JsonNode> response = getWithAuth(
+                "/api/subjects/" + UUID.randomUUID() + "/events");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody().get("error").asText()).isEqualTo("subject_not_found");
+    }
+
+    @Test
+    void listSubjects_withoutBearer_returns401() {
+        pushEvent(SUBJECT_1, 1, "capture");
+
+        ResponseEntity<JsonNode> response =
+                rest.getForEntity("/api/subjects", JsonNode.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody().get("error").asText()).isEqualTo("missing_token");
+    }
+
+    @Test
+    void getSubjectEvents_withoutBearer_returns401() {
+        pushEvent(SUBJECT_1, 1, "capture");
+
+        ResponseEntity<JsonNode> response = rest.getForEntity(
+                "/api/subjects/" + SUBJECT_1 + "/events", JsonNode.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody().get("error").asText()).isEqualTo("missing_token");
     }
 
     private void pushEvent(UUID subjectId, int seq, String type) {
@@ -107,5 +129,10 @@ class SubjectControllerIntegrationTest extends AbstractIntegrationTest {
         Map<String, Object> body = Map.of("events", List.of(event));
         rest.exchange("/api/sync/push", HttpMethod.POST,
                 new HttpEntity<>(body, headers), JsonNode.class);
+    }
+
+    private ResponseEntity<JsonNode> getWithAuth(String path) {
+        return rest.exchange(
+                path, HttpMethod.GET, new HttpEntity<>(authHeaders()), JsonNode.class);
     }
 }

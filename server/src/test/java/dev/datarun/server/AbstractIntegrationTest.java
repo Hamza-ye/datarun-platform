@@ -3,7 +3,11 @@ package dev.datarun.server;
 import dev.datarun.server.config.AssignmentAdminCapabilityPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -102,5 +106,18 @@ public abstract class AbstractIntegrationTest {
         headers.set("Authorization", "Bearer " + TEST_TOKEN);
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
         return headers;
+    }
+
+    protected <T> ResponseEntity<T> getWithAuth(
+            TestRestTemplate rest,
+            String url,
+            Class<T> responseType,
+            Object... uriVariables) {
+        return rest.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders()),
+                responseType,
+                uriVariables);
     }
 }

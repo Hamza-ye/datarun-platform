@@ -344,7 +344,8 @@ class DomainUniquenessIntegrationTest extends AbstractIntegrationTest {
     }
 
     private int projectedEventCount(UUID subjectId) {
-        ResponseEntity<JsonNode> response = rest.getForEntity("/api/subjects", JsonNode.class);
+        ResponseEntity<JsonNode> response =
+                getWithAuth(rest, "/api/subjects", JsonNode.class);
         JsonNode subjects = response.getBody().get("subjects");
         for (JsonNode subject : subjects) {
             if (subjectId.toString().equals(subject.get("id").asText())) {

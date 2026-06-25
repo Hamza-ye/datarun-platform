@@ -26,6 +26,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/sync/pull",
                         "/api/sync/subject-history",
                         "/api/sync/config",
+                        "/api/subjects",
+                        "/api/subjects/**",
                         "/api/assignments",
                         "/api/assignments/**",
                         "/api/conflicts",

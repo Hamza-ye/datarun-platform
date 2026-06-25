@@ -22,12 +22,17 @@ class ProductionDevelopmentSurfaceFilterTest {
         MockHttpServletResponse admin = filter(filter, "/admin/dev/provision");
         MockHttpServletResponse config = filter(filter, "/admin/config");
         MockHttpServletResponse tokens = filter(filter, "/api/actors/actor-id/tokens");
+        MockHttpServletResponse subjects = filter(filter, "/api/subjects");
+        MockHttpServletResponse subjectEvents =
+                filter(filter, "/api/subjects/7c9e6679-7425-40de-944b-e07fc1f90ae7/events");
 
         assertThat(adminRoot.getStatus()).isEqualTo(404);
         assertThat(assignments.getStatus()).isEqualTo(404);
         assertThat(admin.getStatus()).isEqualTo(404);
         assertThat(config.getStatus()).isEqualTo(404);
         assertThat(tokens.getStatus()).isEqualTo(404);
+        assertThat(subjects.getStatus()).isEqualTo(404);
+        assertThat(subjectEvents.getStatus()).isEqualTo(404);
     }
 
     @Test
