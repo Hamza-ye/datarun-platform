@@ -35,9 +35,10 @@ impossible, and what evidence supports that statement.
 
 ## Owner And Hosting Facts
 
-- The current pilot and initial production deployment target is Hamza's
-  existing on-premises lab server, which has sufficient resources for the
-  selected preparation path.
+- The current pilot and initial production deployment target is the
+  SSH-operated lab server Hamza uses for operations. In this context "lab
+  server" means the intended production host for the selected local/on-prem
+  deployment, not a separate test-only environment.
 - When logical separation is needed, use local VMs or isolated services on that
   server before treating a separate physical host, cloud service, managed
   identity provider, managed database, external monitoring service, remote
