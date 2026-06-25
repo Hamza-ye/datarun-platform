@@ -152,7 +152,7 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     }
 
     @Test
-    void configuredWorkDetailsShowScopedStockOperationsFixtureEvidence()
+    void configuredWorkEvidenceDetailShowsSelectedStandardConfiguredWork()
             throws Exception {
         publishStockOperationsFixtureConfig();
         setupReviewerScope("stock_operations");
@@ -161,19 +161,38 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 SUBJECT_IN_SCOPE, districtA, "mids_kit", 42);
         createStocktakeLineRecord(
                 SUBJECT_OUT_OF_SCOPE, districtB, "hidden_kit", 99);
+        MockHttpSession session = webAdminSession(REVIEWER);
 
-        String body = mvc.perform(get("/web-admin/operational/report")
-                        .session(webAdminSession(REVIEWER)))
+        String report = mvc.perform(get("/web-admin/operational/report")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(report)
+                .contains("Open configured work evidence")
+                .doesNotContain("Configured work details")
+                .doesNotContain("Field values")
+                .doesNotContain("stocktake_date")
+                .doesNotContain("mids_kit")
+                .doesNotContain(">42<")
+                .doesNotContain("hidden_kit")
+                .doesNotContain(">99<");
+
+        String body = mvc.perform(get(configuredWorkEvidencePath(report))
+                        .session(session))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
         assertThat(body)
-                .contains("Configured work details")
+                .contains("Configured Work Evidence")
+                .contains("Visible Work Evidence")
                 .contains("Activity")
                 .contains("Record type")
-                .contains("Field values")
+                .contains("Configured work details")
                 .contains("Latest synced/received")
                 .contains("stock_operations")
                 .contains("stocktake_line/v1")
@@ -195,6 +214,159 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 .doesNotContain("stock ledger")
                 .doesNotContain("review workflow")
                 .doesNotContain("<form");
+    }
+
+    @Test
+    void configuredWorkEvidenceRouteRequiresAccessAndScopedRead()
+            throws Exception {
+        mvc.perform(get("/web-admin/operational/evidence"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/web-admin/login"));
+
+        MockHttpSession accessOnly = webAdminSession(REVIEWER);
+        configureAdminCommands(REVIEWER, AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS);
+        mvc.perform(get("/web-admin/operational/evidence")
+                        .param("workToken", "missing")
+                        .session(accessOnly))
+                .andExpect(status().isForbidden());
+
+        MockHttpSession readOnly = webAdminSession(REVIEWER);
+        configureAdminCommands(REVIEWER, AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+        mvc.perform(get("/web-admin/operational/evidence")
+                        .param("workToken", "missing")
+                        .session(readOnly))
+                .andExpect(status().isForbidden());
+
+        configureReportCommands(REVIEWER);
+        String body = mvc.perform(get("/web-admin/operational/evidence")
+                        .param("workToken", "missing")
+                        .session(webAdminSession(REVIEWER)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(body)
+                .contains("No visible configured work evidence is available for this session.")
+                .doesNotContain("missing");
+    }
+
+    @Test
+    void configuredWorkEvidenceRechecksScopeBeforeRendering()
+            throws Exception {
+        publishStockOperationsFixtureConfig();
+        Event assignment = setupReviewerScope("stock_operations");
+        configureReportCommands(REVIEWER);
+        Event visible = createStocktakeLineRecord(
+                SUBJECT_IN_SCOPE, districtA, "mids_kit", 42);
+        MockHttpSession session = webAdminSession(REVIEWER);
+
+        String report = mvc.perform(get("/web-admin/operational/report")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String evidencePath = configuredWorkEvidencePath(report);
+
+        assignmentService.endAssignment(assignmentId(assignment), ADMIN, "route closed");
+        String body = mvc.perform(get(evidencePath).session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(body)
+                .contains("No visible configured work evidence is available for this session.")
+                .doesNotContain("mids_kit")
+                .doesNotContain(">42<")
+                .doesNotContain(visible.id().toString())
+                .doesNotContain(SUBJECT_IN_SCOPE.toString());
+    }
+
+    @Test
+    void configuredWorkEvidenceHidesInternalIdentifiers()
+            throws Exception {
+        publishStockOperationsFixtureConfig();
+        setupReviewerScope("stock_operations");
+        configureReportCommands(REVIEWER);
+        Event visible = createStocktakeLineRecord(
+                SUBJECT_IN_SCOPE, districtA, "mids_kit", 42);
+
+        String body = configuredWorkEvidenceBody(webAdminSession(REVIEWER));
+
+        assertThat(body)
+                .contains("Configured Work Evidence")
+                .contains("mids_kit")
+                .doesNotContain(visible.id().toString())
+                .doesNotContain(SUBJECT_IN_SCOPE.toString())
+                .doesNotContain(FIELD_ACTOR.toString())
+                .doesNotContain(serverIdentity.getDeviceId().toString())
+                .doesNotContain(locationRepository.findPathById(districtA))
+                .doesNotContain("subject_ref")
+                .doesNotContain("actor_ref")
+                .doesNotContain("device_id")
+                .doesNotContain("device_seq")
+                .doesNotContain("sync_watermark")
+                .doesNotContain("location_path")
+                .doesNotContain("payload");
+    }
+
+    @Test
+    void configuredWorkEvidenceSuppressesElevatedOrRestrictedFieldValues()
+            throws Exception {
+        publishGenericConfiguredWorkConfig(
+                "inspection_line", "elevated",
+                "configured_activity", "standard",
+                "sensitive_value");
+        setupReviewerScope("configured_activity");
+        configureReportCommands(REVIEWER);
+        createConfiguredWorkRecord(
+                SUBJECT_IN_SCOPE,
+                districtA,
+                "inspection_line/v1",
+                "configured_activity",
+                "sensitive_value",
+                "restricted evidence value");
+
+        String body = configuredWorkEvidenceBody(webAdminSession(REVIEWER));
+
+        assertThat(body)
+                .contains("Configured field values are suppressed for this evidence.")
+                .contains("configured_activity")
+                .contains("inspection_line/v1")
+                .doesNotContain("sensitive_value")
+                .doesNotContain("restricted evidence value");
+    }
+
+    @Test
+    void reportPageDoesNotBecomeConfiguredRecordListBrowser()
+            throws Exception {
+        publishStockOperationsFixtureConfig();
+        setupReviewerScope("stock_operations");
+        configureReportCommands(REVIEWER);
+        createStocktakeLineRecord(SUBJECT_IN_SCOPE, districtA, "mids_kit", 42);
+        createStocktakeLineRecord(SUBJECT_IN_SCOPE, districtA, "rapid_test_kit", 7);
+
+        String report = mvc.perform(get("/web-admin/operational/report")
+                        .session(webAdminSession(REVIEWER)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(report)
+                .contains("Scoped Operational Report Snapshot")
+                .contains("Open configured work evidence")
+                .doesNotContain("Configured work details")
+                .doesNotContain("Field values")
+                .doesNotContain("stocktake_date")
+                .doesNotContain("stock_category")
+                .doesNotContain("quantity")
+                .doesNotContain("mids_kit")
+                .doesNotContain("rapid_test_kit")
+                .doesNotContain(">42<")
+                .doesNotContain(">7<");
+        assertActivityRow(report, "Stock Operations", 2, 0, 0);
     }
 
     @Test
@@ -327,7 +499,8 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     }
 
     @Test
-    void traceTargetRechecksCurrentScopeBeforeRendering() throws Exception {
+    void traceTargetDoesNotOpenConfiguredEvidenceForUnconfiguredWork()
+            throws Exception {
         Event assignment = setupReviewerScope();
         configureReportCommands(REVIEWER);
         createVisitRecord(SUBJECT_IN_SCOPE, districtA, "Site Visit", "assigned_visit");
@@ -340,8 +513,8 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 .getContentAsString();
         assertThat(report)
                 .contains("Trace Context")
-                .contains("/web-admin/operational")
-                .contains("Open scoped context");
+                .doesNotContain("/web-admin/operational/evidence")
+                .doesNotContain("Open configured work evidence");
 
         assignmentService.endAssignment(assignmentId(assignment), ADMIN, "route closed");
         String operational = mvc.perform(get("/web-admin/operational").session(session))
@@ -383,6 +556,29 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
         assertThat(eventCount()).isEqualTo(before);
     }
 
+    private String configuredWorkEvidenceBody(MockHttpSession session) throws Exception {
+        String report = mvc.perform(get("/web-admin/operational/report").session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return mvc.perform(get(configuredWorkEvidencePath(report)).session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+    }
+
+    private String configuredWorkEvidencePath(String html) {
+        java.util.regex.Matcher matcher = Pattern.compile(
+                        "href=\"([^\"]*/web-admin/operational/evidence\\?workToken=[^\"]+)\"")
+                .matcher(html);
+        assertThat(matcher.find())
+                .as("configured work evidence link")
+                .isTrue();
+        return matcher.group(1);
+    }
+
     private void publishStockOperationsFixtureConfig() {
         ObjectNode schema = objectMapper.createObjectNode();
         schema.putNull("subject_binding");
@@ -401,6 +597,28 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
         activityConfig.putObject("roles").putArray("field_worker").add("capture");
         assertThat(activityService.createActivity(
                 "stock_operations", "standard", activityConfig)).isEmpty();
+    }
+
+    private void publishGenericConfiguredWorkConfig(
+            String shapeName,
+            String shapeSensitivity,
+            String activityRef,
+            String activitySensitivity,
+            String fieldName) {
+        ObjectNode schema = objectMapper.createObjectNode();
+        schema.putNull("subject_binding");
+        schema.putNull("uniqueness");
+        ArrayNode fields = schema.putArray("fields");
+        addField(fields, fieldName, "text", true);
+
+        assertThat(shapeService.createShape(shapeName, shapeSensitivity, schema))
+                .isEmpty();
+
+        ObjectNode activityConfig = objectMapper.createObjectNode();
+        activityConfig.putArray("shapes").add(shapeName + "/v1");
+        activityConfig.putObject("roles").putArray("field_worker").add("capture");
+        assertThat(activityService.createActivity(
+                activityRef, activitySensitivity, activityConfig)).isEmpty();
     }
 
     private void addField(ArrayNode fields, String name, String type,
@@ -491,6 +709,33 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 "capture",
                 "stocktake_line/v1",
                 "stock_operations",
+                subjectRef(subjectId),
+                actorRef(FIELD_ACTOR),
+                serverIdentity.getDeviceId(),
+                (int) serverIdentity.nextDeviceSeq(),
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                payload);
+        assertThat(eventRepository.insert(event)).isTrue();
+        return event;
+    }
+
+    private Event createConfiguredWorkRecord(UUID subjectId,
+                                             UUID locationId,
+                                             String shapeRef,
+                                             String activityRef,
+                                             String fieldName,
+                                             String value) {
+        subjectLocationRepository.upsert(
+                subjectId, locationId, locationRepository.findPathById(locationId));
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put(fieldName, value);
+
+        Event event = new Event(
+                UUID.randomUUID(),
+                "capture",
+                shapeRef,
+                activityRef,
                 subjectRef(subjectId),
                 actorRef(FIELD_ACTOR),
                 serverIdentity.getDeviceId(),

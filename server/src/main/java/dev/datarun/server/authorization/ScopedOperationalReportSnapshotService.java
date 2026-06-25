@@ -26,11 +26,13 @@ public class ScopedOperationalReportSnapshotService {
 
     static final String SCOPED_VIEW_CAVEAT =
             "Current scoped standing only. Coverage not measured.";
-    static final String CONFIGURED_WORK_DETAILS_CAVEAT =
-            "Visible work details are limited to current assignment scope. "
-                    + "Latest synced/received time is scoped and not a guarantee.";
-
-    private static final int CONFIGURED_WORK_DETAIL_LIMIT = 10;
+    static final String CONFIGURED_WORK_EVIDENCE_CAVEAT =
+            "Visible through current assignment scope. Latest synced/received "
+                    + "time is scoped and not a guarantee.";
+    static final String NO_VISIBLE_CONFIGURED_WORK_EVIDENCE =
+            "No visible configured work evidence is available for this session.";
+    static final String SENSITIVE_FIELD_VALUES_SUPPRESSED =
+            "Configured field values are suppressed for this evidence.";
 
     private final EventRepository eventRepository;
     private final ScopeResolver scopeResolver;
@@ -76,12 +78,22 @@ public class ScopedOperationalReportSnapshotService {
                 latestVisibleInput.map(OffsetDateTime::toString).orElse(null),
                 latestCleanSourceWork.map(OffsetDateTime::toString).orElse(null),
                 rows,
-                configuredWorkDetailRows(scopes),
-                CONFIGURED_WORK_DETAILS_CAVEAT,
                 total(rows, ActivityStandingRow::cleanSourceCount),
                 total(rows, ActivityStandingRow::excludedUnresolvedSourceCount),
                 total(rows, ActivityStandingRow::unresolvedIssueCount),
                 traceContext(scopes));
+    }
+
+    public ConfiguredWorkEvidence configuredWorkEvidence(UUID actorId, UUID eventId) {
+        List<OperationalScope> scopes = operationalScopes(
+                scopeResolver.getActiveAssignments(actorId));
+        if (scopes.isEmpty() || eventId == null) {
+            return ConfiguredWorkEvidence.notVisible(NO_VISIBLE_CONFIGURED_WORK_EVIDENCE);
+        }
+        return eventRepository.findScopedVisibleWorkEvent(eventId, scopes)
+                .map(this::configuredWorkEvidence)
+                .orElseGet(() -> ConfiguredWorkEvidence.notVisible(
+                        NO_VISIBLE_CONFIGURED_WORK_EVIDENCE));
     }
 
     private List<OperationalScope> operationalScopes(List<ActiveAssignment> assignments) {
@@ -125,15 +137,6 @@ public class ScopedOperationalReportSnapshotService {
                 activityRef, 0, 0, 0, null, null);
     }
 
-    private List<ConfiguredWorkDetailRow> configuredWorkDetailRows(
-            List<OperationalScope> scopes) {
-        return eventRepository.findScopedVisibleWorkDetails(
-                        scopes, CONFIGURED_WORK_DETAIL_LIMIT)
-                .stream()
-                .map(this::configuredWorkDetailRow)
-                .toList();
-    }
-
     private ActivityStandingRow activityStandingRow(
             OperationalReportActivityStanding standing) {
         return new ActivityStandingRow(
@@ -152,18 +155,25 @@ public class ScopedOperationalReportSnapshotService {
                 "Coverage not measured");
     }
 
-    private ConfiguredWorkDetailRow configuredWorkDetailRow(
+    private ConfiguredWorkEvidence configuredWorkEvidence(
             OperationalWorkEvent work) {
-        return new ConfiguredWorkDetailRow(
+        Optional<Shape> shape = configuredShape(work.event().shapeRef());
+        boolean canRenderFieldValues = canRenderFieldValues(
+                work.event().activityRef(), shape);
+        return ConfiguredWorkEvidence.visible(
                 activityLabel(work.event().activityRef()),
                 work.event().activityRef(),
-                recordTypeLabel(work.event().shapeRef()),
+                recordTypeLabel(work.event().shapeRef(), shape),
                 work.event().shapeRef(),
-                configuredFieldValues(work.event().shapeRef(), work.event().payload()),
+                canRenderFieldValues
+                        ? configuredFieldValues(shape, work.event().payload())
+                        : List.of(),
+                canRenderFieldValues,
+                canRenderFieldValues ? null : SENSITIVE_FIELD_VALUES_SUPPRESSED,
                 safeText(work.receivedAt() == null
                         ? null
                         : work.receivedAt().toString()),
-                "Visible through current assignment scope");
+                CONFIGURED_WORK_EVIDENCE_CAVEAT);
     }
 
     private String activityLabel(String activityRef) {
@@ -176,19 +186,19 @@ public class ScopedOperationalReportSnapshotService {
                 .orElseGet(() -> displayName(activityRef, "Assigned Work"));
     }
 
-    private String recordTypeLabel(String shapeRef) {
-        return configuredShape(shapeRef)
-                .map(shape -> configuredLabel(shape.schemaJson()))
+    private String recordTypeLabel(String shapeRef, Optional<Shape> shape) {
+        return shape
+                .map(Shape::schemaJson)
+                .map(this::configuredLabel)
                 .filter(label -> !label.isBlank())
                 .orElseGet(() -> displayName(shapeRef, "Configured Record"));
     }
 
     private List<ConfiguredWorkFieldValue> configuredFieldValues(
-            String shapeRef, JsonNode payload) {
+            Optional<Shape> shape, JsonNode payload) {
         if (payload == null || !payload.isObject()) {
             return List.of();
         }
-        Optional<Shape> shape = configuredShape(shapeRef);
         if (shape.isEmpty()) {
             return List.of();
         }
@@ -208,7 +218,7 @@ public class ScopedOperationalReportSnapshotService {
         return configuredFields.stream()
                 .filter(field -> {
                     String name = field.path("name").asText(null);
-                    return name != null && !name.isBlank() && payload.has(name);
+                    return name != null && !name.isBlank();
                 })
                 .map(field -> {
                     String name = field.path("name").asText();
@@ -220,11 +230,31 @@ public class ScopedOperationalReportSnapshotService {
     }
 
     private Optional<Shape> configuredShape(String shapeRef) {
+        if (ShapeService.isPlatformShapeRef(shapeRef)) {
+            return Optional.empty();
+        }
         String[] parsed = ShapeService.parseShapeRef(shapeRef);
         if (parsed == null) {
             return Optional.empty();
         }
         return shapeService.getShape(parsed[0], Integer.parseInt(parsed[1]));
+    }
+
+    private boolean hasConfiguredShape(String shapeRef) {
+        return configuredShape(shapeRef).isPresent();
+    }
+
+    private boolean canRenderFieldValues(String activityRef, Optional<Shape> shape) {
+        if (shape.isEmpty() || !isStandardSensitivity(shape.get().sensitivity())) {
+            return false;
+        }
+        return activityService.getActivity(activityRef)
+                .map(activity -> isStandardSensitivity(activity.sensitivity()))
+                .orElse(false);
+    }
+
+    private boolean isStandardSensitivity(String sensitivity) {
+        return sensitivity == null || "standard".equalsIgnoreCase(sensitivity);
     }
 
     private String configuredLabel(JsonNode node) {
@@ -256,6 +286,15 @@ public class ScopedOperationalReportSnapshotService {
         if (value.isTextual() || value.isNumber() || value.isBoolean()) {
             return safeText(value.asText());
         }
+        if (value.isArray()) {
+            List<String> values = new ArrayList<>();
+            value.forEach(item -> {
+                if (item.isTextual() || item.isNumber() || item.isBoolean()) {
+                    values.add(safeText(item.asText()));
+                }
+            });
+            return values.isEmpty() ? "Not recorded" : String.join(", ", values);
+        }
         return value.toString();
     }
 
@@ -264,10 +303,11 @@ public class ScopedOperationalReportSnapshotService {
                 eventRepository.findLatestVisibleSubjectWorkEvent(scopes);
         return latest
                 .map(work -> new TraceContext(
+                        work.event().id(),
                         "Latest visible input",
                         displayName(work.event().activityRef(), "Assigned Work"),
                         work.receivedAt().toString(),
-                        "/web-admin/operational"))
+                        hasConfiguredShape(work.event().shapeRef())))
                 .orElse(null);
     }
 
@@ -336,8 +376,6 @@ public class ScopedOperationalReportSnapshotService {
             String latestVisibleInputAt,
             String latestCleanSourceWorkAt,
             List<ActivityStandingRow> activityRows,
-            List<ConfiguredWorkDetailRow> configuredWorkDetails,
-            String configuredWorkDetailsCaveat,
             long visibleCleanSourceCount,
             long excludedUnresolvedSourceCount,
             long unresolvedIssueCount,
@@ -359,12 +397,12 @@ public class ScopedOperationalReportSnapshotService {
             return !activityRows.isEmpty();
         }
 
-        public boolean hasConfiguredWorkDetails() {
-            return !configuredWorkDetails.isEmpty();
-        }
-
         public boolean hasTraceContext() {
             return traceContext != null;
+        }
+
+        public boolean hasConfiguredWorkEvidenceTarget() {
+            return traceContext != null && traceContext.hasConfiguredWorkEvidenceTarget();
         }
     }
 
@@ -392,17 +430,47 @@ public class ScopedOperationalReportSnapshotService {
         }
     }
 
-    public record ConfiguredWorkDetailRow(
+    public record ConfiguredWorkEvidence(
+            boolean visible,
+            String emptyText,
             String activity,
             String activityRef,
             String recordType,
             String shapeRef,
             List<ConfiguredWorkFieldValue> fieldValues,
+            boolean fieldValuesVisible,
+            String fieldValuesSuppressedText,
             String latestSyncedReceived,
             String visibilityText
     ) {
+        static ConfiguredWorkEvidence notVisible(String emptyText) {
+            return new ConfiguredWorkEvidence(
+                    false, emptyText, null, null, null, null, List.of(),
+                    false, null, null, null);
+        }
+
+        static ConfiguredWorkEvidence visible(
+                String activity,
+                String activityRef,
+                String recordType,
+                String shapeRef,
+                List<ConfiguredWorkFieldValue> fieldValues,
+                boolean fieldValuesVisible,
+                String fieldValuesSuppressedText,
+                String latestSyncedReceived,
+                String visibilityText) {
+            return new ConfiguredWorkEvidence(
+                    true, null, activity, activityRef, recordType, shapeRef,
+                    fieldValues, fieldValuesVisible, fieldValuesSuppressedText,
+                    latestSyncedReceived, visibilityText);
+        }
+
         public boolean hasFieldValues() {
             return !fieldValues.isEmpty();
+        }
+
+        public boolean hasSuppressedFieldValues() {
+            return fieldValuesSuppressedText != null;
         }
     }
 
@@ -412,9 +480,10 @@ public class ScopedOperationalReportSnapshotService {
     ) {}
 
     public record TraceContext(
+            UUID eventId,
             String label,
             String activity,
             String receivedAt,
-            String path
+            boolean hasConfiguredWorkEvidenceTarget
     ) {}
 }

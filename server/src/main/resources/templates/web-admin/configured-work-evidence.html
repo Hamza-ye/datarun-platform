@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Configured Work Evidence</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            background: #f7f8fa;
+            color: #1f2933;
+        }
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 28px;
+            margin: 0 0 4px;
+        }
+        h2 {
+            font-size: 18px;
+            margin: 0 0 12px;
+        }
+        section {
+            background: #ffffff;
+            border: 1px solid #d7dde5;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+        }
+        .status-item {
+            border: 1px solid #e2e7ee;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fbfcfd;
+        }
+        .label {
+            display: block;
+            color: #52606d;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .value {
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+        code {
+            background: #edf1f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-size: 12px;
+        }
+        .notice {
+            border: 1px solid #e2e7ee;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fbfcfd;
+            color: #52606d;
+        }
+        .field-list {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+        }
+        .field-item {
+            display: grid;
+            grid-template-columns: minmax(140px, 35%) 1fr;
+            gap: 8px;
+            border-bottom: 1px solid #e2e7ee;
+            padding-bottom: 8px;
+        }
+        .field-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+        .field-label {
+            color: #52606d;
+            overflow-wrap: anywhere;
+        }
+        .field-value {
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+        .link-button {
+            border: 1px solid #2f6f9f;
+            background: #2f6f9f;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <div>
+            <h1>Configured Work Evidence</h1>
+            <div>Visible work evidence</div>
+        </div>
+        <a class="link-button" href="/web-admin/operational/report">Scoped Report</a>
+    </header>
+
+    <section th:unless="${evidence.visible()}">
+        <h2>Visible Work Evidence</h2>
+        <div class="notice" th:text="${evidence.emptyText()}"></div>
+    </section>
+
+    <div th:if="${evidence.visible()}">
+        <section>
+            <h2>Visible Work Evidence</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <span class="label">Activity</span>
+                    <span class="value" th:text="${evidence.activity()}"></span>
+                    <code th:text="${evidence.activityRef()}"></code>
+                </div>
+                <div class="status-item">
+                    <span class="label">Record type</span>
+                    <span class="value" th:text="${evidence.recordType()}"></span>
+                    <code th:text="${evidence.shapeRef()}"></code>
+                </div>
+                <div class="status-item">
+                    <span class="label">Latest synced/received</span>
+                    <span class="value" th:text="${evidence.latestSyncedReceived()}"></span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Scoped visibility</span>
+                    <span class="value" th:text="${evidence.visibilityText()}"></span>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Configured work details</h2>
+            <div class="notice" th:if="${evidence.hasSuppressedFieldValues()}"
+                 th:text="${evidence.fieldValuesSuppressedText()}"></div>
+            <div class="field-list" th:if="${evidence.fieldValuesVisible() and evidence.hasFieldValues()}">
+                <div class="field-item" th:each="field : ${evidence.fieldValues()}">
+                    <span class="field-label" th:text="${field.label()}"></span>
+                    <span class="field-value" th:text="${field.value()}"></span>
+                </div>
+            </div>
+            <div class="notice" th:if="${evidence.fieldValuesVisible() and !evidence.hasFieldValues()}">
+                No configured fields recorded.
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

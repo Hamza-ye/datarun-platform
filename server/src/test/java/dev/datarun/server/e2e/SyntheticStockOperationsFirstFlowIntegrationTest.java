@@ -151,8 +151,9 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
                 });
 
         configureReportCommands(STOCK_SUPERVISOR);
+        MockHttpSession session = webAdminSession(STOCK_SUPERVISOR);
         String report = mvc.perform(get("/web-admin/operational/report")
-                        .session(webAdminSession(STOCK_SUPERVISOR)))
+                        .session(session))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -162,23 +163,16 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
                 .contains("Scoped Operational Report Snapshot")
                 .contains("known_latest_input")
                 .contains("Current scoped standing only. Coverage not measured.")
-                .contains("Configured work details")
-                .contains("Activity")
-                .contains("Record type")
-                .contains("Field values")
-                .contains("Latest synced/received")
-                .contains("stock_operations")
-                .contains("stocktake_line/v1")
-                .contains("stocktake_date")
-                .contains("stock_category")
-                .contains("quantity")
-                .contains("2026-06-23")
-                .contains("mids_kit")
-                .contains("rapid_test_kit")
-                .contains(">42<")
-                .contains(">7<")
-                .contains("Visible through current assignment scope")
-                .contains("Latest synced/received time is scoped and not a guarantee.")
+                .contains("Open configured work evidence")
+                .doesNotContain("Configured work details")
+                .doesNotContain("Field values")
+                .doesNotContain("stocktake_date")
+                .doesNotContain("stock_category")
+                .doesNotContain("quantity")
+                .doesNotContain("mids_kit")
+                .doesNotContain("rapid_test_kit")
+                .doesNotContain(">42<")
+                .doesNotContain(">7<")
                 .doesNotContain(pilotStockScopeSubjectId.toString())
                 .doesNotContain("Stocktake Line Details")
                 .doesNotContain("review workflow")
@@ -186,6 +180,44 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
                 .doesNotContain("complete")
                 .doesNotContain("all devices current");
         assertActivityRow(report, "Stock Operations", 2, 0, 0);
+
+        String evidence = mvc.perform(get(configuredWorkEvidencePath(report))
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(evidence)
+                .contains("Configured Work Evidence")
+                .contains("Visible Work Evidence")
+                .contains("Activity")
+                .contains("Record type")
+                .contains("Latest synced/received")
+                .contains("stock_operations")
+                .contains("stocktake_line/v1")
+                .contains("stocktake_date")
+                .contains("stock_category")
+                .contains("quantity")
+                .contains("2026-06-23")
+                .contains("rapid_test_kit")
+                .contains(">7<")
+                .contains("Visible through current assignment scope")
+                .contains("Latest synced/received time is scoped and not a guarantee.")
+                .doesNotContain("mids_kit")
+                .doesNotContain(">42<")
+                .doesNotContain(pilotStockScopeSubjectId.toString())
+                .doesNotContain(STOCK_WORKER.toString())
+                .doesNotContain(STOCK_DEVICE.toString())
+                .doesNotContain("subject_ref")
+                .doesNotContain("actor_ref")
+                .doesNotContain("device_id")
+                .doesNotContain("sync_watermark")
+                .doesNotContain("Stocktake Line Details")
+                .doesNotContain("review workflow")
+                .doesNotContain("stock ledger")
+                .doesNotContain("complete")
+                .doesNotContain("all devices current");
     }
 
     private void publishStocktakeLineConfig() {
@@ -399,5 +431,15 @@ class SyntheticStockOperationsFirstFlowIntegrationTest extends AbstractIntegrati
                 .as("activity row %s clean=%s excluded=%s unresolved=%s",
                         activity, clean, excluded, unresolved)
                 .isTrue();
+    }
+
+    private String configuredWorkEvidencePath(String html) {
+        java.util.regex.Matcher matcher = Pattern.compile(
+                        "href=\"([^\"]*/web-admin/operational/evidence\\?workToken=[^\"]+)\"")
+                .matcher(html);
+        assertThat(matcher.find())
+                .as("configured work evidence link")
+                .isTrue();
+        return matcher.group(1);
     }
 }
