@@ -301,9 +301,27 @@ Device requests a subject-bound historical page for projection repair after an a
 
 ## Read APIs
 
+The endpoints in this section are non-production raw projection inspection
+helpers. They expose current subject projection and timeline state for
+development/test inspection, not product supervisor visibility, broad
+audit/history, or assignment-scoped reporting. They are not part of the mobile
+sync push/pull protocol and do not replace scoped subject-history backfill.
+
+In non-production these helpers require `Authorization: Bearer <actor_token>`
+through the same bearer-token boundary used by sync APIs. In production they
+are mechanically contained by the development-surface filter and return `404
+Not Found`, even if a matching controller route exists in the application.
+
+`POST /api/sync/subject-history` remains the scoped subject-history backfill
+path. It authorizes each page against current assignment scope and is the
+accepted mechanism for subject-bound historical projection repair.
+
 ### List Subjects — `GET /api/subjects`
 
-Returns subjects with their latest event summary (minimal projection).
+Non-production raw projection inspection helper. Returns subjects with their
+latest event summary (minimal projection). Requires
+`Authorization: Bearer <actor_token>` outside production; production returns
+`404 Not Found`.
 
 ### Response — `200 OK`
 
@@ -322,7 +340,10 @@ Returns subjects with their latest event summary (minimal projection).
 
 ### Subject Events — `GET /api/subjects/{id}/events`
 
-Returns the full event timeline for one subject, ordered by `sync_watermark`.
+Non-production raw projection inspection helper. Returns the full event
+timeline for one subject, ordered by `sync_watermark`. Requires
+`Authorization: Bearer <actor_token>` outside production; production returns
+`404 Not Found`.
 
 ### Response — `200 OK`
 
@@ -339,7 +360,11 @@ Returns the full event timeline for one subject, ordered by `sync_watermark`.
 
 | Status | Condition | Body |
 |--------|-----------|------|
+| `401` | Missing bearer token in non-production | `{ "error": "missing_token" }` |
+| `401` | Empty bearer token in non-production | `{ "error": "empty_token" }` |
+| `401` | Invalid or revoked bearer token in non-production | `{ "error": "invalid_token" }` |
 | `404` | Subject not found | `{ "error": "subject_not_found" }` |
+| `404` | Any `/api/subjects/**` request in production | platform 404 response |
 
 ---
 
