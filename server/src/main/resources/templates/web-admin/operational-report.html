@@ -75,12 +75,37 @@
             font-weight: 600;
             overflow-wrap: anywhere;
         }
+        code {
+            background: #edf1f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-size: 12px;
+        }
         .notice {
             border: 1px solid #e2e7ee;
             border-radius: 6px;
             padding: 10px;
             background: #fbfcfd;
             color: #52606d;
+        }
+        .field-list {
+            display: grid;
+            gap: 6px;
+            margin: 0;
+        }
+        .field-item {
+            display: grid;
+            grid-template-columns: minmax(120px, 35%) 1fr;
+            gap: 8px;
+        }
+        .field-label {
+            color: #52606d;
+            overflow-wrap: anywhere;
+        }
+        .field-value {
+            font-weight: 600;
+            overflow-wrap: anywhere;
         }
         .link-button {
             border: 1px solid #2f6f9f;
@@ -191,6 +216,52 @@
         </table>
         <div class="notice" th:unless="${snapshot.hasActivityRows()}">
             No visible input. Current scoped standing has no visible source work.
+        </div>
+    </section>
+
+    <section>
+        <h2>Configured work details</h2>
+        <div class="notice" th:text="${snapshot.configuredWorkDetailsCaveat()}"></div>
+        <table th:if="${snapshot.hasConfiguredWorkDetails()}">
+            <thead>
+            <tr>
+                <th>Activity</th>
+                <th>Record type</th>
+                <th>Field values</th>
+                <th>Latest synced/received</th>
+                <th>Visibility</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${snapshot.configuredWorkDetails()}">
+                <td>
+                    <div>
+                        <span th:text="${row.activity()}"></span>
+                        <code th:text="${row.activityRef()}"></code>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <span th:text="${row.recordType()}"></span>
+                        <code th:text="${row.shapeRef()}"></code>
+                    </div>
+                </td>
+                <td>
+                    <div class="field-list" th:if="${row.hasFieldValues()}">
+                        <div class="field-item" th:each="field : ${row.fieldValues()}">
+                            <span class="field-label" th:text="${field.label()}"></span>
+                            <span class="field-value" th:text="${field.value()}"></span>
+                        </div>
+                    </div>
+                    <span th:unless="${row.hasFieldValues()}">No configured fields recorded</span>
+                </td>
+                <td th:text="${row.latestSyncedReceived()}"></td>
+                <td th:text="${row.visibilityText()}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="notice" th:unless="${snapshot.hasConfiguredWorkDetails()}">
+            No visible configured work details in current scope.
         </div>
     </section>
 

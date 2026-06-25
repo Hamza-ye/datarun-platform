@@ -297,11 +297,26 @@ public class EventRepository {
     }
 
     /**
+     * Bounded visible configured-work read model. Scope predicates are applied
+     * before ordering and limiting so out-of-scope work cannot influence the
+     * visible details, latest input, caveats, or empty state.
+     */
+    public List<OperationalWorkEvent> findScopedVisibleWorkDetails(
+            List<OperationalScope> scopes, int limit) {
+        return findScopedSubjectWorkEvents(scopes, limit);
+    }
+
+    /**
      * Bounded handoff current-work read model. Scope predicates are applied
      * before ordering and limiting so out-of-scope work cannot influence the
      * visible context, latest input, caveats, or empty state.
      */
     public List<OperationalWorkEvent> findOperationalHandoffCurrentWork(
+            List<OperationalScope> scopes, int limit) {
+        return findScopedSubjectWorkEvents(scopes, limit);
+    }
+
+    private List<OperationalWorkEvent> findScopedSubjectWorkEvents(
             List<OperationalScope> scopes, int limit) {
         if (scopes == null || scopes.isEmpty() || limit <= 0) {
             return List.of();

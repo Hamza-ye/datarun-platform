@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
+import dev.datarun.server.config.ActivityService;
 import dev.datarun.server.config.AdminCommandCapabilityPolicy;
+import dev.datarun.server.config.ShapeService;
 import dev.datarun.server.event.Event;
 import dev.datarun.server.event.EventRepository;
 import dev.datarun.server.identity.ServerIdentity;
@@ -55,6 +57,8 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     @Autowired private LocationRepository locationRepository;
     @Autowired private SubjectLocationRepository subjectLocationRepository;
     @Autowired private ServerIdentity serverIdentity;
+    @Autowired private ShapeService shapeService;
+    @Autowired private ActivityService activityService;
 
     private UUID region;
     private UUID districtA;
@@ -67,6 +71,10 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
         jdbcTemplate.execute("DELETE FROM events");
         jdbcTemplate.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         jdbcTemplate.execute("DELETE FROM device_sync_state");
+        jdbcTemplate.execute("DELETE FROM config_packages");
+        jdbcTemplate.execute("DELETE FROM expression_rules");
+        jdbcTemplate.execute("DELETE FROM activities");
+        jdbcTemplate.execute("DELETE FROM shapes");
         jdbcTemplate.execute("DELETE FROM deployment_config");
         jdbcTemplate.execute("DELETE FROM locations");
         jdbcTemplate.execute("DELETE FROM auth_principal_binding_operations");
@@ -141,6 +149,52 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 .doesNotContain("complete")
                 .doesNotContain("<form");
         assertActivityRow(body, "Assigned Visit", 1, 0, 0);
+    }
+
+    @Test
+    void configuredWorkDetailsShowScopedStockOperationsFixtureEvidence()
+            throws Exception {
+        publishStockOperationsFixtureConfig();
+        setupReviewerScope("stock_operations");
+        configureReportCommands(REVIEWER);
+        Event visible = createStocktakeLineRecord(
+                SUBJECT_IN_SCOPE, districtA, "mids_kit", 42);
+        createStocktakeLineRecord(
+                SUBJECT_OUT_OF_SCOPE, districtB, "hidden_kit", 99);
+
+        String body = mvc.perform(get("/web-admin/operational/report")
+                        .session(webAdminSession(REVIEWER)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(body)
+                .contains("Configured work details")
+                .contains("Activity")
+                .contains("Record type")
+                .contains("Field values")
+                .contains("Latest synced/received")
+                .contains("stock_operations")
+                .contains("stocktake_line/v1")
+                .contains("stocktake_date")
+                .contains("stock_category")
+                .contains("quantity")
+                .contains("2026-06-23")
+                .contains("mids_kit")
+                .contains(">42<")
+                .contains(receivedAt(visible).toString())
+                .contains("Visible through current assignment scope")
+                .contains("Latest synced/received time is scoped and not a guarantee.")
+                .doesNotContain("hidden_kit")
+                .doesNotContain(">99<")
+                .doesNotContain(SUBJECT_IN_SCOPE.toString())
+                .doesNotContain(SUBJECT_OUT_OF_SCOPE.toString())
+                .doesNotContain("Stocktake Line Details")
+                .doesNotContain("stocktake-line details")
+                .doesNotContain("stock ledger")
+                .doesNotContain("review workflow")
+                .doesNotContain("<form");
     }
 
     @Test
@@ -329,12 +383,71 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
         assertThat(eventCount()).isEqualTo(before);
     }
 
+    private void publishStockOperationsFixtureConfig() {
+        ObjectNode schema = objectMapper.createObjectNode();
+        schema.putNull("subject_binding");
+        schema.putNull("uniqueness");
+        ArrayNode fields = schema.putArray("fields");
+        addField(fields, "stocktake_date", "date", true);
+        addSelectField(fields, "stock_category", true,
+                "mids_kit", "rapid_test_kit", "itn_bale");
+        addIntegerField(fields, "quantity", true, 0);
+
+        assertThat(shapeService.createShape("stocktake_line", "standard", schema))
+                .isEmpty();
+
+        ObjectNode activityConfig = objectMapper.createObjectNode();
+        activityConfig.putArray("shapes").add("stocktake_line/v1");
+        activityConfig.putObject("roles").putArray("field_worker").add("capture");
+        assertThat(activityService.createActivity(
+                "stock_operations", "standard", activityConfig)).isEmpty();
+    }
+
+    private void addField(ArrayNode fields, String name, String type,
+                          boolean required) {
+        ObjectNode field = fields.addObject();
+        field.put("name", name);
+        field.put("type", type);
+        field.put("required", required);
+        field.put("deprecated", false);
+        field.put("display_order", fields.size());
+    }
+
+    private void addSelectField(ArrayNode fields, String name, boolean required,
+                                String... options) {
+        ObjectNode field = fields.addObject();
+        field.put("name", name);
+        field.put("type", "select");
+        field.put("required", required);
+        field.put("deprecated", false);
+        field.put("display_order", fields.size());
+        ArrayNode optionArray = field.putArray("options");
+        for (String option : options) {
+            optionArray.add(option);
+        }
+    }
+
+    private void addIntegerField(ArrayNode fields, String name, boolean required,
+                                 int min) {
+        ObjectNode field = fields.addObject();
+        field.put("name", name);
+        field.put("type", "integer");
+        field.put("required", required);
+        field.put("deprecated", false);
+        field.put("display_order", fields.size());
+        field.putObject("validation").put("min", min);
+    }
+
     private Event setupReviewerScope() {
+        return setupReviewerScope("assigned_visit");
+    }
+
+    private Event setupReviewerScope(String activityRef) {
         assignmentService.createInitialBootstrapAssignment(
                 ADMIN, "admin", null, null, null, past(), null);
         return assignmentService.createAssignment(
                 ADMIN, REVIEWER, "supervisor", districtA, null,
-                List.of("assigned_visit"), past(), null);
+                List.of(activityRef), past(), null);
     }
 
     private Event createVisitRecord(UUID subjectId, UUID locationId,
@@ -353,6 +466,31 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 "activity",
                 "visit_record/v1",
                 activityRef,
+                subjectRef(subjectId),
+                actorRef(FIELD_ACTOR),
+                serverIdentity.getDeviceId(),
+                (int) serverIdentity.nextDeviceSeq(),
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                payload);
+        assertThat(eventRepository.insert(event)).isTrue();
+        return event;
+    }
+
+    private Event createStocktakeLineRecord(UUID subjectId, UUID locationId,
+                                            String category, int quantity) {
+        subjectLocationRepository.upsert(
+                subjectId, locationId, locationRepository.findPathById(locationId));
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("stocktake_date", "2026-06-23");
+        payload.put("stock_category", category);
+        payload.put("quantity", quantity);
+
+        Event event = new Event(
+                UUID.randomUUID(),
+                "capture",
+                "stocktake_line/v1",
+                "stock_operations",
                 subjectRef(subjectId),
                 actorRef(FIELD_ACTOR),
                 serverIdentity.getDeviceId(),
