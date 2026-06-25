@@ -38,6 +38,11 @@ If logical separation is needed, use a local VM, container, or isolated service
 on that server before treating separate physical infrastructure or a managed
 provider as necessary.
 
+Before changing services, inspect and preserve existing lab deployments. Deploy
+Keycloak through an isolated service, VM, or compose project, and avoid mutating
+R12 or retained proof environments unless that is explicitly required and
+recorded.
+
 NW-164 must:
 
 1. Deploy self-hosted Keycloak on the existing server or local VM/service.
@@ -52,14 +57,20 @@ NW-164 must:
 6. Prove actual web-admin login and authenticated actor resolution for the
    bound principal.
 7. Prepare and prove the mobile PKCE client path as far as the current mobile
-   implementation supports. If a real runtime capability is missing, stop and
-   route that specific missing behavior with evidence.
+   implementation supports. If a mobile-specific runtime capability is missing,
+   record and route that specific missing behavior with evidence; it does not
+   invalidate successful live Keycloak, web-admin login, principal-binding, or
+   `/api/auth/me` evidence.
 8. Retain only secret-safe configuration material and evidence. Do not commit
    secrets, tokens, cookies, authorization codes, passwords, private keys, raw
    logs containing secrets, or screenshots that expose credentials.
 
 Mocked-only tests, parser-only checks, static package creation, or synthetic
 manifests without a live login do not complete NW-164.
+
+Complete every independent step when one path fails. Mark NW-164 not ready
+only when the missing capability prevents the required live provider and
+bound-login proof.
 
 ## Executable Checks
 
@@ -81,10 +92,10 @@ dependency.
 
 ## Authority Boundary
 
-CDL remains architecture authority. Contracts remain subordinate technical
-authority for their declared surfaces. NW-163 corrected operational/planning
-enforcement; it did not demote CDL, contracts, accepted platform
-specifications, BAR entries, or stored-event authority.
+CDL is architecture authority. Contracts control their declared technical
+interfaces subject to CDL. Specifications, BAR, status, artifacts, code, and
+tests are evidence of accepted standing or behavior; they cannot independently
+create new architecture authority, prohibitions, or production blockers.
 
 Use accepted OIDC/JWKS and explicit principal-binding behavior. IdP groups,
 roles, claims, UI actor IDs, request actor IDs, and JWT `actor_id` values must
@@ -117,7 +128,8 @@ On success:
 - record the mobile PKCE support result and any exact missing runtime behavior;
 - update `docs/status.md` and
   `docs/agent-working-surface/platform-next-work-backlog.md` with acceptance
-  evidence and the next selected route.
+  evidence and either one concrete successor, explicit owner decision pending,
+  or `No successor selected`.
 
 If live execution cannot proceed, stop with a precise blocker. The blocker
 must name the exact action, evidence, and missing capability/input/access or
