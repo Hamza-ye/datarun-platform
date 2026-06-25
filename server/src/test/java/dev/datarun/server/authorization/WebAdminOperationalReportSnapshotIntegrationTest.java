@@ -217,6 +217,53 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     }
 
     @Test
+    void configuredWorkEvidenceDoesNotRenderRawJsonPayloadValues()
+            throws Exception {
+        ObjectNode schema = objectMapper.createObjectNode();
+        schema.putNull("subject_binding");
+        schema.putNull("uniqueness");
+        ArrayNode fields = schema.putArray("fields");
+        addField(fields, "scalar_value", "text", true);
+        addMultiSelectField(fields, "multi_value", false, "alpha", "beta");
+        addField(fields, "object_value", "text", false);
+        addField(fields, "array_text_value", "text", false);
+        assertThat(shapeService.createShape("inspection_line", "standard", schema))
+                .isEmpty();
+
+        ObjectNode activityConfig = objectMapper.createObjectNode();
+        activityConfig.putArray("shapes").add("inspection_line/v1");
+        activityConfig.putObject("roles").putArray("field_worker").add("capture");
+        assertThat(activityService.createActivity(
+                "configured_activity", "standard", activityConfig)).isEmpty();
+
+        setupReviewerScope("configured_activity");
+        configureReportCommands(REVIEWER);
+
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("scalar_value", "visible scalar");
+        payload.putArray("multi_value").add("alpha").add("beta");
+        payload.putObject("object_value").put("secret", "raw-object-secret");
+        payload.putArray("array_text_value").add("unexpected-array-secret");
+        createConfiguredWorkRecord(
+                SUBJECT_IN_SCOPE, districtA,
+                "inspection_line/v1", "configured_activity", payload);
+
+        String body = configuredWorkEvidenceBody(webAdminSession(REVIEWER));
+
+        assertThat(body)
+                .contains("Configured Work Evidence")
+                .contains("visible scalar")
+                .contains("alpha, beta")
+                .contains("object_value")
+                .contains("array_text_value")
+                .contains("Unsupported value")
+                .doesNotContain("raw-object-secret")
+                .doesNotContain("unexpected-array-secret")
+                .doesNotContain("{&quot;secret&quot;")
+                .doesNotContain("{\"secret\"");
+    }
+
+    @Test
     void configuredWorkEvidenceRouteRequiresAccessAndScopedRead()
             throws Exception {
         mvc.perform(get("/web-admin/operational/evidence"))
@@ -645,6 +692,20 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
         }
     }
 
+    private void addMultiSelectField(ArrayNode fields, String name, boolean required,
+                                     String... options) {
+        ObjectNode field = fields.addObject();
+        field.put("name", name);
+        field.put("type", "multi_select");
+        field.put("required", required);
+        field.put("deprecated", false);
+        field.put("display_order", fields.size());
+        ArrayNode optionArray = field.putArray("options");
+        for (String option : options) {
+            optionArray.add(option);
+        }
+    }
+
     private void addIntegerField(ArrayNode fields, String name, boolean required,
                                  int min) {
         ObjectNode field = fields.addObject();
@@ -726,10 +787,19 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                                              String activityRef,
                                              String fieldName,
                                              String value) {
-        subjectLocationRepository.upsert(
-                subjectId, locationId, locationRepository.findPathById(locationId));
         ObjectNode payload = objectMapper.createObjectNode();
         payload.put(fieldName, value);
+        return createConfiguredWorkRecord(
+                subjectId, locationId, shapeRef, activityRef, payload);
+    }
+
+    private Event createConfiguredWorkRecord(UUID subjectId,
+                                             UUID locationId,
+                                             String shapeRef,
+                                             String activityRef,
+                                             ObjectNode payload) {
+        subjectLocationRepository.upsert(
+                subjectId, locationId, locationRepository.findPathById(locationId));
 
         Event event = new Event(
                 UUID.randomUUID(),

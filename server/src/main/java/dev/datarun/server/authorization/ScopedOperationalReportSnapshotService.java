@@ -224,7 +224,7 @@ public class ScopedOperationalReportSnapshotService {
                     String name = field.path("name").asText();
                     return new ConfiguredWorkFieldValue(
                             fieldLabel(field),
-                            payloadValueText(payload.get(name)));
+                            payloadValueText(payload.get(name), field));
                 })
                 .toList();
     }
@@ -279,23 +279,41 @@ public class ScopedOperationalReportSnapshotService {
         return name.isBlank() ? "Configured field" : name;
     }
 
-    private String payloadValueText(JsonNode value) {
-        if (value == null || value.isNull()) {
+    private String payloadValueText(JsonNode value, JsonNode field) {
+        if (value == null || value.isMissingNode() || value.isNull()) {
             return "Not recorded";
         }
-        if (value.isTextual() || value.isNumber() || value.isBoolean()) {
+        if (isScalarValue(value)) {
             return safeText(value.asText());
         }
         if (value.isArray()) {
-            List<String> values = new ArrayList<>();
-            value.forEach(item -> {
-                if (item.isTextual() || item.isNumber() || item.isBoolean()) {
-                    values.add(safeText(item.asText()));
-                }
-            });
-            return values.isEmpty() ? "Not recorded" : String.join(", ", values);
+            return isMultiSelectField(field)
+                    ? multiSelectValueText(value)
+                    : "Unsupported value";
         }
-        return value.toString();
+        return "Unsupported value";
+    }
+
+    private boolean isScalarValue(JsonNode value) {
+        return value.isTextual() || value.isNumber() || value.isBoolean();
+    }
+
+    private boolean isMultiSelectField(JsonNode field) {
+        return "multi_select".equals(field.path("type").asText(""));
+    }
+
+    private String multiSelectValueText(JsonNode value) {
+        List<String> values = new ArrayList<>();
+        for (JsonNode item : value) {
+            if (item == null || item.isMissingNode() || item.isNull()) {
+                continue;
+            }
+            if (!isScalarValue(item)) {
+                return "Unsupported value";
+            }
+            values.add(safeText(item.asText()));
+        }
+        return values.isEmpty() ? "Not recorded" : String.join(", ", values);
     }
 
     private TraceContext traceContext(List<OperationalScope> scopes) {
