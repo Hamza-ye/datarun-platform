@@ -48,3 +48,24 @@ Use `../validation-matrix.md` as the active validation-control surface.
 - Server test output volume can hide failures or warnings during review.
 - Web-admin UI and template work needs product-vocabulary validation when it is
   user-facing, even if the server tests pass.
+
+## Surfaced Follow-Up Visibility
+
+When an NW reveals material follow-up work, the worker must not bury it in logs.
+
+Classify each surfaced item as one of:
+
+- current-slice fix;
+- selected successor;
+- candidate backlog row;
+- explicit deferral with trigger;
+- rejected / not a risk, with reason.
+
+Implementation agents must not choose broad new scope by themselves. If backlog/status edits are not authorized, they must report the surfaced items in the PR body or final handoff under “Surfaced follow-ups needing routing.”
+
+Before acceptance, status/backlog must show either:
+
+- exactly one selected successor;
+- no successor selected with reason;
+- explicit owner decision pending;
+- candidate/deferred rows for material residuals.

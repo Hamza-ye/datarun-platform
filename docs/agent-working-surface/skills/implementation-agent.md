@@ -37,6 +37,27 @@ diff.
 7. Update allowed status/backlog only if acceptance is authorized.
 8. Report final worktree state.
 
+## Surfaced Follow-Up Visibility
+
+When an NW reveals material follow-up work, the worker must not bury it in logs.
+
+Classify each surfaced item as one of:
+
+- current-slice fix;
+- selected successor;
+- candidate backlog row;
+- explicit deferral with trigger;
+- rejected / not a risk, with reason.
+
+Implementation agents must not choose broad new scope by themselves. If backlog/status edits are not authorized, they must report the surfaced items in the PR body or final handoff under “Surfaced follow-ups needing routing.”
+
+Before acceptance, status/backlog must show either:
+
+- exactly one selected successor;
+- no successor selected with reason;
+- explicit owner decision pending;
+- candidate/deferred rows for material residuals.
+
 ## Must Not
 
 - Do not choose next NW.
