@@ -1,0 +1,27 @@
+name: datarun-local-keycloak
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak@sha256:5fdbf2dbb5897cc34e82de49d13e23db011f9925089dbc555fc095f2c8bc1dac
+    container_name: datarun-local-keycloak
+    restart: unless-stopped
+    command:
+      - start-dev
+      - --hostname=https://keycloak.lab:28443
+      - --http-enabled=true
+      - --https-certificate-file=/opt/keycloak/conf/server.crt
+      - --https-certificate-key-file=/opt/keycloak/conf/server.key
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-kc-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?set from secret file before compose up}
+      KEYCLOAK_ADMIN: ${KC_BOOTSTRAP_ADMIN_USERNAME:-kc-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?set from secret file before compose up}
+    ports:
+      - "192.168.1.217:28443:8443"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+      - ${DATARUN_LOCAL_KEYCLOAK_CERT_DIR:?set cert directory}/server.crt:/opt/keycloak/conf/server.crt:ro
+      - ${DATARUN_LOCAL_KEYCLOAK_CERT_DIR:?set cert directory}/server.key:/opt/keycloak/conf/server.key:ro
+
+volumes:
+  keycloak-data:

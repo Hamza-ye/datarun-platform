@@ -7,11 +7,14 @@ Date: 2026-06-26
 
 NW-164 is complete. Existing lab deployments were preserved, an isolated local
 Keycloak issuer was deployed and configured, one fresh Hamza-owned pilot account
-was bound to a Datarun actor through explicit principal binding, and both live
-web-admin login plus mobile public-client PKCE `/api/auth/me` actor resolution
-were proven against the live issuer.
+was bound to a Datarun actor through explicit principal binding, live web-admin
+login was proven, and live Keycloak public-client authorization-code + PKCE
+produced a token that resolved through live `/api/auth/me`.
 
-Successor: No successor selected.
+Flutter application/on-device external-user-agent handoff was `NOT_RUN`; this
+artifact does not claim live mobile-app proof.
+
+Successor: NW-165 live mobile application OIDC login smoke.
 
 ## Stable Runtime Names
 
@@ -80,6 +83,10 @@ Configured values:
 - Mobile redirect: `dev.datarun.mobile://oauth2redirect`
 - Token audience mapper: `datarun-server`
 
+The pilot subject above is observed NW-164 evidence only. Reusable Keycloak
+configuration retrieves the live user subject and generates the binding
+manifest; it does not hardcode this subject.
+
 The pilot account profile was completed with non-secret profile fields so
 Keycloak did not stop first login at profile-update.
 
@@ -113,11 +120,16 @@ or evidence content.
 
 ## Principal Binding And Pilot Config
 
-Bound actor:
+Bound proof-fixture actor:
 
 ```text
 15000000-0000-4000-8000-000000000001
 ```
+
+This actor and the stock-pilot reviewed config were used only as a proof
+fixture for explicit principal binding, web-admin login, actor resolution, and
+authenticated access. They do not select stock vocabulary, a production actor,
+stock operations product scope, or future pilot product direction.
 
 Provisioning output:
 
@@ -161,7 +173,7 @@ Observed live flow:
 }
 ```
 
-## Mobile/Public Client Proof
+## Mobile/Public Client Token Proof
 
 Safe evidence:
 
@@ -198,9 +210,13 @@ Observed live flow:
 }
 ```
 
-This proves the mobile/client path as far as current mobile support requires:
-the external-user-agent public-client PKCE path and live `/api/auth/me`
-resolution. No on-device UI runtime was needed for this NW proof.
+This proves live Keycloak public-client authorization-code + PKCE and proves
+that the resulting token resolved through live `/api/auth/me`.
+
+`NOT_RUN`: the Flutter application/on-device external-user-agent handoff,
+Android callback into the Flutter application, in-app token exchange,
+actor-session activation, and authenticated in-app config/sync access were not
+executed in NW-164. This section is not live mobile-app proof.
 
 ## Runtime Fix Applied
 
@@ -259,15 +275,25 @@ Live validation:
 - One-shot provisioning commands returned `exit=0`.
 - Web-admin login and session probe returned the expected bound actor and
   `oidc-jwks-principal`.
-- Mobile public-client PKCE and `/api/auth/me` returned the expected bound actor
-  and `oidc-jwks-principal`.
+- Live Keycloak public-client authorization-code + PKCE returned a token, and
+  live `/api/auth/me` with that token returned the expected bound actor and
+  `oidc-jwks-principal`.
+- Flutter application/on-device external-user-agent handoff was `NOT_RUN` and
+  is selected as NW-165.
 
 Local validation:
 
 - `./mvnw clean package -DskipTests` from `server/`: passed.
-- `./mvnw -Dtest=OneShotProvisioningIntegrationTest,WebAdminSessionBoundaryTest test`
-  was attempted and did not validate in this local environment: the provisioning
-  integration context could not connect to its test database, and the web-admin
-  boundary tests hit Mockito inline self-attach failure. The live lab proof above
-  is the acceptance evidence for this slice.
+- PR #65 reviewer patch focused regression:
+  `./mvnw -Dtest=WebAdminSecurityFoundationNonWebTest,WebAdminSecurityFoundationTest test --batch-mode --no-transfer-progress`
+  from `server/`: passed 3 tests, 0 failures, 0 errors, 0 skipped; Maven total
+  time 59.464 s. This proves non-web context startup without `HttpSecurity`,
+  absence of the web-admin security filter chain in non-web mode, and existing
+  servlet web-admin security foundation behavior.
+- PR #65 reviewer patch Server CI Maven gate:
+  `./mvnw verify --batch-mode --no-transfer-progress` from `server/`: passed
+  431 tests, 0 failures, 0 errors, 0 skipped; Maven total time 01:42 min.
+- `bash -n deploy/reference/local-keycloak/provision-realm.sh`: passed.
+- `DATARUN_LOCAL_KEYCLOAK_CERT_DIR=/opt/datarun-lab/keycloak/conf KC_BOOTSTRAP_ADMIN_PASSWORD=dummy docker compose -f deploy/reference/local-keycloak/compose.yaml config`:
+  passed.
 - `git diff --check`: passed.
