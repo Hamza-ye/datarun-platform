@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
@@ -13,22 +14,31 @@ http.Client createMobileHttpClient() {
 
   final client = HttpClient(context: SecurityContext(withTrustedRoots: false));
   client.badCertificateCallback = (certificate, host, port) {
-    final expected = pins[host.toLowerCase()];
-    if (expected == null) return false;
-    final actual = sha256.convert(certificate.der).toString();
-    return actual == expected;
+    return debugTrustedTlsPinMatches(
+      pins: pins,
+      host: host,
+      certificateSha256: sha256.convert(certificate.der).toString(),
+    );
   };
   return IOClient(client);
 }
 
 Map<String, String> debugTrustedTlsPins() {
-  if (!_debugLabTlsTrustEnabled()) return const {};
+  if (!kDebugMode) return const {};
+  if (!const bool.fromEnvironment(_debugTrustLabTlsDefine)) return const {};
 
+  return parseDebugTrustedTlsPins(
+    const String.fromEnvironment(_debugTrustedTlsSha256Define),
+  );
+}
+
+@visibleForTesting
+Map<String, String> parseDebugTrustedTlsPins(String rawPins) {
   final pins = <String, String>{};
-  for (final entry in _debugTrustedTlsSha256().split(',')) {
+  for (final entry in rawPins.split(',')) {
     final separator = entry.indexOf('=');
     if (separator <= 0 || separator == entry.length - 1) continue;
-    final host = entry.substring(0, separator).trim().toLowerCase();
+    final host = normalizeDebugTrustedTlsHost(entry.substring(0, separator));
     final fingerprint = _normalizeFingerprint(entry.substring(separator + 1));
     if (host.isNotEmpty && fingerprint.length == 64) {
       pins[host] = fingerprint;
@@ -37,23 +47,19 @@ Map<String, String> debugTrustedTlsPins() {
   return pins;
 }
 
-bool _debugLabTlsTrustEnabled() {
-  var enabled = false;
-  assert(() {
-    enabled = const bool.fromEnvironment(_debugTrustLabTlsDefine);
-    return true;
-  }());
-  return enabled;
+@visibleForTesting
+bool debugTrustedTlsPinMatches({
+  required Map<String, String> pins,
+  required String host,
+  required String certificateSha256,
+}) {
+  final expected = pins[normalizeDebugTrustedTlsHost(host)];
+  if (expected == null) return false;
+  return expected == _normalizeFingerprint(certificateSha256);
 }
 
-String _debugTrustedTlsSha256() {
-  var value = '';
-  assert(() {
-    value = const String.fromEnvironment(_debugTrustedTlsSha256Define);
-    return true;
-  }());
-  return value;
-}
+@visibleForTesting
+String normalizeDebugTrustedTlsHost(String host) => host.trim().toLowerCase();
 
 String _normalizeFingerprint(String value) =>
     value.replaceAll(RegExp(r'[^0-9a-fA-F]'), '').toLowerCase();
