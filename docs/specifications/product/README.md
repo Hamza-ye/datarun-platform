@@ -32,6 +32,7 @@ Each product specification should include:
 
 | Specification | Status | Owner | Source NW | Supersedes |
 |---|---|---|---|---|
+| [Product Model Consolidation And Slice Backlog](product-model-consolidation-and-slice-backlog.md) | active planning surface; derived planning only | product steward | NW-169 | none |
 | [Product Goal, Complete Scenario Portfolio, And Ordered Slice Roadmap](product-goal-and-representative-journeys.md) | active planning surface; derived planning only | product steward | NW-168 | none |
 | [Product Candidate 1](product-candidate-1.md) | accepted | product steward | NW-084 | none |
 | [Product Candidate 1 PM Handoff](product-candidate-1-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-106 | none |
@@ -41,6 +42,12 @@ Each product specification should include:
 | [Product Candidate 4 PM Handoff](product-candidate-4-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-133 | none |
 | [Stock Operations Pilot PM Handoff](stock-operations-pilot-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-149 | none |
 
+`product-model-consolidation-and-slice-backlog.md` is the active NW-169
+derived planning surface for current-position closure, leverage analysis,
+S06/S06b risk routing, location/path guardrails, ordered M1-M5 candidate
+slices, and the product-level Definition of Done. It does not accept product
+behavior, implementation standing, architecture authority, validation policy,
+product-candidate scope, or production approval.
 `product-goal-and-representative-journeys.md` is the active Product Goal,
 complete scenario portfolio, and ordered slice roadmap surface after NW-168. It
 is derived planning only and does not accept product behavior, implementation
