@@ -121,6 +121,31 @@ void main() {
     expect(identity.knownActorIds, isEmpty);
   });
 
+  test(
+    'auth me network failure is stage-specific and creates no session',
+    () async {
+      final identity = await DeviceIdentity.init();
+      final handoff = _handoff(
+        oidcConfig,
+        onTokenRequest: (_) => _tokenResponse('access-token'),
+      );
+      final authClient = MockClient((request) async {
+        throw http.ClientException('TLS handshake failed', request.url);
+      });
+
+      final result = await MobileAuthService(
+        identity,
+        oidcHandoff: handoff,
+        client: authClient,
+      ).signInWithOidc(serverUrl: 'http://server.test', oidcConfig: oidcConfig);
+
+      expect(result.success, isFalse);
+      expect(result.error, 'Actor identity check failed: network error');
+      expect(identity.activeSession, isNull);
+      expect(identity.knownActorIds, isEmpty);
+    },
+  );
+
   test('refresh updates token only when auth me resolves same actor', () async {
     final identity = await DeviceIdentity.init();
     await identity.activateActorSession(

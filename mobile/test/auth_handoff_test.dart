@@ -111,6 +111,38 @@ void main() {
       ),
     );
   });
+
+  test('token exchange network failure is stage-specific and secret-safe', () {
+    final externalUserAgent = _FakeExternalUserAgent((request) {
+      return request.redirectUri.replace(
+        queryParameters: {'code': 'authorization-code', 'state': state},
+      );
+    });
+    final client = MockClient((request) async {
+      throw http.ClientException('TLS handshake failed', request.url);
+    });
+    final handoff = OidcPkceAuthHandoff(
+      externalUserAgent: externalUserAgent,
+      client: client,
+      codeVerifierFactory: () => verifier,
+      stateFactory: () => state,
+    );
+
+    expect(
+      handoff.signIn(config),
+      throwsA(
+        isA<AuthFlowException>().having(
+          (error) => error.message,
+          'message',
+          allOf(
+            contains('Provider token exchange failed: network error'),
+            isNot(contains('authorization-code')),
+            isNot(contains('state-123')),
+          ),
+        ),
+      ),
+    );
+  });
 }
 
 class _FakeExternalUserAgent implements ExternalUserAgent {
