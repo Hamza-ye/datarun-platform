@@ -4,6 +4,7 @@ import 'package:datarun_mobile/data/auth_service.dart';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:datarun_mobile/data/config_store.dart';
 import 'package:datarun_mobile/data/device_identity.dart';
+import 'package:datarun_mobile/data/mobile_http_client.dart';
 import 'package:datarun_mobile/data/oidc_config.dart';
 import 'package:datarun_mobile/domain/event.dart';
 
@@ -49,7 +50,7 @@ class SyncService {
     http.Client? client,
     MobileAuthService? authService,
     DateTime Function()? now,
-  }) : _client = client ?? http.Client(),
+  }) : _client = client ?? createMobileHttpClient(),
        _authService = authService,
        _now = now ?? DateTime.now;
 

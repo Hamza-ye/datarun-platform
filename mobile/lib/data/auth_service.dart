@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:datarun_mobile/data/device_identity.dart';
+import 'package:datarun_mobile/data/mobile_http_client.dart';
 import 'package:datarun_mobile/data/oidc_config.dart';
 
 class ProviderCredential {
@@ -83,7 +84,7 @@ class OidcPkceAuthHandoff {
     String Function()? stateFactory,
   }) : externalUserAgent =
            externalUserAgent ?? const MethodChannelExternalUserAgent(),
-       _client = client ?? http.Client(),
+       _client = client ?? createMobileHttpClient(),
        _random = random ?? Random.secure(),
        _now = now ?? DateTime.now,
        _codeVerifierFactory = codeVerifierFactory,
@@ -169,18 +170,26 @@ class OidcPkceAuthHandoff {
     required String authorizationCode,
     required String codeVerifier,
   }) async {
-    final response = await _client.post(
-      config.tokenEndpoint,
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: {
-        'grant_type': 'authorization_code',
-        'code': authorizationCode,
-        'redirect_uri': config.redirectUri.toString(),
-        'client_id': config.clientId,
-        'code_verifier': codeVerifier,
-      },
-    );
-    return _parseTokenResponse(response);
+    try {
+      final response = await _client.post(
+        config.tokenEndpoint,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'grant_type': 'authorization_code',
+          'code': authorizationCode,
+          'redirect_uri': config.redirectUri.toString(),
+          'client_id': config.clientId,
+          'code_verifier': codeVerifier,
+        },
+      );
+      return _parseTokenResponse(response);
+    } on AuthFlowException {
+      rethrow;
+    } on Exception {
+      throw const AuthFlowException(
+        'Provider token exchange failed: network error',
+      );
+    }
   }
 
   ProviderCredential _parseTokenResponse(http.Response response) {
@@ -235,7 +244,7 @@ class MobileAuthService {
     OidcPkceAuthHandoff? oidcHandoff,
     http.Client? client,
   }) : _oidcHandoff = oidcHandoff ?? OidcPkceAuthHandoff(),
-       _client = client ?? http.Client();
+       _client = client ?? createMobileHttpClient();
 
   Future<AuthSessionResult> signInWithOidc({
     required String serverUrl,
@@ -344,10 +353,17 @@ class MobileAuthService {
     required String serverUrl,
     required String token,
   }) async {
-    final response = await _client.get(
-      Uri.parse('$serverUrl/api/auth/me'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
+    final http.Response response;
+    try {
+      response = await _client.get(
+        Uri.parse('$serverUrl/api/auth/me'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+    } on Exception {
+      throw const AuthFlowException(
+        'Actor identity check failed: network error',
+      );
+    }
     if (response.statusCode == 401 || response.statusCode == 403) {
       throw const AuthFlowException('Needs sign-in to sync');
     }
