@@ -32,6 +32,7 @@ Each product specification should include:
 
 | Specification | Status | Owner | Source NW | Supersedes |
 |---|---|---|---|---|
+| [Product Goal, Complete Scenario Portfolio, And Ordered Slice Roadmap](product-goal-and-representative-journeys.md) | active planning surface; derived planning only | product steward | NW-168 | none |
 | [Product Candidate 1](product-candidate-1.md) | accepted | product steward | NW-084 | none |
 | [Product Candidate 1 PM Handoff](product-candidate-1-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-106 | none |
 | [Product Candidate Handoff Template](product-candidate-handoff-template.md) | active template; process structure only | product steward | NW-106 | none |
@@ -40,14 +41,19 @@ Each product specification should include:
 | [Product Candidate 4 PM Handoff](product-candidate-4-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-133 | none |
 | [Stock Operations Pilot PM Handoff](stock-operations-pilot-pm-handoff.md) | active PM handoff surface; derived planning only | product steward | NW-149 | none |
 
-`product-candidate-1.md` remains the accepted Product Candidate 1 behavior
-specification. `product-candidate-1-pm-handoff.md` is a derived PM planning
-surface for PC1 route selection. `product-candidate-handoff-template.md`
-provides reusable process structure only. `product-candidate-2-pm-handoff.md`
-is a derived PM planning surface selecting the PC2 boundary; it does not accept
-product behavior or implementation standing. `product-candidate-3-pm-handoff.md`
-is a derived PM planning surface selecting the PC3 boundary; it does not accept
-product behavior, implementation standing, or production approval.
+`product-goal-and-representative-journeys.md` is the active Product Goal,
+complete scenario portfolio, and ordered slice roadmap surface after NW-168. It
+is derived planning only and does not accept product behavior, implementation
+standing, architecture authority, validation policy, product-candidate scope,
+or production approval. `product-candidate-1.md` remains the accepted Product
+Candidate 1 behavior specification. `product-candidate-1-pm-handoff.md` is a
+derived PM planning surface for PC1 route selection.
+`product-candidate-handoff-template.md` provides reusable process structure
+only. `product-candidate-2-pm-handoff.md` is a derived PM planning surface
+selecting the PC2 boundary; it does not accept product behavior or
+implementation standing. `product-candidate-3-pm-handoff.md` is a derived PM
+planning surface selecting the PC3 boundary; it does not accept product
+behavior, implementation standing, or production approval.
 `product-candidate-4-pm-handoff.md` is a derived PM planning surface selecting
 the PC4 boundary; it does not accept product behavior, implementation standing,
 architecture authority, retention/security promises, or production approval.
