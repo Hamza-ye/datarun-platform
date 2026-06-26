@@ -10,8 +10,9 @@ request to read the whole docs tree.
 3. Read the active NW row or task packet when one is named.
 4. Read only the product spec, code, tests, contracts, or docs needed for the
    task or touched files.
-5. For user-visible work, anchor to the accepted product spec or PM handoff and
-   explicit non-goals before architecture routing.
+5. For user-visible work, anchor to the active Product Goal and representative
+   journey portfolio when present, then the accepted product spec or PM handoff
+   and explicit non-goals before architecture routing.
 6. If no active slice is selected and implementation is implied, stop and ask
    for the selected NW/product slice before coding.
 

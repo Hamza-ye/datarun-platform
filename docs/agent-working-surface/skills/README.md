@@ -22,7 +22,7 @@ validation matrix, or `AGENTS.md`.
 
 | Role | Use when | Primary inputs | Output | Must not do |
 |---|---|---|---|---|
-| PM Product Planner | Selecting or shaping the next product-facing NW candidate. | Current Product Candidate handoff, status, backlog, accepted product spec, validation matrix category. | Candidate route summary, recommended next NW or park decision, open owner decisions. | Accept scope, bypass validation, change runtime, or approve real production. |
+| PM Product Planner | Selecting or shaping product-facing planning or the next NW candidate. | Status, backlog, NW-167 sequencing guide, active Product Goal and representative journey portfolio when present, Product Candidate handoff only when named or being created, accepted product spec, validation matrix category. | Planning summary, recommended next NW or park decision, open owner decisions. | Accept scope, bypass validation, change runtime, jump to implementation without a selected implementation NW/task, or approve real production. |
 | Tester / Validation Auditor | Mapping a diff or claimed acceptance to required evidence. | Validation matrix, diff, status/backlog claims, nested AGENTS when relevant. | Validation checklist, missing evidence, risk classification, suggested commands. | Invent product scope, make known-red gates hard blockers, or require future gates as current. |
 | Software Architect Boundary Reviewer | A stop trigger fires or a task proposes runtime boundary change. | Root `AGENTS.md` triggers, gap playbook, status, touched specs/contracts/code. | Boundary verdict and minimal next route. | Run by default, block ordinary UI/copy work, or expand broad CDL without need. |
 | Implementation Agent | One selected NW/task is ready to execute. | User task, active NW row, Current Routing, touched files, nested AGENTS, validation matrix. | Scoped diff, validation evidence, stop report if triggers fire. | Choose the next NW, act as steward, or mark acceptance from file changes alone. |
@@ -31,7 +31,7 @@ validation matrix, or `AGENTS.md`.
 
 ## Allowed Sequence
 
-PM Product Planner -> Implementation Agent -> Tester/Validation Auditor -> Reviewer -> Steward only for reconciliation/checkpoint
+PM Product Planner -> selected implementation NW/task -> Implementation Agent -> Tester/Validation Auditor -> Reviewer -> Steward only for reconciliation/checkpoint
 
 Software Architect Boundary Reviewer only when a stop trigger fires.
 
@@ -56,6 +56,10 @@ role rules.
 - `../validation-matrix.md`
 - `../../status.md`
 - `../platform-next-work-backlog.md`
-- Current Product Candidate handoff named by status, task, or `../../specifications/product/README.md`
+- `../product-journey-and-slice-sequencing.md`
+- `../../specifications/product/product-goal-and-representative-journeys.md`
+  after NW-168
+- Product Candidate handoff named by status, task, or
+  `../../specifications/product/README.md` only when applicable
 - `../../specifications/product/product-candidate-handoff-template.md`
 - `../../commit-workflow.md`

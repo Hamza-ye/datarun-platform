@@ -72,6 +72,7 @@ Codex-discoverable wrappers for these role playbooks live under `.agents/skills/
 | Commit and progress transitions | `docs/commit-workflow.md`. |
 | Validation gates and acceptance evidence format | `validation-matrix.md`. |
 | Execution packets | `prompts/README.md` and the selected prompt. |
+| Product journey and slice sequencing | `product-journey-and-slice-sequencing.md`. |
 | Product/UX vocabulary guardrails | `operational-ux-layering-companion.md`. |
 | Measured evolution paths | `escape-hatch-register.md`. |
 | Historical gated-risk provenance | `docs/flagged-positions.md` only when a current route names an FP, the touched surface matches an FP topic, or a drift/provenance audit needs the old gate. |

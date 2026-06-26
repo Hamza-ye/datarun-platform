@@ -10,11 +10,24 @@ The accepted product spec remains the source of product behavior. The handoff
 routes planning decisions, candidate next-work rows, stop conditions, and PM
 ownership questions.
 
+Before filling this template, use
+[product journey and slice sequencing](../../agent-working-surface/product-journey-and-slice-sequencing.md)
+to establish or cite the active Product Goal and representative journey
+portfolio. After NW-168, cite `product-goal-and-representative-journeys.md`
+when available.
+
+This handoff is where the Product Candidate boundary and ordered slice plan are
+defined. It must not select an implementation slice before the Product Goal and
+representative journey portfolio are explicit.
+
 ## Product Goal
 
 State the product goal in one paragraph. It must come from an accepted product
 spec, accepted audit, or explicitly routed owner decision. Do not add behavior
 inside the goal.
+
+- Product Goal source:
+- Representative journey portfolio source:
 
 ## Target Deployment / Customer Archetype
 
