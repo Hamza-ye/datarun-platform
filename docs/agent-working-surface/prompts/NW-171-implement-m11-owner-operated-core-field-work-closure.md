@@ -24,6 +24,28 @@ Those names are available and must not be documented as blockers. If the
 implementation deliberately chooses one host/path or the same DNS VM instead,
 record the exact selected posture and reason in the evidence.
 
+Current execution environment standing:
+
+- As part of NW-171 execution preparation on 2026-06-27, `app.nmcpye.org`
+  reaches Datarun through the public nginx
+  proxy; `/api/auth/me` returns the expected missing-token 401, and
+  `/web-admin/login` redirects to `auth.nmcpye.org` with callback to
+  `app.nmcpye.org`.
+- As part of NW-171 execution preparation on 2026-06-27, `auth.nmcpye.org`
+  serves the public Keycloak/OIDC discovery path and advertises issuer
+  `https://auth.nmcpye.org/realms/datarun-local`.
+- Local-LAN DNS on the current workstation still resolves `auth.nmcpye.org` to
+  `192.168.1.217`, bypassing the public proxy. Treat this as a
+  validation-context caveat when running LAN-local checks, not as a blocker and
+  not as a reason to route `auth.nmcpye.org` to the Datarun app service. If LAN
+  DNS is changed during execution, it should route to the nginx proxy path that
+  serves the Keycloak vhost.
+- This environment preparation belongs to the NW-171 owner/operator
+  run/diagnose evidence path. It does not by itself prove or accept mobile
+  offline capture, sync, append-only correction, scoped standing, controlled
+  operational use, Keycloak cutover hardening, production cutover, or retention
+  and security promises.
+
 This is production-usable journey evidence for the selected M1.1 path. It is
 not production cutover, legacy account import, submitted-record replay,
 retention/security approval, Keycloak hardening, or broad real-user rollout.
@@ -208,6 +230,9 @@ Minimum acceptance:
 - Operator evidence names the exact local/on-prem posture, including
   `app.nmcpye.org` and `auth.nmcpye.org` unless a one-host/path posture was
   explicitly selected with rationale.
+- Operator evidence records whether validation used the public proxy path or a
+  LAN-local resolver path, including any remaining `auth.nmcpye.org` local-DNS
+  caveat and its effect on the observed login path.
 - Any real-use evidence is explicitly owner-approved and bounded; otherwise the
   proof uses synthetic or neutral extracted evidence.
 - Runtime tests are run only for touched runtime surfaces, plus the required
@@ -221,6 +246,7 @@ Always run:
 cd /home/hamza/datarun-platform
 git diff --check
 rg "NW-171|M1.1|owner-operated local/on-prem core field-work closure" docs/status.md docs/agent-working-surface/platform-next-work-backlog.md docs/agent-working-surface/prompts/NW-171-implement-m11-owner-operated-core-field-work-closure.md
+rg "app\\.nmcpye\\.org|auth\\.nmcpye\\.org|public proxy|local-DNS|LAN" docs/status.md docs/agent-working-surface/platform-next-work-backlog.md docs/agent-working-surface/prompts/NW-171-implement-m11-owner-operated-core-field-work-closure.md
 ```
 
 For docs/evidence-only execution, also run:
