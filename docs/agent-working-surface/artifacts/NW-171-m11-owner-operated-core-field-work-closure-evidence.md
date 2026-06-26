@@ -502,49 +502,223 @@ assignment_create={"assignment_id":"dae89213-b727-427b-92aa-9de54ac07ae8","event
 assignment_list={"count":2,"field_check":1}
 ```
 
-### Mobile Login / Scoped Work / Offline Capture / Sync / Correction
+### Android UI / Device Login / Scoped Work / Offline Capture / Sync / Correction
 
-An actual Android UI run was attempted, but the host cannot boot the configured
-x86_64 AVDs because `/dev/kvm` is unavailable:
-
-```text
-emulator -avd dev_phone -no-window -no-snapshot -gpu swiftshader_indirect -no-audio
-ERROR | x86_64 emulation currently requires hardware acceleration!
-CPU acceleration status: /dev/kvm is not found
-```
-
-This blocks only the Android UI/device run in the current workstation
-environment. It did not block mobile data-layer validation, live app/auth
-domains, or server-side journey continuation.
-
-A one-off Flutter test harness was created and removed in the same working
-turn. It exercised mobile `MobileAuthService`, `DeviceIdentity`, actor-local
-`EventStore`, `ConfigStore`, `EventAssembler`, and `SyncService` against the
-live public domains with the OIDC token obtained above.
-
-Command:
+Android acceleration was available after the KVM fix:
 
 ```bash
-cd /home/hamza/datarun-platform/mobile
-flutter test test/nw171_live_journey_test.dart --reporter=expanded
+stat -c '/dev/kvm type=%F mode=%a owner=%U group=%G' /dev/kvm
+emulator -accel-check
+adb devices -l
 ```
 
 Observed:
 
 ```text
-mobile_sign_in_actor=15000000-0000-4000-8000-000000000001
-mobile_setup_sync pushed=0 pulled=2 config_version=2 local_assignments=2 field_check_assignments=1
-mobile_offline_capture event_id=de4d89b3-c9e0-4abc-996a-8d12961ae3b8 subject_id=17100000-0000-4000-8000-000000000001 pending=1
-mobile_capture_sync pushed=1 pulled=1 pending=0 watermark=3
-mobile_offline_correction event_id=3c50205e-37c6-4cc7-baaf-9967962f0678 subject_id=17100000-0000-4000-8000-000000000001 pending=1
-mobile_correction_sync pushed=1 pulled=1 pending=0 watermark=4
-00:02 +1: All tests passed!
+/dev/kvm type=character special file mode=660 owner=root group=kvm
+accel: 0
+KVM (version 12) is installed and usable.
+emulator-5554 device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa
 ```
 
-Interpretation: the mobile data layer signed in with the live OIDC-derived
-credential, loaded config v2, learned the field-check assignment, assembled one
-offline capture, synced it, assembled one lifecycle-neutral corrective
-recapture for the same subject, and synced it with no pending local work left.
+Device command used:
+
+```bash
+emulator -avd dev_phone -no-window -no-snapshot -gpu swiftshader_indirect -no-audio
+adb shell getprop sys.boot_completed
+adb shell wm size
+```
+
+Observed:
+
+```text
+sys.boot_completed=1
+Physical size: 1080x2400
+```
+
+App command used:
+
+```bash
+cd /home/hamza/datarun-platform/mobile
+flutter run -d emulator-5554 --debug --no-resident
+```
+
+Observed:
+
+```text
+Launching lib/main.dart on sdk gphone64 x86 64 in debug mode...
+Running Gradle task 'assembleDebug'... 135.2s
+Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk... 2,287ms
+Syncing files to device sdk gphone64 x86 64... 398ms
+```
+
+Secret-safe setup state:
+
+```text
+app package cleared: dev.datarun.datarun_mobile
+browser package cleared: com.android.chrome
+base URL entered: https://app.nmcpye.org
+authorization endpoint entered: https://auth.nmcpye.org/realms/datarun-local/protocol/openid-connect/auth
+token endpoint entered: https://auth.nmcpye.org/realms/datarun-local/protocol/openid-connect/token
+client id entered: datarun-mobile
+redirect URI entered: dev.datarun.mobile://oauth2redirect
+scopes entered: openid profile
+```
+
+Automation observations:
+
+```text
+One long ADB text-input attempt truncated the authorization endpoint before login.
+The app state was reset and the endpoint was re-entered in shorter chunks.
+Chrome first-run prompts were completed with "Use without an account" and "No thanks".
+A transient System UI ANR dialog was dismissed with "Wait"; the Datarun app did not crash.
+```
+
+Interpretation: these are automation/device-shell observations, not product
+failures. The corrected setup proceeded through the user-visible path.
+
+OIDC login path:
+
+```text
+Chrome opened Keycloak at auth.nmcpye.org with client_id=datarun-mobile
+Keycloak rendered "Sign in to datarun-local"
+Pilot username entered: hamza-pilot
+Pilot password entered from a temporary local file without printing it
+Chrome returned to dev.datarun.datarun_mobile/.MainActivity
+App showed the signed-in "Get your work" screen
+```
+
+Server-side request logs prove the app resolved the actor through
+`/api/auth/me`:
+
+```text
+2026-06-26T23:14:04.668Z GET /api/auth/me 200 actor_id=15000000-0000-4000-8000-000000000001
+2026-06-26T23:14:28.881Z GET /api/auth/me 200 actor_id=15000000-0000-4000-8000-000000000001
+```
+
+Scoped work and assignment visibility:
+
+```text
+App screen after Get Work:
+roles: pilot_admin, field_worker
+existing work item: Unnamed subject / 3 flags / 0 captures
+add-work action visible
+
+Form picker after tapping add:
+field_check_record
+stocktake_line
+```
+
+The `stocktake_line` row is an old proof-fixture row carried by the complete
+reviewed-config snapshot, not selected NW-171 product scope.
+
+Controlled offline state:
+
+```bash
+adb shell settings put global airplane_mode_on 1
+adb shell svc wifi disable
+adb shell svc data disable
+adb shell ping -c 1 -W 2 app.nmcpye.org
+adb shell dumpsys connectivity
+```
+
+Observed:
+
+```text
+ping: unknown host app.nmcpye.org
+Active default network: none
+```
+
+Offline capture through UI:
+
+```text
+selected form: field_check_record
+check_date: 2026-06-27
+condition: ok
+items_seen: 7
+note: offline-ui-proof
+save result: returned to work list
+pending banner: 1 record saved on this device / Waiting to sync.
+new local item: Unnamed subject / 1 capture
+secret-safe screenshot: /tmp/nw171-android-after-offline-save.png
+```
+
+Sync after network restore:
+
+```bash
+adb shell settings put global airplane_mode_on 0
+adb shell svc wifi enable
+adb shell svc data enable
+```
+
+Observed app sync result:
+
+```text
+Sync complete
+1 record sent.
+1 update received.
+Last successful sync: 02:18 local time
+Device ID prefix: 3c8adebb
+work list after closing sync panel: no pending banner; Unnamed subject / 1 capture
+secret-safe screenshot: /tmp/nw171-android-after-first-sync-real.png
+```
+
+Server request logs for the first UI sync:
+
+```text
+2026-06-26T23:18:25.103Z GET /api/auth/me 200 actor_id=15000000-0000-4000-8000-000000000001
+2026-06-26T23:18:25.291Z POST /api/sync/push 200 actor_id=15000000-0000-4000-8000-000000000001
+2026-06-26T23:18:25.517Z POST /api/sync/pull 200 actor_id=15000000-0000-4000-8000-000000000001
+2026-06-26T23:18:25.911Z GET /api/sync/config 304 actor_id=15000000-0000-4000-8000-000000000001
+```
+
+Corrective recapture through UI:
+
+```text
+Opened the synced subject from the work list.
+Detail showed capture · field_check_record/v1 with:
+  check_date: 2026-06-27
+  condition: ok
+  items_seen: 7
+  note: offline-ui-proof
+Tapped Add correction.
+Correction form showed: Saving creates a new record. The original stays in history.
+Updated note to: offline-ui-proof-correction
+Saved correction.
+Subject detail showed two capture records, newest note offline-ui-proof-correction.
+Work list showed pending banner: 1 record saved on this device / Waiting to sync.
+secret-safe screenshot: /tmp/nw171-android-after-correction-save.png
+```
+
+Correction sync:
+
+```text
+Sync complete
+1 record sent.
+1 update received.
+Last successful sync: 02:21 local time
+work list after closing sync panel: no pending banner; Unnamed subject / 2 captures
+secret-safe screenshot: /tmp/nw171-android-after-correction-sync.png
+```
+
+Server request logs for the correction sync:
+
+```text
+2026-06-26T23:21:00.654Z GET /api/auth/me 200 actor_id=15000000-0000-4000-8000-000000000001
+2026-06-26T23:21:01.834Z GET /api/auth/me 200 actor_id=15000000-0000-4000-8000-000000000001
+2026-06-26T23:21:02.009Z POST /api/sync/push 200 actor_id=15000000-0000-4000-8000-000000000001
+2026-06-26T23:21:02.283Z POST /api/sync/pull 200 actor_id=15000000-0000-4000-8000-000000000001
+2026-06-26T23:21:02.503Z GET /api/sync/config 304 actor_id=15000000-0000-4000-8000-000000000001
+```
+
+Supplemental earlier data-layer proof is retained as provenance: a one-off
+Flutter test harness, removed in the same working turn, exercised
+`MobileAuthService`, `DeviceIdentity`, actor-local `EventStore`, `ConfigStore`,
+`EventAssembler`, and `SyncService` against the live public domains. It passed
+one test in 00:02 and showed `pending=0` after one offline capture and one
+corrective recapture. The actual accepted NW-171 closure proof is now the
+Android UI/device path above.
 
 ### Owner / Supervisor Standing, Freshness, And Attention
 
@@ -556,8 +730,51 @@ web_callback_host=app.nmcpye.org
 web_post_http=302 callback_http=303 shell_http=200 operational_http=200 report_http=200 handoff_http=200 attention_http=200
 ```
 
-Before the controlled attention cue, the scoped operational report showed the
-clean field-check standing:
+After the Android correction sync, web-admin still used the public app/auth
+path and resolved the callback on `app.nmcpye.org`:
+
+```text
+web_login_status=302 redirect_host=auth.nmcpye.org client_id=datarun-web-admin callback_host=app.nmcpye.org
+keycloak_login_page_status=200 url_host=auth.nmcpye.org title_present=True
+web_callback_host=app.nmcpye.org redirect_count=2 final_status=200 final_host=app.nmcpye.org
+page /web-admin/shell status=200
+page /web-admin/operational status=200
+page /web-admin/operational/report status=200
+page /web-admin/operational/handoff status=200
+page /web-admin/operational/attention status=200
+```
+
+Operational standing reflected the synced Android work:
+
+```text
+Operational latest synced work:
+Field Check Record / Field Check
+Latest visible synced work was received by Datarun at 2026-06-26T23:21:01.962641Z.
+This does not prove all devices are current.
+
+Report standing:
+Freshness state: known_latest_input
+Latest visible input
+Clean source work
+Needs attention
+Field Check / Received at
+
+Handoff standing:
+Latest visible input
+Field Check
+Freshness unknown; this does not prove every device has synced.
+Needs attention: Visible work has unresolved attention.
+Not currently resolvable by this session; use the designated reviewer standing.
+
+Attention standing:
+No unresolved attention item is attached to the current scoped work.
+```
+
+The timestamp `2026-06-26T23:21:01.962641Z` corresponds to the Android
+correction sync at local time 2026-06-27 02:21 in the operator environment.
+
+Earlier in the same NW-171 run, before the controlled attention cue, the scoped
+operational report showed clean field-check standing:
 
 ```text
 Freshness state: known_latest_input
@@ -647,46 +864,82 @@ datarun-local-app-db-1       running
 datarun-local-app-server-1   running   192.168.1.213:28443->8080, 127.0.0.1:28481->8081
 ```
 
-Field-check event/flag rows:
+Android proof machine state after the UI run:
 
 ```text
-de4d89b3-c9e0-4abc-996a-8d12961ae3b8|capture|field_check_record/v1|field_check|17100000-0000-4000-8000-000000000001|15000000-0000-4000-8000-000000000001|3|NULL|NULL
-3c50205e-37c6-4cc7-baaf-9967962f0678|capture|field_check_record/v1|field_check|17100000-0000-4000-8000-000000000001|15000000-0000-4000-8000-000000000001|4|NULL|NULL
-735bfd07-e943-4177-b46e-7e2218589d65|review|field_check_record/v1|field_check|17100000-0000-4000-8000-000000000001|15000000-0000-4000-8000-000000000001|5|NULL|NULL
+/dev/kvm type=character special file mode=660 owner=root group=kvm
+KVM (version 12) is installed and usable.
+emulator-5554 device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa
+```
+
+Android logcat was not collected or recorded because OAuth callback and browser
+logs can expose authorization codes, redirects, or session material. Server
+request logs, UI observations, screenshots, and secret-safe database readback
+were used instead.
+
+Field-check event/flag rows after the Android UI proof:
+
+```text
+2db47990-b0cf-4066-a97f-55ed698f75e1|capture|field_check_record/v1|field_check|9d6e03fb-940d-4f10-8e21-65942a7893c4|15000000-0000-4000-8000-000000000001|10|offline-ui-proof-correction|7
+894b2929-2e13-456d-9489-d03fb275cf03|capture|field_check_record/v1|field_check|9d6e03fb-940d-4f10-8e21-65942a7893c4|15000000-0000-4000-8000-000000000001|9|offline-ui-proof|7
+735bfd07-e943-4177-b46e-7e2218589d65|review|field_check_record/v1|field_check|17100000-0000-4000-8000-000000000001|15000000-0000-4000-8000-000000000001|5|NW-171 controlled role-action attention cue|4
+3c50205e-37c6-4cc7-baaf-9967962f0678|capture|field_check_record/v1|field_check|17100000-0000-4000-8000-000000000001|15000000-0000-4000-8000-000000000001|4|NW-171 corrective recapture|4
+de4d89b3-c9e0-4abc-996a-8d12961ae3b8|capture|field_check_record/v1|field_check|17100000-0000-4000-8000-000000000001|15000000-0000-4000-8000-000000000001|3|NW-171 controlled offline capture|3
 3deb450e-3078-36df-94fe-416bf088eaaf|alert|conflict_detected/v1|NULL|17100000-0000-4000-8000-000000000001|system:conflict_detector/role_stale|6|role_stale|735bfd07-e943-4177-b46e-7e2218589d65
 ```
 
 ## Acceptance Rows
 
 User-visible outcome: One owner-operated M1.1 field-check path is now proven
-through the live public app/auth domains: setup/config, principal binding,
-assignment, mobile data-layer sign-in, scoped work, offline capture, sync,
-corrective recapture, scoped operational standing, freshness caveat, attention
-cue, and run/diagnose evidence.
+through the live public app/auth domains and an actual Android UI/device path:
+setup/config, principal binding, assignment, app launch, OIDC browser login,
+callback to Flutter, signed-in app state, scoped work visibility, controlled
+offline capture, sync, corrective recapture, pending work returning to zero,
+scoped web-admin standing/freshness, attention cue provenance, and run/diagnose
+evidence.
 
 Security/authorization checked: Missing-token `/api/auth/me` returns `401`;
 OIDC discovery issuer is `https://auth.nmcpye.org/realms/datarun-local`; the
-mobile public-client PKCE token resolves through `/api/auth/me` to actor
-`15000000-0000-4000-8000-000000000001` with
-`auth_source=oidc-jwks-principal`; assignment and sync APIs were called through
-the same bearer boundary.
+Android app's public-client PKCE token resolved through `/api/auth/me` to actor
+`15000000-0000-4000-8000-000000000001`; assignment, sync, and web-admin paths
+used the same accepted bearer/session boundaries. Secret-bearing material was
+not printed in the artifact.
 
-Offline/sync checked: Mobile data-layer evidence assembled one offline
-field-check capture and one corrective recapture, synced both, and ended with
-`pending=0`.
+Offline/sync checked: The actual Android UI captured one `field_check_record`
+while the device had no active network, synced it after network restore, added
+a UI correction, synced that correction, and ended with no pending banner in the
+app. Supplemental data-layer proof remains recorded as prior provenance only.
 
 Freshness checked: Web operational and scoped report pages show
-`known_latest_input`, latest visible input timestamps, clean source work count,
-and the explicit caveat that this does not prove all devices are current.
+`known_latest_input`, latest visible input/received timestamps including the
+Android correction sync at `2026-06-26T23:21:01.962641Z`, clean source work
+standing, and the explicit caveat that this does not prove all devices are
+current.
 
 Review/attention checked: A contained accepted `role_stale` attention cue was
-raised from a structurally valid field-check `review` event; operational,
-report, handoff, and attention pages show the unresolved attention and reviewer
-standing without adding resolver reassignment or queue behavior.
+raised earlier in the same NW-171 run from a structurally valid field-check
+`review` event; operational, report, handoff, and attention pages show accepted
+standing without adding resolver reassignment or queue behavior. The Android UI
+proof did not implement or require new reviewer lifecycle behavior.
 
 Operations/support checked: DNS, TLS, VM/topology, readiness, container
-posture, app/auth path classification, event rows, and flag rows are recorded
-above without secrets.
+posture, app/auth path classification, Android acceleration, emulator/device
+state, event rows, and flag rows are recorded above without secrets.
+
+Successor standing: no NW-171 successor is selected. Reason: the missing actual
+Android UI/device proof now passed. The residual observations below are visible
+non-blocking follow-ups with their own triggers; they do not reopen NW-171 and
+do not select NW-172.
+
+Surfaced follow-ups needing routing:
+
+| Item | Classification | Route / trigger |
+|---|---|---|
+| Missing actual Android UI/device proof | current-slice fix | Completed in this PR patch with emulator `emulator-5554`; no successor selected for this item. |
+| Retained Keycloak LAN `:443` / `keycloak.lab` container/listener/cert if still present | candidate backlog row | Keep under NW-166 only when pre-cutover Keycloak hardening, production cutover preparation, or an owner-selected cleanup route is active. Not a blocker for this public-proxy M1.1 proof. |
+| Field-check package carries old `stocktake_line` proof-fixture rows because config publish uses a complete reviewed snapshot | explicit deferral with trigger | Clean only if the field-check package is promoted for reuse as a durable standalone package or if package hygiene blocks a selected route. Not a product-scope or runtime-authority risk in NW-171. |
+| ADB long-text endpoint truncation, Chrome first-run prompts, transient System UI ANR | rejected / not a risk | Device automation friction only; corrected setup completed and Datarun app did not crash. |
+| Android logcat not collected | rejected / not a risk | Secret-safety choice; server logs, UI state, database rows, and web-admin standing provide sufficient evidence. |
 
 Validation evidence:
 
@@ -694,6 +947,28 @@ Validation evidence:
 cwd=/home/hamza/datarun-platform
 git diff --check
 result: passed
+
+cwd=/home/hamza/datarun-platform
+stat -c '/dev/kvm type=%F mode=%a owner=%U group=%G' /dev/kvm
+result: /dev/kvm type=character special file mode=660 owner=root group=kvm
+
+cwd=/home/hamza/datarun-platform
+emulator -accel-check
+result: passed; KVM (version 12) is installed and usable.
+
+cwd=/home/hamza/datarun-platform
+adb devices -l
+result: emulator-5554 device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa
+
+cwd=/home/hamza/datarun-platform/mobile
+flutter run -d emulator-5554 --debug --no-resident
+result: passed; debug APK built and installed; Gradle assembleDebug 135.2 s; APK install 2,287 ms; file sync 398 ms.
+
+manual/ADB Android UI proof against https://app.nmcpye.org and https://auth.nmcpye.org
+result: passed; app opened, OIDC login worked, /api/auth/me resolved actor 15000000-0000-4000-8000-000000000001, config/assignment visible, controlled-offline field-check capture saved, sync pushed 1 record, UI correction saved, correction sync pushed 1 record, pending work returned to zero.
+
+web-admin standing after Android correction sync
+result: passed; /web-admin/shell, /web-admin/operational, /web-admin/operational/report, /web-admin/operational/handoff, and /web-admin/operational/attention returned HTTP 200; latest visible synced work timestamp 2026-06-26T23:21:01.962641Z.
 
 rg "NW-171|M1.1|owner-operated local/on-prem core field-work closure" docs/status.md docs/agent-working-surface/platform-next-work-backlog.md docs/agent-working-surface/prompts/NW-171-implement-m11-owner-operated-core-field-work-closure.md
 result: passed
@@ -736,10 +1011,14 @@ result: passed, 1 test, 0 failures, 0 errors, 0 skipped.
 Explicit deferrals and routes: S06 lifecycle, Keycloak cutover hardening,
 import/replay, retention/security promises, tenant/control-plane work, broad
 reporting/export/import, and production cutover remain out of NW-171 scope.
+Retained Keycloak LAN `:443` / `keycloak.lab` cleanup and field-check package
+snapshot hygiene are visible non-blocking follow-ups, not selected successor
+work.
 
 Accepted evidence preserved: NW-163, NW-164, NW-165, and the accepted platform
 specs named by the NW-171 packet remain preserved as evidence anchors.
 
 Stop conditions: No forbidden NW-171 implementation has been started. The
 temporary default Datarun base URL DNS/path mismatch was resolved before
-journey continuation.
+journey continuation. The previous Android KVM blocker is resolved and is no
+longer a basis for selecting NW-172 by default.
