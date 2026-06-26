@@ -1,0 +1,11 @@
+{
+  "target_actor_id": "15000000-0000-4000-8000-000000000001",
+  "role": "field_worker",
+  "geographic_scope": null,
+  "subject_list": null,
+  "activity_list": [
+    "field_check"
+  ],
+  "valid_from": "2026-06-27T00:00:00Z",
+  "valid_to": null
+}
