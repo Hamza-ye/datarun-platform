@@ -88,9 +88,13 @@ accepted product journey that ties the evidenced components together:
 4. field user receives scoped work, captures offline, syncs, and corrects;
 5. supervisor/owner sees scoped standing, freshness, and attention;
 6. operations/support evidence shows how this path is run and diagnosed;
-7. explicit non-goals prevent claims about real users/data, legacy import,
-   submitted-record replay, retention/security promises, Keycloak hardening,
-   and production cutover.
+7. NW-169 itself does not approve real-user rollout, real-data import/use,
+   legacy account import, submitted-record replay, retention/security promises,
+   Keycloak cutover hardening, or production cutover. A later selected M1.1
+   route may explicitly include bounded owner-operated pilot enablement steps,
+   including fresh local users, principal binding, scoped activity setup,
+   mobile login/capture/sync, and supervisor/owner visibility, when those are
+   the selected scope. NW-169 must not pre-forbid those steps.
 
 That closure should be the first implementation route considered after
 NW-169.
@@ -158,6 +162,32 @@ does not create platform authority.
 | Handoff | Continuity across actors, assignments, devices, or custody/responsibility. | Assignment changes, subject-history, transfer pattern, scoped sync. | Not new custody scope or broad audit pull by default. |
 | Report view | Scoped read-side standing with uncertainty and traceability. | Rebuildable projections, scoped event access, flag source links. | Not a warehouse, export/import API, or aggregate authority. |
 | Shape change | A change in what information is collected. | Versioned shape_ref, config package versioning, deploy-time validation. | Not arbitrary migration language or historical reinterpretation. |
+
+### Vocabulary Evidence Extraction Rule
+
+A product/problem evidence gap is not a request for fresh owner-invented
+vocabulary before work continues. Existing walkthroughs and scenarios are
+product evidence. Agents must inspect concrete evidence first, including the
+ITN walkthrough, S08, S20, S21, S22, S27, and S06/S06b, then classify the
+real-world nouns they find.
+
+The real gap is classification, not absence of nouns. For each term, decide
+whether it is a subject, scope/location, configured list item,
+registry-maintained known thing, work item/case, resource/stock item, or
+reporting/projection concept. Escalate to the owner only when existing evidence
+conflicts or is insufficient for the selected slice.
+
+| Evidence term | Source | Candidate classification |
+|---|---|---|
+| Household | ITN/S22 | subject / known thing / candidate lifecycle pressure |
+| Village | ITN/S22 | geographic scope; may also be place-like subject if lifecycle selected |
+| Facility/site | S06/S22/ITN pressure | site/facility reference; not automatically location semantic authority |
+| CHV/volunteer | S20/S21 | actor; may be assessment subject in supervisor visit |
+| Case/situation | S08/S20 | ongoing work item / subject-linked case |
+| Supplies/ITNs | S20/S22/S27 | resource item/quantity, not platform vocabulary |
+| Warehouse/storage/delivery point | ITN/S27 | custody/place reference; lifecycle requires S06 route if maintained |
+| Supervisor visit | S21 | activity entry / review evidence |
+| Discrepancy | S27 | attention/review item |
 
 ## 4. Interaction Grammar
 
@@ -235,7 +265,7 @@ evidence for the touched behavior.
 
 | Order | Slice | Status | User value | Required decision before implementation | Evidence to preserve | Route |
 |---|---|---|---|---|---|---|
-| M1.1 | Owner-operated local/on-prem core field-work closure | Implementation-ready after a bounded task packet | One production-usable path: setup, actor binding, assignment, mobile login, offline capture, sync, correction, scoped standing, attention, support evidence. | No new product/platform decision if lifecycle, import, retention/security, Keycloak hardening, and cutover remain non-goals. | NW-164/NW-165, NW-032/NW-088, NW-050/NW-069, NW-025/NW-026/NW-059-NW-062, NW-029/NW-033/NW-072. | First recommended post-NW-169 implementation/validation slice. |
+| M1.1 | Owner-operated local/on-prem core field-work closure | Implementation-ready after a bounded task packet | One production-usable path: setup, actor binding, assignment, mobile login, offline capture, sync, correction, scoped standing, attention, support evidence. | No new product/platform decision if lifecycle, import/replay, retention/security promises, Keycloak cutover hardening, and production cutover remain outside the selected claim. M1.1 may use synthetic, neutral extracted, or explicitly owner-approved bounded real-use evidence depending on the task packet. | NW-164/NW-165, NW-032/NW-088, NW-050/NW-069, NW-025/NW-026/NW-059-NW-062, NW-029/NW-033/NW-072. | First recommended post-NW-169 implementation/validation slice. |
 | M1.2 | M1 product-language and support closure | Implementation-ready as part of or immediately after M1.1 | Users and operator see safe language for saved, waiting, synced, stale, scoped, pending review, and support/diagnosis. | None if no new runtime behavior or policy claims. | Current mobile sync/capture copy evidence and operational UX guardrail. | Include in M1.1 if small; otherwise follow-up polish slice. |
 | M2.1 | S06 known-things lifecycle decision | Decision first | Defines minimal known-thing model, lifecycle vocabulary, authority, candidate, duplicate, and merge/split UX boundaries. | Yes: S06/BAR-105/NW-021 product/platform decision. | BAR-009 identity mechanisms, BAR-003/007 scope, BAR-015 location_path guardrail. | First M2 precondition; no runtime implementation. |
 | M2.2 | Lifecycle-neutral subject-linked capture | Conditional implementation-ready | Field user selects an existing known thing and captures against it without lifecycle changes. | Only if lookup stays scoped and lifecycle-neutral; otherwise M2.1 first. | S01-compatible subject_ref/history evidence. | Can be a narrow bridge slice if M1 needs subject context. |
@@ -258,7 +288,7 @@ evidence for the touched behavior.
 | Missing reusable interaction pattern | Missing-known-thing candidate review, duplicate stewardship, lifecycle review, responsibility handoff vocabulary. | Product decision/spec; implement only after selected. |
 | Deployment-specific configuration | Domain labels, activity names, role labels, shapes, warning expressions, severity overrides, campaign/logistics/facility wording. | Configuration and product copy; do not promote to platform vocabulary. |
 | Genuine platform-mechanism or architecture gap | Entity lifecycle authority, new scope mechanisms, broad reporting/export/import, trigger execution, auto-resolution, new envelope fields. | S06/BAR-105/NW-021, NW-053, NW-044, BAR-101/CDL-042, NW-045, BAR-107 as applicable. |
-| Unsupported assumption requiring evidence | Real users/data, legacy account import, submitted-record replay, Keycloak cutover hardening, retention/security promises, cross-version comparability. | Explicit owner decision, operations route, NW-166, NW-054, or M2/M5 decision slice. |
+| Unsupported assumption requiring evidence | Real-user rollout, real-data import/use, legacy account import, submitted-record replay, Keycloak cutover hardening, retention/security promises, cross-version comparability. | Selected bounded task packet, explicit owner evidence, operations route, NW-166, NW-054, or M2/M5 decision slice. |
 
 ## 9. Product-Level Definition of Done
 
@@ -289,6 +319,17 @@ Validation evidence:
 Explicit deferrals and routes:
 Accepted evidence preserved:
 Stop conditions:
+```
+
+If a future slice claims a blocker, it must name the exact impossible action
+and concrete evidence. Use this format instead of broad go/no-go language:
+
+```text
+Blocked action:
+Evidence:
+Smallest missing capability/fact:
+Independent work that can continue:
+Owner question, if absolutely required:
 ```
 
 ## 10. Recommendation
