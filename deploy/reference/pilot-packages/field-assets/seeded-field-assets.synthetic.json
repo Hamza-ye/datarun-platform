@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "source": "NW-174:field-asset-setup-seed-proof",
+  "seed_method": "existing subject_locations mapping plus normal sync capture events using asset_check/v1",
+  "shape_ref": "asset_check/v1",
+  "activity_ref": "field_asset_inspection",
+  "geography": {
+    "region_id": "17400000-0000-4000-8000-000000000100",
+    "region_name": "NW-174 Pilot Region",
+    "assigned_location_id": "17400000-0000-4000-8000-000000000101",
+    "assigned_location_name": "NW-174 Pilot District"
+  },
+  "assets": [
+    {
+      "subject_id": "17400000-0000-4000-8000-000000000001",
+      "seed_event_id": "17400000-0000-4000-8000-000000010001",
+      "display_label": "Pilot pump A",
+      "location_id": "17400000-0000-4000-8000-000000000101"
+    },
+    {
+      "subject_id": "17400000-0000-4000-8000-000000000002",
+      "seed_event_id": "17400000-0000-4000-8000-000000010002",
+      "display_label": "Pilot pump B",
+      "location_id": "17400000-0000-4000-8000-000000000101"
+    }
+  ],
+  "field_assignment": {
+    "target_actor_id": "17400000-0000-4000-8000-000000000011",
+    "role": "field_worker",
+    "geographic_id": "17400000-0000-4000-8000-000000000101",
+    "subject_list": [
+      "17400000-0000-4000-8000-000000000001"
+    ],
+    "activity_list": [
+      "field_asset_inspection"
+    ]
+  },
+  "review_assignment": {
+    "target_actor_id": "17400000-0000-4000-8000-000000000012",
+    "role": "supervisor",
+    "geographic_id": "17400000-0000-4000-8000-000000000101",
+    "subject_list": null,
+    "activity_list": [
+      "field_asset_inspection"
+    ]
+  },
+  "out_of_scope_assignment": {
+    "target_actor_id": "17400000-0000-4000-8000-000000000013",
+    "role": "field_worker",
+    "geographic_id": "17400000-0000-4000-8000-000000000101",
+    "subject_list": [
+      "17400000-0000-4000-8000-000000000002"
+    ],
+    "activity_list": [
+      "field_asset_inspection"
+    ]
+  },
+  "non_goals": [
+    "candidate promotion",
+    "candidate rejection",
+    "lifecycle state",
+    "duplicate resolution",
+    "merge/split UX",
+    "registry import/export",
+    "new subject_ref type",
+    "semantic location"
+  ]
+}

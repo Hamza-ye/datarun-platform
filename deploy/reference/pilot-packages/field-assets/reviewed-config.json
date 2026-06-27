@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "source": "NW-174:field-asset-setup-seed-proof",
+  "shapes": [
+    {
+      "name": "asset_check",
+      "version": 1,
+      "status": "active",
+      "sensitivity": "standard",
+      "schema_json": {
+        "fields": [
+          {
+            "name": "field_asset",
+            "type": "subject_ref",
+            "required": true,
+            "deprecated": false,
+            "display_order": 1
+          },
+          {
+            "name": "name",
+            "type": "text",
+            "required": true,
+            "deprecated": false,
+            "display_order": 2
+          }
+        ],
+        "subject_binding": "field_asset",
+        "uniqueness": null
+      }
+    }
+  ],
+  "activities": [
+    {
+      "name": "field_asset_inspection",
+      "status": "active",
+      "sensitivity": "standard",
+      "config_json": {
+        "shapes": [
+          "asset_check/v1"
+        ],
+        "roles": {
+          "setup_owner": [
+            "capture"
+          ],
+          "field_worker": [
+            "capture"
+          ]
+        }
+      }
+    }
+  ],
+  "expressions": [],
+  "flag_severity_overrides": {},
+  "assignment_admin_capabilities": {
+    "schema_version": 1,
+    "roles": {
+      "setup_owner": [
+        "assignment_admin.create",
+        "assignment_admin.end"
+      ]
+    }
+  },
+  "admin_command_capabilities": {
+    "schema_version": 1,
+    "actors": {
+      "17400000-0000-4000-8000-000000000010": [
+        "web_admin.access",
+        "web_admin.read_scoped",
+        "config_admin.author",
+        "config_admin.validate",
+        "config_admin.readiness_review",
+        "config_admin.approve",
+        "config_admin.publish"
+      ],
+      "17400000-0000-4000-8000-000000000012": [
+        "web_admin.access",
+        "web_admin.read_scoped"
+      ]
+    }
+  }
+}
