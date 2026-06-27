@@ -54,6 +54,8 @@ Use the narrowest relevant focused test first, then the required full gate for
 the touched surface. Report exact command, cwd, result, count/duration when
 available, and skipped-gate rationale.
 
+For noisy checks, especially Maven/server full or CI-equivalent runs, capture logs to `/tmp` when useful and report/read the high-signal result context-friendly. Do not stream full logs into conversation unless the user asks or needed for the context.
+
 Use `docs/agent-working-surface/validation-matrix.md` for touched-surface gates
 and evidence format.
 

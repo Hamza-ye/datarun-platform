@@ -50,18 +50,16 @@ Use these sources in this order when authority or routing needs to be resolved:
 
 This table is a routing index, not a second copy of the process rules.
 
-Role-scoped skills live in [skills/README.md](skills/README.md). They are
-playbooks for choosing the right working stance, not authority over accepted
-docs. Default role remains implementation unless the task explicitly selects
-another role or an architecture/gap stop trigger fires.
-Codex-discoverable wrappers for these role playbooks live under `.agents/skills/`.
+Codex-discoverable runtime skills live under `.agents/skills/`. They are
+self-contained playbooks for choosing the right working stance, not authority
+over accepted docs. Default role remains implementation unless the task
+explicitly selects another role or an architecture/gap stop trigger fires.
 
 | Responsibility | Canonical home |
 |---|---|
 | Agent startup and minimal reading order | `AGENTS.md` plus `docs/status.md` Current Routing. |
 | Steward broad-reading, dispatch, and reconciliation rules | `steward-session-guide.md`. |
-| Role-scoped task playbooks | `skills/README.md`. |
-| Codex-discoverable role wrappers | `.agents/skills/`. |
+| Codex-discoverable runtime skills | `.agents/skills/`. |
 | Stable authority and routing source order | This README. |
 | Architecture authority | The CDL via `docs/architecture/adrs-decisions-canonical-ledger/README.md`. |
 | Architecture-sensitive pressure and gap classification | `decision-anchor-layer/gap-routing-playbook.md`. |
