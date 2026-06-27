@@ -32,6 +32,7 @@ Each product specification should include:
 
 | Specification | Status | Owner | Source NW | Supersedes |
 |---|---|---|---|---|
+| [Lifecycle-Neutral Known-Thing Lookup And Candidate Capture](lifecycle-neutral-known-thing-lookup-and-candidate-capture.md) | accepted | product steward | NW-172 | none |
 | [Product Model Consolidation And Slice Backlog](product-model-consolidation-and-slice-backlog.md) | active planning surface; derived planning only | product steward | NW-169 | none |
 | [Product Goal, Complete Scenario Portfolio, And Ordered Slice Roadmap](product-goal-and-representative-journeys.md) | active planning surface; derived planning only | product steward | NW-168 | none |
 | [Product Candidate 1](product-candidate-1.md) | accepted | product steward | NW-084 | none |
@@ -48,6 +49,11 @@ S06/S06b risk routing, location/path guardrails, ordered M1-M5 candidate
 slices, and the product-level Definition of Done. It does not accept product
 behavior, implementation standing, architecture authority, validation policy,
 product-candidate scope, or production approval.
+`lifecycle-neutral-known-thing-lookup-and-candidate-capture.md` is the accepted
+NW-172 M2.2 product boundary for one configured `field_asset` lookup slice,
+user-facing asset/candidate wording, unpromoted candidate evidence, scoped
+access expectations, stale/offline behavior, and future validation gates before
+runtime implementation.
 `product-goal-and-representative-journeys.md` is the active Product Goal,
 complete scenario portfolio, and ordered slice roadmap surface after NW-168. It
 is derived planning only and does not accept product behavior, implementation
