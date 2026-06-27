@@ -1,7 +1,12 @@
 package dev.datarun.server.authorization;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
+import dev.datarun.server.config.ActivityService;
+import dev.datarun.server.config.ShapeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +36,15 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private AssignmentService assignmentService;
+
+    @Autowired
+    private ShapeService shapeService;
+
+    @Autowired
+    private ActivityService activityService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private LocationRepository locationRepository;
@@ -63,6 +77,8 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
         jdbc.execute("DELETE FROM events");
         jdbc.execute("ALTER SEQUENCE events_sync_watermark_seq RESTART WITH 1");
         jdbc.execute("DELETE FROM device_sync_state");
+        jdbc.execute("DELETE FROM activities");
+        jdbc.execute("DELETE FROM shapes");
         jdbc.execute("DELETE FROM locations");
         provisionTestToken(); // admin token for ADMIN actor
 
@@ -399,40 +415,53 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void fieldAssetCandidateEvidenceSyncsWithinSubjectListScopeOnly() {
+        publishFieldAssetConfig();
         UUID allowedAsset = UUID.randomUUID();
-        UUID blockedAsset = UUID.randomUUID();
+        UUID generatedCandidateSubject = UUID.randomUUID();
         assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
-                null, List.of(allowedAsset), List.of("field_asset_inspection"),
+                districtX, List.of(allowedAsset), List.of("field_asset_inspection"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, ACTOR_B, "supervisor",
+                districtX, null, List.of("field_asset_inspection"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        assignmentService.createAssignment(ADMIN, ACTOR_NONE, "supervisor",
+                districtZ, null, List.of("field_asset_inspection"),
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
         long cursor = latestWatermark();
 
-        UUID allowedEvent = pushFieldAssetEvidence(
-                allowedAsset, "Unknown pump", "offline_saved_list");
-        UUID blockedEvent = pushFieldAssetEvidence(
-                blockedAsset, "Hidden pump", "offline_saved_list");
+        UUID candidateEvent = pushFieldAssetEvidenceAs(
+                tokenA, ACTOR_A, generatedCandidateSubject,
+                "Unknown pump", "offline_saved_list");
 
-        ResponseEntity<JsonNode> response = pullEvents(tokenA, cursor, 100);
+        ResponseEntity<JsonNode> response = pullEvents(tokenB, cursor, 100);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(extractCaptureEventIds(response.getBody().get("events")))
-                .contains(allowedEvent.toString())
-                .doesNotContain(blockedEvent.toString());
+                .contains(candidateEvent.toString());
         assertThat(extractCaptureSubjectActivityKeys(response.getBody().get("events")))
-                .contains(allowedAsset + "|field_asset_inspection")
-                .doesNotContain(blockedAsset + "|field_asset_inspection");
+                .contains(generatedCandidateSubject + "|field_asset_inspection")
+                .doesNotContain(allowedAsset + "|field_asset_inspection");
+        assertThat(eventLocationPath(candidateEvent))
+                .isEqualTo(locationRepository.findPathById(districtX));
 
         JsonNode pulled = eventById(response.getBody().get("events"),
-                allowedEvent.toString());
+                candidateEvent.toString());
         JsonNode evidence = pulled.path("payload").path("asset_candidate_evidence");
         assertThat(evidence.path("standing").asText()).isEqualTo("candidate");
         assertThat(evidence.path("display_label").asText()).isEqualTo("Unknown pump");
         assertThat(evidence.path("lookup_standing").path("state").asText())
                 .isEqualTo("offline_saved_list");
+        assertThat(pulled.path("payload").has("field_asset")).isFalse();
         assertThat(pulled.path("payload").has("subject_ref")).isFalse();
         assertThat(evidence.has("promoted")).isFalse();
         assertThat(evidence.has("rejected")).isFalse();
         assertThat(evidence.has("lifecycle_state")).isFalse();
         assertThat(evidence.has("duplicate_resolution")).isFalse();
+
+        ResponseEntity<JsonNode> outOfScope = pullEvents(tokenNone, cursor, 100);
+        assertThat(outOfScope.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(extractCaptureEventIds(outOfScope.getBody().get("events")))
+                .doesNotContain(candidateEvent.toString());
     }
 
     @Test
@@ -473,6 +502,33 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
                 """, subjectId.toString(), locationId.toString(), locationId.toString());
     }
 
+    private void publishFieldAssetConfig() {
+        ObjectNode schema = objectMapper.createObjectNode();
+        schema.put("subject_binding", "field_asset");
+        schema.putNull("uniqueness");
+        ArrayNode fields = schema.putArray("fields");
+        addField(fields, "field_asset", "subject_ref", true);
+        addField(fields, "name", "text", true);
+        assertThat(shapeService.createShape("asset_check", "standard", schema))
+                .isEmpty();
+
+        ObjectNode activityConfig = objectMapper.createObjectNode();
+        activityConfig.putArray("shapes").add("asset_check/v1");
+        activityConfig.putObject("roles").putArray("field_worker").add("capture");
+        assertThat(activityService.createActivity(
+                "field_asset_inspection", "standard", activityConfig))
+                .isEmpty();
+    }
+
+    private void addField(ArrayNode fields, String name, String type, boolean required) {
+        ObjectNode field = fields.addObject();
+        field.put("name", name);
+        field.put("type", type);
+        field.put("required", required);
+        field.put("deprecated", false);
+        field.put("display_order", fields.size());
+    }
+
     private UUID pushCaptureEvent(UUID subjectId, String notes) {
         return pushCaptureEvent(subjectId, null, notes);
     }
@@ -483,8 +539,10 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
                 "basic_capture/v1");
     }
 
-    private UUID pushFieldAssetEvidence(UUID subjectId, String label,
-                                        String lookupStanding) {
+    private UUID pushFieldAssetEvidenceAs(String token, UUID actorId,
+                                          UUID subjectId, String label,
+                                          String lookupStanding) {
+        UUID eventId = UUID.randomUUID();
         Map<String, Object> evidence = new LinkedHashMap<>();
         evidence.put("standing", "candidate");
         evidence.put("review_label", "Candidate asset");
@@ -510,13 +568,32 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
         evidence.put("capture_timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
         evidence.put("original_submitted_record_ref", Map.of(
                 "type", "event",
-                "id", UUID.randomUUID().toString()));
+                "id", eventId.toString()));
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("name", "Candidate evidence record");
         payload.put("asset_candidate_evidence", evidence);
-        return pushCaptureEvent(
-                subjectId, "field_asset_inspection", payload, "asset_check/v1");
+        Map<String, Object> event = new LinkedHashMap<>();
+        event.put("id", eventId.toString());
+        event.put("type", "capture");
+        event.put("shape_ref", "asset_check/v1");
+        event.put("activity_ref", "field_asset_inspection");
+        event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
+        event.put("actor_ref", Map.of("type", "actor", "id", actorId.toString()));
+        event.put("device_id", DEVICE_A.toString());
+        event.put("device_seq", (int) (System.nanoTime() % Integer.MAX_VALUE));
+        event.put("sync_watermark", null);
+        event.put("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
+        event.put("payload", payload);
+
+        Map<String, Object> request = Map.of("events", List.of(event));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<JsonNode> response = rest.exchange("/api/sync/push",
+                HttpMethod.POST, new HttpEntity<>(request, headers), JsonNode.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return eventId;
     }
 
     private UUID pushCaptureEvent(UUID subjectId, String activityRef,

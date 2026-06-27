@@ -13,6 +13,7 @@ import java.util.*;
  */
 @Component
 public class ShapePayloadValidator {
+    private static final String CANDIDATE_EVIDENCE_KEY = "asset_candidate_evidence";
 
     private final ShapeRepository shapeRepository;
     private final PlatformPayloadContractValidator platformPayloadContractValidator;
@@ -64,7 +65,8 @@ public class ShapePayloadValidator {
             boolean deprecated = fieldDef.path("deprecated").asBoolean(false);
 
             if (required && !deprecated) {
-                if (!payload.has(fieldName) || payload.get(fieldName).isNull()) {
+                if ((!payload.has(fieldName) || payload.get(fieldName).isNull())
+                        && !isCandidateFallbackForSubjectBinding(shape.schemaJson(), fieldName, payload)) {
                     violations.add("Required field '" + fieldName + "' is missing");
                 }
             }
@@ -157,5 +159,15 @@ public class ShapePayloadValidator {
             }
             default -> null; // Unknown type → skip
         };
+    }
+
+    private boolean isCandidateFallbackForSubjectBinding(
+            JsonNode schemaJson, String fieldName, JsonNode payload) {
+        JsonNode binding = schemaJson == null ? null : schemaJson.get("subject_binding");
+        return binding != null
+                && binding.isTextual()
+                && fieldName.equals(binding.asText())
+                && payload.has(CANDIDATE_EVIDENCE_KEY)
+                && payload.get(CANDIDATE_EVIDENCE_KEY).isObject();
     }
 }

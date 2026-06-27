@@ -35,6 +35,7 @@ import java.util.UUID;
 public class SyncController {
 
     private static final Logger log = LoggerFactory.getLogger(SyncController.class);
+    private static final String CANDIDATE_EVIDENCE_KEY = "asset_candidate_evidence";
 
     private final EventRepository eventRepository;
     private final EnvelopeValidator envelopeValidator;
@@ -141,6 +142,7 @@ public class SyncController {
                 }
             }
         });
+        applyCandidateEvidenceScope(acceptedEvents, authenticatedActorId);
 
         // --- Tx2: Conflict detection (separate transaction) ---
         // CD failure does not affect event persistence (C3 satisfied)
@@ -335,6 +337,39 @@ public class SyncController {
             }
         }
         return errors;
+    }
+
+    private void applyCandidateEvidenceScope(List<Event> acceptedEvents,
+                                             UUID authenticatedActorId) {
+        if (authenticatedActorId == null || acceptedEvents.isEmpty()) {
+            return;
+        }
+        List<ActiveAssignment> assignments =
+                scopeResolver.getActiveAssignments(authenticatedActorId);
+        if (assignments.isEmpty()) {
+            return;
+        }
+        for (Event event : acceptedEvents) {
+            if (!isCandidateEvidenceEvent(event)
+                    || eventRepository.getLocationPath(event.id()) != null) {
+                continue;
+            }
+            assignments.stream()
+                    .filter(assignment -> assignment.geographicPath() != null)
+                    .filter(assignment -> assignment.containsActivity(event.activityRef()))
+                    .findFirst()
+                    .ifPresent(assignment -> eventRepository.setLocationPathIfAbsent(
+                            event.id(), assignment.geographicPath()));
+        }
+    }
+
+    private boolean isCandidateEvidenceEvent(Event event) {
+        return event != null
+                && event.payload() != null
+                && event.payload().has(CANDIDATE_EVIDENCE_KEY)
+                && event.payload().get(CANDIDATE_EVIDENCE_KEY).isObject()
+                && event.subjectRef() != null
+                && "subject".equals(event.subjectRef().path("type").asText(null));
     }
 
     private List<Event> findAuthorizedPullEvents(long sinceWatermark, int limit,

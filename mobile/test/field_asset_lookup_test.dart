@@ -52,13 +52,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(harness.assembler.lastSubjectId, _assetA);
+    expect(harness.assembler.lastPayload?[fieldAssetSubjectBinding], _assetA);
     expect(harness.assembler.lastPayload?[assetCandidateEvidenceKey], isNull);
   });
 
   testWidgets(
     'field user saves missing asset as candidate evidence without lookup truth',
     (tester) async {
-      final harness = _Harness();
+      final harness = (await tester.runAsync(_RealEventHarness.create))!;
+      addTearDown(() async {
+        await tester.runAsync(harness.dispose);
+      });
       harness.state.lastSyncResult = SyncResult(
         pushedCount: 0,
         pulledCount: 0,
@@ -74,20 +78,43 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField).last, 'Unknown pump');
       await tester.tap(find.text(saveCandidateAction));
-      await tester.pumpAndSettle();
+      await _pumpRealAsyncWork(tester);
 
       expect(find.byType(FormScreen), findsOneWidget);
-      await tester.enterText(
-        find.byType(TextFormField),
-        'Record about missing asset',
+      final recordField = find.descendant(
+        of: find.byType(FormScreen),
+        matching: find.byType(TextFormField),
       );
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      await tester.enterText(recordField, 'Record about missing asset');
+      expect(find.text('Record about missing asset'), findsOneWidget);
+      final saveButton = tester.widget<TextButton>(
+        find.widgetWithText(TextButton, 'Save'),
+      );
+      expect(saveButton.onPressed, isNotNull);
+      await tester.runAsync(() async {
+        saveButton.onPressed!();
+        final deadline = DateTime.now().add(const Duration(seconds: 5));
+        while (DateTime.now().isBefore(deadline)) {
+          if ((await harness.eventStore.getUnpushed()).isNotEmpty) return;
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+        fail('Timed out waiting for candidate event to be stored.');
+      });
+      await tester.pump();
+      final saveException = tester.takeException();
+      expect(saveException, isNull);
+      expect(find.text('Record label is required'), findsNothing);
+      await _waitForFormClosed(tester);
 
-      expect(harness.assembler.lastSubjectId, isNull);
+      final pending = (await tester.runAsync(harness.eventStore.getUnpushed))!;
+      expect(pending, hasLength(1));
+      final event = pending.single;
+      expect(event.subjectRef['type'], 'subject');
+      expect(event.subjectRef['id'], isNot(_assetA));
+      expect(event.subjectRef['id'], isNot(_assetB));
+      expect(event.payload.containsKey(fieldAssetSubjectBinding), isFalse);
       final evidence =
-          harness.assembler.lastPayload?[assetCandidateEvidenceKey]
-              as Map<String, dynamic>;
+          event.payload[assetCandidateEvidenceKey] as Map<String, dynamic>;
       expect(evidence['standing'], 'candidate');
       expect(evidence['review_label'], candidateAssetLabel);
       expect(evidence['display_label'], 'Unknown pump');
@@ -101,6 +128,11 @@ void main() {
         evidence['lookup_standing'],
         containsPair('message', offlineAssetListCaveat),
       );
+      expect(evidence['capture_timestamp'], event.timestamp);
+      expect(evidence['original_submitted_record_ref'], {
+        'type': 'event',
+        'id': event.id,
+      });
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
@@ -159,6 +191,8 @@ const _assetA = 'aaaaaaaa-0000-4000-8000-000000000001';
 const _assetB = 'bbbbbbbb-0000-4000-8000-000000000002';
 const _activityRef = 'field_asset_inspection';
 const _shapeRef = 'asset_check/v1';
+const _assignmentId = 'cccccccc-0000-4000-8000-000000000003';
+const _geoScope = 'dddddddd-0000-4000-8000-000000000004';
 
 Future<void> _pump(WidgetTester tester, AppState state) {
   return tester.pumpWidget(
@@ -167,6 +201,23 @@ Future<void> _pump(WidgetTester tester, AppState state) {
       child: const MaterialApp(home: WorkListScreen()),
     ),
   );
+}
+
+Future<void> _pumpRealAsyncWork(WidgetTester tester) async {
+  await tester.pump();
+  await tester.runAsync(
+    () => Future<void>.delayed(const Duration(milliseconds: 50)),
+  );
+  await tester.pump(const Duration(milliseconds: 300));
+}
+
+Future<void> _waitForFormClosed(WidgetTester tester) async {
+  final deadline = DateTime.now().add(const Duration(seconds: 5));
+  while (DateTime.now().isBefore(deadline)) {
+    await _pumpRealAsyncWork(tester);
+    if (find.byType(FormScreen).evaluate().isEmpty) return;
+  }
+  fail('Timed out waiting for form route to close.');
 }
 
 Finder _dialogText(String text) => find.descendant(
@@ -192,8 +243,9 @@ class _Harness {
           ..subjects = projection.subjects
           ..activeAssignments = [
             {
-              'assignment_id': 'assignment-1',
+              'assignment_id': _assignmentId,
               'role': 'field_worker',
+              'geo_scope': _geoScope,
               'subject_list': _assetA,
               'activity_list': _activityRef,
             },
@@ -215,6 +267,12 @@ class _FakeConfigStore implements ConfigStore {
     sensitivity: 'standard',
     subjectBinding: fieldAssetSubjectBinding,
     fields: [
+      ShapeField(
+        name: fieldAssetSubjectBinding,
+        type: 'subject_ref',
+        required: true,
+        description: 'Asset',
+      ),
       ShapeField(
         name: 'name',
         type: 'text',
@@ -278,8 +336,9 @@ class _FakeEventStore implements EventStore {
   @override
   Future<List<Map<String, dynamic>>> getActiveAssignments() async => [
     {
-      'assignment_id': 'assignment-1',
+      'assignment_id': _assignmentId,
       'role': 'field_worker',
+      'geo_scope': _geoScope,
       'subject_list': _assetA,
       'activity_list': _activityRef,
     },
@@ -382,6 +441,78 @@ class _FakeContextResolver implements ContextResolver {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _RealEventHarness {
+  _RealEventHarness({
+    required this.eventStore,
+    required this.state,
+    required this.dbPath,
+  });
+
+  final EventStore eventStore;
+  final AppState state;
+  final String dbPath;
+
+  static Future<_RealEventHarness> create() async {
+    SharedPreferences.setMockInitialValues({});
+    final identity = await DeviceIdentity.init();
+    await identity.activateActorSession(
+      actorId: _actorId,
+      token: 'field-token',
+    );
+    final dbPath =
+        '${Directory.systemTemp.path}/datarun_asset_lookup_${DateTime.now().microsecondsSinceEpoch}.db';
+    final eventStore = EventStore(dbPath: dbPath, actorId: identity.actorId);
+    await eventStore.processAssignmentEvent(_assignmentCreatedEvent(identity));
+    final projection = _FakeProjectionEngine();
+    final state = AppState(
+      eventStore: eventStore,
+      projectionEngine: projection,
+      eventAssembler: EventAssembler(identity, eventStore),
+      configStore: _FakeConfigStore(),
+      contextResolver: _FakeContextResolver(),
+      syncService: _FakeSyncService(),
+      identity: identity,
+    );
+    await state.refresh();
+    return _RealEventHarness(
+      eventStore: eventStore,
+      state: state,
+      dbPath: dbPath,
+    );
+  }
+
+  Future<void> dispose() async {
+    await eventStore.close();
+    try {
+      File(dbPath).deleteSync();
+    } catch (_) {}
+  }
+}
+
+Event _assignmentCreatedEvent(DeviceIdentity identity) {
+  return Event(
+    id: 'assignment-event-1',
+    type: 'assignment_changed',
+    shapeRef: 'assignment_created/v1',
+    subjectRef: {'type': 'subject', 'id': _assignmentId},
+    actorRef: {'type': 'actor', 'id': _actorId},
+    deviceId: identity.deviceId,
+    deviceSeq: 0,
+    timestamp: '2026-06-27T09:00:00Z',
+    payload: {
+      'target_actor': {'type': 'actor', 'id': _actorId},
+      'role': 'field_worker',
+      'scope': {
+        'geographic': _geoScope,
+        'subject_list': [_assetA],
+        'activity': [_activityRef],
+      },
+      'valid_from': '2026-06-27T09:00:00Z',
+      'valid_to': null,
+    },
+  );
 }
 
 class _FakeSyncService implements SyncService {

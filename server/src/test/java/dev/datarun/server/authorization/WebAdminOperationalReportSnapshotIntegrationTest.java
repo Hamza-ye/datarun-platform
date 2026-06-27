@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.http.MediaType;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -44,6 +45,8 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
             UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID FIELD_ACTOR =
             UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID OUT_OF_SCOPE_REVIEWER =
+            UUID.fromString("55555555-5555-5555-5555-555555555555");
     private static final UUID SUBJECT_IN_SCOPE =
             UUID.fromString("33333333-3333-3333-3333-333333333333");
     private static final UUID SUBJECT_OUT_OF_SCOPE =
@@ -52,6 +55,7 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private AssignmentService assignmentService;
+    @Autowired private ActorTokenRepository actorTokenRepository;
     @Autowired private EventRepository eventRepository;
     @Autowired private ConflictResolutionService conflictResolutionService;
     @Autowired private LocationRepository locationRepository;
@@ -219,39 +223,23 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     @Test
     void configuredWorkEvidenceShowsCandidateAssetAsNeedsReviewOnly()
             throws Exception {
-        publishStockOperationsFixtureConfig();
-        setupReviewerScope("stock_operations");
-        configureReportCommands(REVIEWER);
+        publishFieldAssetConfig();
+        setupReviewerScope("field_asset_inspection");
+        assignmentService.createAssignment(
+                ADMIN, FIELD_ACTOR, "field_worker", districtA,
+                List.of(SUBJECT_IN_SCOPE), List.of("field_asset_inspection"),
+                past(), null);
+        assignmentService.createAssignment(
+                ADMIN, OUT_OF_SCOPE_REVIEWER, "supervisor", districtB,
+                null, List.of("field_asset_inspection"), past(), null);
+        configureReportCommandsForActors(List.of(REVIEWER, OUT_OF_SCOPE_REVIEWER));
 
-        ObjectNode payload = stocktakePayload("mids_kit", 42);
-        ObjectNode candidate = payload.putObject("asset_candidate_evidence");
-        candidate.put("standing", "candidate");
-        candidate.put("review_label", "Candidate asset");
-        candidate.put("display_label", "Unknown pump");
-        candidate.put("candidate_standing",
-                "Needs review before it can be used as a known asset.");
-        candidate.put("capture_timestamp", "2026-06-27T10:00:00Z");
-        candidate.putObject("lookup_standing")
-                .put("state", "offline_saved_list")
-                .put("message", "You are using the last saved asset list.")
-                .put("offline", true)
-                .put("stale", false)
-                .put("incomplete", true)
-                .put("unavailable", false);
-        candidate.putObject("actor_session_provenance")
-                .put("actor_id", FIELD_ACTOR.toString())
-                .put("session", "local_actor_session");
-        candidate.putArray("assignment_scope_context")
-                .addObject()
-                .put("assignment_id", UUID.randomUUID().toString())
-                .put("role", "field_worker");
-        candidate.putObject("original_submitted_record_ref")
-                .put("type", "event")
-                .put("id", UUID.randomUUID().toString());
-
-        createConfiguredWorkRecord(
-                SUBJECT_IN_SCOPE, districtA, "stocktake_line/v1",
-                "stock_operations", payload);
+        UUID generatedCandidateSubject = UUID.randomUUID();
+        UUID candidateEvent = pushFieldAssetCandidateEvidence(
+                actorTokenRepository.createToken(FIELD_ACTOR),
+                generatedCandidateSubject);
+        assertThat(eventRepository.getLocationPath(candidateEvent))
+                .isEqualTo(locationRepository.findPathById(districtA));
 
         String body = configuredWorkEvidenceBody(webAdminSession(REVIEWER));
 
@@ -274,6 +262,16 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 .doesNotContain("official asset")
                 .doesNotContain("Create asset")
                 .doesNotContain("<form");
+
+        String outOfScope = mvc.perform(get("/web-admin/operational/report")
+                        .session(webAdminSession(OUT_OF_SCOPE_REVIEWER)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(outOfScope)
+                .doesNotContain("Unknown pump")
+                .doesNotContain("/web-admin/operational/evidence");
     }
 
     @Test
@@ -706,6 +704,25 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 "stock_operations", "standard", activityConfig)).isEmpty();
     }
 
+    private void publishFieldAssetConfig() {
+        ObjectNode schema = objectMapper.createObjectNode();
+        schema.put("subject_binding", "field_asset");
+        schema.putNull("uniqueness");
+        ArrayNode fields = schema.putArray("fields");
+        addField(fields, "field_asset", "subject_ref", true);
+        addField(fields, "name", "text", true);
+
+        assertThat(shapeService.createShape("asset_check", "standard", schema))
+                .isEmpty();
+
+        ObjectNode activityConfig = objectMapper.createObjectNode();
+        activityConfig.putArray("shapes").add("asset_check/v1");
+        activityConfig.putObject("roles").putArray("field_worker").add("capture");
+        assertThat(activityService.createActivity(
+                "field_asset_inspection", "standard", activityConfig))
+                .isEmpty();
+    }
+
     private void publishGenericConfiguredWorkConfig(
             String shapeName,
             String shapeSensitivity,
@@ -882,6 +899,60 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
         return event;
     }
 
+    private UUID pushFieldAssetCandidateEvidence(String token, UUID subjectId)
+            throws Exception {
+        UUID eventId = UUID.randomUUID();
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("name", "Candidate evidence record");
+        ObjectNode candidate = payload.putObject("asset_candidate_evidence");
+        candidate.put("standing", "candidate");
+        candidate.put("review_label", "Candidate asset");
+        candidate.put("display_label", "Unknown pump");
+        candidate.put("candidate_standing",
+                "Needs review before it can be used as a known asset.");
+        candidate.put("capture_timestamp", "2026-06-27T10:00:00Z");
+        candidate.putObject("lookup_standing")
+                .put("state", "offline_saved_list")
+                .put("message", "You are using the last saved asset list.")
+                .put("offline", true)
+                .put("stale", false)
+                .put("incomplete", true)
+                .put("unavailable", false);
+        candidate.putObject("actor_session_provenance")
+                .put("actor_id", FIELD_ACTOR.toString())
+                .put("session", "local_actor_session");
+        candidate.putArray("assignment_scope_context")
+                .addObject()
+                .put("role", "field_worker")
+                .put("geographic_scope", districtA.toString());
+        candidate.putObject("original_submitted_record_ref")
+                .put("type", "event")
+                .put("id", eventId.toString());
+
+        ObjectNode event = objectMapper.createObjectNode();
+        event.put("id", eventId.toString());
+        event.put("type", "capture");
+        event.put("shape_ref", "asset_check/v1");
+        event.put("activity_ref", "field_asset_inspection");
+        event.set("subject_ref", subjectRef(subjectId));
+        event.set("actor_ref", actorRef(FIELD_ACTOR));
+        event.put("device_id", UUID.randomUUID().toString());
+        event.put("device_seq", 1);
+        event.putNull("sync_watermark");
+        event.put("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
+        event.set("payload", payload);
+
+        ObjectNode request = objectMapper.createObjectNode();
+        request.putArray("events").add(event);
+
+        mvc.perform(post("/api/sync/push")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request.toString()))
+                .andExpect(status().isOk());
+        return eventId;
+    }
+
     private Event createAttentionFlag(Event source, String category, UUID resolverId) {
         return createAttentionFlag(source, category, resolverId.toString());
     }
@@ -974,14 +1045,30 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
     }
 
+    private void configureReportCommandsForActors(List<UUID> actorIds)
+            throws Exception {
+        configureAdminCommandsForActors(
+                actorIds,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_ACCESS,
+                AdminCommandCapabilityPolicy.WEB_ADMIN_READ_SCOPED);
+    }
+
     private void configureAdminCommands(UUID actorId, String... commands)
+            throws Exception {
+        configureAdminCommandsForActors(List.of(actorId), commands);
+    }
+
+    private void configureAdminCommandsForActors(List<UUID> actorIds,
+                                                 String... commands)
             throws Exception {
         ObjectNode policy = objectMapper.createObjectNode();
         policy.put("schema_version", 1);
-        ArrayNode grants = policy.putObject("actors")
-                .putArray(actorId.toString());
-        for (String command : commands) {
-            grants.add(command);
+        ObjectNode actors = policy.putObject("actors");
+        for (UUID actorId : actorIds) {
+            ArrayNode grants = actors.putArray(actorId.toString());
+            for (String command : commands) {
+                grants.add(command);
+            }
         }
         jdbcTemplate.update("""
                 INSERT INTO deployment_config (config_key, config_json, updated_by, updated_at)
@@ -993,7 +1080,7 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 """,
                 AdminCommandCapabilityPolicy.CONFIG_KEY,
                 objectMapper.writeValueAsString(policy),
-                actorId.toString());
+                actorIds.get(0).toString());
     }
 
     private OffsetDateTime past() {

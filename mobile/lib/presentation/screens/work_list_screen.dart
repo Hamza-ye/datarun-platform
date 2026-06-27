@@ -301,7 +301,10 @@ class WorkListScreen extends StatelessWidget {
     );
     if (result == null) return null;
     if (result.subjectId != null) {
-      return _FieldAssetLookupResult(subjectId: result.subjectId);
+      return _FieldAssetLookupResult(
+        subjectId: result.subjectId,
+        initialValues: {fieldAssetSubjectBinding: result.subjectId},
+      );
     }
     final label = result.candidateLabel?.trim();
     if (label == null || label.isEmpty) return null;
