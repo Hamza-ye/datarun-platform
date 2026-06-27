@@ -97,6 +97,13 @@
             font-weight: 600;
             overflow-wrap: anywhere;
         }
+        .candidate-status {
+            border: 1px solid #d8e0e8;
+            border-radius: 6px;
+            padding: 12px;
+            background: #fbfcfd;
+            margin-bottom: 12px;
+        }
         .link-button {
             border: 1px solid #2f6f9f;
             background: #2f6f9f;
@@ -161,6 +168,40 @@
             </div>
             <div class="notice" th:if="${evidence.fieldValuesVisible() and !evidence.hasFieldValues()}">
                 No configured fields recorded.
+            </div>
+        </section>
+
+        <section th:if="${evidence.hasCandidateEvidence()}">
+            <h2>Candidate evidence</h2>
+            <div class="candidate-status">
+                <span class="label" th:text="${evidence.candidateEvidence().reviewLabel()}"></span>
+                <span class="value" th:text="${evidence.candidateEvidence().displayLabel()}"></span>
+            </div>
+            <div class="field-list">
+                <div class="field-item">
+                    <span class="field-label">Standing</span>
+                    <span class="field-value" th:text="${evidence.candidateEvidence().standing()}"></span>
+                </div>
+                <div class="field-item">
+                    <span class="field-label">Lookup standing</span>
+                    <span class="field-value" th:text="${evidence.candidateEvidence().lookupStanding()}"></span>
+                </div>
+                <div class="field-item">
+                    <span class="field-label">Capture time</span>
+                    <span class="field-value" th:text="${evidence.candidateEvidence().captureTimestamp()}"></span>
+                </div>
+                <div class="field-item">
+                    <span class="field-label">Actor/session provenance</span>
+                    <span class="field-value" th:text="${evidence.candidateEvidence().actorSessionProvenance()}"></span>
+                </div>
+                <div class="field-item">
+                    <span class="field-label">Assignment/scope context</span>
+                    <span class="field-value" th:text="${evidence.candidateEvidence().assignmentScopeContext()}"></span>
+                </div>
+                <div class="field-item">
+                    <span class="field-label">Original submitted record</span>
+                    <span class="field-value" th:text="${evidence.candidateEvidence().originalRecordReference()}"></span>
+                </div>
             </div>
         </section>
     </div>

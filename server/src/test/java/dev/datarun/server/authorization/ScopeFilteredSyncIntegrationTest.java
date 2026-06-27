@@ -398,6 +398,44 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void fieldAssetCandidateEvidenceSyncsWithinSubjectListScopeOnly() {
+        UUID allowedAsset = UUID.randomUUID();
+        UUID blockedAsset = UUID.randomUUID();
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                null, List.of(allowedAsset), List.of("field_asset_inspection"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+        long cursor = latestWatermark();
+
+        UUID allowedEvent = pushFieldAssetEvidence(
+                allowedAsset, "Unknown pump", "offline_saved_list");
+        UUID blockedEvent = pushFieldAssetEvidence(
+                blockedAsset, "Hidden pump", "offline_saved_list");
+
+        ResponseEntity<JsonNode> response = pullEvents(tokenA, cursor, 100);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(extractCaptureEventIds(response.getBody().get("events")))
+                .contains(allowedEvent.toString())
+                .doesNotContain(blockedEvent.toString());
+        assertThat(extractCaptureSubjectActivityKeys(response.getBody().get("events")))
+                .contains(allowedAsset + "|field_asset_inspection")
+                .doesNotContain(blockedAsset + "|field_asset_inspection");
+
+        JsonNode pulled = eventById(response.getBody().get("events"),
+                allowedEvent.toString());
+        JsonNode evidence = pulled.path("payload").path("asset_candidate_evidence");
+        assertThat(evidence.path("standing").asText()).isEqualTo("candidate");
+        assertThat(evidence.path("display_label").asText()).isEqualTo("Unknown pump");
+        assertThat(evidence.path("lookup_standing").path("state").asText())
+                .isEqualTo("offline_saved_list");
+        assertThat(pulled.path("payload").has("subject_ref")).isFalse();
+        assertThat(evidence.has("promoted")).isFalse();
+        assertThat(evidence.has("rejected")).isFalse();
+        assertThat(evidence.has("lifecycle_state")).isFalse();
+        assertThat(evidence.has("duplicate_resolution")).isFalse();
+    }
+
+    @Test
     void scopeAxesComposeAndWithinAssignmentOrAcrossAssignments() {
         UUID subjectA = UUID.randomUUID();
         UUID subjectB = UUID.randomUUID();
@@ -440,11 +478,55 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
     }
 
     private UUID pushCaptureEvent(UUID subjectId, String activityRef, String notes) {
+        return pushCaptureEvent(subjectId, activityRef,
+                Map.of("name", "Subject", "category", "test", "notes", notes),
+                "basic_capture/v1");
+    }
+
+    private UUID pushFieldAssetEvidence(UUID subjectId, String label,
+                                        String lookupStanding) {
+        Map<String, Object> evidence = new LinkedHashMap<>();
+        evidence.put("standing", "candidate");
+        evidence.put("review_label", "Candidate asset");
+        evidence.put("display_label", label);
+        evidence.put("candidate_standing",
+                "Needs review before it can be used as a known asset.");
+        evidence.put("activity_context", Map.of(
+                "activity_ref", "field_asset_inspection",
+                "shape_ref", "asset_check/v1"));
+        evidence.put("lookup_standing", Map.of(
+                "state", lookupStanding,
+                "message", "You are using the last saved asset list.",
+                "offline", true,
+                "stale", false,
+                "incomplete", true,
+                "unavailable", false));
+        evidence.put("actor_session_provenance", Map.of(
+                "actor_id", ADMIN.toString(),
+                "session", "local_actor_session"));
+        evidence.put("assignment_scope_context", List.of(Map.of(
+                "role", "field_worker",
+                "activity_list", List.of("field_asset_inspection"))));
+        evidence.put("capture_timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
+        evidence.put("original_submitted_record_ref", Map.of(
+                "type", "event",
+                "id", UUID.randomUUID().toString()));
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("name", "Candidate evidence record");
+        payload.put("asset_candidate_evidence", evidence);
+        return pushCaptureEvent(
+                subjectId, "field_asset_inspection", payload, "asset_check/v1");
+    }
+
+    private UUID pushCaptureEvent(UUID subjectId, String activityRef,
+                                  Map<String, Object> payload,
+                                  String shapeRef) {
         UUID eventId = UUID.randomUUID();
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("id", eventId.toString());
         event.put("type", "capture");
-        event.put("shape_ref", "basic_capture/v1");
+        event.put("shape_ref", shapeRef);
         event.put("activity_ref", activityRef);
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
         event.put("actor_ref", Map.of("type", "actor", "id", ADMIN.toString()));
@@ -452,7 +534,7 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
         event.put("device_seq", (int) (System.nanoTime() % Integer.MAX_VALUE));
         event.put("sync_watermark", null);
         event.put("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString());
-        event.put("payload", Map.of("name", "Subject", "category", "test", "notes", notes));
+        event.put("payload", payload);
 
         Map<String, Object> request = Map.of("events", List.of(event));
         HttpHeaders headers = new HttpHeaders();
@@ -519,5 +601,14 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
             }
         }
         return keys;
+    }
+
+    private JsonNode eventById(JsonNode events, String eventId) {
+        for (JsonNode e : events) {
+            if (eventId.equals(e.get("id").asText())) {
+                return e;
+            }
+        }
+        throw new AssertionError("event not found: " + eventId);
     }
 }

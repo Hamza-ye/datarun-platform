@@ -217,6 +217,66 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     }
 
     @Test
+    void configuredWorkEvidenceShowsCandidateAssetAsNeedsReviewOnly()
+            throws Exception {
+        publishStockOperationsFixtureConfig();
+        setupReviewerScope("stock_operations");
+        configureReportCommands(REVIEWER);
+
+        ObjectNode payload = stocktakePayload("mids_kit", 42);
+        ObjectNode candidate = payload.putObject("asset_candidate_evidence");
+        candidate.put("standing", "candidate");
+        candidate.put("review_label", "Candidate asset");
+        candidate.put("display_label", "Unknown pump");
+        candidate.put("candidate_standing",
+                "Needs review before it can be used as a known asset.");
+        candidate.put("capture_timestamp", "2026-06-27T10:00:00Z");
+        candidate.putObject("lookup_standing")
+                .put("state", "offline_saved_list")
+                .put("message", "You are using the last saved asset list.")
+                .put("offline", true)
+                .put("stale", false)
+                .put("incomplete", true)
+                .put("unavailable", false);
+        candidate.putObject("actor_session_provenance")
+                .put("actor_id", FIELD_ACTOR.toString())
+                .put("session", "local_actor_session");
+        candidate.putArray("assignment_scope_context")
+                .addObject()
+                .put("assignment_id", UUID.randomUUID().toString())
+                .put("role", "field_worker");
+        candidate.putObject("original_submitted_record_ref")
+                .put("type", "event")
+                .put("id", UUID.randomUUID().toString());
+
+        createConfiguredWorkRecord(
+                SUBJECT_IN_SCOPE, districtA, "stocktake_line/v1",
+                "stock_operations", payload);
+
+        String body = configuredWorkEvidenceBody(webAdminSession(REVIEWER));
+
+        assertThat(body)
+                .contains("Configured Work Evidence")
+                .contains("Candidate evidence")
+                .contains("Candidate asset")
+                .contains("Unknown pump")
+                .contains("Needs review before it can be used as a known asset.")
+                .contains("You are using the last saved asset list.")
+                .contains("2026-06-27T10:00:00Z")
+                .contains("Authenticated actor session recorded this candidate evidence.")
+                .contains("Assignment and scope context was preserved with this record.")
+                .contains("This configured work record contains the candidate evidence.")
+                .doesNotContain(FIELD_ACTOR.toString())
+                .doesNotContain(SUBJECT_IN_SCOPE.toString())
+                .doesNotContain("Approve")
+                .doesNotContain("Reject")
+                .doesNotContain("Promote")
+                .doesNotContain("official asset")
+                .doesNotContain("Create asset")
+                .doesNotContain("<form");
+    }
+
+    @Test
     void configuredWorkEvidenceDoesNotRenderRawJsonPayloadValues()
             throws Exception {
         ObjectNode schema = objectMapper.createObjectNode();
@@ -760,10 +820,7 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                                             String category, int quantity) {
         subjectLocationRepository.upsert(
                 subjectId, locationId, locationRepository.findPathById(locationId));
-        ObjectNode payload = objectMapper.createObjectNode();
-        payload.put("stocktake_date", "2026-06-23");
-        payload.put("stock_category", category);
-        payload.put("quantity", quantity);
+        ObjectNode payload = stocktakePayload(category, quantity);
 
         Event event = new Event(
                 UUID.randomUUID(),
@@ -779,6 +836,14 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 payload);
         assertThat(eventRepository.insert(event)).isTrue();
         return event;
+    }
+
+    private ObjectNode stocktakePayload(String category, int quantity) {
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("stocktake_date", "2026-06-23");
+        payload.put("stock_category", category);
+        payload.put("quantity", quantity);
+        return payload;
     }
 
     private Event createConfiguredWorkRecord(UUID subjectId,

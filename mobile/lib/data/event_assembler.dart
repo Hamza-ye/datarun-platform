@@ -1,4 +1,5 @@
 import 'package:datarun_mobile/domain/event.dart';
+import 'package:datarun_mobile/domain/field_asset_lookup.dart';
 import 'package:datarun_mobile/data/device_identity.dart';
 import 'package:datarun_mobile/data/event_store.dart';
 import 'package:uuid/uuid.dart';
@@ -28,10 +29,17 @@ class EventAssembler {
     }
 
     final sid = subjectId ?? _uuid.v4();
+    final eventId = _uuid.v4();
     final seq = await _identity.nextSeq();
+    final timestamp = DateTime.now().toUtc().toIso8601String();
+    final eventPayload = _withCandidateRecordReference(
+      payload,
+      eventId,
+      timestamp,
+    );
 
     final event = Event(
-      id: _uuid.v4(),
+      id: eventId,
       type: 'capture', // Phase 0: only type
       shapeRef: shapeRef,
       activityRef: activityRef,
@@ -40,11 +48,32 @@ class EventAssembler {
       deviceId: _identity.deviceId,
       deviceSeq: seq,
       syncWatermark: null, // Server-assigned
-      timestamp: DateTime.now().toUtc().toIso8601String(),
-      payload: payload,
+      timestamp: timestamp,
+      payload: eventPayload,
     );
 
     await _eventStore.insert(event);
     return event;
+  }
+
+  Map<String, dynamic> _withCandidateRecordReference(
+    Map<String, dynamic> payload,
+    String eventId,
+    String timestamp,
+  ) {
+    final evidence = payload[assetCandidateEvidenceKey];
+    if (evidence is! Map) {
+      return payload;
+    }
+
+    final copy = Map<String, dynamic>.from(payload);
+    final evidenceCopy = Map<String, dynamic>.from(evidence);
+    evidenceCopy.putIfAbsent('capture_timestamp', () => timestamp);
+    evidenceCopy.putIfAbsent(
+      'original_submitted_record_ref',
+      () => {'type': 'event', 'id': eventId},
+    );
+    copy[assetCandidateEvidenceKey] = evidenceCopy;
+    return copy;
   }
 }
