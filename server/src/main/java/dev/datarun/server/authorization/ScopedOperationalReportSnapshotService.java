@@ -271,13 +271,54 @@ public class ScopedOperationalReportSnapshotService {
         }
         String message = text(lookupStanding, "message", null);
         String state = text(lookupStanding, "state", null);
+        List<String> standingLabels = lookupStandingLabels(lookupStanding, state);
+        String standingText = standingLabels.isEmpty()
+                ? null
+                : " Lookup standing: " + String.join(", ", standingLabels) + ".";
         if (message != null && !message.isBlank()) {
-            return message;
+            return message + (standingText == null ? "" : standingText);
         }
         if (state == null || state.isBlank()) {
             return "Lookup standing was not recorded.";
         }
+        if (standingText != null) {
+            return "Lookup standing: " + String.join(", ", standingLabels) + ".";
+        }
         return displayName(state, "Lookup standing recorded");
+    }
+
+    private List<String> lookupStandingLabels(JsonNode lookupStanding, String state) {
+        List<String> labels = new ArrayList<>();
+        addLookupFlag(labels, lookupStanding, "offline", "offline");
+        addLookupFlag(labels, lookupStanding, "stale", "stale");
+        addLookupFlag(labels, lookupStanding, "incomplete", "incomplete");
+        addLookupFlag(labels, lookupStanding, "unavailable", "unavailable");
+        if (!labels.isEmpty() || state == null || state.isBlank()) {
+            return labels;
+        }
+
+        String normalized = state.toLowerCase(Locale.ROOT);
+        if (normalized.contains("offline")) {
+            labels.add("offline");
+        } else if (normalized.contains("stale")) {
+            labels.add("stale");
+        } else if (normalized.contains("incomplete")) {
+            labels.add("incomplete");
+        } else if (normalized.contains("unavailable")) {
+            labels.add("unavailable");
+        } else if (normalized.contains("current")
+                || normalized.startsWith("online")) {
+            labels.add("current");
+        }
+        return labels;
+    }
+
+    private void addLookupFlag(List<String> labels, JsonNode lookupStanding,
+                               String field, String label) {
+        if (lookupStanding.path(field).asBoolean(false)
+                && !labels.contains(label)) {
+            labels.add(label);
+        }
     }
 
     private String text(JsonNode node, String field, String fallback) {

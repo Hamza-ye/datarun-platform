@@ -6,6 +6,7 @@ import dev.datarun.server.AbstractIntegrationTest;
 import dev.datarun.server.authorization.ActorTokenRepository;
 import dev.datarun.server.authorization.AssignmentService;
 import dev.datarun.server.authorization.LocationRepository;
+import dev.datarun.server.authorization.ScopedOperationalReportSnapshotService;
 import dev.datarun.server.config.ConfigPackager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,9 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
 
     @Autowired
     private ActorTokenRepository actorTokenRepository;
+
+    @Autowired
+    private ScopedOperationalReportSnapshotService reportSnapshotService;
 
     @Autowired
     private TestRestTemplate rest;
@@ -209,6 +213,35 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
         assertThat(candidate.has("duplicate_resolution")).isFalse();
         assertThat(candidate.has("merge")).isFalse();
         assertThat(candidate.has("split")).isFalse();
+
+        ScopedOperationalReportSnapshotService.ConfiguredWorkEvidence reviewerEvidence =
+                reportSnapshotService.configuredWorkEvidence(REVIEWER, candidateEventId);
+        assertThat(reviewerEvidence.visible()).isTrue();
+        assertThat(reviewerEvidence.activityRef()).isEqualTo("field_asset_inspection");
+        assertThat(reviewerEvidence.shapeRef()).isEqualTo("asset_check/v1");
+        assertThat(reviewerEvidence.candidateEvidence()).isNotNull();
+        assertThat(reviewerEvidence.candidateEvidence().reviewLabel())
+                .isEqualTo("Candidate asset");
+        assertThat(reviewerEvidence.candidateEvidence().displayLabel())
+                .isEqualTo("Unknown pump");
+        assertThat(reviewerEvidence.candidateEvidence().standing())
+                .isEqualTo("Needs review before it can be used as a known asset.");
+        assertThat(reviewerEvidence.candidateEvidence().lookupStanding())
+                .contains("No matching assets in your assigned work.")
+                .contains("Lookup standing: incomplete.");
+        assertThat(reviewerEvidence.candidateEvidence().captureTimestamp())
+                .isNotEqualTo("Not recorded");
+        assertThat(reviewerEvidence.candidateEvidence().actorSessionProvenance())
+                .isEqualTo("Authenticated actor session recorded this candidate evidence.");
+        assertThat(reviewerEvidence.candidateEvidence().assignmentScopeContext())
+                .isEqualTo("Assignment and scope context was preserved with this record.");
+        assertThat(reviewerEvidence.candidateEvidence().originalRecordReference())
+                .isEqualTo("This configured work record contains the candidate evidence.");
+
+        ScopedOperationalReportSnapshotService.ConfiguredWorkEvidence outOfScopeEvidence =
+                reportSnapshotService.configuredWorkEvidence(
+                        OUT_OF_SCOPE_ACTOR, candidateEventId);
+        assertThat(outOfScopeEvidence.visible()).isFalse();
 
         ResponseEntity<JsonNode> candidateOutOfScopePull =
                 pullEvents(outOfScopeToken, candidateCursor, 100);
