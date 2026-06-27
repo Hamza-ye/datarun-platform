@@ -45,6 +45,7 @@ class ShapeDefinition {
   final int version;
   final String status; // active, deprecated
   final String sensitivity;
+  final String? subjectBinding;
   final List<ShapeField> fields;
   final ShapeUniqueness? uniqueness;
 
@@ -54,6 +55,7 @@ class ShapeDefinition {
     required this.version,
     required this.status,
     required this.sensitivity,
+    this.subjectBinding,
     required this.fields,
     this.uniqueness,
   });
@@ -75,6 +77,7 @@ class ShapeDefinition {
     version: json['version'] as int,
     status: json['status'] as String? ?? 'active',
     sensitivity: json['sensitivity'] as String? ?? 'standard',
+    subjectBinding: json['subject_binding'] as String?,
     fields:
         (json['fields'] as List?)
             ?.map((f) => ShapeField.fromJson(f as Map<String, dynamic>))

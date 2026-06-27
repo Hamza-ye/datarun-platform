@@ -141,6 +141,7 @@ public class SyncController {
                 }
             }
         });
+        applyCandidateEvidenceScope(acceptedEvents, authenticatedActorId);
 
         // --- Tx2: Conflict detection (separate transaction) ---
         // CD failure does not affect event persistence (C3 satisfied)
@@ -335,6 +336,39 @@ public class SyncController {
             }
         }
         return errors;
+    }
+
+    private void applyCandidateEvidenceScope(List<Event> acceptedEvents,
+                                             UUID authenticatedActorId) {
+        if (authenticatedActorId == null || acceptedEvents.isEmpty()) {
+            return;
+        }
+        List<ActiveAssignment> assignments =
+                scopeResolver.getActiveAssignments(authenticatedActorId);
+        if (assignments.isEmpty()) {
+            return;
+        }
+        for (Event event : acceptedEvents) {
+            if (!isFieldAssetCandidateFallbackEvent(event)
+                    || eventRepository.getLocationPath(event.id()) != null) {
+                continue;
+            }
+            assignments.stream()
+                    .filter(assignment -> assignment.geographicPath() != null)
+                    .filter(assignment -> assignment.containsActivity(event.activityRef()))
+                    .findFirst()
+                    .ifPresent(assignment -> eventRepository.setLocationPathIfAbsent(
+                            event.id(), assignment.geographicPath()));
+        }
+    }
+
+    private boolean isFieldAssetCandidateFallbackEvent(Event event) {
+        return event != null
+                && "capture".equals(event.type())
+                && event.subjectRef() != null
+                && "subject".equals(event.subjectRef().path("type").asText(null))
+                && shapePayloadValidator.isFieldAssetCandidateFallback(
+                        event.shapeRef(), event.payload());
     }
 
     private List<Event> findAuthorizedPullEvents(long sinceWatermark, int limit,

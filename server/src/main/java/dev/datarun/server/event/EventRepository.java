@@ -122,6 +122,23 @@ public class EventRepository {
     }
 
     /**
+     * Record the accepted write-time geographic scope for a persisted event
+     * when the scope comes from authenticated assignment context rather than a
+     * pre-existing subject_locations row.
+     */
+    public void setLocationPathIfAbsent(UUID eventId, String locationPath) {
+        if (eventId == null || locationPath == null || locationPath.isBlank()) {
+            return;
+        }
+        jdbc.update("""
+                UPDATE events
+                SET location_path = ?
+                WHERE id = ?::uuid
+                  AND location_path IS NULL
+                """, locationPath, eventId.toString());
+    }
+
+    /**
      * Check if a subject has events from devices OTHER than the given device
      * with sync_watermark strictly greater than the given horizon.
      * Used by ConflictDetector for concurrent_state_change detection.

@@ -33,6 +33,16 @@ public class ScopedOperationalReportSnapshotService {
             "No visible configured work evidence is available for this session.";
     static final String SENSITIVE_FIELD_VALUES_SUPPRESSED =
             "Configured field values are suppressed for this evidence.";
+    static final String CANDIDATE_EVIDENCE_KEY = "asset_candidate_evidence";
+    static final String CANDIDATE_ASSET_LABEL = "Candidate asset";
+    static final String CANDIDATE_ASSET_STANDING =
+            "Needs review before it can be used as a known asset.";
+    static final String CANDIDATE_ACTOR_SESSION_PROVENANCE =
+            "Authenticated actor session recorded this candidate evidence.";
+    static final String CANDIDATE_SCOPE_PROVENANCE =
+            "Assignment and scope context was preserved with this record.";
+    static final String CANDIDATE_ORIGINAL_RECORD =
+            "This configured work record contains the candidate evidence.";
 
     private final EventRepository eventRepository;
     private final ScopeResolver scopeResolver;
@@ -170,6 +180,7 @@ public class ScopedOperationalReportSnapshotService {
                         : List.of(),
                 canRenderFieldValues,
                 canRenderFieldValues ? null : SENSITIVE_FIELD_VALUES_SUPPRESSED,
+                candidateEvidence(work.event().payload()),
                 safeText(work.receivedAt() == null
                         ? null
                         : work.receivedAt().toString()),
@@ -227,6 +238,66 @@ public class ScopedOperationalReportSnapshotService {
                             payloadValueText(payload.get(name), field));
                 })
                 .toList();
+    }
+
+    private CandidateEvidence candidateEvidence(JsonNode payload) {
+        if (payload == null || !payload.isObject()) {
+            return null;
+        }
+        JsonNode evidence = payload.get(CANDIDATE_EVIDENCE_KEY);
+        if (evidence == null || !evidence.isObject()) {
+            return null;
+        }
+        return new CandidateEvidence(
+                safeText(text(evidence, "review_label", CANDIDATE_ASSET_LABEL)),
+                safeText(text(evidence, "display_label", "Unlabeled candidate asset")),
+                safeText(text(evidence, "candidate_standing", CANDIDATE_ASSET_STANDING)),
+                lookupStandingText(evidence.path("lookup_standing")),
+                safeText(text(evidence, "capture_timestamp", null)),
+                hasObject(evidence, "actor_session_provenance")
+                        ? CANDIDATE_ACTOR_SESSION_PROVENANCE
+                        : "Actor session provenance was not recorded.",
+                hasArray(evidence, "assignment_scope_context")
+                        ? CANDIDATE_SCOPE_PROVENANCE
+                        : "Assignment or scope context was not recorded.",
+                hasObject(evidence, "original_submitted_record_ref")
+                        ? CANDIDATE_ORIGINAL_RECORD
+                        : "Original submitted record reference was not recorded.");
+    }
+
+    private String lookupStandingText(JsonNode lookupStanding) {
+        if (lookupStanding == null || !lookupStanding.isObject()) {
+            return "Lookup standing was not recorded.";
+        }
+        String message = text(lookupStanding, "message", null);
+        String state = text(lookupStanding, "state", null);
+        if (message != null && !message.isBlank()) {
+            return message;
+        }
+        if (state == null || state.isBlank()) {
+            return "Lookup standing was not recorded.";
+        }
+        return displayName(state, "Lookup standing recorded");
+    }
+
+    private String text(JsonNode node, String field, String fallback) {
+        JsonNode value = node == null ? null : node.get(field);
+        if (value == null || value.isMissingNode() || value.isNull()
+                || !value.isValueNode()) {
+            return fallback;
+        }
+        String text = value.asText();
+        return text == null || text.isBlank() ? fallback : text;
+    }
+
+    private boolean hasObject(JsonNode node, String field) {
+        JsonNode value = node == null ? null : node.get(field);
+        return value != null && value.isObject();
+    }
+
+    private boolean hasArray(JsonNode node, String field) {
+        JsonNode value = node == null ? null : node.get(field);
+        return value != null && value.isArray() && !value.isEmpty();
     }
 
     private Optional<Shape> configuredShape(String shapeRef) {
@@ -458,13 +529,14 @@ public class ScopedOperationalReportSnapshotService {
             List<ConfiguredWorkFieldValue> fieldValues,
             boolean fieldValuesVisible,
             String fieldValuesSuppressedText,
+            CandidateEvidence candidateEvidence,
             String latestSyncedReceived,
             String visibilityText
     ) {
         static ConfiguredWorkEvidence notVisible(String emptyText) {
             return new ConfiguredWorkEvidence(
                     false, emptyText, null, null, null, null, List.of(),
-                    false, null, null, null);
+                    false, null, null, null, null);
         }
 
         static ConfiguredWorkEvidence visible(
@@ -475,12 +547,13 @@ public class ScopedOperationalReportSnapshotService {
                 List<ConfiguredWorkFieldValue> fieldValues,
                 boolean fieldValuesVisible,
                 String fieldValuesSuppressedText,
+                CandidateEvidence candidateEvidence,
                 String latestSyncedReceived,
                 String visibilityText) {
             return new ConfiguredWorkEvidence(
                     true, null, activity, activityRef, recordType, shapeRef,
                     fieldValues, fieldValuesVisible, fieldValuesSuppressedText,
-                    latestSyncedReceived, visibilityText);
+                    candidateEvidence, latestSyncedReceived, visibilityText);
         }
 
         public boolean hasFieldValues() {
@@ -490,11 +563,26 @@ public class ScopedOperationalReportSnapshotService {
         public boolean hasSuppressedFieldValues() {
             return fieldValuesSuppressedText != null;
         }
+
+        public boolean hasCandidateEvidence() {
+            return candidateEvidence != null;
+        }
     }
 
     public record ConfiguredWorkFieldValue(
             String label,
             String value
+    ) {}
+
+    public record CandidateEvidence(
+            String reviewLabel,
+            String displayLabel,
+            String standing,
+            String lookupStanding,
+            String captureTimestamp,
+            String actorSessionProvenance,
+            String assignmentScopeContext,
+            String originalRecordReference
     ) {}
 
     public record TraceContext(

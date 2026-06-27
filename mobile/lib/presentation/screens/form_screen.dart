@@ -4,6 +4,7 @@ import 'package:datarun_mobile/presentation/app_state.dart';
 import 'package:datarun_mobile/domain/activity_role_actions.dart';
 import 'package:datarun_mobile/domain/shape.dart';
 import 'package:datarun_mobile/domain/expression_evaluator.dart';
+import 'package:datarun_mobile/domain/field_asset_lookup.dart';
 import 'package:datarun_mobile/presentation/widgets/widget_mapper.dart';
 
 class CaptureSaveResult {
@@ -72,6 +73,10 @@ class _FormScreenState extends State<FormScreen> {
         _values[field.name] = field.type == 'multi_select' && value is List
             ? value.whereType<String>().toList()
             : value;
+      }
+      final candidateEvidence = widget.initialValues[assetCandidateEvidenceKey];
+      if (candidateEvidence != null) {
+        _values[assetCandidateEvidenceKey] = candidateEvidence;
       }
     }
     _context
@@ -257,7 +262,11 @@ class _FormScreenState extends State<FormScreen> {
                         ),
                       ),
                     ..._shape!.activeFields
-                        .where((field) => !_hiddenFields.contains(field.name))
+                        .where(
+                          (field) =>
+                              !_hiddenFields.contains(field.name) &&
+                              field.name != _shape!.subjectBinding,
+                        )
                         .map((field) {
                           return WidgetMapper.build(
                             field,
