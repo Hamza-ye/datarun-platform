@@ -52,8 +52,21 @@ Required:
 
 Pattern/projection mechanism check:
 
-- `docs/architecture/adrs-decisions-canonical-ledger/canonical-decision-ledger.md`
-  only CDL-047, CDL-049, CDL-050, and CDL-055 unless a stop condition fires
+Required CDL authority slices:
+
+- CDL-005: mechanisms and instances are classified separately
+- CDL-016 and CDL-017: references and `subject_ref` contract
+- CDL-022 through CDL-027: duplicate identity, merge, split, lineage,
+  online-only identity operations
+- CDL-030 through CDL-035: assignment-based access, sync scope, authority
+  projection, original subject scope, containment, stale authorization
+- CDL-038 through CDL-050: configuration gradient, shapes, packages, server
+  policy, pattern registry, pattern composition
+- CDL-055 and CDL-056: scope mechanism/config split and activity as deployer
+  configuration
+
+Do not read the full CDL unless a stop condition fires.
+
 - `contracts/pattern-definition.schema.json`
 - `contracts/patterns/`
 
@@ -154,6 +167,23 @@ At minimum classify:
 - cross-version reporting/comparability;
 - offline stale known-thing behavior.
 
+## Authority Boundary Map
+
+The output must state, for each major lifecycle pressure, which authority
+surface controls it:
+
+- CDL / architecture authority
+- contract/schema authority
+- accepted platform spec
+- accepted product spec
+- current implementation evidence
+- planning evidence only
+- owner/product evidence only
+- unresolved decision gap
+
+This map must make clear that product/backlog/status docs are evidence unless
+they are accepted durable specs or explicitly route to authority.
+
 ## Output
 
 Create exactly one bounded output, choosing the correct durable home:
@@ -176,6 +206,7 @@ The output must include:
 - source evidence used;
 - accepted current evidence preserved;
 - the decision/classification table;
+- authority boundary map;
 - first implementable slice or explicit park decision;
 - required product/platform spec route, if any;
 - successor route, if any;
