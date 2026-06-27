@@ -465,6 +465,78 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void selectedFieldAssetDoesNotUseCandidateFallbackScopeStamping() {
+        publishFieldAssetConfig();
+        UUID selectedAsset = UUID.randomUUID();
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                districtX, List.of(selectedAsset), List.of("field_asset_inspection"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        UUID selectedEvent = UUID.randomUUID();
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("field_asset", selectedAsset.toString());
+        payload.put("name", "Selected pump");
+
+        ResponseEntity<JsonNode> response = pushConfiguredEventAs(
+                tokenA, ACTOR_A, selectedAsset, selectedEvent,
+                "asset_check/v1", "field_asset_inspection", payload);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(eventLocationPath(selectedEvent)).isNull();
+        assertThat(eventSubjectId(selectedEvent)).isEqualTo(selectedAsset.toString());
+        assertThat(eventPayloadText(selectedEvent, "field_asset"))
+                .isEqualTo(selectedAsset.toString());
+    }
+
+    @Test
+    void assetCandidateEvidenceDoesNotBypassUnrelatedSubjectBindingValidation() {
+        publishSubjectBoundConfig(
+                "facility_check", "facility", "facility_inspection");
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                districtX, null, List.of("facility_inspection"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        UUID eventId = UUID.randomUUID();
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("name", "Facility candidate note");
+        payload.put("asset_candidate_evidence",
+                candidateEvidence(eventId, "Unknown facility", "online_empty"));
+
+        ResponseEntity<JsonNode> response = pushConfiguredEventAs(
+                tokenA, ACTOR_A, UUID.randomUUID(), eventId,
+                "facility_check/v1", "facility_inspection", payload);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().path("error").asText())
+                .isEqualTo("shape_validation_failed");
+        assertThat(response.getBody().toString())
+                .contains("Required field 'facility' is missing");
+        assertThat(eventCount(eventId)).isZero();
+    }
+
+    @Test
+    void assetCandidateEvidenceOnUnrelatedConfiguredShapeDoesNotReceiveFallbackLocationScope() {
+        publishGenericCandidateCarrierConfig(
+                "asset_note", "asset_note_activity");
+        assignmentService.createAssignment(ADMIN, ACTOR_A, "field_worker",
+                districtX, null, List.of("asset_note_activity"),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(1), null);
+
+        UUID eventId = UUID.randomUUID();
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("name", "Candidate-key note");
+        payload.put("asset_candidate_evidence",
+                candidateEvidence(eventId, "Generic asset mention", "online_empty"));
+
+        ResponseEntity<JsonNode> response = pushConfiguredEventAs(
+                tokenA, ACTOR_A, UUID.randomUUID(), eventId,
+                "asset_note/v1", "asset_note_activity", payload);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(eventLocationPath(eventId)).isNull();
+    }
+
+    @Test
     void scopeAxesComposeAndWithinAssignmentOrAcrossAssignments() {
         UUID subjectA = UUID.randomUUID();
         UUID subjectB = UUID.randomUUID();
@@ -520,6 +592,43 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
                 .isEmpty();
     }
 
+    private void publishSubjectBoundConfig(String shapeName, String bindingName,
+                                           String activityRef) {
+        ObjectNode schema = objectMapper.createObjectNode();
+        schema.put("subject_binding", bindingName);
+        schema.putNull("uniqueness");
+        ArrayNode fields = schema.putArray("fields");
+        addField(fields, bindingName, "subject_ref", true);
+        addField(fields, "name", "text", true);
+        assertThat(shapeService.createShape(shapeName, "standard", schema))
+                .isEmpty();
+
+        ObjectNode activityConfig = objectMapper.createObjectNode();
+        activityConfig.putArray("shapes").add(shapeName + "/v1");
+        activityConfig.putObject("roles").putArray("field_worker").add("capture");
+        assertThat(activityService.createActivity(
+                activityRef, "standard", activityConfig))
+                .isEmpty();
+    }
+
+    private void publishGenericCandidateCarrierConfig(String shapeName,
+                                                      String activityRef) {
+        ObjectNode schema = objectMapper.createObjectNode();
+        schema.putNull("subject_binding");
+        schema.putNull("uniqueness");
+        ArrayNode fields = schema.putArray("fields");
+        addField(fields, "name", "text", true);
+        assertThat(shapeService.createShape(shapeName, "standard", schema))
+                .isEmpty();
+
+        ObjectNode activityConfig = objectMapper.createObjectNode();
+        activityConfig.putArray("shapes").add(shapeName + "/v1");
+        activityConfig.putObject("roles").putArray("field_worker").add("capture");
+        assertThat(activityService.createActivity(
+                activityRef, "standard", activityConfig))
+                .isEmpty();
+    }
+
     private void addField(ArrayNode fields, String name, String type, boolean required) {
         ObjectNode field = fields.addObject();
         field.put("name", name);
@@ -543,6 +652,20 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
                                           UUID subjectId, String label,
                                           String lookupStanding) {
         UUID eventId = UUID.randomUUID();
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("name", "Candidate evidence record");
+        payload.put("asset_candidate_evidence",
+                candidateEvidence(eventId, label, lookupStanding));
+
+        ResponseEntity<JsonNode> response = pushConfiguredEventAs(
+                token, actorId, subjectId, eventId,
+                "asset_check/v1", "field_asset_inspection", payload);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return eventId;
+    }
+
+    private Map<String, Object> candidateEvidence(UUID eventId, String label,
+                                                  String lookupStanding) {
         Map<String, Object> evidence = new LinkedHashMap<>();
         evidence.put("standing", "candidate");
         evidence.put("review_label", "Candidate asset");
@@ -569,15 +692,17 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
         evidence.put("original_submitted_record_ref", Map.of(
                 "type", "event",
                 "id", eventId.toString()));
+        return evidence;
+    }
 
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("name", "Candidate evidence record");
-        payload.put("asset_candidate_evidence", evidence);
+    private ResponseEntity<JsonNode> pushConfiguredEventAs(
+            String token, UUID actorId, UUID subjectId, UUID eventId,
+            String shapeRef, String activityRef, Map<String, Object> payload) {
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("id", eventId.toString());
         event.put("type", "capture");
-        event.put("shape_ref", "asset_check/v1");
-        event.put("activity_ref", "field_asset_inspection");
+        event.put("shape_ref", shapeRef);
+        event.put("activity_ref", activityRef);
         event.put("subject_ref", Map.of("type", "subject", "id", subjectId.toString()));
         event.put("actor_ref", Map.of("type", "actor", "id", actorId.toString()));
         event.put("device_id", DEVICE_A.toString());
@@ -590,10 +715,8 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        ResponseEntity<JsonNode> response = rest.exchange("/api/sync/push",
+        return rest.exchange("/api/sync/push",
                 HttpMethod.POST, new HttpEntity<>(request, headers), JsonNode.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return eventId;
     }
 
     private UUID pushCaptureEvent(UUID subjectId, String activityRef,
@@ -663,6 +786,29 @@ class ScopeFilteredSyncIntegrationTest extends AbstractIntegrationTest {
                 "SELECT location_path FROM events WHERE id = ?::uuid",
                 String.class,
                 eventId.toString());
+    }
+
+    private String eventSubjectId(UUID eventId) {
+        return jdbc.queryForObject(
+                "SELECT subject_ref->>'id' FROM events WHERE id = ?::uuid",
+                String.class,
+                eventId.toString());
+    }
+
+    private String eventPayloadText(UUID eventId, String fieldName) {
+        return jdbc.queryForObject(
+                "SELECT payload ->> ? FROM events WHERE id = ?::uuid",
+                String.class,
+                fieldName,
+                eventId.toString());
+    }
+
+    private int eventCount(UUID eventId) {
+        Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM events WHERE id = ?::uuid",
+                Integer.class,
+                eventId.toString());
+        return count == null ? 0 : count;
     }
 
     private List<String> extractCaptureSubjectActivityKeys(JsonNode events) {

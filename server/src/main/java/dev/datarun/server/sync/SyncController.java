@@ -35,7 +35,6 @@ import java.util.UUID;
 public class SyncController {
 
     private static final Logger log = LoggerFactory.getLogger(SyncController.class);
-    private static final String CANDIDATE_EVIDENCE_KEY = "asset_candidate_evidence";
 
     private final EventRepository eventRepository;
     private final EnvelopeValidator envelopeValidator;
@@ -350,7 +349,7 @@ public class SyncController {
             return;
         }
         for (Event event : acceptedEvents) {
-            if (!isCandidateEvidenceEvent(event)
+            if (!isFieldAssetCandidateFallbackEvent(event)
                     || eventRepository.getLocationPath(event.id()) != null) {
                 continue;
             }
@@ -363,13 +362,13 @@ public class SyncController {
         }
     }
 
-    private boolean isCandidateEvidenceEvent(Event event) {
+    private boolean isFieldAssetCandidateFallbackEvent(Event event) {
         return event != null
-                && event.payload() != null
-                && event.payload().has(CANDIDATE_EVIDENCE_KEY)
-                && event.payload().get(CANDIDATE_EVIDENCE_KEY).isObject()
+                && "capture".equals(event.type())
                 && event.subjectRef() != null
-                && "subject".equals(event.subjectRef().path("type").asText(null));
+                && "subject".equals(event.subjectRef().path("type").asText(null))
+                && shapePayloadValidator.isFieldAssetCandidateFallback(
+                        event.shapeRef(), event.payload());
     }
 
     private List<Event> findAuthorizedPullEvents(long sinceWatermark, int limit,

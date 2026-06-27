@@ -14,6 +14,7 @@ import java.util.*;
 @Component
 public class ShapePayloadValidator {
     private static final String CANDIDATE_EVIDENCE_KEY = "asset_candidate_evidence";
+    private static final String FIELD_ASSET_BINDING = "field_asset";
 
     private final ShapeRepository shapeRepository;
     private final PlatformPayloadContractValidator platformPayloadContractValidator;
@@ -49,6 +50,8 @@ public class ShapePayloadValidator {
         if (fieldsNode == null || !fieldsNode.isArray()) return List.of();
 
         List<String> violations = new ArrayList<>();
+        boolean fieldAssetCandidateFallback =
+                isFieldAssetCandidateFallback(shape.schemaJson(), payload);
 
         // Build field definitions map
         Map<String, JsonNode> fieldDefs = new LinkedHashMap<>();
@@ -66,7 +69,8 @@ public class ShapePayloadValidator {
 
             if (required && !deprecated) {
                 if ((!payload.has(fieldName) || payload.get(fieldName).isNull())
-                        && !isCandidateFallbackForSubjectBinding(shape.schemaJson(), fieldName, payload)) {
+                        && !(FIELD_ASSET_BINDING.equals(fieldName)
+                                && fieldAssetCandidateFallback)) {
                     violations.add("Required field '" + fieldName + "' is missing");
                 }
             }
@@ -93,6 +97,26 @@ public class ShapePayloadValidator {
         }
 
         return violations;
+    }
+
+    /**
+     * NW-173's failed lookup path carries candidate evidence on a generated
+     * submitted-record subject, but only for the configured field_asset binding.
+     */
+    public boolean isFieldAssetCandidateFallback(String shapeRef, JsonNode payload) {
+        if (shapeRef == null || payload == null) return false;
+        if (platformPayloadContractValidator.isPlatformPayloadShape(shapeRef)) {
+            return false;
+        }
+
+        String[] parsed = ShapeService.parseShapeRef(shapeRef);
+        if (parsed == null) return false;
+
+        Optional<Shape> shapeOpt = shapeRepository.findByNameAndVersion(
+                parsed[0], Integer.parseInt(parsed[1]));
+        return shapeOpt
+                .map(shape -> isFieldAssetCandidateFallback(shape.schemaJson(), payload))
+                .orElse(false);
     }
 
     private String validateFieldType(String fieldName, JsonNode value, String expectedType, JsonNode fieldDef) {
@@ -161,13 +185,31 @@ public class ShapePayloadValidator {
         };
     }
 
-    private boolean isCandidateFallbackForSubjectBinding(
-            JsonNode schemaJson, String fieldName, JsonNode payload) {
+    private boolean isFieldAssetCandidateFallback(JsonNode schemaJson, JsonNode payload) {
         JsonNode binding = schemaJson == null ? null : schemaJson.get("subject_binding");
-        return binding != null
-                && binding.isTextual()
-                && fieldName.equals(binding.asText())
-                && payload.has(CANDIDATE_EVIDENCE_KEY)
-                && payload.get(CANDIDATE_EVIDENCE_KEY).isObject();
+        if (binding == null
+                || !binding.isTextual()
+                || !FIELD_ASSET_BINDING.equals(binding.asText())) {
+            return false;
+        }
+        if (payload == null
+                || payload.has(FIELD_ASSET_BINDING)
+                || !payload.has(CANDIDATE_EVIDENCE_KEY)
+                || !payload.get(CANDIDATE_EVIDENCE_KEY).isObject()) {
+            return false;
+        }
+
+        JsonNode fields = schemaJson.get("fields");
+        if (fields == null || !fields.isArray()) {
+            return false;
+        }
+        for (JsonNode field : fields) {
+            if (FIELD_ASSET_BINDING.equals(field.path("name").asText(null))) {
+                return "subject_ref".equals(field.path("type").asText(null))
+                        && field.path("required").asBoolean(false)
+                        && !field.path("deprecated").asBoolean(false);
+            }
+        }
+        return false;
     }
 }
