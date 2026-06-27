@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "source": "NW-174:field-asset-setup-owner-bootstrap",
+  "target_actor_id": "17400000-0000-4000-8000-000000000010",
+  "role": "setup_owner",
+  "geographic_id": "17400000-0000-4000-8000-000000000101",
+  "subject_list": null,
+  "activity_list": [
+    "field_asset_inspection"
+  ],
+  "valid_from": "2026-06-27T00:00:00Z",
+  "valid_to": null
+}
