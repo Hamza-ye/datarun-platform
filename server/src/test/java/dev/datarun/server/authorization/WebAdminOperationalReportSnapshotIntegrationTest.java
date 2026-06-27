@@ -63,6 +63,7 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
     @Autowired private ServerIdentity serverIdentity;
     @Autowired private ShapeService shapeService;
     @Autowired private ActivityService activityService;
+    @Autowired private ScopedOperationalReportSnapshotService reportSnapshotService;
 
     private UUID region;
     private UUID districtA;
@@ -234,34 +235,109 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                 null, List.of("field_asset_inspection"), past(), null);
         configureReportCommandsForActors(List.of(REVIEWER, OUT_OF_SCOPE_REVIEWER));
 
+        ObjectNode knownAssetPayload = objectMapper.createObjectNode();
+        knownAssetPayload.put("field_asset", SUBJECT_IN_SCOPE.toString());
+        knownAssetPayload.put("name", "Known pump");
+        createConfiguredWorkRecord(
+                SUBJECT_IN_SCOPE, districtA, "asset_check/v1",
+                "field_asset_inspection", knownAssetPayload);
+
         UUID generatedCandidateSubject = UUID.randomUUID();
         UUID candidateEvent = pushFieldAssetCandidateEvidence(
                 actorTokenRepository.createToken(FIELD_ACTOR),
                 generatedCandidateSubject);
         assertThat(eventRepository.getLocationPath(candidateEvent))
                 .isEqualTo(locationRepository.findPathById(districtA));
+        assertThat(eventPayloadHasKey(candidateEvent, "field_asset")).isFalse();
+        assertThat(knownFieldAssetBindings())
+                .contains(SUBJECT_IN_SCOPE.toString())
+                .doesNotContain(generatedCandidateSubject.toString());
 
-        String body = configuredWorkEvidenceBody(webAdminSession(REVIEWER));
+        ScopedOperationalReportSnapshotService.ConfiguredWorkEvidence directEvidence =
+                reportSnapshotService.configuredWorkEvidence(REVIEWER, candidateEvent);
+        assertThat(directEvidence.visible()).isTrue();
+        assertThat(directEvidence.activityRef()).isEqualTo("field_asset_inspection");
+        assertThat(directEvidence.shapeRef()).isEqualTo("asset_check/v1");
+        assertThat(directEvidence.candidateEvidence()).isNotNull();
+        assertThat(directEvidence.candidateEvidence().reviewLabel())
+                .isEqualTo("Candidate asset");
+        assertThat(directEvidence.candidateEvidence().displayLabel())
+                .isEqualTo("Unknown pump");
+        assertThat(directEvidence.candidateEvidence().standing())
+                .isEqualTo("Needs review before it can be used as a known asset.");
+        assertThat(directEvidence.candidateEvidence().lookupStanding())
+                .contains("You are using the last saved asset list.")
+                .contains("Lookup standing: offline, incomplete.");
+
+        ScopedOperationalReportSnapshotService.ConfiguredWorkEvidence outOfScopeDirect =
+                reportSnapshotService.configuredWorkEvidence(
+                        OUT_OF_SCOPE_REVIEWER, candidateEvent);
+        assertThat(outOfScopeDirect.visible()).isFalse();
+
+        MockHttpSession reviewerSession = webAdminSession(REVIEWER);
+        String report = mvc.perform(get("/web-admin/operational/report")
+                        .session(reviewerSession))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String evidencePath = configuredWorkEvidencePath(report);
+
+        String body = mvc.perform(get(evidencePath).session(reviewerSession))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
         assertThat(body)
                 .contains("Configured Work Evidence")
+                .contains("Activity")
+                .contains("Field Asset Inspection")
+                .contains("field_asset_inspection")
+                .contains("Record type")
+                .contains("Asset Check")
+                .contains("asset_check/v1")
                 .contains("Candidate evidence")
                 .contains("Candidate asset")
                 .contains("Unknown pump")
+                .contains("Standing")
                 .contains("Needs review before it can be used as a known asset.")
+                .contains("Lookup standing")
                 .contains("You are using the last saved asset list.")
+                .contains("Lookup standing: offline, incomplete.")
+                .contains("Capture time")
                 .contains("2026-06-27T10:00:00Z")
+                .contains("Actor/session provenance")
                 .contains("Authenticated actor session recorded this candidate evidence.")
+                .contains("Assignment/scope context")
                 .contains("Assignment and scope context was preserved with this record.")
+                .contains("Original submitted record")
                 .contains("This configured work record contains the candidate evidence.")
                 .doesNotContain(FIELD_ACTOR.toString())
                 .doesNotContain(SUBJECT_IN_SCOPE.toString())
-                .doesNotContain("Approve")
-                .doesNotContain("Reject")
-                .doesNotContain("Promote")
                 .doesNotContain("official asset")
-                .doesNotContain("Create asset")
                 .doesNotContain("<form");
+        assertThat(body.toLowerCase(java.util.Locale.ROOT))
+                .doesNotContain("approve")
+                .doesNotContain("reject")
+                .doesNotContain("promote")
+                .doesNotContain("create official asset")
+                .doesNotContain("create asset")
+                .doesNotContain("lifecycle")
+                .doesNotContain("duplicate")
+                .doesNotContain("merge")
+                .doesNotContain("split");
+
+        String copiedTokenBody = mvc.perform(get(evidencePath)
+                        .session(webAdminSession(OUT_OF_SCOPE_REVIEWER)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(copiedTokenBody)
+                .contains("No visible configured work evidence is available for this session.")
+                .doesNotContain("Unknown pump")
+                .doesNotContain("Candidate asset");
 
         String outOfScope = mvc.perform(get("/web-admin/operational/report")
                         .session(webAdminSession(OUT_OF_SCOPE_REVIEWER)))
@@ -951,6 +1027,24 @@ class WebAdminOperationalReportSnapshotIntegrationTest extends AbstractIntegrati
                         .content(request.toString()))
                 .andExpect(status().isOk());
         return eventId;
+    }
+
+    private boolean eventPayloadHasKey(UUID eventId, String fieldName) {
+        Boolean hasKey = jdbcTemplate.queryForObject(
+                "SELECT jsonb_exists(payload, ?) FROM events WHERE id = ?::uuid",
+                Boolean.class,
+                fieldName,
+                eventId.toString());
+        return Boolean.TRUE.equals(hasKey);
+    }
+
+    private List<String> knownFieldAssetBindings() {
+        return jdbcTemplate.queryForList("""
+                SELECT DISTINCT payload->>'field_asset'
+                FROM events
+                WHERE payload ? 'field_asset'
+                ORDER BY payload->>'field_asset'
+                """, String.class);
     }
 
     private Event createAttentionFlag(Event source, String category, UUID resolverId) {
