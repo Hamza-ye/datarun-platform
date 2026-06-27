@@ -18,12 +18,12 @@ docker compose -f deploy/reference/compose.yaml run --rm --no-deps server \
   --datarun.ops.evidence-id=CHANGE_OR_EVIDENCE_ID
 ```
 
-`COMMAND` is exactly `principal-bindings`, `config-publish`, or
-`assignment-bootstrap`. The input must be a non-empty, valid UTF-8 regular
-file at an absolute path, no larger than 10 MiB. The operator is an explicit
-operator-evidence UUID; it does not grant platform actor or assignment
-authority. The evidence identifier is 1-200 characters using letters, digits,
-`.`, `_`, `:`, `/`, or `-`.
+`COMMAND` is exactly `principal-bindings`, `config-publish`,
+`assignment-bootstrap`, or `field-assets-seed`. The input must be a non-empty,
+valid UTF-8 regular file at an absolute path, no larger than 10 MiB. The
+operator is an explicit operator-evidence UUID; it does not grant platform
+actor or assignment authority. The evidence identifier is 1-200 characters
+using letters, digits, `.`, `_`, `:`, `/`, or `-`.
 
 Success prints one JSON object and exits zero. Every success includes
 `command`, `status`, `operator_id`, `evidence_id`, and `input_sha256`.
@@ -152,3 +152,33 @@ arrays when non-null and cannot be empty; `valid_to`, when present, must be
 after `valid_from`. Exact reapplication returns the existing event ID.
 Any drift or any different prior assignment state fails. The command creates
 no general root authority, online API, direct SQL procedure, or rollback path.
+
+## Field Assets Seed
+
+This command is package-scoped to
+`deploy/reference/pilot-packages/field-assets/seeded-field-assets.synthetic.json`.
+It is for a small synthetic or owner-approved `field_asset` rehearsal set after
+the package `reviewed-config.json` and
+`assignment-bootstrap.setup-owner.json` have already succeeded.
+
+The command:
+
+- requires the active reviewed `asset_check/v1` shape with
+  `subject_binding = "field_asset"`;
+- requires the active `field_asset_inspection` activity to include
+  `asset_check/v1`;
+- creates or reuses the package geography;
+- creates or reuses exact `subject_locations` for the listed asset subjects;
+- creates or reuses the listed field, reviewer, and out-of-scope assignments
+  through existing setup-owner assignment authority; and
+- inserts or reuses append-only seed capture events using existing event
+  storage and shape payload validation.
+
+Exact reapplication reports reused counts. Any pre-existing location,
+subject-location, assignment, or seed event with different content fails the
+transaction instead of being updated.
+
+The command is not a registry import/export path, bulk loader, lifecycle
+transition, candidate promotion/rejection workflow, duplicate workflow,
+semantic location model, new scope model, or new `subject_ref` identity
+primitive.
