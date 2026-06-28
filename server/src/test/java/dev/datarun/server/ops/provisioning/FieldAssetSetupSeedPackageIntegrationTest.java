@@ -278,6 +278,30 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
                 .doesNotContain(candidateEventId.toString());
     }
 
+    @Test
+    void fieldAssetSeedRequiresSetupOwnerBootstrapBeforeMutating()
+            throws Exception {
+        JsonNode configPublish = provisioningService.execute(
+                "config-publish",
+                packageFile("reviewed-config.json"),
+                OPERATOR,
+                "NW-178-config-without-bootstrap");
+        assertThat(configPublish.path("published").asBoolean()).isTrue();
+
+        assertThatThrownBy(() -> provisioningService.execute(
+                "field-assets-seed",
+                packageFile("seeded-field-assets.synthetic.json"),
+                OPERATOR,
+                "NW-178-seed-without-bootstrap"))
+                .isInstanceOf(ProvisioningCommandException.class)
+                .hasMessageContaining("setup-owner bootstrap assignment");
+
+        assertThat(countLocations()).isZero();
+        assertThat(countSubjectLocations()).isZero();
+        assertThat(countAssignmentCreatedEvents()).isZero();
+        assertThat(countFieldAssetSeedEvents()).isZero();
+    }
+
     private String packageFile(String fileName) throws Exception {
         return Files.readString(Path.of(
                 "..",
@@ -488,6 +512,28 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
                     '17400000-0000-4000-8000-000000000012',
                     '17400000-0000-4000-8000-000000000013'
                   )
+                """, Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    private int countLocations() {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM locations", Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    private int countSubjectLocations() {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM subject_locations", Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    private int countAssignmentCreatedEvents() {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE type = 'assignment_changed'
+                  AND shape_ref = 'assignment_created/v1'
                 """, Integer.class);
         return count == null ? 0 : count;
     }

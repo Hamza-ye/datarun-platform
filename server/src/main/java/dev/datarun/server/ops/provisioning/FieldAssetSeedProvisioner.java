@@ -30,8 +30,11 @@ import java.util.UUID;
 public class FieldAssetSeedProvisioner {
 
     private static final long FIELD_ASSET_SEED_LOCK_ID = 0x4649454C44415354L;
+    private static final String INITIAL_BOOTSTRAP_ACTOR =
+            "system:assignment_bootstrap/initial";
     private static final UUID SETUP_ACTOR_ID =
             UUID.fromString("17400000-0000-4000-8000-000000000010");
+    private static final String SETUP_OWNER_ROLE = "setup_owner";
     private static final OffsetDateTime DEFAULT_VALID_FROM =
             OffsetDateTime.parse("2026-06-27T00:00:00Z");
     private static final String SHAPE_REF = "asset_check/v1";
@@ -87,6 +90,9 @@ public class FieldAssetSeedProvisioner {
         eventRepository.getJdbcTemplate()
                 .queryForList("SELECT pg_advisory_xact_lock(?)", FIELD_ASSET_SEED_LOCK_ID);
 
+        Geography geography = manifest.geography();
+        requireSetupOwnerBootstrap(geography);
+
         int locationsCreated = 0;
         int locationsReused = 0;
         int subjectLocationsCreated = 0;
@@ -96,7 +102,6 @@ public class FieldAssetSeedProvisioner {
         int seedEventsInserted = 0;
         int seedEventsReused = 0;
 
-        Geography geography = manifest.geography();
         String regionPath = "/" + geography.regionId();
         if (ensureLocation(geography.regionId(), geography.regionName(), null,
                 "region", regionPath)) {
@@ -312,6 +317,75 @@ public class FieldAssetSeedProvisioner {
             throw new ProvisioningCommandException(
                     "reviewed field asset activity is not active for asset_check/v1");
         }
+    }
+
+    private void requireSetupOwnerBootstrap(Geography geography) {
+        List<Event> candidates = eventRepository.findByType("assignment_changed")
+                .stream()
+                .filter(event -> "assignment_created/v1".equals(event.shapeRef()))
+                .filter(this::isSetupOwnerBootstrapRelated)
+                .toList();
+        List<Event> exactMatches = candidates.stream()
+                .filter(event -> matchesSetupOwnerBootstrap(
+                        event, geography.assignedLocationId()))
+                .toList();
+        if (exactMatches.size() == 1 && candidates.size() == 1) {
+            return;
+        }
+        if (candidates.isEmpty()) {
+            throw new ProvisioningCommandException(
+                    "field asset setup-owner bootstrap assignment is required before field-assets-seed");
+        }
+        throw new ProvisioningCommandException(
+                "field asset setup-owner bootstrap assignment drift");
+    }
+
+    private boolean isSetupOwnerBootstrapRelated(Event event) {
+        return INITIAL_BOOTSTRAP_ACTOR.equals(
+                event.actorRef().path("id").asText(null))
+                || SETUP_ACTOR_ID.toString().equals(
+                event.payload().path("target_actor").path("id").asText(null));
+    }
+
+    private boolean matchesSetupOwnerBootstrap(Event event, UUID assignedLocationId) {
+        try {
+            JsonNode payload = event.payload();
+            JsonNode scope = payload.path("scope");
+            return "actor".equals(event.actorRef().path("type").asText(null))
+                    && INITIAL_BOOTSTRAP_ACTOR.equals(
+                    event.actorRef().path("id").asText(null))
+                    && SETUP_ACTOR_ID.toString().equals(
+                    payload.path("target_actor").path("id").asText(null))
+                    && SETUP_OWNER_ROLE.equals(payload.path("role").asText(null))
+                    && Objects.equals(assignedLocationId,
+                    nullableUuid(scope.path("geographic")))
+                    && nullableUuidArray(scope.path("subject_list")) == null
+                    && Objects.equals(List.of(ACTIVITY_REF),
+                    nullableTextArray(scope.path("activity")))
+                    && sameTime(DEFAULT_VALID_FROM, payload.path("valid_from"))
+                    && sameNullableTime(null, payload.path("valid_to"))
+                    && !assignmentEnded(event);
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    private boolean assignmentEnded(Event assignmentCreated) {
+        JsonNode subjectRef = assignmentCreated.subjectRef();
+        String assignmentId = subjectRef == null
+                ? null
+                : subjectRef.path("id").asText(null);
+        if (assignmentId == null || assignmentId.isBlank()) {
+            return true;
+        }
+        Integer count = eventRepository.getJdbcTemplate().queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE type = 'assignment_changed'
+                  AND shape_ref = 'assignment_ended/v1'
+                  AND subject_ref->>'id' = ?
+                """, Integer.class, assignmentId);
+        return count != null && count > 0;
     }
 
     private boolean ensureLocation(UUID id, String name, UUID parentId,
