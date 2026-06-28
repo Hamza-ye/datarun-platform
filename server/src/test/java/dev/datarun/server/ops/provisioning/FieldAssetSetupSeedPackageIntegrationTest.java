@@ -2,9 +2,9 @@ package dev.datarun.server.ops.provisioning;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.datarun.server.AbstractIntegrationTest;
 import dev.datarun.server.authorization.ActorTokenRepository;
-import dev.datarun.server.authorization.AssignmentService;
 import dev.datarun.server.authorization.LocationRepository;
 import dev.datarun.server.authorization.ScopedOperationalReportSnapshotService;
 import dev.datarun.server.config.ConfigPackager;
@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest {
 
@@ -46,6 +47,10 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
             UUID.fromString("17400000-0000-4000-8000-000000000012");
     private static final UUID OUT_OF_SCOPE_ACTOR =
             UUID.fromString("17400000-0000-4000-8000-000000000013");
+    private static final UUID UNRELATED_BOOTSTRAP_TARGET =
+            UUID.fromString("17400000-0000-4000-8000-000000000088");
+    private static final UUID PACKAGE_GEOGRAPHY =
+            UUID.fromString("17400000-0000-4000-8000-000000000101");
     private static final UUID DEVICE =
             UUID.fromString("17400000-0000-4000-8000-000000000020");
 
@@ -59,9 +64,6 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
     private ObjectMapper objectMapper;
 
     @Autowired
-    private AssignmentService assignmentService;
-
-    @Autowired
     private LocationRepository locationRepository;
 
     @Autowired
@@ -73,7 +75,6 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
     @Autowired
     private TestRestTemplate rest;
 
-    private String setupToken;
     private String fieldToken;
     private String reviewerToken;
     private String outOfScopeToken;
@@ -94,7 +95,6 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
         jdbcTemplate.update("DELETE FROM device_sync_state");
         jdbcTemplate.update("DELETE FROM locations");
 
-        setupToken = actorTokenRepository.createToken(SETUP_ACTOR);
         fieldToken = actorTokenRepository.createToken(FIELD_ACTOR);
         reviewerToken = actorTokenRepository.createToken(REVIEWER);
         outOfScopeToken = actorTokenRepository.createToken(OUT_OF_SCOPE_ACTOR);
@@ -104,7 +104,6 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
     void fieldAssetSetupSeedPackageUsesExistingScopeAndSyncPaths()
             throws Exception {
         JsonNode seed = objectMapper.readTree(packageFile("seeded-field-assets.synthetic.json"));
-        createLocations(seed);
 
         JsonNode configPublish = provisioningService.execute(
                 "config-publish",
@@ -139,16 +138,52 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
         AssetSeed assigned = assets.get(0);
         AssetSeed hidden = assets.get(1);
 
-        assets.forEach(asset -> registerSubjectLocation(
-                asset.subjectId(), asset.locationId()));
-        createAssignmentFromSeed(seed.path("field_assignment"));
-        createAssignmentFromSeed(seed.path("review_assignment"));
-        createAssignmentFromSeed(seed.path("out_of_scope_assignment"));
-
         long seedCursor = latestWatermark();
-        for (AssetSeed asset : assets) {
-            pushFieldAssetSeedEvent(asset);
-        }
+        JsonNode seedApply = provisioningService.execute(
+                "field-assets-seed",
+                packageFile("seeded-field-assets.synthetic.json"),
+                OPERATOR,
+                "NW-178-seed");
+        assertThat(seedApply.path("locations_created").asInt()).isEqualTo(2);
+        assertThat(seedApply.path("locations_reused").asInt()).isZero();
+        assertThat(seedApply.path("subject_locations_created").asInt()).isEqualTo(2);
+        assertThat(seedApply.path("subject_locations_reused").asInt()).isZero();
+        assertThat(seedApply.path("assignments_created").asInt()).isEqualTo(3);
+        assertThat(seedApply.path("assignments_reused").asInt()).isZero();
+        assertThat(seedApply.path("seed_events_inserted").asInt()).isEqualTo(2);
+        assertThat(seedApply.path("seed_events_reused").asInt()).isZero();
+        assertThat(countFieldAssetSeedEvents()).isEqualTo(2);
+        assertThat(countFieldAssetProvisionedAssignments()).isEqualTo(3);
+
+        JsonNode exactReapply = provisioningService.execute(
+                "field-assets-seed",
+                packageFile("seeded-field-assets.synthetic.json"),
+                OPERATOR,
+                "NW-178-reapply");
+        assertThat(exactReapply.path("locations_created").asInt()).isZero();
+        assertThat(exactReapply.path("locations_reused").asInt()).isEqualTo(2);
+        assertThat(exactReapply.path("subject_locations_created").asInt()).isZero();
+        assertThat(exactReapply.path("subject_locations_reused").asInt()).isEqualTo(2);
+        assertThat(exactReapply.path("assignments_created").asInt()).isZero();
+        assertThat(exactReapply.path("assignments_reused").asInt()).isEqualTo(3);
+        assertThat(exactReapply.path("seed_events_inserted").asInt()).isZero();
+        assertThat(exactReapply.path("seed_events_reused").asInt()).isEqualTo(2);
+        assertThat(countFieldAssetSeedEvents()).isEqualTo(2);
+        assertThat(countFieldAssetProvisionedAssignments()).isEqualTo(3);
+
+        ObjectNode drift = (ObjectNode) objectMapper.readTree(
+                packageFile("seeded-field-assets.synthetic.json"));
+        ((ObjectNode) drift.path("assets").get(0))
+                .put("display_label", "Changed pilot pump");
+        assertThatThrownBy(() -> provisioningService.execute(
+                "field-assets-seed",
+                objectMapper.writeValueAsString(drift),
+                OPERATOR,
+                "NW-178-drift"))
+                .isInstanceOf(ProvisioningCommandException.class)
+                .hasMessageContaining("seed event drift");
+        assertThat(countFieldAssetSeedEvents()).isEqualTo(2);
+        assertThat(countFieldAssetProvisionedAssignments()).isEqualTo(3);
 
         ResponseEntity<JsonNode> fieldPull = pullEvents(fieldToken, seedCursor, 100);
         assertThat(fieldPull.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -249,6 +284,63 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
                 .doesNotContain(candidateEventId.toString());
     }
 
+    @Test
+    void fieldAssetSeedIgnoresInitialBootstrapForDifferentTargetActor()
+            throws Exception {
+        JsonNode configPublish = provisioningService.execute(
+                "config-publish",
+                packageFile("reviewed-config.json"),
+                OPERATOR,
+                "NW-178-config-unrelated-bootstrap");
+        assertThat(configPublish.path("published").asBoolean()).isTrue();
+
+        JsonNode bootstrap = provisioningService.execute(
+                "assignment-bootstrap",
+                packageFile("assignment-bootstrap.setup-owner.json"),
+                OPERATOR,
+                "NW-178-bootstrap-unrelated-bootstrap");
+        assertThat(bootstrap.path("created").asBoolean()).isTrue();
+
+        simulateUnrelatedInitialBootstrapAssignment();
+
+        JsonNode seedApply = provisioningService.execute(
+                "field-assets-seed",
+                packageFile("seeded-field-assets.synthetic.json"),
+                OPERATOR,
+                "NW-178-seed-unrelated-bootstrap");
+
+        assertThat(seedApply.path("locations_created").asInt()).isEqualTo(2);
+        assertThat(seedApply.path("subject_locations_created").asInt()).isEqualTo(2);
+        assertThat(seedApply.path("assignments_created").asInt()).isEqualTo(3);
+        assertThat(seedApply.path("seed_events_inserted").asInt()).isEqualTo(2);
+        assertThat(countFieldAssetSeedEvents()).isEqualTo(2);
+        assertThat(countFieldAssetProvisionedAssignments()).isEqualTo(3);
+    }
+
+    @Test
+    void fieldAssetSeedRequiresSetupOwnerBootstrapBeforeMutating()
+            throws Exception {
+        JsonNode configPublish = provisioningService.execute(
+                "config-publish",
+                packageFile("reviewed-config.json"),
+                OPERATOR,
+                "NW-178-config-without-bootstrap");
+        assertThat(configPublish.path("published").asBoolean()).isTrue();
+
+        assertThatThrownBy(() -> provisioningService.execute(
+                "field-assets-seed",
+                packageFile("seeded-field-assets.synthetic.json"),
+                OPERATOR,
+                "NW-178-seed-without-bootstrap"))
+                .isInstanceOf(ProvisioningCommandException.class)
+                .hasMessageContaining("setup-owner bootstrap assignment");
+
+        assertThat(countLocations()).isZero();
+        assertThat(countSubjectLocations()).isZero();
+        assertThat(countAssignmentCreatedEvents()).isZero();
+        assertThat(countFieldAssetSeedEvents()).isZero();
+    }
+
     private String packageFile(String fileName) throws Exception {
         return Files.readString(Path.of(
                 "..",
@@ -257,18 +349,6 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
                 "pilot-packages",
                 "field-assets",
                 fileName));
-    }
-
-    private void createLocations(JsonNode seed) {
-        JsonNode geography = seed.path("geography");
-        UUID regionId = UUID.fromString(geography.path("region_id").asText());
-        UUID districtId = UUID.fromString(
-                geography.path("assigned_location_id").asText());
-        locationRepository.insert(
-                regionId, geography.path("region_name").asText(), null, "region");
-        locationRepository.insert(
-                districtId, geography.path("assigned_location_name").asText(),
-                regionId, "district");
     }
 
     private List<AssetSeed> assetSeeds(JsonNode seed) {
@@ -281,38 +361,47 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
                 .toList();
     }
 
-    private void createAssignmentFromSeed(JsonNode assignment) {
-        assignmentService.createAssignment(
-                SETUP_ACTOR,
-                UUID.fromString(assignment.path("target_actor_id").asText()),
-                assignment.path("role").asText(),
-                nullableUuid(assignment.get("geographic_id")),
-                nullableUuidList(assignment.get("subject_list")),
-                nullableTextList(assignment.get("activity_list")),
-                OffsetDateTime.parse(assignment.path("valid_from").asText(
-                        "2026-06-27T00:00:00Z")),
-                nullableDateTime(assignment.get("valid_to")));
-    }
+    private void simulateUnrelatedInitialBootstrapAssignment() throws Exception {
+        UUID serverDeviceId = jdbcTemplate.queryForObject(
+                "SELECT device_id FROM server_identity LIMIT 1", UUID.class);
+        long seq = jdbcTemplate.queryForObject(
+                "SELECT nextval('server_device_seq')", Long.class);
 
-    private void registerSubjectLocation(UUID subjectId, UUID locationId) {
+        ObjectNode subjectRef = objectMapper.createObjectNode();
+        subjectRef.put("type", "assignment");
+        subjectRef.put("id", UUID.randomUUID().toString());
+
+        ObjectNode actorRef = objectMapper.createObjectNode();
+        actorRef.put("type", "actor");
+        actorRef.put("id", "system:assignment_bootstrap/initial");
+
+        ObjectNode payload = objectMapper.createObjectNode();
+        ObjectNode targetActor = payload.putObject("target_actor");
+        targetActor.put("type", "actor");
+        targetActor.put("id", UNRELATED_BOOTSTRAP_TARGET.toString());
+        payload.put("role", "setup_owner");
+
+        ObjectNode scope = payload.putObject("scope");
+        scope.put("geographic", PACKAGE_GEOGRAPHY.toString());
+        scope.putNull("subject_list");
+        scope.putArray("activity").add("field_asset_inspection");
+
+        payload.put("valid_from", "2026-06-27T00:00:00Z");
+        payload.putNull("valid_to");
+
         jdbcTemplate.update("""
-                INSERT INTO subject_locations (subject_id, location_id, path)
-                VALUES (?::uuid, ?::uuid, (SELECT path FROM locations WHERE id = ?::uuid))
-                ON CONFLICT (subject_id) DO UPDATE
-                SET location_id = EXCLUDED.location_id, path = EXCLUDED.path
-                """, subjectId.toString(), locationId.toString(), locationId.toString());
-    }
-
-    private void pushFieldAssetSeedEvent(AssetSeed asset) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("field_asset", asset.subjectId().toString());
-        payload.put("name", asset.displayLabel());
-        ResponseEntity<JsonNode> response = pushConfiguredEventAs(
-                setupToken, SETUP_ACTOR, asset.subjectId(), asset.seedEventId(),
-                "asset_check/v1", "field_asset_inspection", payload);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(eventLocationPath(asset.seedEventId()))
-                .isEqualTo(locationRepository.findPathById(asset.locationId()));
+                INSERT INTO events (id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                                    device_id, device_seq, timestamp, payload)
+                VALUES (?::uuid, 'assignment_changed', 'assignment_created/v1', NULL,
+                        ?::jsonb, ?::jsonb, ?::uuid, ?, ?::timestamptz, ?::jsonb)
+                """,
+                UUID.randomUUID().toString(),
+                objectMapper.writeValueAsString(subjectRef),
+                objectMapper.writeValueAsString(actorRef),
+                serverDeviceId.toString(),
+                seq,
+                "2026-06-27T00:00:00Z",
+                objectMapper.writeValueAsString(payload));
     }
 
     private UUID pushCandidateEvidenceEvent(UUID subjectId) {
@@ -481,34 +570,54 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
                 """, String.class));
     }
 
-    private UUID nullableUuid(JsonNode node) {
-        return node == null || node.isNull()
-                ? null
-                : UUID.fromString(node.asText());
+    private int countFieldAssetSeedEvents() {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE type = 'capture'
+                  AND shape_ref = 'asset_check/v1'
+                  AND activity_ref = 'field_asset_inspection'
+                  AND payload ? 'field_asset'
+                """, Integer.class);
+        return count == null ? 0 : count;
     }
 
-    private List<UUID> nullableUuidList(JsonNode node) {
-        if (node == null || node.isNull()) {
-            return null;
-        }
-        List<UUID> values = new ArrayList<>();
-        node.forEach(value -> values.add(UUID.fromString(value.asText())));
-        return values;
+    private int countFieldAssetProvisionedAssignments() {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE type = 'assignment_changed'
+                  AND shape_ref = 'assignment_created/v1'
+                  AND actor_ref->>'id' = ?
+                  AND payload->'target_actor'->>'id' IN (
+                    '17400000-0000-4000-8000-000000000011',
+                    '17400000-0000-4000-8000-000000000012',
+                    '17400000-0000-4000-8000-000000000013'
+                  )
+                """, Integer.class, SETUP_ACTOR.toString());
+        return count == null ? 0 : count;
     }
 
-    private List<String> nullableTextList(JsonNode node) {
-        if (node == null || node.isNull()) {
-            return null;
-        }
-        List<String> values = new ArrayList<>();
-        node.forEach(value -> values.add(value.asText()));
-        return values;
+    private int countLocations() {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM locations", Integer.class);
+        return count == null ? 0 : count;
     }
 
-    private OffsetDateTime nullableDateTime(JsonNode node) {
-        return node == null || node.isNull()
-                ? null
-                : OffsetDateTime.parse(node.asText());
+    private int countSubjectLocations() {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM subject_locations", Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    private int countAssignmentCreatedEvents() {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM events
+                WHERE type = 'assignment_changed'
+                  AND shape_ref = 'assignment_created/v1'
+                """, Integer.class);
+        return count == null ? 0 : count;
     }
 
     private record AssetSeed(

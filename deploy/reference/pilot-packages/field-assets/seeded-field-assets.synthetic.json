@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "source": "NW-174:field-asset-setup-seed-proof",
-  "seed_method": "existing subject_locations mapping plus normal sync capture events using asset_check/v1",
+  "source": "NW-178:field-asset-setup-provisioning",
+  "seed_method": "field-assets-seed one-shot command using existing subject_locations, assignment, and append-only event paths",
   "shape_ref": "asset_check/v1",
   "activity_ref": "field_asset_inspection",
   "geography": {

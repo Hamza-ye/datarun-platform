@@ -26,16 +26,19 @@ public class OneShotProvisioningService {
     private final PrincipalBindingManifestProvisioner principalBindingProvisioner;
     private final ReviewedConfigProvisioner reviewedConfigProvisioner;
     private final AssignmentService assignmentService;
+    private final FieldAssetSeedProvisioner fieldAssetSeedProvisioner;
 
     public OneShotProvisioningService(
             ObjectMapper objectMapper,
             PrincipalBindingManifestProvisioner principalBindingProvisioner,
             ReviewedConfigProvisioner reviewedConfigProvisioner,
-            AssignmentService assignmentService) {
+            AssignmentService assignmentService,
+            FieldAssetSeedProvisioner fieldAssetSeedProvisioner) {
         this.objectMapper = objectMapper;
         this.principalBindingProvisioner = principalBindingProvisioner;
         this.reviewedConfigProvisioner = reviewedConfigProvisioner;
         this.assignmentService = assignmentService;
+        this.fieldAssetSeedProvisioner = fieldAssetSeedProvisioner;
     }
 
     public ObjectNode execute(
@@ -89,6 +92,17 @@ public class OneShotProvisioningService {
                         input.validFrom(), input.validTo());
                 result.put("assignment_event_id", bootstrap.eventId().toString());
                 result.put("created", bootstrap.created());
+            }
+            case "field-assets-seed" -> {
+                var applied = fieldAssetSeedProvisioner.apply(inputJson);
+                result.put("locations_created", applied.locationsCreated());
+                result.put("locations_reused", applied.locationsReused());
+                result.put("subject_locations_created", applied.subjectLocationsCreated());
+                result.put("subject_locations_reused", applied.subjectLocationsReused());
+                result.put("assignments_created", applied.assignmentsCreated());
+                result.put("assignments_reused", applied.assignmentsReused());
+                result.put("seed_events_inserted", applied.seedEventsInserted());
+                result.put("seed_events_reused", applied.seedEventsReused());
             }
             default -> throw new ProvisioningCommandException(
                     "unsupported provisioning command");
