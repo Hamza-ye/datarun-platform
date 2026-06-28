@@ -323,7 +323,8 @@ public class FieldAssetSeedProvisioner {
         List<Event> candidates = eventRepository.findByType("assignment_changed")
                 .stream()
                 .filter(event -> "assignment_created/v1".equals(event.shapeRef()))
-                .filter(this::isSetupOwnerBootstrapRelated)
+                .filter(event -> SETUP_ACTOR_ID.toString().equals(
+                        event.payload().path("target_actor").path("id").asText(null)))
                 .toList();
         List<Event> exactMatches = candidates.stream()
                 .filter(event -> matchesSetupOwnerBootstrap(
@@ -338,13 +339,6 @@ public class FieldAssetSeedProvisioner {
         }
         throw new ProvisioningCommandException(
                 "field asset setup-owner bootstrap assignment drift");
-    }
-
-    private boolean isSetupOwnerBootstrapRelated(Event event) {
-        return INITIAL_BOOTSTRAP_ACTOR.equals(
-                event.actorRef().path("id").asText(null))
-                || SETUP_ACTOR_ID.toString().equals(
-                event.payload().path("target_actor").path("id").asText(null));
     }
 
     private boolean matchesSetupOwnerBootstrap(Event event, UUID assignedLocationId) {

@@ -39,12 +39,18 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
 
     private static final UUID OPERATOR =
             UUID.fromString("17400000-0000-4000-8000-000000000099");
+    private static final UUID SETUP_ACTOR =
+            UUID.fromString("17400000-0000-4000-8000-000000000010");
     private static final UUID FIELD_ACTOR =
             UUID.fromString("17400000-0000-4000-8000-000000000011");
     private static final UUID REVIEWER =
             UUID.fromString("17400000-0000-4000-8000-000000000012");
     private static final UUID OUT_OF_SCOPE_ACTOR =
             UUID.fromString("17400000-0000-4000-8000-000000000013");
+    private static final UUID UNRELATED_BOOTSTRAP_TARGET =
+            UUID.fromString("17400000-0000-4000-8000-000000000088");
+    private static final UUID PACKAGE_GEOGRAPHY =
+            UUID.fromString("17400000-0000-4000-8000-000000000101");
     private static final UUID DEVICE =
             UUID.fromString("17400000-0000-4000-8000-000000000020");
 
@@ -279,6 +285,39 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
     }
 
     @Test
+    void fieldAssetSeedIgnoresInitialBootstrapForDifferentTargetActor()
+            throws Exception {
+        JsonNode configPublish = provisioningService.execute(
+                "config-publish",
+                packageFile("reviewed-config.json"),
+                OPERATOR,
+                "NW-178-config-unrelated-bootstrap");
+        assertThat(configPublish.path("published").asBoolean()).isTrue();
+
+        JsonNode bootstrap = provisioningService.execute(
+                "assignment-bootstrap",
+                packageFile("assignment-bootstrap.setup-owner.json"),
+                OPERATOR,
+                "NW-178-bootstrap-unrelated-bootstrap");
+        assertThat(bootstrap.path("created").asBoolean()).isTrue();
+
+        simulateUnrelatedInitialBootstrapAssignment();
+
+        JsonNode seedApply = provisioningService.execute(
+                "field-assets-seed",
+                packageFile("seeded-field-assets.synthetic.json"),
+                OPERATOR,
+                "NW-178-seed-unrelated-bootstrap");
+
+        assertThat(seedApply.path("locations_created").asInt()).isEqualTo(2);
+        assertThat(seedApply.path("subject_locations_created").asInt()).isEqualTo(2);
+        assertThat(seedApply.path("assignments_created").asInt()).isEqualTo(3);
+        assertThat(seedApply.path("seed_events_inserted").asInt()).isEqualTo(2);
+        assertThat(countFieldAssetSeedEvents()).isEqualTo(2);
+        assertThat(countFieldAssetProvisionedAssignments()).isEqualTo(3);
+    }
+
+    @Test
     void fieldAssetSeedRequiresSetupOwnerBootstrapBeforeMutating()
             throws Exception {
         JsonNode configPublish = provisioningService.execute(
@@ -320,6 +359,49 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
                         asset.path("display_label").asText(),
                         UUID.fromString(asset.path("location_id").asText())))
                 .toList();
+    }
+
+    private void simulateUnrelatedInitialBootstrapAssignment() throws Exception {
+        UUID serverDeviceId = jdbcTemplate.queryForObject(
+                "SELECT device_id FROM server_identity LIMIT 1", UUID.class);
+        long seq = jdbcTemplate.queryForObject(
+                "SELECT nextval('server_device_seq')", Long.class);
+
+        ObjectNode subjectRef = objectMapper.createObjectNode();
+        subjectRef.put("type", "assignment");
+        subjectRef.put("id", UUID.randomUUID().toString());
+
+        ObjectNode actorRef = objectMapper.createObjectNode();
+        actorRef.put("type", "actor");
+        actorRef.put("id", "system:assignment_bootstrap/initial");
+
+        ObjectNode payload = objectMapper.createObjectNode();
+        ObjectNode targetActor = payload.putObject("target_actor");
+        targetActor.put("type", "actor");
+        targetActor.put("id", UNRELATED_BOOTSTRAP_TARGET.toString());
+        payload.put("role", "setup_owner");
+
+        ObjectNode scope = payload.putObject("scope");
+        scope.put("geographic", PACKAGE_GEOGRAPHY.toString());
+        scope.putNull("subject_list");
+        scope.putArray("activity").add("field_asset_inspection");
+
+        payload.put("valid_from", "2026-06-27T00:00:00Z");
+        payload.putNull("valid_to");
+
+        jdbcTemplate.update("""
+                INSERT INTO events (id, type, shape_ref, activity_ref, subject_ref, actor_ref,
+                                    device_id, device_seq, timestamp, payload)
+                VALUES (?::uuid, 'assignment_changed', 'assignment_created/v1', NULL,
+                        ?::jsonb, ?::jsonb, ?::uuid, ?, ?::timestamptz, ?::jsonb)
+                """,
+                UUID.randomUUID().toString(),
+                objectMapper.writeValueAsString(subjectRef),
+                objectMapper.writeValueAsString(actorRef),
+                serverDeviceId.toString(),
+                seq,
+                "2026-06-27T00:00:00Z",
+                objectMapper.writeValueAsString(payload));
     }
 
     private UUID pushCandidateEvidenceEvent(UUID subjectId) {
@@ -506,13 +588,13 @@ class FieldAssetSetupSeedPackageIntegrationTest extends AbstractIntegrationTest 
                 FROM events
                 WHERE type = 'assignment_changed'
                   AND shape_ref = 'assignment_created/v1'
-                  AND actor_ref->>'id' = '17400000-0000-4000-8000-000000000010'
+                  AND actor_ref->>'id' = ?
                   AND payload->'target_actor'->>'id' IN (
                     '17400000-0000-4000-8000-000000000011',
                     '17400000-0000-4000-8000-000000000012',
                     '17400000-0000-4000-8000-000000000013'
                   )
-                """, Integer.class);
+                """, Integer.class, SETUP_ACTOR.toString());
         return count == null ? 0 : count;
     }
 
